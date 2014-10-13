@@ -1,0 +1,21 @@
+BK Instant!  is a media exchanger.
+
+On the order of a web server, however it establishes 2 way communications sharing
+audio, video, and other live streaming data.
+
+This task is stand-alone - not depending on any other app.  
+It broadcasts and receives beacons indicating presence of other BK Instant media servers.
+
+Other Linux tasks can attach to this and they will receive messages based on their application
+type.  Such as robot movement commands.
+
+Core Functions Provided:
+	udp beacon 
+	
+	Audio 2 way (selectable enable each direction)
+	Video 2 way (selectable enable each direction)
+	Images (taken previously)
+	Files 2 way
+	CAN communications
+	
+
