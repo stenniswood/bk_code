@@ -147,6 +147,7 @@ static void init_word_lists()
 {
 	init_subject_list();
 	init_verb_list();
+	init_adjective_list();
 	init_object_list();
 	init_preposition_list();
 }
@@ -171,6 +172,10 @@ void audio_listen()
 	// later on.  Not necessary now!
 	printf( "Listening for incoming audio...\n");
 	create_audio_thread( FALSE,  TRUE, BASE_FILE_PORT );
+	
+	nlp_reply_formulated=TRUE;
+	strcpy(NLP_Response, "Okay, I'm listening for your audio");
+	
 }
 void send_audio()
 {
@@ -181,6 +186,17 @@ void send_audio()
 	// Fill in later...!  WaveHeader struct
 	char* header=NULL;
 	create_audio_tx_thread( header );
+
+	nlp_reply_formulated=TRUE;
+	strcpy(NLP_Response, "Okay, I am attempting to send you my audio.");
+}
+void audio_cancel()
+{
+	printf( "Cancelling audio connection.\n");
+	
+	audio_terminate_requested = TRUE;
+	nlp_reply_formulated      = TRUE;
+	strcpy(NLP_Response, "Okay, I am terminating our audio connection.");	
 }
 void audio_two_way()
 {
@@ -191,6 +207,9 @@ void audio_two_way()
 	// Fill in with WaveHeader struct !
 	char* header=NULL;
 	create_audio_tx_thread( header );
+
+	nlp_reply_formulated=TRUE;
+	strcpy(NLP_Response, "Okay, we'll both hear each other now.");
 }
 
 /*****************************************************************
@@ -202,16 +221,27 @@ BOOL Parse_Audio_Statement( char* mSentence )
 {
 	int retval = FALSE;
 	std::string* subject  	= extract_word( mSentence, &subject_list );
+	if (subject==NULL) return FALSE;  // subject matter must pertain.
+	printf("Parse_Audio_Statement\n");
+	
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 );
+	if (verb==NULL)
+	{	printf("Reply:  What do you want me to do with %s\n", subject->c_str());
+		return FALSE;
+	}
+
 	std::string* object 	= extract_word( mSentence, &object_list  );
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-	int prepos_index      	= get_preposition_index( mSentence );
+	//int prepos_index      	= get_preposition_index( mSentence );
+
+	diagram_sentence(subject, verb, adjective, object );
 
 	if ((strcmp( subject->c_str(), "audio")==0) ||
 		(strcmp( subject->c_str(), "microphone")==0) ||
 		(strcmp( subject->c_str(), "recording")==0) ||
 		(strcmp( subject->c_str(), "music")==0))
 	{
+			
 		//printf("Processing audio telegram. verb=%s\n", verb->c_str());
 		if ((strcmp(verb->c_str(), "upload") ==0) 	   ||
 			(strcmp(verb->c_str(), "eavesdrop") ==0)  ||
@@ -243,7 +273,8 @@ BOOL Parse_Audio_Statement( char* mSentence )
 		    (strcmp(verb->c_str(), "terminate") ==0)  ||		    		    
 		    (strcmp(verb->c_str(), "kill" ) ==0))
 			{
-				 audio_terminate_requested = TRUE;
+				 audio_cancel();
+				 retval = TRUE;
 			}
 	}
 

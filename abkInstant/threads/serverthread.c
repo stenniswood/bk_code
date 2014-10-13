@@ -42,9 +42,6 @@ int 	 		listenfd = 0, connfd = 0;
 static BYTE 	oBuff[OUTPUT_BUFFER_SIZE];
 static void 	exit1() {	while (1==1) {  }; }
 
-// Response language:
-BOOL 			nlp_reply_formulated = FALSE;
-char			NLP_Response[255];
 int 			bytes_txd;
 
 /********************************************************************
@@ -123,6 +120,7 @@ BOOL Parse_done( char* mSentence )
 		if ((strcmp(object->name.c_str(), "this connection") ==0)	||
 		    (strcmp(object->name.c_str(), "us") ==0))
 		{
+			printf("Parser is closing!\n");
 			return TRUE;
 		}
 	}
@@ -132,6 +130,8 @@ BOOL Parse_done( char* mSentence )
 // Send nlp response:
 void Send_Reply()
 {
+	printf("RESPONSE:|%s|\n", NLP_Response);
+
 	int length = strlen(NLP_Response);
 	if (length > MAX_SENTENCE_LENGTH)
 		length = MAX_SENTENCE_LENGTH;
@@ -212,11 +212,14 @@ void* server_thread(void*)
 				UINT  DataLength = strlen(header);
 
 				Parse_Statement(header);
-				if (nlp_reply_formulated)
+				printf("Done parsing.\n");
+				
+				if (nlp_reply_formulated)				
 					Send_Reply();
+				printf("Done parsing.\n");	
 				ipc_write_command_text( header );
-
-				done = Parse_done(header);
+				
+				//done = Parse_done(header);
 			}
 		}
 		done = FALSE;

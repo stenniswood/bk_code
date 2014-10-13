@@ -131,6 +131,9 @@ return  TRUE = GPIO Telegram was Handled by this routine
 BOOL Parse_CAN_Statement( char* mSentence )
 {
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);
+	if (subject==NULL) return FALSE;  // subject matter must pertain.
+	printf("Parse_CAN_Statement\n");
+			
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
 	std::string* object 	= extract_word( mSentence, &object_list  	);
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	

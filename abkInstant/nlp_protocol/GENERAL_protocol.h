@@ -3,6 +3,10 @@ extern "C" {
 #endif
 
 
+extern BOOL nlp_reply_formulated ;
+extern char	NLP_Response[];
+
+
 struct sObject
 {
 	sObject(const char* mNewname, int mId) { 
@@ -13,8 +17,12 @@ struct sObject
 	int		id;	
 };
 
-void 	Init_General_Protocol		( );
+void diagram_sentence(	std::string* subject,
+						std::string* verb, 		
+						std::string* adjective,
+						std::string* object	);
 
+void 	Init_General_Protocol		( );
 int 	find_subject				( char* mSubject  );
 
 struct sObject*	extract_subject		( char* mSentence );

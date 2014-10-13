@@ -350,7 +350,7 @@ void* file_server_thread(void* msg)
 
 	/* wait for a client to talk to us */
     BOOL done = FALSE;
-    while(1)
+    //while(1)
     {
     	// WAIT FOR A NEW SESSION:
         connfd = accept(listenfd, (struct sockaddr*)NULL, NULL); 

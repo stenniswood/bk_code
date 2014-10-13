@@ -121,24 +121,32 @@ Do the work of the Telegram :
 return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
 *****************************************************************/
-BOOL Parse_File_transfer_Statement(char* mStatement, 
-									sObject* mSubject, 
-									std::string* mVerb, 
-									sObject* mObject )
+BOOL Parse_File_Statement(char* mSentence)			
 {
-	int retval = FALSE;
-	if ((strcmp( mSubject->name.c_str(), "file")==0) || 
-		(strcmp( mSubject->name.c_str(), "files")==0) ||
-		(strcmp( mSubject->name.c_str(), "path")==0) ||		
-		(strcmp( mSubject->name.c_str(), "directory")==0))
+	BOOL retval = FALSE;
+	std::string* subject  	= extract_word( mSentence, &subject_list 	);
+	if (subject==NULL) return FALSE;  // subject matter must pertain.
+	printf("Parse_FILE_Statement\n");
+		
+	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
+
+	std::string* object 	= extract_word( mSentence, &object_list  	);
+	//std::string* adjective	= extract_word( mSentence, &adjective_list  );	
+	int prepos_index      	= get_preposition_index( mSentence );
+
+
+	if ((strcmp( subject->c_str(), "file")==0) || 
+		(strcmp( subject->c_str(), "files")==0) ||
+		(strcmp( subject->c_str(), "path")==0) ||		
+		(strcmp( subject->c_str(), "directory")==0))
 	{
-		//printf("Processing audio telegram. verb=%s\n", mVerb->c_str());
-		if ((strcmp(mVerb->c_str(), "upload") ==0) ||
-		    (strcmp(mVerb->c_str(), "transfer") ==0)   ||
-		    (strcmp(mVerb->c_str(), "incoming") ==0)   ||
-		    (strcmp(mVerb->c_str(), "receive") ==0)	 ||
-		    (strcmp(mVerb->c_str(), "show") ==0)	 ||		/* even a show will create the thread for listening */
-		    (strcmp(mVerb->c_str(), "save") ==0))
+		//printf("Processing audio telegram. verb=%s\n", verb->c_str());
+		if ((strcmp(verb->c_str(), "upload") ==0) ||
+		    (strcmp(verb->c_str(), "transfer") ==0)   ||
+		    (strcmp(verb->c_str(), "incoming") ==0)   ||
+		    (strcmp(verb->c_str(), "receive") ==0)	 ||
+		    (strcmp(verb->c_str(), "show") ==0)	 ||		/* even a show will create the thread for listening */
+		    (strcmp(verb->c_str(), "save") ==0))
 		{
 			// Maybe want to verify the source IP address for security purposes
 			// later on.  Not necessary now!

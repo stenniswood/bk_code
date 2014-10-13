@@ -73,6 +73,10 @@
  	Next time I say "..." do such and such [established phrase]
  */
 
+// Response language:
+BOOL 			nlp_reply_formulated = FALSE;
+char			NLP_Response[255];
+
 /*****************************************************************
 Do the work of the Telegram :
 return  TRUE = GPIO Telegram was Handled by this routine
@@ -215,7 +219,7 @@ std::string* extract_word(char* mSentence, std::list<std::string> *m_word_list )
 	{
 		if (Sentence.find( (*iter).c_str() ) != std::string::npos)
 		{
-			printf("Verb=%s\n", (*iter).c_str() );			
+			//printf("=%s\n", (*iter).c_str() );			
 			return &(*iter);
 		}
 	}
@@ -255,12 +259,27 @@ struct sObject* extract_object(char*  mSentence)
 	for ( ; iter != object_list.end(); iter++, i++)
 	{
 		if (Sentence.find( (*iter)->name.c_str() ) != std::string::npos)
-		{
-			printf("Object=%s\n", (*iter)->name.c_str() );
+		{ 
+			//printf("Object=%s\n", (*iter)->name.c_str() );
 			return (*iter);
 		}
 	}
 	return (NULL);
+}
+
+void diagram_sentence(	std::string* subject,
+						std::string* verb, 		
+						std::string* adjective,
+						std::string* object	)							
+{
+	if (subject)
+		printf("subject=%s\n", 	subject->c_str() );
+	if (verb)
+		printf("verb=%s\n", 	verb->c_str() );
+	if (adjective)
+		printf("adjective=%s\n", adjective->c_str() );
+	if (object)
+		printf("object=%s\n", 	 object->c_str() );		
 }
 
 /*****************************************************************
@@ -270,25 +289,35 @@ return  TRUE = GPIO Telegram was Handled by this routine
 *****************************************************************/
 void Parse_Statement(char*  mSentence)
 {	
-	sObject* subject  = extract_subject( mSentence );	
+	/*sObject* subject  = extract_subject( mSentence );	
 	std::string* verb = extract_verb   ( mSentence );
 	sObject* object   = extract_object ( mSentence );	// direct object of sentence.
-	int prepos_index  = get_preposition_index( mSentence );
-
-	if (subject==NULL) return;
+	int prepos_index  = get_preposition_index( mSentence ); */
+ 
+	if (mSentence==NULL) return;
+		printf("Sentence:|%s|\n", mSentence);
 
 	BOOL result = Parse_Audio_Statement( mSentence );
+	
 	if (result==FALSE)
 		result = Parse_Camera_Statement( mSentence );
+
+	if (result==FALSE)
+		result = Parse_File_Statement( mSentence );
+		/* ie. File transfer, directory, backup, etc. */		
+		
 	if (result==FALSE)
 		result = Parse_HMI_Statement   ( mSentence ); 
 		/* ie mouse, keyboard, PS3 controller, etc. */
-		
+
 	if (result==FALSE)
 		result = Parse_CAN_Statement   ( mSentence );
-//	if (result==FALSE)		
-		//result = Parse_File_transfer_Statement( mSentence );
-		/* ie. File transfer, directory, backup, etc. */		
+	
+	if (result==FALSE)
+	{	
+		nlp_reply_formulated = TRUE;
+		strcpy (NLP_Response, "I don't understand. Ignoring.");		
+	}
 }
 
 /*****************************************************************

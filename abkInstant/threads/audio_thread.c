@@ -127,7 +127,7 @@ void* audio_server_thread(void* msg)
     struct sockaddr_in serv_addr;  
     char sendBuff[1025];
     time_t ticks;     
-        
+
     parse_thread_params( (char*)msg );
 	init_server		   ( 	 );
 
@@ -146,7 +146,7 @@ void* audio_server_thread(void* msg)
 
 	/* wait for a client to talk to us */
     BOOL done = FALSE;
-    while(1)
+    //while(1)
     {
     	// WAIT FOR A NEW SESSION:
         connfd = accept(listenfd, (struct sockaddr*)NULL, NULL); 
