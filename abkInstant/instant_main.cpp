@@ -98,7 +98,7 @@ void establish_ipc()
 		sway_attach_memory  (); 
 		sway_fill_memory	();
 	} else 
-		sway_deallocate_memory( 98307 );	
+		sway_deallocate_memory();	
 
 	if (USE_PICAMSCAN) 
 	{
