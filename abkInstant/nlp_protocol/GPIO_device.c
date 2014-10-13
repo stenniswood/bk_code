@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <string.h>
 #include <string>
+#include <list>
 #include <sys/types.h>
 #include <time.h> 
 #include "protocol.h"

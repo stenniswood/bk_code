@@ -52,7 +52,7 @@ void seg_save_segment_id	(char* mFilename);
 int  read_segment_id		(char* mFilename);
 
 int  sway_allocate_memory	(); 
-void sway_deallocate_memory	(int msegment_id);
+void sway_deallocate_memory	();
 
 int  sway_attach_memory		();
 void sway_reattach_memory	();

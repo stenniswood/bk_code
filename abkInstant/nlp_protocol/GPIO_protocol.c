@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <time.h> 
 #include <string>
+#include <list>
 #include "protocol.h"
 #include "devices.h"
 #include "GENERAL_protocol.h"
