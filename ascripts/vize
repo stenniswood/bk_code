@@ -1,0 +1,6 @@
+sudo /home/pi/aconf/aconf instance 1 reassign 21
+sudo /home/pi/aconf/aconf instance 2 reassign 22
+sudo /home/pi/aconf/aconf instance 3 reassign 23
+sudo /home/pi/aconf/aconf instance 4 reassign 31
+sudo /home/pi/aconf/aconf instance 5 reassign 32
+sudo /home/pi/aconf/aconf instance 6 reassign 33

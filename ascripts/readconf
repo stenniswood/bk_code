@@ -1,0 +1,7 @@
+sudo /home/pi/aconf/aconf config 21 read
+sudo /home/pi/aconf/aconf config 22 read 
+sudo /home/pi/aconf/aconf config 23 read 
+sudo /home/pi/aconf/aconf config 31 read 
+sudo /home/pi/aconf/aconf config 32 read 
+sudo /home/pi/aconf/aconf config 33 read 
+

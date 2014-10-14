@@ -1,0 +1,14 @@
+sudo /home/pi/aconf/aconf mot 21 getmark 2
+sudo /home/pi/aconf/aconf mot 22 getmark 2
+sudo /home/pi/aconf/aconf mot 23 getmark 2
+sudo /home/pi/aconf/aconf mot 21 getmark 1          
+sudo /home/pi/aconf/aconf mot 22 getmark 1  
+sudo /home/pi/aconf/aconf mot 23 getmark 1  
+
+sudo /home/pi/aconf/aconf mot 31 getmark 1          
+sudo /home/pi/aconf/aconf mot 32 getmark 1  
+sudo /home/pi/aconf/aconf mot 33 getmark 1  
+sudo /home/pi/aconf/aconf mot 31 getmark 2
+sudo /home/pi/aconf/aconf mot 32 getmark 2
+sudo /home/pi/aconf/aconf mot 33 getmark 2
+

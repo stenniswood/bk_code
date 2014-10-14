@@ -137,10 +137,13 @@ BOOL Parse_CAN_Statement( char* mSentence )
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
 	std::string* object 	= extract_word( mSentence, &object_list  	);
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-	int prepos_index      	= get_preposition_index( mSentence );
+	//int prepos_index      	= get_preposition_index( mSentence );
+
+	diagram_sentence(subject, verb, adjective, object );
 
 	BOOL retval = FALSE;
-	if ( (strcmp( subject->c_str(), "CAN traffic")==0) ||
+	if ( (strcmp( subject->c_str(), "CAN")==0) ||
+		 (strcmp( subject->c_str(), "CAN traffic")==0) ||
 		 (strcmp( subject->c_str(), "CAN data")==0) )
 	{
 		if ( (strcmp(verb->c_str(), "receive") ==0) ||

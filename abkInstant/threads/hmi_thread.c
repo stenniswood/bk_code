@@ -184,7 +184,7 @@ void* hmi_server_thread(void* msg)
 
     bind  ( listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen( listenfd, 10);
-	printf( "\n BK File Transfer Thread  :  IP=%s:%d \n\n", ip_addr, port );
+	printf( "\n BK HMI Transfer Thread  :  IP=%s:%d \n\n", ip_addr, port );
 
 	/* To send & receive files simulataneously, need to set the socket to non-blocking.
 	   when not receiving, send, etc.		*/

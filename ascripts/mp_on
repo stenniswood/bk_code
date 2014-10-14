@@ -1,0 +1,9 @@
+sudo /home/pi/aconf/aconf config 31 2 0xFF 0x41
+sudo /home/pi/aconf/aconf config 32 2 0xFF 0x41
+sudo /home/pi/aconf/aconf config 33 2 0xFF 0x41
+
+sudo /home/pi/aconf/aconf config 21 2 0xFF 0x41
+sudo /home/pi/aconf/aconf config 22 2 0xFF 0x41
+sudo /home/pi/aconf/aconf config 23 2 0xFF 0x41
+
+

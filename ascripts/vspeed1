@@ -1,0 +1,4 @@
+sudo /home/pi/aconf/aconf mot 21 speed $1
+sudo /home/pi/aconf/aconf mot 22 speed $2
+sudo /home/pi/aconf/aconf mot 23 speed $3
+

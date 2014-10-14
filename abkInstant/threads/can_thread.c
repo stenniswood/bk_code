@@ -122,8 +122,9 @@ void* CAN_server_thread(void* msg)
     bind  (listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen(listenfd, 10);
 	//char* ip_addr = inet_ntoa( serv_addr.sin_addr );
-	printf( "\n Welcome to BK Media Control  :  IP=%s:%d \n\n", ip_addr, port );
-
+	//printf( "\n Welcome to BK Media Control  :  IP=%s:%d \n\n", ip_addr, port );
+	printf( "\n BK CAN Transfer Thread  :  IP=%s:%d \n\n", ip_addr, port );
+	
 	/* wait for a client to talk to us */
     BOOL done = FALSE;
     while(1)
