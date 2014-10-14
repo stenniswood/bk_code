@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
@@ -21,28 +24,35 @@
 #define margin_percent 0.07
 
 TextView::TextView(int Left, int Right, int Top, int Bottom )
-:Control(Left, Right, Top, Bottom)
+:ScrollControl(Left, Right, Top, Bottom)
 {
 	Initialize(	);
 	calc_margins( 0.1 );
 }
-
+TextView::TextView( int Width, int Height )
+:ScrollControl( Width, Height)
+{
+	Initialize(	);
+		
+}
 TextView::TextView()
+:ScrollControl()
 {
 	set_position( 0, 0, 0, 0 );
-	Initialize(	);
-	calc_margins( 0.1 );		
+	Initialize  (		);
+	calc_margins( 0.1 	);
 }
 
 void TextView::Initialize(	)
 {
 	style 			= 0;
 	text_size 		= 14.0;
-	font_height 	= 2*text_size;
+	line_height		= 1.25*text_size;
 	font 			= &SerifTypeface;
-	text_color		= 0xFF9f9f0f;
+	text_color		= 0xFF001f00;
 	border_color 	= 0xFFffffff;
-	background_color= 0xFf202020;
+	background_color= 0xFFE2E2CC;
+	calc_margins(0.1);
 }
 
 void TextView::set_position ( int Left, int Right, int Top, int Bottom )
@@ -51,6 +61,8 @@ void TextView::set_position ( int Left, int Right, int Top, int Bottom )
 	calc_margins(0.025);
 }
 	
+// need to be recalculated everytime:  set_width_height()
+
 void TextView::calc_margins( float fraction )
 {
 	float TheMargin = (width)*fraction;	
@@ -88,10 +100,6 @@ int TextView::get_num_chars_fit( char* mString, int mWidth )
 	printf("\n");
 	return length;	// entire string will fit
 }
-int TextView::count_num_lines_present( char* mString, int mWidth )
-{
-	
-}
 
 // for eol (ie. last space before the last non-space letter.
 char* TextView::get_word_break( char* mString, int mMaxLength )
@@ -112,27 +120,26 @@ char* TextView::get_word_break( char* mString, int mMaxLength )
 	return delim;
 }
 
-void  TextView::set_text( char* NewText )
-{	
-	all_text = NewText;
-}
 
 /* Out of all the text, get one complete line */
 char* TextView::get_end_of_line	( char* mText )	// for eol 
 {
-	int strLength   = strlen(mText);
-	char* pos 		= strchr(mText, (int)'\n' );
-	int pixel_width = (right_margin-left_margin);
-	//printf("TextView::get_end_of_line :  MIddle of \n");
-	int length 		= get_num_chars_fit( mText, pixel_width );		
-
-	// If the line does not reach the margin (ie last line) don't find the word break.
-	char tmp = mText[length];  mText[length] = 0;
-	VGfloat t_width = TextWidth( mText, *font, text_size );
-	mText[length] = tmp;	
-	if (t_width < (pixel_width-2))	// does not reach right margin
-		return &(mText[length]);	// 
+	int strLength   	 = strlen(mText);
+	char* pos 			 = strchr(mText, (int)'\n' );
+	int available_pixels = (right_margin-left_margin);
+	int length 			 = get_num_chars_fit( mText, available_pixels );	
+	//printf("TextView::get_end_of_line: newline:%d;  fit:%d / %d  availablePixels=%d\n", pos, length, strLength, available_pixels);
 	
+	// If the line does not reach the margin (ie last line) don't find the word break.
+	char tmp = mText[length];  
+	mText[length] = 0;
+	VGfloat t_width = TextWidth( mText, *font, text_size );
+	mText[length] = tmp;
+	
+	// Text width in pixels < space available:	
+	if (t_width < (available_pixels-2))		// does not reach right margin
+		return &( mText[length] );			
+
 	char* eol 		= get_word_break( mText, length );
 	length 			= (eol-mText);
 
@@ -140,6 +147,21 @@ char* TextView::get_end_of_line	( char* mText )	// for eol
 	if ( (pos>0) && ((pos-mText)<length) )
 		length = (pos-mText);
 	return &(mText[length]);
+}
+
+
+int TextView::count_num_lines_present(  )
+{
+	int Lines = 0;
+	int total_length = strlen(text);
+	char* ptr = text;
+	char* eol = get_end_of_line( text );
+	do {
+		eol = get_end_of_line( ptr );
+		Lines++;
+		ptr = eol+1;
+	} while ( (ptr-text) < total_length );
+	return Lines;
 }
 
 /*
@@ -155,12 +177,18 @@ char* TextView::draw_one_line( char* mtext, int mVerticalPix )
 	{
 		VGfloat font_width = TextWidth( mtext, *font, text_size );
 		int space = (width-(font_width))/2;		
-		Text(left+space, bottom+mVerticalPix, mtext, *font, text_size );
+		Text(left+space,  bottom+mVerticalPix, mtext, *font, text_size );
 	} else {
 		Text(left_margin, bottom+mVerticalPix, mtext, *font, text_size );
 	}
 	*eol = tmp;
 	return eol;
+}
+
+void  TextView::set_text_size( float TextSize )
+{
+	ScrollControl::set_text_size( TextSize );
+	calc_metrics();
 }
 
 /********************************************************************
@@ -170,41 +198,97 @@ char* TextView::draw_one_line( char* mtext, int mVerticalPix )
 *********************************************************************/
 int TextView::draw()
 {
-	Control::draw();
+	ScrollControl::draw();
 
-	if (height==0) 		return 1;
-	if (all_text==NULL) return 1;
+	if (height==0) 	return 1;
+	if (text==NULL) return 1;
 
-
-	Fill_l(text_color);				// 
-	int line_height = 1.25*text_size;
+	// 
+	Fill_l(text_color);					// 
+	//line_height 	= 1.25*text_size;
 	int vertical    = height-line_height;
-	char* ptr       = all_text-1;
-	print_positions();
+	char* ptr       = text-1;
 	
 	if (style & CENTER_VERTICAL)
 	{
-		vertical = vertical / 2.0;
+		int num_lines   = count_num_lines_present();
+		int text_height = (num_lines*line_height);
+		// we print from the top down, and vertical is base of the first line.
+		vertical = (height- text_height) / 2.0 + (text_height-line_height);	
 	}
-	int total_length = strlen(all_text);
-	//printf("TextView::draw(): mid! %s  %d:vertical=%6.2f\n", all_text, total_length, vertical);
+	int total_length = strlen(text);
+	//printf("TextView::draw(): mid! %s  %d:vertical=%d\n", text, total_length, vertical);
 
 	do {
 		ptr = draw_one_line( ptr+1, vertical );
-		//printf("TextView::draw(): mid! len=%d   %s \n", total_length, ptr+1);	
+		//printf("TextView::draw(): mid! len=%d   %s \n", (ptr-text), ptr+1);	
 		vertical -= line_height;
 		if (vertical < 0)
 			break;
 		//printf("loop 1 completed\n");
-	} while ( (ptr-all_text) < total_length );
+	} while ( (ptr-text) < total_length ); 
 	//printf("TextView::draw(): done! \n");	
 }
 
+void TextView::calc_metrics(  )
+{
+	line_height 		  = 1.25*text_size;
+	int num_visible_lines = (height / line_height);
+	int max 			  = count_num_lines_present();
+	int first_visible 	  = 0;
+	if (vsb)
+		first_visible     = vsb->get_position();
 
-int	TextView::onClick()
+	printf("TextView::calc_metrics():  max=%d; min=0; num_visible_lines=%d\n",
+			max, num_visible_lines );
+	set_v_scroll_values(  max, 0, first_visible, num_visible_lines );
+}
+
+void TextView::load_file( char* mFullFilename )
+{
+	struct stat buf;
+	FILE* fd = fopen( mFullFilename, "r" );
+	printf("load_file:: filename=%s;  \t\tfd=%x\n", mFullFilename, fd);
+	if (fd==NULL)
+	{
+		text = "File not found";
+	}
+	else
+	{
+		// Get the filesize
+		errno=0;
+		int result = stat(mFullFilename, &buf);
+		int errsv = errno;
+		perror(" -fstat error- ");
+		int FileSize = buf.st_size;
+		printf("load_file: result=%d/%d;  fizesize=%d\n", result, errsv, FileSize);
+				
+		text = new char[FileSize];
+		int bytes_read=0;
+		char* ptr = text;
+		// need to allocate entire file at once.
+		bytes_read = fread( text, FileSize, 1, fd);
+		if (bytes_read != FileSize)
+		{
+			//printf("ERROR Loading Text File!  Bytes read=%d!\n", bytes_read );
+		}				
+		calc_metrics();
+	}
+}
+
+void TextView::set_width_height( int Width, int Height )
+{
+	Control::set_width_height(Width,Height);
+	calc_margins(0.1);
+}
+void TextView::move_to ( float Left,   float  Bottom )
+{
+	Control::move_to(Left,Bottom);
+	calc_margins(0.1);
+}
+
+int	TextView::onClick(int x, int y, bool mouse_is_down)
 {	
-	draw();
-	draw();
 	return -1;
 }
 

@@ -39,6 +39,8 @@ TabularListBox::TabularListBox()
 {
 	set_position( 0, 0, 0, 0 );
 	Initialize();
+	width  =-1;
+	height =-1;
 }
 TabularListBox::~TabularListBox()
 {
@@ -52,7 +54,8 @@ void TabularListBox::Initialize()
 	header_border_color     = 0xFFBFBFBF;
 	header_text_size 		= 14.0;
 	Headings = NULL;
-	
+	show();
+	show_border(true);
 	calc_metrics();
 }
 
@@ -78,7 +81,8 @@ void TabularListBox::calc_metrics( )
 	header_height 		 = header_text_size * 1.5;
 	body_height 		 = (height - header_height);
 	LineHeight           = text_size * 1.5;
-	number_lines_visible = ceil( body_height/LineHeight );
+	number_lines_visible = floor( body_height/LineHeight );
+	
 	printf("TabularLB: calc_metrics: height=%6.2f; body_height=%6.2f\n", height, body_height );	
 	
 	if (vsb) vsb->set_amount_visible(number_lines_visible);
@@ -246,6 +250,7 @@ int TabularListBox::draw_vertical_lines()
 		Line(x, bottom, x, bottom+body_height);	
 	}
 }
+
 int TabularListBox::draw_line_backgrounds()
 {
 	StrokeWidth(3.0);
@@ -257,6 +262,7 @@ int TabularListBox::draw_line_backgrounds()
 			Fill_mainline     (left, y, width, LineHeight);
 		else 
 			Fill_alternateline(left, y, width, LineHeight);
+		
 	}
 }
 
@@ -324,20 +330,26 @@ void TabularListBox::calc_widths_from_text( int mNotToExceed )
 	}
 }
 
-void TabularListBox::calc_column_positions_from_widths(   )
+void TabularListBox::calc_column_positions_from_widths( )
 {
-	if (Headings==NULL) return;
-	
+	if (Headings==NULL) 	return;
 	(*Headings)[0].start_x = left;
+
+	int num_cols = (*Headings).size();
 	
-	// Calculate the start_x:		
-	for (int col=1; col<(*Headings).size(); col++)
+	// Calculate the start_x:
+	for (int col=1; col<num_cols; col++)
 		(*Headings)[col].start_x = (*Headings)[col-1].start_x + (*Headings)[col-1].width+1;
 
 	// Calculate the end_x:
-	for (int col=1; col < (*Headings).size(); col++)
+
+	for (int col=1; col <num_cols; col++)
 		(*Headings)[col].end_x = (*Headings)[col].start_x + (*Headings)[col-1].width;
+
+	if (width==-1)
+		width = (*Headings)[num_cols-1].end_x;
 }
+
 void TabularListBox::move_to( float Left, float Bottom )
 {
 	ScrollControl::move_to( Left, Bottom );
@@ -356,6 +368,13 @@ void TabularListBox::change_header_titles( string mHeaderTexts, int column )
 {
 	if (Headings==NULL) return;
 	(*Headings)[column].text = mHeaderTexts;
+}
+
+void TabularListBox::select( int mIndex )
+{
+//	printf("Selected item # %d/%d  visible_line=%d\n", mIndex, LineData.size(), 
+//				mIndex-first_visible_line);
+	selected_item = mIndex;
 }
 
 void TabularListBox::add_row( vector<string> *mData )

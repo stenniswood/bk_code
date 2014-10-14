@@ -42,6 +42,9 @@ public:
 	void			auto_hide		 ( bool mAutoHide = true);
 	void			set_alignment	 ( byte mAlignment = SIDEBAR_ALIGN_CENTER );
 
+	virtual int		onClick(int x, int y, bool mouse_is_down=true);
+	
+	
 protected:
 
 	int				num_tabs;

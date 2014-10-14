@@ -16,23 +16,26 @@
 #include "scroll_control.hpp"
 
 
-
 #define Debug 0
 
 
 ScrollControl::ScrollControl()
 : Control()
 {
-
 }
+
 ScrollControl::ScrollControl( int Left, int Right, int Top, int Bottom )
 : Control( Left, Right, Top, Bottom )
 {
-
 }
+
+ScrollControl::ScrollControl( int Width, int Height )
+: Control( Width, Height )
+{
+}
+
 ScrollControl::~ScrollControl()
 {
-
 }
 
 void ScrollControl::Initialize()
@@ -44,7 +47,6 @@ void ScrollControl::Initialize()
 	h_visible_value 	  = 0;
 	v_first_visible_value = 0;
 	v_visible_value 	  = 0;
-	
 }
 void ScrollControl::calc_metrics	 (   )
 {
@@ -75,10 +77,14 @@ void ScrollControl::move_to( float mLeft,   float  mBottom )
 void ScrollControl::set_v_scroll_values( int max, int min, int first_visible, 
 										 int amount_visible )
 {
-	vsb->set_max_value( max );
-	vsb->set_min_value( min );
-	vsb->scroll_to  ( first_visible	 );
-	vsb->set_amount_visible ( amount_visible );
+	int amount = (max-min);
+	if ((vsb==NULL) && (amount_visible<amount))
+		enable_v_scroll_bar(true);
+
+	vsb->set_max_value	( max );
+	vsb->set_min_value	( min );
+	vsb->scroll_to  	( first_visible	 );
+	vsb->set_amount_visible( amount_visible );
 }
 	
 void ScrollControl::enable_v_scroll_bar( bool mEnable )
@@ -90,7 +96,7 @@ void ScrollControl::enable_v_scroll_bar( bool mEnable )
 		vsb->height = height;
 		vsb->left  = (left+width)-DEFAULT_VSCROLL_WIDTH;
 		vsb->width = DEFAULT_VSCROLL_WIDTH;
-		//printf("ListBox VScroll - \t");		vsb->print_positions();
+		printf("ScrollControl::enabled VScroll - \t");		vsb->print_positions();
 		
 		vsb->set_bar_color		 ( 0x7FFF7F7F );
 		vsb->set_background_color( 0x9F000000 );
@@ -130,6 +136,7 @@ void ScrollControl::set_first_visible_v( int mValue )
 	v_first_visible_value = mValue;
 	if (vsb) vsb->scroll_to( v_first_visible_value ); 
 }
+
 void ScrollControl::set_first_visible_h( int mValue )
 {
 	h_first_visible_value = mValue;
@@ -141,6 +148,7 @@ void ScrollControl::set_amount_visible_v( int mValue )
 	v_visible_value = mValue;
 	if (vsb) vsb->set_amount_visible( v_visible_value ); 
 }
+
 void ScrollControl::set_amount_visible_h( int mValue ) 
 {
 	h_visible_value = mValue; 
@@ -149,7 +157,7 @@ void ScrollControl::set_amount_visible_h( int mValue )
 
 int ScrollControl::draw()
 {
-	//Control::draw();
+	Control::draw();
 	if (vsb) {
 		vsb->draw();
 		//vsb->print_positions();
@@ -157,5 +165,15 @@ int ScrollControl::draw()
 	}
 	if (hsb)
 		hsb->draw();	
+}
+Control* ScrollControl::HitTest(int x, int y)
+{
+	Control::HitTest(x,y);
+}
+
+int	ScrollControl::onClick(int x, int y, bool mouse_is_down)
+{	
+	draw();
+	return -1;
 }
 

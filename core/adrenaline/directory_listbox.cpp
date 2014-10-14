@@ -75,8 +75,7 @@ void DirectoryListBox::setup_headings( )
 void DirectoryListBox::draw_one_cell( int mRow, int mCol, float mY )
 {
 	if (Headings==NULL) return;
-
-	printf("draw_one_row: col=%d;  %d\n", mCol, icon_id[mRow]);
+	//printf("draw_one_cell: col=%d;  %d\n", mCol, mRow );
 	
 	if (icon_id[mRow]==DIRECTORY_ID)
 		vgSetPixels( (*Headings)[mCol].start_x, mY, folder_image, 0, 0, 
@@ -103,6 +102,22 @@ void DirectoryListBox::draw_one_cell( int mRow, int mCol, float mY )
 		x = (*Headings)[mCol].end_x - text_width;
 		TextEnd( x, mY+above_line_offset, (char*)LineData[mRow][mCol].c_str(), SerifTypeface, text_size );			
 	}
+}
+
+bool	DirectoryListBox::is_item_a_directory( int mIndex )
+{
+	if (mIndex==-1)	mIndex = selected_item;
+	return (icon_id[mIndex]==DIRECTORY_ID) ? true: false;
+}
+char*	DirectoryListBox::get_item_text ( int mIndex )
+{
+	if (mIndex==-1)	mIndex = selected_item;
+	return LineData[mIndex][0].c_str();
+}
+int	DirectoryListBox::get_item_id	( int mIndex )
+{		// file type
+	if (mIndex==-1)	mIndex = selected_item;
+	return icon_id[mIndex];
 }
 
 void DirectoryListBox::populate_files( char* mPath, int Column )

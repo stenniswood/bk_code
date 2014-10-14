@@ -49,11 +49,11 @@ public:
 	void			print_tab_info			(   );
 	void			print_client_rect		(   );		// body_height, scroll_bar width
 	
-	void			calc_metrics			(   );
-	void		 	calc_widths_from_text	( int mNotToExceed=-1 );
+	void			calc_metrics					(   );
+	void		 	calc_widths_from_text			( int mNotToExceed=-1 );
 	void 			calc_column_positions_from_widths( );
-	virtual void  	move_to					( float Left, float Bottom );
-	virtual void 	set_width_height   		( int Width, int Height );
+	virtual void  	move_to							( float Left, float Bottom );
+	virtual void 	set_width_height   				( int Width, int Height );
 
 	vector<string>*	get_line_data			( int mIndex );
 	void			set_headings			( vector<struct HeaderItemInfo> *mHeaderTexts );
@@ -65,6 +65,7 @@ public:
 	void			add_row   				( vector<string> *mData  );
 	int				find_item 				( int index, int mcolumn );
 
+	virtual void	select( int mIndex );
 	void			adjust_height_for_num_visible_items ( int mNumber_items_shown );
 	
 protected:

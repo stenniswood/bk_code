@@ -22,7 +22,7 @@ public:
 	// override set_position to update box_rectangle.
 	int				set_height_to_text();
 	int				set_check(bool CheckOn=true);
-	virtual int		onClick();
+	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
 protected:
 	float	 box_rectangle[4];

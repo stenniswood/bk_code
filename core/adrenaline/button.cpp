@@ -46,9 +46,9 @@ void Button::Initialize()
 	text_size = 14.0;
 	sunken    = false;
 
-	text_color		 = 0xFFCfCf3f;
+	text_color		 = 0xFF000000; //0xFFCfCf3f;
 	border_color 	 = 0xFFffffff;
-	background_color = 0xFf202020;
+	background_color = 0xFFE7E7BF; //0xFf202020;
 }
 
 int   	Button::draw_sunken (	)
@@ -103,12 +103,10 @@ int Button::draw()
 	}  
 }
 
-int	Button::onClick()
+int	Button::onClick(int x, int y, bool mouse_is_down)
 {
-	sunken = true;
-	draw();
-//	sunken = false;
-//	draw();
+	sunken = !sunken;
+	Invalidate();
 	return -1;
 }
 

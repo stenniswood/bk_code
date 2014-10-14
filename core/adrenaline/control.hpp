@@ -19,7 +19,7 @@ public:
 	
 	virtual void 	Initialize			  (					);	
 	virtual void  	set_text_size		  ( float TextSize		 			   );
-	void  			set_text  			  ( char* NewText	);
+	void  			set_text  			  ( const char* NewText	);
 	void  			set_text_color 	  	  ( long int TextColor 	);
 	void  			set_border_color      ( long mColor ) { border_color= mColor; 	  }
 	void  			set_background_color  ( long mColor ) { background_color= mColor; }
@@ -31,12 +31,12 @@ public:
 	void		 	set_position	  	 ( int Left, int Right, int Top, int Bottom );
 	virtual void 	set_width_height  	 ( int Width, int Height )	  { width = Width; height=Height; };
 	virtual void  	move_to	  		  	 ( float Left,   float  mBottom	);
-	void  			get_xy	  		  	 ( int* mLeft, int* mBottom	) { *mLeft=left; *mBottom=bottom; };
+	void  			get_xy	  		  	 ( float* mLeft, float* mBottom	) { *mLeft=left; *mBottom=bottom; };
 	void 		 	move_bottom_to  	 ( float  mNewBottom	);	
 	void 		 	move_left_to  	 	 ( float  mNewLeft	);		
 	virtual void  	move_by	  		  	 ( int DeltaX, int  DeltaY	) { left+=DeltaX; bottom+=DeltaY; };
-	void  			set_position_left_of  ( Control* Sibling, bool mCopyVert=true );
-	void  			set_position_right_of ( Control* Sibling, bool mCopyVert=true );
+	void  			set_position_left_of  ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding);
+	void  			set_position_right_of ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding);
 	void 		 	set_position_above    ( Control* Sibling, bool mCopyHoriz=true );
 	void  			set_position_below	  ( Control* Sibling, bool mCopyHoriz=true );	
 	void  			copy_position_horiz	  ( Control* Sibling );	
@@ -67,9 +67,9 @@ public:
 	if the mouse click is on this control (ie. if the function below returns true), 
 	then the display manager will call OnClick() subsequently.  
 	*/
-	virtual Control*	HitTest(int x, int y);
-	virtual int			onHover() {return 0;};
-	virtual int			onClick() ;
+	virtual Control*	HitTest		(int x, int y);
+	virtual int			onHover		() {return 0;};
+	virtual int			onClick		(int x, int y, bool mouse_is_down=true);
 	virtual int			onDoubleClick();
 	virtual int			onReceiveFocus();
 	int					isTabStop()			{ return 0; };

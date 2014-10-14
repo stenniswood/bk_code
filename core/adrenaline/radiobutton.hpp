@@ -15,11 +15,14 @@ public:
 	
 	void 		  Initialize();	
 	
-	int			  join_group( RadioButton* mNewButton );
-	int			  select    (  );
-	
+	virtual void  wrap_content	( );
+	int			  join_group	( RadioButton* mNewButton );
+	int			  select    	(  );
+	float		  get_longest_width();
+	void		  expand_group_widths();		// make all radiobuttons in this group the width of the longest.
+		
 	virtual int   draw 	 ( );	
-	virtual	int	  onClick( );
+	virtual	int	  onClick(int x, int y, bool mouse_is_down=true);
 	
 private:
 	float		box_rectangle[4];

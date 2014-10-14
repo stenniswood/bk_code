@@ -32,7 +32,7 @@ public:
 	void	remove_object		( Control* NewControl );
 	void	remove_all_objects	( );
 
-	void 	onClick			( int x, int y );
+	//void 	onClick			( int x, int y, bool mouse_is_down=true );
 	Control* HitTest		( int x, int y );
 
 	void  start_draw		(	);

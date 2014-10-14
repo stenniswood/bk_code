@@ -99,3 +99,8 @@ int SideBarControl::draw()
 }
 
 
+int	SideBarControl::onClick(int x, int y, bool mouse_is_down)
+{	
+	draw();
+	return -1;
+}

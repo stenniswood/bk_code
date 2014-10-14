@@ -109,7 +109,7 @@ int	CheckBox::set_check(bool CheckOn)
 	checked = CheckOn;
 }
 
-int	CheckBox::onClick()
+int	CheckBox::onClick(int x, int y, bool mouse_is_down)
 {
 	checked = !checked;
 	draw();

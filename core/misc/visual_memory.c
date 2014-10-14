@@ -134,7 +134,7 @@ void ipc_write_command_text( char* mSentence )
 
 	//printf("%d:Copying %d bytes to shared mem.\n", SentenceCounter, length);
 	strcpy(ipc_memory_avis->Sentence, mSentence);
-	//printf("|%s|\n", ipc_memory_avis->Sentence );
+	printf("|%s|\n", ipc_memory_avis->Sentence );
 	//dump_ipc();
 }
 

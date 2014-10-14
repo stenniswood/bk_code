@@ -20,27 +20,28 @@ extern VGImage createImageFromJpeg(const char *filename, struct image_info* II);
 class IconView : public Control 
 {
 public:
-	IconView( char* FileName );
+	IconView( );
 	IconView( int Left, int Right, int Top, int Bottom, char* mFileName );
-	IconView( int Left, int Bottom, char* mFileName );
+	IconView( int Left, int Bottom );
 	~IconView();
-	void Initialize();
+	void 			Initialize();
 	
-	void	set_file			( char* FileName );
-	void	calc_margins		( );
-	void	read_from_jpeg_file	( );
-	void	read_from_file     	( );
+	void			set_file			( char* FileName );
+	void			set_image			( VGImage* mImage, struct image_info* mImageInfo );
+	void			calc_margins		( );
+	void			read_from_jpeg_file	( );
+	void			read_from_file     	( );
 
-	virtual void load_resources( );
+	virtual void 	load_resources( );
 	
-	virtual void  set_position	( int Left, int Right, int Top, int Bottom );
-	void  	move_to( int mLeft, int mBottom );
+	virtual void  	set_position	( int Left, int Right, int Top, int Bottom );
+	virtual void  	move_to( int mLeft, int mBottom );
 	
-	void center_vertical  ( BOOL on )	{ if (on) style |= CENTER_VERTICAL;	else style &= ~CENTER_VERTICAL;	};
-	void center_horizontal( BOOL on )	{ if (on) style |= CENTER_HORIZONTAL; else style &= ~CENTER_HORIZONTAL;	};
+	void 			center_vertical  ( BOOL on )	{ if (on) style |= CENTER_VERTICAL;	else style &= ~CENTER_VERTICAL;	};
+	void 			center_horizontal( BOOL on )	{ if (on) style |= CENTER_HORIZONTAL; else style &= ~CENTER_HORIZONTAL;	};
 		
 	virtual int   	draw   (	);	
-	virtual int		onClick(	);
+	virtual int		onClick(int x, int y, bool mouse_is_down=true );
 
 protected:
 	char*		Filename;

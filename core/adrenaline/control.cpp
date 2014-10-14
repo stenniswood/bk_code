@@ -67,16 +67,19 @@ void Control::print_color_info( )
 }
 
 void Control::wrap_content( )
-{ 
+{ 	
+	//printf( "\t\tControl::wrap_content() ts=%6.1f text=%s\n", text_size, text );
+	//VGfloat size = text_size;
+	VGfloat text_width = TextWidth( (char*)text, SerifTypeface, (int)text_size );
+	//printf( "\t\tControl::wrap_content() ts=%6.1f text=%s\n", text_size, text );
+	if (width==-1.)
+		width = text_width*1.2;
+	if (height==-1.)
+		height = text_size*1.5;
 	printf("\t\tControl::wrap_content() Got Called! w=%6.1f h=%6.1f\n", width, height);
-	float text_width = TextWidth( text, SerifTypeface, text_size );
-	if (width==-1)
-		width = 	text_width*1.2;	
-	if (height==-1)
-		height = text_size*1.5;	
-};
+}
 
-void Control::set_text( char* NewText )
+void Control::set_text( const char* NewText )
 {
 // Sometimes we can't do a free()  ie for Static string constants!
 // The 2nd call to this function causes a glibc error!
@@ -85,7 +88,9 @@ void Control::set_text( char* NewText )
 
 	text = new char[strlen(NewText)+1];
 	strcpy(text, NewText);	
+	printf("%s", text);
 	wrap_content();		// won't do anything if width/height are already set.
+	printf("%s", text);	
 }
 
 void Control::set_text_size( float mTextSize )
@@ -105,23 +110,26 @@ void Control::set_title ( char* NewTitle )
 	strcpy (title,NewTitle);	
 }
 
-void Control::set_position_left_of( Control* Sibling, bool mCopyVert )
+void Control::set_position_left_of( Control* Sibling, bool mCopyVert, float mPadding )
 {
-	left 	= Sibling->left - DefaultPadding - width;
+	float Left 	= Sibling->left - mPadding - width;
+	move_to ( Left, bottom );
 	if (mCopyVert)
 		copy_position_vert(Sibling);
 }
 
-void Control::set_position_right_of(Control* Sibling, bool mCopyVert )
+void Control::set_position_right_of(Control* Sibling, bool mCopyVert, float mPadding )
 {
-	left 	= Sibling->left + Sibling->width + DefaultPadding;
+	float Left 	= Sibling->left + Sibling->width + mPadding;
+	move_to ( Left, bottom );
 	if (mCopyVert)
 		copy_position_vert(Sibling);
 }
 
 void Control::set_position_above( Control* Sibling, bool mCopyHoriz )
 {
-	bottom  = Sibling->bottom + Sibling->height + DefaultPadding;
+	float Bottom  = Sibling->bottom + Sibling->height + DefaultPadding;
+	move_to( left, Bottom );
 	if (mCopyHoriz)
 		copy_position_horiz(Sibling);
 }
@@ -130,28 +138,27 @@ void Control::set_position_above( Control* Sibling, bool mCopyHoriz )
 // mleft, mwidth are optional.
 void Control::set_position_below( Control* Sibling, bool mCopyHoriz )
 { 
-	bottom  = Sibling->bottom - DefaultPadding - height;
-	if (mCopyHoriz)
+	float Bottom  = Sibling->bottom - DefaultPadding - height;
+	move_to( left, Bottom );
+	if (mCopyHoriz) 
 		copy_position_horiz(Sibling);
 }
 
 void Control::copy_position_horiz	  ( Control* Sibling )
 {
-	left = Sibling->left;
-	width = Sibling->width;
+	set_width_height( Sibling->width, height );
+	move_to			( Sibling->left,  bottom );		
 }
 void Control::copy_position_vert	  ( Control* Sibling )
 {
-	bottom  = Sibling->bottom;
-	height  = Sibling->height;
+	set_width_height( width, Sibling->height );
+	move_to			( left, 	Sibling->bottom );	
 }
 
 void Control::set_position( int Left, int Right, int Top, int Bottom )
 {
-	left 	= Left;
-	bottom 	= Bottom;
-	width 	= Right-Left;
-	height	= Top-Bottom;
+	move_to			( Left,Bottom );
+	set_width_height( Right-Left, Top-Bottom );
 }
 
 void  Control::move_bottom_to  	 ( float  mNewBottom	)
@@ -225,7 +232,7 @@ Control* Control::HitTest(int x, int y)
 		return NULL;
 }
 
-int		Control::onClick()
+int		Control::onClick(int x, int y, bool mouse_is_down)
 {
 	return -1; 
 }

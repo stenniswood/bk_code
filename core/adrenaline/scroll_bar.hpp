@@ -7,6 +7,10 @@
 class ScrollControl;
 class TabularListBox;
 
+#define NO_HIT  0 
+#define HIT_BAR 1
+#define HIT_SPACE 2
+
 class ScrollBar : public Control 
 {
 	friend class ListBox;
@@ -23,13 +27,16 @@ public:
 	
 	void 			print_scroll_info	( 				 );
 	virtual int   	draw 				(				 );	
-	void			set_max_value		( long int  mMax );
-	void			set_min_value		( long int  mMin );
-
+	void			set_max_value		( long int  mMax   );
+	void			set_min_value		( long int  mMin   );
+	void			set_amount_visible	( long int  mValue );
+	
+	long int		get_max				( 				   )	{ return MaxValue; };
+	long int		get_min				( 				   )	{ return MinValue; };
 	long int		get_position		( 				   );
 	void			scroll_to			( long int  mValue );
-	void			set_amount_visible	( long int  mValue );		
-
+	void			scroll_by			( long int  mValue );
+	
 	void			calc_bar_pixels		( );
 	void  			set_bar_color    	( long mColor ) { bar_color= mColor; };
 		
@@ -38,9 +45,14 @@ public:
 	
 // add speed/friction etc?
 	void			set_orientation		( bool mIsVertical=true ) { isVertical=mIsVertical; }
+
+	int				HitTestArea(int x, int y);
+	// need to put mouse_is_down into Control:: and all derived classes!
+	int		 		onClick	(int x, int y, bool mouse_is_down);
+
 	
 protected:
-	void 			initialize();
+	long int 		interpolate(float bar_top);
 
 protected:
 	long int 	MaxValue;
@@ -51,7 +63,9 @@ protected:
 	long int 	bar_color;
 	int			bar_pixel_length;		// height for vertical; width for horizontal
 	int			start_pixel;			// bottom for vertical;  left for horizontal
-	
+	bool		is_dragging;			// cursor is dragging.
+	int			drag_y_to_top;					// cursor y when clicked
+
 private:
 	bool		isVertical;
 };

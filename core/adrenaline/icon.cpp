@@ -35,19 +35,18 @@ IconView::IconView( int Left, int Right, int Top, int Bottom, char* mFileName )
 	Initialize();	
 	set_file(mFileName);
 }
-IconView::IconView( char* mFileName )
+IconView::IconView(  )
 {
 	Initialize();
 	set_position( 0, 0, 0, 0 );
-	set_file(mFileName);
+//	set_file(mFileName);
 }
-IconView::IconView( int Left, int Bottom, char* mFileName )
+IconView::IconView( int Left, int Bottom )
 {
 	Initialize();
 	set_position( Left, 0, 0, Bottom );
 	// want to load resource here
 	style |= WRAP_IMAGE_SIZE;
-	set_file(mFileName);
 }
 
 void IconView::set_file( char* mFileName )
@@ -62,10 +61,10 @@ void IconView::set_file( char* mFileName )
 void IconView::Initialize()
 {
 	Visible   = FALSE;
-	style = 0;
+	style     = 0;
 	file_loaded = false;
 
-	ImageInfo.width = 0;
+	ImageInfo.width  = 0;
 	ImageInfo.height = 0;
 
 	text_color		= 0xFF9f9f0f;
@@ -100,6 +99,8 @@ void IconView::calc_margins( )
 }
 void IconView::read_from_jpeg_file ( )
 {
+	if (Filename==NULL) return;
+	
 //	printf("read_from_jpeg_file:  %s;  w=%d\n",Filename, ImageInfo.width);
 	image = createImageFromJpeg( Filename, &ImageInfo );
 	file_loaded = true;
@@ -122,6 +123,12 @@ void IconView::load_resources( )
 	printf("IconView:load_resources(): FN=%s;  image=%d\n", Filename, image );
 }
 
+void IconView::set_image( VGImage* mImage, struct image_info* mImageInfo )
+{
+	image = *mImage;
+	ImageInfo = *mImageInfo;
+}
+
 /********************************************************************
  Comment on RoundRect & TextMid!!!!
 	RoundRect Uses width / height as 2nd and 3rd parameters.
@@ -141,7 +148,7 @@ int IconView::draw()
 	vgSetPixels(l, b, image, 0, 0, min_w, min_h);	
 }
 
-int	IconView::onClick()
+int	IconView::onClick(int x, int y, bool mouse_is_down)
 {	
 	draw();
 	return -1;

@@ -53,6 +53,7 @@ void ScrollBar::print_scroll_info( )
 			MaxValue, MinValue, AmountVisibleValue, position);
 }
 
+
 /*void ScrollBar::set_position( int Left, int Right, int Top, int Bottom )
 {
 	Control::set_position(Left, Right, Top, Bottom);	
@@ -126,7 +127,7 @@ int ScrollBar::draw (				)
 
 void ScrollBar::set_max_value		( long int  mMax )
 {
-	MaxValue = mMax;
+	MaxValue = mMax;		
 }
 void ScrollBar::set_min_value		( long int  mMin )
 {
@@ -137,16 +138,82 @@ long int ScrollBar::get_position	(  )
 {
 	return position;
 }
-
+void ScrollBar::scroll_by			( long int  mPixelDelta )
+{
+	
+	//mPixelDelta
+}
 void ScrollBar::scroll_to			( long int  mValue )
 {
 	position = mValue;
 }
 
 void ScrollBar::set_amount_visible	( long int  mValue )
-{
+{		
 	AmountVisibleValue = mValue;
 }
 
+int	ScrollBar::HitTestArea(int x, int y)
+{
+	if (is_dragging)
+		return HIT_BAR;		// even if it moves sideways outside the rectangle!
+		
+	if ((x>left) && (x<(left+width)))
+	{
+		if ((y>start_pixel) && (y<(start_pixel+bar_pixel_length)))
+		{	
+			// clicked on the bar
+			return HIT_BAR;
+		}
+		return HIT_SPACE;
+	}
+	return 0;	// no hit
+}
+
+// linear interpolate between:  bottom,height,y, and min,MaxValue
+// Assume top down for now.  so min at top and Max at bottom.
+long int ScrollBar::interpolate(float bar_top)
+{
+	// linear interpolate between:  bottom,height,y, and min,MaxValue
+	// Assume top down for now.  so min at top and Max at bottom.
+	int value_range = (MaxValue-AmountVisibleValue - MinValue);	// most value 
+	int pixel_range = (height - bar_pixel_length);  // most pixels from top to top_of_bar
+	
+	// now where is the bar top?
+	float pixel_height = (height-bar_top);		// pixel distance from top.
+	
+	// pix height is to pixel range as val is to value_range:
+	// (pixel_height / pixel_range) = value / value_range	
+	float value = (pixel_height / pixel_range * value_range);
+	return value;
+}
+
+// need to put mouse_is_down into Control:: and all derived classes!
+int	ScrollBar::onClick	 (int x, int y, bool mouse_is_down)
+{
+	if ((is_dragging) )		// release
+	{
+		// Want to place the same portion of the bar as when we picked it up; in the
+		// new location.
+		// Subtract off where we :
+		y += drag_y_to_top;		// adjust to top of bar
+		long int new_value = interpolate(y);
+		scroll_to(new_value);
+		if (mouse_is_down==false)
+			is_dragging = false;
+	}
+	int area = HitTestArea(x,y);
+	if (area == HIT_BAR)
+	{
+		if (mouse_is_down)	
+		{
+			// store the number of pixels to top of the bar.
+			drag_y_to_top = (start_pixel+bar_pixel_length)-y;
+			is_dragging = true;
+			
+		}
+	}
+	
+}
 
 

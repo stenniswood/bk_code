@@ -18,7 +18,9 @@ public:
 	virtual int   	draw 		(	);	
 	int   			draw_raised (	);	
 	int   			draw_sunken (	);	
-	virtual int		onClick();
+//	int				set_on_click_listener( void (void*) );
+	
+	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
 private:
 	bool sunken;

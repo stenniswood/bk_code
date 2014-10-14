@@ -13,11 +13,12 @@
 #include <shapes.h>
 #include <fontinfo.h>
 #include "Graphbase.hpp"
-#include "../core/can/bk_system_defs.h"
+#include "bk_system_defs.h"
+#include "mouse.h"
 #include "display_manager.hpp"
 
 
-#define old_way 1
+//#define old_way 1
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
@@ -48,11 +49,13 @@ void  DisplayManager::init_screen()
 {
 	printf("DisplayManager::\tscreen_width=%d;\tscreen_height=%d\n", screen_width, screen_height );
 	init(&screen_width, &screen_height);	// Graphics initialization
+	mouse_init( screen_width, screen_height );
 }
 // Screen initialization
 void  DisplayManager::start_screen()
 {
 	Start(screen_width, screen_height);		// Start the picture
+//	esTranslate(ESMatrix *result, GLfloat tx, GLfloat ty, GLfloat tz);
 }
 void  DisplayManager::end_screen( )
 {
@@ -78,7 +81,7 @@ void DisplayManager::load_resources( )
 		}
 #else
 		list<Control*>::iterator	iter = controls.begin();
-		for (int i=0; iter!=controls.end(); i++ )
+		for (int i=0; iter!=controls.end(); i++, iter++ )
 		{
 			(*iter)->load_resources();
 		}
@@ -162,7 +165,7 @@ int   DisplayManager::draw(	)
 	start_draw();
 	draw_background();
 	draw_children();	
-	end_draw();	
+	end_draw();				// end is needed to see display!
 		if (Debug) printf("draw display manager\tdone!\n\n" );
 }
 
@@ -171,15 +174,15 @@ void  DisplayManager::end_draw(	)
 	end_screen();	   // End the picture
 }
 
-
-void  DisplayManager::onClick( int x, int y )
+/*void  DisplayManager::onClick( int x, int y, bool mouse_is_down=true )
 {
 	Control* obj = HitTest(x,y);
 	obj->onClick();
-}
+}*/
 
 Control* DisplayManager::HitTest( int x, int y )
 {
+#ifdef old_way
 	Control* result = NULL;
 	Control* obj = Head;
 	while (obj)
@@ -190,6 +193,21 @@ Control* DisplayManager::HitTest( int x, int y )
 		obj = obj->getNext();
 	}
 	return NULL;
+#else
+	Control* result = NULL;
+	list<Control*>::iterator iter = controls.begin();
+	for (int i=0; iter!=controls.end(); i++, iter++ )
+	{
+		result = (*iter)->HitTest(x,y);
+		if (result) {
+			printf ("DisplayManager::HitTest:  found a hit. child number %d\n", i );
+			return (*iter);
+			//return result;
+		}
+	}
+	return NULL;
+#endif
+	
 }
 
 int   DisplayManager::draw_children( )
@@ -208,10 +226,12 @@ int   DisplayManager::draw_children( )
 	
 #else
 	list<Control*>::iterator	iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++ )
+	for (int i=0; iter!=controls.end(); i++, iter++ )
 	{
-		(*iter)->draw();
+		if (Debug) printf("draw child %d\n", i);	
+		(*iter)->draw();		
 	}
+	return -1;
 #endif
 	
 }
@@ -231,7 +251,7 @@ int   DisplayManager::draw_background( 	)
 		VGfloat stops[] = {
 		0.0, 0.0, 0.0, 1.0, 1.0,
 		0.5, 0.0, 0.0, 0.5, 1.0,
-		1.0, 0.0, 0.0, 0.0, 1.0
+		1.0, 1.0, 1.0, 1.0, 1.0
 		};	
 		float x1 = 0.0;				float y1 = 0.0;
 		float x2 = screen_width;	float y2 = screen_height+1;

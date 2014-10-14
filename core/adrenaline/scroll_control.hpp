@@ -24,6 +24,7 @@ class ScrollControl : public Control
 public:
 	ScrollControl();
 	ScrollControl( int Left, int Right, int Top, int Bottom );
+	ScrollControl( int Width, int Height );
 	~ScrollControl();
 	
 	virtual void	Initialize		 (   );	
@@ -36,7 +37,7 @@ public:
 
 	virtual void  	move_to	  		   ( float mLeft,   float  mBottom );
 	virtual void 	set_width_height   ( int Width, int Height );
-		
+
 	void 			set_v_scroll_values( int max, int min, int first_visible, 
 										 int amount_visible );
 		
@@ -45,7 +46,10 @@ public:
 
 	void 			set_amount_visible_v( int mValue );
 	void 			set_amount_visible_h( int mValue );
-	
+
+	virtual Control*	HitTest(int x, int y);
+	virtual int		onClick(int x, int y, bool mouse_is_down=true);
+		
 protected:
 	int				v_first_visible_value;
 	int   			v_visible_value;
