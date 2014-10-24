@@ -16,7 +16,7 @@
 
 BOOL callback_board_presence( struct sCAN* mMsg )
 {
-	printf("Rxd callback_board_presence\n");
+	//printf("Rxd callback_board_presence\n");
 	int i;
 	
 	struct stBoardInfo* board;	

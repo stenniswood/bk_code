@@ -241,7 +241,7 @@ void print_interrupt_type(byte status)
 */
 void CAN_isr()
 {
-	printf("<<---CAN Received Interrupt--- \n");
+	//printf("<<---CAN Received Interrupt--- \n");
 	byte status = read_register( CANSTAT );
 	byte intf   = read_register( CANINTF );
 	byte inte   = read_register( CANINTE );
