@@ -1,0 +1,19 @@
+cd aconf
+make clean
+make
+cd ../amonitor
+make clean
+make
+cd ../aled
+make clean
+make
+cd ../asway
+make clean
+make
+cd ../avisual 
+make clean
+make
+cd ../aquad
+make clean
+make
+
