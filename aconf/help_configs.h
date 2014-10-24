@@ -4,14 +4,14 @@ extern "C" {
 
 
 void help_Configs();
-void help_config_info();
+void help_config_info(char* mBoardType);
 
 void help_BigMotor();
-void help_Tilt();
+void help_Tilt	();
 void help_Button();
 void help_Analog();
-void help_PWM();
-void help_LCD();
+void help_PWM	();
+void help_LCD	();
 
 #ifdef __cplusplus
  }

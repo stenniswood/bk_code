@@ -165,7 +165,7 @@ DESCRIPTION:  CAN ISR will call the function sent here on a Receive interrupt
 ******************************************************************************/
 void set_system_rx_callback( BOOL (*mCallback)(struct sCAN*) )
 {
-	printf("set_system_rx_callback(%d)\n", mCallback);
+	//printf("set_system_rx_callback(%d)\n", mCallback);
 	rx_system_call_back = mCallback;
 }
 
@@ -179,7 +179,7 @@ DESCRIPTION:  CAN ISR will call the function sent here on a Receive interrupt
 ******************************************************************************/
 void set_model_rx_callback( BOOL (*mCallback)(struct sCAN*) )
 {
-	printf("set_model_rx_callback(%d)\n", mCallback);
+	//printf("set_model_rx_callback(%d)\n", mCallback);
 	rx_model_call_back = mCallback;
 }
 

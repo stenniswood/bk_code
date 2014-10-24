@@ -100,9 +100,8 @@ void init()
 	//gpio_init();
 
 	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
-	write_register( CANINTE, 0x00);
-	CAN_init( CANSPEED_250, 0 );
-	
+	write_register( CANINTE, 0x00   );
+	CAN_init	  ( CANSPEED_250, 0 );
 	
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
 	// and attach myInterrupt() to the interrupt
@@ -193,17 +192,18 @@ int main( int argc, char *argv[] )
 					printf( "No instance parameter.\n"); 
 					return 0;
 			}
+			// CONFIG HELP:
 			if (strcmp(argv[first_param+1], "help")==0) {
-			// extract next parameter for specific board
-				help_config_info();
-			}
-			
+				if (argc>(first_param+1))				
+					help_config_info( argv[first_param+2] );	// extract next parameter for specific board 
+				else 
+					help_config_info((char*)"all");
+			}			
 			instance = atoi(argv[first_param+1]);
 
 			if (strcmp(argv[first_param+2], "read")==0)
 			{
 				pack_configure( &msg1, instance, 0x10, 0, 0 );
-				
 			} else {
 // Better to look up the index and value for each config option.
 // Cmd Line may have multiple options.
