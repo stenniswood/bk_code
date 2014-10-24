@@ -18,6 +18,10 @@ public:
 	PowerLevel();
 	~PowerLevel();
 
+	void		set_level( float mLevel );
+	void		set_max  ( float mMax );
+	void		set_min  ( float mMin );
+	
 protected:
 
 

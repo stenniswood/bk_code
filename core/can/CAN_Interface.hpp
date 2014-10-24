@@ -40,6 +40,7 @@ void setMask( uint8_t mByte, long int mMask );
 //Protected Functions:  
 //void print_interrupt_type(byte status);
 //void print_register_name( uint8_t mAddress )
+//void print_tx_register_name( uint8_t mAddress )
 //float print_baud_prescaler( int mCNF1 )
 //void print_bit_timing( byte mCNF2, byte mCNF3, float tq )
 //void print_speed( int mSpeed )
@@ -90,7 +91,7 @@ uint8_t 	send_message(struct sCAN* message);
 uint8_t 	can_send_msg_no_wait(byte unused, struct sCAN* message);
 
 uint8_t 	print_message( struct sCAN* msg );
-void 		tx_register_dump(byte mBuffer);
+void 		tx_register_dump(byte mTxMob);
 void 		register_dump();
 
 

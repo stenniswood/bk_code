@@ -380,6 +380,31 @@ void print_register_name( uint8_t mAddress )
 	Default   : printf("Unknown"); 	  break;
 	}
 }
+
+void print_tx_register_name( uint8_t mAddress )
+{
+	uint8_t address = mAddress & 0x0F;
+	switch(address)
+	{
+	case 0x00 : printf ("TXB0CTRL"	);   break;
+	case 0x01 : printf ("TXB0SIDH"  ); 	 break;
+	case 0x02 : printf ("TXB0SIDL"	);   break;
+	case 0x03 : printf ("TXB0EID8"	);   break;
+	case 0x04 : printf ("TXB0EID0"	);   break;
+	case 0x05 : printf ("TXB0DLC "	);   break;
+	case 0x06 : printf ("TXB0D0  "	);   break;
+	case 0x07 : printf ("TXB0D1  "	);   break;
+	
+	case 0x08 : printf ("TXB0D2  "	);   break;
+	case 0x09 : printf ("TXB0D3  "	);   break;
+	case 0x0A : printf ("TXB0D4  "	);   break;
+	case 0x0B : printf ("TXB0D5  "	);   break;
+	case 0x0C : printf ("TXB0D6  "	);   break;	
+	case 0x0D : printf ("TXB0D7  "	);   break;
+	Default   : printf("Unknown"); 	  break;
+	}
+}
+
 float print_baud_prescaler( int mCNF1 )
 {
 	//printf("Clock Speed = 16Mhz\n");
@@ -894,44 +919,47 @@ uint8_t print_message(struct sCAN* msg)
 		printf("\tDF\n");
 }
 
-void tx_register_dump(byte mBuffer)
+/***********************************
+Input: 	mTxMob 	-	[0..2]
+************************************/
+void tx_register_dump(byte mTxMob)
 {
-        byte bank = (mBuffer<<4);
-        read_register( TXB0CTRL+bank );
-        read_register( TXB0SIDH+bank );
-        read_register( TXB0SIDL+bank ); 
-        read_register( TXB0EID8+bank ); 
-        read_register( TXB0EID0+bank ); 
-        read_register( TXB2DLC+bank  );
-        read_register( TXB2D0+bank   );
-        for (int i=0; i<8; i++)
-        read_register( TXB2D0+i+bank );
+	//  TXB0CTRL = 0x30	
+		printf("Transmit Registers (mob %d)\n", mTxMob);
+		uint8_t val=0;
+        byte bank  = TXB0CTRL+( mTxMob<<4 );
+        for (byte offset=0; offset<14; offset++)
+        { 
+        	val=read_register( bank+offset );	
+        	print_tx_register_name(bank+offset);    
+        	printf("\t=%x\n",val);
+        }
+//        for (int i=0; i<8; i++)  {
+ //       	val=read_register( TXB2D0+i+bank );	print_tx_register_name(CANINTE);    printf("\t=%x\n",val);
+   //     }
 }
 
 void register_dump()
 {
-        // READ CAN:
-        uint8_t adr=0;
-        uint8_t val=0;
-        val=read_register( CANINTE );	print_register_name(CANINTE);    printf("\t=%x\n",val);
-        val=read_register( CANINTF );	print_register_name(CANINTF);    printf("\t=%x\n",val);
-        val=read_register( CANSTAT );	print_register_name(CANSTAT);    printf("\t=%x\n",val);
-        val=read_register( CANCTRL );	print_register_name(CANCTRL);    printf("\t=%x\n",val);
-        val=read_register( EFLG );		print_register_name(EFLG   );    printf("\t=%x\n",val);
-        val=read_register( TEC );		print_register_name(TEC    );    printf("\t=%x\n",val);
-        val=read_register( REC );		print_register_name(REC    );    printf("\t=%x\n",val);
-        val=read_register( TXRTSCTRL );	print_register_name(TXRTSCTRL);  printf("\t=%x\n",val);
-        val=read_register( RXB0CTRL );	print_register_name(RXB0CTRL );  printf("\t=%x\n",val);
-        val=read_register( RXB1CTRL );	print_register_name(RXB1CTRL );  printf("\t=%x\n",val);
-        val=read_register( TXB0CTRL );	print_register_name(TXB0CTRL );  printf("\t=%x\n",val);
-        val=read_register( TXB1CTRL );	print_register_name(TXB1CTRL );  printf("\t=%x\n",val);
-        val=read_register( TXB2CTRL );	print_register_name(TXB2CTRL );  printf("\t=%x\n",val);
-        if (0)
-        {
-             val=read_register( CNF1 );	print_register_name(CNF1 );  printf("=%x\n",val);
-             val=read_register( CNF2 );	print_register_name(CNF2 );  printf("=%x\n",val);
-             val=read_register( CNF3 );	print_register_name(CNF3 );  printf("=%x\n",val);
-        }
+	// READ CAN:
+	uint8_t adr=0;
+	uint8_t val=0;
+	
+	val=read_register( CNF1 );		print_register_name(CNF1 );  	 printf("=%x\n",val);
+	val=read_register( CNF2 );		print_register_name(CNF2 );  	 printf("=%x\n",val);
+	val=read_register( CNF3 );		print_register_name(CNF3 );  	 printf("=%x\n",val);
+	val=read_register( CANINTE );	print_register_name(CANINTE);    printf("\t=%x\n",val);
+	val=read_register( CANINTF );	print_register_name(CANINTF);    printf("\t=%x\n",val);
+	val=read_register( EFLG );		print_register_name(EFLG   );    printf("\t=%x\n",val);
+	val=read_register( CANSTAT );	print_register_name(CANSTAT);    printf("\t=%x\n",val);
+	val=read_register( CANCTRL );	print_register_name(CANCTRL);    printf("\t=%x\n",val);
+
+	val=read_register( TEC );		print_register_name(TEC    );    printf("\t=%x\n",val);
+	val=read_register( REC );		print_register_name(REC    );    printf("\t=%x\n",val);
+	val=read_register( BFPCTRL );	print_register_name(BFPCTRL);  	 printf("\t=%x\n",val);
+	val=read_register( TXRTSCTRL );	print_register_name(TXRTSCTRL);  printf("\t=%x\n",val);
+	val=read_register( RXB0CTRL );	print_register_name(RXB0CTRL );  printf("\t=%x\n",val);
+	val=read_register( RXB1CTRL );	print_register_name(RXB1CTRL );  printf("\t=%x\n",val);
 }
 
 

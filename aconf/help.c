@@ -86,6 +86,7 @@ void help_mot()
 	printf("\t: dspeed [speed1 percent (0..100)] [speed1 percent (0..100)] = dual speed (BigMotor configured as 2 unidirectional motors)\n" );	
 	printf("\t: stop   .\n" );	
 }
+
 void help_lcd()
 {
 	printf("lcd [instance] [operation] [new instance:opt]\n");

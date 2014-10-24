@@ -102,7 +102,7 @@ void init()
 	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
 	write_register( CANINTE, 0x00);
 	CAN_init( CANSPEED_250, 0 );
-	register_dump();
+	
 	
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
 	// and attach myInterrupt() to the interrupt
@@ -193,9 +193,11 @@ int main( int argc, char *argv[] )
 					printf( "No instance parameter.\n"); 
 					return 0;
 			}
-			if (strcmp(argv[first_param+1], "help")==0)
+			if (strcmp(argv[first_param+1], "help")==0) {
+			// extract next parameter for specific board
 				help_config_info();
-				
+			}
+			
 			instance = atoi(argv[first_param+1]);
 
 			if (strcmp(argv[first_param+2], "read")==0)
@@ -216,6 +218,16 @@ int main( int argc, char *argv[] )
 			}
 			print_message ( &msg1 );
 			AddToSendList ( &msg1 );
+	}
+	else if ( (strcmp(argv[first_param], "reg") == 0) ||
+			  (strcmp(argv[first_param], "regs") == 0) ||
+			  (strcmp(argv[first_param], "registers") == 0) ||
+			  (strcmp(argv[first_param], "reg_dump") == 0) )
+	{
+		register_dump();
+		tx_register_dump(0);
+		tx_register_dump(1);
+		tx_register_dump(2);
 	}
 	else if (strcmp(argv[first_param], "dev") == 0)
 	{
