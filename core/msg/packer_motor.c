@@ -135,6 +135,32 @@ void pack_move_speed( struct sCAN* mMsg, byte mDestInstance,
 	mMsg->data[1] = lo(Speed);		// 10 000
 }
 
+/* String may be upto 8 characters only! */
+void pack_stop( struct sCAN* mMsg, byte mDestInstance  )					 
+{
+	mMsg->id = create_CAN_eid( ID_STOP_MOTOR, mDestInstance );
+	mMsg->header.DLC = 3;
+	mMsg->header.rtr = 0;
+
+	// datum [0] & [1] do not matter on a stop.  see coast.
+	mMsg->data[2] = HARD_STOP_MOTOR;
+}
+
+void pack_coast( struct sCAN* mMsg, byte mDestInstance, 
+				 float mSpeedPercent )
+{
+	mMsg->id = create_CAN_eid( ID_STOP_MOTOR, mDestInstance );
+	mMsg->header.DLC = 3;
+	mMsg->header.rtr = 0;
+
+	// User enters a number [-100.0 , 100.0]
+	float fraction = (mSpeedPercent / 100.);
+	short Speed    = fraction*10000.;	// *100 = 10,000
+	mMsg->data[0] = hi(Speed);		// 65 535
+	mMsg->data[1] = lo(Speed);		// 10 000
+	mMsg->data[2] = 1;				// non-zero & !HARD_STOP_MOTOR	
+}
+
 /* For BigMotorEn boards which are set to 2 Motor configuration. */
 void pack_move_dual_speed( struct sCAN* mMsg,   byte mDestInstance, 
 	 					   float mSpeedPercent, float mSpeedPercent2 )

@@ -65,6 +65,7 @@ char* getID_Text(word mID);
 #define ID_MOVE_SPEED					0x0042
 #define ID_SET_MAX_MOTOR_ACCEL			0x0043		
 #define ID_MOVE_DUAL_SPEED				0x0044		// For 2 unidirectional motor configuration
+#define ID_STOP_MOTOR					0x004B		// coast/stop/brake
 
 // TRANSMITTING MESSAGE IDs:
 #define ID_CALIBRATED_STOP				0x0045		// Upon request FOR DEBUG  1 or 2 in data[0]

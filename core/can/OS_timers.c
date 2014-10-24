@@ -53,7 +53,7 @@ Description	: Handler for the event tic.
 void OS_InitTask()
 {
 	OS_tmr_init();	
-	/******************* PERIPHERAL INIT ********************/
+	/******************* PERIPHERAL INIT  ********************/
 	/******************* APPLICATION INIT ********************/
 
 	// Look for serial idle:	
@@ -104,7 +104,7 @@ TIMER0_COMPA_vect
 TIMER0_COMPB_vect
 TIMER0_OVF_vect
 ******************************************************************************/
-ISR( TIMER0_COMPA_vect )
+int ISR( TIMER0_COMPA_vect )
 {
 	// the OCF0A flag is automatically cleared by executing this ISR.
 	
@@ -131,6 +131,7 @@ ISR( TIMER0_COMPA_vect )
 		System_Dispatch();
 		OS_Dispatch();
 	}
+	return 1;
 	//if (OS_Event_TIC_Counter == 999)	// after 1 second
     //		OS_Event_TIC_Counter = 0;		// start over
 }
@@ -155,18 +156,13 @@ void OS_tmr_init()
 	*  Say we use "f/64" and set OCR0A = 0x250
 	*		Gives 1khz signal => 1ms period.
 	*/
-	
+
 	/* We want to use Clear Timer on Compare (CTC mode)		*/
 	/* COM0A0 and COM0A1 are put into "disconnected" mode.	*/
 	/* COM0B0 and COM0B1 are put into "disconnected" mode.	*/
 	
 	OS_Event_TIC_Counter = 0;	// counts # of ms
 }
-
-
-
-
-
 
 
 

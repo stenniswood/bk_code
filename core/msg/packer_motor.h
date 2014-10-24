@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#define HARD_STOP_MOTOR 99
+
 /************* CONFIGURATION *****************/
 /**** CONFIG BYTE 1 - BIT DEFS ****/
 #define MODE_USE_ENCODER 	0x01		// else use potentiometer.  default is pot (0x00)
@@ -41,20 +43,25 @@ byte can_parse_motor_angle( struct sCAN* mMsg, float* mAngle, word* mCurrent, sh
 byte can_parse_motor_value( struct sCAN* mMsg, word* mAngle, word* mCurrent, short* mSpeedTenthDegSec );
 byte can_parse_motor_speed( struct sCAN* mMsg, float* mAngle, word* mCurrent, short* mSpeedTenthDegSec );
 
-void pack_move_to_angle( struct sCAN* mMsg, byte mDestInstance, 
-						 float mAngleDeg, word mSpeedTenthPercent );
+void pack_move_to_angle	  ( struct sCAN* mMsg, byte mDestInstance, 
+						    float mAngleDeg, word mSpeedTenthPercent );
 
-void pack_move_speed	 ( struct sCAN* mMsg, byte mDestInstance, 
-						   float mSpeedPercent );
+void pack_move_speed	  ( struct sCAN* mMsg, byte mDestInstance, 
+						    float mSpeedPercent );
+void pack_stop ( struct sCAN* mMsg, byte mDestInstance						 );
+void pack_coast( struct sCAN* mMsg, byte mDestInstance,  float mSpeedPercent );
+				
+				 
+
 // Unidirectional motor:
-void pack_move_dual_speed( struct sCAN* mMsg,   byte mDestInstance, 
-	 					   float mSpeedPercent, float mSpeedPercent2 );
+void pack_move_dual_speed ( struct sCAN* mMsg,   byte mDestInstance, 
+	 					    float mSpeedPercent, float mSpeedPercent2 );
 
-void pack_mark_motor_stop( struct sCAN* mMsg, byte mDestInstance, 
-						   byte mStopNumber, float mAngleDeg, word mValue );
+void pack_mark_motor_stop ( struct sCAN* mMsg, byte mDestInstance, 
+						    byte mStopNumber, float mAngleDeg, word mValue );
 
 void pack_set_max_acceleration( struct sCAN* mMsg, byte mDestInstance, 
-						   float mMaxAcceleration );
+						   		float mMaxAcceleration );
 
 void pack_read_motor_stop( struct sCAN* mMsg, byte mDestInstance, 
 						   byte mStopNumber );

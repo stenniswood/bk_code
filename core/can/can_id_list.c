@@ -110,6 +110,9 @@ char* getID_Text(word mID)
 			break;
 	case ID_ANALOG_MEASUREMENT:			return "ID_ANALOG_MEASUREMENT";
 			break;			
+	case ID_STOP_MOTOR:					return "ID_STOP_MOTOR";
+			break;			
+
 	default: return "unknown message ID";
 			break;
 	}

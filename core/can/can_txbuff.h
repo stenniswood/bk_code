@@ -19,6 +19,7 @@ BOOL 		 SendNext	  	( 				  	 );
 struct sCAN* GetTxMessagePtr( byte mIndex 		 );
 extern byte  TransmissionInProgress;
 
+void 		 can_tx_timeslice();
 
 #ifdef  __cplusplus
 }

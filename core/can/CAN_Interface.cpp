@@ -241,7 +241,7 @@ void print_interrupt_type(byte status)
 */
 void CAN_isr()
 {
-	//printf("<<<<<<<--------CAN Received Interrupt------ \n");
+	printf("<<---CAN Received Interrupt--- \n");
 	byte status = read_register( CANSTAT );
 	byte intf   = read_register( CANINTF );
 	byte inte   = read_register( CANINTE );
@@ -893,4 +893,45 @@ uint8_t print_message(struct sCAN* msg)
 	else
 		printf("\tDF\n");
 }
+
+void tx_register_dump(byte mBuffer)
+{
+        byte bank = (mBuffer<<4);
+        read_register( TXB0CTRL+bank );
+        read_register( TXB0SIDH+bank );
+        read_register( TXB0SIDL+bank ); 
+        read_register( TXB0EID8+bank ); 
+        read_register( TXB0EID0+bank ); 
+        read_register( TXB2DLC+bank  );
+        read_register( TXB2D0+bank   );
+        for (int i=0; i<8; i++)
+        read_register( TXB2D0+i+bank );
+}
+
+void register_dump()
+{
+        // READ CAN:
+        uint8_t adr=0;
+        uint8_t val=0;
+        val=read_register( CANINTE );	print_register_name(CANINTE);    printf("\t=%x\n",val);
+        val=read_register( CANINTF );	print_register_name(CANINTF);    printf("\t=%x\n",val);
+        val=read_register( CANSTAT );	print_register_name(CANSTAT);    printf("\t=%x\n",val);
+        val=read_register( CANCTRL );	print_register_name(CANCTRL);    printf("\t=%x\n",val);
+        val=read_register( EFLG );		print_register_name(EFLG   );    printf("\t=%x\n",val);
+        val=read_register( TEC );		print_register_name(TEC    );    printf("\t=%x\n",val);
+        val=read_register( REC );		print_register_name(REC    );    printf("\t=%x\n",val);
+        val=read_register( TXRTSCTRL );	print_register_name(TXRTSCTRL);  printf("\t=%x\n",val);
+        val=read_register( RXB0CTRL );	print_register_name(RXB0CTRL );  printf("\t=%x\n",val);
+        val=read_register( RXB1CTRL );	print_register_name(RXB1CTRL );  printf("\t=%x\n",val);
+        val=read_register( TXB0CTRL );	print_register_name(TXB0CTRL );  printf("\t=%x\n",val);
+        val=read_register( TXB1CTRL );	print_register_name(TXB1CTRL );  printf("\t=%x\n",val);
+        val=read_register( TXB2CTRL );	print_register_name(TXB2CTRL );  printf("\t=%x\n",val);
+        if (0)
+        {
+             val=read_register( CNF1 );	print_register_name(CNF1 );  printf("=%x\n",val);
+             val=read_register( CNF2 );	print_register_name(CNF2 );  printf("=%x\n",val);
+             val=read_register( CNF3 );	print_register_name(CNF3 );  printf("=%x\n",val);
+        }
+}
+
 

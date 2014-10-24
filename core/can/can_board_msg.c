@@ -30,6 +30,7 @@ AUTHOR	:  Stephen Tenniswood
 #include "bk_system_defs.h"
 #include "can_id_list.h"
 #include "CAN_base.h"
+#include "can_txbuff.h"
 #include "can_eid.h"
 #include "can_board_msg.h"
 #include "leds.h"

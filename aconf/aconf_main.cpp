@@ -25,6 +25,7 @@
 #include "config_options.h"
 #include "OS_Dispatch.h"
 #include "OS_timers.h"
+#include <unistd.h>
 
 #include <pthread.h>
 
@@ -33,6 +34,7 @@
 #define BUTTON1_INT_PIN 4
 #define BUTTON2_INT_PIN 5
 #define BUTTON3_INT_PIN 6
+
 
 short MsgCounter   = 0;
 byte  MsgIDCounter = 0;
@@ -46,6 +48,11 @@ void* unknown_thread(void* n)
 {
 	while (1)
 	{	
+		//printf("unknown_thread()\n");
+		OS_Event_TIC_Counter++;
+		//System_Dispatch();
+		OS_Dispatch();
+		usleep( 1000 );
 	}	
 }
 void create_threads()
@@ -147,7 +154,6 @@ void read_cnfs()
 	result = read_register( CNF3 );
 }
 
-
 void print_args(int argc, char *argv[])
 {
 	printf("%d ARGS: ", argc);
@@ -173,14 +179,14 @@ int main( int argc, char *argv[] )
 			help();
 			return 0;
 	}
-		init();
+	init();
 
-		printf(" STOP MOTOR : get ID text 4B %s \n", getID_Text(0x004B) );
-		printf("===============================================\n");
-	
-		if ((strcmp(argv[first_param], "cfg") == 0) ||
-			(strcmp(argv[first_param], "config") == 0) ||
-			(strcmp(argv[first_param], "configure") == 0))
+	//printf(" STOP MOTOR : get ID text 4B %s \n", getID_Text(0x004B) );
+	printf("=====================================================\n");
+
+	if ((strcmp(argv[first_param], "cfg") == 0) ||
+		(strcmp(argv[first_param], "config") == 0) ||
+		(strcmp(argv[first_param], "configure") == 0))
 		{
 			printf("CONFIGURING...\n");
 			if (argc < (first_param+1)) {
@@ -210,45 +216,43 @@ int main( int argc, char *argv[] )
 			}
 			print_message ( &msg1 );
 			AddToSendList ( &msg1 );
-			
+	}
+	else if (strcmp(argv[first_param], "dev") == 0)
+	{
+		proc_dev( argc, argv );
+	}	
+	else if (strcmp(argv[first_param], "led") == 0)
+	{
+		proc_led( argc, argv, first_param );
+	}
+	else if (strcmp(argv[first_param], "mot") == 0)
+	{
+		proc_mot( argc, argv, first_param );
+	}
+	else if (strcmp(argv[first_param], "vec") == 0)
+	{
+		proc_vec( argc, argv, first_param );
+	}
+	else if (strcmp(argv[first_param], "instance") == 0)		
+	{		
+		proc_instance( argc, argv, first_param );
+	} 
+	else if (strcmp(argv[first_param], "lcd") == 0)
+	{		
+		proc_lcd( argc, argv, first_param );
+	} 
+	else if (strcmp(argv[first_param], "screen") == 0)	
+	{
+		// GET SPECIFIC INSTANCE NUMBER (255 for all):
+		if (argc < (first_param+1)) {
+				printf( "No instance parameter.\n"); 
+				return 0;
 		}
-		else if (strcmp(argv[first_param], "dev") == 0)
-		{
-			proc_dev( argc, argv );
-		}	
-		else if (strcmp(argv[first_param], "led") == 0)
-		{
-			proc_led( argc, argv, first_param );
-		}
-		else if (strcmp(argv[first_param], "mot") == 0)
-		{
-			proc_mot( argc, argv, first_param );
-		}
-		else if (strcmp(argv[first_param], "vec") == 0)
-		{
-			proc_vec( argc, argv, first_param );
-		}
-		else if (strcmp(argv[first_param], "instance") == 0)		
-		{		
-			proc_instance( argc, argv, first_param );
-		} 
-		else if (strcmp(argv[first_param], "lcd") == 0)
-		{		
-			proc_lcd( argc, argv, first_param );
-		} 
-		else if (strcmp(argv[first_param], "screen") == 0)	
-		{
-			// GET SPECIFIC INSTANCE NUMBER (255 for all):
-			if (argc < (first_param+1)) {
-					printf( "No instance parameter.\n"); 
-					return 0;
-			}
-			instance = atoi(argv[first_param+1]);
-			printf("SEND SCREEN...\n");
-			//send_screen1( instance );
-		}
+		instance = atoi(argv[first_param+1]);
+		printf("SEND SCREEN...\n");
+		//send_screen1( instance );
+	}
 
-		// PUMP TRANSMIT MESSAGE QUEUE:
-		delay(2000);
+	// PUMP TRANSMIT MESSAGE QUEUE:
+	delay(2000);
 }
-

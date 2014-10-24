@@ -51,6 +51,7 @@ BOOL AddToSendList( struct sCAN* mMsg )
 //	else printf(" Tx in progress: %d/%d \n", TxTail, TxHead );
 }
 
+
 // called by ISR()
 BOOL SendNext()
 {
@@ -58,20 +59,19 @@ BOOL SendNext()
 	
 	ReadyToSendAnother = FALSE;
 	if (TxTail == TxHead) 
-	{
-		//if (TxTail>0) printf("Head=Tail=0\n");
+	{		
 		TxTail=0; TxHead=0;
 		return FALSE;		// no more to send
-	} else { 
-		//printf(">>SendNext t=%d; h=%d;\n", TxTail, TxHead);
+	} else { 		
 		TransmissionInProgress = TRUE;
+		//printf(">>SendNext t=%d; h=%d;\n", TxTail, TxHead);
 		//print_message(  &(Transmitting[TxTail])  );
 		
 		byte buff_num = send_message( &(Transmitting[TxTail]) );
 		TxTail++;
 		Request_To_Send( buff_num ); 	
-		// have to finish the CANISR before calling this 2nd time!!! stuck in ISR with no return!
-		
+		// have to finish the CANISR before calling this 2nd time!!! stuck in ISR with 
+		// no return!		
 		// solve by sending next 
 	}
 	//printf("<<SendNext t=%d; h=%d;\n",TxTail, TxHead);
@@ -84,3 +84,11 @@ struct sCAN* GetTxMessagePtr( byte mIndex )
 }
 
 
+void can_tx_timeslice()
+{
+	if ((TxHead > TxTail) && (TransmissionInProgress == FALSE))
+	{
+		SendNext();
+	}
+	
+}

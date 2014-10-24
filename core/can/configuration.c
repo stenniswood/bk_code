@@ -7,19 +7,19 @@ AUTHOR	:  Stephen Tenniswood
 ********************************************************************/
 #include <string.h>
 #include "bk_system_defs.h"
+#include "can_id_list.h"
+#include "can_eid.h"
+#include "CAN_base.h"
 //#include "pgmspace.h"
 //#include <inttypes.h>
 //#include "pin_definitions.h"
-#include "can_id_list.h"
-#include "can_eid.h"
 //#include "can.h"
-#include "CAN_base.h"
 //#include "can_instance.h"
-#include "can_board_msg.h"
-
 //#include "calibrations.h"
-#include "configuration.h"
 //#include "eeprom.h"
+#include "can_board_msg.h"
+#include "configuration.h"
+
 
 /**************** TYPE DEFS *************************************/
 
@@ -77,9 +77,11 @@ void ConfigureCANBaudRate(byte BaudRate)	{  config_byte_4 = (BaudRate & 0xF0); }
 byte* save_cal(byte* addr ) { return 0; };		// Prototyped here as abstract headers.
 byte* read_cal(byte* addr ) { return 0; };		// each board must implement these.
 
-byte* eeprom_write_byte( byte* addr, byte d)
-{ return addr;}
-byte* eeprom_read_byte( byte* addr ){ return addr;}
+
+// for Raspberry Pi, these don't do anything!
+byte eeprom_write_byte( byte* addr, byte d){ return (byte)0;}  //addr; }
+byte eeprom_read_byte ( byte* addr )		{ return (byte)0;} //addr; }
+
 
 /**********************************************
 save_configuration_eeprom()

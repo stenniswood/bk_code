@@ -90,6 +90,8 @@ uint8_t 	send_message(struct sCAN* message);
 uint8_t 	can_send_msg_no_wait(byte unused, struct sCAN* message);
 
 uint8_t 	print_message( struct sCAN* msg );
+void 		tx_register_dump(byte mBuffer);
+void 		register_dump();
 
 
 // library-accessible "private" interface

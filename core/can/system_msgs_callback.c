@@ -4,6 +4,7 @@
 #include "bk_system_defs.h"
 #include "can_eid.h"
 #include "CAN_base.h"
+#include "CAN_Interface.h"
 //#include "can_instance.h"
 #include "can_board_msg.h"
 #include "pican_defines.h"
@@ -15,7 +16,7 @@
 
 BOOL callback_board_presence( struct sCAN* mMsg )
 {
-	//printf("Rxd callback_board_presence\n");
+	printf("Rxd callback_board_presence\n");
 	int i;
 	
 	struct stBoardInfo* board;	
@@ -23,7 +24,7 @@ BOOL callback_board_presence( struct sCAN* mMsg )
 	{
 	case ID_BOARD_PRESENCE_BROADCAST : 
 		board = AddBoard( mMsg->id.group.instance, mMsg->data[0] );
-		//print_board( board );
+		print_board( board );
 		//print_message( mMsg );
 		return FALSE;
 		break;
