@@ -19,26 +19,21 @@ Graphbase::Graphbase(int Left, int Right, int Top, int Bottom )
 	left 	= Left;
 	right 	= Right;
 	top 	= Top;
-	bottom	= Bottom;
-	NumberHorizontalLines=5;	
-	
-	xAxisLabel	= NULL;
-	yAxisLabel  = NULL;
-	title 		= NULL;
-	
-	title_size  = 16.0;	
-	xlabel_size = 14.0;
-	ylabel_size = 14.0;	
+	bottom	= Bottom;	
 }
 
 Graphbase::Graphbase()
+:Control()
 {
 	left 	= 0;
 	right 	= 0;
 	top 	= 0;
-	bottom	= 0;			
-	NumberHorizontalLines=5;
-	
+	bottom	= 0;
+}
+
+void  Graphbase::Initialize	()
+{
+	NumberHorizontalLines=5;	
 	xAxisLabel	= NULL;
 	yAxisLabel  = NULL;
 	title 		= NULL;
@@ -46,9 +41,7 @@ Graphbase::Graphbase()
 	title_size  = 16.0;	
 	xlabel_size = 14.0;
 	ylabel_size = 14.0;	
-
 }
-
 void Graphbase::set_text( char* Title, char* xLabel, char* yLabel )
 {
 	title 		= Title;

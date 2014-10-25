@@ -1,6 +1,7 @@
 #ifndef _DATA_SET_H_
 #define _DATA_SET_H_
 
+/* Need to redo this class and use a vector<float> template! */
 
 class DataSet
 {
@@ -8,13 +9,13 @@ public:
 	DataSet( int NumberElements );	// allocates 
 	DataSet( float* data, int n );
 
-	float operator [](int index) {return Data[index]; };
+	float operator [](int index) { return Data[index]; };
 	
 	int	 get_count( )  { return last_filled_index; };	
 	int	 get_size ( )  { return n; };	
 	void set_data ( float* data, int n );	// sets pointer (does not free existing memory)
-	void add	  ( float new_member );
-	void shift_add( float new_member );		// removes first element adds new to end.
+	void add	  ( float new_member   );
+	void shift_add( float new_member   );		// removes first element adds new to end.
 
 	void  compute_stats	(  );	// Does the crunching.
 	float calc_average	(  );	// then results can be repeatedly retrieve at no cost.

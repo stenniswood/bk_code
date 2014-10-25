@@ -1,6 +1,6 @@
 
-void print_test_list();
 
+void print_test_list();
 
 void load_test_screen(int number);
 
@@ -25,6 +25,8 @@ void pack_sample_window();
 void init_file_browser	 ();
 void init_frame_window	 ();
 void init_image_gallery	 ();
+void init_line_graph	 ();
+
 void init_okay_cancel_dlg();
 
 

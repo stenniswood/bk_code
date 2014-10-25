@@ -23,8 +23,12 @@ public:
 	void		set_min  ( float mMin );
 	
 protected:
+	int		number_levels;		// 10 default
 
-
+	float 	box_height;			// based on control window size
+	float	box_width;			// calculates based on margins	
+	float	margin;
+	
 };
 
  

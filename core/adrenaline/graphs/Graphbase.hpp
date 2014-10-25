@@ -11,6 +11,7 @@ public:
 	Graphbase( int Left, int Right, int Top, int Bottom );
 	Graphbase();
 
+	virtual void  Initialize	 ();
 	void  set_text  	 ( char* Title, char* xLabel, char* yLabel );
 
 	void  set_title_size ( float NewSize )	{ title_size  = NewSize; };

@@ -35,7 +35,7 @@
 #include "directory_listbox.hpp"
 #include "file_browser.hpp"
 #include "image_gallery.hpp"
-//#include "window_layouts.hpp"
+
 
 
 static TextView 	ConnectionStatus( 50, 1230, 750, 700 );
@@ -108,6 +108,7 @@ void print_test_list()
 	printf("10 : init_frame_window\n");
 	printf("11 : init_textfile_view\n");
 	printf("12 : init_image_gallery\n");
+	printf("13 : init_line_graph\n");	
 	printf("20 : init_okay_cancel_dlg\n");
 	printf("14 : init_\n");
 	printf("15 : init_\n");
@@ -143,6 +144,8 @@ void load_test_screen(int number)
 	case 11: init_textfile_view();
 			break;		
 	case 12: init_image_gallery();
+			break;		
+	case 13: init_line_graph();
 			break;		
 	case 20: init_okay_cancel_dlg();
 			break;
@@ -296,14 +299,14 @@ void init_directory_lb_test()
 	printf( "\ninit_directory_lb_test() DirectoryListbox::\n" );
 	DirectoryListBox* tmp_dir  = new DirectoryListBox();
 	tmp_dir->set_width_height	 ( 200, 200 );		// height will get overwritten.
-	tmp_dir->populate_directories( "/home/pi/", 1 );
+	tmp_dir->populate_directories( (char*)"/home/pi/", 1 );
 	ParentWindowF.pack_control   ( tmp_dir, PACK_LEFT, PACK_FILL_PARENT );
 
 	// widths of columns
 	DirectoryListBox* tmp_dir2  = new DirectoryListBox();	
 	tmp_dir2->set_odd_color   ( 0xFFFFFFFF 	);
 	tmp_dir2->set_width_height( 200, 200 	);		// height will get overwritten.
-	tmp_dir2->populate_files  ( "/home/pi/aorient/", 1 );
+	tmp_dir2->populate_files  ( (char*)"/home/pi/aorient/", 1 );
 
 	tmp_dir2->set_position_right_of( tmp_dir, true, 0 );
 	tmp_dir2->copy_position_vert   ( tmp_dir );	
@@ -346,7 +349,6 @@ void init_textfile_view()
 	MainDisplay.add_object( &tf );		
 }
 
-
 ImageGallery ig;
 void init_image_gallery()
 {
@@ -358,6 +360,64 @@ void init_image_gallery()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &ig );
 }
+
+void fill_fake_data1()
+{
+	ds1.add( 1. );	ds1.add( 2. );	ds1.add( 3. );	ds1.add( 4. );
+	ds1.add( 5. );	ds1.add( 6. );	ds1.add( 7. );	ds1.add( 8. );
+	ds1.add( 9. );	ds1.add( 10. );	ds1.add( 11. );	ds1.add( 12. );
+	ds1.add( 13. );	ds1.add( 14. );	ds1.add( 15. );	ds1.add( 16. );
+	ds1.add( 17. );	ds1.add( 18. );	ds1.add( 19. );	ds1.add( 20. );	
+	ds1.add( 21. );	ds1.add( 22. );	ds1.add( 23. );	ds1.add( 24. );
+	ds1.add( 25. );	ds1.add( 26. );	ds1.add( 27. );	ds1.add( 28. );
+	ds1.add( 29. );	ds1.add( 30. );	ds1.add( 31. );	ds1.add( 32. );
+							
+/*	ds1[0]=1.;		ds1[1]=2.;		ds1[2]=3.;		ds1[3]=4.;
+	ds1[4]=5.;		ds1[5]=6.;		ds1[6]=7.;		ds1[7]=8.;	
+	ds1[8]=9.;		ds1[9]=10.;		ds1[10]=11.;	ds1[11]=12.;	
+	ds1[12]=13.;	ds1[13]=14.;	ds1[14]=15.;	ds1[15]=16.;	
+	ds1[16]=17.;	ds1[17]=18.;	ds1[18]=19.;	ds1[19]=20.;	
+	ds1[20]=21.;	ds1[21]=22.;	ds1[22]=23.;	ds1[23]=24.;	
+	ds1[24]=25.;	ds1[25]=26.;	ds1[26]=27.;	ds1[27]=28.;
+	ds1[28]=29.;	ds1[29]=30.;	ds1[30]=31.;	ds1[31]=32.;*/
+	
+}
+void fill_fake_data2()
+{
+	ds2.add( 1. );	ds2.add( 2. );	ds2.add( 3. );	ds2.add( 4. );
+	ds2.add( 5. );	ds2.add( 6. );	ds2.add( 7. );	ds2.add( 8. );
+	ds2.add( 9. );	ds2.add( 10. );	ds2.add( 11. );	ds2.add( 12. );
+	ds2.add( 13. );	ds2.add( 14. );	ds2.add( 15. );	ds2.add( 16. );
+	ds2.add( 17. );	ds2.add( 18. );	ds2.add( 19. );	ds2.add( 20. );	
+	ds2.add( 21. );	ds2.add( 22. );	ds2.add( 23. );	ds2.add( 24. );
+	ds2.add( 25. );	ds2.add( 26. );	ds2.add( 27. );	ds2.add( 28. );
+	ds2.add( 29. );	ds2.add( 30. );	ds2.add( 31. );	ds2.add( 32. );
+}
+
+void init_line_graph()
+{
+	fill_fake_data1	(	);
+	fill_fake_data2	(	);
+
+	lg1.set_title 	( (char*) "Sample X Line Graph" );
+	lg1.set_xLabel	( (char*) "Time" 			);
+	lg1.set_yLabel	( (char*) "X Degree/second" );
+	lg1.addDataSeries		( &ds1 );
+	lg1.set_horizontal_lines( 5 );
+	lg1.show_vertical_lines	( true );
+
+	lg2.set_title ( (char*) "Sample Y Line Graph" );
+	lg2.set_xLabel( (char*) "Time" 			);
+	lg2.set_yLabel( (char*) "Y Degree/second" );
+	lg2.addDataSeries( &ds2 );
+	lg1.set_horizontal_lines(5);
+	lg1.show_vertical_lines( false );
+	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &lg1 );
+	//MainDisplay.add_object( &lg2 );
+}
+
 void init_okay_cancel_dlg()
 {	
 	MyRadio1.set_text("AM Radio");

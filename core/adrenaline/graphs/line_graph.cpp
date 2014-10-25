@@ -33,7 +33,6 @@ LineGraph::LineGraph( int Left, int Right, int Top, int Bottom )
 	DataTail=NULL;
 }
 
-
 void LineGraph::line_plot( DataSet* data, long int Color )
 {
 	Stroke((Color&0x00FF0000)>>16, (Color&0x0000FF00)>>8, (Color&0x000000FF), 1.0);
