@@ -26,7 +26,6 @@
 #include "OS_Dispatch.h"
 #include "OS_timers.h"
 #include <unistd.h>
-
 #include <pthread.h>
 
 // Wiring PI pin number (gpio pin 15)
@@ -67,8 +66,38 @@ void create_threads()
 	}
 }
 
+byte last_stop=0;
+struct sEndPoint
+{
+	long int angle;		// FPA type;  Degrees*100  
+	word 	 value;		// Pot value
+} EndPoint;
+word extract_word_be( byte* mData )
+{
+	long int retval = 0;
+	retval |= (mData[0]<<8);
+	retval |= mData[1];
+	return retval;
+}
+long int extract_long_int_be( byte* mData)
+{
+	long int retval = 0;
+	retval |= (((unsigned long)mData[0])<<24);
+	retval |= (((unsigned long)mData[1])<<16);
+	retval |= (mData[2]<<8);
+	retval |=  mData[3];
+	return retval;
+}
+void can_proc_set_stop_msg( sCAN* mMsg )
+{
+	last_stop 	   = mMsg->data[0];
+	EndPoint.angle = extract_long_int_be( &(mMsg->data[1]) );
+	EndPoint.value = extract_word_be	( &(mMsg->data[5]) );
+}
+
 BOOL can_msg_callback( struct sCAN* mMsg )
 {
+	float angle =0.;
 	switch (mMsg->id.group.id)
 	{
 	case ID_SYSTEM_CONFIGURE : 
@@ -79,8 +108,16 @@ BOOL can_msg_callback( struct sCAN* mMsg )
 		print_message( mMsg );	
 		return TRUE;
 		break;
-	default: break;
+	case ID_CALIBRATED_STOP:	
+		print_message( mMsg );	
+		can_proc_set_stop_msg( mMsg );
+		angle = EndPoint.angle / 100.0;
+		printf("Stop#%d : Angle=%6.2f; Potentiometer=%x\n", last_stop, angle, EndPoint.value );
+		return TRUE;	
+		break;
+	default: break; 
 	}
+	return FALSE;
 }
 
 
@@ -207,7 +244,7 @@ int main( int argc, char *argv[] )
 			} else {
 // Better to look up the index and value for each config option.
 // Cmd Line may have multiple options.
-//byte index = get_config_option_tilt( char* mOption, byte* mValue)
+//byte index = get_config_option_tilt    ( char* mOption, byte* mValue )
 //byte index = get_config_option_bigmotor( char* mOption, byte* mValue );
 				byte index = atoi(argv[first_param+2]);
 				if (index<1) { printf("config bytes start at 1!"); return 0; };

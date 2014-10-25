@@ -76,7 +76,7 @@ void help_mot()
 {
 	printf("mot [instance] [cmd] :  Motor board\n");
 	//printf("\t: config = change mode/configuration \n" );
-	printf("\t: getmark [stop number:1,2] = read stop angle & value\n");
+	printf("\t: getmarks = read angle & value for both stops\n");
 	printf("\t: mark   [stop number:1,2] [angle] [value] = set stops\n");
 	printf("\t: moveto [angle:real] [speed(0..100.99)] = move motor to an angle.\n"   );
 	printf("\t: speed  [speed percent (0..100)] = run motor at speed\n" );

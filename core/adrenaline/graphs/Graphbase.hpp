@@ -38,17 +38,12 @@ public:
 	int   draw_y_axis_label		( 	);
 	void  draw_horizontal_lines (   );
 	void  draw_vertical_lines   (   );
-	
 	//virtual int	  draw_body		(	)=0;	// Must implement in derived class! Contains the graph body.
 
 protected:
 //	Container* DataSeries;
 	DataSet* DataHead;
 	DataSet* DataTail;	
-	int 	left;
-	int 	right;
-	int 	top;
-	int 	bottom;	
 
 	float	title_size  ;
 	float	xlabel_size ;

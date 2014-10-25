@@ -276,10 +276,10 @@ int proc_mot( int argc, char *argv[], byte first_param )
 			printf( "No instance operation specified.\n");
 			return 0;
 	}
-	if (strcmp(argv[first_param+2], "getmark") == 0)
+	if (strcmp(argv[first_param+2], "getmarks") == 0)
 	{
-		byte stop_num  = atoi(argv[first_param+3]);
-		pack_mark_motor_stop( &msg1, instance, 0x10|stop_num, 0, 0 );
+		//byte stop_num  = atoi(argv[first_param+3]);
+		pack_mark_motor_stop( &msg1, instance, 0x10, 0, 0 );	// BigMotorEn returns both stops - no matter the lower nibble 1 or 2.
 		AddToSendList( &msg1 );
 	} else if (strcmp(argv[first_param+2], "mark") == 0)
 	{

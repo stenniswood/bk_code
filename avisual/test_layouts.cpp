@@ -396,6 +396,7 @@ void fill_fake_data2()
 
 void init_line_graph()
 {
+	printf("Line Graph Init\n");
 	fill_fake_data1	(	);
 	fill_fake_data2	(	);
 
