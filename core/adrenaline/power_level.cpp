@@ -35,7 +35,46 @@ PowerLevel::PowerLevel()
 	Initialize();
 }
 
+void PowerLevel::Initialize()
+{
+	number_levels = 10;
+	margin = 0.05;		// 5%
+}
+
 PowerLevel::~PowerLevel()
 {
+}
+PowerLevel::calc_metrics( )
+{
+	float box_height = (body_height / number_levels);
+	float box_width  = width * (1-2*margin);
+
+}
+
+PowerLevel::draw_box(float mx, float my, long int mColor )
+{
+	Stroke_l( mColor );
+	Fill_l  ( mColor );
+	Rect( mx, my, box_height, box_width );	
+}
+
+PowerLevel::draw( )
+{
+	// We'll draw from bottom up:
+	float box_bottom = bottom + (height*margin);
+	float box_top    = box_bottom + box_height;
+	float box_top_final = bottom + height - (height*margin);
+	float box_left = left + (height*margin);
+	long int color = 0xFF00FF00;		// start at green.
+	int box_number = 0;					// 
+	for ( float y=box_bottom; y<box_top_final; y++)
+	{
+		draw_box( box_left, box_bottom, color );		
+		box_number++;
+		if (box_number<)
+		{
+			
+		}
+	}	
 }
 

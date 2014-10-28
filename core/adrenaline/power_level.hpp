@@ -27,7 +27,7 @@ protected:
 
 	float 	box_height;			// based on control window size
 	float	box_width;			// calculates based on margins	
-	float	margin;
+	float	margin;				// percentage of width
 	
 };
 
