@@ -62,16 +62,11 @@ BOOL sensor_not_moving = TRUE;
 /* Time Stamp Variables & Function */
 // struct timeval  start, end; 
 float  gyro_time_delta_prev = 0;
-float  gyro_time_delta 	    = 0.1;
-
-/* Time Stamp Variables & Function */
-struct timeval prev_gyro_timestamp;
-struct timeval latest_gyro_timestamp;
-
-/*void calc_gyro_time_delta( BOOL mShowResult )	 * Output:  gyro_time_delta *
+float  gyro_time_delta 	   = 0.1;
+void calc_gyro_time_delta( BOOL mShowResult )	/* Output:  gyro_time_delta */
 {
 	// GET TIME:
-	//gettimeofday(&end, NULL);
+	gettimeofday(&end, NULL);
 	// SUBTRACT PREVIOUS TIME:
 	long seconds  = end.tv_sec  - start.tv_sec;
 	long useconds = end.tv_usec - start.tv_usec;    
@@ -80,7 +75,7 @@ struct timeval latest_gyro_timestamp;
 	start = end;
 	if (mShowResult)
 		printf("*** GYRO DELTA TIME=%10.4f\n", gyro_time_delta);
-}*/
+}
 
 void fuse_gyro_init() 
 {
@@ -161,14 +156,7 @@ INPUT:
 void process_gyro( BOOL ShowData )
 {
 	if (DEBUG) printf("============Inside Process Gyro===============\n");
-	
-	// TIME STAMP:
-	prev_gyro_timestamp = latest_gyro_timestamp;
-	gettimeofday(&latest_gyro_timestamp, NULL);
-	time_delta = calc_time_delta( &prev_gyro_timestamp, &latest_gyro_timestamp );
-	if (ShowGyroData)
-		printf("*** GYRO TIME DELTA=%10.4f\n", time_delta );
-	//calc_gyro_time_delta(DEBUG);
+	calc_gyro_time_delta(DEBUG);
 
 	// Scale & Subtract offset:
 	scale     ( cast_f &RawxyzGyro,    bits_to_dps,      		cast_f &GyroReading  );
