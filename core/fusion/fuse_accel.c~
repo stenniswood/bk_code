@@ -39,8 +39,8 @@ BOOL   LinearAccelerationDetected=FALSE;
 struct fXYZ AccelScaled;
 
 // First Cut from Accel sensor:
-struct frXYZ AccelAngularPosition;		// Calc'd from aSin when stationary
-struct frXYZ AccelAngularPositionPrev;	// Hold previous result for substract to get deltas.
+struct frXYZ AccelAngularPosition;			// Calc'd from aSin when stationary
+struct frXYZ AccelAngularPositionPrev;		// Hold previous result for substract to get deltas.
 struct frXYZ AccelAngularVelocity;		// Hold the change in angles (compare to gyro)
 struct frXYZ AccelAngularVelocityPrev;	// Hold previous delta for linefit
 
@@ -174,7 +174,7 @@ void process_accel( BOOL ShowData )
 	// TIME STAMP : 
 	prev_accel_timestamp = latest_accel_timestamp;
 	gettimeofday( &latest_accel_timestamp, NULL	);
-	accel_time_delta = calc_time_delta( &prev_accel_timestamp, &latest_accel_timestamp );
+	accel_time_delta = calc_time_delta( &prev_accel_timestamp,   &latest_accel_timestamp );
 	//if (ShowData)
 	//	printf("*** ACCEL TIME DELTA=%10.4f\n", accel_time_delta );
 

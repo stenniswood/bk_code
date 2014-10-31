@@ -1,5 +1,4 @@
 // Application Specific commands for Tilt
-
 #include <sys/time.h>
 #include <string.h>
 #include <errno.h>
@@ -36,9 +35,7 @@
 #include "mcp2515_defs.h"
 #include "sway_config.hpp"
 
-
 bool	EmergencyStop = false;
-
 #define MEDIAN_ANGLE_FILTER_SIZE 7
 
 // This will hold the last 5 angle measurements.
@@ -55,9 +52,6 @@ int count_samples= 0;
 float TiltAngle 	= 0.;
 float TiltAnglePrev	= 0.;
 
-/* Time Stamp Variables & Function */
-struct timeval prev_gyro_timestamp;
-struct timeval latest_gyro_timestamp;
 
 // Call back function for system msg processing 
 BOOL (*tiltsensor_callback)() = NULL;	
@@ -127,77 +121,109 @@ B) 2 consequetive timeslices with no significant change,
 C) 2 consequetive timeslices with more than 5 degrees/100th second, 
 		decrease alpha by 10%
  *******************************************************************/
-#define NO_SIGNIFICANT_CHANGE_ANGLE 2.0		// Degrees per 0.01 second.
-#define TOO_MUCH_CHANGE_ANGLE 		6.0		// Degrees per 0.01 second.
 
-#define MIN_ALPHA 0.0
-#define MAX_ALPHA 4.0
-
-float adjust_alpha( byte bin, float alpha )
+struct state_variables
 {
-
-	// Hopefully TiltAngle is closer to 0 than is TiltAnglePrev.
-	// After all Balance is the whole goal!
-
-	// OBSERVATION OF CHANGE:
-	byte mid_index = round(MEDIAN_ANGLE_FILTER_SIZE/2.0);
-	float LastAngleChange = fabs(median_angle_filter[MEDIAN_ANGLE_FILTER_SIZE-1]- 
-								 median_angle_filter[mid_index]);
-
-	// ADJUST:
-	if ( LastAngleChange < NO_SIGNIFICANT_CHANGE_ANGLE )
-	{
-		// Don't adjust this if we are in the bin closest to zero
-		if ((bin != 4) && (bin != 5))	// b/c we want small changes here!
-		{
-			alpha *= 1.10;	printf("Inc*");
-			if (alpha>MAX_ALPHA) alpha = MAX_ALPHA;
-			//skip_count = (MEDIAN_ANGLE_FILTER_SIZE - mid_index);
-		}
-	}
-	else if (LastAngleChange > TOO_MUCH_CHANGE_ANGLE )
-	{
-		alpha *= 0.90;		printf("dec/");
-		if (alpha<MIN_ALPHA) alpha = MIN_ALPHA;
-		//skip_count = (MEDIAN_ANGLE_FILTER_SIZE - mid_index);
-	}
-	return alpha;
-}
-
-// want to update the alpha's for the prev bin:
-void update_alphas( )
-{
-	static byte skip_count = 0;
-	if ((skip_count--) > 0)
-		return ;	
-
-	// We adjust the alpha of the previous timeslice's bin:
-	byte prev_bin = sc.get_bin_number( TiltAnglePrev );
-	float alpha1  = sc.get_LeftAlpha ( prev_bin );
-	float alpha2  = sc.get_RightAlpha( prev_bin );
+	float angle;
+	float angular_rate;
+	float position;
+	float speed;
 	
-	float aalpha1 = adjust_alpha( prev_bin, alpha1 );		// Based on prev and curr angles
-	float aalpha2 = adjust_alpha( prev_bin, alpha2 );		// 
-	if (aalpha1 != alpha1)
-		skip_count = 3;			// delay 3x (slow changes)
+	float composite;
+};
+struct constants
+{
+	float Kangle;
+	float Kangular_rate;
+	float Kposition;
+	float Kspeed;
+};
+struct s_pid_state
+{
+	float integral;
+	float derivative;
+} PID_state;
 
-	// WANT TO effect the alpha of the bin from TiltAnglePrev,
-	// because that alpha is what was used to make the change we now see!
-	printf("b=%d; adj alpha = %2.4f %2.4f \n", prev_bin, aalpha1, aalpha2 );
+/*****************************************
+			PID FUNCTIONS
+*****************************************/
+struct s_pid_params
+{
+	// Gain parameters
+	float  Kgain;        // Loop gain parameter
+	float  Ti;           // Integrator time constant
+	float  Td;           // Differentiator time constant
+	float  deltaT;         // Update time interval
+} PID_params;
 
-	sc.set_LeftAlpha ( prev_bin, aalpha1 );
-	sc.set_RightAlpha( prev_bin, aalpha2 );
+struct constants	   KError;
+struct state_variables Nominal;
+struct state_variables Error;
+
+void pid_init()
+{
+	KError.Kangle 		 = ;
+	KError.Kangular_rate = ;
+	KError.Kposition 	 = ;
+	KError.Kspeed	 	 = ;
+
+	PID_state.integral 		= 0.;
+	PID_state.derivative 	= 0.;
+
+	PID_params.Kgain 		=;
+	PID_params.Ti			=;
+	PID_params.Td			=;	
+	PID_params.deltaT		=;
 }
+
+void pid_set_nominal( float mangle, float mrate, float mposition, float mspeed )
+{
+	Nominal.angle 		 = mangle;
+	Nominal.angular_rate = mrate;	
+	Nominal.position     = mposition;
+	Nominal.speed		 = mspeed;
+}
+
+float calc_error( float mangle, float mangular_rate, float mposition, float mspeed )
+{
+	// COMPUTE ERROR FROM NOMINAL:
+	Error.angle 		= (mangle 		 - Nominal.angle		);
+	Error.angular_rate 	= (mangular_rate - Nominal.angular_rate	);
+	Error.position 		= (mposition	 - Nominal.position		);
+	Error.speed    		= (mspeed		 - Nominal.speed		);
+
+	// COMPUTE COMPOSITE:
+	Error.composite  = KError.angle 		* Error.angle;
+	Error.composite += KError.angular_rate 	* Error.angular_rate;
+	Error.composite += KError.position 		* Error.position;
+	Error.composite += KError.speed 		* Error.speed;
+	return Error.composite;
+}
+
+float pid_computations( float mangle, float mangular_rate, float mposition, float mspeed )
+{
+	// PROPORTIONAL:
+	float error = calc_error(  mangle, mangular_rate, mposition, mspeed );
+	pid_out 	= error;
+
+	// INTEGRAL:
+	pidout 			   += PID_state.integral * PID_params.deltaT / PID_params.Ti;
+	PID_state.integral += error;
+	
+	// DERIVATIVE:
+	float change 	 	 = error - PID_state.derivative;
+	pidout 				+= change * PID_params.Td / PID_params.deltaT;
+	PID_state.derivative = error;
+	
+	// OVERALL GAIN:
+	pidout 				*= -PID_state.Kgain;
+	return pidout;
+}
+
 
 /***********************************************************
- ***********************************************************/
-/* calculates the duty cycle needed */
-float compute_speed( float AngularRate, float Alpha )
-{
-	float percent = AngularRate * Alpha * 100.0;	
-	return percent;
-}
 
+ ***********************************************************/
 void send_speeds(float mLpercent, float mRpercent)
 {
 	if (EmergencyStop==false)
@@ -270,21 +296,15 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 			update_segway_base();
 		retval = TRUE;
 		break;
-/*	case ID_GYRO_XYZ : 
+
+	case ID_GYRO_XYZ : 
 		count_gyro++;		
 		parse_gyro_msg(mMsg); 	// puts into RawxyzGyro
-
-		// TIME STAMP:
-		prev_gyro_timestamp = latest_gyro_timestamp;
-		gettimeofday(&latest_gyro_timestamp, NULL);
-		time_delta = calc_time_delta( &prev_gyro_timestamp, &latest_gyro_timestamp );
-		if (ShowGyroData)
-			printf("*** GYRO TIME DELTA=%10.4f\n", time_delta );
-
 		process_gyro	(FALSE); 	// ShowGyroData);		
 		retval=TRUE;
 		break;
-	case ID_MAGNET_XYZ : 
+
+/*	case ID_MAGNET_XYZ : 
 		count_magnet++;
 		if (ShowMagnetData && ShowCANData)		print_message(mMsg);		
 		parse_magnet_msg(mMsg);
