@@ -300,6 +300,31 @@ static GLfloat inc_and_wrap_angle(GLfloat angle, GLfloat angle_inc)
    return angle;
 }
 
+GLfloat set_angle( GLfloat angle_new)
+{
+   GLfloat angle = angle_new;
+
+   if (angle >= 360.0)
+      angle -= 360.f;
+   else if (angle <=0)
+      angle += 360.f;
+
+   return angle;
+}
+
+void set_x_angle( GLfloat angle_new )
+{
+	state->rot_angle_x = set_angle( angle_new );
+}
+void set_y_angle( GLfloat angle_new )
+{
+	state->rot_angle_y = set_angle( angle_new );
+}
+void set_z_angle( GLfloat angle_new )
+{
+	state->rot_angle_z = set_angle( angle_new );
+}
+
 /***********************************************************
  * Name: inc_and_clip_distance
  *

@@ -4,7 +4,7 @@ INC		  = ../core/can/ ../core/msg/ ../core/misc/ ../core/fusion/ ./
 SELF_INC  = ../../orient/ ./
 CFLAGS 	  = -lwiringPi -lm -lrt -lstdc++
 DEPS   	  = 
-OBJ        = triangle.o segway_main.o board_list.o help.o sway_config.o app_tilt.o 
+OBJ        = MahonyAHRS.o triangle.o segway_main.o board_list.o help.o sway_config.o app_tilt.o 
 CAN_OBJS   = CAN_Interface.o can_instance.o can_eid.o can_rxbuff.o can_txbuff.o   \
 	         bk_system_defs.o can_id_list.o system_msgs_callback.o 
 MSG_OBJS   = packer_lcd.o packer.o parser_tilt.o packer_motor.o
@@ -19,7 +19,7 @@ INCLUDES+=-I$(SDKSTAGE)/opt/vc/include/ -I$(SDKSTAGE)/opt/vc/include/interface/v
 ##include ./Makefile.include
 
 %.o: %.cpp $(DEPS)
-	$(CC) $(addprefix -I,$(INC)) -c -o $@ $< $(CFLAGS) -Wno-deprecated-declarations
+	$(CC) $(addprefix -I,$(INC)) $(INCLUDES) -c -o $@ $< $(CFLAGS) -Wno-deprecated-declarations
 
 %.o: %.c $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) $(INCLUDES) -g -c -o $@ $< $(OPTIONS) $(CFLAGS) -fgnu89-inline -Wno-deprecated-declarations

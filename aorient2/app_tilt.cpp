@@ -34,6 +34,15 @@
 #include "mcp2515.h"
 #include "mcp2515_defs.h"
 #include "sway_config.hpp"
+#include "MahonyAHRS.h"
+#include "triangle.h"
+
+
+/*#include "bcm_host.h"
+#include "GLES/gl.h"
+#include "EGL/egl.h"
+#include "EGL/eglext.h" */
+
 
 bool	EmergencyStop = false;
 #define MEDIAN_ANGLE_FILTER_SIZE 7
@@ -276,6 +285,7 @@ void update_segway_base( )
 BOOL fusion_complete()
 {
 	update_segway_base( );
+	return TRUE;
 }
 
 BOOL callback_tilt_reading( struct sCAN* mMsg )
@@ -313,26 +323,33 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		retval= FALSE;
 		break;
 	}
-	//if ((count_accel==1) && (count_gyro==1) && (count_magnet==1))
-	if ((count_accel==1) && (count_gyro==1))
+	if ((count_accel==1) && (count_gyro==1) && (count_magnet==1))
+	//if ((count_accel==1) && (count_gyro==1))
 	{
-		//printf("<<<=======FUSION===========>>>\n");
+		printf("<<<=======FUSION===========>>>\n");
+		MahonyAHRSupdate(RawxyzGyro.x,  RawxyzGyro.y,  RawxyzGyro.z,
+						 RawxyzAccel.x,  RawxyzAccel.y,  RawxyzAccel.z, 
+						 RawxyzMagnet.x,  RawxyzMagnet.y,  RawxyzMagnet.z);
+
+		float ax = getPitch();
+		float ay = getYaw  ();
+		float az = getRoll ();
+		set_x_angle( ax );
+		set_y_angle( ay );
+		set_z_angle( az );		 	 
+
 		//compute_accelGyro_fusion(FALSE);
 		//if (tiltsensor_callback)
 		//	(*tiltsensor_callback)( );
-
 		/*if (count_samples++ < 300)
 			save_timeslice_data();
 		else 
 			close_log_file();
 		*/
-		count_accel=0;
-		count_gyro=0;
+		count_accel =0;
+		count_gyro  =0;
 		count_magnet=0;
 	}
 	return retval;
 }
-
-
-
 

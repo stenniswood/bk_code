@@ -162,18 +162,18 @@ struct state_variables Error;
 
 void pid_init()
 {
-	KError.Kangle 		 = ;
-	KError.Kangular_rate = ;
-	KError.Kposition 	 = ;
-	KError.Kspeed	 	 = ;
+	KError.Kangle 		 = 1;
+	KError.Kangular_rate = 1;
+	KError.Kposition 	 = 1;
+	KError.Kspeed	 	 = 1;
 
 	PID_state.integral 		= 0.;
 	PID_state.derivative 	= 0.;
 
-	PID_params.Kgain 		=;
-	PID_params.Ti			=;
-	PID_params.Td			=;	
-	PID_params.deltaT		=;
+	PID_params.Kgain 		=1;
+	PID_params.Ti			=1;
+	PID_params.Td			=1;	
+	PID_params.deltaT		=1;
 }
 
 void pid_set_nominal( float mangle, float mrate, float mposition, float mspeed )
@@ -193,10 +193,10 @@ float calc_error( float mangle, float mangular_rate, float mposition, float mspe
 	Error.speed    		= (mspeed		 - Nominal.speed		);
 
 	// COMPUTE COMPOSITE:
-	Error.composite  = KError.angle 		* Error.angle;
-	Error.composite += KError.angular_rate 	* Error.angular_rate;
-	Error.composite += KError.position 		* Error.position;
-	Error.composite += KError.speed 		* Error.speed;
+	Error.composite  = KError.Kangle 			* Error.angle;
+	Error.composite += KError.Kangular_rate 	* Error.angular_rate;
+	Error.composite += KError.Kposition 		* Error.position;
+	Error.composite += KError.Kspeed 			* Error.speed;
 	return Error.composite;
 }
 
@@ -204,20 +204,20 @@ float pid_computations( float mangle, float mangular_rate, float mposition, floa
 {
 	// PROPORTIONAL:
 	float error = calc_error(  mangle, mangular_rate, mposition, mspeed );
-	pid_out 	= error;
+	float pid_out 	= error;
 
 	// INTEGRAL:
-	pidout 			   += PID_state.integral * PID_params.deltaT / PID_params.Ti;
+	pid_out 			   += PID_state.integral * PID_params.deltaT / PID_params.Ti;
 	PID_state.integral += error;
 	
 	// DERIVATIVE:
 	float change 	 	 = error - PID_state.derivative;
-	pidout 				+= change * PID_params.Td / PID_params.deltaT;
+	pid_out 				+= change * PID_params.Td / PID_params.deltaT;
 	PID_state.derivative = error;
 	
 	// OVERALL GAIN:
-	pidout 				*= -PID_state.Kgain;
-	return pidout;
+	pid_out 				*= -PID_params.Kgain;
+	return pid_out;
 }
 
 
@@ -251,8 +251,8 @@ void update_segway_base( )
 	byte bin     = sc.get_bin_number(angle);			// current bin
 	float Lalpha = sc.get_LeftAlpha (bin);
 	float Ralpha = sc.get_RightAlpha(bin); 					// alphas for current bin!
-	float Lpercent = compute_speed( angle, Lalpha );
-	float Rpercent = compute_speed( angle, Ralpha );
+	//float Lpercent = compute_speed( angle, Lalpha );
+	//float Rpercent = compute_speed( angle, Ralpha );
 
 	// DISPLAY RESULTS:
 	printf("==%1.3f; <%6.1f, %6.1f, %6.1f>\tAngle=%6.1f/%6.1f;", 
@@ -260,18 +260,15 @@ void update_segway_base( )
 		   RawxyzAccel.x, RawxyzAccel.y, RawxyzAccel.z,
 		   AccelAngularPosition.rx, angle 
 		    );
-	printf("\tDuty=<%6.3f,%6.3f> ", Lpercent, Rpercent );
+	//printf("\tDuty=<%6.3f,%6.3f> ", Lpercent, Rpercent );
 	//printf("\n");
 
-	// SEND SPEEDS TO MOTOR BOARDS:
-	send_speeds( Lpercent, Rpercent );
 
 	// ADJUST ALPHAS:
 	if (call_count++ > MEDIAN_ANGLE_FILTER_SIZE)	// have to wait after start up until the median filter has good data.
 	{												// otherwise, since angle was not valid, no power was given to the motors.
 													// so we'll see no change in the tilt angle.
-		call_count=255;					
-		update_alphas( );
+		call_count=255;							
 	} 
 	printf("\n");
 }
