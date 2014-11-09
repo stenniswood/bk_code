@@ -39,9 +39,10 @@ void LineGraph::line_plot( DataSet* data, long int Color )
 	StrokeWidth(stroke_width);
 
 	Fill((Color&0x00FF0000)>>16, (Color&0x0000FF00)>>8, (Color&0x000000FF), 1);
-	int n = data->get_count();
-	float spacing = ((float)(right - left))/((float)data->get_size());
+	int n = data->get_size();
+	float spacing = ((float)(width))/((float)data->get_size());
 	int x = left;
+	int top = bottom+height;
 	float one,two;
 	for(int i=0; i<(n-1); i++)
 	{
@@ -72,8 +73,8 @@ void LineGraph::draw_data_series( )
 //	float min = data->get_min();
 float LineGraph::calc_scale( float max, float min )
 {
-	float xpixels = right - left;
-	float ypixels = top - bottom;
+	float xpixels = width;
+	float ypixels = height;
 
 	xscale = 1.0; 	//(float)n / xpixels;
 	yscale = ypixels/(max-min);

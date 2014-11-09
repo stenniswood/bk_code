@@ -1,11 +1,14 @@
 #ifndef _CONTROL_W_SCROLL_
 #define _CONTROL_W_SCROLL_
 
+//
+//#include <list>
+
 #include "control.hpp"
 #include "scroll_bar.hpp"
-#include <list>
-#include <string>
-using namespace std;
+
+//using namespace std;
+//#include <string>
 
 
 #define DEFAULT_VSCROLL_WIDTH 10

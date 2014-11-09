@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
+#include <list>
 #include <math.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"

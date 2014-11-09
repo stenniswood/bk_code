@@ -11,25 +11,25 @@ public:
 	Graphbase( int Left, int Right, int Top, int Bottom );
 	Graphbase();
 
-	virtual void  Initialize	 ();
-	void  set_text  	 ( char* Title, char* xLabel, char* yLabel );
+	virtual void  Initialize	(					);
+	void  set_text  	 		( char* Title, char* xLabel, char* yLabel );
 
-	void  set_title_size ( float NewSize )	{ title_size  = NewSize; };
-	void  set_xLabel_size( float NewSize )	{ xlabel_size = NewSize; };
-	void  set_yLabel_size( float NewSize )	{ ylabel_size = NewSize; };
+	void  set_title_size 		( float NewSize 	)	{ title_size  = NewSize; };
+	void  set_xLabel_size		( float NewSize 	)	{ xlabel_size = NewSize; };
+	void  set_yLabel_size		( float NewSize 	)	{ ylabel_size = NewSize; };
 
-	void  set_title ( char* Title );
-	void  set_xLabel( char* Label );
-	void  set_yLabel( char* Label );
-	void  set_position( int Left, int Right, int Top, int Bottom );
-	void  move_to	  ( int Left, int Right );
+	void  set_title 			( char* Title 		);
+	void  set_xLabel			( char* Label 		);
+	void  set_yLabel			( char* Label 		);
+	void  set_position			( int Left, int Right, int Top, int Bottom );
+	void  move_to	  			( int Left, int Right );
 
 	// This links the Datasets together!
-	void  addDataSeries	  ( DataSet* NewData );
-	void  removeDataSeries( DataSet* OldData );
+	void  addDataSeries	  		( DataSet* NewData );
+	void  removeDataSeries		( DataSet* OldData );
 		
-	void  set_horizontal_lines( int NumberLines ) { NumberHorizontalLines=NumberLines; };	
-	void  show_vertical_lines ( bool Show ) {ShowVerticalLines=Show; };
+	void  set_horizontal_lines	( int NumberLines ) { NumberHorizontalLines=NumberLines; };	
+	void  show_vertical_lines 	( bool Show ) {ShowVerticalLines=Show; };
 	
 	virtual int   draw			(	);		// Draw calls all the sub draw routines.
 	virtual int   draw_body		( 	)=0;		// derived class must override this!

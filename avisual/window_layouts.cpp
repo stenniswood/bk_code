@@ -55,11 +55,11 @@ ScrollBar   sb;
 ScrollBar   hsb(false);
 
 ////////////////////////////////////////////
-DataSet ds1(100);
-DataSet ds2(100);
-DataSet ds3(100);
-DataSet ds_tiltx(1000);
-DataSet ds_tilty(1000);
+DataSet ds1;
+DataSet ds2;
+DataSet ds3;
+DataSet ds_tiltx;
+DataSet ds_tilty;
 
 
 Histogram hg ( 100, 300, 300, 100 );

@@ -15,20 +15,13 @@
 #define margin_percent 0.07
 
 Graphbase::Graphbase(int Left, int Right, int Top, int Bottom )
+: Control( Left,Right,Top,Bottom )
 {
-	left 	= Left;
-	right 	= Right;
-	top 	= Top;
-	bottom	= Bottom;	
 }
 
 Graphbase::Graphbase()
 :Control()
 {
-	left 	= 0;
-	right 	= 0;
-	top 	= 0;
-	bottom	= 0;
 }
 
 void  Graphbase::Initialize	()
@@ -60,20 +53,12 @@ void Graphbase::set_yLabel( char* Label )
 
 void Graphbase::set_position( int Left, int Right, int Top, int Bottom )
 {
-	left 	= Left;
-	right 	= Right;
-	top 	= Top;
-	bottom	= Bottom;
-}
-void  Graphbase::move_to( int Left, int Top )
-{
-	int width  = right-left;	// Preserve width & height!
-	int height = top-bottom;
+	Control::set_position(Left,Right, Top,Bottom);
 	
-	left 	= Left;
-	top 	= Top;	
-	right 	= left+width;
-	bottom	= top-height;
+}
+void  Graphbase::move_to( int mLeft, int mBottom )
+{		
+	Control::move_to( mLeft, mBottom );
 }
 
 void Graphbase::draw_horizontal_lines(  ) 
@@ -82,14 +67,15 @@ void Graphbase::draw_horizontal_lines(  )
 	StrokeWidth(2);
 
 	//printf("NumberLines=%d\n", NumberHorizontalLines);
-	float divs = NumberHorizontalLines;
-	float alpha = 1.0;
-	float y_spacing = ((float)(top - bottom)) / (divs);	
+	float divs 		= NumberHorizontalLines;
+	float alpha 	= 1.0;
+	float y_spacing = ((float)(height)) / (divs);	
+
 	// HORIZONTAL:
 	Fill(255, 0, 125, alpha);
-	for (VGfloat y=bottom; y <= top; y+=y_spacing) 
+	for (VGfloat y=bottom; y <= bottom+height; y+=y_spacing) 
 	{
-		Line(left, y, right, y);
+		Line(left, y, left+width, y);
 	}
 }
 
@@ -101,13 +87,13 @@ void Graphbase::draw_vertical_lines( )
 	int i;
 	VGfloat x;
 	VGfloat alpha = 1.0;				// start solid
-	VGfloat x_spacing = (right - left) / 10.0;	
-	
+	VGfloat x_spacing = (width / 10.0);
+
 	// VERTICAL
 	Fill(255, 0, 125, alpha);
-	for (int x = left; x <= right; x+=x_spacing) 
+	for (int x = left; x <= left+width; x += x_spacing) 
 	{
-		Line(x, top, x, bottom);
+		Line(x, bottom+height, x, bottom);
 	}
 }
 
@@ -115,20 +101,20 @@ int Graphbase::draw_y_axis_label()
 {
 	if (yAxisLabel==NULL) return -1;
 	
-	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
-	VGfloat alpha = 1.0;
-	int yrange = (top-bottom);
-	int tenpercent = (float)(right-left)*margin_percent;
-	int x = left-tenpercent;
-	int y = bottom+yrange/2.0;
+	VGfloat fade  	= (100.0 / (VGfloat) 1) / 100.0;
+	VGfloat alpha 	= 1.0;
+	int yrange 		= (height);
+	int tenpercent 	= (float)(width)*margin_percent;
+	int x 	= left-tenpercent;
+	int y 	= bottom+yrange/2.0;
 
 // size :  yrange/strlen(yAxisLabel)
-	Translate(x, y);
-	Rotate(90);	
-	Fill(0, 255, 125, alpha);
-	TextMid  ( 0, 0, yAxisLabel, SerifTypeface, ylabel_size );
-	Rotate   ( -90    );	
-	Translate( -x, -y );
+	Translate	( x, y );
+	Rotate		( 90   );
+	Fill		( 0, 255, 125, alpha);
+	TextMid  	( 0, 0, yAxisLabel, SerifTypeface, ylabel_size );
+	Rotate   	( -90    );	
+	Translate	( -x, -y );
 	return TRUE;
 }
 
@@ -138,9 +124,9 @@ int Graphbase::draw_x_axis_label()
 	
 	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
 	VGfloat alpha = 1.0;
-	int xrange = (right-left);
-	int yrange = (top-bottom);	
-	int tenpercent = (float)(top-bottom)*margin_percent;
+	int xrange = (width);
+	int yrange = (height);	
+	int tenpercent = (float)(height)*margin_percent;
 	int size = xrange/strlen(xAxisLabel);
 	
 //	Translate(x, y);
@@ -156,14 +142,13 @@ int Graphbase::draw_title()
 	if (title==NULL) return -1;
 	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
 	VGfloat alpha = 1.0;
-	int xrange = (right-left);
-	int yrange = (top-bottom);	
-	int tenpercent = (float)(top-bottom)*margin_percent;	
+	int xrange = (width);
+	int yrange = (height);	
+	int tenpercent = (float)(height)*margin_percent;	
 
 	Fill(0, 255, 125, alpha);
 	// size : yrange/strlen(title)
-	TextMid  ( left+xrange/2.0, top+tenpercent, title, SerifTypeface, 
-				title_size );
+	TextMid( left+xrange/2.0, bottom+height+tenpercent, title, SerifTypeface, title_size );
 	return TRUE;
 }
 

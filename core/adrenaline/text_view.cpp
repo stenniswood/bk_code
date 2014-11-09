@@ -7,9 +7,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>

@@ -4,13 +4,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
+
 #include <math.h>
+
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
 #include "Graphbase.hpp"
-#include "control.hpp"
+#include "control.hpp" 
 #include "listbox.hpp"
 #include "display.h"
 

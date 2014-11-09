@@ -56,11 +56,11 @@ static ScrollBar   vsb;
 static ScrollBar   hsb(false);
 
 ////////////////////////////////////////////
-static DataSet ds1(100);
-static DataSet ds2(100);
-static DataSet ds3(100);
-static DataSet ds_tiltx(1000);
-static DataSet ds_tilty(1000);
+static DataSet ds1;
+static DataSet ds2;
+static DataSet ds3;
+static DataSet ds_tiltx;
+static DataSet ds_tilty;
 
 static Histogram hg ( 100, 300, 300, 100 );
 static LineGraph lg1( 100, 300, 600, 400 );
@@ -355,7 +355,7 @@ void init_image_gallery()
 	ig.set_position(10,1200, 700, 10);
 	ig.onCreate    (); 
 	//ig.set_directory( "/home/pi/abkInstant/media/" );
-	ig.set_directory( "/media/My\ Book/tv/PhonePics/" );
+	ig.set_directory( "/media/My Book/tv/PhonePics/" );
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &ig );

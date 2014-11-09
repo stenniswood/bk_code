@@ -12,7 +12,6 @@
 #include "control.hpp"
 #include "display.h"
 
-
 #define margin_percent 0.07
 
 Control::Control(int Left, int Right, int Top, int Bottom )
@@ -38,6 +37,7 @@ Control::Control()
 Control::~Control()
 {
 }
+
 void Control::Initialize() 
 {
 	text		= NULL;
@@ -68,10 +68,7 @@ void Control::print_color_info( )
 
 void Control::wrap_content( )
 { 	
-	//printf( "\t\tControl::wrap_content() ts=%6.1f text=%s\n", text_size, text );
-	//VGfloat size = text_size;
 	VGfloat text_width = TextWidth( (char*)text, SerifTypeface, (int)text_size );
-	//printf( "\t\tControl::wrap_content() ts=%6.1f text=%s\n", text_size, text );
 	if (width==-1.)
 		width = text_width*1.2;
 	if (height==-1.)

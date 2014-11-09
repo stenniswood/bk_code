@@ -67,8 +67,8 @@ float Histogram::calc_scale( )
 	float six_sigma   = 2.0 * three_sigma;
 	bin_value_spacing = six_sigma / bins;
 
-	float xpixels 	= (right - left);
-	float ypixels 	= (top - bottom);
+	float xpixels 	= (width);
+	float ypixels 	= (height);
 	bin_xpixel_spacing = (xpixels / bins);
 
 	highest_bin_count = get_highest_sample_count();
@@ -94,12 +94,12 @@ int Histogram::draw_bell_curve()
 	Stroke(44, 77, 232, 1.0);
 	StrokeWidth(2);
 	
-	float xscale = (2*three_sigma) / ((float)(right-left));	
+	float xscale = (2*three_sigma) / ((float)(width));	
 	float x_value = center_value - three_sigma;
 	float prev_y=0;
 	float eval_y=0;
 
-	for (int xpix=left; xpix<right; xpix++)		// for each pixel
+	for (int xpix=left; xpix<left+width; xpix++)		// for each pixel
 	{
 		eval_y = evaluate_gaussian(center_value, data->get_stddev(), x_value)*yscale;
 		Line( xpix, bottom+prev_y,  xpix+1, bottom+eval_y);
@@ -114,9 +114,9 @@ void Histogram::draw_stats()
 	Stroke(255, 128, 128, 0.75);
 
 	char n_str[12];
-	sprintf(n_str, "n=%d", data->get_count() );
+	sprintf(n_str, "n=%d", data->get_size() );
 	float x = center_xpix + ((center_xpix - left)/4.0);
-	float y = top - ((float)(top-bottom)/4.0);
+	float y = bottom+height - ((float)(height)/4.0);
 	Text( x,y, n_str, SerifTypeface, 12.0 );
 
 	sprintf(n_str, "avg=%6.1f", data->get_average() );

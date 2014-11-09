@@ -6,9 +6,8 @@
 #include "scroll_control.hpp"
 
 #include <list>
-#include <string>
 using namespace std;
-
+#include <string>
 
 #define DEFAULT_SCROLL_WIDTH 10
 
