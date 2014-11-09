@@ -17,7 +17,7 @@
 #include "control.hpp"
 #include "button.hpp"
 #include "display.h"
-#include "text_view.hpp"
+#include "text_view.hpp" 
 #include "scroll_bar.hpp"
 
 

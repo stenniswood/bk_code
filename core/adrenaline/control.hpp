@@ -1,6 +1,6 @@
 #ifndef _CONTROL_H_
 #define _CONTROL_H_
-
+  
 #include "../core/can/bk_system_defs.h"
 
 #define DefaultPadding 15

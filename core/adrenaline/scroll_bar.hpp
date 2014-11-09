@@ -2,7 +2,7 @@
 #define _SCROLL_BAR_
 
 
-#include "control.hpp"
+#include "control.hpp" 
 //#include "scroll_control.hpp"
 class ScrollControl;
 class TabularListBox;

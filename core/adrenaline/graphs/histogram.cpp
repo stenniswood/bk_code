@@ -112,7 +112,7 @@ void Histogram::draw_stats()
 {
 	Fill  (255,  77, 22, 1  );	   		// Big blue marble
 	Stroke(255, 128, 128, 0.75);
-
+  
 	char n_str[12];
 	sprintf(n_str, "n=%d", data->get_size() );
 	float x = center_xpix + ((center_xpix - left)/4.0);

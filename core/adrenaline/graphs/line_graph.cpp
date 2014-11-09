@@ -43,7 +43,7 @@ void LineGraph::line_plot( DataSet* data, long int Color )
 	float spacing = ((float)(width))/((float)data->get_size());
 	int x = left;
 	int top = bottom+height;
-	float one,two;
+	float one,two; 
 	for(int i=0; i<(n-1); i++)
 	{
 		one = bottom + (float)((*data)[i]   - yoffset)*yscale;

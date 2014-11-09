@@ -8,7 +8,7 @@
 #include "scroll_bar.hpp"
 
 //using namespace std;
-//#include <string>
+//#include <string> 
 
 
 #define DEFAULT_VSCROLL_WIDTH 10

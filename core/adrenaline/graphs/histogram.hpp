@@ -1,4 +1,4 @@
-#ifndef _HISTOGRAM_
+#ifndef _HISTOGRAM_ 
 #define _HISTOGRAM_
 
 #include "Graphbase.hpp"

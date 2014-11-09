@@ -1,7 +1,7 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
+ 
 struct info 
 {
 	int 	left;

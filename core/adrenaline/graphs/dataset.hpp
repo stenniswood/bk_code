@@ -14,7 +14,7 @@ public:
 	float operator [] (int index) { return Data[index]; };
 	float get_datum 	( int index 			 )  { return Data[index]; };
 	void set_datum 		( int index, float datum )	{ Data[index]=datum; };		
-	
+ 	
 	int	 get_size 		( )  { return Data.size(); };	
 	void set_data 		( float* data, int n );	// sets pointer (does not free existing memory)
 	void add	  		( float new_member   );

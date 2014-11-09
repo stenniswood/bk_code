@@ -1,4 +1,4 @@
-// line graph OpenVG program
+// line graph OpenVG program 
 // Steve Tenniswood
 #include <stdio.h>
 #include <stdlib.h>

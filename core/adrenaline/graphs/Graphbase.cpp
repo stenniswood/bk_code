@@ -154,7 +154,7 @@ int Graphbase::draw_title()
 
 void Graphbase::addDataSeries( DataSet* NewSeries )
 {
-	NewSeries->setPrev( DataTail );
+	NewSeries->setPrev( DataTail ); 
 	NewSeries->setNext( NULL );
 	if (DataHead == NULL)
 		DataHead = NewSeries;

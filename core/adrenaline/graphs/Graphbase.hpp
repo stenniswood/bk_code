@@ -39,7 +39,7 @@ public:
 	void  draw_horizontal_lines (   );
 	void  draw_vertical_lines   (   );
 	//virtual int	  draw_body		(	)=0;	// Must implement in derived class! Contains the graph body.
-
+ 
 protected:
 //	Container* DataSeries;
 	DataSet* DataHead;

@@ -58,7 +58,7 @@ ScrollBar   hsb(false);
 DataSet ds1;
 DataSet ds2;
 DataSet ds3;
-DataSet ds_tiltx;
+DataSet ds_tiltx; 
 DataSet ds_tilty;
 
 

@@ -19,7 +19,6 @@ public:
 protected:
 	void  line_plot		( DataSet* data, long int Color );
 
-
 private:
 	DataSet* data;
 	float 	xscale, xoffset;
@@ -27,6 +26,6 @@ private:
 
 	float	stroke_width;
 };
-
+ 
  
 #endif

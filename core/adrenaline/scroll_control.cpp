@@ -6,7 +6,7 @@
 #include <string.h>
 #include <string>
 #include <list>
-#include <math.h>
+#include <math.h> 
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
