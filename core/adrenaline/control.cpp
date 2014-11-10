@@ -47,7 +47,7 @@ void Control::Initialize()
 	text_size = 14.0;
 	border_roundness_x = 15.0;
 	border_roundness_y = 15.0;	
-	background_color = 0x7F202020;
+	background_color = 0xCF202020;
 	border_color	 = 0xFFFFFFFF;
 	text_color		 = 0xFFFFFFFF;
 	Next = NULL;

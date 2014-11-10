@@ -1,5 +1,12 @@
-// line graph OpenVG program
-// Steve Tenniswood
+/* Histogram - shows samples of a measurement (read many times)
+ *				X Axis is the measurement going from lowest to highest.
+ *				Y Axis shows the number of measurements which fall in that range.
+ *				Assumes a normal distribution for the Bell curve which is fitted to the data.
+ *
+ * OpenVG program
+ * Author:		Steve Tenniswood
+ */ 
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,21 +22,12 @@ Histogram::Histogram()
 :Graphbase()
 {	
 	bins = 10.0;
-	ShowVerticalLines=false;
-	data=NULL;
 }
 
 Histogram::Histogram( int Left, int Right, int Top, int Bottom )
 :Graphbase(Left,Right,Top,Bottom)
 {	
 	bins = 10.0;
-	ShowVerticalLines=false;
-	data=NULL;
-}
-
-void Histogram::set_data( DataSet* NewData )
-{
-	data = NewData;
 }
 
 float Histogram::get_highest_sample_count()
@@ -38,10 +36,10 @@ float Histogram::get_highest_sample_count()
 	float start_val  = (center_value - three_sigma);	// first bin on left
 	float end_val    = start_val + bin_value_spacing;
 	int   count;
-	
+		
 	for (int i=0; i<bins; i++)
 	{		
-		count = data->count_samples_between( start_val, end_val );
+		count = DataHead->count_samples_between( start_val, end_val );
 		if (count > highest)
 			highest = count;
 			
@@ -56,14 +54,14 @@ float Histogram::get_highest_sample_count()
 float Histogram::calc_scale( )
 {
 	// COMPUTE STATS : 
-	data->compute_stats();
+	DataHead->compute_stats();
 	
 	// WE'LL PLACE AVERAGE RIGHT IN THE CENTER:
 	// and allow enough room for 6 sigma (standard formatting)
-	center_value = data->get_average();
+	center_value = DataHead->get_average();
 
 	// Use SixSigma instead on Max/Min!
-	three_sigma       = 3.0 * data->get_stddev();
+	three_sigma       = 3.0 * DataHead->get_stddev();
 	float six_sigma   = 2.0 * three_sigma;
 	bin_value_spacing = six_sigma / bins;
 
@@ -101,7 +99,7 @@ int Histogram::draw_bell_curve()
 
 	for (int xpix=left; xpix<left+width; xpix++)		// for each pixel
 	{
-		eval_y = evaluate_gaussian(center_value, data->get_stddev(), x_value)*yscale;
+		eval_y = evaluate_gaussian(center_value, DataHead->get_stddev(), x_value)*yscale;
 		Line( xpix, bottom+prev_y,  xpix+1, bottom+eval_y);
 		prev_y = eval_y;
 		x_value += xscale;
@@ -114,18 +112,18 @@ void Histogram::draw_stats()
 	Stroke(255, 128, 128, 0.75);
   
 	char n_str[12];
-	sprintf(n_str, "n=%d", data->get_size() );
+	sprintf(n_str, "n=%d", DataHead->get_size() );
 	float x = center_xpix + ((center_xpix - left)/4.0);
 	float y = bottom+height - ((float)(height)/4.0);
 	Text( x,y, n_str, SerifTypeface, 12.0 );
 
-	sprintf(n_str, "avg=%6.1f", data->get_average() );
+	sprintf(n_str, "avg=%6.1f", DataHead->get_average() );
 	Text( x,y+20.0, n_str, SerifTypeface, 12.0 );	
 }
 
 //	
 //	printf("============ Histogram: average=%6.2f +- %6.2f 3sigma=%6.2f ===========\n", 
-//			data->get_average(), data->get_stddev(), three_sigma );
+//			DataHead->get_average(), DataHead->get_stddev(), three_sigma );
 int Histogram::draw_body() 
 { 	
 	calc_scale();
@@ -141,9 +139,9 @@ int Histogram::draw_body()
 	float end_val   = start_val + bin_value_spacing;
 	for (int i=0; i<bins; i++, x+=bin_xpixel_spacing)
 	{
-		NumberOfSamples = data->count_samples_between( start_val, end_val );
+		NumberOfSamples = DataHead->count_samples_between( start_val, end_val );
 		Line( x, bottom,  x, bottom+ (NumberOfSamples*yscale) );
-		
+
 		// Bump to next bin:
 		start_val = end_val;
 		end_val   = start_val+bin_value_spacing;	

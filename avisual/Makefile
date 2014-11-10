@@ -24,14 +24,15 @@ IPC_OBJS   =
 #  button_array_gui.o Container.o
 ADRENALINE_OBJS = 
 ADRENALINE_CPP_OBJS = control.o  \
-			leveler.o button.o checkbox.o progressbar.o radiobutton.o  \
-			listbox.o tabular_listbox.o directory_listbox.o file_browser.o \
-			text_view.o icon.o scroll_bar.o scroll_control.o \
-			window.o side_bar.o tab_control.o table_window.o frame_window.o \
-			display_manager.o display.o mouse.o image_gallery.o
-			
-		
-ADRENALINE_GRAPH_OBJS = Graphbase.o dataset.o line_graph.o histogram.o 
+			leveler.o button.o checkbox.o progressbar.o radiobutton.o  	\
+			listbox.o tabular_listbox.o directory_listbox.o file_browser.o  \
+			text_view.o icon.o scroll_bar.o scroll_control.o window.o  	\
+			side_bar.o tab_control.o table_window.o frame_window.o     	\
+			display_manager.o display.o mouse.o image_gallery.o power_level.o \
+			stereo_power.o
+
+ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o 		\
+			 bar_graph.o bar_graph_stacked.o scatter_plot.o
 KINETIC_OBJS = 
 
 # APP CODE

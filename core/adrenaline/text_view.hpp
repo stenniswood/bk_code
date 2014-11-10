@@ -9,7 +9,7 @@
 class TextView : public ScrollControl 
 {
 public:
-	TextView();
+	TextView( );
 	TextView( int Left, int Right, int Top, int Bottom );
 	TextView( int Width, int Height );
 	

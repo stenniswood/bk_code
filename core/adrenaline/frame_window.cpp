@@ -89,7 +89,6 @@ void FrameWindow::set_width_height( int NewWidth, int NewHeight )
 	
 	Window::set_width_height( NewWidth, NewHeight );
 	body_height = height-1.5*text_size;
-		
 }
 
 int   	FrameWindow::draw_header( )

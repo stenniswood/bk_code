@@ -10,13 +10,14 @@
 #include <fontinfo.h>
 #include "line_graph.hpp"
 #include "display.h" 
+#include "scatter_plot.hpp"
 
-long int ColorSequence[10] = { 
+static long int ColorSequence[10] = { 
 0x00FF0000, 0x0000FF00, 0x000000FF, 0x007F7F7F,
 0x007F3F00, 0x00007F3F, 0x003F007F, 
 0x007F7F00, 0x00007F7F, 0x00FFFFFF };
 
-LineGraph::LineGraph()
+ScatterGraph::ScatterGraph()
 :Graphbase()
 {	
 	stroke_width = 5.0;
@@ -29,7 +30,7 @@ LineGraph::LineGraph()
 	Initialize();
 }
 
-LineGraph::LineGraph( int Left, int Right, int Top, int Bottom )
+ScatterGraph::ScatterGraph( int Left, int Right, int Top, int Bottom )
 :Graphbase(Left,Right,Top,Bottom)
 {
 	stroke_width = 5.0;
@@ -42,7 +43,7 @@ LineGraph::LineGraph( int Left, int Right, int Top, int Bottom )
 	Initialize();
 }
 
-void LineGraph::line_plot( DataSet* data, long int Color )
+void ScatterGraph::line_plot( DataSet* data, long int Color )
 {
 	Stroke((Color&0x00FF0000)>>16, (Color&0x0000FF00)>>8, (Color&0x000000FF), 1.0);
 	StrokeWidth(stroke_width);
@@ -67,7 +68,7 @@ void LineGraph::line_plot( DataSet* data, long int Color )
 	}		
 }
 
-void LineGraph::draw_data_series( )
+void ScatterGraph::draw_data_series( )
 {
 	DataSet* ptr = DataHead;
 	int i=0;
@@ -79,7 +80,7 @@ void LineGraph::draw_data_series( )
 	}	
 }
 
-float LineGraph::calc_auto_scale( )
+float ScatterGraph::calc_auto_scale( )
 {
 	// get max of all data series:
 	DataSet* ptr = DataHead;
@@ -96,7 +97,7 @@ float LineGraph::calc_auto_scale( )
 	// round max and min 
 }
 
-void LineGraph::calc_scale( )
+void ScatterGraph::calc_scale( )
 {
 	float xpixels = width;
 	float ypixels = height; 
@@ -112,12 +113,12 @@ void LineGraph::calc_scale( )
 	yoffset = min;	
 }
 
-int LineGraph::draw_body() 
+int ScatterGraph::draw_body() 
 {
 	Fill(44, 77, 232, 1);				   // Big blue marble
 	Stroke(255, 128, 128, 0.5);
 	StrokeWidth(2);
-	printf("LineGraph::draw_body()\n");	  
+	printf("ScatterGraph::draw_body()\n");	  
 	
 	//calc_scale( );
 	draw_data_series( );

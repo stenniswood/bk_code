@@ -152,16 +152,19 @@ char* TextView::get_end_of_line	( char* mText )	// for eol
 }
 
 
+/* There's an error here somewhere!! */
 int TextView::count_num_lines_present(  )
 {
 	int Lines = 0;
 	int total_length = strlen(text);
 	char* ptr = text;
 	char* eol = get_end_of_line( text );
+	printf("total length=%d; chars to end_of_line=%d\n", total_length, (eol-text) );
 	do {
 		eol = get_end_of_line( ptr );
 		Lines++;
 		ptr = eol+1;
+		printf("chars to end_of_line=%d\n", (eol-text) );
 	} while ( (ptr-text) < total_length );
 	return Lines;
 }
@@ -207,7 +210,9 @@ int TextView::draw()
 
 	// 
 	Fill_l(text_color);					// 
-	//line_height 	= 1.25*text_size;
+	line_height 	= 1.25*text_size;
+	printf(" text_size % \n");
+	
 	int vertical    = height-line_height;
 	char* ptr       = text-1;
 	
@@ -234,9 +239,12 @@ int TextView::draw()
 
 void TextView::calc_metrics(  )
 {
+	printf("calc_metrics:  text_size=%6.1f\n", text_size);
 	line_height 		  = 1.25*text_size;
 	int num_visible_lines = (height / line_height);
+	printf(": num_visible_lines=%d\n", num_visible_lines );
 	int max 			  = count_num_lines_present();
+	printf("calc_metrics:  lines present=%d\n", max);
 	int first_visible 	  = 0;
 	if (vsb)
 		first_visible     = vsb->get_position();
@@ -261,7 +269,7 @@ void TextView::load_file( char* mFullFilename )
 		errno=0;
 		int result = stat(mFullFilename, &buf);
 		int errsv = errno;
-		perror(" -fstat error- ");
+		//perror(" -fstat error- ");
 		int FileSize = buf.st_size;
 		printf("load_file: result=%d/%d;  fizesize=%d\n", result, errsv, FileSize);
 				
@@ -269,11 +277,12 @@ void TextView::load_file( char* mFullFilename )
 		int bytes_read=0;
 		char* ptr = text;
 		// need to allocate entire file at once.
-		bytes_read = fread( text, FileSize, 1, fd);
+		bytes_read = fread( text, 1, FileSize, fd );
 		if (bytes_read != FileSize)
 		{
-			//printf("ERROR Loading Text File!  Bytes read=%d!\n", bytes_read );
+			printf("ERROR Loading Text File!  Bytes read=%d!\n", bytes_read );
 		}				
+		printf("Loaded Text File:  Bytes read=%d\n", bytes_read );
 		calc_metrics();
 	}
 }

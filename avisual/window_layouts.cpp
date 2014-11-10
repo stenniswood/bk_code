@@ -58,7 +58,7 @@ ScrollBar   hsb(false);
 DataSet ds1;
 DataSet ds2;
 DataSet ds3;
-DataSet ds_tiltx; 
+DataSet ds_tiltx;
 DataSet ds_tilty;
 
 
@@ -282,17 +282,22 @@ void init_tilt_objs()
 	hg.set_title ("Accel ry");
 	hg.set_xLabel("Time (seconds)");
 	hg.set_yLabel("Rotate about y (degrees)");
-	hg.set_data  ( &ds_tilty );
+	hg.add_data_series  ( &ds_tilty );
 	
-	lg2.addDataSeries	( &ds_tilty 	);
+	lg2.add_data_series	( &ds_tilty 	);
 	lg2.set_text	 	( "Rotate y", "Time (seconds)", "Angle (degrees)" );		
-	lg2.calc_scale	 	( 1024, 0 		);
+	lg2.set_max(1024);
+	lg2.set_min(0 );
+
+	lg2.calc_scale	 	( 				);
 	lg2.set_stroke_width( 1.0 			);
 	lg2.set_title_size	( 18.0 			);
 
-	lg3.addDataSeries	( &ds3 );	
+	lg3.add_data_series	( &ds3 );	
 	lg3.set_text		( "Rotate z", "Time (seconds)", "Angle (degrees)" );		
-	lg3.calc_scale		( 1024, 0 );
+	lg3.set_max(1024);
+	lg3.set_min(0 );
+	lg3.calc_scale		( 		);
 	lg3.set_stroke_width( 1.0 	);	
 	lg3.set_title_size	( 18.0  );	
 
@@ -307,11 +312,13 @@ void init_tilt_objs()
 
 void init_pot_objs()
 {
-	lg1.addDataSeries( &ds1 );
-	lg1.addDataSeries( &ds2 );
-	lg1.addDataSeries( &ds3 );
+	lg1.add_data_series( &ds1 );
+	lg1.add_data_series( &ds2 );
+	lg1.add_data_series( &ds3 );
 	lg1.set_text     ( "Hip", "Time (seconds)", "Angle (degrees)" );	
-	lg1.calc_scale   ( 1024, 0 );
+	lg1.set_max(1024);
+	lg1.set_min(0);
+	lg1.calc_scale   (  );
 	lg1.set_stroke_width( 1.0 );
 	lg1.set_title_size  ( 16.0 );
 

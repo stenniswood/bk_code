@@ -45,7 +45,7 @@ void SideBarControl::calc_metrics	 	(   )
 	
 }
 
-int		SideBarControl::add_control( Control* mControl, char* mText=NULL )
+int		SideBarControl::add_control( Control* mControl, char* mText )
 {
 	// Need to set it's location first:
 	// This control proportions them out:
@@ -70,25 +70,25 @@ int		SideBarControl::add_control( Control* mControl, char* mText=NULL )
 	paired_text.push_back( mText );
 	return 1;
 }
-void	SideBarControl::hide			 ( bool mHide = true)
+void	SideBarControl::hide			 ( bool mHide )
 {	
 	isHidden = mHide;
 	Invalidate();
 }
-void	SideBarControl::auto_hide		 ( bool mAutoHide = true)
+void	SideBarControl::auto_hide		 ( bool mAutoHide )
 {	
 	AutoHideEnabled = mAutoHide;
 	// need a timer after 5 seconds hide.
 }
 
-void SideBarControl::set_alignment( byte mAlignment = SIDEBAR_ALIGN_CENTER )
+void SideBarControl::set_alignment( byte mAlignment  )
 {
 	Alignment = mAlignment;
 }
 
 int SideBarControl::draw()
 {
-	if (isHidden)	return;
+	if (isHidden)	return 0;
 
 	Control::draw();
 	list<Control*>::iterator	iter = controls.begin();
@@ -97,6 +97,7 @@ int SideBarControl::draw()
 	{
 		(*iter)->draw();
 	}	
+	return 1;
 }
 
 
