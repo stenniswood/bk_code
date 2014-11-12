@@ -20,16 +20,19 @@
 #include "display.h"
 
 
+#define DEFAULT_BAR_COLOR 0xDF4FAF20
+
+
 BarGraph::BarGraph()
 :Graphbase()
 {	
-	bar_color = 0xDFFF7F7F;
+	bar_color = DEFAULT_BAR_COLOR;
 }
 
 BarGraph::BarGraph( int Left, int Right, int Top, int Bottom )
 :Graphbase(Left,Right,Top,Bottom)
 {	
-	bar_color = 0xDFFF7F7F;
+	bar_color = DEFAULT_BAR_COLOR;
 }
 
 // Number of Bins must be set before call this!

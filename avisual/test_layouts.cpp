@@ -92,7 +92,7 @@ static PowerLevel   pl		   (-1,-1);
 static StereoPowerLevels spl   (-1,-1);
 
 static ListBox  	MyList	   ( 20, 320, 700, 550  );
-static ProgressBar  MyProgress ( 450, 650, 300, 275 );
+static ProgressBar  MyProgress ( 450, 650, 400, 375 );
 static CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
 
 static RadioButton 	MyRadio1 ( -1, -1 );
@@ -184,23 +184,24 @@ void init_simple_button_test()
 
 	Button* test = new Button( -1, -1 ); 
 	test->set_text( "Try me and see" );
-	test->copy_position_vert( &MyButt );
+	test->copy_position_vert   ( &MyButt );
 	test->set_position_right_of( &MyButt );
 
 	// PowerLevel
-	pl.move_to  (100, 200);
-	pl.set_width_height( 75, 150 );
-	pl.set_max  ( 100.0 );
-	pl.set_min  (   0.0 );
-	pl.set_level(  75.0 );
+	pl.move_to  		(100, 200);
+	pl.set_width_height ( 75, 150 );
+	pl.set_max  		( 100.0 );
+	pl.set_min  		(   0.0 );
+	pl.set_level		(  75.0 );
 
 	// Stereo Power Indicator	
 	spl.move_to  		(100, 200);
 	spl.set_width_height( 75, 150);
 	spl.set_max  		( 100.0 );
 	spl.set_min  		(   0.0 );
-	spl.set_level		(  75.0 );
-
+	spl.set_level_left	(  75.0 );
+	spl.set_level_right	(  75.0 );
+	
 	// Add to display manager:
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &MyButt );	
@@ -245,27 +246,28 @@ void init_progressbar_test()
 {
 	MyProgress.set_percentage(100.0);		
 	MyProgress.show_percentage();
-	MyProgress.print_positions();
+	//MyProgress.print_positions();
 	
 	ProgressBar* tmp = new ProgressBar();
 	tmp->set_percentage	(50.0);
+	tmp->move_to(100,500);
 	tmp->copy_position_horiz( &MyProgress );
 	//tmp->show_percentage();
-	tmp->set_position_above ( &MyProgress );
-	tmp->print_positions();
+	//tmp->set_position_above ( &MyProgress );
+	//tmp->print_positions();
+
+	ProgressBar* tmp2 = new ProgressBar();
+	tmp2->move_to ( 100, 200 );
+	tmp2->copy_position_horiz( &MyProgress );
+	tmp2->set_percentage(20.0);
+	//tmp2->print_positions();	
 
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
 	MainDisplay.add_object( &MyProgress );
 	MainDisplay.add_object( tmp		    );	
+	MainDisplay.add_object( tmp2	    );	
 
-	tmp = new ProgressBar();
-	tmp->copy_position_horiz( &MyProgress );
-	tmp->set_position_below ( &MyProgress );
-	tmp->set_percentage(20.0);
-
-	tmp->print_positions();	
-	MainDisplay.add_object( tmp		    );	
 }
 
 void init_radio_button_test()
@@ -507,7 +509,7 @@ void init_combined_graph()
 	fill_fake_data2			(	);
 	fill_fake_data3			(	);	
 
-	lg1.set_title 			( (char*) chart1_title );
+	lg1.set_title 			( (char*) chart1_title 			);
 	lg1.set_xLabel			( (char*) "Time" 				);
 	lg1.set_yLabel			( (char*) "X Degree/second" 	);	
 	lg1.set_max				( 64.0 );
@@ -534,7 +536,9 @@ void init_combined_graph()
 	bg.set_yLabel			( (char*) "Apples Sold" 	);	
 	bg.add_data_series		( &ds3 );
 
+
 	hg.move_to				( 100,100 );
+	hg.set_background_color ( 0xFF202020 );
 	hg.set_title 			( (char*) chart1_title );
 	hg.set_xLabel			( (char*) "Angle" 		);
 	hg.set_yLabel			( (char*) "Samples" 	);	

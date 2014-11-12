@@ -302,16 +302,3 @@ int Graphbase::draw_y_scale()
 	return TRUE;
 }
 
-// grid draws a grid
-/*void Graphbase::grid(VGfloat x, VGfloat y, int n, int w, int h) {
-	VGfloat ix, iy;
-	Stroke(255, 128, 128, 0.5);
-	StrokeWidth(2);
-	for (ix = x; ix <= x + w; ix += n) {
-		Line(ix, y, ix, y + h);
-	}
-
-	for (iy = y; iy <= y + h; iy += n) {
-		Line(x, iy, x + w, iy);
-	}
-}*/
