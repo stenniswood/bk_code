@@ -33,7 +33,6 @@ AUTHOR	:  Stephen Tenniswood
 
 char* 	visual_shared_memory;
 int 	visual_segment_id;
-
 struct  avisual_ipc_memory_map* ipc_memory_avis=NULL;
  
 void dump_ipc()

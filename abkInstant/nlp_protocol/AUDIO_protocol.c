@@ -21,7 +21,6 @@
 #include "audio_thread.h"
 #include "thread_control.h"
 
-
 /* Suggested Statements:
 
 	start 2 way audio to me.
@@ -171,7 +170,7 @@ void audio_listen()
 	// Maybe want to verify the source IP address for security purposes
 	// later on.  Not necessary now!
 	printf( "Listening for incoming audio...\n");
-	create_audio_thread( FALSE,  TRUE, BASE_FILE_PORT );
+	create_audio_thread( FALSE,  TRUE );
 	
 	nlp_reply_formulated=TRUE;
 	strcpy(NLP_Response, "Okay, I'm listening for your audio");
@@ -193,10 +192,10 @@ void send_audio()
 void audio_cancel()
 {
 	printf( "Cancelling audio connection.\n");
-	
 	audio_terminate_requested = TRUE;
 	nlp_reply_formulated      = TRUE;
-	strcpy(NLP_Response, "Okay, I am terminating our audio connection.");	
+	strcpy(NLP_Response, "Okay, I am terminating our audio connection.");
+	printf( "Cancel initiated.\n");
 }
 void audio_two_way()
 {
@@ -232,7 +231,7 @@ BOOL Parse_Audio_Statement( char* mSentence )
 
 	std::string* object 	= extract_word( mSentence, &object_list  );
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-	//int prepos_index      	= get_preposition_index( mSentence );
+	//int prepos_index      = get_preposition_index( mSentence );
 
 	diagram_sentence(subject, verb, adjective, object );
 
@@ -253,10 +252,7 @@ BOOL Parse_Audio_Statement( char* mSentence )
 		if (strcmp(verb->c_str(), "send") ==0) 	
 		{
 			if (strcmp(object->c_str(), "me") ==0)
-			{	send_audio();	retval = TRUE;	}
-		}
-		if (strcmp(verb->c_str(), "send") ==0) 	
-		{
+			{	send_audio();	retval = TRUE;	}				
 			if (strcmp(object->c_str(), "you") ==0)
 			{	audio_listen();		retval = TRUE;	}
 		}
@@ -273,18 +269,22 @@ BOOL Parse_Audio_Statement( char* mSentence )
 		    (strcmp(verb->c_str(), "terminate") ==0)  ||		    		    
 		    (strcmp(verb->c_str(), "kill" ) ==0))
 			{
-				 audio_cancel();
+				 audio_cancel(); 
 				 retval = TRUE;
 			}
 	}
+	//printf( "Parse_Audio_Statement almost done\n" );
 
-	if ((strcmp( subject->c_str(), "audio")==0) ||
-		(strcmp( subject->c_str(), "connection")==0))
+	if ( (strcmp( subject->c_str(), "audio")==0) ||
+		 (strcmp( subject->c_str(), "connection")==0))
 	{
-		if (strcmp( object->c_str(), "connection")==0)
-		{	audio_two_way();		retval = TRUE;	}
+		if (object)  {
+			if (strcmp( object->c_str(), "connection")==0)
+			{	audio_two_way();		retval = TRUE;	}
+		}
 	}
-	
+
+	//printf( "Parse_Audio_Statement done\n" );	
 	return retval;
 }
 

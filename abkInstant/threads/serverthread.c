@@ -28,7 +28,6 @@
 #include "visual_memory.h"
 
 
-
 #define MAX_SENTENCE_LENGTH 255
 char	 		header[MAX_SENTENCE_LENGTH];
 
@@ -163,7 +162,7 @@ void* server_thread(void*)
     char 	sendBuff[1025];
     time_t 	ticks; 
 
-	init_server    ( );		// Get "ip_addr" of this machine.
+	init_server    ( );			// Get "ip_addr" of this machine.
 	Init_NLP_word_lists( );		// parser
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -176,7 +175,8 @@ void* server_thread(void*)
 
     bind  (listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen(listenfd, 10);
-	//char* ip_addr = inet_ntoa( serv_addr.sin_addr );
+
+	char* ip_addr = inet_ntoa( serv_addr.sin_addr );
 	printf( "\n Welcome to BK Media Control  :  IP=%s:%d \n\n", ip_addr, BK_MEDIA_PORT );
 
 	/* wait for a client to talk to us */
@@ -194,16 +194,18 @@ void* server_thread(void*)
 		{
 			/* Get HEADER from the client */
 			int bytes_rxd = read(connfd, header, MAX_SENTENCE_LENGTH);
+			int errsv = errno;
 
 			if (bytes_rxd == 0)
 			{ 
-				printf("Received 0 bytes - closed \n");
+				printf("Server thread Received Close (0 bytes) \n");
 				done = TRUE;
 			}
 			else if (bytes_rxd == -1) 
 			{
-				printf("Received -1 byte - error \n");			
-				perror("recv");
+				printf("NLP Server thread error: Received -1 bytes; errno=%d\n", errno);
+				errno = errsv;
+				perror("NLP socket");
 				exit1();
 			}
 			else 	// DATA ARRIVED, HANDLE:
@@ -216,9 +218,9 @@ void* server_thread(void*)
 				
 				if (nlp_reply_formulated)				
 					Send_Reply();
-				printf("Done parsing.\n");	
+				printf("Reply sent.\n");	
+
 				ipc_write_command_text( header );
-				
 				//done = Parse_done(header);
 			}
 		}

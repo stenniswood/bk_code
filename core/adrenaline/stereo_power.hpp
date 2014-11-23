@@ -17,17 +17,21 @@ public:
 	StereoPowerLevels ( );
 	~StereoPowerLevels( );
 
-	void 		Initialize();
-	void		set_level_left ( float mLevel )	{ left.set_level(mLevel);  };
-	void		set_level_right( float mLevel )	{ right.set_level(mLevel); };
+	void	Initialize	   (			  );
+	void	set_level_left ( float mLevel )	{ left_ch.set_level(mLevel);  };
+	void	set_level_right( float mLevel )	{ right_ch.set_level(mLevel); };
+	void	set_number_boxes( int mBoxes )	{ left_ch.set_number_boxes(mBoxes); right_ch.set_number_boxes(mBoxes); };
 	
+	virtual void set_width_height ( int Width,  int Height 		);
+	virtual void move_to		  ( float Left, float  Bottom	);
+
 	void		set_max( float mMax );
-	void 		set_min( float mMin );	
-	int 		draw( );
-	
+	void 		set_min( float mMin );
+	int 		draw   ( 			);
+
 protected:
-	PowerLevel left;
-	PowerLevel right;
+	PowerLevel left_ch;
+	PowerLevel right_ch;
 	
 };
 

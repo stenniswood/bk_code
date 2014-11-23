@@ -23,38 +23,39 @@ Window::Window ( )
 :Control()
 {
 	Initialize();
-
-	//printf("\t\tWindow::ctor()\n");
 }
 
 Window::Window ( int Left, int Right, int Top, int Bottom )
 :Control(Left, Right, Top, Bottom)
 {
 	Initialize();
-	//printf("\t\tWindow::ctor()\n");
-
 }
+
 Window::Window( int Width, int Height )
 :Control(Width, Height)
 {
+	Initialize();
 }
+
 Window::~Window( )
 {
 }
+
 void	Window::Initialize		 (   )
 {
 	Control::Initialize();
 	packer_vertical_position = bottom+height;
-	packer_horizontal_l_position = left;	// Moves Left to Right.
+	packer_horizontal_l_position = left;		// Moves Left to Right.
 	packer_horizontal_r_position = left+width;
-	printf("Window::Initialize:  vp=%6.2f; lp=%6.2f; rp=%6.2f\n", packer_vertical_position,
-			packer_horizontal_l_position, packer_horizontal_r_position );	
+	/*printf("Window::Initialize:  vp=%6.2f; lp=%6.2f; rp=%6.2f\n", 
+			packer_vertical_position,
+			packer_horizontal_l_position, 
+			packer_horizontal_r_position );	*/
 }
 
 int   	Window::draw 			 (	 )
 {
-	printf("\tWindow::\t");	print_positions();
-
+	//printf("\tWindow::\t");	print_positions();
 	Control::draw();
 	
 	list<Control*>::iterator	iter = controls.begin();
@@ -63,7 +64,6 @@ int   	Window::draw 			 (	 )
 		printf("\t\t\t Drawing child %d\t", i);
 		(*iter)->print_positions();
 		//(*iter)->print_color_info();
-
 		(*iter)->draw();
 	}
 }
@@ -75,8 +75,8 @@ void	Window::calc_metrics	 (   )
 // Works like a stack from top down of the window.  
 void Window::pack_control( Control* mNewControl, byte mHorizontalPacking, byte mVerticalPacking )
 {
-	printf("Window::pack_control:  packer: vert_pos=%6.2f; horiz_l=%6.2f horiz_r=%6.2f\n", 
-			packer_vertical_position, packer_horizontal_l_position, packer_horizontal_r_position );
+	//printf("Window::pack_control:  packer: vert_pos=%6.2f; horiz_l=%6.2f horiz_r=%6.2f\n", 
+	//		packer_vertical_position, packer_horizontal_l_position, packer_horizontal_r_position );
 	//printf("Window::pack_control: <%6.1f,%6.1f> \n", mNewControl->left, mNewControl->bottom );
 
 	set_vertical_position  ( mNewControl, mVerticalPacking   );
@@ -158,23 +158,6 @@ void Window::pack_below  (Control* mNewControl, Control* mReferenceControl, byte
 	} else 
 		set_horizontal_position( mNewControl, mHorizontalPacking );
 
-	/*if (mHorizontalPacking & PACK_FILL_PARENT )
-	{
-		mNewControl->left = left;
-		mNewControl->width = width;
-	}
-	if (mHorizontalPacking & PACK_LEFT )
-	{
-		mNewControl->left = left;
-	}
-	if (mHorizontalPacking & PACK_CENTER )
-	{
-		mNewControl->left = (width - mNewControl->width) / 2.0;		
-	}
-	if (mHorizontalPacking & PACK_RIGHT )
-	{
-		mNewControl->left  = left+width - mNewControl->width;
-	}*/
 	controls.push_back( mNewControl );
 }
 
@@ -212,11 +195,6 @@ int	Window::add_control_local_coords( Control* mControl )
 	mControl->move_by( -left, -bottom );
 	controls.push_back( mControl );
 }
-
-/*int	Window::add_control_absolute_coords( Control* mControl )
-{
-	controls.push_back( mControl );
-}*/
 
 int		Window::add_control		 ( Control* mControl )
 {
@@ -296,7 +274,6 @@ Control*	Window::HitTest	( int x, int y )
 		return NULL;
 }
 
-
 int Window::onClick(int x, int y, bool mouse_is_down)
 {
 	// Disperse to affected child:
@@ -304,10 +281,10 @@ int Window::onClick(int x, int y, bool mouse_is_down)
 	for (int i=0; iter!=controls.end(); i++, iter++)
 	{
 		Control* result = (*iter)->HitTest( x, y );
-		if (result)
+		if (result) {
 			(*iter)->onClick( x, y );
-				
-	//	if (result)  return result;
-	//  
+			return TRUE;
+		}				
 	}
+	return FALSE;
 }

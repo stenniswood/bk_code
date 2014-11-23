@@ -36,6 +36,7 @@
 #include "test_layouts.hpp"
 
 #include "visual_memory.h"
+#include "audio_memory.h"
 
 
 /*
@@ -60,6 +61,13 @@ void init( const char* mVectorFileName )
 	// Ready-to-send, Receive buffer full 
 	create_threads();
 	bkInstant_connected = connect_shared_abkInstant_memory(); 
+
+	if (aud_allocate_memory() == -1)
+	{
+		printf("Cannot allocate memory.\n");
+		return;
+	}
+	aud_attach_memory();
 }
   
 void help()
@@ -226,8 +234,6 @@ int main( int argc, char *argv[] )
 
 		// Want to be able to open the screen leaving everything as is.
 		// then do an end again to render the mouse.
-		
-		
 		
 		/*sequencer_interface();
 		voice_interface();

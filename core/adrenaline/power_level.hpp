@@ -11,7 +11,6 @@ class Window;
 
 class PowerLevel : public Control
 {
-
 public:
 	PowerLevel( int Left, int Right, int Top, int Bottom );
 	PowerLevel( int Width, int Height 					 );
@@ -19,12 +18,13 @@ public:
 	~PowerLevel();
 
 	void 		Initialize();
-	void		set_level( float mLevel );
-	void		set_max  ( float mMax )		{ max = mMax; }; 
-	void		set_min  ( float mMin )		{ min = mMin; };
+	void		set_level	 ( float mLevel );
+	void		set_max  	 ( float mMax 	)	{ max = mMax; }; 
+	void		set_min  	 ( float mMin 	)	{ min = mMin; };
+	void		set_number_boxes( int mBoxes );
 
-	void 		draw_box(float mx, float my, long int mColor );
-	int 		draw( );
+	void 		draw_box 	( float mx, float my, long int mColor );
+	virtual int draw		( );
 	void 		calc_metrics( );
 	
 protected:
@@ -35,7 +35,6 @@ protected:
 	float 	box_height;			// based on control window size
 	float	box_width;			// calculates based on margins	
 	float	margin;				// percentage of width
-	
 };
 
  

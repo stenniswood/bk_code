@@ -30,7 +30,7 @@ public:
 	
 	void		 	set_position	  	 ( int Left, int Right, int Top, int Bottom );
 	virtual void 	set_width_height  	 ( int Width, int Height )	  { width = Width; height=Height; };
-	virtual void  	move_to	  		  	 ( float Left,   float  mBottom	);
+	virtual void  	move_to	  		  	 ( float Left,   float  Bottom	);
 	void  			get_xy	  		  	 ( float* mLeft, float* mBottom	) { *mLeft=left; *mBottom=bottom; };
 	void 		 	move_bottom_to  	 ( float  mNewBottom	);	
 	void 		 	move_left_to  	 	 ( float  mNewLeft	);		
@@ -53,7 +53,6 @@ public:
 	virtual int   	draw				(	);
 	int   			draw_title			( 	);
 	int   			draw_border			(   );
-
 
 	// Datasets may be linked:
 	void			setNext(Control* next)	{ Next = next; };

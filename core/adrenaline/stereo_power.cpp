@@ -40,38 +40,56 @@ StereoPowerLevels::StereoPowerLevels()
 
 void StereoPowerLevels::Initialize()
 {
-	left.set_level (10);
-	right.set_level(10);	
+	left_ch.set_level (10);
+	right_ch.set_level(10);	
+
+	left_ch.set_max ( 100.);
+	left_ch.set_min (   0.);	
+	right_ch.set_max( 100.);
+	right_ch.set_min(   0.);
+
+	set_width_height( width, height );
+}
+
+void StereoPowerLevels::set_width_height ( int Width,  int Height )
+{
+	Control::set_width_height( Width, Height );
 	
-	left.set_max( 100. );
-	left.set_min(   0. );
-	
-	right.set_max( 100.);
-	right.set_min(   0.);
-} 
+	float half_w = (Width/2.0);
+	left_ch.set_width_height ( half_w, height );
+	right_ch.set_width_height( half_w, height );	
+}
+
+void StereoPowerLevels::move_to( float Left, float Bottom )
+{
+	Control::move_to( Left, Bottom );
+
+	float half_w = (width/2.0);
+	left_ch.move_to ( left, 		 bottom );
+	right_ch.move_to( left+half_w+2, bottom );
+}
 
 StereoPowerLevels::~StereoPowerLevels()
 {
+
 }
-
-
 
 int StereoPowerLevels::draw( )
 {
 	Control::draw();
-	left.draw();
-	right.draw();		
+	left_ch.draw();
+	right_ch.draw();		
 }
 
 void StereoPowerLevels::set_max  ( float mMax )	
 {
-	left.set_max (mMax);
-	right.set_max(mMax);	
+	left_ch.set_max (mMax);
+	right_ch.set_max(mMax);	
 }
 
 void StereoPowerLevels::set_min  ( float mMin )
 {
-	left.set_min (mMin);
-	right.set_min(mMin);	
+	left_ch.set_min (mMin);
+	right_ch.set_min(mMin);
 }
 

@@ -279,24 +279,24 @@ void init_avisual()
 void init_tilt_objs()
 {
 	// Link the Dataseries
-	hg.set_title ("Accel ry");
-	hg.set_xLabel("Time (seconds)");
-	hg.set_yLabel("Rotate about y (degrees)");
-	hg.add_data_series  ( &ds_tilty );
-	
-	lg2.add_data_series	( &ds_tilty 	);
+	hg.set_title 		("Accel ry"			);
+	hg.set_xLabel		("Time (seconds)"	);
+	hg.set_yLabel		("Rotate about y (degrees)");
+	hg.add_data_series  ( &ds_tilty 		);
+
+	lg2.add_data_series	( &ds_tilty 		);
 	lg2.set_text	 	( "Rotate y", "Time (seconds)", "Angle (degrees)" );		
-	lg2.set_max(1024);
-	lg2.set_min(0 );
+	lg2.set_max			( 1024 );
+	lg2.set_min			( 0    );
 
 	lg2.calc_scale	 	( 				);
 	lg2.set_stroke_width( 1.0 			);
 	lg2.set_title_size	( 18.0 			);
 
-	lg3.add_data_series	( &ds3 );	
+	lg3.add_data_series	( &ds3  );
 	lg3.set_text		( "Rotate z", "Time (seconds)", "Angle (degrees)" );		
-	lg3.set_max(1024);
-	lg3.set_min(0 );
+	lg3.set_max			( 1024  );
+	lg3.set_min			( 0     );
 	lg3.calc_scale		( 		);
 	lg3.set_stroke_width( 1.0 	);	
 	lg3.set_title_size	( 18.0  );	

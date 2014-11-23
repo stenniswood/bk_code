@@ -82,7 +82,8 @@ void ScrollControl::set_v_scroll_values( int max, int min, int first_visible,
 	int amount = (max-min);
 	if ((vsb==NULL) && (amount_visible<amount))
 		enable_v_scroll_bar(true);
-
+	if (vsb==NULL) return;
+	
 	vsb->set_max_value	( max );
 	vsb->set_min_value	( min );
 	vsb->scroll_to  	( first_visible	 );

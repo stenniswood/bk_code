@@ -7,6 +7,10 @@ class Leveler : public Control
 {
 public:
 	Leveler	(float Max, float Min);
+	// set level percent actually moves the marker.
+	// want to expand this to set max, min, and level.
+	// so we can show any unit, not just percents!
+	
 	int   set_level			(float level		 );
 	void  set_level_cap		(float level		 );
 	void  set_level_percent	(float percent		 );

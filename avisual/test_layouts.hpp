@@ -31,6 +31,8 @@ void init_bar_graph	 	 ();
 void init_scatter_graph	 ();
 void init_combined_graph ();
 
+void init_audio_view	 ();
+
 void init_okay_cancel_dlg();
 
 

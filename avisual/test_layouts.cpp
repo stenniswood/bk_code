@@ -1,5 +1,15 @@
-// line graph OpenVG program
-// Steve Tenniswood
+/*************************************************************************
+NAME	:	test_layouts.cpp
+DESCRIPTION:
+
+	This file is used to test the primitive objects in the Adrenaline
+	windowing package.
+
+	For combinations of objects see:  test_combo_layouts.cpp
+	
+DATE	: November 20, 2014
+AUTHOR	: Steve Tenniswood
+**************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -24,7 +34,6 @@
 #include "scroll_bar.hpp"
 #include "control.hpp"
 #include "icon.hpp"
-#include "visual_memory.h"
 #include "listbox.hpp"
 #include "tabular_listbox.hpp"
 #include "window.hpp"
@@ -41,11 +50,17 @@
 #include "power_level.hpp"
 #include "stereo_power.hpp"
 
+#include "visual_memory.h"
+#include "audio_memory.h"
+#include "wave_view.hpp"
+#include "frequency_view.hpp"
+#include "fft.h"
+#include "test_combo_layouts.hpp"
 
 
-static TextView 	ConnectionStatus( 50, 1230, 750, 700 );
-static TextView 	LongText		( 50, 1230, 750, 500 );
-static TabularListBox  tab_lb		( 600, 900, 750, 50 );
+static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
+static TextView 		LongText		( 50, 1230, 750, 500 );
+static TabularListBox	tab_lb			( 600, 900, 750, 50  );
 
 /********************* A sample Window ***********************************/
 static FrameWindow	ParentWindowFrame(450, 1050, 500, 100);
@@ -60,7 +75,7 @@ static IconView		test_icon ( 50,200 );
 static ScrollBar   vsb;
 static ScrollBar   hsb(false);
 
-////////////////////////////////////////////
+////////////////////////////////////////////////////
 static DataSet ds1;
 static DataSet ds2;
 static DataSet ds3;
@@ -88,8 +103,8 @@ static Button   	MyButt	   ( 450, 600, 400, 350 );
 static Button   	Okay	   (-1,-1);
 static Button   	Cancel	   (-1,-1);
 
-static PowerLevel   pl		   (-1,-1);
-static StereoPowerLevels spl   (-1,-1);
+static PowerLevel		 pl		(-1,-1);
+static StereoPowerLevels spl  	(-1,-1);
 
 static ListBox  	MyList	   ( 20, 320, 700, 550  );
 static ProgressBar  MyProgress ( 450, 650, 400, 375 );
@@ -124,9 +139,9 @@ void print_test_list()
 	printf("14 : init_histogram_graph\n" );	
 	printf("15 : init_bar_graph\n"		 );	
 	printf("16 : init_scatter_graph\n"	 );	
-	
+	printf("17 : init_audio_view\n"	 	 );
 	printf("20 : init_okay_cancel_dlg\n" );
-	printf("21 : init_combined_graph\n"	 );
+	printf("21 : init_combined_graph\n"	 );	
 }
 void load_test_screen(int number)
 {
@@ -168,11 +183,13 @@ void load_test_screen(int number)
 			break;
 	case 16: init_scatter_graph();
 			break;
+	case 17: init_audio_view();
+			break;
 	case 20: init_okay_cancel_dlg();
 			break;
 	case 21: init_combined_graph();
 			break;				
-	default:	
+	default: load_combo_test_screen( number );
 			break;
 	}
 }
@@ -188,11 +205,11 @@ void init_simple_button_test()
 	test->set_position_right_of( &MyButt );
 
 	// PowerLevel
-	pl.move_to  		(100, 200);
+	pl.move_to  		(100, 200 );
 	pl.set_width_height ( 75, 150 );
-	pl.set_max  		( 100.0 );
-	pl.set_min  		(   0.0 );
-	pl.set_level		(  75.0 );
+	pl.set_max  		( 100.0   );
+	pl.set_min  		(   0.0   );
+	pl.set_level		(  75.0   );
 
 	// Stereo Power Indicator	
 	spl.move_to  		(100, 200);
@@ -299,8 +316,6 @@ void init_radio_button_test()
 	MainDisplay.add_object( &MyRadio4 );
 }
 
-//CheckBox check1(50, 250, 300, 250);
-//CheckBox check2(50, 250, 240, 190);
 CheckBox check1(-1, -1);
 CheckBox check2(-1, -1);
 
@@ -498,10 +513,13 @@ void init_bar_graph	 	()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( &bg );
 }
+
+
 void init_scatter_graph	 	()
 {
 
 }
+
 void init_combined_graph()
 {
 	printf("Line Graph Init\n");
@@ -536,7 +554,6 @@ void init_combined_graph()
 	bg.set_yLabel			( (char*) "Apples Sold" 	);	
 	bg.add_data_series		( &ds3 );
 
-
 	hg.move_to				( 100,100 );
 	hg.set_background_color ( 0xFF202020 );
 	hg.set_title 			( (char*) chart1_title );
@@ -551,54 +568,6 @@ void init_combined_graph()
 	MainDisplay.add_object( &hg );
 }
 
-void init_okay_cancel_dlg()
-{	
-	MyRadio1.set_text("AM Radio");
-	MyRadio2.set_text("FM Radio");
-	MyRadio3.set_text("XM Radio");
-	MyRadio4.set_text("Internet Radio");
-				
-/*	MyRadio2.set_position_below ( &MyRadio1 );
-	MyRadio3.set_position_below ( &MyRadio2 );
-	MyRadio4.set_position_below ( &MyRadio3 ); */
-	
-	MyRadio1.join_group( &MyRadio2 );
-	MyRadio1.join_group( &MyRadio3 );
-	MyRadio1.join_group( &MyRadio4 );
-	MyRadio1.expand_group_widths();		
-	MyRadio3.select();
-	MyRadio2.select();
-
-	check1.set_text("V6 Engine");
-	check2.set_text("All wheel drive");
-	check1.set_check();
-	//check1.set_position_above( &check2 );
-	//check2.set_position_below( &check1 );
-	//check1.copy_position_horiz( &check2 );
-
-	Okay.set_text("Okay");
-	Cancel.set_text("Cancel");
-	
-	SampleText.set_width_height(-1,-1);
-	SampleText.set_text("My Car dialog\n");
-	//SampleText.center_vertical(TRUE);
-	ParentWindowF.pack_control( &SampleText, PACK_FILL_PARENT, PACKER_ALIGN_TOP );
-	ParentWindowF.pack_control( &MyRadio1, PACK_RIGHT, PACKER_ALIGN_TOP );
-	ParentWindowF.pack_below  ( &MyRadio2, &MyRadio1, PACK_COPY_HORIZ );
-	ParentWindowF.pack_below  ( &MyRadio3, &MyRadio2, PACK_COPY_HORIZ );
-	ParentWindowF.pack_below  ( &MyRadio4, &MyRadio3, PACK_COPY_HORIZ );
-
-	ParentWindowF.pack_control( &check1, PACK_LEFT, PACKER_ALIGN_TOP  	);
-	ParentWindowF.pack_below  ( &check2, &check1, PACK_COPY_HORIZ );
-
-	ParentWindowF.pack_control( &test_icon , PACK_LEFT	 , 	PACKER_ALIGN_BOTTOM );
-	ParentWindowF.pack_control( &Okay	   , PACK_RIGHT  ,  PACKER_ALIGN_BOTTOM );
-	ParentWindowF.pack_control( &Cancel	   , PACK_RIGHT  ,  PACKER_ALIGN_BOTTOM );
-	
-	// Add to display manager:
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object		  ( &ParentWindowF );	
-}
 
 void populate_simple_lb()
 {
@@ -634,25 +603,23 @@ void pack_sample_window()
 
 	AvailableClients.set_width_height( 200, 200 );
 	AvailableClients.adjust_height_for_num_visible_items( 9 );
-	populate_simple_lb();
-	AvailableClients.set_text_size( 18.0 );	
+	populate_simple_lb				(		);
+	AvailableClients.set_text_size	( 18.0  );
 
-	ParentWindowF.print_positions();
-
+	ParentWindowF.print_positions	( );
 	ParentWindowF.pack_control		( &MyButt, PACK_FILL_PARENT, PACKER_ALIGN_TOP  	);
 	ParentWindowF.pack_below        ( &AvailableClients, &MyButt, PACK_FILL_PARENT  );
 	ParentWindowF.pack_control		( &MyProgress, PACK_LEFT, PACKER_ALIGN_BOTTOM	);
 	
-//	ParentWindow.pack_control		( &SampleText, PACK_FILL_PARENT );	
+//	ParentWindow.pack_control		( &SampleText, PACK_FILL_PARENT );
 	test_image.set_file( (char*)"./resources/desert0.jpg" );
 	test_icon.set_file ( (char*)"./resources/folder.jpg"  );
-	
+
 	//test_image.set_position_right_of( &AvailableClients );
 	//ParentWindow.pack_control		( &test_image, PACK_FILL_PARENT );
-	
+
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
 	MainDisplay.add_object( &ParentWindowF );
 }
-
 

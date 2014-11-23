@@ -7,6 +7,25 @@ extern "C" {
 #define WORD unsigned short
 #define BYTE unsigned char
 
+/************************* WAVE HEADER ******************************
+typedef struct wav_header 
+{
+    char 		chunk_id[4];
+    int 		chunk_size;
+    char 		format[4];
+    char 		subchunk1_id[4];
+    int 		subchunk1_size;
+    short int 	audio_format;
+    short int 	num_channels;
+    int 		sample_rate;
+    int 		byte_rate;
+    short int 	block_align;
+    short int 	bits_per_sample;
+    short int 	extra_param_size;
+    char 		subchunk2_id[4];
+    int 		subchunk2_size;
+};
+********************************************************************/
 
 extern	BOOL	audio_terminate_requested;
 

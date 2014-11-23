@@ -34,13 +34,10 @@ AUTHOR	:  Stephen Tenniswood
 #include "ipc_mem_bkinstant.h"
 
 
-
 long int	SentenceCounter=0;
 char*		Sentence;
-
 long int	StatusCounter=0;
 char*		Status;
-
 
 int connect_shared_abkInstant_memory( )
 {

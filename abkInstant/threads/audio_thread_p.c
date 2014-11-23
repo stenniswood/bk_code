@@ -27,13 +27,25 @@ Tenniswood - 2014
 #include "utilities.h"
 #include "audio_memory.h"
 
+/************************************************
+Put this structure in the audio_thread.h header
+All the info extracted from the protocol will
+go into the audio_memory.h structure.
+************************************************/
+
 
 #define MAX_USERS     10
 #define MAX_LISTENERS 12
 
 #define AUDIO_BUFFER_SIZE 16384
-static char	 buffer[AUDIO_BUFFER_SIZE];		// 4 byte token + 4 byte length
+
+// Individual packets come in from the read function.
 static int 	 bytes_rxd=0;
+static char	 buffer[AUDIO_BUFFER_SIZE];		// 4 byte token + 4 byte length
+
+// The packets are assembled here until a complete telegram is available.
+static int 	 completed_buffer_size=0;			   // the size is how many bytes have been written.
+static char	 completed_buffer[AUDIO_BUFFER_SIZE];  // 4 byte token + 4 byte length
 
 static BOOL 	save_requested = FALSE;
 static BOOL 	play_requested = FALSE;
@@ -45,6 +57,7 @@ static struct   sockaddr_in s_in;
 static struct   sockaddr_in p_in;	// To be stored in UserList for each user.
 static fd_set	socks;
 static int 	 	listenfd = 0, connfd = 0;
+static BOOL 	start_new_packet=TRUE;
 
 #define OUTPUT_BUFFER_SIZE 65535
 static byte 	oBuff[OUTPUT_BUFFER_SIZE];
@@ -60,9 +73,105 @@ struct wav_header wave_header;		// first packet.
 BOOL  header_received = FALSE;
 char* header_position = (char*)&wave_header;	// start at the top
 
-BOOL handle_audio_data( )
+/******************************************************************
+	Same as handle_audio_data, however we're gauranteed to have the 
+	start of each telegram aligned to mBuffer[0].  And the whole info 
+	available (ie. string length)
+INPUT:		Data is in the completed_buffer.
+
+*****************************************************************/
+BOOL process_start_of_telegram( char* mType )
 {
-	//printf("Inside handle_audio_data()\n");
+	// char msg[512];
+	int   length = strlen(msg);
+	char* next = (char*)(completed_buffer + length);
+
+	// 
+	if (strcmp(msg, "WAVE NAME")==0)
+	{
+		strcpy( ipc_memory_aud->name, next );
+			
+	} else if (strcmp(msg, "DESCRIPTION")==0)
+	{
+		strcpy( ipc_memory_aud->description, next );
+
+	} else if (strcmp(msg, "WAVE HEADER")==0)
+	{
+		strcpy( ipc_memory_aud->audio_header, next );
+			
+	} else if (strcmp(msg, "WAVE DATA")==0)
+	{
+		
+	}
+}
+
+static char packet_type[80];
+static char bytes_expected_str[80];
+static int  bytes_expected;
+
+// Let's simplify by assuming [type string & length string] are completely present.
+BOOL extract_telegram( byte* mBuffer, int mBytes_rxd )
+{
+	// EXTRACT PACKET TYPE:
+	int length 	      = strlen( (char*)mBuffer );
+	strcpy( packet_type, mBuffer );	
+
+	// EXTRACT BYTES EXPECTED:
+	int bytes_length  = strlen( mBuffer+length );	// needed below
+	strcpy( bytes_expected_str, mBuffer+length );
+	bytes_expected    = atoi( bytes_expected_str );
+
+	// DISCARD the Type and length bytes (we've already used):
+	char* starting_at = mBuffer+length+bytes_length;
+	int bytes_remaining = mBytes_rxd - (starting_at-mBuffer);
+	bytes_expected -= bytes_remaining;
+	
+	// ADD BYTES TO QUE:
+	memcpy( tmp, mBuffer, bytes_remaining );
+	completed_buffer_size += bytes_remaining;
+}
+	
+/*******************************************************
+return:		TRUE when a complete packet is available.
+			FALSE when a complete packet is available.
+********************************************************/
+BOOL handle_audio_data( byte* mBuffer, int mBytes_rxd )
+{
+	// The goal of this should be to assemble incoming data into 
+	// complete packets and issue to process_start_of_telegram()
+	// How do we know when we have a complete packet?
+
+	// Assume the very first call is a start of packet.  ie. the connection
+	// has just been established.  First entry is gauranteed then to be a string.
+	
+	// however it's possible not all of the string is present.  So scan for that first.
+	char* tmp  = (completed_buffer + completed_buffer_size);
+
+	/* if (length > mBytes_rxd)  	// Then the string is not completely loaded.
+	{
+		// but take what we have:
+		memcpy( tmp, mBuffer, mBytes_rxd );
+		completed_buffer_size += mBytes_rxd;
+		return FALSE;
+	}*/
+
+	// IF WE'RE READY FOR A NEW PACKET:
+	if (bytes_expected==0)
+		extract_telegram( mBuffer, mBytes_rxd );
+	else 
+	{	// ADJUST BYTES EXPECTED:
+		bytes_expected -= mBytes_rxd;
+		if (bytes_expected < 0)
+			bytes_expected -= mBytes_rxd;
+
+		// COPY DATA TO COMPLETED BUFFER:
+		int bytes_to_copy = mBytes_rxd;
+		memcpy( tmp, mBuffer, mBytes_rxd );
+		completed_buffer_size += mBytes_rxd;
+	}
+	
+	// We only copy into the completed buffer as much data as we know is part of
+	// the current packet.
 	BOOL retval = TRUE;
 	if (header_received==FALSE)
 	{
@@ -242,7 +351,12 @@ void* audio_server_thread(void* msg)
 			else 	// DATA ARRIVED, HANDLE:
 			{
 				// Either save or play or both:
-				handle_audio_data();
+				BOOL packet_complete = handle_audio_data( buffer, bytes_rxd );
+				if (packet_complete)
+				{
+					start_new_packet = process_start_of_telegram();
+				}
+
 				// This ram variable will be modified by main thread.
 				//if (audio_terminate_requested)
 					//done = TRUE;
@@ -251,19 +365,7 @@ void* audio_server_thread(void* msg)
 		done = FALSE;
 		close(connfd);
 	}
-		// SEND Timestamp:	
-	    //time_t ticks;
-        //ticks = time(NULL);
-        //snprintf(sendBuff, sizeof(sendBuff), "%.24s\r\n", ctime(&ticks));
-        //write(connfd, sendBuff, strlen(sendBuff)); 
-
         close(connfd);
 		perror("close connfd");
-        //sleep(0.25);
 		printf(" Terminated audio connection.\n");
 }
-
-
-
-    //char sendBuff[1025];
-    //memset(sendBuff,   '0', sizeof(sendBuff));

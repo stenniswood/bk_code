@@ -4,6 +4,7 @@ extern "C" {
 #endif
 
 
+#define BASE_NLP_PORT 	5000
 #define BASE_AUDIO_PORT 5010
 #define BASE_VIDEO_PORT 5020
 #define BASE_CAN_PORT   5030

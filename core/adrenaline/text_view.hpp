@@ -21,7 +21,7 @@ public:
 	virtual void  	move_to	  		  	 	( float Left,   float  Bottom	);
 
 	void			load_file				( char* mFullFilename 	);
-	char*  			get_end_of_line			( char* mText    		);	// for eol 
+	char*  			get_end_of_line			( char* mText    		);			// for eol 
 	char*  			get_word_break			( char* mString, int mMaxLength );	// for eol (ie. last space before the last non-space letter.
 	int  			get_num_chars_fit		( char* mString, int width  	);
 	int  			count_num_lines_present	( 								);

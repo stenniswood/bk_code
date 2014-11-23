@@ -18,6 +18,7 @@
 #define TIC_WIDTH 10
 #define margin_percent 0.07
 
+
 Leveler::Leveler(float Max, float Min)
 {
 	xAxisLabel	= (char*)"Potentiometer 1";
@@ -56,7 +57,7 @@ int Leveler::set_level(float level)
 {
 	if (level > yMax)	return -1;
 	if (level < yMin)	return -1;
-	
+
 	Level = level;
 	return 1;
 }
@@ -203,6 +204,6 @@ int Leveler::draw()
 	draw_x_label	 	(  );
 	draw_y_label	 	(  );
 
-	draw_marker(  );
+	draw_marker			(  );
 }
 

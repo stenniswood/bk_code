@@ -103,6 +103,10 @@ The message can be:
 *******************************/
 void create_audio_thread( BOOL mPlay, BOOL mSave, int Port )
 {	
+	static int first_time = TRUE;
+	if (first_time)
+	{
+		first_time = FALSE;
 	// FORM THE PARAMETER LIST:
 	static char message[] = "none:none:600001   ";	
 	if (mPlay)
@@ -118,6 +122,7 @@ void create_audio_thread( BOOL mPlay, BOOL mSave, int Port )
 	{
 		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
 		exit(EXIT_FAILURE);
+	}
 	}
 }
 void terminate_audio_thread( )

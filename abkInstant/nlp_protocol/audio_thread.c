@@ -252,7 +252,7 @@ void* server_thread(void*)
     bind  (listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     listen(listenfd, 10);
 	//char* ip_addr = inet_ntoa( serv_addr.sin_addr );
-	printf( "\n Welcome to BK Media Control  :  IP=%s:%d \n\n", ip_addr, BK_MEDIA_PORT );
+	printf( "\n Welcome to BK Audio Rx  :  IP=%s:%d \n\n", ip_addr, BK_MEDIA_PORT );
 
 	/* wait for a client to talk to us */
     BOOL done = FALSE;

@@ -29,6 +29,7 @@
 #include "can_rxbuff.h"
 #include "visual_memory.h"
 #include "sway_memory.h"
+#include "audio_memory.h"
 #include "picamscan_memory.h"
 #include "udp_transponder.hpp"
 #include "thread_control.h"
@@ -79,6 +80,7 @@ void create_threads()
 #define USE_AVISUAL 1
 #define USE_SWAY	1
 #define USE_PICAMSCAN	0
+#define USE_AUDIO	1
 
 /* Inter Process Communications (via shared memory)		*/
 void establish_ipc()
@@ -108,6 +110,14 @@ void establish_ipc()
 		//dump_line();
 	} else 
 		vis_deallocate_memory( 98307 );	
+		
+	if (USE_AUDIO)
+	{
+		aud_allocate_memory();
+		aud_attach_memory  (); 
+		aud_fill_memory	   ();
+	} else 
+		aud_deallocate_memory();
 
 }
 
