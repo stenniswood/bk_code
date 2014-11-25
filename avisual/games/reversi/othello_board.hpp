@@ -1,0 +1,15 @@
+
+
+
+class Othello 
+{
+public:
+	
+
+
+private:
+
+
+
+
+}

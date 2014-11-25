@@ -20,6 +20,8 @@ struct avisual_ipc_memory_map
 	char	 Sentence        [128];	
 	int		 NumberClients;
 	char	 ClientArray[MAX_CLIENT_ARRAY_SIZE];		// String array (dimension of NumberClients)
+	//short	 ScreenNumber;			// Which screen is being displayed.  voice commands can change.  Simplistic for now a single number per page.
+	
 };
 /******************** AVISUAL MEMORY MAP *****************/
 /*********************************************************/

@@ -51,7 +51,7 @@ WaveView::~WaveView()
 
 void WaveView::calc_metrics( )
 {
-	pix_height = ceil((float)height/2.);
+	pix_height = floor((float)height/2.)-1;
 	center_y   = bottom + height/2;	
 }
 
@@ -69,7 +69,7 @@ int WaveView::draw( )
 {
 	Control::draw();
 	calc_metrics();
-	
+
 	// Pick waveform color:
 	long int color = 0xFF00FF00;		// start at green.
 	Fill_l  (color);

@@ -18,7 +18,7 @@ MISC_OBJS  = vector_math.o ini_file.o visual_memory.o audio_memory.o fft.o
 FUSE_OBJS  = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o 
 VG_OBJS    = libshapes.o oglinit.o 
 APP_CPP_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
-			  ipc_mem_bkinstant.o test_layouts.o test_combo_layouts.o
+			  ipc_mem_bkinstant.o test_layouts.o audio_app.o
 IPC_OBJS   = 
 
 #  button_array_gui.o Container.o

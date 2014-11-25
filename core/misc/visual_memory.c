@@ -151,6 +151,10 @@ void ipc_write_connection_status( char* mStatus )
 	printf( "|%s|\n", ipc_memory_avis->ConnectionStatus );
 }
 
+void ipc_write_active_page( short NewActivePage )
+{
+//	ipc_memory_avis->ScreenNumber = NewActivePage;
+}
 /* See udp_transponder for update_client_list()		*/
 
 

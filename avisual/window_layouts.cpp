@@ -252,7 +252,7 @@ void init_avisual()
 	hsb.scroll_to    		( 20  );
 	hsb.set_amount_visible	( 50 );
 	
-	l1.setPosition 		( 500, 600, 300, 70 );
+	l1.set_position 		( 500, 600, 300, 70 );
 	l1.set_level_percent( 50.0 );
 
 	// Add to display manager:
@@ -322,13 +322,13 @@ void init_pot_objs()
 	lg1.set_stroke_width( 1.0 );
 	lg1.set_title_size  ( 16.0 );
 
-	l1.setPosition ( 500, 600, 300, 70 );
-	l2.setPosition_right_of( l1, 70 );
-	l3.setPosition_right_of( l2, 70 );
-	l4.setPosition_right_of( l3, 70 );
-	l5.setPosition_right_of( l4, 70 );
-	l6.setPosition_right_of( l5, 70 );
-
+	l1.set_position ( 500, 600, 300, 70 );
+	l2.set_position_right_of( &l1, true );
+	l3.set_position_right_of( &l2, true );
+	l4.set_position_right_of( &l3, true );
+	l5.set_position_right_of( &l4, true );
+	l6.set_position_right_of( &l5, true );
+	
 	l1.set_level_percent(50.0);
 	l2.set_level_percent(66.6);
 	l3.set_level_percent(50.0);
@@ -336,15 +336,15 @@ void init_pot_objs()
 	
 	// Add to display manager:
 	MainDisplay.remove_all_objects();	
-	MainDisplay.add_object( &lg1 );
+	//MainDisplay.add_object( &lg1 );
 	//MainDisplay.add_object( &sf1 );	
 	//MainDisplay.add_object( &sl2 );		
-	MainDisplay.add_object( &l1 );	
+	/*MainDisplay.add_object( &l1 );	
 	MainDisplay.add_object( &l2 );
 	MainDisplay.add_object( &l3 );	
 	MainDisplay.add_object( &l4 );
 	MainDisplay.add_object( &l5 );
-	MainDisplay.add_object( &l6 );	
+	MainDisplay.add_object( &l6 );	*/
 }
 
 void update_to_controls()

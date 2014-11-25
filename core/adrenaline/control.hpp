@@ -35,8 +35,8 @@ public:
 	void 		 	move_bottom_to  	 ( float  mNewBottom	);	
 	void 		 	move_left_to  	 	 ( float  mNewLeft	);		
 	virtual void  	move_by	  		  	 ( int DeltaX, int  DeltaY	) { left+=DeltaX; bottom+=DeltaY; };
-	void  			set_position_left_of  ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding);
-	void  			set_position_right_of ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding);
+	void  			set_position_left_of  ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding );
+	void  			set_position_right_of ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding );
 	void 		 	set_position_above    ( Control* Sibling, bool mCopyHoriz=true );
 	void  			set_position_below	  ( Control* Sibling, bool mCopyHoriz=true );	
 	void  			copy_position_horiz	  ( Control* Sibling );	

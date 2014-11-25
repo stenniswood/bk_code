@@ -12,13 +12,12 @@ public:
 	// so we can show any unit, not just percents!
 	
 	int   set_level			(float level		 );
-	void  set_level_cap		(float level		 );
 	void  set_level_percent	(float percent		 );
+	void  set_max			(float max 			 ) { yMax 	= max; };
+	void  set_min			(float min 			 ) { yMin 	= min; };
+	
 	float get_level_pixel	(	);
-
-	void  setPosition(int Left, int Right, int Top, int Bottom);
-	void  setPosition_left_of (Leveler& mSibling, int width, int Top=-1, int Bottom=-1);
-	void  setPosition_right_of(Leveler& mSibling, int width, int Top=-1, int Bottom=-1);
+	//void  set_position		( int Left, int Right, int Top, int Bottom );
 
 	//float calc_scale		(float* data, int n );
 
@@ -32,10 +31,10 @@ public:
 	int draw				(	);
 
 private:
-	int 	left;
+/*	int 	left;
 	int 	right;
 	int 	top;
-	int 	bottom;	
+	int 	bottom;	*/
 	float 	yMax, yMin;
 	float	Level;		// Must be somewhere between yMin & yMax
 	

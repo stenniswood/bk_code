@@ -88,7 +88,7 @@ void ImageGallery::Initialize()
 	NextImage = new Button(20,-1);	
 	ImageView = new IconView();
 	//printf("ImageGallery::Initialize()1\n");
-	current_image_index = 10;
+	current_image_index = 0;
 }
 
 void ImageGallery::onCreate()
@@ -103,14 +103,14 @@ void ImageGallery::onCreate()
 	pack_control( NextImage, PACK_RIGHT, 		PACK_FILL_PARENT );
 	pack_control( ImageView, PACK_FILL_PARENT, 	PACK_FILL_PARENT ); 
 }
-
+ 
 void ImageGallery::set_directory( char* mDirectoryName )
 {
 	DirectoryName = mDirectoryName;
-	//printf("ImageGallery::set_directory()  %s\n", DirectoryName.c_str());
-	retrieve_name_list(mDirectoryName, false );
-	
-	//ImageView->set_file("/home/pi/abkInstant/media/golf_1.jpg");	
+	printf( "ImageGallery::set_directory()  %s\n", DirectoryName.c_str() );
+	retrieve_name_list( mDirectoryName, false );
+
+	//ImageView->set_file("/home/pi/abkInstant/media/golf_1.jpg");
 	load_resources();
 }
 
@@ -123,12 +123,12 @@ void ImageGallery::load_resources( )
 	ImageInfo.clear();
 	
 	int fs = Filelist.size();
-	int number = min(NUMBER_TO_READ_AHEAD, fs);
+	int number = min( NUMBER_TO_READ_AHEAD,   fs);
 	printf("ImageGallery: total files=%d\n", fs );
 	printf("ImageGallery: loading # [%d..%d]\n", current_image_index, current_image_index+number );
-	
+	int i;
 	// Load images ahead:
-	for (int i=current_image_index; i<current_image_index+number; i++)
+	for (i=current_image_index; i<current_image_index+number; i++)
 	{
 		image = createImageFromJpeg( Filelist[i].c_str(), &ii );
 		printf("Loaded: %s : \n", Filelist[i].c_str() );
@@ -147,7 +147,7 @@ void ImageGallery::retrieve_name_list(char* mPath, bool include_hidden_files )
 	string 	Pathfilename;
 	bool				is_hidden_file = false;
 	if (d)
-	{
+	{		
 		// Go thru all FILES:
 		while ((dir = readdir(d)) != NULL)
 		{
@@ -159,11 +159,14 @@ void ImageGallery::retrieve_name_list(char* mPath, bool include_hidden_files )
 					continue;		// skip!
 				}
 				Pathfilename = DirectoryName + dir->d_name;
+				printf( "%s\n", Pathfilename.c_str() );
 				Filelist.push_back( Pathfilename );
 			}
 		}
 		//rewinddir(d);
 		closedir(d);
+	} else {
+		printf("ImageGaller::Retrieve_name_list: Error path is not a directory: %s \n", mPath );
 	}
 
 }

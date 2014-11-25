@@ -30,10 +30,12 @@ int 		quitState = 0;
 
 
 // eventThread reads from the mouse input file
-void *eventThread(void *arg) {
-
+void *eventThread(void *arg) 
+{
 	// Open mouse driver
-	if ((mouse_fd = open("/dev/input/event2", O_RDONLY)) < 0) {
+	if ((mouse_fd = open("/dev/input/event0", O_RDONLY)) < 0) {	
+//	if ((mouse_fd = open("/dev/input/mouse0", O_RDONLY)) < 0) {	
+//	if ((mouse_fd = open("/dev/input/event2", O_RDONLY)) < 0) {
 		fprintf(stderr, "Error opening Mouse!\n");
 		quitState = 1;
 		return &quitState;

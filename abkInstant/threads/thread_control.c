@@ -108,7 +108,7 @@ void create_audio_thread( BOOL mPlay, BOOL mSave, int Port )
 	{
 		first_time = FALSE;
 	// FORM THE PARAMETER LIST:
-	static char message[] = "none:none:600001   ";	
+	static char message[] = "play:none:600001   ";	
 	if (mPlay)
 		memcpy (message, "play", 4);
 	if (mSave)

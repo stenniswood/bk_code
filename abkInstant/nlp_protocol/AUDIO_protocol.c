@@ -165,12 +165,15 @@ void Init_Audio_Protocol()
 
 
 /* 3 possible actions:  */
-void audio_listen()
+void audio_listen(BOOL Play=TRUE, BOOL Save=FALSE)
 {
+	//BOOL Play = TRUE;
+	//BOOL Save = TRUE;
+	
 	// Maybe want to verify the source IP address for security purposes
 	// later on.  Not necessary now!
 	printf( "Listening for incoming audio...\n");
-	create_audio_thread( FALSE,  TRUE );
+	create_audio_thread( Play,  Save );
 	
 	nlp_reply_formulated=TRUE;
 	strcpy(NLP_Response, "Okay, I'm listening for your audio");
@@ -180,7 +183,7 @@ void send_audio()
 {
 	// Maybe want to verify the source IP address for security purposes
 	// later on.  Not necessary now!
-	printf( "Listening for incoming audio...\n");
+	printf( "Sending my incoming audio...\n");
 
 	// Fill in later...!  WaveHeader struct
 	char* header=NULL;

@@ -410,9 +410,9 @@ ImageGallery ig;
 void init_image_gallery()
 {
 	ig.set_position(10,1200, 700, 10);
-	ig.onCreate    (); 
-	//ig.set_directory( "/home/pi/abkInstant/media/" );
-	ig.set_directory( "/media/My Book/tv/PhonePics/" ); 
+	ig.onCreate    ();
+	ig.set_directory( "/home/pi/bk_code/abkInstant/media/" );
+	//ig.set_directory( "/media/My Book/tv/PhonePics/" ); 
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &ig );

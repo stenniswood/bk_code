@@ -27,6 +27,11 @@ Tenniswood - 2014
 #include "utilities.h"
 #include "audio_memory.h"
 
+#include "bcm_host.h"
+#include "ilclient.h"
+
+#include "AUDIO_device.h"
+
 
 #define MAX_USERS     10
 #define MAX_LISTENERS 12
@@ -37,6 +42,7 @@ static int 	 bytes_rxd=0;
 
 static BOOL 	save_requested = FALSE;
 static BOOL 	play_requested = FALSE;
+static BOOL 	play_started   = FALSE;
 static BOOL 	send_requested = FALSE;
 BOOL			audio_terminate_requested = FALSE;
 static int   	port	= 6000;
@@ -81,6 +87,7 @@ BOOL handle_audio_data( )
 			int shift = (header_position-end_of_header);
 			memcpy(buffer, buffer+shift, bytes_rxd-shift);
 			print_audio_header( &wave_header );
+			
 		} else if ( header_position == end_of_header ) 	// need to wait for more data.
 		{
 			// shift left overs:
@@ -114,10 +121,24 @@ BOOL handle_audio_data( )
 		ipc_write_buffer( (short*)buffer, bytes_rxd>>1 );
 	}
 
-	//if (play_requested)
-		// SEND OUT ON CAN CONTROLLER	
-	//if (send_requested)
-		// 
+	if (play_requested)
+	{
+		int audio_dest = 0;
+		if ((header_received) && (play_started==FALSE))		
+		{
+			audio_setup_and_play(   audio_dest, 
+									wave_header.sample_rate, 
+									wave_header.num_channels, 
+									wave_header.bits_per_sample );
+			printf("Audio Setup completed\n");
+			play_started = TRUE;
+		}
+		else if (play_started==TRUE)
+		{
+			printf("Audio sending buffer.\n");
+			audio_add_play_buffer( (short*)buffer, bytes_rxd, wave_header.sample_rate );			
+		}
+	}	
 	return retval;
 }
 
@@ -135,7 +156,9 @@ static void parse_thread_params(char* mMsg)
 	if (delim) *delim = 0;
 	if (strcmp(mMsg, "play") == 0)
 	{
+		play_requested = TRUE;
 		// init audio play
+		// not right here because, don't have the header info yet.		
 	}
 	*delim = ':';		// restore
 	
@@ -143,7 +166,7 @@ static void parse_thread_params(char* mMsg)
 	if (delim2) *delim2 = 0;
 	if (strcmp(delim+1, "save") == 0)
 	{
-		// init audio save
+		save_requested=TRUE;	// init audio save
 	}
 	*delim2 = ':';	
 	port 	     = atoi( delim2+1 );

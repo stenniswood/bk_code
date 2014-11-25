@@ -36,10 +36,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "bcm_host.h"
 #include "ilclient.h"
+#include "AUDIO_device.h"
 
 #define N_WAVE          1024    /* dimension of Sinewave[] */
 #define PI (1<<16>>1)
-#define SIN(x) Sinewave[((x)>>6) & (N_WAVE-1)]
+//#define SIN(x) Sinewave[((x)>>6) & (N_WAVE-1)]
 #define COS(x) SIN((x)+(PI>>1))
 #define OUT_CHANNELS(num_channels) ((num_channels) > 4 ? 8: (num_channels) > 2 ? 4: (num_channels))
 extern short Sinewave[];
@@ -48,19 +49,9 @@ extern short Sinewave[];
    #define countof(arr) (sizeof(arr) / sizeof(arr[0]))
 #endif
 
-#define BUFFER_SIZE_SAMPLES 1024
+//#define BUFFER_SIZE_SAMPLES 1024
+//typedef int int32_t;
 
-typedef int int32_t;
-
-typedef struct {
-   sem_t sema;
-   ILCLIENT_T *client;
-   COMPONENT_T *audio_render;
-   COMPONENT_T *list[2];
-   OMX_BUFFERHEADERTYPE *user_buffer_list; // buffers owned by the client
-   uint32_t num_buffers;
-   uint32_t bytes_per_sample;
-} AUDIOPLAY_STATE_T;
 
 static void input_buffer_callback(void *data, COMPONENT_T *comp)
 {
@@ -338,6 +329,7 @@ uint32_t audioplay_get_latency(AUDIOPLAY_STATE_T *st)
 #define MIN_LATENCY_TIME 20
 
 static const char *audio_dest[] = {"local", "hdmi"};
+
 void play_api_test(int samplerate, int bitdepth, int nchannels, int dest)
 {
    AUDIOPLAY_STATE_T *st;
@@ -371,7 +363,7 @@ void play_api_test(int samplerate, int bitdepth, int nchannels, int dest)
       // fill the buffer
       for (i=0; i<BUFFER_SIZE_SAMPLES; i++)
       {
-         int16_t val = SIN(phase);
+         int16_t val = 0;//SIN(phase);
          phase += inc>>16;
          inc += dinc;
          if (inc>>16 < 512)
@@ -399,28 +391,68 @@ void play_api_test(int samplerate, int bitdepth, int nchannels, int dest)
    audioplay_delete(st);
 }
 
-int audio_setup_and_play(int argc, char **argv)
+/*******
+INPUT:
+   audio_dest = 		{ 0=headphones, 1=hdmi }
+   samplerate = 48000; 	{ audio sample rate in Hz }
+   channels = 2;		{ number of audio channels }
+   int bitdepth = 16;	{ number of bits per sample }
+*********/
+int 				buffer_size = 0;
+AUDIOPLAY_STATE_T *	st;
+uint8_t*			buf;
+uint32_t 			latency;
+   
+int32_t audio_setup_and_play( int dest, int samplerate, int nchannels, int bitdepth )
 {
-   // 0=headphones, 1=hdmi
-   int audio_dest = 0;
-   // audio sample rate in Hz
-   int samplerate = 48000;
-   // numnber of audio channels
-   int channels = 2;
-   // number of bits per sample
-   int bitdepth = 16;
-   bcm_host_init();
+   bcm_host_init();		// is this needed in akbInstant?  i don't know.
 
-   if (argc > 1)
-      audio_dest = atoi(argv[1]);
-   if (argc > 2)
-      channels = atoi(argv[2]);
-   if (argc > 3)
-      samplerate = atoi(argv[3]);
+   printf("Outputting audio to %s\n", dest==0 ? "analogue":"hdmi");
 
-   printf("Outputting audio to %s\n", audio_dest==0 ? "analogue":"hdmi");
+   buffer_size = (BUFFER_SIZE_SAMPLES * bitdepth * OUT_CHANNELS(nchannels))>>3;
+   assert(dest == 0 || dest == 1);
 
-   play_api_test(samplerate, bitdepth, channels, audio_dest);
-   return 0;
+   int32_t ret = audioplay_create(&st, samplerate, nchannels, bitdepth, 10, buffer_size);
+   assert(ret == 0);
+
+   ret = audioplay_set_dest(st, audio_dest[dest]);
+   assert(ret == 0);
+
+   return ret;
+   // Now fill in buffers and send to audioplay_play_buffer()
 }
 
+// 
+uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate )
+{
+	int bytes_sent   =0;
+	int bytes_to_send=0;
+	int32_t ret;
+
+	while (bytes_sent < length)
+	{
+		while((buf=audioplay_get_buffer(st)) == NULL)
+			usleep(10*1000);
+		printf("got buff\n");
+
+		if (length > buffer_size)
+			bytes_to_send = buffer_size;
+		memcpy( buf, mBuffer, bytes_to_send );
+		
+		// try and wait for a minimum latency time (in ms) before
+		// sending the next packet
+		while((latency = audioplay_get_latency(st)) > (samplerate*(MIN_LATENCY_TIME+CTTW_SLEEP_TIME)/1000))
+		usleep(CTTW_SLEEP_TIME*1000);
+		printf("latency done\n");
+		ret = audioplay_play_buffer( st, buf, buffer_size );
+		printf("audioplay ret=%d\n",ret);
+		
+		assert(ret == 0);
+	}  
+	return ret;
+}
+
+void audio_close(  )
+{
+   audioplay_delete(st);
+}

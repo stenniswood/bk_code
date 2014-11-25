@@ -28,46 +28,18 @@ Leveler::Leveler(float Max, float Min)
 	yMin 	= Min;
 }
 
-void Leveler::setPosition(int Left, int Right, int Top, int Bottom)
+/*void Leveler::set_position(int Left, int Right, int Top, int Bottom)
 {
-	left 	= Left;
-	right 	= Right;
-	top 	= Top;
-	bottom	= Bottom;
-}
-
-void Leveler::setPosition_left_of(Leveler& Sibling, int width, int Top, int Bottom)
-{
-	right 	= Sibling.left - DefaultPadding;
-	left 	= right - width;
-
-	if (Top==-1)	top 	= Top;
-	if (Bottom==-1)	bottom	= Bottom;
-}
-
-void Leveler::setPosition_right_of(Leveler& Sibling, int width, int Top, int Bottom)
-{
-	left 	= Sibling.right + DefaultPadding;
-	right 	= left+width;
-	if (Top==-1)	top 	= Sibling.top;
-	if (Bottom==-1)	bottom	= Sibling.bottom;
-}
+	Control:set_position( Left, Right, Top, Bottom );
+} */
 
 int Leveler::set_level(float level)
-{
-	if (level > yMax)	return -1;
-	if (level < yMin)	return -1;
-
-	Level = level;
-	return 1;
-}
-
-void Leveler::set_level_cap(float level)
 {
 	if (level > yMax)	level = yMax;
 	if (level < yMin)	level = yMin;
 	
 	Level = level;
+	return 1;
 }
 
 void Leveler::set_level_percent( float percent )
@@ -85,10 +57,10 @@ void Leveler::draw_horizontal_tics(  )
 	StrokeWidth(2);
 
 	float alpha = 1.0;
-	float y_spacing = ((float)(top - bottom)) / 10.0;	
+	float y_spacing = ((float)height) / 10.0;	
 	// HORIZONTAL
 	Fill(255, 0, 125, alpha);
-	for (VGfloat y = bottom; y <= top; y+=y_spacing) 
+	for (VGfloat y = bottom; y <= (bottom+height); y+=y_spacing) 
 	{
 		Line(left, y, left+TIC_WIDTH, y);
 	}
@@ -102,19 +74,19 @@ void Leveler::draw_vertical_line( )
 	int i;
 	VGfloat x;
 	VGfloat alpha = 1.0;				// start solid
-	VGfloat x_spacing = (right-left) / 10.0;	
+	VGfloat x_spacing = (width) / 10.0;	
 	
 	// VERTICAL
 	Fill(255, 0, 125, alpha);
-	Line(left, top, left, bottom);
+	Line(left, bottom+height, left, bottom);
 }
 
 int Leveler::draw_y_label() 
 {
 	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
 	VGfloat alpha = 1.0;
-	int yrange = (top-bottom);
-	int tenpercent = (float)(right-left)*margin_percent;
+	int yrange = (height);
+	int tenpercent = (float)(width)*margin_percent;
 	int x = left-tenpercent;
 	int y = bottom+yrange/2.0;
 	float size = 14;  //yrange/strlen(yAxisLabel);
@@ -133,9 +105,9 @@ int Leveler::draw_x_label()
 
 	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
 	VGfloat alpha = 1.0;
-	int xrange = (right-left);
-	int yrange = (top-bottom);	
-	int tenpercent = (float)(top-bottom)*margin_percent;
+	int xrange = (width);
+	int yrange = (height);	
+	int tenpercent = (float)(height)*margin_percent;
 	sprintf(label, "%6.1f", Level);
 	int size = 16.0 ; //xrange/strlen(label);	
 
@@ -147,20 +119,22 @@ int Leveler::draw_l_title()
 {
 	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
 	VGfloat alpha = 1.0;
-	float xrange  = (right-left);
-	int yrange    = (top-bottom);	
-	int tenpercent= (float)(top-bottom)*margin_percent;	
+	float xrange  = (width);
+	int yrange    = (height);	
+	int tenpercent= (float)(height)*margin_percent;	
 	float length  = strlen(title);
 	float size    = (xrange+6.0*xrange*margin_percent)/length;	
  	
 	Fill( 255, 255, 255, alpha );
-	Text( left+TIC_WIDTH, top+tenpercent, title, SerifTypeface, size );				
+	// Fix!! should not go outside client Rect!!
+	
+	Text( left+TIC_WIDTH, bottom+height+tenpercent, title, SerifTypeface, size );				
 }
 
 float Leveler::get_level_pixel()
 {
 	// Interpolate:
-	float pixel_range = (top - bottom);	
+	float pixel_range = (height);
 	float value_range = (yMax - yMin );
 	float ypix = ((Level / value_range) * pixel_range) + bottom;
 	return ypix;
@@ -189,15 +163,15 @@ void Leveler::draw_marker(  )
 //	float max = get_max(data, n);
 //	float min = get_min(data, n);
 
-	float xpixels = right - left;
-	float ypixels = top - bottom;
+	float xpixels = width;
+	float ypixels = height;
 }*/
 
 int Leveler::draw() 
 {	
 	Stroke		(255, 128, 128, 0.5);
-	StrokeWidth (2);
-
+	StrokeWidth (2); 
+ 
 	draw_l_title		(  );
 	draw_horizontal_tics(  );
 	draw_vertical_line  (  );
