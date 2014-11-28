@@ -148,7 +148,7 @@ void Control::copy_position_horiz	  ( Control* Sibling )
 }
 void Control::copy_position_vert	  ( Control* Sibling )
 {
-	set_width_height( width, Sibling->height );
+	set_width_height( width, Sibling->height 	);
 	move_to			( left, 	Sibling->bottom );	
 }
 

@@ -8,16 +8,28 @@
 #include <unistd.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
+#include "tk_colors.hpp"
 #include "display.h"
 
+
+
 int screen_width, screen_height;
+
+void Stroke_c( Color c )
+{
+	Stroke( c.m_red, c.m_green, c.m_blue, c.get_alpha() );
+}
+void Fill_c( Color c )
+{
+	Fill( c.m_red, c.m_green, c.m_blue, c.get_alpha() );
+}
+
 
 void Stroke_l( long int Color )
 {
 	float alpha = ((Color & 0xFF000000)>>24) / 255.;
 	Stroke( (Color & 0x00FF0000)>>16, (Color & 0x0000FF00)>>8, (Color & 0x000000FF), alpha );
 }
-
 void Fill_l( long int Color)
 {
 	float alpha = ((Color & 0xFF000000)>>24) / 255.;

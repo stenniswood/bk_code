@@ -2,7 +2,9 @@ CC		   = g++
 OPTIONS	   = -fpermissive -Wwrite-strings 
 INC		   = ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ \
 			 ../core/adrenaline/ ../core/adrenaline/graphs/ ./wifi/ ./hardware/  \
-			 ./voice/ ./kinetic/ ./
+			 ./voice/ ./kinetic/ ./ ./games/ ./games/blackjack/ ./games/reversi/  \
+			 ./games/card_core/
+			 
 SELF_INC   = ../../avisual/ ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 		 	 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
@@ -21,6 +23,12 @@ APP_CPP_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			  ipc_mem_bkinstant.o test_layouts.o audio_app.o
 IPC_OBJS   = 
 
+REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o
+HEARTS_GAME_OBJS 	= hearts_game.o 
+BLACKJACK_GAME_OBJS = blackjack.o 
+CARDCORE_GAME_OBJS  = card.o card_player.o deck.o
+
+
 #  button_array_gui.o Container.o
 ADRENALINE_OBJS = 
 ADRENALINE_CPP_OBJS = control.o  \
@@ -29,7 +37,7 @@ ADRENALINE_CPP_OBJS = control.o  \
 			text_view.o icon.o scroll_bar.o scroll_control.o window.o  	\
 			side_bar.o tab_control.o table_window.o frame_window.o     	\
 			display_manager.o display.o mouse.o image_gallery.o power_level.o \
-			stereo_power.o wave_view.o frequency_view.o
+			stereo_power.o wave_view.o frequency_view.o rectangle.o tk_colors.o
 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o 		\
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o
@@ -46,6 +54,11 @@ VOICE_OBJS 	=
 avisual: $(APP_CPP_OBJS) 					\
 		$(addprefix ./voice/, 				$(VOICE_OBJS)) 			\
 		$(addprefix ./kinetic/, 			$(KINETIC_OBJS)) 		\
+		$(addprefix ./games/reversi/, 		$(REV_GAME_OBJS)) 		\
+		$(addprefix ./games/heart/, 		$(HEART_GAME_OBJS)) 	\
+		$(addprefix ./games/, 				$(GAME_OBJS)) 			\
+		$(addprefix ./games/blackjack/, 	$(BLACKJACK_GAME_OBJS)) \
+		$(addprefix ./games/card_core/, 	$(CARDCORE_GAME_OBJS)) 	\
 		$(addprefix ../core/misc/,			$(MISC_OBJS))  			\
 		$(addprefix /home/pi/openvg/,		$(VG_OBJS))  			\
 		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) 	\

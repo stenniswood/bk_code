@@ -16,7 +16,7 @@ public:
 	Control( int Width, int Height 					  );
 	Control();
 	~Control();
-	
+
 	virtual void 	Initialize			  (					);	
 	virtual void  	set_text_size		  ( float TextSize		 			   );
 	void  			set_text  			  ( const char* NewText	);
@@ -26,15 +26,17 @@ public:
 	void  			set_title 		  	  ( char* NewTitle 		);
 	
 	// set_position should call move_to() and set_width_height() both are virtual.  so this need not be!
-	virtual void 	wrap_content	  	 ( );
+	virtual void 	wrap_content	  	  ( );
 	
-	void		 	set_position	  	 ( int Left, int Right, int Top, int Bottom );
-	virtual void 	set_width_height  	 ( int Width, int Height )	  { width = Width; height=Height; };
-	virtual void  	move_to	  		  	 ( float Left,   float  Bottom	);
-	void  			get_xy	  		  	 ( float* mLeft, float* mBottom	) { *mLeft=left; *mBottom=bottom; };
-	void 		 	move_bottom_to  	 ( float  mNewBottom	);	
-	void 		 	move_left_to  	 	 ( float  mNewLeft	);		
-	virtual void  	move_by	  		  	 ( int DeltaX, int  DeltaY	) { left+=DeltaX; bottom+=DeltaY; };
+	void		 	set_position	  	  ( int Left, int Right, int Top, int Bottom );
+	virtual void 	set_width_height  	  ( int Width, int Height )	  { width = Width; height=Height; };
+	virtual void  	move_to	  		  	  ( float Left,   float  Bottom	);
+	void  			get_xy	  		  	  ( float* mLeft, float* mBottom	) { *mLeft=left; *mBottom=bottom; };
+	float			get_width			  () {return width; };
+	float			get_height			  () {return height; };
+	void 		 	move_bottom_to  	  ( float  mNewBottom	);	
+	void 		 	move_left_to  	 	  ( float  mNewLeft	);		
+	virtual void  	move_by	  		  	  ( int DeltaX, int  DeltaY	) { left+=DeltaX; bottom+=DeltaY; };
 	void  			set_position_left_of  ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding );
 	void  			set_position_right_of ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding );
 	void 		 	set_position_above    ( Control* Sibling, bool mCopyHoriz=true );
@@ -47,9 +49,13 @@ public:
 
 	void  			show				  ( ) 	{ Visible = TRUE;  };
 	void  			hide				  ( ) 	{ Visible = FALSE; };
-	void  			show_border 		( bool Show=true ) { HasBorder = Show; };
+	void  			show_border 		  ( bool Show=true ) { HasBorder = Show; };
 	
-	virtual void 	load_resources		(	);
+	virtual void 	load_resources		  (	);
+	/*At some point, want to add a param: Canvas canvas to the draw functions.
+		so that we can draw into any memoryDC or the screen.  Switching "on
+		the fly".
+	*/
 	virtual int   	draw				(	);
 	int   			draw_title			( 	);
 	int   			draw_border			(   );
@@ -97,6 +103,19 @@ protected:
 	Control* 	Next;
 	Control* 	Prev;	
 };
+
+// i see all the time dumping into this stuff.
+// also causes me to feel like an idiot, fool, excentric, etc.
+// and i start to hate myself for it.
+
+// which is what everyone else sees too.
+// so it's because i have little condition of worth here.
+// which is why google keeps encouraging me.  so that i have condition of worth here.
+// then i don't hate myself for it.  and i can either finish or walk away and be out of the hole.
+// And 
+
+
+
 
  
 #endif

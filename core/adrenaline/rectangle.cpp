@@ -5,35 +5,33 @@
 #include <math.h>
 #include "rectangle.hpp"
 
-
 	
-	
-Rect::Rect(float left, float bottom, float Width, float Height)
+Rectangle::Rectangle(float Left, float Bottom, float Width, float Height)
 {
-	coords[LEFT]  	= left;
-	coords[RIGHT] 	= left + Width;
-	coords[TOP]		= bottom + Height;
-	coords[BOTTOM]  = bottom;
+	set_left  ( Left 			);
+	set_right ( Left + Width    );
+	set_top   ( Bottom + Height );
+	set_bottom( Bottom 			);
 }
 
-Rect::Rect(int left, int right, int Width, int Height)
+Rectangle::Rectangle(float Width, float Height)
 {
-	coords[LEFT]  	= left;
-	coords[RIGHT] 	= left + Width;
-	coords[TOP]		= bottom + Height;
-	coords[BOTTOM]  = bottom;
+	set_left   ( 0 );
+	set_bottom ( 0 );	
+	set_width  ( Width  );
+	set_height ( Height );	
 }
 
-Rect::Rect(int Width, int Height)
+Rectangle::Rectangle()
 {
-	coords[LEFT]  	= 0;
-	coords[RIGHT] 	= Width;
-	coords[TOP]		= Height;
-	coords[BOTTOM]  = 0;
+	set_left  ( 0. );
+	set_right ( 0. );
+	set_top   ( 0. );
+	set_bottom( 0. );
 }
 
 
-void	Rect::move_to	( float left, float bottom )
+void	Rectangle::move_to	( float left, float bottom )
 {
 	coords[TOP]   = bottom + get_height();
 	coords[RIGHT] = left   + get_width();
@@ -43,7 +41,7 @@ void	Rect::move_to	( float left, float bottom )
 }
 
 
-void 	Rect::set_size	( float width, float height);
+void 	Rectangle::set_size	( float width, float height)
 {
 	coords[TOP]   = get_bottom() + height;
 	coords[RIGHT] = get_left()   + width;

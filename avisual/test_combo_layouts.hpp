@@ -1,17 +1,40 @@
-#ifndef _TEST_COMBO_LAYOUTS_
-#define _TEST_COMBO_LAYOUTS_
 
 
+void print_test_list();
+
+void load_test_screen(int number);
+
+void init_simple_button_test();
+void init_simple_textview_test();
+void init_textview_test();
+
+void init_textfile_view();
+
+void init_progressbar_test();
+void init_sidebar_test();
 
 
-void print_combo_test_list	(			);
-void load_combo_test_screen ( int number);
-void init_okay_cancel_dlg	(			);
-void init_audio_view		(			);
-
-// 12, 7, 16,  not working
+void init_radio_button_test();
+void init_check_button_test();
+void init_directory_lb_test();
 
 
-#endif
+void populate_simple_lb();
+void pack_sample_window();
+
+void init_file_browser	 ();
+void init_frame_window	 ();
+void init_image_gallery	 ();
+void init_line_graph	 ();
+void init_histogram_graph();
+void init_bar_graph	 	 ();
+void init_scatter_graph	 ();
+void init_combined_graph ();
+
+void init_audio_view	 ();
+
+void init_okay_cancel_dlg();
 
 
+// for test only:
+//extern RadioButton 	MyRadio1;

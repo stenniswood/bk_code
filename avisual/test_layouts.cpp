@@ -49,6 +49,7 @@ AUTHOR	: Steve Tenniswood
 #include "scatter_plot.hpp"
 #include "power_level.hpp"
 #include "stereo_power.hpp"
+#include "adrenaline_windows.h"
 
 #include "visual_memory.h"
 #include "audio_memory.h"
@@ -56,6 +57,11 @@ AUTHOR	: Steve Tenniswood
 #include "frequency_view.hpp"
 #include "fft.h"
 #include "test_combo_layouts.hpp"
+#include "audio_app.hpp"
+
+#include "card.hpp"
+#include "deck.hpp"
+#include "card_player.hpp"
 
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
@@ -189,6 +195,9 @@ void load_test_screen(int number)
 			break;
 	case 21: init_combined_graph();
 			break;				
+	case 30: init_card();			// GAMES start at 30!
+			break;				
+
 	default: load_combo_test_screen( number );
 			break;
 	}
@@ -514,10 +523,49 @@ void init_bar_graph	 	()
 	MainDisplay.add_object	( &bg );
 }
 
+Card card1(3);
+Card card2(4);
+Card card3(5);
+Card card4(6);
+Card card5(7);
+Card card6(8);
 
-void init_scatter_graph	 	()
+CardPlayer player1;
+CardPlayer player2;
+Deck deck();
+
+void init_card( )
 {
+	printf("init_card()\n");	
+	card1.move_to( 200, 200 );	card1.load_resources();		card1.match_image_size();
+	card2.move_to( 200, 300 );	card2.load_resources();		card2.match_image_size();
+	card3.move_to( 200, 400 );	card3.load_resources();		card3.match_image_size();
 
+	card4.move_to( 200, 200 );	card4.load_resources();		card4.match_image_size();
+	card5.move_to( 200, 300 );	card5.load_resources();		card5.match_image_size();
+	card6.move_to( 200, 400 );	card6.load_resources();		card6.match_image_size();
+
+
+	player1.move_to			( 300, 200  );
+	player1.set_width_height( 70*5, 100 );
+	player1.receive_card( &card1, true );
+	player1.receive_card( &card2, true );
+	player1.receive_card( &card3, true );
+
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object	( &card1 );
+	MainDisplay.add_object	( &card2 );
+	MainDisplay.add_object	( &card3 );
+	
+	MainDisplay.add_object	( &card4 );
+	MainDisplay.add_object	( &card5 );
+	MainDisplay.add_object	( &card6 );
+
+	MainDisplay.add_object	( &player1 );
+}
+
+void init_scatter_graph( )
+{
 }
 
 void init_combined_graph()

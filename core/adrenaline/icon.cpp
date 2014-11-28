@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <jpeglib.h>
@@ -16,6 +17,9 @@
 #include "GLES/gl.h"
 #include "bcm_host.h"
 
+
+
+#include <string.h>
 #include <fontinfo.h>
 #include <shapes.h>
 #include "Graphbase.hpp"
@@ -111,16 +115,38 @@ void IconView::read_from_jpeg_file ( )
 	}
 	calc_margins(); 
 }
-void IconView::read_from_file ( )
+
+void convertToUpper(char *str)
 {
-	image = createImageFromJpeg( Filename, &ImageInfo );
+    char *p = str;
+    while( *p=toupper(*p) )  { p++; };
+}
+
+/* Note the file extension can only be 15 chars long */
+void IconView::read_from_file( )
+{
+	char* extension = strrchr( Filename, '.' )+1;
+	char CapExtension[15];
+	
+    strcpy( CapExtension, extension );
+    convertToUpper( CapExtension );
+	printf("Extension:%s\n", CapExtension );
+	
+	if (strcmp(CapExtension, "JPG")==0)
+		image = createImageFromJpeg( Filename, &ImageInfo );
+/*	else if (strcmp(CapExtension, "PNG")==0)
+		image = createImageFromPNG ( Filename, &ImageInfo );
+	else if (strcmp(extension, "BMP")==0)
+		image = createImageFromPNG ( Filename, &ImageInfo ); */
 	file_loaded = true;
 	calc_margins();
 }
+
+
 void IconView::load_resources( )
 {
-	read_from_jpeg_file();
-	printf("IconView:load_resources(): FN=%s;  image=%d\n", Filename, image );
+	read_from_file( );
+	printf("IconView:load_resources(): FN=%s;  image=%d\n", Filename, image );	
 }
 
 void IconView::set_image( VGImage* mImage, struct image_info* mImageInfo )
@@ -135,17 +161,20 @@ void IconView::set_image( VGImage* mImage, struct image_info* mImageInfo )
 	Text characters come out the color of the Fill, not stroke!!
 *********************************************************************/
 int IconView::draw()
-{	
+{
 	Control::draw();
 
-	Fill_l(background_color);		// 
-	Rect( left, bottom, +width, +height );
+	Fill_l(background_color);				// 
+	Rect  ( left, bottom, +width, +height );
 
 	VGfloat l = left+left_margin;
 	VGfloat b = bottom+bottom_margin;
 	int min_w = min(ImageInfo.width, width);
 	int min_h = min(ImageInfo.height, height);
-	vgSetPixels(l, b, image, 0, 0, min_w, min_h);	
+	if (image!=NULL)
+		vgSetPixels(l, b, image, 0, 0, min_w, min_h);
+		
+
 }
 
 int	IconView::onClick(int x, int y, bool mouse_is_down)

@@ -102,7 +102,7 @@ void FrequencyView::set_data( short* mData, int mLength )
 	number_of_bars = mLength;
 }
 
-byte blue;
+
 
 /***********************************************************************
 	This draws 1 square - picking a color based on it's value and the 
