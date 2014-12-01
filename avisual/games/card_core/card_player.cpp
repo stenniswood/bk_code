@@ -17,14 +17,44 @@
 
 
 
-CardPlayer::CardPlayer()
+CardPlayer::CardPlayer( int MaxCardsInHand ) 
+:Control()
 {
-
+	set_width_height( MaxCardsInHand*(62+20), 100 );
 }
 
 void CardPlayer::receive_card( Card* mNewCard, bool mExposed )
 {
+	printf("%x received %x 1 card\n",this,  mNewCard );
+	mNewCard->expose( mExposed );
 	cards.push_back(mNewCard);
+}
+#define CARD_SPACE_PADDING 15
+
+int	CardPlayer::get_total_value( )
+{
+	float l=left;
+	std::list<Card*>::iterator	iter = cards.begin();
+	while (iter != cards.end())
+	{
+		l += (*iter)->get_value() + CARD_SPACE_PADDING;
+		printf(" %d \t", l );
+		iter++;
+	}
+}
+
+int CardPlayer::is_ace_in_hand( )
+{
+//	return ;
+}
+
+int CardPlayer::get_best_black_jack_score( )
+{
+	int total = get_total_value();
+	if (total > 21)
+	{
+		
+	}
 }
 
 void	CardPlayer::flip_card	( Card* mNewCard )
@@ -40,29 +70,34 @@ void	CardPlayer::expose_card	( Card* mNewCard, bool mExposed )
 
 int	CardPlayer::arrange_cards( )
 {
-	int l = left; 
 	const int PADDING = 20;
-	printf(" arrange_cards() \n" ); 
+	int l = left+PADDING; 
+	//printf("CardPlayer::arrange_cards() \n" ); 
 	
 	std::list<Card*>::iterator	iter = cards.begin();
 	while (iter != cards.end())
 	{
 		(*iter)->move_to( l, bottom );
 		l += (*iter)->get_width() + PADDING;
-		printf(" %d \t", l );
+		//printf(" %d \t", l );
 		iter++;
 	}
-	printf("\n");
-}
+	//printf("\n");
+} 
 
 int	CardPlayer::draw( )
 {
-	arrange_cards( );
+	Control::draw();
+	arrange_cards();
+	printf("CardPlayer::draw()  %x \n", this );
+	Control::print_positions();
 	
 	std::list<Card*>::iterator	iter = cards.begin();
 	// FIRST ARRANGE CARDS:
 	while (iter != cards.end())
 	{		
+		printf("drawing %d %c\n", (*iter)->get_value(), (*iter)->get_suit() );
+		(*iter)->print_positions();
 		(*iter)->draw();
 		iter++;
 	}

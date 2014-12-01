@@ -3,7 +3,7 @@ OPTIONS	   = -fpermissive -Wwrite-strings
 INC		   = ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ \
 			 ../core/adrenaline/ ../core/adrenaline/graphs/ ./wifi/ ./hardware/  \
 			 ./voice/ ./kinetic/ ./ ./games/ ./games/blackjack/ ./games/reversi/  \
-			 ./games/card_core/
+			 ./games/card_core/ ./games/hearts/
 			 
 SELF_INC   = ../../avisual/ ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
@@ -55,7 +55,7 @@ avisual: $(APP_CPP_OBJS) 					\
 		$(addprefix ./voice/, 				$(VOICE_OBJS)) 			\
 		$(addprefix ./kinetic/, 			$(KINETIC_OBJS)) 		\
 		$(addprefix ./games/reversi/, 		$(REV_GAME_OBJS)) 		\
-		$(addprefix ./games/heart/, 		$(HEART_GAME_OBJS)) 	\
+		$(addprefix ./games/hearts/, 		$(HEARTS_GAME_OBJS)) 	\
 		$(addprefix ./games/, 				$(GAME_OBJS)) 			\
 		$(addprefix ./games/blackjack/, 	$(BLACKJACK_GAME_OBJS)) \
 		$(addprefix ./games/card_core/, 	$(CARDCORE_GAME_OBJS)) 	\

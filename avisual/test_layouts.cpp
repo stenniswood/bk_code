@@ -19,49 +19,24 @@ AUTHOR	: Steve Tenniswood
 #include <shapes.h>
 #include <fontinfo.h>
 #include "CAN_Interface.h"
-#include "line_graph.hpp"
-#include "dataset.hpp"
-#include "histogram.hpp"
-#include "line_graph.hpp"
-#include "leveler.hpp"
 #include "display.h"
 #include "display_manager.hpp"
-#include "button.hpp"
-#include "listbox.hpp"
-#include "checkbox.hpp"
-#include "progressbar.hpp"
-#include "text_view.hpp"
-#include "scroll_bar.hpp"
-#include "control.hpp"
-#include "icon.hpp"
-#include "listbox.hpp"
-#include "tabular_listbox.hpp"
-#include "window.hpp"
 #include "frame_window.hpp"
 #include <vector>
-#include "radiobutton.hpp"
 #include "test_layouts.hpp"
-#include "directory_listbox.hpp"
-#include "file_browser.hpp"
-#include "image_gallery.hpp"
-#include "bar_graph.hpp"
-#include "bar_graph_stacked.hpp"
-#include "scatter_plot.hpp"
 #include "power_level.hpp"
 #include "stereo_power.hpp"
 #include "adrenaline_windows.h"
 
 #include "visual_memory.h"
 #include "audio_memory.h"
-#include "wave_view.hpp"
-#include "frequency_view.hpp"
 #include "fft.h"
 #include "test_combo_layouts.hpp"
 #include "audio_app.hpp"
 
-#include "card.hpp"
-#include "deck.hpp"
-#include "card_player.hpp"
+#include "adrenaline_windows.h"
+#include "adrenaline_graphs.h"
+#include "card_games.h"
 
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
@@ -148,58 +123,48 @@ void print_test_list()
 	printf("17 : init_audio_view\n"	 	 );
 	printf("20 : init_okay_cancel_dlg\n" );
 	printf("21 : init_combined_graph\n"	 );	
+
+	printf("30 : init_cards_only\n"	 	);	
+	printf("31 : init_cards\n"	 	);	
+	printf("32 : init_blackjack\n"	);	
+	printf("33 : init_hearts\n"	);	
+	printf("34 : init_reversi\n"	);			
+	printf("\n"	);	
 }
+
 void load_test_screen(int number)
 {
 	printf("init_display() DisplayNum=%d\n", number);
 	//number = 5;
 	switch(number) 
 	{	
-	case 0:	init_simple_button_test();
-			break;
-	case 1:	init_simple_textview_test();
-			break;
-	case 2:	init_textview_test();
-			break;
-	case 3: init_progressbar_test();
-			break;
-	case 4: init_radio_button_test();
-			break;
-	case 5: init_check_button_test();
-			break;
-	case 6: init_sidebar_test();
-			break;		
-	case 7: init_directory_lb_test();
-			break;		
-	case 8: init_file_browser();
-			break;
-	case 9: pack_sample_window();
-			break;		
-	case 10: init_frame_window();
-			break;		
-	case 11: init_textfile_view();
-			break;		
-	case 12: init_image_gallery();
-			break;		
-	case 13: init_line_graph();
-			break;		
-	case 14: init_histogram_graph();
-			break;
-	case 15: init_bar_graph();
-			break;
-	case 16: init_scatter_graph();
-			break;
-	case 17: init_audio_view();
-			break;
-	case 20: init_okay_cancel_dlg();
-			break;
-	case 21: init_combined_graph();
-			break;				
-	case 30: init_card();			// GAMES start at 30!
-			break;				
-
-	default: load_combo_test_screen( number );
-			break;
+	case 0:	init_simple_button_test	();		break;
+	case 1:	init_simple_textview_test();	break;
+	case 2:	init_textview_test		();		break;
+	case 3: init_progressbar_test	();		break;
+	case 4: init_radio_button_test	();		break;
+	case 5: init_check_button_test	();		break;
+	case 6: init_sidebar_test		();		break;		
+	case 7: init_directory_lb_test	();		break;		
+	case 8: init_file_browser		();		break;
+	case 9: pack_sample_window		();		break;		
+	case 10: init_frame_window		();		break;		
+	case 11: init_textfile_view		();		break;		
+	case 12: init_image_gallery		();		break;		
+	case 13: init_line_graph		();		break;		
+	case 14: init_histogram_graph	();		break;
+	case 15: init_bar_graph			();		break;
+	case 16: init_scatter_graph		();		break;
+	case 17: init_audio_view		();		break;
+	case 20: init_okay_cancel_dlg	();		break;
+	case 21: init_combined_graph	();		break;				
+	// GAMES start at 30!
+	case 30: init_cards_only		();		break;
+	case 31: init_card				();		break;				
+	case 32: init_blackjack			();		break;
+	case 33: init_hearts			();		break;
+	case 34: init_reversi			();		break;
+	default: load_combo_test_screen( number );	break;
 	}
 }
 
@@ -526,13 +491,78 @@ void init_bar_graph	 	()
 Card card1(3);
 Card card2(4);
 Card card3(5);
-Card card4(6);
-Card card5(7);
-Card card6(8);
+Card* c6 = new Card(6);
+Card* c7 = new Card(7);
+Card* c8 = new Card(8);
 
-CardPlayer player1;
-CardPlayer player2;
+CardPlayer player1(4);
+CardPlayer player2(4);
 Deck deck();
+
+Button hit (-1,-1);
+Button stay(-1,-1);
+
+void init_cards_only( )
+{
+	const int PADDING = 20;
+	int l = 100+PADDING; 
+	MainDisplay.remove_all_objects(	);
+			
+	//  HEARTS.   h c d s 
+	Card* cardsH[13];				// first suit.
+	for (int i=0; i<13; i++)
+	{
+		cardsH[i] = new Card(i);
+		cardsH[i]->load_resources();
+		cardsH[i]->match_image_size();
+		cardsH[i]->move_to( l, 200 );
+		cardsH[i]->print_positions();		
+		l += cardsH[i]->get_width() + PADDING;
+		MainDisplay.add_object	( cardsH[i] );
+	}
+	
+	//  HEARTS.   h c d s 
+	Card* cardsC[13];				// first suit.
+	l = 100+PADDING;
+	for (int i=0; i<13; i++)
+	{
+		cardsC[i] = new Card(i+13);
+		cardsC[i]->load_resources();
+		cardsC[i]->match_image_size();
+		cardsC[i]->move_to( l, 300 );
+		cardsC[i]->print_positions();		
+		l += cardsC[i]->get_width() + PADDING;
+		MainDisplay.add_object	( cardsC[i] );
+	}
+
+	//  HEARTS.   h c d s 
+	Card* cardsD[13];				// first suit.
+	l = 100+PADDING;
+	for (int i=0; i<13; i++)
+	{
+		cardsD[i] = new Card(i+26);
+		cardsD[i]->load_resources();
+		cardsD[i]->match_image_size();
+		cardsD[i]->move_to( l, 400 );
+		cardsD[i]->print_positions();		
+		l += cardsD[i]->get_width() + PADDING;
+		MainDisplay.add_object	( cardsD[i] );
+	}
+
+	//  HEARTS.   h c d s 
+	Card* cardsS[13];				// first suit.
+	l = 100+PADDING;
+	for (int i=0; i<13; i++)
+	{
+		cardsS[i] = new Card(i+39);
+		cardsS[i]->load_resources();
+		cardsS[i]->match_image_size();
+		cardsS[i]->move_to( l, 500 );
+		cardsS[i]->print_positions();		
+		l += cardsS[i]->get_width() + PADDING;
+		MainDisplay.add_object	( cardsS[i] );
+	}	
+}
 
 void init_card( )
 {
@@ -541,27 +571,84 @@ void init_card( )
 	card2.move_to( 200, 300 );	card2.load_resources();		card2.match_image_size();
 	card3.move_to( 200, 400 );	card3.load_resources();		card3.match_image_size();
 
-	card4.move_to( 200, 200 );	card4.load_resources();		card4.match_image_size();
-	card5.move_to( 200, 300 );	card5.load_resources();		card5.match_image_size();
-	card6.move_to( 200, 400 );	card6.load_resources();		card6.match_image_size();
+	c6->move_to( 200, 200 );	c6->load_resources();		c6->match_image_size();
+	c7->move_to( 200, 300 );	c7->load_resources();		c7->match_image_size();
+	c8->move_to( 200, 400 );	c8->load_resources();		c8->match_image_size();
 
+	hit.set_width_height 	( 100, 100 );
+	stay.set_width_height	( 100, 100 );
+	hit.move_to 		 	( 100, 100 );
+	stay.move_to		 	( 220, 100 );
 
 	player1.move_to			( 300, 200  );
 	player1.set_width_height( 70*5, 100 );
-	player1.receive_card( &card1, true );
-	player1.receive_card( &card2, true );
-	player1.receive_card( &card3, true );
+	player1.receive_card	( c6, true );
+	player1.receive_card	( c7, true );
+	player1.receive_card	( c8, true );
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( &card1 );
 	MainDisplay.add_object	( &card2 );
 	MainDisplay.add_object	( &card3 );
 	
-	MainDisplay.add_object	( &card4 );
-	MainDisplay.add_object	( &card5 );
-	MainDisplay.add_object	( &card6 );
+/*	MainDisplay.add_object	( c6 );
+	MainDisplay.add_object	( c7 );
+	MainDisplay.add_object	( c8 ); */
 
 	MainDisplay.add_object	( &player1 );
+}
+
+BlackJack  bj(2);
+HeartsGame hearts(4);
+
+void init_blackjack( )
+{
+	printf("init_blackjack()\n");
+
+	hit.set_width_height ( 100, 50 );
+	stay.set_width_height( 100, 50 );
+	hit.move_to 		 ( 100, 100 );
+	stay.move_to		 ( 220, 100 );	
+	hit.set_text		 ("Hit" );
+	stay.set_text		 ("Stay");
+
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object	( &hit  );
+	MainDisplay.add_object	( &stay );	
+	
+	bj.load_resources();
+	bj.deal();
+	bj.set_graphic_center( 700, 400 );
+	
+	// black jack knows how to add all it's graphic objects
+	bj.add_to_display_manager( &MainDisplay );
+}
+
+void init_hearts( )
+{
+	printf("init_hearts()\n");
+	hit.set_width_height ( 100, 100 );
+	stay.set_width_height( 100, 100 );
+	hit.move_to 		 ( 100, 100 );
+	stay.move_to		 ( 220, 100 );	
+
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object	( &hit  );
+	MainDisplay.add_object	( &stay );	
+	
+	// black jack knows how to add all it's graphic objects.
+//	hearts.add_to_display_manager( &MainDisplay );	
+}
+
+void init_reversi( )
+{
+	printf("init_reversi()\n");	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object	( &hit  );
+	MainDisplay.add_object	( &stay );	
+	
+	// black jack knows how to add all it's graphic objects.
+//	bj.add_to_display_manager( &MainDisplay );	
 }
 
 void init_scatter_graph( )
@@ -573,7 +660,7 @@ void init_combined_graph()
 	printf("Line Graph Init\n");
 	fill_fake_data1			(	);
 	fill_fake_data2			(	);
-	fill_fake_data3			(	);	
+	fill_fake_data3			(	);
 
 	lg1.set_title 			( (char*) chart1_title 			);
 	lg1.set_xLabel			( (char*) "Time" 				);

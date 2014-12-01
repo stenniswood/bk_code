@@ -17,8 +17,6 @@
 #include "GLES/gl.h"
 #include "bcm_host.h"
 
-
-
 #include <string.h>
 #include <fontinfo.h>
 #include <shapes.h>
@@ -105,8 +103,8 @@ void IconView::read_from_jpeg_file ( )
 {
 	if (Filename==NULL) return;
 	
-//	printf("read_from_jpeg_file:  %s;  w=%d\n",Filename, ImageInfo.width);
 	image = createImageFromJpeg( Filename, &ImageInfo );
+	printf("read_from_jpeg_file:  %s;  w=%d h=%d\n", Filename, ImageInfo.width,ImageInfo.height );
 	file_loaded = true;
 	if (style & WRAP_IMAGE_SIZE)
 	{	
@@ -127,13 +125,14 @@ void IconView::read_from_file( )
 {
 	char* extension = strrchr( Filename, '.' )+1;
 	char CapExtension[15];
-	
+
     strcpy( CapExtension, extension );
     convertToUpper( CapExtension );
-	printf("Extension:%s\n", CapExtension );
-	
+	//printf("Extension:%s\n", CapExtension );
+
 	if (strcmp(CapExtension, "JPG")==0)
 		image = createImageFromJpeg( Filename, &ImageInfo );
+	printf(" %s width=%d height=%d\n", Filename, ImageInfo.width, ImageInfo.height);
 /*	else if (strcmp(CapExtension, "PNG")==0)
 		image = createImageFromPNG ( Filename, &ImageInfo );
 	else if (strcmp(extension, "BMP")==0)
@@ -173,7 +172,6 @@ int IconView::draw()
 	int min_h = min(ImageInfo.height, height);
 	if (image!=NULL)
 		vgSetPixels(l, b, image, 0, 0, min_w, min_h);
-		
 
 }
 
@@ -269,6 +267,7 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 	// Create VG image
 	img = vgCreateImage(rgbaFormat, II->width, II->height, VG_IMAGE_QUALITY_BETTER);
 	vgImageSubData(img, data, II->dstride, rgbaFormat, 0, 0, II->width, II->height);
+	printf("read jpeg, %d w=%d; h=%d\n", img, II->width, II->height);
 
 	// Cleanup
 	jpeg_destroy_decompress(&jdc);

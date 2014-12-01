@@ -20,8 +20,21 @@
 #include "icon.hpp"
 #include "card.hpp"
 
+char e_card_values[] = {
+'A','2','3','4','5','6','7','8','9','T','J','Q','K',
+'A','2','3','4','5','6','7','8','9','T','J','Q','K',
+'A','2','3','4','5','6','7','8','9','T','J','Q','K',
+'A','2','3','4','5','6','7','8','9','T','J','Q','K',
+};
+char e_card_suits[] = {
+'H','H','H','H','H','H','H','H','H','H','H','H','H','H',
+'C','C','C','C','C','C','C','C','C','C','C','C','C','C',
+'D','D','D','D','D','D','D','D','D','D','D','D','D','D',
+'S','S','S','S','S','S','S','S','S','S','S','S','S','S'
+};
+
 char const* e_card_names[] = {
-"1_H.jpg",
+"ace_H.jpg",
 "two_H.jpg",
 "three_H.jpg",
 "four_H.jpg",
@@ -31,12 +44,11 @@ char const* e_card_names[] = {
 "eight_H.jpg",
 "nine_H.jpg",
 "ten_H.jpg",
-"J_H.jpg",
-"Q_H.jpg",
-"K_H.jpg",
-"A_H.jpg",
+"j_H.jpg",
+"q_H.jpg",
+"k_H.jpg",
 
-"1_C.jpg",
+"ace_C.jpg",
 "two_C.jpg",
 "three_C.jpg",
 "four_C.jpg",
@@ -46,12 +58,11 @@ char const* e_card_names[] = {
 "eight_C.jpg",
 "nine_C.jpg",
 "ten_C.jpg",
-"J_C.jpg",
-"Q_C.jpg",
-"K_C.jpg",
-"A_C.jpg",
+"j_C.jpg",
+"q_C.jpg",
+"k_C.jpg",
 
-"1_D.jpg",
+"ace_D.jpg",
 "two_D.jpg",
 "three_D.jpg",
 "four_D.jpg",
@@ -61,12 +72,11 @@ char const* e_card_names[] = {
 "eight_D.jpg",
 "nine_D.jpg",
 "ten_D.jpg",
-"J_D.jpg",
-"Q_D.jpg",
-"K_D.jpg",
-"A_D.jpg",
+"j_D.jpg",
+"q_D.jpg",
+"k_D.jpg",
 
-"1_S.jpg",
+"ace_S.jpg",
 "two_S.jpg",
 "three_S.jpg",
 "four_S.jpg",
@@ -76,10 +86,9 @@ char const* e_card_names[] = {
 "eight_S.jpg",
 "nine_S.jpg",
 "ten_S.jpg",
-"J_S.jpg",
-"Q_S.jpg",
-"K_S.jpg",
-"A_S.jpg"
+"j_S.jpg",
+"q_S.jpg",
+"k_S.jpg"
 };
 
 Card::Card	( char* mFilename, char Value, char suit )
@@ -94,13 +103,38 @@ Card::Card	( int  mIndex )
 	char* filename = new char[80];
 	strcpy  ( filename, "./games/card_images/" );
 	int length = strlen(filename);
-	strcat  ( (char*) &(filename[length]), e_card_names[mIndex] );
+	strcat  ( filename, e_card_names[mIndex] );
 	set_file( filename );
+
+	is_face_down= false;
+	value = e_card_values[mIndex];
+	suit  = e_card_suits[mIndex];
 	delete filename;
+}
+
+int Card::get_value( )
+{
+	switch(value)
+	{
+	case '2' : return 2;
+	case '3' : return 3;
+	case '4' : return 4;
+	case '5' : return 5;
+	case '6' : return 6;
+	case '7' : return 7;
+	case '8' : return 8;
+	case '9' : return 9;
+	case 'J' : return 10;
+	case 'Q' : return 10;	
+	case 'K' : return 10;	
+	case 'A' : return 11;	// 11 or 1 
+	default  : return -1;
+	}
 }
 
 int	Card::draw( )
 {
+	print_positions();
 	if (is_face_down==true)
 	{
 		Control::draw();

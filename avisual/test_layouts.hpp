@@ -35,7 +35,12 @@ void init_audio_view	 ();
 void init_okay_cancel_dlg();
 
 // GAMES:
-void init_card( );
+void init_cards_only( );
+void init_card		( );
+void init_blackjack	( );
+void init_hearts	( );
+void init_reversi	( );
+
 
 // for test only:
 //extern RadioButton 	MyRadio1;

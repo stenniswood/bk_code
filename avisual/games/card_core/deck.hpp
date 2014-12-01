@@ -1,3 +1,6 @@
+#ifndef _DECK_H_
+#define _DECK_H_
+
 #include <vector>
 #include "card.hpp"
 
@@ -7,7 +10,6 @@ class Deck
 public:
 	Deck( );
 	
-protected:
 	void	load_resources();	
 
 	Card*	draw_one();
@@ -16,6 +18,7 @@ protected:
 	void 	reuse_discarded();		// call when action is required. (ie not a state)
 	
 	void	shuffle();
+	void	print_order();	
 	void 	order();
 		
 private:
@@ -25,3 +28,5 @@ private:
 	
 };
 
+
+#endif

@@ -33,7 +33,7 @@ public:
 	void			read_from_file     	( );
 
 	virtual void 	load_resources( );
-	void			match_image_size()  {  set_width_height( ImageInfo.width,ImageInfo.height);  };
+	void			match_image_size()  {  set_width_height( ImageInfo.width, ImageInfo.height);  };
 	
 	virtual void  	set_position	( int Left, int Right, int Top, int Bottom );
 	virtual void  	move_to( int mLeft, int mBottom );
@@ -43,6 +43,9 @@ public:
 		
 	virtual int   	draw   (	);	
 	virtual int		onClick(int x, int y, bool mouse_is_down=true );
+
+	float			get_image_width()  { return ImageInfo.width;  };
+	float			get_image_height() { return ImageInfo.height; };
 
 protected:
 	char*		Filename;

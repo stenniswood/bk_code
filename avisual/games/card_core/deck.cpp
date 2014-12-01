@@ -11,6 +11,7 @@
 #include "display.h"
 #include "control.hpp"
 #include <vector>
+#include <list>
 #include "deck.hpp"
 
 
@@ -25,6 +26,7 @@ Deck::Deck()
 		tmp = new Card(i);		
 		theDeck.push_back( tmp );	
 	}	
+	shuffle();
 }
 	
 
@@ -33,7 +35,13 @@ void Deck::load_resources()
 	Card* tmp = NULL;
 	// Load up all the cards:
 	for (int i=0; i<52; i++)
+	{
 		theDeck[i]->load_resources();
+		theDeck[i]->match_image_size();
+//		float width  = theDeck[i]->get_image_width();
+//		float height = theDeck[i]->get_image_height();
+//		theDeck[i]->set_width_height( width, height );
+	}
 }
 
 Card* Deck::draw_one()
@@ -51,31 +59,46 @@ void Deck::reuse_discarded()		// call when action is required. (ie not a state)
 {
 }
 
-void Deck::shuffle()
+int get_element( int nth )
 {
-	// first start with all the numbers, as they are taken up, we put a -1 in there.
-	// if the next random number falls on a -1, we pick another.
-	int					number_cards_remaining = 52;
-	std::vector<int>	start_indices;
-	for (int i=0; i<theDeck.size(); i++)
-	{
-		start_indices[i] = i;			
-	}
-
-	// Now 
-	int tmp = 0;
-	for (int i=0; i < theDeck.size(); i++)
-	{
-		tmp = rand()%52;
-		while ( start_indices[tmp] == -1 )
-		{
-			tmp = rand()%52;							
-		};
-		shuffled_indices[i] = tmp;
-		number_cards_remaining--;
-	}
+	return nth;
 }
 
+void Deck::shuffle()
+{
+	// first start with all the numbers:  [0 1 2 3...49 50 51]
+	// delete as they are used
+	int					number_cards_remaining = 52;
+	std::list<int>		start_indices;
+	for (int i=0; i<theDeck.size(); i++)
+		start_indices.push_back( i );			
+	//printf("Ordered Sequence [0 1 2 ... %d ]  \n", theDeck.size());
+
+	// Now create a random list [ 34 2 27 43 0 ]
+	shuffled_indices.clear();
+	int rnd2 = 0;
+	int rnd  = 0;
+	for (int i=0; i < theDeck.size(); i++)
+	{
+		rnd2 = rnd = rand() % number_cards_remaining;
+		std::list<int>::iterator iter = start_indices.begin();
+		for ( ; rnd>0; rnd-- )
+			iter++;
+		shuffled_indices.push_back( *iter );
+		//printf("shuffled_indices rnd2=%d  %d\n", rnd2, shuffled_indices[i] );
+		start_indices.erase( iter );
+		number_cards_remaining--;
+	}
+	print_order(); 
+}
+
+void Deck::print_order()
+{
+	printf("Deck order:  \n");
+	std::vector<int>::iterator	iter = shuffled_indices.begin();	
+	for ( ; iter != shuffled_indices.end(); iter++)
+		printf (" %d ", *iter);
+}
 void Deck::order()
 {
 	for (int i=0; i<theDeck.size(); i++)
