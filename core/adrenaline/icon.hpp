@@ -34,7 +34,7 @@ public:
 
 	virtual void 	load_resources( );
 	void			match_image_size()  {  set_width_height( ImageInfo.width, ImageInfo.height);  };
-	
+
 	virtual void  	set_position	( int Left, int Right, int Top, int Bottom );
 	virtual void  	move_to( int mLeft, int mBottom );
 	

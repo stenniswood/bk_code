@@ -19,29 +19,32 @@
 Deck::Deck()
 {
 	Card* tmp = NULL;
-	
 	// Load up all the cards:
 	for (int i=0; i<52; i++)
 	{
-		tmp = new Card(i);		
-		theDeck.push_back( tmp );	
+		tmp = new Card(i);
+		theDeck.push_back( tmp );
 	}	
-	shuffle();
+	shuffle();	
 }
 	
+int	Deck::onCreate(  )
+{
+	for (int i=0; i<52; i++)
+	{
+		theDeck[i]->onCreate();
+	}
+}
 
 void Deck::load_resources()
 {
 	Card* tmp = NULL;
 	// Load up all the cards:
-	for (int i=0; i<52; i++)
+/*	for (int i=0; i<52; i++)
 	{
 		theDeck[i]->load_resources();
 		theDeck[i]->match_image_size();
-//		float width  = theDeck[i]->get_image_width();
-//		float height = theDeck[i]->get_image_height();
-//		theDeck[i]->set_width_height( width, height );
-	}
+	} */
 }
 
 Card* Deck::draw_one()
@@ -51,12 +54,18 @@ Card* Deck::draw_one()
 	return tmp;	
 }
 
-void Deck::discard	(Card* mCard )
+void Deck::discard( Card* mCard )
 {
+	std::vector<Card*>::iterator iter = theDeck.begin();
+	while ( *iter != mCard )  {		iter++;		};
 
+	theDeck.erase( iter );
+	//shuffled_indices.pop_back();
 }
+
 void Deck::reuse_discarded()		// call when action is required. (ie not a state)
 {
+
 }
 
 int get_element( int nth )
@@ -92,6 +101,19 @@ void Deck::shuffle()
 	print_order(); 
 }
 
+void Deck::draw_image_back( Card* card )
+{
+	//Control::draw();
+/*	Fill_l( card->background_color);
+	Rect  ( card->left, card->bottom, card->width, card->height );
+	VGfloat l = card->left+left_margin;
+	VGfloat b = bottom+bottom_margin;
+	int min_w = min(ImageInfo.width, width);
+	int min_h = min(ImageInfo.height, height);
+	if (image!=NULL)
+		vgSetPixels(l, b, image, 0, 0, min_w, min_h);  */
+}
+
 void Deck::print_order()
 {
 	printf("Deck order:  \n");
@@ -105,5 +127,17 @@ void Deck::order()
 	{
 		shuffled_indices[i] = i;			
 	}
+}
+
+Card* Deck::find( char mValue, char mSuit )
+{
+	for (int i=0; i<52; i++)
+	{
+		char value = theDeck[i]->get_value();
+		char suit = theDeck[i]->get_suit();
+		if ((value==mValue) && (mSuit==suit))
+			return theDeck[i];
+	}
+	return NULL;
 }
 

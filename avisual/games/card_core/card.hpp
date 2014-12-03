@@ -24,8 +24,9 @@ public:
 	void	flip  		(			   )  { is_face_down = !is_face_down;	};
 	void	expose		( bool mExpose )  { is_face_down = !mExpose;   		};
 	bool	is_exposed	( )  			  { return !is_face_down;			};
-	
-	virtual int	draw  	( );
+
+	virtual int		onCreate  (  );
+	virtual int		draw  	  (  );
 
 private:
 	char	value;

@@ -2,32 +2,43 @@
 #define _BLACKJACK_H_
 
 #include <vector>
+#include "control.hpp"
+#include "button.hpp"
 #include "deck.hpp"
 #include "card_player.hpp"
 #include "display_manager.hpp"
 
-class BlackJack
+class BlackJack : public Control
 {
 public:
 	BlackJack( int mNumber_of_players );
 	
-	void	deal();
-	void	score();
-	void	evaluate_winners();	
-	void	pay_out();
+	void		deal			(	);
+	void		score			(	);
+	int			get_score		( int mPlayerIndex );
 
-	void 	set_graphic_center( float cx, float cy );	
-	void	place_players( float radius );		// place places around the game's center point.
-												// house at top.  square first, then circle.
-	void	add_to_display_manager( DisplayManager* dm );	
-	void	load_resources() { deck[0]->load_resources();  };	
-	Card*	draw_one();
+	void		evaluate_winners(	);	
+	void		pay_out			(	);
+
+	void 		set_graphic_center( );	
+	void 		place_buttons	( int mPlayerIndex 	);
+	void		place_players	( float radius 		);	// place places around the game's center point.
+														// house at top.  square first, then circle.
+	void		add_to_display_manager( DisplayManager* dm );	
+	void		load_resources	(	) { deck[0]->load_resources();  };	
+	Card*		draw_one		(	);		
+	virtual int	draw  	 		(	);
+	virtual int		onCreate  	(	);
 
 private:
 	std::vector<Deck*>			deck;
 	std::vector<CardPlayer*>	players;
 	CardPlayer*					house;
+	Button hit ;
+	Button stay;
 
+	int		whos_turn_is_it;		// player index
+	int 	deck_index;
 	int 	number_of_players;
 	int		number_of_decks;
 

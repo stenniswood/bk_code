@@ -32,7 +32,6 @@ Control::Control()
 {
 	set_position( 0, 0, 0, 0 );
 	Initialize();	
-//	Visible = false;
 }
 Control::~Control()
 {
@@ -40,6 +39,7 @@ Control::~Control()
 
 void Control::Initialize() 
 {
+	created		= false;
 	text		= NULL;
 	title 		= NULL;
 	HasBorder = true;	
@@ -66,14 +66,23 @@ void Control::print_color_info( )
 					  border_color,     text_color,     background_color );
 }
 
+// Chance to load resources, call functions which use fonts
+//  (already loaded before this call) etc.
+int	Control::onCreate(  )
+{	
+	wrap_content();
+	created = true;
+}
+
 void Control::wrap_content( )
-{ 	
+{ 		
+	if (created==false)  return;	//if fonts are not yet loaded...
 	VGfloat text_width = TextWidth( (char*)text, SerifTypeface, (int)text_size );
-	if (width==-1.)
-		width = text_width*1.2;
-	if (height==-1.)
+	if (width == -1.)
+		width  = text_width*1.2;
+	if (height== -1.)
 		height = text_size*1.5;
-	printf("\t\tControl::wrap_content() Got Called! w=%6.1f h=%6.1f\n", width, height);
+	//printf("\t\tControl::wrap_content() Got Called! w=%6.1f h=%6.1f\n", width, height);
 }
 
 void Control::set_text( const char* NewText )
@@ -82,12 +91,10 @@ void Control::set_text( const char* NewText )
 // The 2nd call to this function causes a glibc error!
 //	if (text) free(text);
 //	text = (char*) malloc (strlen(NewText));
-
-	text = new char[strlen(NewText)+1];
+	int len = strlen(NewText)+1;
+	text = new char[len];		
 	strcpy(text, NewText);	
-	printf("%s", text);
 	wrap_content();		// won't do anything if width/height are already set.
-	printf("%s", text);	
 }
 
 void Control::set_text_size( float mTextSize )

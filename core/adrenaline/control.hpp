@@ -72,15 +72,20 @@ public:
 	if the mouse click is on this control (ie. if the function below returns true), 
 	then the display manager will call OnClick() subsequently.  
 	*/
-	virtual Control*	HitTest		(int x, int y);
-	virtual int			onHover		() {return 0;};
-	virtual int			onClick		(int x, int y, bool mouse_is_down=true);
-	virtual int			onDoubleClick();
-	virtual int			onReceiveFocus();
-	int					isTabStop()			{ return 0; };
-
+	virtual Control*	HitTest		  ( int x, int y 	);
+	virtual int			onHover		  (  			 	) { return 0; };
+	virtual int			onClick		  ( int x, int y, bool mouse_is_down=true );
+	virtual int			onDoubleClick ( 				);
+	virtual int			onReceiveFocus( 				);
+	int					isTabStop	  (					)	{ return 0; };
+	virtual int			onCreate	  (  );	// chance to load resources, call functions which use fonts (already loaded before this call) etc.
+	
+	float 				get_left	  ( 		)	{ return left;   };
+	float 				get_bottom	  ( 		)	{ return bottom; };
+	
 protected:
 	bool		invalidated;		// forces a redraw in display manager.  not implemented yet.
+	bool		created;
 	
 	float 		left;
 	float 		bottom;

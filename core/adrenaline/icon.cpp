@@ -267,7 +267,7 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 	// Create VG image
 	img = vgCreateImage(rgbaFormat, II->width, II->height, VG_IMAGE_QUALITY_BETTER);
 	vgImageSubData(img, data, II->dstride, rgbaFormat, 0, 0, II->width, II->height);
-	printf("read jpeg, %d w=%d; h=%d\n", img, II->width, II->height);
+	//printf("read jpeg, %d w=%d; h=%d\n", img, II->width, II->height);
 
 	// Cleanup
 	jpeg_destroy_decompress(&jdc);

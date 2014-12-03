@@ -18,18 +18,23 @@ public:
 	void	flip_card	( Card* mNewCard 						);
 	void	expose_card	( Card* mNewCard, bool mExposed = false );
 
+	float	determine_card_spacing();
 	int		get_total_value	( );
 	int		get_best_black_jack_score( );
 	int		is_ace_in_hand	( );	
 	void	set_winner		( bool mWon )	{ winner = mWon;  };
 	bool	is_winner		( )	{ return winner;  };
 
-	int		arrange_cards( );
+	float	get_one_card_width ();
+	float	get_one_card_height();
+	
+	int		arrange_cards(  float mCardSpacing  );
 	virtual int	draw  	 ( );
 
 private:
 	std::list<Card*>	cards;
-	
+	float	card_spacing;
+	int		max_number_cards_in_hand;
 	int		number_cards_in_hand;
 	int		number_exposed_cards;
 	bool	winner;

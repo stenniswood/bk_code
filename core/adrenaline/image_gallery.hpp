@@ -19,7 +19,7 @@ public:
 
 	void			set_directory     ( char* mDirectoryName );
 	void 			retrieve_name_list( char* mPath, bool include_hidden_files=false );
-	void			onCreate();
+	virtual int		onCreate();
 	
 	virtual void 	load_resources    ( );
 

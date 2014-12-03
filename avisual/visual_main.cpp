@@ -191,7 +191,8 @@ int main( int argc, char *argv[] )
 	int value    	= 0;
 	DisplayNum      = 0; 
 	init("simple_walk.csv");
-	
+
+	printf("======= Checking command line arguments ==============\n");	
 	if (argc>1)
 	{
 		if ((strcmp(argv[first_param], "help") == 0))
@@ -206,26 +207,9 @@ int main( int argc, char *argv[] )
 		}
 	} else 
 		load_screen(4);
-
 	UpdateDisplaySemaphore=1;
-	printf("================= Checking command line arguments ========================\n");
-
-    if (argc>1) {
-		if (strcmp(argv[first_param], "help") == 0)
-		{
-			help();
-			exit(1);
-		}
-		if (strchr(argv[first_param], 'a') > 0)		
-		{		
-		}
-
-		if (argc>2) {
-		}
-	}
-
-	printf("================= Main Loop ==========================\n");
 	
+	printf("================= Main Loop ==========================\n");	
 	while (1)
 	{	
 		gui_interface();

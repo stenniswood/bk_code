@@ -28,6 +28,9 @@ public:
 
 	void	load_resources  (					  );
 
+	float	get_width		(	)		{  return screen_width;	};
+	float 	get_height		(	)		{  return screen_width;	};
+	
 	void	add_object			( Control* NewControl );
 	void	remove_object		( Control* NewControl );
 	void	remove_all_objects	( );
@@ -41,7 +44,9 @@ public:
 	int   draw_text			( 	);
 	int   draw_background	( 	);
 	void  end_draw			(	);
-	
+
+	void 	call_on_creates	( 	);  // maybe not needed
+
 protected:
 	int 	left; 
 	int		right;

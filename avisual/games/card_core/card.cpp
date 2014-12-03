@@ -124,6 +124,7 @@ int Card::get_value( )
 	case '7' : return 7;
 	case '8' : return 8;
 	case '9' : return 9;
+	case 'T' : return 10;	
 	case 'J' : return 10;
 	case 'Q' : return 10;	
 	case 'K' : return 10;	
@@ -134,7 +135,7 @@ int Card::get_value( )
 
 int	Card::draw( )
 {
-	print_positions();
+	//print_positions();
 	if (is_face_down==true)
 	{
 		Control::draw();
@@ -143,4 +144,9 @@ int	Card::draw( )
 	}
 }
 
+int	Card::onCreate(  )
+{
+	load_resources();
+	match_image_size();
+}
 

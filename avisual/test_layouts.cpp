@@ -41,27 +41,27 @@ AUTHOR	: Steve Tenniswood
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
 static TextView 		LongText		( 50, 1230, 750, 500 );
-static TabularListBox	tab_lb			( 600, 900, 750, 50  );
+//static TabularListBox	tab_lb			( 600, 900, 750, 50  );
 
 /********************* A sample Window ***********************************/
 static FrameWindow	ParentWindowFrame(450, 1050, 500, 100);
 static Window		ParentWindowF(450, 1050, 500, 100);
-static Window		ViewWindow	 (0, 1080, 760, 0);
+//static Window		ViewWindow	 (0, 1080, 760, 0);
 static TextView 	SampleText;
 static ListBox  	AvailableClients;
 static IconView		test_image;
 static IconView		test_icon ( 50,200 );
 /*************************************************************************/
 
-static ScrollBar   vsb;
-static ScrollBar   hsb(false);
+//static ScrollBar   vsb;
+//static ScrollBar   hsb(false);
 
 ////////////////////////////////////////////////////
 static DataSet ds1;
 static DataSet ds2;
 static DataSet ds3;
-static DataSet ds_tiltx;
-static DataSet ds_tilty;
+//static DataSet ds_tiltx;
+//static DataSet ds_tilty;
 
 static Histogram 		hg ( 100, 300, 600, 400 );		// was ( 100, 300, 300, 100 );
 static LineGraph 		lg1( 100, 300, 600, 400 );
@@ -99,7 +99,7 @@ static RadioButton 	MyRadio4 ( -1, -1 );
 static vector<DirectoryListBox>  dir_lb;
 
 //ButtonArrayMot MyArray	( 700, 1070, 350, 100);
-static char 		ConnectionStatusText[255];
+static char 		ConnectionStatusText[128];
 
 void print_test_list()
 {
@@ -488,7 +488,7 @@ void init_bar_graph	 	()
 	MainDisplay.add_object	( &bg );
 }
 
-Card card1(3);
+/*Card card1(3);
 Card card2(4);
 Card card3(5);
 Card* c6 = new Card(6);
@@ -497,11 +497,9 @@ Card* c8 = new Card(8);
 
 CardPlayer player1(4);
 CardPlayer player2(4);
-Deck deck();
+//Deck deck();
 
-Button hit (-1,-1);
-Button stay(-1,-1);
-
+*/
 void init_cards_only( )
 {
 	const int PADDING = 20;
@@ -567,7 +565,7 @@ void init_cards_only( )
 void init_card( )
 {
 	printf("init_card()\n");	
-	card1.move_to( 200, 200 );	card1.load_resources();		card1.match_image_size();
+/*	card1.move_to( 200, 200 );	card1.load_resources();		card1.match_image_size();
 	card2.move_to( 200, 300 );	card2.load_resources();		card2.match_image_size();
 	card3.move_to( 200, 400 );	card3.load_resources();		card3.match_image_size();
 
@@ -590,21 +588,36 @@ void init_card( )
 	MainDisplay.add_object	( &card1 );
 	MainDisplay.add_object	( &card2 );
 	MainDisplay.add_object	( &card3 );
-	
+*/	
 /*	MainDisplay.add_object	( c6 );
 	MainDisplay.add_object	( c7 );
 	MainDisplay.add_object	( c8 ); */
 
-	MainDisplay.add_object	( &player1 );
+//	MainDisplay.add_object	( &player1 );
 }
 
-BlackJack  bj(2);
-HeartsGame hearts(4);
+BlackJack  bj(3);
+//HeartsGame hearts(4);
 
 void init_blackjack( )
 {
 	printf("init_blackjack()\n");
 
+	float wide = MainDisplay.get_width();
+	float high = MainDisplay.get_height()/2;
+	bj.set_width_height( wide, high-20 );
+	bj.move_to(0, 0);	
+	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object	( &bj 	);
+
+	// black jack knows how to add all it's graphic objects
+	//bj.add_to_display_manager( &MainDisplay );
+}
+
+void init_hearts( )
+{
+/*	printf("init_hearts()\n");
 	hit.set_width_height ( 100, 50 );
 	stay.set_width_height( 100, 50 );
 	hit.move_to 		 ( 100, 100 );
@@ -612,41 +625,25 @@ void init_blackjack( )
 	hit.set_text		 ("Hit" );
 	stay.set_text		 ("Stay");
 
+	hearts.set_graphic_center(500, 350);
+	hearts.setup();
+	printf("Done setting up\n");
+	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( &hit  );
 	MainDisplay.add_object	( &stay );	
-	
-	bj.load_resources();
-	bj.deal();
-	bj.set_graphic_center( 700, 400 );
-	
-	// black jack knows how to add all it's graphic objects
-	bj.add_to_display_manager( &MainDisplay );
-}
-
-void init_hearts( )
-{
-	printf("init_hearts()\n");
-	hit.set_width_height ( 100, 100 );
-	stay.set_width_height( 100, 100 );
-	hit.move_to 		 ( 100, 100 );
-	stay.move_to		 ( 220, 100 );	
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &hit  );
-	MainDisplay.add_object	( &stay );	
-	
-	// black jack knows how to add all it's graphic objects.
-//	hearts.add_to_display_manager( &MainDisplay );	
+	hearts.add_to_display_manager( &MainDisplay );	
+	*/
 }
 
 void init_reversi( )
 {
+/*
 	printf("init_reversi()\n");	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( &hit  );
 	MainDisplay.add_object	( &stay );	
-	
+*/	
 	// black jack knows how to add all it's graphic objects.
 //	bj.add_to_display_manager( &MainDisplay );	
 }
@@ -726,15 +723,6 @@ void pack_sample_window()
 
 	MyButt.set_text( "Push me" );
 	MyProgress.set_percentage(80.0);
-
-	/*	strcpy(ConnectionStatusText, "A moment of kindness between two animals was captured " );		
-	SampleText.set_text			( ConnectionStatusText );
-	SampleText.move_to			( 10, 500  );
-	SampleText.calc_margins		( 0.1      );
-	SampleText.set_width_height ( 300, 200 );
-	SampleText.center_vertical	( TRUE		 );
-	SampleText.center_horizontal( TRUE		 );	 
-	ParentWindowF.pack_control	( &SampleText, PACK_FILL_PARENT, PACK_FILL_PARENT );*/
 
 	AvailableClients.set_width_height( 200, 200 );
 	AvailableClients.adjust_height_for_num_visible_items( 9 );

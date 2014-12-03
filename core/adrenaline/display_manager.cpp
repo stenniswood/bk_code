@@ -19,7 +19,7 @@
 #include "display_manager.hpp"
 
 
-//#define old_way 1
+
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
@@ -48,9 +48,11 @@ DisplayManager::DisplayManager( int mScreenWidth, int mScreenHeight )
 // Graphics initialization
 void  DisplayManager::init_screen()
 {
-	printf("DisplayManager::\tscreen_width=%d;\tscreen_height=%d\n", screen_width, screen_height );
 	init(&screen_width, &screen_height);	// Graphics initialization
+	printf("DisplayManager::\tscreen_width=%d;\tscreen_height=%d\n", screen_width, screen_height );
 	mouse_init( screen_width, screen_height );
+	load_resources();
+	
 }
 // Screen initialization
 void  DisplayManager::start_screen()
@@ -63,30 +65,31 @@ void  DisplayManager::end_screen( )
 	End();
 }
 
+// Perhaps this is not needed.  need to re-architect.
+void DisplayManager::call_on_creates( )
+{
+	// Load all controls which are already registered.
+	printf("Creating child controls\n");
+	list<Control*>::iterator	iter = controls.begin();
+	for (int i=0; iter!=controls.end(); i++, iter++ )
+	{
+		(*iter)->onCreate();
+	}
+}
+
 void DisplayManager::load_resources( )
 {
 	if (Filename)
 	{
 		read_from_jpeg_file( );
 	}
+	// Load all controls which are already registered.
 	printf("Loading child resources\n");
-
-#ifdef old_way
-		int count = 0;
-		Control* obj = Head;
-		while (obj)
-		{
-			if (Debug) printf("load child resources %d  \n", count++);
-			obj->load_resources();
-			obj = obj->getNext();
-		}
-#else
-		list<Control*>::iterator	iter = controls.begin();
-		for (int i=0; iter!=controls.end(); i++, iter++ )
-		{
-			(*iter)->load_resources();
-		}
-#endif
+	list<Control*>::iterator	iter = controls.begin();
+	for (int i=0; iter!=controls.end(); i++, iter++ )
+	{
+		(*iter)->load_resources();
+	}
 }
 
 void  DisplayManager::set_title( char* Title )
@@ -107,7 +110,7 @@ void  DisplayManager::set_background_color( long int Color )
 
 void  DisplayManager::add_object( Control* NewControl )
 {
-#ifdef old_way
+/*#ifdef old_way
 	// Add to list
 	NewControl->setPrev( Tail );	// attach to end of list
 	NewControl->setNext( NULL );
@@ -119,9 +122,10 @@ void  DisplayManager::add_object( Control* NewControl )
 		Tail->setNext( NewControl );		// this one is now end
 
 	Tail = NewControl;						// this one is now end
-#else
+#else */
+	NewControl->onCreate();
 	controls.push_back( NewControl );	
-#endif
+//#endif
 
 }
 
@@ -167,7 +171,7 @@ int   DisplayManager::draw(	)
 	draw_background();
 	draw_children();	
 	end_draw();				// end is needed to see display!
-		if (Debug) printf("draw display manager\tdone!\n\n" );
+	if (Debug) printf("draw display manager\tdone!\n\n" );
 }
 
 void  DisplayManager::end_draw(	)

@@ -91,7 +91,7 @@ void ImageGallery::Initialize()
 	current_image_index = 0;
 }
 
-void ImageGallery::onCreate()
+int ImageGallery::onCreate()
 {
 	PrevImage->set_text("<");		// font has to be loaded before this will work!!
 									// It is loaded in init_screen();
