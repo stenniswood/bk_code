@@ -112,6 +112,7 @@ int	BlackJack::dealer_play(	)
 		house->draw();
 		decision = dealer_hits( );
 	}
+	house->expose_all_cards( true );	
 	hit.hide();
 	stay.hide();
 	play_again.show();
@@ -153,6 +154,8 @@ void BlackJack::setup_game(	)
 	place_players( 100. );	
 	deal();	
 	float card_spacing = CARD_WIDTH + 10;	
+	house->arrange_cards( card_spacing );
+	// Arrange each players cards:
 	vector<CardPlayer*>::iterator	iter = players.begin();
 	for ( ; iter!=players.end(); iter++ )
 	{
@@ -165,8 +168,8 @@ void BlackJack::setup_game(	)
 int	BlackJack::onCreate  (  )
 {
 	printf("onCreate\n");
-	float sx = width/2. + left   - play_again.get_width()/2.;
-	float sy = height/2. + bottom - play_again.get_height()/2.;	
+	float sx = width/2.  + left   - play_again.get_width() /2.;
+	float sy = height/2. + bottom - play_again.get_height()/2.;
 	play_again.move_to( sx, sy );
 
 	printf("onCreate - deck\n");
@@ -180,12 +183,14 @@ void	BlackJack::deal()
 {
 	Card* card;
 	vector<CardPlayer*>::iterator	iter;
+	bool face_up = false;
 
 	for (int i=0; i<2; i++)
 	{
 		// House gets one
 		card = draw_one();
-		house->receive_card( card, true );
+		house->receive_card( card, face_up );
+		face_up = true;
 		
 		// Disperse to each player 1 at a time	
 		iter = players.begin();
@@ -320,7 +325,7 @@ int		BlackJack::draw()
 	Stroke_l(0xFFFFFFFF);
 	Fill_l(0xFFFFFF00);
 	float centerx = width/2 + left;
-	float centery = height + bottom- 36;
+	float centery = height + bottom- 50;
 	TextMid(centerx, centery, "Black Jack", SerifTypeface, 32 );
 
 	// Draw house + players

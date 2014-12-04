@@ -103,31 +103,35 @@ static char 		ConnectionStatusText[128];
 
 void print_test_list()
 {
-	printf("0 : init_simple_button_test\n");
-	printf("1 : init_simple_textview_test\n");
+	printf("0 : init_simple_button_test  \n");		// Simple
+	printf("1 : init_simple_textview_test\n");		
 	printf("2 : init_textview_test\n"	 );
 	printf("3 : init_progressbar_test\n" );
 	printf("4 : init_radio_button_test\n");
 	printf("5 : init_check_button_test\n");
-	printf("6 : init_sidebar_test\n"	 );
-	printf("7 : init_directory_lb_test\n");
-	printf("8 : init_file_browser\n"	 );
-	printf("9 : pack_sample_window\n"	 );
-	printf("10 : init_frame_window\n"	 );
+	printf("6 : init_simple_text\n" 	 );
+	printf("7 : init_simple_path\n" 	 );
+	printf("8 : pack_sample_window\n"	 );
+	
+	printf("10 : init_frame_window \n"	 );		// Combined
 	printf("11 : init_textfile_view\n"	 );
 	printf("12 : init_image_gallery\n"	 );
-	printf("13 : init_line_graph\n"		 );	
-	printf("14 : init_histogram_graph\n" );	
-	printf("15 : init_bar_graph\n"		 );	
-	printf("16 : init_scatter_graph\n"	 );	
-	printf("17 : init_audio_view\n"	 	 );
-	printf("20 : init_okay_cancel_dlg\n" );
-	printf("21 : init_combined_graph\n"	 );	
+	printf("13 : init_okay_cancel_dlg\n" );
+	printf("14 : init_audio_view \n"	 );
+	printf("15 : init_directory_lb_test\n");
+	printf("16 : init_file_browser\n"	 );
+	printf("17 : init_sidebar_test\n"	 );
+	
+	printf("20 : init_line_graph\n"		 );		// GRAPHS
+	printf("21 : init_histogram_graph\n" );	
+	printf("22 : init_bar_graph\n"		 );	
+	printf("23 : init_scatter_graph\n"	 );	
+	printf("24 : init_combined_graph\n"	 );	
 
-	printf("30 : init_cards_only\n"	 	);	
+	printf("30 : init_cards_only\n"	);			// GAMES:
 	printf("31 : init_cards\n"	 	);	
 	printf("32 : init_blackjack\n"	);	
-	printf("33 : init_hearts\n"	);	
+	printf("33 : init_hearts\n"		);
 	printf("34 : init_reversi\n"	);			
 	printf("\n"	);	
 }
@@ -144,26 +148,32 @@ void load_test_screen(int number)
 	case 3: init_progressbar_test	();		break;
 	case 4: init_radio_button_test	();		break;
 	case 5: init_check_button_test	();		break;
-	case 6: init_sidebar_test		();		break;		
-	case 7: init_directory_lb_test	();		break;		
-	case 8: init_file_browser		();		break;
-	case 9: pack_sample_window		();		break;		
+	case 6: init_simple_text		();		break;
+	case 7: init_simple_path		();		break;
+	case 8: pack_sample_window		();		break;
+
 	case 10: init_frame_window		();		break;		
 	case 11: init_textfile_view		();		break;		
 	case 12: init_image_gallery		();		break;		
-	case 13: init_line_graph		();		break;		
-	case 14: init_histogram_graph	();		break;
-	case 15: init_bar_graph			();		break;
-	case 16: init_scatter_graph		();		break;
-	case 17: init_audio_view		();		break;
-	case 20: init_okay_cancel_dlg	();		break;
-	case 21: init_combined_graph	();		break;				
+	case 13: init_okay_cancel_dlg	();		break;
+	case 14: init_audio_view		();		break;
+	case 15: init_directory_lb_test	();		break;
+	case 16: init_file_browser		();		break;			
+	case 17: init_sidebar_test		();		break;
+	
+	case 20: init_line_graph		();		break;		
+	case 21: init_histogram_graph	();		break;
+	case 22: init_bar_graph			();		break;
+	case 23: init_scatter_graph		();		break;
+	case 24: init_combined_graph	();		break;
+
 	// GAMES start at 30!
 	case 30: init_cards_only		();		break;
 	case 31: init_card				();		break;				
 	case 32: init_blackjack			();		break;
 	case 33: init_hearts			();		break;
 	case 34: init_reversi			();		break;
+	case 35: init_battleships		();		break;	
 	default: load_combo_test_screen( number );	break;
 	}
 }
@@ -217,6 +227,88 @@ void init_simple_textview_test()
 	MainDisplay.add_object( &ConnectionStatus );
 }
 
+void init_simple_text()
+{
+	MainDisplay.init_screen();
+	MainDisplay.start_screen();
+
+	printf("Simple text\n");
+	float x = 50;
+	float y = 450;
+
+	vgSetf(VG_STROKE_LINE_WIDTH, 1.0);
+	vgSeti(VG_STROKE_CAP_STYLE,  VG_CAP_BUTT);
+	vgSeti(VG_STROKE_JOIN_STYLE, VG_JOIN_MITER);
+	//StrokeWidth	( 1.0 );
+	Stroke_l	( 0xFFFFFF00 );
+	Fill_l		( 0xFF0000FF );
+	Text( x, y, "Sample Large thin", SerifTypeface, 64 );
+	
+	// To Answer the question - is there any fill in a font:
+	y = 200;
+	StrokeWidth	( 40.0 		 );
+	Stroke_l	( 0xFFFFFF00 );
+	Fill_l		( 0xFF0000FF );
+	Text( x, y, "Sample Large thick", SerifTypeface, 64 );
+	
+	MainDisplay.end_screen();
+
+	// Add to display manager:
+	while (1) {  };
+}
+
+void init_simple_path()
+{
+	MainDisplay.init_screen();
+	MainDisplay.start_screen();
+
+	printf("Simple VG path example\n");
+	
+	// To Answer the question - is there any fill in a font:
+	StrokeWidth	( 1.0 		 );
+	Stroke_l	( 0xFFFF00FF );
+	Fill_l		( 0xFF0000FF );
+	//Text( x, y, "Sample Large thick", SerifTypeface, 42 );
+	VGubyte * commands = new VGubyte[10];
+	VGfloat * coords   = new VGfloat[20];
+	VGint numCmds		= 10;
+	VGint numCoords 	= 10;
+	VGPath path = vgCreatePath(VG_PATH_FORMAT_STANDARD,
+								VG_PATH_DATATYPE_F,
+								1.0f, 0.0f, 		// scale,bias
+								numCmds, numCoords,
+								VG_PATH_CAPABILITY_ALL);
+	commands[0] = VG_MOVE_TO_ABS;
+	commands[1] = VG_LINE_TO_ABS;
+	commands[2] = VG_LINE_TO_ABS;
+	commands[3] = VG_LINE_TO_ABS;
+	commands[4] = VG_LINE_TO_ABS;
+	commands[5] = VG_LINE_TO_ABS;
+	commands[6] = VG_LINE_TO_ABS;
+	commands[7] = VG_LINE_TO_ABS;
+	commands[8] = VG_LINE_TO_ABS;
+	commands[9] = VG_LINE_TO_ABS;
+	commands[10]= VG_LINE_TO_ABS;
+	
+	coords[0]   = 12.0;		coords[1] = 24.0;
+	coords[2]   = 100.0;	coords[3] = 350.0;
+	coords[4]   = 150.0;	coords[5] = 400.0;
+	coords[6]   = 200.0;	coords[7] = 500.0;
+	coords[8]   = 300.0;	coords[9] = 350.0;
+	coords[10]  = 125.0;	coords[11] =200.0;
+	coords[12]  = 900.0;	coords[13] =250.0;
+	coords[14]  = 1080.0;	coords[15] =200.0;
+	coords[16]  = 500.0;	coords[17] =100.0;
+	coords[18]  = 12.0;		coords[19] =24.0;
+
+	vgAppendPathData(path, numCmds, commands, coords);
+	vgDrawPath		(path, VG_STROKE_PATH			);
+	MainDisplay.end_screen();
+
+	// Add to display manager:
+	while (1) {  };
+}
+
 void init_textview_test()
 {
 	strcpy(ConnectionStatusText, "A moment of kindness between two animals was captured by a Tampa police officer just before a colleague rescued a stranded dog from the Hillsborough River. Residents in Tampas Seminole Heights neighborhood heard a strange noise coming from the river " );	
@@ -258,7 +350,6 @@ void init_progressbar_test()
 	MainDisplay.add_object( &MyProgress );
 	MainDisplay.add_object( tmp		    );	
 	MainDisplay.add_object( tmp2	    );	
-
 }
 
 void init_radio_button_test()
@@ -333,9 +424,9 @@ void init_directory_lb_test()
 	ParentWindowF.pack_control   ( tmp_dir, PACK_LEFT, PACK_FILL_PARENT );
 
 	// widths of columns
-	DirectoryListBox* tmp_dir2  = new DirectoryListBox();	
+	DirectoryListBox* tmp_dir2  = new DirectoryListBox();
 	tmp_dir2->set_odd_color   ( 0xFFFFFFFF 	);
-	tmp_dir2->set_width_height( 200, 200 	);		// height will get overwritten.
+	tmp_dir2->set_width_height( 200, 200 	);		// height will get overwritten
 	tmp_dir2->populate_files  ( (char*)"/home/pi/aorient/", 1 );
 
 	tmp_dir2->set_position_right_of( tmp_dir, true, 0 );
@@ -381,6 +472,7 @@ void init_textfile_view()
 }
 
 ImageGallery ig;
+
 void init_image_gallery()
 {
 	ig.set_position(10,1200, 700, 10);
@@ -597,7 +689,7 @@ void init_card( )
 }
 
 BlackJack  bj(3);
-//HeartsGame hearts(3);
+HeartsGame hearts(4);
 
 void init_blackjack( )
 {
@@ -614,17 +706,16 @@ void init_blackjack( )
 
 void init_hearts( )
 {
-	printf("init_hearts()\n");
-	
+	printf("init_hearts()\n");	
 	float wide = MainDisplay.get_width();
 	float high = MainDisplay.get_height()/2;
-//	hearts.set_width_height( wide, high );
-//	hearts.move_to(0,0);	
-//	hearts.setup();
+	hearts.set_width_height( wide, high );
+	hearts.move_to(0,0);	
+	hearts.setup();
 	printf("Done setting up\n");
-	
+
 	MainDisplay.remove_all_objects(	);
-//	MainDisplay.add_object		  ( &hearts );
+	MainDisplay.add_object		  ( &hearts );
 }
 
 void init_reversi( )
@@ -636,6 +727,18 @@ void init_reversi( )
 	MainDisplay.add_object	( &stay );	
 */	
 	// black jack knows how to add all it's graphic objects.
+//	bj.add_to_display_manager( &MainDisplay );	
+}
+
+void init_battleships( )
+{
+/*
+	printf("init_reversi()\n");	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object	( &hit  );
+	MainDisplay.add_object	( &stay );	
+*/	
+// black jack knows how to add all it's graphic objects.
 //	bj.add_to_display_manager( &MainDisplay );	
 }
 
@@ -690,7 +793,6 @@ void init_combined_graph()
 	MainDisplay.add_object( &bg );
 	MainDisplay.add_object( &hg );
 }
-
 
 void populate_simple_lb()
 {

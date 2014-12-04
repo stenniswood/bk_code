@@ -160,7 +160,7 @@ int	Card::draw( )
 	}
 }
 
-const char red_back[] = "./games/card_images/card_back_red_small.jpg";
+const char red_back[] = "./games/card_images/card_back_red.jpg";
 
 int	Card::onCreate(  )
 {

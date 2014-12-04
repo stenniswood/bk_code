@@ -59,22 +59,29 @@ BasicCardGame::BasicCardGame( int mNumber_of_players )
 
 int	BasicCardGame::onCreate  (  )
 {
+	printf("BasicCardGame::onCreate()\n" );
 	deck[0]->onCreate();
 	place_players( 100. );	
 	int starting_card_count = number_of_cards_to_start( number_of_players);
+	printf("BasicCardGame::onCreate() start with %d cards\n", starting_card_count );
 	deal( starting_card_count );	
-	float card_spacing = CARD_WIDTH + 10;	
+	printf("BasicCardGame::onCreate() cards dealt\n" );
+	float card_spacing = CARD_WIDTH + 10;
+
+	// 
 	vector<CardPlayer*>::iterator	iter = players.begin();
 	for ( ; iter!=players.end(); iter++ )
 	{
 		(*iter)->arrange_cards( card_spacing );
 	}
+	printf("BasicCardGame::onCreate() players cards arranged\n" );	
 	place_buttons( whos_turn_is_it );
+	printf("BasicCardGame::onCreate\n" );
 }
 
 int	BasicCardGame::number_of_cards_to_start( int mNumber_of_players )
 {
-	
+	return 1;
 }
 void	BasicCardGame::score		( )
 {
@@ -93,10 +100,11 @@ void	BasicCardGame::deal( int n_Cards )
 			card = draw_one();
 			house->receive_card( card, true );
 		}
-		
+	
 		// Disperse to each player 1 at a time	
-		for (int p=0; p<number_of_players; p++)
+		for (int p=0; p<players.size(); p++)
 		{
+			printf("deal card player %d\n", p);
 			card = draw_one();
 			players[p]->receive_card( card, true );
 		}
@@ -133,8 +141,8 @@ void BasicCardGame::place_players( float radius )		// place places around the ga
 {
 	printf("place_players()  %d\n", number_of_players);
 	cx = width/2 + left;
-	cx = height/2 + bottom;
-	
+	cy = height/2 + bottom;
+
 	if (house)
 	{
 		house->move_to( cx - house->get_width()/2, 400 );
@@ -201,6 +209,7 @@ void	BasicCardGame::pay_out()
 
 Card*	BasicCardGame::draw_one()
 {
+	printf("draw_one()\n");
 	return deck[0]->draw_one();
 }
 

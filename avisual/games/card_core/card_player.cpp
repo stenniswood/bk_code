@@ -89,7 +89,17 @@ void	CardPlayer::flip_card	( Card* mNewCard )
 //	mNewCard->
 }
 
-void	CardPlayer::expose_card	( Card* mNewCard, bool mExposed )
+void CardPlayer::expose_all_cards( bool mExposed )
+{
+	std::list<Card*>::iterator	iter = cards.begin();
+	while (iter != cards.end())
+	{
+		(*iter)->expose( mExposed );
+		iter++;
+	}	
+}
+
+void CardPlayer::expose_card	( Card* mNewCard, bool mExposed )
 {
 	cards.push_back(mNewCard);	
 }

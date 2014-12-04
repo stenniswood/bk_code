@@ -17,7 +17,8 @@ public:
 	void	receive_card( Card* mNewCard, bool mExposed = false );
 	void	flip_card	( Card* mNewCard 						);
 	void	expose_card	( Card* mNewCard, bool mExposed = false );
-
+	void	expose_all_cards( bool mExposed = false );
+	
 	float	determine_card_spacing();
 	int		get_total_value	( );
 	int		get_best_black_jack_score( );

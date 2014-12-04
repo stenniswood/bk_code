@@ -34,12 +34,18 @@ void init_combined_graph ();
 void init_audio_view	 ();
 void init_okay_cancel_dlg();
 
+void init_simple_text();
+void init_simple_path();
+
+
+
 // GAMES:
 void init_cards_only( );
 void init_card		( );
 void init_blackjack	( );
 void init_hearts	( );
 void init_reversi	( );
+void init_battleships( );
 
 
 // for test only:

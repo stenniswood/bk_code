@@ -12,8 +12,8 @@ class Control
 //	friend class DisplayManager;
 	friend class Window;
 public:
-	Control( int Left, int Right, int Top, int Bottom );
-	Control( int Width, int Height 					  );
+	Control( int Left,  int Right, int Top, int Bottom );
+	Control( int Width, int Height 					   );
 	Control();
 	~Control();
 
@@ -34,8 +34,8 @@ public:
 	void  			get_xy	  		  	  ( float* mLeft, float* mBottom	) { *mLeft=left; *mBottom=bottom; };
 	float			get_width			  () {return width; };
 	float			get_height			  () {return height; };
-	void 		 	move_bottom_to  	  ( float  mNewBottom	);	
-	void 		 	move_left_to  	 	  ( float  mNewLeft	);		
+	void 		 	move_bottom_to  	  ( float  mNewBottom	);
+	void 		 	move_left_to  	 	  ( float  mNewLeft		);
 	virtual void  	move_by	  		  	  ( int DeltaX, int  DeltaY	) { left+=DeltaX; bottom+=DeltaY; };
 	void  			set_position_left_of  ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding );
 	void  			set_position_right_of ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding );

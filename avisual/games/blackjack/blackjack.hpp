@@ -35,9 +35,9 @@ public:
 	void		load_resources	(	) { deck[0]->load_resources();  };	
 	Card*		draw_one		(	);		
 
-	int			draw_score_text	( CardPlayer* mcp );
-	virtual int	draw  	 		(	);
-	virtual int		onCreate  	(	);
+	int				draw_score_text	( CardPlayer* mcp );
+	virtual int		draw  	 		(	);
+	virtual int		onCreate  		(	);
 	int 			onClick( int x, int y, bool mouse_is_down );
 
 private:
