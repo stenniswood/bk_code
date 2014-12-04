@@ -24,25 +24,17 @@
 
 
 HeartsGame::HeartsGame( int mNumber_of_players )
-: discard_pile(12)
+: BasicCardGame(mNumber_of_players), trick(mNumber_of_players)
 {
-/*	CardPlayer* cp;
-	int cards_in_hand = number_of_cards_to_start( mNumber_of_players );
-	
-	for (int i=0; i<mNumber_of_players; i++)
-	{
-		cp = new CardPlayer(cards_in_hand);
-		players.push_back( cp );
-		number_of_players++;
-	}
-*/
-	// Add 3 decks:
-//	Deck* tmp = new Deck();
-	//tmp->load_resources();
-//	deck.push_back(tmp);
+	house = NULL;
+	CardPlayer* cp;
+	int cards_in_hand = number_of_cards_to_start( mNumber_of_players );	
 
-	cx=800;
-	cy=350;
+	// 
+	for (int i=0; i<mNumber_of_players; i++)	{
+	//	players[i]->set_width_height( 4*CARD_WIDTH, 100 );
+	}
+	
 }
 
 void	HeartsGame::score					( )
@@ -52,12 +44,6 @@ void	HeartsGame::score					( )
 void	HeartsGame::evaluate_winners		( )
 {
 
-}
-
-void 	HeartsGame::set_graphic_center( float mcx, float mcy )
-{
-	cx = mcx;
-	cy = mcy;
 }
 
 void	HeartsGame::setup(		)
@@ -73,7 +59,7 @@ void	HeartsGame::setup(		)
 	whos_turn_is_it = 0;
 }
 
-void	HeartsGame::deal( int n	)
+/*void	HeartsGame::deal( int n	)
 {
 	printf("Dealing %d cards to each of %d players\n", n, number_of_players);
 	Card* card;
@@ -86,13 +72,13 @@ void	HeartsGame::deal( int n	)
 			players[p]->receive_card( card, true );
 		}
 	}
-}
+} */
 
 void	HeartsGame::discard_one(	)
 {
 	Card* card = draw_one();
 	if (card)
-		discard_pile.receive_card( card, true );
+		trick.receive_card( card );
 }
 
 int		HeartsGame::number_of_cards_to_start( int mNumber_of_players )
@@ -136,12 +122,12 @@ int		HeartsGame::remove_cards(	)
 }
 	
 // place places around the game's center point.
-void	HeartsGame::place_players( float radius )
+/*void	HeartsGame::place_players( float radius )
 {
 	float width = 7*61;
 	
-	discard_pile.set_width_height( 61*3, 100 );
-	discard_pile.move_to( cx-90, cy );
+	trick.set_width_height( 61*3, 100 );
+	trick.move_to( cx-90, cy );
 		
 	std::vector<CardPlayer*>::iterator  iter = players.begin();
 	if (number_of_players>0)
@@ -165,11 +151,11 @@ void	HeartsGame::place_players( float radius )
 		(*iter)->set_width_height( 61*7, 100 );		// goes right		
 		(*iter)->move_to( cx - width/2, 500 );		// goes right
 	}
-}
+}*/
 
 void	HeartsGame::add_to_display_manager( DisplayManager* dm )
 {
-	dm->add_object( &discard_pile );
+	dm->add_object( &trick );
 	int i=0;
 
 	// Display Manager Players : 

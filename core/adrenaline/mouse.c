@@ -122,8 +122,9 @@ void save_pixels(VGImage CursorBuffer, int curx, int cury, int screen_width, int
 }
 
 // restoreCursor restores the pixels under the mouse cursor
-void restore_pixels(VGImage CursorBuffer) {
-	if (cur_saved != 0) {
+void restore_pixels( VGImage CursorBuffer )
+{
+	if (cur_saved) {
 		vgSetPixels(cur_sx, cur_sy, CursorBuffer, 0, 0, cur_w, cur_h);
 	}
 }
@@ -136,13 +137,11 @@ void circleCursor(int curx, int cury, int width, int height, int s) {
 	Circle(curx, cury, 2);
 }
 
-// mouseinit starts the mouse event thread
-int mouseinit() {
-}
 
 // get these values from display manager.
 int 	cursorx, cursory, cbsize;
 VGImage CursorBuffer;
+
 
 int mouse_init(int screen_width, int screen_height)
 {
@@ -166,6 +165,18 @@ int mouse_init(int screen_width, int screen_height)
 void draw_cursor(int curx, int cury, int width, int height, int s) 
 {
 	circleCursor(cursorx, cursory, mouse.max_x, mouse.max_y, CUR_SIZ);
+}
+
+void hide_mouse()
+{
+	restore_pixels(CursorBuffer);
+
+}
+void save_mouse()
+{
+	// draw cursor:
+	save_pixels(CursorBuffer, cursorx, cursory, mouse.max_x, mouse.max_y, CUR_SIZ);
+	draw_cursor(cursorx, cursory, mouse.max_x, mouse.max_y, CUR_SIZ);
 }
 
 int mouse_timeslice() 

@@ -172,7 +172,6 @@ int IconView::draw()
 	int min_h = min(ImageInfo.height, height);
 	if (image!=NULL)
 		vgSetPixels(l, b, image, 0, 0, min_w, min_h);
-
 }
 
 int	IconView::onClick(int x, int y, bool mouse_is_down)

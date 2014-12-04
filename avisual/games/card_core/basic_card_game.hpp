@@ -1,5 +1,5 @@
-#ifndef _BLACKJACK_H_
-#define _BLACKJACK_H_
+#ifndef _BASICCARD_H_
+#define _BASICCARD_H_
 
 #include <vector>
 #include "control.hpp"
@@ -9,45 +9,37 @@
 #include "display_manager.hpp"
 
 
-class BlackJack : public Control
+extern const int CARD_WIDTH;
+
+class BasicCardGame : public Control
 {
 public:
-	BlackJack( int mNumber_of_players );
-	
-	void		deal			(	);
-	void		score			(	);
+	BasicCardGame( int mNumber_of_players );
+
+	virtual int	number_of_cards_to_start( int mNumber_of_players);
+	void		deal			( int n_Cards );
+	virtual void		score			(	);
 	int			get_score		( int mPlayerIndex );
 
-	CardPlayer*	get_player		( int mPlayerIndex=-1 );
-	CardPlayer*	next_player		( 	);
-
-	void		setup_game		(	);		
 	void		evaluate_winners(	);	
 	void		pay_out			(	);
-	int			dealer_hits		(	);
-	int			dealer_play		(	);
-		
-	void 		set_graphic_center( );	
-	void 		place_buttons	( int mPlayerIndex =-1	);
+
+	void 		place_buttons	( int mPlayerIndex 	);
 	void		place_players	( float radius 		);	// place places around the game's center point.
 														// house at top.  square first, then circle.
-	void		add_to_display_manager( DisplayManager* dm );	
 	void		load_resources	(	) { deck[0]->load_resources();  };	
 	Card*		draw_one		(	);		
-
-	int			draw_score_text	( CardPlayer* mcp );
 	virtual int	draw  	 		(	);
-	virtual int		onCreate  	(	);
-	int 			onClick( int x, int y, bool mouse_is_down );
+	virtual int	onCreate  		(	);
 
-private:
+protected:
+	char*						NameOfTheGame;
+	Button 						hit ;
+	Button 						stay;
 	std::vector<Deck*>			deck;
 	std::vector<CardPlayer*>	players;
 	CardPlayer*					house;
-	Button hit ;
-	Button stay;
-	Button play_again;
-
+	
 	int		whos_turn_is_it;		// player index
 	int 	deck_index;
 	int 	number_of_players;

@@ -18,12 +18,16 @@ public:
 	virtual int   	draw 		(	);	
 	int   			draw_raised (	);	
 	int   			draw_sunken (	);	
-//	int				set_on_click_listener( void (void*) );
-	
+	int				set_on_click_listener( void (*callback)(void*), void* mOn_click_context );
+
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
 private:
 	bool sunken;
+	void (*on_click_callback)(void*);
+	void* on_click_context;				// often this pointer to a Control*
+	
+	
 
 };
 

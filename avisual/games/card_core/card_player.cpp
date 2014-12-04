@@ -21,7 +21,7 @@ CardPlayer::CardPlayer( int MaxCardsInHand )
 :Control()
 {
 	max_number_cards_in_hand = MaxCardsInHand;
-	set_width_height( MaxCardsInHand*(22+5), 100 );
+	//set_width_height( MaxCardsInHand*(22+5), 100 );
 }
 
 void CardPlayer::receive_card( Card* mNewCard, bool mExposed )
@@ -59,9 +59,18 @@ int	CardPlayer::get_total_value( )
 	return total_value;
 }
 
-int CardPlayer::is_ace_in_hand( )
+bool CardPlayer::is_ace_in_hand( )
 {
-//	return ;
+	std::list<Card*>::iterator	iter = cards.begin();
+	while (iter != cards.end())
+	{
+		if ( (*iter)->get_card() == 'A' ) {
+			printf("ACE is in Hand!\n");
+			return true;
+		}
+		iter++;
+	}
+	return false;
 }
 
 int CardPlayer::get_best_black_jack_score( )
@@ -69,7 +78,7 @@ int CardPlayer::get_best_black_jack_score( )
 	int total = get_total_value();
 	if (total > 21)
 	{
-		if (is_ace_in_hand())
+		if (is_ace_in_hand()==true)
 			return (total-10);
 	}
 	return total;
@@ -90,9 +99,12 @@ int	CardPlayer::arrange_cards( float mCardSpacing )
 	const int PADDING = 20;
 	const float CARD_HEIGHT = 81;
 	
+	
 	int l = left+PADDING; 
 	float b = (height-CARD_HEIGHT)/2 + bottom;
 	//printf("CardPlayer::arrange_cards() \n" ); 
+	if (mCardSpacing==-1)
+		mCardSpacing = determine_card_spacing();
 	
 	std::list<Card*>::iterator	iter = cards.begin();
 	while (iter != cards.end())
@@ -109,7 +121,7 @@ int	CardPlayer::draw( )
 	Control::draw();
 	//float spacing = determine_card_spacing();
 
-	printf("CardPlayer::draw()  %x \n", this );
+	//printf("CardPlayer::draw()  %x \n", this );
 	//Control::print_positions();
 	
 	std::list<Card*>::iterator	iter = cards.begin();
@@ -117,7 +129,7 @@ int	CardPlayer::draw( )
 	while (iter != cards.end())
 	{		
 		printf("drawing %d %c\n", (*iter)->get_value(), (*iter)->get_suit() );
-		(*iter)->print_positions();
+		//(*iter)->print_positions();
 		(*iter)->draw();
 		iter++;
 	}

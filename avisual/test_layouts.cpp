@@ -597,43 +597,34 @@ void init_card( )
 }
 
 BlackJack  bj(3);
-//HeartsGame hearts(4);
+//HeartsGame hearts(3);
 
 void init_blackjack( )
 {
 	printf("init_blackjack()\n");
-
 	float wide = MainDisplay.get_width();
 	float high = MainDisplay.get_height()/2;
 	bj.set_width_height( wide, high-20 );
 	bj.move_to(0, 0);	
-	
+	printf("init_blackjack() mid\n");	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( &bj 	);
-
-	// black jack knows how to add all it's graphic objects
-	//bj.add_to_display_manager( &MainDisplay );
+	printf("init_blackjack() done\n");
 }
 
 void init_hearts( )
 {
-/*	printf("init_hearts()\n");
-	hit.set_width_height ( 100, 50 );
-	stay.set_width_height( 100, 50 );
-	hit.move_to 		 ( 100, 100 );
-	stay.move_to		 ( 220, 100 );	
-	hit.set_text		 ("Hit" );
-	stay.set_text		 ("Stay");
-
-	hearts.set_graphic_center(500, 350);
-	hearts.setup();
+	printf("init_hearts()\n");
+	
+	float wide = MainDisplay.get_width();
+	float high = MainDisplay.get_height()/2;
+//	hearts.set_width_height( wide, high );
+//	hearts.move_to(0,0);	
+//	hearts.setup();
 	printf("Done setting up\n");
 	
 	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &hit  );
-	MainDisplay.add_object	( &stay );	
-	hearts.add_to_display_manager( &MainDisplay );	
-	*/
+//	MainDisplay.add_object		  ( &hearts );
 }
 
 void init_reversi( )

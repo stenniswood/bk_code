@@ -69,7 +69,7 @@ void init( const char* mVectorFileName )
 	}
 	aud_attach_memory();
 }
-  
+
 void help()
 {
 	printf("A Visual - this task is the adrenaline general purpose \n"			);
@@ -125,8 +125,8 @@ void gui_interface()
 	Control* object_clicked = NULL;
 	int x = round(mouse.x);
 	int y = round(mouse.y);
-	if (result == LEFT_BUTTON_DOWN) 
-	{		
+	if (result == LEFT_BUTTON_DOWN)
+	{
 		//printf(" Left button clicked!  mousex=(%d,%d)\n", x,y);
 		object_clicked = MainDisplay.HitTest( x, y );
 		if (object_clicked)
@@ -149,7 +149,10 @@ void gui_interface()
 	{
 		UpdateDisplaySemaphore = 0;
 		//update_to_controls();
+		// hide mouse: (mouse has the old image stored in it's buffer)
 		MainDisplay.draw();
+		// so now just resave the buffer with new contents:
+		save_mouse();		
 	}
 }
 

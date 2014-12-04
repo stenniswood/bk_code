@@ -91,10 +91,18 @@ char const* e_card_names[] = {
 "k_S.jpg"
 };
 
+
+VGImage				Card::back_image;
+struct image_info 	Card::back_ImageInfo;
+char*				Card::CardBackFilename = NULL;
+
+
 Card::Card	( char* mFilename, char Value, char suit )
 :IconView()
 {
 	set_file( mFilename );	
+	if (back_image==0)
+	CardBackFilename = NULL;
 }
 
 Card::Card	( int  mIndex )
@@ -138,14 +146,33 @@ int	Card::draw( )
 	//print_positions();
 	if (is_face_down==true)
 	{
-		Control::draw();
+		//Control::draw();	
+		Fill_l( background_color );
+		Rect  ( left, bottom, +width, +height );	
+		VGfloat l = left;    //+left_margin;
+		VGfloat b = bottom;  //+bottom_margin;
+		int min_w = min(back_ImageInfo.width,  width );
+		int min_h = min(back_ImageInfo.height, height);
+		if (back_image != NULL)
+			vgSetPixels(l, b, Card::back_image, 0, 0, min_w, min_h);
 	} else {
 		IconView::draw();
 	}
 }
 
+const char red_back[] = "./games/card_images/card_back_red_small.jpg";
+
 int	Card::onCreate(  )
 {
+	printf("Card::oncreate  \n");
+	if (Card::CardBackFilename==NULL)
+	{
+		int len = strlen(red_back);
+		Card::CardBackFilename = new char[len];
+		strcpy( Card::CardBackFilename, red_back );
+		printf("%s\n", Card::CardBackFilename ); 
+		back_image = createImageFromJpeg( Card::CardBackFilename, &Card::back_ImageInfo );		
+	}
 	load_resources();
 	match_image_size();
 }

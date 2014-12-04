@@ -25,8 +25,35 @@ using namespace std;
 
 const int CARD_WIDTH = 62;
 
+void hit_cb( void* mBlackJack )
+{
+	printf("Hit button pushed\n");
+	// House gets one
+	Card* card = ((BlackJack*)mBlackJack)->draw_one();
+	CardPlayer* cp = ((BlackJack*)mBlackJack)->get_player(  );
+	cp->receive_card( card, true );
+	cp->arrange_cards( );
+	int score = cp->get_best_black_jack_score();
+	//if (score>21)
+		// skip to next player.
+	cp->draw();
+}
+
+void stay_cb( void* mBlackJack )
+{
+	printf("Stay button pushed\n");
+	// House gets one : 
+	((BlackJack*)mBlackJack)->next_player();
+}
+
+void play_again( void* mBlackJack )
+{
+	printf("Play Again button pushed\n");
+	((BlackJack*)mBlackJack)->setup_game();
+}
+
 BlackJack::BlackJack( int mNumber_of_players )
-: Control(), hit(-1,-1), stay(-1,-1)
+: Control(), hit(-1,-1), stay(-1,-1), play_again(-1,-1)
 {
 	hit.set_text	( "Hit" );
 	stay.set_text   ( "Stay");	
@@ -34,9 +61,14 @@ BlackJack::BlackJack( int mNumber_of_players )
 	stay.move_to		 ( 220, 100 );	
 	hit.set_width_height ( 75, 30 );
 	stay.set_width_height( 75, 30 );
+	
+	hit.set_on_click_listener( hit_cb, this );
+	stay.set_on_click_listener( stay_cb, this );
+	play_again.set_text("Play Again");
+	play_again.hide();
 
 	house		   = new CardPlayer(4);
-	house->set_width_height( 2*CARD_WIDTH, 100 );
+	house->set_width_height( 4*CARD_WIDTH, 100 );
 
 	CardPlayer* cp;
 	for (int i=0; i<mNumber_of_players; i++)
@@ -57,12 +89,67 @@ BlackJack::BlackJack( int mNumber_of_players )
 //	deck.push_back(tmp);
 
 	whos_turn_is_it = 0;
-//	set_graphic_center( 750, 350 );
+}
+	
+CardPlayer*	BlackJack::next_player( )	
+{
+	whos_turn_is_it++;
+	if (whos_turn_is_it == number_of_players) 	// dealers turn	
+		dealer_play();
+	place_buttons();
+	Invalidate();
+	return players[whos_turn_is_it];
 }
 
-int	BlackJack::onCreate  (  )
+int	BlackJack::dealer_play(	)
+{	
+	int decision = dealer_hits( );
+	while (decision)
+	{
+		Card* card = draw_one( );
+		house->receive_card  ( card, true );
+		house->arrange_cards ( );
+		house->draw();
+		decision = dealer_hits( );
+	}
+	hit.hide();
+	stay.hide();
+	play_again.show();
+	Invalidate();
+}
+/*
+return	0 - stay
+		1 - hit
+*/
+int	BlackJack::dealer_hits( )
 {
-	deck[0]->onCreate();
+	int score = house->get_best_black_jack_score();
+	if (score<17)
+		return 1;
+		
+	// Some casinos hit on soft 17
+	if (score==17)
+	{
+		// (ie. A+6, A+2+4, A+5+A, etc)
+		if (house->is_ace_in_hand())
+			return 1;
+	}
+	return 0;	
+}
+	
+CardPlayer*	BlackJack::get_player( int mPlayerIndex )
+{
+	int index = mPlayerIndex;
+	if (index == -1)
+		index = whos_turn_is_it;
+	if (index >= players.size())
+		index = 0;
+	return players[index];
+}
+
+void BlackJack::setup_game(	)
+{
+	play_again.hide();
 	place_players( 100. );	
 	deal();	
 	float card_spacing = CARD_WIDTH + 10;	
@@ -71,8 +158,21 @@ int	BlackJack::onCreate  (  )
 	{
 		(*iter)->arrange_cards( card_spacing );
 	}
-	set_graphic_center();
+	whos_turn_is_it = 0;
 	place_buttons( whos_turn_is_it );
+}
+
+int	BlackJack::onCreate  (  )
+{
+	printf("onCreate\n");
+	float sx = width/2. + left   - play_again.get_width()/2.;
+	float sy = height/2. + bottom - play_again.get_height()/2.;	
+	play_again.move_to( sx, sy );
+
+	printf("onCreate - deck\n");
+	deck[0]->onCreate();
+	printf("onCreate - setup\n");	
+	setup_game( );	
 }
 
 // The start of a new game.
@@ -109,22 +209,14 @@ void BlackJack::place_buttons( int mPlayerIndex )
 	float sx;
 	float sy;
 	const float below = 75;
-	switch (mPlayerIndex)
-	{
-	case 0 : sx = players[mPlayerIndex]->get_left();
-			 sy = players[mPlayerIndex]->get_bottom() - below ;
-			 break;
-	case 1 : sx = players[mPlayerIndex]->get_left() ;
-			 sy = players[mPlayerIndex]->get_bottom() - below ;
-			 break;
-	case 2 : sx = players[mPlayerIndex]->get_left() ;
-			 sy = players[mPlayerIndex]->get_bottom() - below ;
-			 break;
-	case 3 : sx = players[mPlayerIndex]->get_left() ;
-			 sy = players[mPlayerIndex]->get_bottom() - below ;
-			 break;
-	default: break;
-	};
+	int index = mPlayerIndex;
+	if (mPlayerIndex == -1)
+		index = whos_turn_is_it;
+
+	CardPlayer* cp = get_player(index);
+	sx = cp->get_left();
+	sy = cp->get_bottom() - below;
+	printf("place_buttons:  sx,sy = %d,%d\n", sx, sy );	
 	hit.move_to( sx, sy );
 	stay.set_position_right_of( &hit, true, 10 );
 }
@@ -194,6 +286,30 @@ Card*	BlackJack::draw_one()
 	return deck[0]->draw_one();
 }
 
+
+int	BlackJack::draw_score_text( CardPlayer* mcp )
+{
+	const int TEXT_HEIGHT=24;
+
+	char  score_text[40];
+	int   score = mcp->get_best_black_jack_score();
+	float sx = mcp->get_width()/2.  + mcp->get_left();
+	float sy = mcp->get_bottom() - TEXT_HEIGHT;
+
+	if (score > 21)
+	{
+		Stroke_l(0xFFFF0000);
+		Fill_l  (0xFFFF0000);		
+		sprintf ( score_text, "Bust!" );
+	}
+	else {
+		Stroke_l(0xFFFFFFFF);
+		Fill_l  (0xFFFFFFFF);
+		sprintf(score_text, "Score: %d", score );
+	}
+	TextMid ( sx, sy, score_text, SerifTypeface, 16 );	
+}
+
 int		BlackJack::draw()
 {
 	printf("\tBlackjack draw.\n");
@@ -207,17 +323,10 @@ int		BlackJack::draw()
 	float centery = height + bottom- 36;
 	TextMid(centerx, centery, "Black Jack", SerifTypeface, 32 );
 
-#define TEXT_HEIGHT 24
-	
 	// Draw house + players
 	house->draw(  );
-		char score_text[40];
-		int score = house->get_best_black_jack_score();
-		float sx = house->get_width()/2.  + house->get_left();
-		float sy = house->get_bottom() - TEXT_HEIGHT;
-		sprintf ( score_text, "Score: %d", score  );
-		printf  ( "sx=%6.1f;  sy=%6.1f\n", sx, sy ); 
-		TextMid ( sx, sy, score_text, SerifTypeface, 16 );
+	if (whos_turn_is_it>=number_of_players)
+		draw_score_text( house );
 	
 	int i=0;
 	// Display Manager Players : 
@@ -231,21 +340,12 @@ int		BlackJack::draw()
 	// Draw Wagers 
 
 	// Draw Scores:	
-	Stroke_l(0xFFFFFFFF);
-	Fill_l  (0xFFFFFFFF);
-
-
 	iter = players.begin();
 	while ( iter != players.end() )
 	{
-		sx = (*iter)->get_width()/2.  + (*iter)->get_left();
-		sy = (*iter)->get_bottom() - TEXT_HEIGHT;
-		score = (*iter)->get_best_black_jack_score();
-		sprintf(score_text, "Score: %d", score );
-		printf("sx=%6.1f;  sy=%6.1f\n", sx, sy ); 
-		TextMid(sx, sy, score_text, SerifTypeface, 16 );
+		draw_score_text( *iter );
 		iter++;	
-	} 
+	}
 	
 	// Draw Hit/stay buttons:
 	hit.draw();
@@ -253,3 +353,22 @@ int		BlackJack::draw()
 	return TRUE;
 }
 
+int BlackJack::onClick( int x, int y, bool mouse_is_down )
+{
+	Control* result = NULL;
+	result = hit.HitTest(x,y);
+	if (result) {
+		hit.onClick(x,y,mouse_is_down);
+		//printf ("DisplayManager::HitTest:  found a hit. child number %d\n", i );		
+	}
+
+	result = stay.HitTest(x,y);
+	if (result)
+		stay.onClick(x,y,mouse_is_down);
+
+	result = play_again.HitTest(x,y);
+	if (result)
+		play_again.onClick( x, y, mouse_is_down );
+		
+	return -1; 
+}

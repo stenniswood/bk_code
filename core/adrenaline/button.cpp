@@ -49,6 +49,9 @@ void Button::Initialize()
 	text_color		 = 0xFF000000; //0xFFCfCf3f;
 	border_color 	 = 0xFFffffff;
 	background_color = 0xFFE7E7BF; //0xFf202020;
+
+	on_click_callback = NULL;
+	on_click_context  = NULL;
 }
 
 int   	Button::draw_sunken (	)
@@ -92,7 +95,7 @@ int Button::draw()
 	Stroke_l   ( border_color );		// box color
 	StrokeWidth(2);
 
-	printf("text_size=%6.1f; %s\n", text_size, text);
+	//printf("text_size=%6.1f; %s\n", text_size, text);
 	if (sunken)
 	{
 		draw_sunken();
@@ -103,9 +106,22 @@ int Button::draw()
 	}  
 }
 
+int	Button::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
+{
+	on_click_context  = mOn_click_context;
+	on_click_callback = callback;
+}
+
 int	Button::onClick(int x, int y, bool mouse_is_down)
 {
+	printf("sunken = true.   on_click_callback=%x: %x\n", on_click_callback, on_click_context );
+	if (on_click_callback)
+		on_click_callback( on_click_context );
+
 	sunken = !sunken;
+	if (sunken)
+	{
+	}
 	Invalidate();
 	return -1;
 }

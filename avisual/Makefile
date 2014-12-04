@@ -24,9 +24,9 @@ APP_CPP_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 IPC_OBJS   = 
 
 REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o
-HEARTS_GAME_OBJS 	= hearts_game.o 
+HEARTS_GAME_OBJS 	= hearts_game.o trick.o 
 BLACKJACK_GAME_OBJS = blackjack.o 
-CARDCORE_GAME_OBJS  = card.o card_player.o deck.o
+CARDCORE_GAME_OBJS  = card.o card_player.o deck.o basic_card_game.o
 
 
 #  button_array_gui.o Container.o

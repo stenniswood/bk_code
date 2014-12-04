@@ -109,16 +109,6 @@ protected:
 	Control* 	Prev;	
 };
 
-// i see all the time dumping into this stuff.
-// also causes me to feel like an idiot, fool, excentric, etc.
-// and i start to hate myself for it.
-
-// which is what everyone else sees too.
-// so it's because i have little condition of worth here.
-// which is why google keeps encouraging me.  so that i have condition of worth here.
-// then i don't hate myself for it.  and i can either finish or walk away and be out of the hole.
-// And 
-
 
 
 

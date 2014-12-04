@@ -21,23 +21,23 @@ public:
 	float	determine_card_spacing();
 	int		get_total_value	( );
 	int		get_best_black_jack_score( );
-	int		is_ace_in_hand	( );	
+	bool	is_ace_in_hand	( );	
 	void	set_winner		( bool mWon )	{ winner = mWon;  };
 	bool	is_winner		( )	{ return winner;  };
 
 	float	get_one_card_width ();
 	float	get_one_card_height();
 	
-	int		arrange_cards(  float mCardSpacing  );
+	int		arrange_cards(  float mCardSpacing=-1  );
 	virtual int	draw  	 ( );
 
-private:
+protected:
 	std::list<Card*>	cards;
-	float	card_spacing;
-	int		max_number_cards_in_hand;
-	int		number_cards_in_hand;
-	int		number_exposed_cards;
-	bool	winner;
+	float		card_spacing;
+	int			max_number_cards_in_hand;
+	int			number_cards_in_hand;
+	int			number_exposed_cards;
+	bool		winner;
 	
 };
 

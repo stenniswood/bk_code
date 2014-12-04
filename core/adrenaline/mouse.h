@@ -21,18 +21,13 @@ struct mouse_t {
 extern struct mouse_t 	mouse;		// global mouse state
 
 
-
-/* This:
- 	A) Restores pixels under the mouse
- 	B) Draws the mouse
- 	C) 
-*/
-
 int mouse_init(int screen_width, int screen_height);
 int mouse_timeslice();
 int mouse_close(float screen_width, float screen_height);
 
-
+//void hide_mouse();
+//void show_mouse();
+void save_mouse();
 
 
 
