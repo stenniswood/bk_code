@@ -26,7 +26,8 @@
 #include "wave_view.hpp"
 #include "frequency_view.hpp"
 
-
+#include "horizontal_menu.hpp"
+#include "vertical_menu.hpp"
 
 
 

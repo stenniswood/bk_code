@@ -23,20 +23,21 @@ AUTHOR	: Steve Tenniswood
 #include "display_manager.hpp"
 #include "frame_window.hpp"
 #include <vector>
-#include "test_layouts.hpp"
 #include "power_level.hpp"
 #include "stereo_power.hpp"
 #include "adrenaline_windows.h"
-
 #include "visual_memory.h"
 #include "audio_memory.h"
 #include "fft.h"
-#include "test_combo_layouts.hpp"
 #include "audio_app.hpp"
-
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
 #include "card_games.h"
+
+#include "test_layouts.hpp"
+#include "test_combo_layouts.hpp"
+#include "test_game_layouts.hpp"
+#include "test_graph_layouts.hpp"
 
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
@@ -53,25 +54,6 @@ static IconView		test_image;
 static IconView		test_icon ( 50,200 );
 /*************************************************************************/
 
-//static ScrollBar   vsb;
-//static ScrollBar   hsb(false);
-
-////////////////////////////////////////////////////
-static DataSet ds1;
-static DataSet ds2;
-static DataSet ds3;
-//static DataSet ds_tiltx;
-//static DataSet ds_tilty;
-
-static Histogram 		hg ( 100, 300, 600, 400 );		// was ( 100, 300, 300, 100 );
-static LineGraph 		lg1( 100, 300, 600, 400 );
-static LineGraph 		lg2( 400, 600, 600, 400 );
-static LineGraph 		lg3( 700, 900, 600, 400 );
-
-static BarGraph  		bg ( 100, 500, 600, 400 );		// was ( 100, 300, 300, 100 );
-static StackedBarGraph  sbg( 100, 300, 600, 400 );		// was ( 100, 300, 300, 100 );
-static ScatterGraph  	sg ( 100, 300, 600, 400 );		// was ( 100, 300, 300, 100 );
-
 static Leveler l1(1024, 0);
 static Leveler l2(1024, 0);
 static Leveler l3(1024, 0);
@@ -81,13 +63,11 @@ static Leveler l6(1024, 0);
 
 // L, R, T, B
 static Button   	MyButt	   ( 450, 600, 400, 350 );
-static Button   	Okay	   (-1,-1);
-static Button   	Cancel	   (-1,-1);
 
 static PowerLevel		 pl		(-1,-1);
 static StereoPowerLevels spl  	(-1,-1);
 
-static ListBox  	MyList	   ( 20, 320, 700, 550  );
+//static ListBox  	MyList	   ( 20, 320, 700, 550  );
 static ProgressBar  MyProgress ( 450, 650, 400, 375 );
 static CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
 
@@ -112,9 +92,10 @@ void print_test_list()
 	printf("6 : init_simple_text\n" 	 );
 	printf("7 : init_simple_path\n" 	 );
 	printf("8 : pack_sample_window\n"	 );
-	
 	printf("10 : init_frame_window \n"	 );		// Combined
 	printf("11 : init_textfile_view\n"	 );
+
+	// test_combo_layouts.hpp
 	printf("12 : init_image_gallery\n"	 );
 	printf("13 : init_okay_cancel_dlg\n" );
 	printf("14 : init_audio_view \n"	 );
@@ -122,12 +103,14 @@ void print_test_list()
 	printf("16 : init_file_browser\n"	 );
 	printf("17 : init_sidebar_test\n"	 );
 	
+	// test_graph_layouts.hpp :
 	printf("20 : init_line_graph\n"		 );		// GRAPHS
 	printf("21 : init_histogram_graph\n" );	
 	printf("22 : init_bar_graph\n"		 );	
 	printf("23 : init_scatter_graph\n"	 );	
 	printf("24 : init_combined_graph\n"	 );	
 
+	// test_game_layouts.hpp
 	printf("30 : init_cards_only\n"	);			// GAMES:
 	printf("31 : init_cards\n"	 	);	
 	printf("32 : init_blackjack\n"	);	
@@ -151,29 +134,32 @@ void load_test_screen(int number)
 	case 6: init_simple_text		();		break;
 	case 7: init_simple_path		();		break;
 	case 8: pack_sample_window		();		break;
-
 	case 10: init_frame_window		();		break;		
 	case 11: init_textfile_view		();		break;		
-	case 12: init_image_gallery		();		break;		
-	case 13: init_okay_cancel_dlg	();		break;
-	case 14: init_audio_view		();		break;
-	case 15: init_directory_lb_test	();		break;
-	case 16: init_file_browser		();		break;			
-	case 17: init_sidebar_test		();		break;
+	case 12: init_horiz_menu		();		break;			
+	case 13: init_vert_menu			();		break;
+	case 14: init_combo_menu		();		break;
+
+	case 21: init_image_gallery		();		break;		
+	case 22: init_okay_cancel_dlg	();		break;
+	case 23: init_audio_view		();		break;
+	case 24: init_directory_lb_test	();		break;
+	case 25: init_file_browser		();		break;			
+	case 26: init_sidebar_test		();		break;
 	
-	case 20: init_line_graph		();		break;		
-	case 21: init_histogram_graph	();		break;
-	case 22: init_bar_graph			();		break;
-	case 23: init_scatter_graph		();		break;
-	case 24: init_combined_graph	();		break;
+	case 30: init_line_graph		();		break;		
+	case 31: init_histogram_graph	();		break;
+	case 32: init_bar_graph			();		break;
+	case 33: init_scatter_graph		();		break;
+	case 34: init_combined_graph	();		break;
 
 	// GAMES start at 30!
-	case 30: init_cards_only		();		break;
-	case 31: init_card				();		break;				
-	case 32: init_blackjack			();		break;
-	case 33: init_hearts			();		break;
-	case 34: init_reversi			();		break;
-	case 35: init_battleships		();		break;	
+	case 40: init_cards_only		();		break;
+	case 41: init_card				();		break;				
+	case 42: init_blackjack			();		break;
+	case 43: init_hearts			();		break;
+	case 44: init_reversi			();		break;
+	case 45: init_battleships		();		break;	
 	default: load_combo_test_screen( number );	break;
 	}
 }
@@ -182,10 +168,11 @@ void init_simple_button_test()
 {
 	MyButt.set_text( "Push me" );
 	MyButt.set_state(true);
-
+	MyButt.print_positions( );
+	
 	Button* test = new Button( -1, -1 ); 
 	test->set_text( "Try me and see" );
-	test->copy_position_vert   ( &MyButt );
+	//test->copy_position_vert   ( &MyButt );
 	test->set_position_right_of( &MyButt );
 
 	// PowerLevel
@@ -196,12 +183,12 @@ void init_simple_button_test()
 	pl.set_level		(  75.0   );
 
 	// Stereo Power Indicator	
-	spl.move_to  		(100, 200);
+	spl.set_position_right_of( &pl );
 	spl.set_width_height( 75, 150);
 	spl.set_max  		( 100.0 );
 	spl.set_min  		(   0.0 );
 	spl.set_level_left	(  75.0 );
-	spl.set_level_right	(  75.0 );
+	spl.set_level_right	(  75.0 ); 
 	
 	// Add to display manager:
 	MainDisplay.remove_all_objects(	);
@@ -225,88 +212,6 @@ void init_simple_textview_test()
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
 	MainDisplay.add_object( &ConnectionStatus );
-}
-
-void init_simple_text()
-{
-	MainDisplay.init_screen();
-	MainDisplay.start_screen();
-
-	printf("Simple text\n");
-	float x = 50;
-	float y = 450;
-
-	vgSetf(VG_STROKE_LINE_WIDTH, 1.0);
-	vgSeti(VG_STROKE_CAP_STYLE,  VG_CAP_BUTT);
-	vgSeti(VG_STROKE_JOIN_STYLE, VG_JOIN_MITER);
-	//StrokeWidth	( 1.0 );
-	Stroke_l	( 0xFFFFFF00 );
-	Fill_l		( 0xFF0000FF );
-	Text( x, y, "Sample Large thin", SerifTypeface, 64 );
-	
-	// To Answer the question - is there any fill in a font:
-	y = 200;
-	StrokeWidth	( 40.0 		 );
-	Stroke_l	( 0xFFFFFF00 );
-	Fill_l		( 0xFF0000FF );
-	Text( x, y, "Sample Large thick", SerifTypeface, 64 );
-	
-	MainDisplay.end_screen();
-
-	// Add to display manager:
-	while (1) {  };
-}
-
-void init_simple_path()
-{
-	MainDisplay.init_screen();
-	MainDisplay.start_screen();
-
-	printf("Simple VG path example\n");
-	
-	// To Answer the question - is there any fill in a font:
-	StrokeWidth	( 1.0 		 );
-	Stroke_l	( 0xFFFF00FF );
-	Fill_l		( 0xFF0000FF );
-	//Text( x, y, "Sample Large thick", SerifTypeface, 42 );
-	VGubyte * commands = new VGubyte[10];
-	VGfloat * coords   = new VGfloat[20];
-	VGint numCmds		= 10;
-	VGint numCoords 	= 10;
-	VGPath path = vgCreatePath(VG_PATH_FORMAT_STANDARD,
-								VG_PATH_DATATYPE_F,
-								1.0f, 0.0f, 		// scale,bias
-								numCmds, numCoords,
-								VG_PATH_CAPABILITY_ALL);
-	commands[0] = VG_MOVE_TO_ABS;
-	commands[1] = VG_LINE_TO_ABS;
-	commands[2] = VG_LINE_TO_ABS;
-	commands[3] = VG_LINE_TO_ABS;
-	commands[4] = VG_LINE_TO_ABS;
-	commands[5] = VG_LINE_TO_ABS;
-	commands[6] = VG_LINE_TO_ABS;
-	commands[7] = VG_LINE_TO_ABS;
-	commands[8] = VG_LINE_TO_ABS;
-	commands[9] = VG_LINE_TO_ABS;
-	commands[10]= VG_LINE_TO_ABS;
-	
-	coords[0]   = 12.0;		coords[1] = 24.0;
-	coords[2]   = 100.0;	coords[3] = 350.0;
-	coords[4]   = 150.0;	coords[5] = 400.0;
-	coords[6]   = 200.0;	coords[7] = 500.0;
-	coords[8]   = 300.0;	coords[9] = 350.0;
-	coords[10]  = 125.0;	coords[11] =200.0;
-	coords[12]  = 900.0;	coords[13] =250.0;
-	coords[14]  = 1080.0;	coords[15] =200.0;
-	coords[16]  = 500.0;	coords[17] =100.0;
-	coords[18]  = 12.0;		coords[19] =24.0;
-
-	vgAppendPathData(path, numCmds, commands, coords);
-	vgDrawPath		(path, VG_STROKE_PATH			);
-	MainDisplay.end_screen();
-
-	// Add to display manager:
-	while (1) {  };
 }
 
 void init_textview_test()
@@ -391,9 +296,13 @@ void init_check_button_test()
 	check1.set_text("Select me");
 	check2.set_text("Pick me too! ");
 	check1.set_check();
-	//check1.set_position_above( &check2 );
-	check2.set_position_below ( &check1 );
-	check1.copy_position_horiz( &check2 );
+
+	// Aha architecture problem:  height of check1 is not determined until onCreate()
+	// yet here we need it to place check2.  
+	// Think of how to best do this after lunch.
+
+	check2.set_position_below( &check1, true, 50. );
+	//check1.copy_position_horiz( &check2 );
 
 	//check1.print_positions();
 	//check2.print_positions();
@@ -404,394 +313,87 @@ void init_check_button_test()
 	MainDisplay.add_object( &check2 );	
 }
 
-void init_sidebar_test()
+
+void init_simple_text()
 {
-	// Add to display manager:
-	MainDisplay.remove_all_objects(		);
-	MainDisplay.add_object( &ConnectionStatus );
-}
+	MainDisplay.init_screen();
+	MainDisplay.start_screen();
 
-/*  There are several views in an file explorer.
-	The first one, we'll have a succession of normal listboxes (not tabular)
-    Each level should be a tabularListbox.
-*/
-void init_directory_lb_test()
-{	
-	printf( "\ninit_directory_lb_test() DirectoryListbox::\n" );
-	DirectoryListBox* tmp_dir  = new DirectoryListBox();
-	tmp_dir->set_width_height	 ( 200, 200 );		// height will get overwritten.
-	tmp_dir->populate_directories( (char*)"/home/pi/", 1 );
-	ParentWindowF.pack_control   ( tmp_dir, PACK_LEFT, PACK_FILL_PARENT );
+	printf("Simple text\n");
+	float x = 50;
+	float y = 450;
 
-	// widths of columns
-	DirectoryListBox* tmp_dir2  = new DirectoryListBox();
-	tmp_dir2->set_odd_color   ( 0xFFFFFFFF 	);
-	tmp_dir2->set_width_height( 200, 200 	);		// height will get overwritten
-	tmp_dir2->populate_files  ( (char*)"/home/pi/aorient/", 1 );
-
-	tmp_dir2->set_position_right_of( tmp_dir, true, 0 );
-	tmp_dir2->copy_position_vert   ( tmp_dir );	
-	ParentWindowF.add_control	   ( tmp_dir2 );	
-
-//	dir_lb.populate_files		( "/home/pi/", 1 );
+	vgSetf(VG_STROKE_LINE_WIDTH, 1.0);
+	vgSeti(VG_STROKE_CAP_STYLE,  VG_CAP_BUTT);
+	vgSeti(VG_STROKE_JOIN_STYLE, VG_JOIN_MITER);
+	//StrokeWidth	( 1.0 );
+	Stroke_l	( 0xFFFFFF00 );
+	Fill_l		( 0xFF0000FF );
+	Text( x, y, "Sample Large thin", SerifTypeface, 64 );
+	
+	// To Answer the question - is there any fill in a font:
+	y = 200;
+	StrokeWidth	( 40.0 		 );
+	Stroke_l	( 0xFFFFFF00 );
+	Fill_l		( 0xFF0000FF );
+	Text( x, y, "Sample Large thick", SerifTypeface, 64 );
+	
+	MainDisplay.end_screen();
 
 	// Add to display manager:
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &ConnectionStatus );	
-	MainDisplay.add_object( &ParentWindowF );	
+	while (1) {  };
 }
 
-FileBrowser  browser(800,600);
-void init_file_browser()
+void init_simple_path()
 {
-	browser.set_base_path( "/home/pi/" );
-	browser.move_to(100,100);	
+	MainDisplay.init_screen();
+	MainDisplay.start_screen();
+
+	printf("Simple VG path example\n");
 	
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &browser );		
-}
-void init_frame_window()
-{
-	ParentWindowFrame.print_positions();
+	// To Answer the question - is there any fill in a font:
+	StrokeWidth	( 1.0 		 );
+	Stroke_l	( 0xFFFF00FF );
+	Fill_l		( 0xFF0000FF );
+	//Text( x, y, "Sample Large thick", SerifTypeface, 42 );
+	VGubyte * commands = new VGubyte[10];
+	VGfloat * coords   = new VGfloat[20];
+	VGint numCmds		= 10;
+	VGint numCoords 	= 10;
+	VGPath path = vgCreatePath(VG_PATH_FORMAT_STANDARD,
+								VG_PATH_DATATYPE_F,
+								1.0f, 0.0f, 		// scale,bias
+								numCmds, numCoords,
+								VG_PATH_CAPABILITY_ALL);
+	commands[0] = VG_MOVE_TO_ABS;
+	commands[1] = VG_LINE_TO_ABS;
+	commands[2] = VG_LINE_TO_ABS;
+	commands[3] = VG_LINE_TO_ABS;
+	commands[4] = VG_LINE_TO_ABS;
+	commands[5] = VG_LINE_TO_ABS;
+	commands[6] = VG_LINE_TO_ABS;
+	commands[7] = VG_LINE_TO_ABS;
+	commands[8] = VG_LINE_TO_ABS;
+	commands[9] = VG_LINE_TO_ABS;
+	commands[10]= VG_LINE_TO_ABS;
 	
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &ParentWindowFrame );
-}
+	coords[0]   = 12.0;		coords[1] = 24.0;
+	coords[2]   = 100.0;	coords[3] = 350.0;
+	coords[4]   = 150.0;	coords[5] = 400.0;
+	coords[6]   = 200.0;	coords[7] = 500.0;
+	coords[8]   = 300.0;	coords[9] = 350.0;
+	coords[10]  = 125.0;	coords[11] =200.0;
+	coords[12]  = 900.0;	coords[13] =250.0;
+	coords[14]  = 1080.0;	coords[15] =200.0;
+	coords[16]  = 500.0;	coords[17] =100.0;
+	coords[18]  = 12.0;		coords[19] =24.0;
 
-char textfilename[] = "Readme.txt"; 
-TextView tf;
+	vgAppendPathData(path, numCmds, commands, coords);
+	vgDrawPath		(path, VG_STROKE_PATH			);
+	MainDisplay.end_screen();
 
-void init_textfile_view()
-{
-	tf.set_width_height	( 600, 600 );
-	tf.move_to  		( 100, 100 );	
-	tf.load_file		( textfilename );
-	
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &tf );		
-}
-
-ImageGallery ig;
-
-void init_image_gallery()
-{
-	ig.set_position(10,1200, 700, 10);
-	ig.onCreate    ();
-	ig.set_directory( "/home/pi/bk_code/abkInstant/media/" );
-	//ig.set_directory( "/media/My Book/tv/PhonePics/" ); 
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &ig );
-}
-
-void fill_fake_data1()
-{
-	ds1.add( 1. );	ds1.add( 2. );	ds1.add( 3. );	ds1.add( 4. );
-	ds1.add( 5. );	ds1.add( 6. );	ds1.add( 7. );	ds1.add( 8. );
-	ds1.add( 9. );	ds1.add( 10. );	ds1.add( 11. );	ds1.add( 12. );
-	ds1.add( 13. );	ds1.add( 14. );	ds1.add( 15. );	ds1.add( 16. );
-	ds1.add( 17. );	ds1.add( 18. );	ds1.add( 19. );	ds1.add( 20. );	
-	ds1.add( 21. );	ds1.add( 22. );	ds1.add( 23. );	ds1.add( 24. );
-	ds1.add( 25. );	ds1.add( 26. );	ds1.add( 27. );	ds1.add( 28. );
-	ds1.add( 29. );	ds1.add( 30. );	ds1.add( 31. );	ds1.add( 32. );						
-}
-void fill_fake_data2()
-{
-	ds2.add( 1. );	ds2.add( 3. );	ds2.add( 5. );	ds2.add( 7. );
-	ds2.add( 9. );	ds2.add( 11. );	ds2.add( 13. );	ds2.add( 15. );
-	ds2.add( 17. );	ds2.add( 19. );	ds2.add( 21. );	ds2.add( 23. );
-	ds2.add( 25. );	ds2.add( 27. );	ds2.add( 29. );	ds2.add( 31. );
-	ds2.add( 33. );	ds2.add( 35. );	ds2.add( 37. );	ds2.add( 39. );	
-	ds2.add( 41. );	ds2.add( 43. );	ds2.add( 45. );	ds2.add( 47. );
-	ds2.add( 49. );	ds2.add( 51. );	ds2.add( 53. );	ds2.add( 55. );
-	ds2.add( 57. );	ds2.add( 59. );	ds2.add( 61. );	ds2.add( 63. );
-}
-void fill_fake_data3()
-{
-	ds3.add( 10. );	ds3.add( 10. );	ds3.add( 10. );		ds3.add( 10. );
-	ds3.add( 11. );	ds3.add( 11. );	ds3.add( 11. );		ds3.add( 10. );
-	ds3.add( 9. );	ds3.add( 9. );	ds3.add( 9. );		ds3.add( 9.5 );
-	ds3.add( 8. );	ds3.add( 8. );	ds3.add( 8.75 );	ds3.add( 8.5 );
-	ds3.add( 12. );	ds3.add( 12. );	ds3.add( 11.5 );	ds3.add( 11.25 );	
-	ds3.add( 14. );	ds3.add( 15.5 ); ds3.add( 13.5 );	ds3.add( 12.2 );
-	ds3.add( 6. );	ds3.add( 6.1 );	ds3.add( 6.9 );		ds3.add( 9.5 );
-	ds3.add( 5. );	ds3.add( 16.2 ); ds3.add( 8.78 );	ds3.add( 8.88 );
-}
-
-const char chart1_title[] = "Sample X Line Graph";
-const char chart2_title[] = "Sample Y Line Graph";
-
-void init_line_graph()
-{
-	printf("Line Graph Init\n");
-	fill_fake_data1			(	);
-	fill_fake_data2			(	);
-	fill_fake_data3			(	);	
-
-	lg1.set_title 			( (char*) chart1_title );
-	lg1.set_xLabel			( (char*) "Time" 				);
-	lg1.set_yLabel			( (char*) "X Degree/second" 	);	
-	//lg1.draw_title			(      );
-	lg1.set_max				( 64.0 );
-	lg1.set_min				( 0.0  );
-	
-	lg1.add_data_series		( &ds1 							);
-	lg1.add_data_series		( &ds3 							);	
-	lg1.calc_scale			( 								);
-	lg1.set_horizontal_lines( 5 							);
-	lg1.set_vertical_lines	( 5 							);
-
-	lg2.set_title 			( (char*) chart2_title 			);
-	lg2.set_xLabel			( (char*) "Time" 				);
-	lg2.set_yLabel			( (char*) "Y Degree/second" 	);
-	lg2.add_data_series		( &ds2 							);
-	lg2.set_max				( 64.0 );
-	lg2.set_min				( 0.0 );
-	lg2.calc_scale			( );
-	lg2.set_horizontal_lines( 5		);
-	lg2.set_vertical_lines  ( 5 	); 
-	
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &lg1 );
-	MainDisplay.add_object( &lg2 );
-}
-void init_histogram_graph()
-{
-	printf("Histogram Graph Init\n");
-	fill_fake_data3			(	);
-	
-	hg.set_title 			( (char*) chart1_title );
-	hg.set_xLabel			( (char*) "Angle" 		);
-	hg.set_yLabel			( (char*) "Samples" 	);	
-	hg.add_data_series		( &ds3 );
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &hg );
-}
-void init_bar_graph	 	()
-{
-	fill_fake_data3();
-	bg.set_title 			( (char*) "Bar Chart" );
-	bg.set_xLabel			( (char*) "Month" 		);
-	bg.set_yLabel			( (char*) "Apples Sold" 	);	
-	bg.add_data_series		( &ds3 );
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &bg );
-}
-
-/*Card card1(3);
-Card card2(4);
-Card card3(5);
-Card* c6 = new Card(6);
-Card* c7 = new Card(7);
-Card* c8 = new Card(8);
-
-CardPlayer player1(4);
-CardPlayer player2(4);
-//Deck deck();
-
-*/
-void init_cards_only( )
-{
-	const int PADDING = 20;
-	int l = 100+PADDING; 
-	MainDisplay.remove_all_objects(	);
-			
-	//  HEARTS.   h c d s 
-	Card* cardsH[13];				// first suit.
-	for (int i=0; i<13; i++)
-	{
-		cardsH[i] = new Card(i);
-		cardsH[i]->load_resources();
-		cardsH[i]->match_image_size();
-		cardsH[i]->move_to( l, 200 );
-		cardsH[i]->print_positions();		
-		l += cardsH[i]->get_width() + PADDING;
-		MainDisplay.add_object	( cardsH[i] );
-	}
-	
-	//  HEARTS.   h c d s 
-	Card* cardsC[13];				// first suit.
-	l = 100+PADDING;
-	for (int i=0; i<13; i++)
-	{
-		cardsC[i] = new Card(i+13);
-		cardsC[i]->load_resources();
-		cardsC[i]->match_image_size();
-		cardsC[i]->move_to( l, 300 );
-		cardsC[i]->print_positions();		
-		l += cardsC[i]->get_width() + PADDING;
-		MainDisplay.add_object	( cardsC[i] );
-	}
-
-	//  HEARTS.   h c d s 
-	Card* cardsD[13];				// first suit.
-	l = 100+PADDING;
-	for (int i=0; i<13; i++)
-	{
-		cardsD[i] = new Card(i+26);
-		cardsD[i]->load_resources();
-		cardsD[i]->match_image_size();
-		cardsD[i]->move_to( l, 400 );
-		cardsD[i]->print_positions();		
-		l += cardsD[i]->get_width() + PADDING;
-		MainDisplay.add_object	( cardsD[i] );
-	}
-
-	//  HEARTS.   h c d s 
-	Card* cardsS[13];				// first suit.
-	l = 100+PADDING;
-	for (int i=0; i<13; i++)
-	{
-		cardsS[i] = new Card(i+39);
-		cardsS[i]->load_resources();
-		cardsS[i]->match_image_size();
-		cardsS[i]->move_to( l, 500 );
-		cardsS[i]->print_positions();		
-		l += cardsS[i]->get_width() + PADDING;
-		MainDisplay.add_object	( cardsS[i] );
-	}	
-}
-
-void init_card( )
-{
-	printf("init_card()\n");	
-/*	card1.move_to( 200, 200 );	card1.load_resources();		card1.match_image_size();
-	card2.move_to( 200, 300 );	card2.load_resources();		card2.match_image_size();
-	card3.move_to( 200, 400 );	card3.load_resources();		card3.match_image_size();
-
-	c6->move_to( 200, 200 );	c6->load_resources();		c6->match_image_size();
-	c7->move_to( 200, 300 );	c7->load_resources();		c7->match_image_size();
-	c8->move_to( 200, 400 );	c8->load_resources();		c8->match_image_size();
-
-	hit.set_width_height 	( 100, 100 );
-	stay.set_width_height	( 100, 100 );
-	hit.move_to 		 	( 100, 100 );
-	stay.move_to		 	( 220, 100 );
-
-	player1.move_to			( 300, 200  );
-	player1.set_width_height( 70*5, 100 );
-	player1.receive_card	( c6, true );
-	player1.receive_card	( c7, true );
-	player1.receive_card	( c8, true );
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &card1 );
-	MainDisplay.add_object	( &card2 );
-	MainDisplay.add_object	( &card3 );
-*/	
-/*	MainDisplay.add_object	( c6 );
-	MainDisplay.add_object	( c7 );
-	MainDisplay.add_object	( c8 ); */
-
-//	MainDisplay.add_object	( &player1 );
-}
-
-BlackJack  bj(3);
-HeartsGame hearts(4);
-
-void init_blackjack( )
-{
-	printf("init_blackjack()\n");
-	float wide = MainDisplay.get_width();
-	float high = MainDisplay.get_height()/2;
-	bj.set_width_height( wide, high-20 );
-	bj.move_to(0, 0);	
-	printf("init_blackjack() mid\n");	
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &bj 	);
-	printf("init_blackjack() done\n");
-}
-
-void init_hearts( )
-{
-	printf("init_hearts()\n");	
-	float wide = MainDisplay.get_width();
-	float high = MainDisplay.get_height()/2;
-	hearts.set_width_height( wide, high );
-	hearts.move_to(0,0);	
-	hearts.setup();
-	printf("Done setting up\n");
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object		  ( &hearts );
-}
-
-void init_reversi( )
-{
-/*
-	printf("init_reversi()\n");	
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &hit  );
-	MainDisplay.add_object	( &stay );	
-*/	
-	// black jack knows how to add all it's graphic objects.
-//	bj.add_to_display_manager( &MainDisplay );	
-}
-
-void init_battleships( )
-{
-/*
-	printf("init_reversi()\n");	
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &hit  );
-	MainDisplay.add_object	( &stay );	
-*/	
-// black jack knows how to add all it's graphic objects.
-//	bj.add_to_display_manager( &MainDisplay );	
-}
-
-void init_scatter_graph( )
-{
-}
-
-void init_combined_graph()
-{
-	printf("Line Graph Init\n");
-	fill_fake_data1			(	);
-	fill_fake_data2			(	);
-	fill_fake_data3			(	);
-
-	lg1.set_title 			( (char*) chart1_title 			);
-	lg1.set_xLabel			( (char*) "Time" 				);
-	lg1.set_yLabel			( (char*) "X Degree/second" 	);	
-	lg1.set_max				( 64.0 );
-	lg1.set_min				( 0.0  );	
-	lg1.add_data_series		( &ds1 							);
-	lg1.add_data_series		( &ds3 							);	
-	lg1.calc_scale			( 								);
-	lg1.set_horizontal_lines( 5 							);
-	lg1.set_vertical_lines	( 5 							);
-
-	lg2.set_title 			( (char*) chart2_title 			);
-	lg2.set_xLabel			( (char*) "Time" 				);
-	lg2.set_yLabel			( (char*) "Y Degree/second" 	);
-	lg2.add_data_series		( &ds2 							);
-	lg2.set_max				( 64.0 );
-	lg2.set_min				( 0.0 );
-	lg2.calc_scale			( );
-	lg2.set_horizontal_lines( 5		);
-	lg2.set_vertical_lines  ( 5 	); 
-	
-	bg.move_to				( 675, 400 );
-	bg.set_title 			( (char*) "Bar Chart" );
-	bg.set_xLabel			( (char*) "Month" 		);
-	bg.set_yLabel			( (char*) "Apples Sold" 	);	
-	bg.add_data_series		( &ds3 );
-
-	hg.move_to				( 100,100 );
-	hg.set_background_color ( 0xFF202020 );
-	hg.set_title 			( (char*) chart1_title );
-	hg.set_xLabel			( (char*) "Angle" 		);
-	hg.set_yLabel			( (char*) "Samples" 	);	
-	hg.add_data_series		( &ds3 );
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &lg1 );
-	MainDisplay.add_object( &lg2 );
-	MainDisplay.add_object( &bg );
-	MainDisplay.add_object( &hg );
+	// Add to display manager:
+	while (1) {  };
 }
 
 void populate_simple_lb()
@@ -839,3 +441,87 @@ void pack_sample_window()
 	MainDisplay.add_object( &ParentWindowF );
 }
 
+void init_frame_window()
+{
+	ParentWindowFrame.print_positions();
+	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &ParentWindowFrame );
+}
+
+char textfilename[] = "Readme.txt"; 
+TextView tf;
+
+void init_textfile_view()
+{
+	tf.set_width_height	( 600, 600 );
+	tf.move_to  		( 100, 100 );	
+	tf.load_file		( textfilename );
+	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &tf );		
+}
+
+HorizontalMenu hm(-1,-1);
+VerticalMenu   vm(-1,-1);
+
+void init_horiz_menu		()
+{
+	//stHorizMenuInfo ptr = new struct stHorizMenuInfo;
+	//ptr->text = "File";
+	
+	hm.set_width_height(400, 30);
+	hm.move_to( 100, 500 );
+	hm.add_entry_text( "File" );
+	hm.add_entry_text( "Edit" );	
+	hm.add_entry_text( "View" );	
+	hm.add_entry_text( "Window" );
+	hm.print_positions( );
+	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &hm );
+}
+void init_vert_menu			()
+{
+	printf("init_vert_menu\n");
+	
+	vm.set_width_height	( 200, 200 );
+	vm.move_to			( 100, 500 );
+	vm.add_simple_command( "File Browser" 	);
+	vm.add_simple_command( "Audio Amp" 		);	
+	vm.add_simple_command( "Black Jack" 	);		
+	vm.add_simple_command( "Hearts" 		);			
+	vm.add_simple_command( "Image Gallery"	);
+	vm.calc_metrics();
+	printf("init_vert_menu\n");
+	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &vm );
+}
+
+void init_combo_menu()
+{
+	vm.set_width_height	( 200, 200 );
+	vm.move_to			( 100, 500 );
+	vm.add_simple_command( "File Browser" 	);
+	vm.add_simple_command( "Audio Amp" 		);	
+	vm.add_simple_command( "Black Jack" 	);		
+	vm.add_simple_command( "Hearts" 		);			
+	vm.add_simple_command( "Image Gallery"	);
+	vm.calc_metrics();
+	
+	hm.set_width_height(400, 30);
+	hm.move_to( 100, 500 );
+	hm.add_entry_text( "File" );
+	hm.add_entry_text( "Edit" );	
+	hm.add_entry_text( "View" );	
+	hm.add_sub_menu( "Window", &vm );
+	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &hm );
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////

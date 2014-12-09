@@ -1,15 +1,12 @@
 
-#ifndef _ADREN_NETWORK_VIEW_H_
-#define _ADREN_NETWORK_VIEW_H_
+#ifndef _STATUS_LIST_H_
+#define _STATUS_LIST_H_
 
 #include "list.hpp"
 
 /* This is a list view with a pane on the right showing
-   another Control (usually textview)
-
-*/
-
-
+   another Control (usually textview)	*/
+   
 class StatusList : public ListControl
 {
 public:
@@ -24,8 +21,6 @@ private:
 	vector<Control*>	m_status_panes;
 
 };
-
-
 
 
 #endif

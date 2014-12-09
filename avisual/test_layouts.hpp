@@ -34,9 +34,11 @@ void init_combined_graph ();
 void init_audio_view	 ();
 void init_okay_cancel_dlg();
 
-void init_simple_text();
-void init_simple_path();
-
+void init_simple_text	();
+void init_simple_path	();
+void init_horiz_menu	();
+void init_vert_menu		();
+void init_combo_menu	();
 
 
 // GAMES:

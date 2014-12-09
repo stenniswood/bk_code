@@ -64,54 +64,6 @@ void load_combo_test_screen( int number )
 	}
 }
 
-void init_okay_cancel_dlg()
-{	
-	MyRadio1.set_text("AM Radio");
-	MyRadio2.set_text("FM Radio");
-	MyRadio3.set_text("XM Radio");
-	MyRadio4.set_text("Internet Radio");
-
-/*	MyRadio2.set_position_below ( &MyRadio1 );
-	MyRadio3.set_position_below ( &MyRadio2 );
-	MyRadio4.set_position_below ( &MyRadio3 ); */
-
-	MyRadio1.join_group( &MyRadio2 );
-	MyRadio1.join_group( &MyRadio3 );
-	MyRadio1.join_group( &MyRadio4 );
-	MyRadio1.expand_group_widths();		
-	MyRadio3.select();
-	MyRadio2.select();
-
-	audio_source1.set_text("V6 Engine");
-	audio_source2.set_text("All wheel drive");
-	audio_source1.set_check();
-	//check1.set_position_above( &check2 );
-	//check2.set_position_below( &check1 );
-	//check1.copy_position_horiz( &check2 );
-
-	Okay.set_text("Okay");
-	Cancel.set_text("Cancel");
-	
-	SampleText.set_width_height(-1,-1);
-	SampleText.set_text("My Car dialog\n");
-	//SampleText.center_vertical(TRUE);
-	ParentWindowF.pack_control( &SampleText, PACK_FILL_PARENT, PACKER_ALIGN_TOP );
-	ParentWindowF.pack_control( &MyRadio1, PACK_RIGHT, PACKER_ALIGN_TOP );
-	ParentWindowF.pack_below  ( &MyRadio2, &MyRadio1, PACK_COPY_HORIZ );
-	ParentWindowF.pack_below  ( &MyRadio3, &MyRadio2, PACK_COPY_HORIZ );
-	ParentWindowF.pack_below  ( &MyRadio4, &MyRadio3, PACK_COPY_HORIZ );
-
-	ParentWindowF.pack_control( &audio_source1, PACK_LEFT, PACKER_ALIGN_TOP  	);
-	ParentWindowF.pack_below  ( &audio_source2, &audio_source1, PACK_COPY_HORIZ );
-
-	ParentWindowF.pack_control( &test_icon , PACK_LEFT	 , 	PACKER_ALIGN_BOTTOM );
-	ParentWindowF.pack_control( &Okay	   , PACK_RIGHT  ,  PACKER_ALIGN_BOTTOM );
-	ParentWindowF.pack_control( &Cancel	   , PACK_RIGHT  ,  PACKER_ALIGN_BOTTOM );
-
-	// Add to display manager:
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object		  ( &ParentWindowF );	
-}
 
 
 // AUDIO GRAPHICS VARIABLES : 

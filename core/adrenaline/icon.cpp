@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+//#include <iostream>
+//#include <fstream>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <jpeglib.h>
@@ -25,7 +27,6 @@
 #include "button.hpp"
 #include "display.h"
 #include "icon.hpp"
-
 
 #define margin_percent 0.07
 

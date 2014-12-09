@@ -24,13 +24,15 @@
 #include "button.hpp"
 #include "display.h"
 #include "icon.hpp"
+#include "line_grouper.hpp"
 
 
-
+ 
 VerticalLineGroup::VerticalLineGroup(  )
 {
 	
 }
+
 VerticalLineGroup::~VerticalLineGroup(  )
 {
 	vector<point*>::iterator *siter = m_source_points.begin();

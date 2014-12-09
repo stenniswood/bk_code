@@ -134,7 +134,7 @@ void  DisplayManager::add_object( Control* NewControl )
 // because some may be static.  Leave that to the caller.
 void  DisplayManager::remove_object( Control* NewControl )
 {
-	Control* prev = NewControl->getPrev();
+/*	Control* prev = NewControl->getPrev();
 	Control* next = NewControl->getNext();
 	
 	if (prev==NULL)
@@ -147,7 +147,7 @@ void  DisplayManager::remove_object( Control* NewControl )
 		// end of list
 		Tail = prev;
 	else
-		next->setPrev( prev );
+		next->setPrev( prev ); */
 }
 
 void  DisplayManager::remove_all_objects(  )
@@ -188,7 +188,7 @@ void  DisplayManager::end_draw(	)
 Control* DisplayManager::HitTest( int x, int y )
 {
 #ifdef old_way
-	Control* result = NULL;
+/*	Control* result = NULL;
 	Control* obj = Head;
 	while (obj)
 	{
@@ -197,7 +197,7 @@ Control* DisplayManager::HitTest( int x, int y )
 			return obj;
 		obj = obj->getNext();
 	}
-	return NULL;
+	return NULL; */
 #else
 	Control* result = NULL;
 	list<Control*>::iterator iter = controls.begin();

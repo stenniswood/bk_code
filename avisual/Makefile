@@ -1,9 +1,9 @@
 CC		   = g++
 OPTIONS	   = -fpermissive -Wwrite-strings 
-INC		   = ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ \
-			 ../core/adrenaline/ ../core/adrenaline/graphs/ ./wifi/ ./hardware/  \
-			 ./voice/ ./kinetic/ ./ ./games/ ./games/blackjack/ ./games/reversi/  \
-			 ./games/card_core/ ./games/hearts/
+INC		   = ../core/can/ ../core/fusion/ ../core/hardware/ ../core/kinetic \
+			 ../core/misc/ ../core/msg/ ../core/wifi/ ./voice/ ./kinetic/ ./ \
+			 ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/ \
+			 ../core/adrenaline/ ../core/adrenaline/atoms/ ../core/adrenaline/molecules/ ../core/adrenaline/graphs/ 			 
 			 
 SELF_INC   = ../../avisual/ ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
@@ -20,7 +20,8 @@ MISC_OBJS  = vector_math.o ini_file.o visual_memory.o audio_memory.o fft.o
 FUSE_OBJS  = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o 
 VG_OBJS    = libshapes.o oglinit.o 
 APP_CPP_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
-			  ipc_mem_bkinstant.o test_layouts.o audio_app.o
+			  ipc_mem_bkinstant.o audio_app.o test_layouts.o test_combo_layouts.o \
+			  test_game_layouts.o test_graph_layouts.o 
 IPC_OBJS   = 
 
 REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o
@@ -29,18 +30,21 @@ BLACKJACK_GAME_OBJS = blackjack.o
 CARDCORE_GAME_OBJS  = card.o card_player.o deck.o basic_card_game.o
 
 
-#  button_array_gui.o Container.o
-ADRENALINE_OBJS = 
-ADRENALINE_CPP_OBJS = control.o  \
-			leveler.o button.o checkbox.o progressbar.o radiobutton.o  	\
-			listbox.o tabular_listbox.o directory_listbox.o file_browser.o  \
-			text_view.o icon.o scroll_bar.o scroll_control.o window.o  	\
-			side_bar.o tab_control.o table_window.o frame_window.o     	\
-			display_manager.o display.o mouse.o image_gallery.o power_level.o \
-			stereo_power.o wave_view.o frequency_view.o rectangle.o tk_colors.o
-
+#  button_array_gui.o Container.o 
+ADRENALINE_OBJS = display.o display_manager.o mouse.o resource_manager.o 
+ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o  \
+			directory_listbox.o frame_window.o groupbox.o icon.o \
+			leveler.o line_grouper.o listbox.o marquee.o power_level.o \
+			progressbar.o radiobutton.o rectangle.o scroll_bar.o scroll_control.o \
+			stick_leg.o tab_control.o table_window.o tabular_listbox.o \
+			TextFile.o text_view.o tk_colors.o wave_view.o window.o \
+			horizontal_menu.o vertical_menu.o 
+ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  \
+			frequency_view.o image_gallery.o list_status.o side_bar.o \
+			stereo_power.o stick_figure.o 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o 		\
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o
+
 KINETIC_OBJS = 
 
 # APP CODE
@@ -62,8 +66,9 @@ avisual: $(APP_CPP_OBJS) 					\
 		$(addprefix ../core/misc/,			$(MISC_OBJS))  			\
 		$(addprefix /home/pi/openvg/,		$(VG_OBJS))  			\
 		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) 	\
-		$(addprefix ../core/adrenaline/,	$(ADRENALINE_CPP_OBJS)) \
-		$(addprefix ../core/adrenaline/graphs/,	$(ADRENALINE_GRAPH_OBJS))
+		$(addprefix ../core/adrenaline/atoms/,	  $(ADRENALINE_ATOMS_OBJS)) 	\
+		$(addprefix ../core/adrenaline/molecules/, $(ADRENALINE_MOLECULES_OBJS)) \
+		$(addprefix ../core/adrenaline/graphs/,	  $(ADRENALINE_GRAPH_OBJS))
 	g++ -o $@ $^ $(CFLAGS)  $(LIBFLAGS)
 
 clean:
@@ -73,6 +78,8 @@ clean:
 	rm -rf ../core/misc/*.o 
 	rm -rf ../core/fusion/*.o 	
 	rm -rf ../core/adrenaline/*.o 
+	rm -rf ../core/adrenaline/atoms/*.o 	
+	rm -rf ../core/adrenaline/molecules/*.o
 	rm -rf ../core/adrenaline/graphs/*.o 
 	rm -rf ./hardware/*.o 	
 	rm -rf ./wifi/*.o 		

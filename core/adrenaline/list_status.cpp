@@ -24,6 +24,7 @@
 #include "button.hpp"
 #include "display.h"
 #include "icon.hpp"
+#include "list_status.hpp"
 
 
 StatusList::StatusList(  )
