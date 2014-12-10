@@ -61,6 +61,7 @@ int 	TabControl::enable_add_button	( bool mEnable 	 )
 
 int    	TabControl::draw_curve (	) 
 { 
+
 }		
 
 int    	TabControl::draw_one_tab		(	) 

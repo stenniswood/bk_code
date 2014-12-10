@@ -187,18 +187,6 @@ void  DisplayManager::end_draw(	)
 
 Control* DisplayManager::HitTest( int x, int y )
 {
-#ifdef old_way
-/*	Control* result = NULL;
-	Control* obj = Head;
-	while (obj)
-	{
-		result = obj->HitTest(x,y);
-		if (result)
-			return obj;
-		obj = obj->getNext();
-	}
-	return NULL; */
-#else
 	Control* result = NULL;
 	list<Control*>::iterator iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++ )
@@ -210,35 +198,18 @@ Control* DisplayManager::HitTest( int x, int y )
 			//return result;
 		}
 	}
-	return NULL;
-#endif
-	
+	return NULL;	
 }
 
 int   DisplayManager::draw_children( )
 {
-#ifdef old_way
-
-	int count = 0;
-	Control* obj = Head;
-	while (obj)
-	{
-		if (Debug) printf("draw child %d\n", count++);
-		obj->draw();
-		obj = obj->getNext();
-	}
-	return -1;
-	
-#else
 	list<Control*>::iterator	iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++ )
 	{
 		if (Debug) printf("draw child %d\n", i);	
 		(*iter)->draw();		
 	}
-	return -1;
-#endif
-	
+	return -1;	
 }
 
 int   DisplayManager::draw_text( 	)
@@ -270,7 +241,6 @@ int   DisplayManager::draw_background( 	)
 	}
 	return 1;
 }
-
 
 /*Control*  DisplayManager::Find_object( Control* NewControl )
 {

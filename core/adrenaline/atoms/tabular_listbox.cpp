@@ -27,6 +27,13 @@ TabularListBox::TabularListBox( int Left, int Right, int Top, int Bottom )
 	set_position( Left, Right, Top, Bottom );
 	Initialize();
 }
+
+TabularListBox::TabularListBox( int Width, int Height )
+:ListBox( Width, Height )
+{
+	Initialize();
+}
+
 TabularListBox::TabularListBox(int Left, int Bottom, int mWidth, int mNumber_items_shown, int mItem_height )
 :ListBox(Left, Bottom, mWidth, mNumber_items_shown, mItem_height)
 {
@@ -36,6 +43,7 @@ TabularListBox::TabularListBox(int Left, int Bottom, int mWidth, int mNumber_ite
 	set_position( Left, Left+mWidth, Bottom+(mNumber_items_shown*mItem_height)+2, Bottom );
 	Initialize();
 }
+
 TabularListBox::TabularListBox()
 :ListBox()
 {
@@ -380,6 +388,7 @@ void TabularListBox::select( int mIndex )
 	selected_item = mIndex;
 }
 
+// 
 void TabularListBox::add_row( vector<string> *mData )
 {
 	LineData.push_back(*mData);
@@ -412,7 +421,7 @@ void TabularListBox::add_column( struct HeaderItemInfo* mNewHeading )
 	for (int i=0; i<rows; i++)
 	{
 		LineData[i][column] = "";
-	}	
+	}
 }
 
 void TabularListBox::update_col_data( vector<string> *mNewColText, int mColumn  )

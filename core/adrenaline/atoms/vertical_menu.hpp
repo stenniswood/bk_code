@@ -12,9 +12,9 @@ struct stVertMenuInfo {
 	char	short_cut_key[4];		// to directly activate from keyboard 
 	float	width;
 	int		state;
+	int		(*callback)(void*);		// called when the item is selected.
 	VerticalMenu*	menu;
 };
-
 
 #define MENU_STATE_NORMAL 		1
 #define MENU_STATE_GRAYED 		2
@@ -38,8 +38,8 @@ public:
 	int				add_sub_menu		( char* mText, VerticalMenu* mSubMenu=NULL );	
 	int				add_entry			( stVertMenuInfo mEntry 	 );
 
+	int				get_id				( )	{ return selected_item; };
 	int				set_state			( int mState, int mIndex );
-
 	
 	// This will move it's upper left corner to the horizontal menu:
 	int				attach_at			( float x, float y );
@@ -54,7 +54,7 @@ public:
 
 protected:
 	std::vector<stVertMenuInfo*> m_entries;
-	//int						m_width;
+	int						m_selection;
 	bool					has_scroller;
 	bool					is_visible;
 };

@@ -28,6 +28,9 @@
 
 #include "horizontal_menu.hpp"
 #include "vertical_menu.hpp"
+#include "spinner.hpp"
+//#include "multiselect_listbox.hpp"
+#include "tab_control.hpp"
 
 
 

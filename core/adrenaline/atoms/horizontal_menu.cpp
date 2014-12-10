@@ -51,6 +51,7 @@ void 	HorizontalMenu::Initialize (	)
 	text_color 		 = 0xFF000000;
 	text_size 		 = 14.;
 	m_menu_padding	 = 50.;
+	m_selection		 = -1 ;
 	printf("Colors: background=%4x; selected=%4x; text=%4x; mp=%6.1f\n", background_color, m_selected_color, text_color, m_menu_padding );
 }
 
@@ -62,7 +63,7 @@ int 	HorizontalMenu::calc_metrics( )
 	for (int i=0; i<m_entries.size(); i++)
 	{
 		m_entries[i]->width	= TextWidth( m_entries[i]->text, SerifTypeface, text_size );
-		printf("%6.1f pad=%6.1f\n", m_entries[i]->width, m_menu_padding );
+		//printf("%6.1f pad=%6.1f\n", m_entries[i]->width, m_menu_padding );
 		m_entries[i]->sx    = sx;
 		m_entries[i]->ex    = sx+m_entries[i]->width + m_menu_padding;
 		sx += (m_entries[i]->width + m_menu_padding);
@@ -70,7 +71,6 @@ int 	HorizontalMenu::calc_metrics( )
 		VerticalMenu* vm = m_entries[i]->menu;
 		if (vm)
 			vm->attach_at( m_entries[i]->sx, bottom );
-
 	}
 	return 0;
 }
@@ -95,7 +95,6 @@ int		HorizontalMenu::add_sub_menu( char* mMenuText, VerticalMenu* vm )
 	ptr->menu = vm;
 	strcpy(ptr->text, mMenuText);
 
-	
 	m_entries.push_back( ptr );
 	calc_metrics();
 }
@@ -113,6 +112,7 @@ int 	HorizontalMenu::select 	( int mSelected 	)
 
 int HorizontalMenu::draw(	)
 { 
+	//printf("H Menu Draw()\n");
 	int item_count = m_entries.size();
 	float l = left;
 	float c = (height-text_size) / 2.0 + bottom;
@@ -121,10 +121,13 @@ int HorizontalMenu::draw(	)
 	Fill_l  ( background_color );
 	Rect    ( left, bottom, width, height );
 
-	Stroke_l( m_selected_color );
-	Fill_l  ( m_selected_color );
-	Rect    ( m_entries[m_selection]->sx, bottom, m_entries[m_selection]->width, height );
-
+	if (m_selection>=0)
+	{
+		Stroke_l( m_selected_color );
+		Fill_l  ( m_selected_color );
+		Rect    ( m_entries[m_selection]->sx, bottom, m_entries[m_selection]->width, height );
+		//printf("H menu drew rectangles!\n");
+	}
 	// Print text for each entry:
 	for (int i=0; i<item_count; i++)
 	{
@@ -132,20 +135,27 @@ int HorizontalMenu::draw(	)
 		{
 			Stroke_l( background_color );
 			Fill_l  ( background_color );
-			printf("MenuColor: txt=%4x\n", background_color );
+			//printf  ("MenuColor: txt=%4x\n", background_color );
 			if (m_entries[i]->menu)
 				m_entries[i]->menu->draw();
-			
 		} else {
 			Stroke_l( text_color );
 			Fill_l  ( text_color );
-			printf("MenuColor: txt=%4x\n", text_color );			
+			//printf("MenuColor: txt=%4x\n", text_color );
 		}
 		l = m_entries[i]->sx;
 		printf("%6.1f, %6.1f: %6.1f  %s\n", l, bottom, text_size, m_entries[i]->text );
 		Text( l, c, m_entries[i]->text,  SerifTypeface, text_size );
 	}
+}
+
+int	HorizontalMenu::get_id(   )
+{
+	if (m_selection==-1)	return -1;
+	if (m_selection > m_entries.size()) return -1;
 	
+	int result = (m_selection*1000);
+	//m_entries[m_selection]->menu->get_id();	
 }
 
 int 	HorizontalMenu::get_hit_index( int Mousex, int Mousey ) 

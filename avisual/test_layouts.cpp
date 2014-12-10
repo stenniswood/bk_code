@@ -39,6 +39,8 @@ AUTHOR	: Steve Tenniswood
 #include "test_game_layouts.hpp"
 #include "test_graph_layouts.hpp"
 
+#include "can_msg_view.hpp"
+
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
 static TextView 		LongText		( 50, 1230, 750, 500 );
@@ -139,6 +141,8 @@ void load_test_screen(int number)
 	case 12: init_horiz_menu		();		break;			
 	case 13: init_vert_menu			();		break;
 	case 14: init_combo_menu		();		break;
+	case 15: init_spinner_menu		();		break;	
+	case 16: init_CAN_msg_view		();		break;	
 
 	case 21: init_image_gallery		();		break;		
 	case 22: init_okay_cancel_dlg	();		break;
@@ -468,10 +472,9 @@ VerticalMenu   vm(-1,-1);
 void init_horiz_menu		()
 {
 	//stHorizMenuInfo ptr = new struct stHorizMenuInfo;
-	//ptr->text = "File";
-	
+	//ptr->text = "File";	
 	hm.set_width_height(400, 30);
-	hm.move_to( 100, 500 );
+	hm.move_to( 100, 700 );
 	hm.add_entry_text( "File" );
 	hm.add_entry_text( "Edit" );	
 	hm.add_entry_text( "View" );	
@@ -501,7 +504,7 @@ void init_vert_menu			()
 
 void init_combo_menu()
 {
-	vm.set_width_height	( 200, 200 );
+	//vm.set_width_height	( 200, 200 );
 	vm.move_to			( 100, 500 );
 	vm.add_simple_command( "File Browser" 	);
 	vm.add_simple_command( "Audio Amp" 		);	
@@ -510,8 +513,8 @@ void init_combo_menu()
 	vm.add_simple_command( "Image Gallery"	);
 	vm.calc_metrics();
 	
-	hm.set_width_height(400, 30);
-	hm.move_to( 100, 500 );
+	hm.set_width_height(640, 30);
+	hm.move_to( 100, 768-36 );
 	hm.add_entry_text( "File" );
 	hm.add_entry_text( "Edit" );	
 	hm.add_entry_text( "View" );	
@@ -519,9 +522,98 @@ void init_combo_menu()
 	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &hm );
-
 }
 
+SpinnerControl spin(200, 36);
+SpinnerControl spin2(200, 36);
+
+void init_spinner_menu()
+{
+	spin.move_to  ( 300, 300 );
+	spin.set_value( 350  );
+	spin.set_max  ( 1000 );
+	spin.set_min  (    0 );
+	spin.set_text_color(0xFFFF0000);
+
+	spin2.move_to  ( 300, 400 );
+	spin2.set_value( 400  );
+	spin2.set_max  ( 1000 );
+	spin2.set_min  (    0 );
+	spin2.set_text_color(0xFFFF0000);
+
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &spin  );
+	MainDisplay.add_object( &spin2 );
+}
+
+void init_dropdown_menu()
+{
+	
+}
+
+CANMessageView msg_view;
+struct sCAN msg[4];
+
+void fill_data( byte* mdata, byte last)
+{
+	mdata[0] = 0x12;
+	mdata[1] = 0x34;
+	mdata[2] = 0x56;
+	mdata[3] = 0x78;	
+	mdata[4] = 0xAB;
+	mdata[5] = 0xCD;
+	mdata[6] = 0xEF;
+	mdata[7] = last;
+}
+
+void fill_msg1(  )
+{
+	msg[0].id.group.id = 0x1234;
+	msg[0].id.group.instance = 128;
+	msg[0].header.DLC = 8;	
+	fill_data( msg[0].data, 0x11 );	
+}
+void fill_msg2(  )
+{
+	msg[1].id.group.id = 0x1234;
+	msg[1].id.group.instance = 128;
+	msg[1].header.DLC = 8;	
+	fill_data( msg[1].data, 0x22 );
+}
+void fill_msg3(  )
+{
+	msg[2].id.group.id = 0x1234;
+	msg[2].id.group.instance = 128;
+	msg[2].header.DLC = 8;
+	fill_data( msg[2].data, 0x33 );
+}
+void fill_msg4(  )
+{
+	msg[3].id.group.id = 0x1234;
+	msg[3].id.group.instance = 128;
+	msg[3].header.DLC = 8;
+	fill_data( msg[3].data, 0x44 );
+}
+
+void init_CAN_msg_view( )
+{
+	msg_view.move_to  		 ( 200, 200   );
+	msg_view.set_width_height( 400, 400   );	
+	msg_view.set_text_color	 ( 0xFFFF0000 );
+
+	fill_msg1();
+	fill_msg2();
+	fill_msg3();
+	fill_msg4();
+	
+	msg_view.add_message	 ( &msg[0] );
+	msg_view.add_message	 ( &msg[1] );
+	msg_view.add_message	 ( &msg[2] );
+	msg_view.add_message	 ( &msg[3] );
+
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &msg_view );
+}
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

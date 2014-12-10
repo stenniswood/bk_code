@@ -30,22 +30,24 @@ struct HeaderItemInfo
 class TabularListBox : public ListBox
 {
 public:
-	TabularListBox();
+	TabularListBox( );
 	TabularListBox( int Left, int Bottom, int mWidth, int mNumber_items_shown, int mItem_height );
 	TabularListBox( int Left, int Right, int Top, int Bottom  );
+	TabularListBox( int mWidth, int mHeight );
 	~TabularListBox();
-	
+
 	virtual	void 	Initialize();
 
-	virtual int   	draw 					(	);	
+	virtual int   	draw 					(	);
 	int 			draw_line_backgrounds	(   );
 	int 			draw_vertical_lines 	(   );
 	int 			draw_header				(	);
 	virtual void	draw_one_cell			( int mRow, int mCol, float mY );
-	void		 	draw_one_row			( int mRow, float mY );
+	void		 	draw_one_row			( int mRow, float mY 		   );
 	int 			draw_text_top_down		(	);
 	int 			draw_text_bottom_up		(	);
-	
+
+
 	void			print_tab_info			(   );
 	void			print_client_rect		(   );		// body_height, scroll_bar width
 	
@@ -60,6 +62,7 @@ public:
 	void			set_column_width		( int mColumn, int mWidth );	
 	void 			change_header_titles	( string mHeaderTexts, int column );
 
+	// Does not copy the structure !!
 	void			add_column 				( struct HeaderItemInfo* mNewHeading );	// row data will be increased and blanked!
 	void			update_col_data			( vector<string> *mNewColText, int mColumn );	// does not update the header!
 	void			add_row   				( vector<string> *mData  );

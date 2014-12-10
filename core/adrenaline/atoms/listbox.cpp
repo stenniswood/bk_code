@@ -282,7 +282,6 @@ void ListBox::print_info(	)
 	else 				printf("TopDown:false;\t");	
 	if (show_header)	printf("show_header:true;\t");
 	else				printf("show_header:false;\t");
-
 }
 
 // result in pixels:

@@ -26,11 +26,12 @@ public:
 
 	virtual void 	Initialize			(	);
 	int				calc_metrics		(	);
+	int				get_id				(   );
 	
-	int				add_entry_text		( char* mMenuText );
+	int				add_entry_text		( char* mMenuText 					);
 	int				add_sub_menu		( char* mMenuText, VerticalMenu* vm );
-	int				add_entry			( stHorizMenuInfo* mEntry );
-	int				select				( int mSelected 	);
+	int				add_entry			( stHorizMenuInfo* mEntry 			);
+	int				select				( int mSelected 					);
 
 	virtual int   	draw		 		(	);
 

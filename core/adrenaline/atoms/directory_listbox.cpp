@@ -165,8 +165,7 @@ void DirectoryListBox::compose_detail_line( char* path, char* d_name )
 	
 	/*	Name									d_name
 		last modified time:						buf.st_mtime
-		size:						 off_t    	st_size
-	
+		size:						 off_t    	st_size	
 		owner:						 uid_t 		st_uid
 	*/		
 	//time_t    st_mtime;

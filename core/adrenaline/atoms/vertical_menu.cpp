@@ -45,14 +45,14 @@ void 	VerticalMenu::Initialize(	)
 	has_scroller= ;
 	is_visible	= ;	*/
 	set_odd_color ( 0xEFFFFFFF );
-	set_even_color( 0x8FFF00FF );
+	set_even_color( 0xEFFFFFFF );
 	isTopDown  = true;
 	text_color = 0xFF000000;
 }
 
 int  VerticalMenu::calc_metrics()
 {
-	printf("VerticalMenu::calc_metrics()\n");
+	//printf("VerticalMenu::calc_metrics()\n");
 	float tmp_width  = get_longest_line();
 	float tmp_height = (number_lines_visible*LineHeight);
 	set_width_height( tmp_width, tmp_height );

@@ -39,6 +39,8 @@ void init_simple_path	();
 void init_horiz_menu	();
 void init_vert_menu		();
 void init_combo_menu	();
+void init_spinner_menu	();
+void init_CAN_msg_view	();
 
 
 // GAMES:

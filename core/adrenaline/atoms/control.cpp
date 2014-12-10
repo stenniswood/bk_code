@@ -42,9 +42,9 @@ void Control::Initialize()
 {
 	created		= false;
 	text		= NULL;
-	HasBorder = true;	
-	Visible   = true;
-	text_size = 14.0;
+	HasBorder 	= true;	
+	Visible   	= true;
+	text_size 	= 14.0;
 	border_roundness_x = 15.0;
 	border_roundness_y = 15.0;	
 	background_color = 0xCF202020;
@@ -180,24 +180,11 @@ void Control::load_resources( )
 {
 }
 
-/*int Control::draw_title() 
-{
-	if (title==NULL) return -1;
-
-	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
-	VGfloat alpha = 1.0;
-	int tenpercent = (float)(height)*margin_percent;
-	Fill_l( text_color );
-	TextMid  ( left+width/2.0, bottom+height+tenpercent, title, SerifTypeface, 
-				height/strlen(title) );
-	return TRUE;
-}*/
 
 int Control::draw() 
 {
 	//printf("Control::draw() \n");
 	if (Visible==false)	 return 0;
-	//printf("Control::draw() is Visible!\n");
 
 	StrokeWidth(2);
 	if (HasBorder) 

@@ -57,7 +57,7 @@ void IconView::set_file( char* mFileName )
 
 	Filename = new char[strlen(mFileName)+1];
 	strcpy (Filename, mFileName );
-	printf("IconView: Filename=%s\n", Filename);
+	//printf("IconView: Filename=%s\n", Filename);
 }
 
 void IconView::Initialize()
@@ -69,8 +69,8 @@ void IconView::Initialize()
 	ImageInfo.width  = 0;
 	ImageInfo.height = 0;
 
-	text_color		= 0xFF9f9f0f;
-	border_color 	= 0xFFffffff;
+	text_color		 = 0xFF9f9f0f;
+	border_color 	 = 0xFFffffff;
 	background_color = 0xFf202020;
 }
 

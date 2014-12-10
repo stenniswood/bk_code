@@ -3,7 +3,6 @@
 
 #include "control.hpp"
 
-
 struct stTabInfo {
 	char*	text;
 	float	width;
@@ -21,7 +20,6 @@ as children.  But we prefer to simplify for the programmer,
 so   
 This offers is readily builtin.
 ************************************************************/
-
 
 class TabControl : public Control
 {
@@ -53,13 +51,12 @@ public:
 //	int				set_on_click_listener( void (void*) );
 
 protected:
-	vector<stTabInfo*>		m_tabs;
+	std::vector<stTabInfo*>		m_tabs;
 	int						m_selection;
 	
 	int						m_height;
 	bool					m_has_scroller;
 	bool					m_has_add_button;
 };
-
  
 #endif
