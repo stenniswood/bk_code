@@ -160,7 +160,8 @@ void init_blackjack( )
 	float wide = MainDisplay.get_width();
 	float high = MainDisplay.get_height()/2;
 	bj.set_width_height( wide, high-20 );
-	bj.move_to(0, 0);	
+	bj.move_to(0, high/2.);
+	bj.print_positions();
 	printf("init_blackjack() mid\n");	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( &bj 	);

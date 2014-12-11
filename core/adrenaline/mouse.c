@@ -22,7 +22,6 @@
 static int 			mouse_fd;
 struct input_event 	mouse_ev;		// info read from driver.
 
-
 struct mouse_t 	mouse;					// global mouse state
 int 		left_count = 0;
 int 		quitState = 0;
@@ -33,9 +32,10 @@ int 		quitState = 0;
 void *eventThread(void *arg) 
 {
 	// Open mouse driver
-	if ((mouse_fd = open("/dev/input/event0", O_RDONLY)) < 0) {	
 //	if ((mouse_fd = open("/dev/input/mouse0", O_RDONLY)) < 0) {	
-//	if ((mouse_fd = open("/dev/input/event2", O_RDONLY)) < 0) {
+//	if ((mouse_fd = open("/dev/input/event0", O_RDONLY)) < 0) {	
+//	if ((mouse_fd = open("/dev/input/event1", O_RDONLY)) < 0) {	
+	if ((mouse_fd = open("/dev/input/event2", O_RDONLY)) < 0) {
 		fprintf(stderr, "Error opening Mouse!\n");
 		quitState = 1;
 		return &quitState;

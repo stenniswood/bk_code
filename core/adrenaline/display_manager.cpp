@@ -17,8 +17,7 @@
 #include "bk_system_defs.h"
 #include "mouse.h"
 #include "display_manager.hpp"
-
-
+#include "avisual_menu.hpp"
 
 
 // Offer one instance for whole app;
@@ -49,10 +48,9 @@ DisplayManager::DisplayManager( int mScreenWidth, int mScreenHeight )
 void  DisplayManager::init_screen()
 {
 	init(&screen_width, &screen_height);	// Graphics initialization
-	printf("DisplayManager::\tscreen_width=%d;\tscreen_height=%d\n", screen_width, screen_height );
+	printf("\nDisplayManager::\tscreen_width=%d;\tscreen_height=%d\n", screen_width, screen_height );
 	mouse_init( screen_width, screen_height );
-	load_resources();
-	
+	load_resources();	
 }
 // Screen initialization
 void  DisplayManager::start_screen()
@@ -65,9 +63,24 @@ void  DisplayManager::end_screen( )
 	End();
 }
 
+int	DisplayManager::onCreate(  )
+{
+	sb.set_width_height( screen_width, 36 );
+	float b = (screen_height-sb.get_height());
+	printf("DisplayManager::onCreate()  %d,%d, %5.1f\n", screen_width, screen_height, b );
+
+	sb.move_to		   ( 0, b );
+	init_avisual_menu  ( &(sb.m_Menu) );
+	add_object( &sb );
+	sb.print_positions();
+}
+
 // Perhaps this is not needed.  need to re-architect.
 void DisplayManager::call_on_creates( )
 {
+	// System Bar will always be treated separately.
+	sb.onCreate();
+	
 	// Load all controls which are already registered.
 	printf("Creating child controls\n");
 	list<Control*>::iterator	iter = controls.begin();
@@ -110,44 +123,15 @@ void  DisplayManager::set_background_color( long int Color )
 
 void  DisplayManager::add_object( Control* NewControl )
 {
-/*#ifdef old_way
-	// Add to list
-	NewControl->setPrev( Tail );	// attach to end of list
-	NewControl->setNext( NULL );
-
-	if (Head == NULL) {
-		Head = NewControl;
-	}
-	if (Tail != NULL)
-		Tail->setNext( NewControl );		// this one is now end
-
-	Tail = NewControl;						// this one is now end
-#else */
 	NewControl->onCreate();
-	controls.push_back( NewControl );	
-//#endif
-
+	controls.push_back( NewControl );
 }
-
 
 // This removes the object from the list.  Does not delete or free memory.
 // because some may be static.  Leave that to the caller.
 void  DisplayManager::remove_object( Control* NewControl )
 {
-/*	Control* prev = NewControl->getPrev();
-	Control* next = NewControl->getNext();
-	
-	if (prev==NULL)
-		// head of list
-		Head = next;
-	else
-		prev->setNext( next );
-		
-	if (next==NULL)
-		// end of list
-		Tail = prev;
-	else
-		next->setPrev( prev ); */
+
 }
 
 void  DisplayManager::remove_all_objects(  )
@@ -156,7 +140,6 @@ void  DisplayManager::remove_all_objects(  )
 	Head = NULL;
 	Tail = NULL;
 	controls.clear();
-	
 }
 
 void  DisplayManager::start_draw(	)
@@ -169,6 +152,7 @@ int   DisplayManager::draw(	)
 	if (Debug) printf("\ndraw display manager\tstart:\n" );
 	start_draw();
 	draw_background();
+	//sb.print_positions();
 	draw_children();	
 	end_draw();				// end is needed to see display!
 	if (Debug) printf("draw display manager\tdone!\n\n" );
@@ -187,14 +171,16 @@ void  DisplayManager::end_draw(	)
 
 Control* DisplayManager::HitTest( int x, int y )
 {
-	Control* result = NULL;
+	Control* result = sb.HitTest(x,y);
+	if (result)  return result;
+	
 	list<Control*>::iterator iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++ )
 	{
 		result = (*iter)->HitTest(x,y);
 		if (result) {
 			printf ("DisplayManager::HitTest:  found a hit. child number %d\n", i );
-			return (*iter);
+			return (result);
 			//return result;
 		}
 	}
@@ -203,6 +189,8 @@ Control* DisplayManager::HitTest( int x, int y )
 
 int   DisplayManager::draw_children( )
 {
+	sb.draw();
+	
 	list<Control*>::iterator	iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++ )
 	{

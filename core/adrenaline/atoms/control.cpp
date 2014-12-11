@@ -34,6 +34,7 @@ Control::Control()
 	set_position( 0, 0, 0, 0 );
 	Initialize();	
 }
+
 Control::~Control()
 {
 }
@@ -107,7 +108,6 @@ void Control::set_text_color ( long int TextColor )
 {
 	text_color = TextColor;
 }
-
 
 void Control::set_position_left_of( Control* Sibling, bool mCopyVert, float mPadding )
 {
@@ -230,4 +230,8 @@ int		Control::onReceiveFocus()
 	return -1;
 }
 
+void Control::register_child( Control* mNewChild )
+{
+	m_child_controls.push_back( mNewChild );
+}
 

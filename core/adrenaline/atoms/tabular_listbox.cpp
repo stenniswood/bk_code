@@ -47,7 +47,7 @@ TabularListBox::TabularListBox(int Left, int Bottom, int mWidth, int mNumber_ite
 TabularListBox::TabularListBox()
 :ListBox()
 {
-	printf("TabularListBox ctor \n" );
+	//printf("TabularListBox ctor \n" );
 	//set_position( 0, 0, 0, 0 );
 	Initialize();
 	width  =-1;
@@ -94,7 +94,7 @@ void TabularListBox::calc_metrics( )
 	LineHeight           = text_size * 1.5;
 	number_lines_visible = floor( body_height/LineHeight );
 	
-	printf("TabularLB: calc_metrics: height=%6.2f; body_height=%6.2f\n", height, body_height );	
+	//printf("TabularLB: calc_metrics: height=%6.2f; body_height=%6.2f\n", height, body_height );	
 	
 	if (vsb) vsb->set_amount_visible(number_lines_visible);
 
@@ -141,7 +141,7 @@ int TabularListBox::draw_header(	)
 	float Hdr_Bottom = bottom + body_height;
 	int vspace       = ((Hdr_Top-Hdr_Bottom) - header_text_size)/2.0;
 
-	printf("Hdr_Top=%6.1f; Hdr_bottom=%6.1f; \n", Hdr_Top, Hdr_Bottom );
+	//printf("Hdr_Top=%6.1f; Hdr_bottom=%6.1f; \n", Hdr_Top, Hdr_Bottom );
 	Stroke_l	( header_border_color 	 );
 	Fill_l  	( header_background_color);
 	StrokeWidth	( 2.0					 );
@@ -290,7 +290,7 @@ int TabularListBox::draw()
 		draw_text_top_down();
 	else 
 		draw_text_bottom_up();
-	printf("TabularListBox:draw text done:\n");
+	//printf("TabularListBox:draw text done:\n");
 	draw_vertical_lines();
 	// DRAW Scroll Bars:
 	ScrollControl::draw();
@@ -433,8 +433,8 @@ void TabularListBox::update_col_data( vector<string> *mNewColText, int mColumn  
 	for (int i=0; i<rows; i++)
 	{
 		LineData[i][mColumn] = (*mNewColText)[rows];
+		
 	}
-	
 }
 
 

@@ -1,6 +1,7 @@
 #ifndef _DISPLAY_MANAGER_H_
 #define _DISPLAY_MANAGER_H_
 
+#include "system_bar.hpp"
 #include "control.hpp"
 #include "icon.hpp"
 
@@ -26,10 +27,11 @@ public:
 	void	start_screen	(					  );
 	void	end_screen		(					  );
 
+	virtual int	onCreate	(  					  );	
 	void	load_resources  (					  );
 
-	float	get_width		(	)		{  return screen_width;	};
-	float 	get_height		(	)		{  return screen_width;	};
+	float	get_width		(	)		{  return screen_width;	 };
+	float 	get_height		(	)		{  return screen_height; };
 	
 	void	add_object			( Control* NewControl );
 	void	remove_object		( Control* NewControl );
@@ -56,6 +58,7 @@ protected:
 	long int BackgroundColor;				
 	
 	// Linked List of objects.
+	SystemBar		sb;
 	list<Control*>	controls;		// new way - not tested yet!
 	Control* Head;
 	Control* Tail;

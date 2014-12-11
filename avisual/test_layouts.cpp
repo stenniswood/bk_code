@@ -85,7 +85,7 @@ static char 		ConnectionStatusText[128];
 
 void print_test_list()
 {
-	printf("0 : init_simple_button_test  \n");		// Simple
+	printf("0 : init_simple_button_test  \n");	// Simple
 	printf("1 : init_simple_textview_test\n");		
 	printf("2 : init_textview_test\n"	 );
 	printf("3 : init_progressbar_test\n" );
@@ -94,30 +94,37 @@ void print_test_list()
 	printf("6 : init_simple_text\n" 	 );
 	printf("7 : init_simple_path\n" 	 );
 	printf("8 : pack_sample_window\n"	 );
-	printf("10 : init_frame_window \n"	 );		// Combined
-	printf("11 : init_textfile_view\n"	 );
-
+	printf("9 : init_frame_window \n"	 );		// Combined
+	printf("10 : init_textfile_view\n"	 );
+	printf("11 : init_horiz_menu\n"	 	 );
+	printf("12 : init_vert_menu\n"	 	 );
+	printf("13 : init_combo_menu\n"	 	 );
+	printf("14 : init_spinner_menu\n"	 );
+	printf("15 : init_CAN_msg_view\n"	 );	
+			
+	
 	// test_combo_layouts.hpp
-	printf("12 : init_image_gallery\n"	 );
-	printf("13 : init_okay_cancel_dlg\n" );
-	printf("14 : init_audio_view \n"	 );
-	printf("15 : init_directory_lb_test\n");
-	printf("16 : init_file_browser\n"	 );
-	printf("17 : init_sidebar_test\n"	 );
+	printf("21 : init_image_gallery\n"	 );
+	printf("22 : init_okay_cancel_dlg\n" );
+	printf("23 : init_audio_view \n"	 );
+	printf("24 : init_directory_lb_test\n");
+	printf("25 : init_file_browser\n"	 );
+	printf("26 : init_sidebar_test\n"	 );
 	
 	// test_graph_layouts.hpp :
-	printf("20 : init_line_graph\n"		 );		// GRAPHS
-	printf("21 : init_histogram_graph\n" );	
-	printf("22 : init_bar_graph\n"		 );	
-	printf("23 : init_scatter_graph\n"	 );	
-	printf("24 : init_combined_graph\n"	 );	
+	printf("30 : init_line_graph\n"		 );		// GRAPHS
+	printf("31 : init_histogram_graph\n" );	
+	printf("32 : init_bar_graph\n"		 );	
+	printf("33 : init_scatter_graph\n"	 );	
+	printf("34 : init_combined_graph\n"	 );	
 
 	// test_game_layouts.hpp
-	printf("30 : init_cards_only\n"	);			// GAMES:
-	printf("31 : init_cards\n"	 	);	
-	printf("32 : init_blackjack\n"	);	
-	printf("33 : init_hearts\n"		);
-	printf("34 : init_reversi\n"	);			
+	printf("40 : init_cards_only\n"	);			// GAMES:
+	printf("41 : init_cards\n"	 	);	
+	printf("42 : init_blackjack\n"	);	
+	printf("43 : init_hearts\n"		);
+	printf("44 : init_reversi\n"	);			
+	printf("45 : init_battleships\n");
 	printf("\n"	);	
 }
 
@@ -136,13 +143,13 @@ void load_test_screen(int number)
 	case 6: init_simple_text		();		break;
 	case 7: init_simple_path		();		break;
 	case 8: pack_sample_window		();		break;
-	case 10: init_frame_window		();		break;		
-	case 11: init_textfile_view		();		break;		
-	case 12: init_horiz_menu		();		break;			
-	case 13: init_vert_menu			();		break;
-	case 14: init_combo_menu		();		break;
-	case 15: init_spinner_menu		();		break;	
-	case 16: init_CAN_msg_view		();		break;	
+	case 9: init_frame_window		();		break;		
+	case 10: init_textfile_view		();		break;		
+	case 11: init_horiz_menu		();		break;			
+	case 12: init_vert_menu			();		break;
+	case 13: init_combo_menu		();		break;
+	case 14: init_spinner_menu		();		break;	
+	case 15: init_CAN_msg_view		();		break;
 
 	case 21: init_image_gallery		();		break;		
 	case 22: init_okay_cancel_dlg	();		break;
@@ -352,7 +359,6 @@ void init_simple_path()
 {
 	MainDisplay.init_screen();
 	MainDisplay.start_screen();
-
 	printf("Simple VG path example\n");
 	
 	// To Answer the question - is there any fill in a font:
@@ -466,8 +472,17 @@ void init_textfile_view()
 	MainDisplay.add_object( &tf );		
 }
 
-HorizontalMenu hm(-1,-1);
-VerticalMenu   vm(-1,-1);
+static HorizontalMenu hm(-1,-1);
+VerticalMenu   vm   	(-1,-1);
+VerticalMenu   simple   (-1,-1);
+//VerticalMenu   molecules(-1,-1);
+static VerticalMenu   games	(-1,-1);
+
+int menu_callback(void* menuPtr, int mMenuIndex )
+{
+	printf("menu_callback( %4x, %d )\n", menuPtr, mMenuIndex );
+	load_test_screen( mMenuIndex );
+}
 
 void init_horiz_menu		()
 {
@@ -486,8 +501,7 @@ void init_horiz_menu		()
 }
 void init_vert_menu			()
 {
-	printf("init_vert_menu\n");
-	
+	printf("init_vert_menu\n");	
 	vm.set_width_height	( 200, 200 );
 	vm.move_to			( 100, 500 );
 	vm.add_simple_command( "File Browser" 	);
@@ -496,6 +510,7 @@ void init_vert_menu			()
 	vm.add_simple_command( "Hearts" 		);			
 	vm.add_simple_command( "Image Gallery"	);
 	vm.calc_metrics();
+	
 	printf("init_vert_menu\n");
 	
 	MainDisplay.remove_all_objects(	);
@@ -504,21 +519,63 @@ void init_vert_menu			()
 
 void init_combo_menu()
 {
-	//vm.set_width_height	( 200, 200 );
-	vm.move_to			( 100, 500 );
-	vm.add_simple_command( "File Browser" 	);
-	vm.add_simple_command( "Audio Amp" 		);	
-	vm.add_simple_command( "Black Jack" 	);		
-	vm.add_simple_command( "Hearts" 		);			
-	vm.add_simple_command( "Image Gallery"	);
-	vm.calc_metrics();
+	//vm.set_width_height( 200, 200 );
+	simple.move_to			 ( 100, 500 		);	
+	simple.add_simple_command( "init_simple_button_test" );
+	simple.add_simple_command( "init_simple_textview_test" );
+	simple.add_simple_command( "init_textview_test"		);
+	simple.add_simple_command( "init_progressbar_test"  );
+	simple.add_simple_command( "init_radio_button_test" );
+	simple.add_simple_command( "init_check_button_test"	);
+	simple.add_simple_command( "init_simple_text"		);
+	simple.add_simple_command( "init_simple_path"		);
+	simple.add_simple_command( "pack_sample_window"		);
+	simple.add_simple_command( "init_frame_window"		);
+	simple.add_simple_command( "init_textfile_view"		);	
+	simple.add_simple_command( "init_horiz_menu"		);
+	simple.add_simple_command( "init_vert_menu"			);
+	simple.add_simple_command( "init_combo_menu"		);		
+	simple.add_simple_command( "init_spinner_menu"		);		
+	simple.add_simple_command( "init_CAN_msg_view"		);
+
+	simple.add_callback( 0, menu_callback  );
+	simple.add_callback( 1, menu_callback  );
+	simple.add_callback( 2, menu_callback  );
+	simple.add_callback( 3, menu_callback  );
+	simple.add_callback( 4, menu_callback  );
+	simple.add_callback( 5, menu_callback  );
+	simple.add_callback( 6, menu_callback  );
+	simple.add_callback( 7, menu_callback  );
+	simple.add_callback( 8, menu_callback  );			
+	simple.add_callback( 9, menu_callback  );			
+	simple.add_callback( 10, menu_callback  );			
+	simple.add_callback( 11, menu_callback  );						
+	simple.add_callback( 12, menu_callback  );						
+	simple.add_callback( 13, menu_callback  );						
+	simple.add_callback( 14, menu_callback  );
+	simple.add_callback( 15, menu_callback  );	
+
+/*	molecules.move_to			( 100, 500 			);
+	molecules.add_simple_command( "Image Gallery" 	);
+	molecules.add_simple_command( "Okay Cancel Dialog" 	);
+	molecules.add_simple_command( "Audio Amp" 	);
+	molecules.add_simple_command( "Directory lb" 	);
+	molecules.add_simple_command( "File Browser" 	);				
+	molecules.add_simple_command( "sidebar test" 	);
+	molecules.add_callback( 0,  menu_callback  );
+	molecules.add_callback( 1,  menu_callback  );	
+	molecules.add_callback( 2,  menu_callback  );	
+	molecules.add_callback( 3,  menu_callback  );	
+	molecules.add_callback( 4,  menu_callback  );	
+	molecules.add_callback( 5,  menu_callback  ); */
 	
 	hm.set_width_height(640, 30);
 	hm.move_to( 100, 768-36 );
 	hm.add_entry_text( "File" );
 	hm.add_entry_text( "Edit" );	
 	hm.add_entry_text( "View" );	
-	hm.add_sub_menu( "Window", &vm );
+	hm.add_sub_menu( "Atoms", &simple );
+	//hm.add_sub_menu( "Molecules", &molecules );	
 	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &hm );
@@ -534,7 +591,7 @@ void init_spinner_menu()
 	spin.set_max  ( 1000 );
 	spin.set_min  (    0 );
 	spin.set_text_color(0xFFFF0000);
-
+ 
 	spin2.move_to  ( 300, 400 );
 	spin2.set_value( 400  );
 	spin2.set_max  ( 1000 );

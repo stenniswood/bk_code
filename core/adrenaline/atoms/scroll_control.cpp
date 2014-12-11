@@ -62,7 +62,7 @@ void ScrollControl::set_width_height( int Width, int Height )
 		vsb->move_to( (left+width-vsb->width), bottom );	// move sideways.
 		vsb->set_width_height( vsb->width, Height);
 	}
-	if (hsb)	
+	if (hsb)
 		hsb->set_width_height( Width, hsb->height);
 }
 

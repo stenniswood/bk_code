@@ -1,6 +1,7 @@
 #ifndef _CONTROL_H_
 #define _CONTROL_H_
   
+#include <vector>
 #include "../core/can/bk_system_defs.h"
 
 #define DefaultPadding 15
@@ -61,7 +62,8 @@ public:
 	virtual int   	draw				(	);
 	int   			draw_border			(   );
 
-	void			Invalidate()			{ invalidated = true; };
+	void			Invalidate		( )			{ invalidated = true; };
+	void			register_child	( Control* mNewChild );
 
 	/* Display manager calls HitTest on a window, then all it's child controls.
 	if the mouse click is on this control (ie. if the function below returns true), 
@@ -76,6 +78,8 @@ public:
 	virtual int			onCreate	  (  );	// chance to load resources, call functions which use fonts (already loaded before this call) etc.
 
 protected:
+	std::vector<Control*>	m_child_controls;
+	
 	bool		invalidated;		// forces a redraw in display manager.  not implemented yet.
 	bool		created;
 	

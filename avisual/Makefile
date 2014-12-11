@@ -21,7 +21,7 @@ FUSE_OBJS  = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 VG_OBJS    = libshapes.o oglinit.o 
 APP_CPP_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			  ipc_mem_bkinstant.o audio_app.o test_layouts.o test_combo_layouts.o \
-			  test_game_layouts.o test_graph_layouts.o 
+			  test_game_layouts.o test_graph_layouts.o avisual_menu.o
 IPC_OBJS   = 
 
 REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o
@@ -31,7 +31,7 @@ CARDCORE_GAME_OBJS  = card.o card_player.o deck.o basic_card_game.o
 
 
 #  button_array_gui.o Container.o 
-ADRENALINE_OBJS = display.o display_manager.o mouse.o resource_manager.o 
+ADRENALINE_OBJS = display.o display_manager.o mouse.o resource_manager.o
 ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			directory_listbox.o frame_window.o groupbox.o icon.o       \
 			leveler.o line_grouper.o listbox.o marquee.o power_level.o \
@@ -39,12 +39,11 @@ ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			stick_leg.o tab_control.o table_window.o tabular_listbox.o \
 			TextFile.o text_view.o tk_colors.o wave_view.o window.o    \
 			horizontal_menu.o vertical_menu.o spinner.o can_msg_view.o 
-ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  \
+ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
-			stereo_power.o stick_figure.o 
+			stereo_power.o stick_figure.o system_bar.o
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o
-
 KINETIC_OBJS = 
 
 # APP CODE

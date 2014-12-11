@@ -54,32 +54,33 @@ int		CANMessageView::calc_metrics()
 }
 int		CANMessageView::add_message ( struct sCAN* msg )
 { 
+   //std::vector<std::string>*  row = new std::vector<std::string>;
+   
    // Make a copy on the heap : 
    struct sCAN* tmpC = new struct sCAN();
    memcpy( tmpC, msg, sizeof(struct sCAN) );
    m_msgs.push_back( tmpC );
    
    std::string str;
-   //std::vector<std::string>*  row = new std::vector<std::string>;
    std::vector<std::string>  row;   
 
    char str2[30];
-   itoa( msg->id.group.id, str2, 16 );
+   sprintf( str2, "%2x", msg->id.group.id );
    row.push_back( str2 ); 
 
    strcpy( str2, "need lookup table" );
    row.push_back( str2 );
    
-   itoa( msg->id.group.instance, str2, 10 );
+   sprintf( str2, "%2d", msg->id.group.instance );
    row.push_back( str2 );
 
-   itoa( msg->header.DLC, str2, 10 );
+   sprintf( str2, "%2d", msg->header.DLC, str2 );
    row.push_back( str2 );
    
 	str2[0] = 0;
 	for (int i=0; i<msg->header.DLC; i++)
 	{
-		itoa( msg->data[i], str2, 16 );
+		sprintf( str2, "%2x", msg->data[i] );
 		row.push_back( str2 );
 	}
 	add_row( &row );

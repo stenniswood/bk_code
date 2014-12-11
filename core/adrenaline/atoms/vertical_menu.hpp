@@ -1,8 +1,15 @@
 #ifndef _VERTICAL_MENU_H_
 #define _VERTICAL_MENU_H_
 
+#include <string>
+//#include <string.h>
 #include <vector>
 #include "control.hpp"
+using namespace std;
+#include "listbox.hpp"
+
+#include "horizontal_menu.hpp"
+
 
 class VerticalMenu;
 
@@ -12,7 +19,7 @@ struct stVertMenuInfo {
 	char	short_cut_key[4];		// to directly activate from keyboard 
 	float	width;
 	int		state;
-	int		(*callback)(void*);		// called when the item is selected.
+	int		(*callback)(void*, int);		// called when the item is selected.
 	VerticalMenu*	menu;
 };
 
@@ -31,16 +38,18 @@ public:
 	VerticalMenu ( int Width, int Height 				   );
 	~VerticalMenu( );
 
-	virtual void 	Initialize(	);
-	int				calc_metrics();
- 
+	virtual void 	Initialize			(	);
+	int				calc_metrics		(	);
+
 	int				add_simple_command	( char* mText, char* mShortcut=NULL );
 	int				add_sub_menu		( char* mText, VerticalMenu* mSubMenu=NULL );	
+	int				add_callback		( int  mIndex, int (*callback)(void*, int)=NULL );	
 	int				add_entry			( stVertMenuInfo mEntry 	 );
 
-	int				get_id				( )	{ return selected_item; };
+//	int				get_id				( )	{ return selected_item; };
 	int				set_state			( int mState, int mIndex );
-	
+	int				set_h_parent		( HorizontalMenu* mMenu  );
+		
 	// This will move it's upper left corner to the horizontal menu:
 	int				attach_at			( float x, float y );
 
@@ -49,10 +58,12 @@ public:
 	virtual int   	draw		 		(				);
 
 	int				get_hit_index		( int Mousex, int Mousey );
-//	int				set_on_click_listener( void (void*) );	
-	virtual int		onClick(int x, int y, bool mouse_is_down=true);
+//	int				set_on_click_listener( void (void*) );
+	virtual int		onClick				( int x, int y, bool mouse_is_down=true );
 
 protected:
+	HorizontalMenu*			m_horiz_parent;
+
 	std::vector<stVertMenuInfo*> m_entries;
 	int						m_selection;
 	bool					has_scroller;

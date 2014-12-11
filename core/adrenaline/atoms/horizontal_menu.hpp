@@ -35,7 +35,10 @@ public:
 
 	virtual int   	draw		 		(	);
 
+	bool			is_selection_valid	( 	);
+
 	int				get_hit_index		( int Mousex, int Mousey );
+	virtual Control* HitTest			( int x, int y 	);
 	virtual int		onClick				( int x, int y, bool mouse_is_down=true );
 //	int				set_on_click_listener( void (void*) );
 

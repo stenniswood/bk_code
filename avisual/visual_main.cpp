@@ -132,7 +132,7 @@ void gui_interface()
 		if (object_clicked)
 		{
 			printf("clicked an object %x!\n", object_clicked);
-			int num = object_clicked->onClick( x, y ); 
+			int num = object_clicked->onClick( x, y );
 			UpdateDisplaySemaphore=1;
 		} else
 			printf(" hit test returned null\n");
@@ -211,6 +211,7 @@ int main( int argc, char *argv[] )
 	} else 
 		load_screen(4);
 	UpdateDisplaySemaphore=1;
+	MainDisplay.onCreate();
 	
 	printf("================= Main Loop ==========================\n");	
 	while (1)

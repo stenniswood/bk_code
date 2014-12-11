@@ -151,7 +151,7 @@ int ListBox::draw_text_top_down()
 	{
 		y = bottom + body_height - (i - first_visible_line +1)*LineHeight;
 		draw_one_row( i, y );
-		printf( "y=%6.3f Num_lines=%d LH=%6.3f, TextSize=%6.3f above=%6.3f\n", y, num_lines, LineHeight, text_size);
+		//printf( "y=%6.3f Num_lines=%d LH=%6.3f, TextSize=%6.3f above=%6.3f\n", y, num_lines, LineHeight, text_size);
 	}
 }
 
@@ -219,7 +219,7 @@ int ListBox::draw()
 
 	// DRAW Scroll Bars:
 	ScrollControl::draw();
-	
+
 	draw_line_backgrounds();
 
 	StrokeWidth(3.0);
@@ -302,7 +302,7 @@ float ListBox::get_longest_line(  )
 
 void ListBox::set_width_height   ( int Width, int Height )
 {
-	ScrollControl::set_width_height( Width, Height );
+	ScrollControl::set_width_height( Width, Height );	
 	calc_metrics();
 }
 
@@ -321,6 +321,7 @@ void ListBox::select( int mIndex )
 // Returns the select index of the listbox:
 int ListBox::get_hit_index(int mx, int my)
 {
+	printf("ListBox::get_hit_index()\n");
 	int   start	 = first_visible_line;
 	int   end  	 = first_visible_line + number_lines_visible;
 	int	  retval = -1;
