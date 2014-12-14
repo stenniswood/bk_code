@@ -15,14 +15,16 @@ class BasicCardGame : public Control
 {
 public:
 	BasicCardGame( int mNumber_of_players );
+	~BasicCardGame();
 
-	virtual int	number_of_cards_to_start( int mNumber_of_players);
-	void		deal			( int n_Cards );
-	virtual void		score			(	);
-	int			get_score		( int mPlayerIndex );
+	virtual int		number_of_cards_to_start( int mNumber_of_players);
+	void			deal				( int n_Cards );
+	virtual void	score				(	);
+	int				get_score			( int mPlayerIndex );
 
-	void		evaluate_winners(	);	
-	void		pay_out			(	);
+	void		setup_game				(	);		
+	void		evaluate_winners		(	);	
+	void		pay_out					(	);
 
 	void 		place_buttons	( int mPlayerIndex 	);
 	void		place_players	( float radius 		);	// place places around the game's center point.

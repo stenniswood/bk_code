@@ -14,6 +14,7 @@
 #include "card.hpp"
 #include "card_player.hpp"
 
+const int Margin = 12;
 #define CARD_SPACE_PADDING 15
 
 
@@ -24,24 +25,30 @@ CardPlayer::CardPlayer( int MaxCardsInHand )
 	//set_width_height( MaxCardsInHand*(22+5), 100 );
 }
 
-void CardPlayer::receive_card( Card* mNewCard, bool mExposed )
+bool CardPlayer::receive_card( Card* mNewCard, bool mExposed )
 {
-	//printf("%x received %x 1 card\n",this,  mNewCard );
-	mNewCard->expose( mExposed );
-	cards.push_back(mNewCard);
-	arrange_cards( card_spacing );
+	int size = cards.size();
+	if (size < max_number_cards_in_hand)
+	{
+		//printf("%x received %x 1 card\n",this,  mNewCard );
+		mNewCard->expose( mExposed );
+		cards.push_back(mNewCard);
+		arrange_cards( card_spacing );
+	}
 }
 
 float	CardPlayer::get_one_card_width ()
 {	return 62.;	}
 
 float	CardPlayer::get_one_card_height()
-{	return 81.;	}
+{	return 81.;	
+}
 
 float CardPlayer::determine_card_spacing(  )
 {
 	printf(" max_number_cards_in_hand=%d;  width=%6.1f\n", max_number_cards_in_hand, width);
-	float edge_width = (float)width - get_one_card_width();
+	float edge_width = width - get_one_card_width() - 2.*Margin ;
+	
 	float spacing = ( edge_width / (float)max_number_cards_in_hand  );
 	return spacing;
 }
@@ -106,12 +113,12 @@ void CardPlayer::expose_card	( Card* mNewCard, bool mExposed )
 
 int	CardPlayer::arrange_cards( float mCardSpacing )
 {
-	const int PADDING = 20;
+
 	const float CARD_HEIGHT = 81;
 	
-	
-	int l = left+PADDING; 
+	int   l = left+Margin; 
 	float b = (height-CARD_HEIGHT)/2 + bottom;
+
 	//printf("CardPlayer::arrange_cards() \n" ); 
 	if (mCardSpacing==-1)
 		mCardSpacing = determine_card_spacing();
@@ -125,6 +132,11 @@ int	CardPlayer::arrange_cards( float mCardSpacing )
 	}
 	//printf("\n");
 } 
+
+Card* CardPlayer::get_hit_index( float x, float y )
+{
+	
+}
 
 int	CardPlayer::draw( )
 {

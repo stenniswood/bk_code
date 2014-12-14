@@ -6,7 +6,6 @@
 #include <string.h>
 #include <string>
 #include <math.h>
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
@@ -46,12 +45,14 @@ CANMessageView::~CANMessageView()
 
 void 	CANMessageView::Initialize(	) 
 {
- 
+ 	TabularListBox::Initialize();
+ 	setup_headers();
 }
 int		CANMessageView::calc_metrics() 
 {
  
 }
+
 int		CANMessageView::add_message ( struct sCAN* msg )
 { 
    //std::vector<std::string>*  row = new std::vector<std::string>;
@@ -88,65 +89,55 @@ int		CANMessageView::add_message ( struct sCAN* msg )
 
 int	CANMessageView::setup_headers()
 {
-	struct HeaderItemInfo* mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "ID";
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;
-	add_column( mNewHeading );
+	static struct HeaderItemInfo mNewHeading;	// = new struct HeaderItemInfo();
+	//mNewHeading.width	  = -1;
+	mNewHeading.text 		= "ID";
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "Name";
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;
-	add_column( mNewHeading );
+	mNewHeading.text 		= "Name";
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "Instance";
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );
+	mNewHeading.text 		= "Instance";
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "DLC";
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );
+	mNewHeading.text 		= "DLC";
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "[0]";		// for now all 8 bytes at once.
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );
+	mNewHeading.text 		= "[0]";		// for now all 8 bytes at once.
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "[1]";		// for now all 8 bytes at once.
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );
+	mNewHeading.text 		= "[1]";		// for now all 8 bytes at once.
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "[2]";		// for now all 8 bytes at once.
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );
+	mNewHeading.text 		= "[2]";		// for now all 8 bytes at once.
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "[3]";		// for now all 8 bytes at once.
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );
+	mNewHeading.text 		= "[3]";		// for now all 8 bytes at once.
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "[4]";		// for now all 8 bytes at once.
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );
+	mNewHeading.text 		= "[4]";		// for now all 8 bytes at once.
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "[5]";		// for now all 8 bytes at once.
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );
+	mNewHeading.text 		= "[5]";		// for now all 8 bytes at once.
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "[6]";		// for now all 8 bytes at once.
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );
+	mNewHeading.text 		= "[6]";		// for now all 8 bytes at once.
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 
-	mNewHeading = new struct HeaderItemInfo();
-	mNewHeading->text 		= "[7]";		// for now all 8 bytes at once.
-	mNewHeading->alignment  = HEADER_ALIGN_LEFT;	
-	add_column( mNewHeading );	
+	mNewHeading.text 		= "[7]";		// for now all 8 bytes at once.
+	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	add_column( &mNewHeading );
 }
 
 int 	CANMessageView::order_by_time		() 

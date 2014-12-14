@@ -23,6 +23,7 @@
 
 using namespace std;
 
+const int TITLE_HEIGHT = 32;
 const int CARD_WIDTH = 62;
 
 void hit_cb( void* mBlackJack )
@@ -168,8 +169,9 @@ void BlackJack::setup_game(	)
 int	BlackJack::onCreate  (  )
 {
 	printf("onCreate\n");
-	float sx = width/2.  + left   - play_again.get_width() /2.;
-	float sy = height/2. + bottom - play_again.get_height()/2.;
+	set_graphic_center();
+	float sx = cx - play_again.get_width() /2.;
+	float sy = cy - play_again.get_height()/2.;
 	play_again.move_to( sx, sy );
 
 	printf("onCreate - deck\n");
@@ -205,8 +207,8 @@ void	BlackJack::deal()
 
 void BlackJack::set_graphic_center( )
 {
-	cx = width /2 + left;
-	cy = height/2 + bottom;
+	cx = width /2. + left;
+	cy = height/2. + bottom;
 }
 
 void BlackJack::place_buttons( int mPlayerIndex )	
@@ -228,10 +230,13 @@ void BlackJack::place_buttons( int mPlayerIndex )
 
 void BlackJack::place_players( float radius )		// place places around the game's center point.
 {
-	printf("place_players()  %d\n", number_of_players);
+	printf("place_players()  %d  ", number_of_players);
 	set_graphic_center();
-	
-	house->move_to( cx - house->get_width()/2, 400 );
+	//printf(" cx,cy = %6.1f,%6.1f \n", cx, cy );
+	float house_x = cx - house->get_width()/2.;
+	float title_bottom = bottom + height - 1.5*TITLE_HEIGHT;
+	float house_y = (title_bottom - cy - house->get_height() )/2. + cy;
+	house->move_to( house_x, house_y );
 	house->print_positions( );
 
 	// place hit, stay buttons here.
@@ -240,22 +245,22 @@ void BlackJack::place_players( float radius )		// place places around the game's
 		// circle configuration.
 		return;
 	}
-	float w;
+	float w,yp;
 	std::vector<CardPlayer*>::iterator  iter = players.begin();
 	if (number_of_players>0)
 	{	
 		w = (*iter)->get_width()/2.;
-		(*iter)->move_to( cx-w, 150 );				// bottom
+		yp = bottom + (cy-bottom-(*iter)->get_height() )/2. ;
+		(*iter)->move_to( cx-w, yp );				// bottom
 	}
 	if (number_of_players>1) 
 	{
 		iter++;
 		w = (*iter)->get_width();
-		(*iter)->move_to( cx-3*radius-w, cy-(*iter)->get_height()/2 );		// goes left
+		(*iter)->move_to( cx-3*radius-w, cy-(*iter)->get_height()/2. );		// goes left
 	}
 	if (number_of_players>2) {
-		iter++;
-		
+		iter++;		
 		(*iter)->move_to( cx+3*radius, cy-(*iter)->get_height()/2 );			// goes right
 	}
 	// anything else is circle configuration.
@@ -324,9 +329,9 @@ int		BlackJack::draw()
 	// Draw title
 	Stroke_l(0xFFFFFFFF);
 	Fill_l(0xFFFFFF00);
-	float centerx = width/2 + left;
-	float centery = height + bottom- 50;
-	TextMid(centerx, centery, "Black Jack", SerifTypeface, 32 );
+	float centerx = width/8. + left;
+	float centery = height + bottom- 1.5*TITLE_HEIGHT;
+	TextMid(centerx, centery, "Black Jack", SerifTypeface, TITLE_HEIGHT );
 
 	// Draw house + players
 	house->draw(  );

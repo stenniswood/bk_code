@@ -10,7 +10,6 @@
 #include "VG/vgu.h"
 #include <fontinfo.h>
 #include <shapes.h>
-
 #include "bcm_host.h"
 #include "bk_system_defs.h"
 #include "display.h"
@@ -22,7 +21,6 @@
 #include "card_games.h"
 
 
-
 HeartsGame::HeartsGame( int mNumber_of_players )
 : BasicCardGame(mNumber_of_players), trick(mNumber_of_players)
 {
@@ -30,11 +28,9 @@ HeartsGame::HeartsGame( int mNumber_of_players )
 	CardPlayer* cp;
 	int cards_in_hand = number_of_cards_to_start( mNumber_of_players );	
 
-	// 
 	for (int i=0; i<mNumber_of_players; i++)	{
 	//	players[i]->set_width_height( 4*CARD_WIDTH, 100 );
-	}
-	
+	}	
 }
 
 void	HeartsGame::score					( )
@@ -46,33 +42,6 @@ void	HeartsGame::evaluate_winners		( )
 
 }
 
-void	HeartsGame::setup(		)
-{
-	place_players(100.);
-	deck[0]->load_resources();
-	
-	int n_to_deal = number_of_cards_to_start(number_of_players);
-	deal		( n_to_deal );
-	
-	// No discard.  the first person discards to set the suit.
-	//discard_one	(			);
-	whos_turn_is_it = 0;
-}
-
-/*void	HeartsGame::deal( int n	)
-{
-	printf("Dealing %d cards to each of %d players\n", n, number_of_players);
-	Card* card;
-	for (int i=0; i<n; i++)
-	{
-		printf("%d\n", i);
-		for (int p=0; p<number_of_players; p++)
-		{
-			card = draw_one();
-			players[p]->receive_card( card, true );
-		}
-	}
-} */
 
 void	HeartsGame::discard_one(	)
 {
@@ -120,38 +89,6 @@ int		HeartsGame::remove_cards(	)
 	default: break;
 	}
 }
-	
-// place places around the game's center point.
-/*void	HeartsGame::place_players( float radius )
-{
-	float width = 7*61;
-	
-	trick.set_width_height( 61*3, 100 );
-	trick.move_to( cx-90, cy );
-		
-	std::vector<CardPlayer*>::iterator  iter = players.begin();
-	if (number_of_players>0)
-	{	
-		(*iter)->set_width_height( 61*7, 100 );		// bottom
-		(*iter)->move_to( cx-width/2., 200 );		// bottom
-	}
-	if (number_of_players>1) 
-	{
-		iter++;
-		(*iter)->set_width_height( 61*7, 100 );		// goes left
-		(*iter)->move_to( cx/2-50, cy );			// goes left
-	} 
-	if (number_of_players>2) {
-		iter++;
-		(*iter)->set_width_height( 61*7, 100 );		// goes right		
-		(*iter)->move_to( 3*cx/2, cy );				// goes right
-	}	
-	if (number_of_players>3) {
-		iter++;
-		(*iter)->set_width_height( 61*7, 100 );		// goes right		
-		(*iter)->move_to( cx - width/2, 500 );		// goes right
-	}
-}*/
 
 void	HeartsGame::add_to_display_manager( DisplayManager* dm )
 {

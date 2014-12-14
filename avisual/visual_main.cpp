@@ -189,6 +189,8 @@ void behavior_interface()
 	are only set when the Enable is.  maybe.		*/
 int main( int argc, char *argv[] )
 {
+	printf("======= main() ==============\n");	
+
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg 
 	int value    	= 0;

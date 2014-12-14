@@ -14,7 +14,7 @@ class CardPlayer : public Control
 public:
 	CardPlayer(int MaxCardsInHand );
 
-	void	receive_card( Card* mNewCard, bool mExposed = false );
+	bool	receive_card( Card* mNewCard, bool mExposed = false );
 	void	flip_card	( Card* mNewCard 						);
 	void	expose_card	( Card* mNewCard, bool mExposed = false );
 	void	expose_all_cards( bool mExposed = false );
@@ -29,8 +29,9 @@ public:
 	float	get_one_card_width ();
 	float	get_one_card_height();
 	
-	int		arrange_cards(  float mCardSpacing=-1  );
-	virtual int	draw  	 ( );
+	int		arrange_cards		(  float mCardSpacing=-1  );
+	virtual int	draw  	 		( );
+	Card*	get_hit_index		( float x, float y );
 
 protected:
 	std::list<Card*>	cards;

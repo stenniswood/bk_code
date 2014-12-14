@@ -152,30 +152,27 @@ void init_card( )
 }
 
 BlackJack  bj(3);
-HeartsGame hearts(4);
+HeartsGame hearts(3);
 
 void init_blackjack( )
 {
 	printf("init_blackjack()\n");
 	float wide = MainDisplay.get_width();
-	float high = MainDisplay.get_height()/2;
-	bj.set_width_height( wide, high-20 );
-	bj.move_to(0, high/2.);
-	bj.print_positions();
-	printf("init_blackjack() mid\n");	
+	float high = MainDisplay.get_height();
+	bj.set_width_height( wide*(1-0.125), 3.*high/4. );
+	bj.move_to(0.0625*wide, high*(1./8.) );
+	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( &bj 	);
-	printf("init_blackjack() done\n");
 }
 
 void init_hearts( )
 {
 	printf("init_hearts()\n");	
 	float wide = MainDisplay.get_width();
-	float high = MainDisplay.get_height()/2;
-	hearts.set_width_height( wide, high );
-	hearts.move_to(0,0);	
-	hearts.setup();
+	float high = MainDisplay.get_height();
+	hearts.set_width_height( wide*(1-0.125), high*(3./4.) );
+	hearts.move_to(0.0625*wide, high*(1./8.) );
 	printf("Done setting up\n");
 
 	MainDisplay.remove_all_objects(	);

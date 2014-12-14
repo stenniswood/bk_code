@@ -149,13 +149,13 @@ int HorizontalMenu::draw(	)
 			//printf("MenuColor: txt=%4x\n", text_color );
 		}
 		l = m_entries[i]->sx;
-		printf("%6.1f, %6.1f: %6.1f  %s\n", l, bottom, text_size, m_entries[i]->text );
+		//printf("%6.1f, %6.1f: %6.1f  %s\n", l, bottom, text_size, m_entries[i]->text );
 		Text( l, c, m_entries[i]->text,  SerifTypeface, text_size );
 	}
 	if ( is_selection_valid() )  {
-		printf("H Menu selection is valid!\n");
+		//printf("H Menu selection is valid!\n");
 		if (m_entries[m_selection]->menu) {
-			printf("H Menu selection is a menu\n");		
+			//printf("H Menu selection is a menu\n");		
 			m_entries[m_selection]->menu->draw();
 		}
 	}

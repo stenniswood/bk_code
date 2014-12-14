@@ -24,25 +24,31 @@
 
 using namespace std;
 
+const int TITLE_HEIGHT = 32;
 const int CARD_WIDTH = 62;
+
 
 BasicCardGame::BasicCardGame( int mNumber_of_players )
 : Control(), hit(-1,-1), stay(-1,-1)
 {
+	NameOfTheGame = new char[20];
+	strcpy(NameOfTheGame, "Hearts");
+	
 	hit.move_to 		 ( 100, 100 );
 	stay.move_to		 ( 220, 100 );	
 	hit.set_width_height ( 75, 30 );
 	stay.set_width_height( 75, 30 );
 
-	house		   = new CardPlayer(4);
-	house->set_width_height( 2*CARD_WIDTH, 100 );
+	house = NULL;
+	//house		   = new CardPlayer(4);
+	//house->set_width_height( 4.*CARD_WIDTH, 100 );
 
 	// CREATE THE PLAYERS:
 	CardPlayer* cp;
 	for (int i=0; i<mNumber_of_players; i++)
 	{
 		cp = new CardPlayer ( 13 );
-		cp->set_width_height( 4*CARD_WIDTH, 100 );
+		cp->set_width_height( 6*CARD_WIDTH, 100 );
 		players.push_back( cp );
 		number_of_players++;
 	}
@@ -57,24 +63,38 @@ BasicCardGame::BasicCardGame( int mNumber_of_players )
 	whos_turn_is_it = 0;
 }
 
-int	BasicCardGame::onCreate  (  )
+BasicCardGame::~BasicCardGame()
 {
-	printf("BasicCardGame::onCreate()\n" );
+	delete NameOfTheGame;
+	NameOfTheGame = NULL;
+}
+
+void BasicCardGame::setup_game(	)
+{
+//	deck[0]->load_resources();	
 	deck[0]->onCreate();
-	place_players( 100. );	
+	place_players( 100. );
 	int starting_card_count = number_of_cards_to_start( number_of_players);
 	printf("BasicCardGame::onCreate() start with %d cards\n", starting_card_count );
 	deal( starting_card_count );	
 	printf("BasicCardGame::onCreate() cards dealt\n" );
-	float card_spacing = CARD_WIDTH + 10;
 
-	// 
+	whos_turn_is_it = 0;
+}
+
+int	BasicCardGame::onCreate  (  )
+{
+	printf("BasicCardGame::onCreate()\n" );
+	setup_game();
+	
+	//float card_spacing = CARD_WIDTH + 10; 		// this should be done in the card player, not here!
 	vector<CardPlayer*>::iterator	iter = players.begin();
 	for ( ; iter!=players.end(); iter++ )
 	{
-		(*iter)->arrange_cards( card_spacing );
+		(*iter)->arrange_cards( );
 	}
-	printf("BasicCardGame::onCreate() players cards arranged\n" );	
+	//printf("BasicCardGame::onCreate() players cards arranged\n" );
+
 	place_buttons( whos_turn_is_it );
 	printf("BasicCardGame::onCreate\n" );
 }
@@ -94,7 +114,7 @@ void	BasicCardGame::deal( int n_Cards )
 	Card* card;
 	for (int i=0; i<n_Cards; i++)
 	{
-		// House gets one
+		// House gets one:
 		if (house)
 		{	
 			card = draw_one();
@@ -140,13 +160,16 @@ void BasicCardGame::place_buttons( int mPlayerIndex )
 void BasicCardGame::place_players( float radius )		// place places around the game's center point.
 {
 	printf("place_players()  %d\n", number_of_players);
-	cx = width/2 + left;
-	cy = height/2 + bottom;
+	cx = width/2. + left;
+	cy = height/2. + bottom;
 
 	if (house)
 	{
-		house->move_to( cx - house->get_width()/2, 400 );
-		house->print_positions( );
+		float house_x = cx - house->get_width()/2. ;
+		float title_bottom = bottom + height - 1.5*TITLE_HEIGHT;
+		float house_y = (title_bottom - cy - house->get_height() )/2. + cy;
+		house->move_to( house_x, house_y );
+		//house->print_positions( );
 	}
 
 	// place hit, stay buttons here.
@@ -155,27 +178,29 @@ void BasicCardGame::place_players( float radius )		// place places around the ga
 		// circle configuration.
 		return;
 	}
-	float w;
+	float w,yp;
 	std::vector<CardPlayer*>::iterator  iter = players.begin();
 	if (number_of_players>0)
 	{	
 		w = (*iter)->get_width()/2.;
-		(*iter)->move_to( cx-w, 150 );				// bottom
-		printf("player 1 done.\n");
+		yp = bottom + (cy-bottom-(*iter)->get_height() )/2. ;
+		(*iter)->move_to( cx-w, yp );				// bottom
 		(*iter)->print_positions();
 	}
 	if (number_of_players>1) 
 	{
 		iter++;
 		w = (*iter)->get_width();
-		(*iter)->move_to( cx-3*radius-w, cy-(*iter)->get_height()/2 );		// goes left
+		yp = cy-(*iter)->get_height()/2.;
+		(*iter)->move_to( cx-3.*radius-w, yp );		// goes left
 		printf("player 2 done.\n");
 		(*iter)->print_positions();		
 	}
 	if (number_of_players>2) 
 	{
 		iter++;		
-		(*iter)->move_to( cx+3*radius, cy-(*iter)->get_height()/2 );			// goes right
+		yp = cy-(*iter)->get_height()/2.;		
+		(*iter)->move_to( cx+3.*radius, yp );			// goes right
 		printf("player 3 done.\n");
 		(*iter)->print_positions();		
 	}
@@ -217,26 +242,31 @@ Card*	BasicCardGame::draw_one()
 
 int		BasicCardGame::draw()
 {
-	//printf("\Basic Card draw.\n");
-	//print_positions();
+	char score_text[40];
+	
+	printf("Basic Card draw.\n");
 	Control::draw();
 
 	// Draw title
 	Stroke_l(0xFFFFFFFF);
-	Fill_l(0xFFFFFF00);
-	float centerx = width/2 + left;
-	float centery = height + bottom- 36;
-	TextMid(centerx, centery, NameOfTheGame, SerifTypeface, 32 );
+	Fill_l  (0xFFFFFF00);
+	float centerx = width/8. + left;
+	float centery = height + bottom- 1.5*TITLE_HEIGHT;
+	TextMid(centerx, centery, NameOfTheGame, SerifTypeface, TITLE_HEIGHT );
+	printf("Basic Card draw.  %s\n", NameOfTheGame );
 	
 	// Draw house + players
-	house->draw(  );
-		char score_text[40];
+	/*if (house)
+	{
+		house->draw(  );
+		
 		int score = house->get_best_black_jack_score();
 		float sx = house->get_width()/2.  + house->get_left();
 		float sy = house->get_bottom() - TEXT_HEIGHT;
 		sprintf ( score_text, "Score: %d", score  );
 		printf  ( "sx=%6.1f;  sy=%6.1f\n", sx, sy ); 
 		TextMid ( sx, sy, score_text, SerifTypeface, 16 );
+	}*/
 	
 	int i=0;
 	// Display Manager Players : 
@@ -253,21 +283,22 @@ int		BasicCardGame::draw()
 	Stroke_l(0xFFFFFFFF);
 	Fill_l  (0xFFFFFFFF);
 
+/*	float sx,sy;
 	iter = players.begin();
 	while ( iter != players.end() )
 	{
 		sx = (*iter)->get_width()/2.  + (*iter)->get_left();
 		sy = (*iter)->get_bottom() - TEXT_HEIGHT;
-		score = (*iter)->get_best_black_jack_score();
+		int score = (*iter)->get_best_black_jack_score();
 		sprintf(score_text, "Score: %d", score );
 		printf("sx=%6.1f;  sy=%6.1f\n", sx, sy ); 
 		TextMid(sx, sy, score_text, SerifTypeface, 16 );
 		iter++;	
-	} 
+	} */
 
 	// Draw Hit/stay buttons:
-	hit.draw();
-	stay.draw();	
+//	hit.draw();
+//	stay.draw();	
 	return TRUE;
 }
 

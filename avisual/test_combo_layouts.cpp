@@ -59,7 +59,7 @@ AUTHOR	: Steve Tenniswood
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
 static TextView 		LongText		( 50, 1230, 750, 500 );
-static TabularListBox	tab_lb			( 600, 900, 750, 50  );
+//static TabularListBox	tab_lb			( 600, 900, 750, 50  );
 
 /********************* A sample Window ***********************************/
 static FrameWindow	ParentWindowFrame(450, 1050, 500, 100);

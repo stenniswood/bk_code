@@ -38,7 +38,7 @@
 TextView 	ConnectionStatus( 50, 1230, 750, 700 );
 TextView 	CmdText;
 
-TabularListBox  tab_lb(600, 20, 620, 5, -1);
+//TabularListBox  tab_lb(600, 20, 620, 5, -1);
 TabularListBox  adren_board_list;
 
 /********************* A sample Window ****************/
@@ -86,56 +86,55 @@ char ConnectionStatusText[128];
 
 void set_headings()
 {
-	vector<struct HeaderItemInfo> *headings = new vector<struct HeaderItemInfo>;	// 	
 	struct HeaderItemInfo hdr_info;
 
 	// Column #1 : 
 	hdr_info.text  = "Host name";
 	hdr_info.width = -1;
 	hdr_info.alignment = HEADER_ALIGN_LEFT;	
-	headings->push_back( hdr_info );		// This makes a copy of it!
-
+//	tab_lb.add_column( &hdr_info );
+	
 	// Column #2 :
 	hdr_info.text  = "IP Address";
 	hdr_info.width = -1;
 	hdr_info.alignment = HEADER_ALIGN_LEFT;		
-	headings->push_back( hdr_info );
+	//headings->push_back( hdr_info );
+//	tab_lb.add_column( &hdr_info );
 
 	// Column #3:
 	//hdr_info = new struct HeaderItemInfo();
 	hdr_info.text  = "Machine Type";
 	hdr_info.width = -1;
 	hdr_info.alignment = HEADER_ALIGN_LEFT;			
-	headings->push_back( hdr_info );
+//	tab_lb.add_column( &hdr_info );
+	//headings->push_back( hdr_info );
 	//tab_lb.set_headings( headings );
 	//printf("#1: %s\n", (*headings)[1].text.c_str() );	
 }
 
 void adren_board_list_set_headings()
 {
-	vector<struct HeaderItemInfo> *headings = new vector<struct HeaderItemInfo>;	// 	
-	struct HeaderItemInfo hdr_info;
+	static struct HeaderItemInfo hdr_info;
 
 	// Column #1 : 
 	hdr_info.text  = "Model";
-	hdr_info.width = -1;
+	hdr_info.width = 100;
 	hdr_info.alignment = HEADER_ALIGN_LEFT;	
-	headings->push_back( hdr_info );		// This makes a copy of it!
+	adren_board_list.add_column( &hdr_info );
 
 	// Column #2 :
 	hdr_info.text  = "Instance";
-	hdr_info.width = -1;
+	hdr_info.width = 100;
 	hdr_info.alignment = HEADER_ALIGN_LEFT;		
-	headings->push_back( hdr_info );
+	adren_board_list.add_column( &hdr_info );
 
 	// Column #3:
 	//hdr_info = new struct HeaderItemInfo();
 	hdr_info.text  = "Firmware";
-	hdr_info.width = -1;
+	hdr_info.width = 100;
 	hdr_info.alignment = HEADER_ALIGN_LEFT;			
-	headings->push_back( hdr_info );
-	adren_board_list.set_headings( headings );
-	//printf("#1: %s\n", (*headings)[1].text.c_str() );	
+	adren_board_list.add_column( &hdr_info );
+		
 }
 
 void populate_listbox()
@@ -145,37 +144,37 @@ void populate_listbox()
 	data->push_back("sjt-linux");
 	data->push_back("192.168.1.142");
 	data->push_back("Raspberry Pi");
-	tab_lb.add_row (data);
+//	tab_lb.add_row (data);
 	
 	data = new vector<string>;	
 	data->push_back("dev1");
 	data->push_back("192.168.1.141");
 	data->push_back("Raspberry Pi");
-	tab_lb.add_row (data);
+//	tab_lb.add_row (data);
 
 	data = new vector<string>;	
 	data->push_back("sjtenniswood");
 	data->push_back("192.168.1.140");
 	data->push_back("Macbook Pro");
-	tab_lb.add_row (data);
+//	tab_lb.add_row (data);
 
 	data = new vector<string>;	
 	data->push_back("sjShadows computer");
 	data->push_back("192.168.1.666");
 	data->push_back("Cat attack");
-	tab_lb.add_row (data);
+//	tab_lb.add_row (data);
 
 	data = new vector<string>;	
 	data->push_back("merici drops");
 	data->push_back("192.168.1.777");
 	data->push_back("Windows PC");
-	tab_lb.add_row (data);
+//	tab_lb.add_row (data);
 	
 	data = new vector<string>;	
 	data->push_back("tv");
 	data->push_back("192.168.1.144");
 	data->push_back("Mac");
-	tab_lb.add_row (data);
+//	tab_lb.add_row (data);
 }
 
 void update_available_client_list()
@@ -192,6 +191,7 @@ void update_available_client_list()
 	}
 	printf("===================================================\n");
 }
+
 void init_avisual()
 {
 	char* str = new char[255];
@@ -215,21 +215,24 @@ void init_avisual()
 	AvailableClients.set_position( 1000, 1200, 300, 20 );
 	update_available_client_list();
 
-	set_headings();
+	//set_headings();
 	printf("SET_HEADINGS() - \n");
-	populate_listbox();
+	//populate_listbox();
 	printf("POPULATED LISTBOX () - \n");
 
-	adren_board_list.print_positions();
-	adren_board_list.move_to( 10, 10 );
-	adren_board_list.copy_position_vert 				(&AvailableClients);
-	adren_board_list.set_text_size					    ( 12.0 );
-	adren_board_list.adjust_height_for_num_visible_items( 8 );
 	adren_board_list_set_headings();
-	//adren_board_list.calc_widths_from_text			    (   );
-	//adren_board_list.calc_column_positions_from_widths  (   );
-	adren_board_list.calc_metrics();
+	adren_board_list.set_width_height( 300,300 );
+	adren_board_list.move_to( 10, 10 );
 
+	//adren_board_list.copy_position_vert 				(&AvailableClients);
+	//adren_board_list.set_text_size				    ( 12.0 );
+	adren_board_list.adjust_height_for_num_visible_items( 8 );
+	
+	adren_board_list.calc_widths_from_text			    (   );
+	adren_board_list.calc_column_positions_from_widths  (   );
+	//adren_board_list.calc_metrics();
+	adren_board_list.print_positions();
+	
 	//printf("CALC_METRICS() - DONE \n");
 
 	//pack_sample_window();	

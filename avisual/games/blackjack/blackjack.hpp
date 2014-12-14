@@ -26,7 +26,7 @@ public:
 	void		pay_out			(	);
 	int			dealer_hits		(	);
 	int			dealer_play		(	);
-		
+
 	void 		set_graphic_center( );	
 	void 		place_buttons	( int mPlayerIndex =-1	);
 	void		place_players	( float radius 		);	// place places around the game's center point.

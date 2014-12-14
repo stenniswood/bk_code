@@ -15,6 +15,11 @@ using namespace std;
 #define FILE_ID 	 1
 #define DIRECTORY_ID 2
 
+const int LIST_MODE   = 1;
+const int DETAIL_MODE = 2;
+const int ICON_MODE   = 3;		// NOT IMPLEMENTED YET
+
+
 class DirectoryListBox : public TabularListBox
 {
 public:
@@ -24,7 +29,9 @@ public:
 	~DirectoryListBox();
 	void 			Initialize			( );
 	
+	void			show_mode			( int mMode				  );
 	void			setup_headings		( 						  );
+	void 			setup_heading_simple( 						  );
 	void			setup_heading_details( 						  );
 	void 			compose_detail_line	( char* path, char* d_name );
 	
@@ -41,7 +48,8 @@ public:
 protected:	
 	bool			show_hidden_files;
 	string			longest_path;		// compiled path of the selected items.
-
+	int				m_display_mode;
+	
 private:
 	vector< int >		icon_id;
 

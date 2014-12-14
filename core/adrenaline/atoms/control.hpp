@@ -23,7 +23,7 @@ public:
 	void  			set_text_color 	  	  ( long int TextColor 	);
 	void  			set_border_color      ( long mColor 	) { border_color= mColor; 	  }
 	void  			set_background_color  ( long mColor 	) { background_color= mColor; }
-	
+
 	// set_position should call move_to() and set_width_height() both are virtual.  so this need not be!
 	virtual void 	wrap_content	  	  ( 				);
 
@@ -35,6 +35,7 @@ public:
 	float			get_height			  (			)	{return height;  };
 	float 			get_left	  		  ( 		)	{ return left;   };
 	float 			get_bottom	  		  ( 		)	{ return bottom; };
+	inline bool		is_created			  ( 		)   { return created; };
 	
 	void 		 	move_bottom_to  	  ( float  mNewBottom	);
 	void 		 	move_left_to  	 	  ( float  mNewLeft		);
@@ -62,13 +63,17 @@ public:
 	virtual int   	draw				(	);
 	int   			draw_border			(   );
 
-	void			Invalidate		( )			{ invalidated = true; };
-	void			register_child	( Control* mNewChild );
+	void			Invalidate			( )			{ invalidated = true; };
+	// Once registered, will be tested in the HitTest & OnClick()
+	void			register_child		( Control* mNewChild );
+	void			unregister_child	( Control* mNewChild );	
 
 	/* Display manager calls HitTest on a window, then all it's child controls.
 	if the mouse click is on this control (ie. if the function below returns true), 
 	then the display manager will call OnClick() subsequently.  
 	*/
+			Control*	ChildrenHitTest( int x, int y 	);
+
 	virtual Control*	HitTest		  ( int x, int y 	);
 	virtual int			onHover		  (  			 	) { return 0; };
 	virtual int			onClick		  ( int x, int y, bool mouse_is_down=true );

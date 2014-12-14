@@ -23,7 +23,7 @@
 ListBox::ListBox(int Left, int Right, int Top, int Bottom )
 : ScrollControl(Left, Right, Top, Bottom )
 {
-	set_position( Left, Right, Top, Bottom );
+	//set_position( Left, Right, Top, Bottom );
 	Initialize();
 }
 
@@ -65,8 +65,33 @@ void ListBox::Initialize()
 	selected_item   = 1;
 	selected_color  = 0xFF2C5DCE;		// exact copy of the Mac color selected item active.
 	//selected_color_passive = 0xFFCECECE;	// Mac selected item color window inactive.
-
 //	calc_metrics();
+}
+void ListBox::move_to ( float mLeft,   float  mBottom )
+{
+	ScrollControl::move_to( mLeft, mBottom );	
+}
+void ListBox::set_width_height   ( int Width, int Height )
+{
+	ScrollControl::set_width_height( Width, Height );	
+	calc_metrics();
+}
+void ListBox::calc_metrics( )
+{
+	LineHeight           = text_size * 1.5;
+	number_lines_visible = floor( height/LineHeight );
+	body_height 		 = (number_lines_visible*LineHeight);
+
+	if (vsb) {
+		 vsb->set_amount_visible(number_lines_visible);
+		 //width -= vsb->width;
+	}
+	// The change in height, could change number_lines_visible, which would require scroll bar:
+	if (LineTexts.size() > number_lines_visible) {
+		enable_v_scroll_bar(true);
+		set_v_scroll_values( LineTexts.size(), 0, first_visible_line, number_lines_visible );
+	}
+	//printf("number_lines_visible=%d; LineHeight=%5.3f\n", number_lines_visible, LineHeight );
 }
 
 void ListBox::Fill_mainline(float mleft, float mbottom, float mwidth, float mheight)
@@ -87,7 +112,7 @@ void ListBox::Fill_selected_line(float mleft, float mbottom, float mwidth, float
 
 void ListBox::Fill_alternateline(float mleft, float mbottom, float mwidth, float mheight)
 {
-	Stroke_l( EvenColor );
+	Stroke_l( OddColor );
 	Fill_l  ( OddColor  );
 	Rect    ( mleft, mbottom, mwidth, mheight );
 }
@@ -122,76 +147,45 @@ void ListBox::draw_one_row( int mRow, float mY )
 	Text( left, mY+above_line_offset, (char*)get_item(mRow)->c_str(), SerifTypeface, text_size );
 }
 
-int ListBox::draw_text_bottom_up()
+int ListBox::draw_text()
 {
-	int num_lines = min(number_lines_visible, (int)LineTexts.size());
+	int num_lines = min( number_lines_visible, (int)LineTexts.size() );
 	int i=0;
+	int screen_i=0;	
 	int start = first_visible_line;
 	int stop  = first_visible_line+num_lines;
 
-	Fill_l(text_color);
-	float y;
-	for (int i=start; i<stop; i++, y+=LineHeight)
+	Fill_l( text_color );
+	float y = get_line_bottom( screen_i );
+	for (int i=start; i<stop; i++, screen_i++ )
 	{
-		y = bottom + (i-first_visible_line)*LineHeight;
+		y = get_line_bottom( screen_i );
 		draw_one_row( i, y );
+		printf( "y=%6.3f Num_lines=%d LH=%6.3f, TextSize=%6.3f above=%6.3f\n", y, num_lines, LineHeight, text_size);
 	}
-}
-
-int ListBox::draw_text_top_down()
-{
-	int num_lines = min(number_lines_visible, (int)LineTexts.size());
-	int i=0;
-	int start = first_visible_line;
-	int stop  = first_visible_line+num_lines;
-
-	Fill_l(text_color);
-	float y;
-	for (int i=start; i<stop; i++, y-= LineHeight)
-	{
-		y = bottom + body_height - (i - first_visible_line +1)*LineHeight;
-		draw_one_row( i, y );
-		//printf( "y=%6.3f Num_lines=%d LH=%6.3f, TextSize=%6.3f above=%6.3f\n", y, num_lines, LineHeight, text_size);
-	}
-}
-
-void ListBox::calc_metrics( )
-{
-	LineHeight           = text_size * 1.5;
-	number_lines_visible = ceil( height/LineHeight );
-	body_height 		 = (number_lines_visible*LineHeight)+2;
-
-	if (vsb) {
-		 vsb->set_amount_visible(number_lines_visible);
-		 //width -= vsb->width;
-	}
-	// The change in height, could change number_lines_visible, which would require scroll bar:
-	if (LineTexts.size() > number_lines_visible) {
-		enable_v_scroll_bar(true);
-		set_v_scroll_values( LineTexts.size(), 0, first_visible_line, number_lines_visible );
-	}
-	//printf("number_lines_visible=%d; LineHeight=%5.3f\n", number_lines_visible, LineHeight );
 }
 
 void ListBox::adjust_height_for_num_visible_items( int mNumber_items_shown )
 {
-	//body_height = (mNumber_items_shown*LineHeight)+2;
-	//set_position( left, left+width, bottom+height, bottom );
+	body_height = (mNumber_items_shown*LineHeight);
+	set_width_height(width, body_height);
 	calc_metrics();
 }
 
-void ListBox::draw_header( )
+/*  VisibleIndex means the index which is visible on the screen. 
+	This is different from the item index (lines may not be visible)
+*/
+float ListBox::get_line_bottom( int mVisibleIndex )
 {
-	// [intensity, Red, Green, Blue, Alpha]
-	VGfloat stops[] = {
-	0.0, 0.0, 0.0, 1.0, 1.0,
-	0.5, 0.0, 0.0, 0.5, 1.0,
-	1.0, 0.0, 0.0, 0.0, 1.0
-	};
-	float x1 = left;	    float y1 = bottom+body_height;
-	float x2 = left+width;	float y2 = bottom+height;
-	FillLinearGradient(x1, y2, x1, y1, stops, 3);
-	Rect(x1, y1, x2-x1, y2-y1);
+	float y;
+	if (isTopDown)
+	{
+		y = bottom + body_height - LineHeight * (mVisibleIndex+1);
+		return y;
+	} else {
+		y = bottom + LineHeight * (mVisibleIndex);
+		return y;
+	}
 }
 
 int ListBox::draw_line_backgrounds()
@@ -199,9 +193,11 @@ int ListBox::draw_line_backgrounds()
 	StrokeWidth(1.0);
 	// DRAW LINE BACKGROUND COLOR:
 	int   i = first_visible_line;
-	float y = bottom;
-	for (; i<(first_visible_line+number_lines_visible); y+=LineHeight, i++)	
+	int   j = 0;
+	float y;
+	for (; i<(first_visible_line+number_lines_visible); i++, j++)	
 	{
+		y = get_line_bottom( j );
 		if ((i%2)==0)
 			Fill_mainline     (left, y, width, LineHeight);
 		else 
@@ -213,27 +209,17 @@ int ListBox::draw_line_backgrounds()
 }
 
 int ListBox::draw()
-{	
-	//printf("number_lines_visible=%d\n", number_lines_visible);
+{
 	if (Debug)  printf("ListBox draw(): bottom=%6.1f; height=%6.1f\n", bottom, height);
 
 	// DRAW Scroll Bars:
 	ScrollControl::draw();
-
 	draw_line_backgrounds();
 
-	StrokeWidth(3.0);
-
 	// DRAW TEXT:
-	if (isTopDown)
-		draw_text_top_down();
-	else
-		draw_text_bottom_up();
+	draw_text();
 	
 	if (vsb) vsb->draw();
-	
-//	if (show_header)
-//		draw_header();
 }
  
 void ListBox::set_text_size( float mTextSize )
@@ -249,16 +235,22 @@ void ListBox::clear_items( )
 	Invalidate();
 }
 
+void ListBox::add_item( char* mString )
+{
+	set_item(mString);
+}
+
 void ListBox::set_item( char* mString )
 {
 	LineTexts.push_back(mString);
-	if (LineTexts.size() > number_lines_visible)
+	
+	if (LineTexts.size() > number_lines_visible)	// We need scroll bars.
 	{
-		if (vsb) {
+		if (vsb) {		// if already enabled, adjust the max value.
 			vsb->set_max_value( LineTexts.size() );
 			vsb->print_scroll_info();
 		} else {
-			enable_v_scroll_bar( true );
+			enable_v_scroll_bar( true );	// if not, enable them.
 			set_v_scroll_values( LineTexts.size(), 0, first_visible_line, 
 								 number_lines_visible );			
 		}
@@ -266,10 +258,6 @@ void ListBox::set_item( char* mString )
 	// or if set_text_size() changes
 	// or if set_postion() changes the height
 	// need to re-evaluate scrollbar need.
-}
-void ListBox::move_to ( float mLeft,   float  mBottom )
-{
-	ScrollControl::move_to( mLeft, mBottom );	
 }
 
 void ListBox::print_info(	)
@@ -280,8 +268,6 @@ void ListBox::print_info(	)
 
 	if (isTopDown)		printf("TopDown:true;\t");
 	else 				printf("TopDown:false;\t");	
-	if (show_header)	printf("show_header:true;\t");
-	else				printf("show_header:false;\t");
 }
 
 // result in pixels:
@@ -300,21 +286,10 @@ float ListBox::get_longest_line(  )
 	return max_w;
 }
 
-void ListBox::set_width_height   ( int Width, int Height )
-{
-	ScrollControl::set_width_height( Width, Height );	
-	calc_metrics();
-}
-
-Control* ListBox::HitTest(int x, int y)
-{
-	ScrollControl::HitTest(x,y);
-}
-
 void ListBox::select( int mIndex )
 {
-	printf("Selected item # %d/%d  visible_line=%d\n", mIndex, LineTexts.size(), 
-				mIndex-first_visible_line);
+	printf("Selected item # %d/%d  visible_line=%d\n", 
+			mIndex, LineTexts.size(), mIndex-first_visible_line);
 	selected_item = mIndex;
 }
 
@@ -327,62 +302,45 @@ int ListBox::get_hit_index(int mx, int my)
 	int	  retval = -1;
 	float y;
 	printf("\tbottom=%6.1f, body_height=%6.1f LineHeight=%6.1f\n", bottom, body_height, LineHeight);
-	if (isTopDown)
-	{	
-		y = (bottom+body_height)-LineHeight;
-		for (int i=start;   i<end;    y-=LineHeight, i++)	
-		{
-			printf("y=%6.1f\n", y);
-			if ( (my>y) && (my<(y+LineHeight)) )
-				retval = i;
-		}
-	} else {
-		y=bottom;
-		for (int i=start; i<end; y+=LineHeight, i++)
-		{
-			if ( (my>y) && (my<(y+LineHeight)) )
-				retval = i;
-		}
+
+	for ( int i=start; i<end; i++ )
+	{
+		y = get_line_bottom( i-start ); 
+		//printf( "y=%6.1f\n", y );
+		if ( (my>y) && (my<(y+LineHeight)) )
+			retval = i;
 	}
-	printf("Selected Item # %d : start=%d, end=%d\n", retval, first_visible_line, end);
+	string str = *get_item(retval);
+	printf("Selected Item # %d : start=%d, end=%d  %s\n", retval, first_visible_line, end, str.c_str() );
 	return retval; 
+}
+
+Control* ListBox::HitTest(int x, int y)
+{
+	ScrollControl::HitTest(x,y);
 }
 
 int	ListBox::onClick(int Mousex, int Mousey, bool mouse_is_down)
 {	
+	// Call ScrollControl::onClick() first.  If click is a scrollbar, then handle it.
+	int retval = ScrollControl::onClick( Mousex, Mousey, mouse_is_down );
+	if (retval>0)
+		return retval;
+	
+	if ((Mousex<left) || (Mousex>(left+width)))
+		return 0;
+
 	int   start=first_visible_line;
 	int   end  =first_visible_line+number_lines_visible;
 	printf("ListBox:: on Click()  : start=%d, end=%d\n",  first_visible_line, end);
 	float y;
 
-	if ((Mousex>left) && (Mousex<(left+width)))
-	{
-		printf("ListBox:: on Click()  : mousex,mousey\n");
-		print_positions();
-		
-		// bottom up:
-		if (isTopDown) 
-		{
-				// top down:
-				y = (bottom+body_height)-LineHeight;
-				printf("\tbottom=%6.1f, body_height=%6.1f LineHeight=%6.1f\n", bottom, body_height, LineHeight);
-				for (int i=start; i<end; y-=LineHeight, i++)	
-				{
-						if ((Mousey>y) && (Mousey<(y+LineHeight)))
-						{
-							printf("Selected Item # %d : start=%d, end=%d\n", i, first_visible_line, end);
-							select( i );
-						}
-				}
-		} else {
-				y=bottom;
-				for (int i=start; i<end; y+=LineHeight, i++)
-				{
-						if ((Mousey>y) && (Mousey<(y+LineHeight)))
-							select( i );
-				}
-		}
-	}
+	printf("ListBox:: on Click()  : mousex,mousey\n");
+	print_positions();
+	
+	int index = get_hit_index( Mousex, Mousey );
+	select( index );
+
 	Invalidate();
 	return selected_item;
 }

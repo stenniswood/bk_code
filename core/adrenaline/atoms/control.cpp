@@ -173,9 +173,21 @@ void  Control::move_left_to  	 ( float  mNewLeft	)
 // have to update the scroll bar as well)
 void  Control::move_to( float Left, float Bottom )
 {
+	float deltaX = left   - Left;
+	float deltaY = bottom - Bottom;
+	
 	left   = Left;
 	bottom = Bottom;	
+
+	Control* retval = NULL;
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while ( iter != m_child_controls.end() )
+	{
+		(*iter)->move_to( (*iter)->get_left()+deltaX, (*iter)->get_bottom()+deltaY );
+		iter++;
+	}
 }
+
 void Control::load_resources( )
 {
 }
@@ -202,12 +214,24 @@ int Control::draw_border()
 	Roundrect( left, bottom, width, height, 15.0, 15.0);
 }
 
+Control* Control::ChildrenHitTest( int x, int y )
+{
+	Control* retval = NULL;
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while ( iter != m_child_controls.end() )
+	{
+		retval = (*iter)->HitTest( x,y );
+		iter++;
+	}
+	return retval;
+}
+
 Control* Control::HitTest(int x, int y)
 {
 	float right = left+width;
 	float top = bottom+height;
 	
-	if ((x>left) && (x<right)  &&
+	if ((x>left)   && (x<right)  &&
 	    (y>bottom) && (y<top))
 	   return this;
 	// could add in a border check.  ie. if with 2 pixels of left or right, etc
@@ -217,7 +241,14 @@ Control* Control::HitTest(int x, int y)
 
 int		Control::onClick(int x, int y, bool mouse_is_down)
 {
-	return -1; 
+	Control* result = ChildrenHitTest(x,y);
+	if (result)
+	{
+		printf("Control::onClick()  Clicked a registered child.\n");
+		result->onClick(x,y,mouse_is_down);
+		return 1;
+	}
+	return -1;
 }
 
 int		Control::onDoubleClick()
@@ -233,5 +264,12 @@ int		Control::onReceiveFocus()
 void Control::register_child( Control* mNewChild )
 {
 	m_child_controls.push_back( mNewChild );
+}
+
+void Control::unregister_child	( Control* mNewChild )
+{
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while ( *iter != mNewChild )  { iter++; };		
+	m_child_controls.erase( iter );
 }
 

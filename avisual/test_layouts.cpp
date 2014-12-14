@@ -1,6 +1,6 @@
 /*************************************************************************
-NAME	:	test_layouts.cpp
-DESCRIPTION:
+NAME		:  test_layouts.cpp
+DESCRIPTION	:  
 
 	This file is used to test the primitive objects in the Adrenaline
 	windowing package.
@@ -38,13 +38,12 @@ AUTHOR	: Steve Tenniswood
 #include "test_combo_layouts.hpp"
 #include "test_game_layouts.hpp"
 #include "test_graph_layouts.hpp"
-
 #include "can_msg_view.hpp"
 
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
 static TextView 		LongText		( 50, 1230, 750, 500 );
-//static TabularListBox	tab_lb			( 600, 900, 750, 50  );
+static TabularListBox	tab_lb			( 600, 900, 750, 50  );
 
 /********************* A sample Window ***********************************/
 static FrameWindow	ParentWindowFrame(450, 1050, 500, 100);
@@ -100,9 +99,11 @@ void print_test_list()
 	printf("12 : init_vert_menu\n"	 	 );
 	printf("13 : init_combo_menu\n"	 	 );
 	printf("14 : init_spinner_menu\n"	 );
-	printf("15 : init_CAN_msg_view\n"	 );	
-			
-	
+	printf("15 : init_listbox_menu\n"	 );
+	printf("16 : init_tab_listbox_menu\n");	
+	printf("17 : init_scrollbar()\n"	 );	
+	printf("18 : init_CAN_msg_view\n"	 );
+
 	// test_combo_layouts.hpp
 	printf("21 : init_image_gallery\n"	 );
 	printf("22 : init_okay_cancel_dlg\n" );
@@ -148,8 +149,12 @@ void load_test_screen(int number)
 	case 11: init_horiz_menu		();		break;			
 	case 12: init_vert_menu			();		break;
 	case 13: init_combo_menu		();		break;
-	case 14: init_spinner_menu		();		break;	
-	case 15: init_CAN_msg_view		();		break;
+	case 14: init_spinner_menu		();		break;
+	case 15: init_listbox			();		break;
+	case 16: init_tab_listbox		();		break;
+	case 17: init_scrollbar			();		break;
+				
+	case 18: init_CAN_msg_view		();		break;
 
 	case 21: init_image_gallery		();		break;		
 	case 22: init_okay_cancel_dlg	();		break;
@@ -429,6 +434,7 @@ void pack_sample_window()
 	MyButt.set_text( "Push me" );
 	MyProgress.set_percentage(80.0);
 
+	AvailableClients.set_top_down	( false );
 	AvailableClients.set_width_height( 200, 200 );
 	AvailableClients.adjust_height_for_num_visible_items( 9 );
 	populate_simple_lb				(		);
@@ -449,6 +455,7 @@ void pack_sample_window()
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
 	MainDisplay.add_object( &ParentWindowF );
+	AvailableClients.print_info();
 }
 
 void init_frame_window()
@@ -603,6 +610,62 @@ void init_spinner_menu()
 	MainDisplay.add_object( &spin2 );
 }
 
+ScrollBar My_sb;
+ScrollBar My_sb2;
+void init_scrollbar()
+{
+	My_sb.set_width_height	( 200, 200 );
+	My_sb.move_to		 	( 400, 400 );
+	My_sb.set_max_value		( 100. );
+	My_sb.set_min_value		( 0.   );
+	My_sb.set_amount_visible( 25.  );
+	My_sb.print_scroll_info	(      );
+
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &My_sb );
+}
+
+void init_listbox()
+{
+	//AvailableClients.set_top_down	( false );
+	AvailableClients.set_width_height( 200, 200 );
+	AvailableClients.move_to		 ( 400, 400 );
+	AvailableClients.adjust_height_for_num_visible_items( 9 );
+	populate_simple_lb				 (		);
+	AvailableClients.set_text_size	 ( 18.0 );
+
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &AvailableClients );
+}
+
+void init_tab_listbox()
+{
+	printf("\ninit_tab_listbox\n");
+	static struct HeaderItemInfo hdr_info;
+	if (tab_lb.is_created()==false)
+	{
+		hdr_info.start_x  = 10.;
+		hdr_info.end_x	  = 10.;
+		hdr_info.text 	  = "Name";
+		hdr_info.width	  = -1;
+		hdr_info.alignment= HEADER_ALIGN_LEFT;	// left,center,right
+		tab_lb.add_column( &hdr_info );
+	
+		printf("\ninit_tab_listbox : added first column \n");
+		hdr_info.text 	 = "Advisor";
+		tab_lb.add_column( &hdr_info );
+	
+		hdr_info.text 	 = "Expected Time";	
+		tab_lb.add_column( &hdr_info );
+		printf("\ninit_tab_listbox : added 3 columns \n");
+	}
+	tab_lb.move_to( 100, 100 );
+	printf("\ninit_tab_listbox : moved_to \n");	
+	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &tab_lb );
+}
+
 void init_dropdown_menu()
 {
 	
@@ -633,21 +696,21 @@ void fill_msg1(  )
 void fill_msg2(  )
 {
 	msg[1].id.group.id = 0x1234;
-	msg[1].id.group.instance = 128;
+	msg[1].id.group.instance = 129;
 	msg[1].header.DLC = 8;	
 	fill_data( msg[1].data, 0x22 );
 }
 void fill_msg3(  )
 {
 	msg[2].id.group.id = 0x1234;
-	msg[2].id.group.instance = 128;
+	msg[2].id.group.instance = 130;
 	msg[2].header.DLC = 8;
 	fill_data( msg[2].data, 0x33 );
 }
 void fill_msg4(  )
 {
 	msg[3].id.group.id = 0x1234;
-	msg[3].id.group.instance = 128;
+	msg[3].id.group.instance = 131;
 	msg[3].header.DLC = 8;
 	fill_data( msg[3].data, 0x44 );
 }
@@ -655,18 +718,21 @@ void fill_msg4(  )
 void init_CAN_msg_view( )
 {
 	msg_view.move_to  		 ( 200, 200   );
-	msg_view.set_width_height( 400, 400   );	
+	msg_view.set_width_height( 600, 400   );	
 	msg_view.set_text_color	 ( 0xFFFF0000 );
-
+	printf("CAN_msg_view: object constructed and positioned.\n");
+	
 	fill_msg1();
 	fill_msg2();
 	fill_msg3();
 	fill_msg4();
+	printf("CAN_msg_view: 4 CAN msgs constructed.\n");	
 	
 	msg_view.add_message	 ( &msg[0] );
-	msg_view.add_message	 ( &msg[1] );
+	/*msg_view.add_message	 ( &msg[1] );
 	msg_view.add_message	 ( &msg[2] );
 	msg_view.add_message	 ( &msg[3] );
+	printf("CAN_msg_view: 4 CAN msgs added.\n");*/
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &msg_view );

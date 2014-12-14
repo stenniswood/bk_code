@@ -9,8 +9,6 @@
 #include <dirent.h> 
 #include <sys/stat.h>
 #include <errno.h>
-
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
@@ -59,76 +57,85 @@ void DirectoryListBox::Initialize()
 	show_hidden_files = false;
 	set_odd_color 		 ( 0xFFCFCFFF );
 	set_even_color		 ( 0xFFFFFFFF );
-	setup_headings		 ( 			);		// should place start_x!
+	m_display_mode = LIST_MODE;
+	setup_headings		 ( 			  );		// should place start_x!
 
 	// Load Directory Folder icon:
 	if (folder_image==0)
 		folder_image = createImageFromJpeg( "./resources/folder.jpg", &ImageInfo );
 }
 
+void DirectoryListBox::show_mode( int mMode	)
+{
+	m_display_mode = mMode;
+}
+
 void DirectoryListBox::setup_headings( )
 {
-	vector<struct HeaderItemInfo>*  Headers = new vector<struct HeaderItemInfo>;
+	if (m_display_mode==LIST_MODE)
+		setup_heading_simple();
+	else if (m_display_mode==DETAIL_MODE)
+		setup_heading_details();
+		
+}
+void DirectoryListBox::setup_heading_simple( )
+{
 	struct HeaderItemInfo hi;
 	hi.text      = "Filename";
 	hi.alignment = HEADER_ALIGN_LEFT;
+	add_column( &hi );
 
-	Headers->push_back( hi );
-	set_headings( Headers );
 }
-
 void DirectoryListBox::setup_heading_details( )
 {
-	vector<struct HeaderItemInfo>*  Headers = new vector<struct HeaderItemInfo>;
 	struct HeaderItemInfo  hi;
 
 	hi.text      = "Filename";
 	hi.alignment = HEADER_ALIGN_LEFT;
-	Headers->push_back( hi );
+	add_column( &hi );
 	
 	hi.text      = "Last Modified";
 	hi.alignment = HEADER_ALIGN_LEFT;
-	Headers->push_back( hi );
-
+	add_column( &hi );
+	
 	hi.text      = "Size";
 	hi.alignment = HEADER_ALIGN_RIGHT;
-	Headers->push_back( hi );
+	add_column( &hi );
 	
 	hi.text      = "Kind";
 	hi.alignment = HEADER_ALIGN_LEFT;
-	Headers->push_back( hi );
+	add_column( &hi );
 	
-	set_headings( Headers );
 }
 
 void DirectoryListBox::draw_one_cell( int mRow, int mCol, float mY )
 {
-	if (Headings==NULL) return;
+	//if (Headings==NULL) return;
 	//printf("draw_one_cell: col=%d;  %d\n", mCol, mRow );
 	
 	if (icon_id[mRow]==DIRECTORY_ID)
-		vgSetPixels( (*Headings)[mCol].start_x, mY, folder_image, 0, 0, 
+		vgSetPixels( (Headings)[mCol].start_x, mY, folder_image, 0, 0, 
 						ImageInfo.width, ImageInfo.height );
 
 	// Compute measurements for correctly placing the text:
 	float text_width = TextWidth( LineData[mRow][mCol].c_str(), SerifTypeface, text_size );
-	int   col_space  = ((*Headings)[mCol].width - text_width - ImageInfo.width);
+	int   col_space  = (Headings[mCol].width - text_width - ImageInfo.width);
 	int   indent     = col_space / 2.0;
 	float above_line_offset = (LineHeight-text_size)/2.0;
 	int   x;
 
 	// Determine the X start pixel:
-	if 		((*Headings)[mCol].alignment == HEADER_ALIGN_LEFT)
+	if 		(Headings[mCol].alignment == HEADER_ALIGN_LEFT)
 	{
-		x = (*Headings)[mCol].start_x + ImageInfo.width;
+		x = Headings[mCol].start_x + ImageInfo.width;
 		Text( x, mY+above_line_offset, (char*)LineData[mRow][mCol].c_str(), SerifTypeface, text_size );	
-	} else if ((*Headings)[mCol].alignment == HEADER_ALIGN_CENTER)
+	} else if (Headings[mCol].alignment == HEADER_ALIGN_CENTER)
 	{
-		x = (*Headings) [mCol].start_x + indent;
+		x = Headings [mCol].start_x + indent;
 		TextMid( x, mY+above_line_offset, (char*)LineData[mRow][mCol].c_str(), SerifTypeface, text_size );			
-	} else if ((*Headings)[mCol].alignment == HEADER_ALIGN_RIGHT)
+	} else if (Headings[mCol].alignment == HEADER_ALIGN_RIGHT)
 	{
-		x = (*Headings)[mCol].end_x - text_width;
+		x = Headings[mCol].end_x - text_width;
 		TextEnd( x, mY+above_line_offset, (char*)LineData[mRow][mCol].c_str(), SerifTypeface, text_size );			
 	}
 }

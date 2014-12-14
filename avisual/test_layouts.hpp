@@ -40,6 +40,11 @@ void init_horiz_menu	();
 void init_vert_menu		();
 void init_combo_menu	();
 void init_spinner_menu	();
+
+void init_scrollbar		();
+
+void init_listbox		();
+void init_tab_listbox	();
 void init_CAN_msg_view	();
 
 

@@ -56,8 +56,10 @@ int show_atom_screens (void* menuPtr, int mMenuIndex )
 	case 11: init_horiz_menu		();		break;			
 	case 12: init_vert_menu			();		break;
 	case 13: init_combo_menu		();		break;
-	case 14: init_spinner_menu		();		break;	
-	case 15: init_CAN_msg_view		();		break;
+	case 14: init_spinner_menu		();		break;
+	case 15: init_listbox			();		break;	
+	case 16: init_tab_listbox		();		break;			
+	case 17: init_CAN_msg_view		();		break;
 	default: break;
 	}
 }
@@ -77,8 +79,10 @@ void init_atom_menu()
 	atoms.add_simple_command( "init_textfile_view"		);	
 	atoms.add_simple_command( "init_horiz_menu"			);
 	atoms.add_simple_command( "init_vert_menu"			);
-	atoms.add_simple_command( "init_combo_menu"			);		
-	atoms.add_simple_command( "init_spinner_menu"		);		
+	atoms.add_simple_command( "init_combo_menu"			);
+	atoms.add_simple_command( "init_spinner_menu"		);
+	atoms.add_simple_command( "init_listbox"			);
+	atoms.add_simple_command( "init_tab_listbox"		);
 	atoms.add_simple_command( "init_CAN_msg_view"		);
 
 	atoms.add_callback( 0, show_atom_screens  );
@@ -97,6 +101,8 @@ void init_atom_menu()
 	atoms.add_callback( 13, show_atom_screens  );						
 	atoms.add_callback( 14, show_atom_screens  );
 	atoms.add_callback( 15, show_atom_screens  );
+	atoms.add_callback( 16, show_atom_screens  );						
+	atoms.add_callback( 17, show_atom_screens  );
 }
 
 int show_molecule_screens( void* menuPtr, int mMenuIndex )
@@ -136,22 +142,21 @@ int show_game_screens( void* menuPtr, int mMenuIndex )
 	{
 	// GAMES start at 30!
 	case 0: init_cards_only	();		break;
-	case 1: init_card		();		break;				
-	case 2: init_blackjack	();		break;
-	case 3: init_hearts		();		break;
-	case 4: init_reversi	();		break;
-	case 5: init_battleships();		break;	
+	case 1: init_blackjack	();		break;
+	case 2: init_hearts		();		break;
+	case 3: init_reversi	();		break;
+	case 4: init_battleships();		break;	
 	default: break;
 	}
 }
 
 void init_game_menu()
 {
-	games.add_simple_command( "Black Jack" 	);
+	games.add_simple_command( "Show deck" 	);
+	games.add_simple_command( "Twenty One" 	);
 	games.add_simple_command( "Hearts" 		);
 	games.add_simple_command( "Reversi" 	);
 	games.add_simple_command( "Battleships" );
-	games.add_simple_command( "File Browser" );
 
 	games.add_callback( 0,  show_game_screens  );
 	games.add_callback( 1,  show_game_screens  );	

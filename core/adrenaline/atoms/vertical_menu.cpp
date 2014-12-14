@@ -66,7 +66,7 @@ int  VerticalMenu::calc_metrics()
 int  VerticalMenu::add_simple_command	( char* mText, char* mShortcut )
 {
 	set_item( mText );
-	printf  ( "add_simple_command:: %s \n", mText );
+	//printf  ( "add_simple_command:: %s \n", mText );
 	
 	struct stVertMenuInfo* m = new struct stVertMenuInfo();
 	strcpy ( m->text, mText );  
@@ -111,7 +111,7 @@ void 	VerticalMenu::draw_one_row( int mRow, float mY )
 	mY += above_line_offset;
 	Stroke_l( text_color );
 	Fill_l  ( text_color );
-	printf("%6.1f %6.1f   %s \n", left, mY, (char*)get_item(mRow)->c_str() ); 
+	//printf("%6.1f %6.1f   %s \n", left, mY, (char*)get_item(mRow)->c_str() ); 
 	Text( left, mY, (char*)get_item(mRow)->c_str(), SerifTypeface, text_size );
 
 	// draw short cut info (if available)

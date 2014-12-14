@@ -38,6 +38,8 @@ ScrollControl::ScrollControl( int Width, int Height )
 
 ScrollControl::~ScrollControl()
 {
+	if (vsb)	delete vsb;
+	if (hsb)	delete hsb;	
 }
 
 void ScrollControl::Initialize()
@@ -103,10 +105,14 @@ void ScrollControl::enable_v_scroll_bar( bool mEnable )
 		
 		vsb->set_bar_color		 ( 0x7FFF7F7F );
 		vsb->set_background_color( 0x9F000000 );
+		register_child( vsb );
  	} else {
-		if (vsb)
+		if (vsb) {
+			unregister_child( vsb );
 			delete vsb;
-		vsb = NULL;
+			vsb = NULL;
+		}
+		
  	}
 }
 void ScrollControl::enable_h_scroll_bar( bool mEnable,int max, int min, int first_visible, 
@@ -127,10 +133,13 @@ void ScrollControl::enable_h_scroll_bar( bool mEnable,int max, int min, int firs
 
 		hsb->set_bar_color		( 0x7FFF7F7F );
 		hsb->set_background_color( 0x9F000000 );
+		register_child( hsb );
  	} else {
-		if (hsb)
+		if (hsb) {
+			unregister_child( hsb );
 			delete hsb;
-		hsb = NULL;
+			hsb = NULL;
+		}
  	}
 }
 
@@ -176,7 +185,6 @@ Control* ScrollControl::HitTest(int x, int y)
 
 int	ScrollControl::onClick(int x, int y, bool mouse_is_down)
 {	
-	draw();
-	return -1;
+	return Control::onClick(x,y,mouse_is_down);
 }
 
