@@ -102,7 +102,7 @@ void TabularListBox::calc_metrics( )
 		text_size = 12;
 	LineHeight           = text_size * 1.5;
 	number_lines_visible = floor( body_height/LineHeight );
-	
+
 	printf("TabularLB: calc_metrics: height=%6.2f; body_height=%6.2f\n", height, body_height );	
 	
 	if (vsb) vsb->set_amount_visible(number_lines_visible);
@@ -198,12 +198,16 @@ int TabularListBox::draw_header(	)
 // for instance.
 void TabularListBox::draw_one_cell( int mRow, int mCol, float mY )
 {
+	if (Headings[mCol].end_x > (left+width))
+		return;
+	
 	// Compute measurements for correctly placing the text:
 	float text_width = TextWidth( (char*)LineData[mRow][mCol].c_str(), SerifTypeface, text_size );
 	int   col_space  = (Headings[mCol].width - text_width);
 	int   indent     = col_space / 2.0;
 	float above_line_offset = (LineHeight-text_size)/2.0;
 	int x;
+	printf( "TabularListBox::draw_one_cell()  x position determined.\n" );
 
 	// Determine the X start pixel:
 	if 		(Headings[mCol].alignment == HEADER_ALIGN_LEFT)
@@ -212,6 +216,7 @@ void TabularListBox::draw_one_cell( int mRow, int mCol, float mY )
 		x = Headings [mCol].start_x + indent;
 	else if (Headings[mCol].alignment == HEADER_ALIGN_RIGHT)
 		x = Headings[mCol].end_x - text_width;
+	printf("TabularListBox::draw_one_cell()  x position determined.\n");
 
 	Text( x, mY+above_line_offset, (char*)LineData[mRow][mCol].c_str(), SerifTypeface, text_size );
 }
@@ -219,12 +224,28 @@ void TabularListBox::draw_one_cell( int mRow, int mCol, float mY )
 void TabularListBox::draw_one_row( int mRow, float mY )
 {
 	int size=Headings.size();
+	//printf("LineData rows=%d/%d; cols=%d\n", mRow, LineData.size(), size );
 	for (int col=0; col < size; col++)
 	{
+		//printf("\t\t%s\n", LineData[mRow][col].c_str() );
 		draw_one_cell( mRow, col, mY);
 	}
 }
 
+float TabularListBox::get_line_bottom( int mVisibleIndex )
+{
+//	return ListBox::get_line_bottom( mVisibleIndex );
+	float y;
+	if (isTopDown)
+	{
+		y = bottom + body_height - LineHeight * (mVisibleIndex+1);
+		return y;
+	} else {
+		y = bottom + LineHeight * (mVisibleIndex);
+		return y;
+	}	
+}
+	
 int TabularListBox::draw_vertical_lines()
 {	
 	float x,y1,y2;
@@ -245,7 +266,7 @@ int TabularListBox::draw()
 {
 	if (Debug) { printf("TabularListBox:draw():\t");  print_positions(); };
 	StrokeWidth(1.0);
-	Control::draw();
+	Control::draw( );
 
 	draw_line_backgrounds();	
 	draw_header();
@@ -253,8 +274,6 @@ int TabularListBox::draw()
 	
 	draw_text();
 	printf("TabularListBox:draw_text_() done\n");
-			
-	//printf("TabularListBox:draw text done:\n");
 	draw_vertical_lines();
 	// DRAW Scroll Bars:
 	ScrollControl::draw();

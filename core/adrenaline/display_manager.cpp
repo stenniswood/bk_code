@@ -65,21 +65,21 @@ void  DisplayManager::end_screen( )
 
 int	DisplayManager::onCreate(  )
 {
-	sb.set_width_height( screen_width, 36 );
-	float b = (screen_height-sb.get_height());
+	m_sb.set_width_height( screen_width, 36 );
+	float b = (screen_height-m_sb.get_height());
 	printf("DisplayManager::onCreate()  %d,%d, %5.1f\n", screen_width, screen_height, b );
 
-	sb.move_to		   ( 0, b );
-	init_avisual_menu  ( &(sb.m_Menu) );
-	add_object( &sb );
-	sb.print_positions();
+	m_sb.move_to		   ( 0, b );
+	init_avisual_menu  ( &(m_sb.m_Menu) );
+	add_object( &m_sb );
+	m_sb.print_positions();
 }
 
 // Perhaps this is not needed.  need to re-architect.
 void DisplayManager::call_on_creates( )
 {
 	// System Bar will always be treated separately.
-	sb.onCreate();
+	m_sb.onCreate();
 	
 	// Load all controls which are already registered.
 	printf("Creating child controls\n");
@@ -152,7 +152,7 @@ int   DisplayManager::draw(	)
 	if (Debug) printf("\ndraw display manager\tstart:\n" );
 	start_draw();
 	draw_background();
-	//sb.print_positions();
+	//m_sb.print_positions();
 	draw_children();	
 	end_draw();				// end is needed to see display!
 	if (Debug) printf("draw display manager\tdone!\n\n" );
@@ -171,7 +171,7 @@ void  DisplayManager::end_draw(	)
 
 Control* DisplayManager::HitTest( int x, int y )
 {
-	Control* result = sb.HitTest(x,y);
+	Control* result = m_sb.HitTest(x,y);
 	if (result)  return result;
 	
 	list<Control*>::iterator iter = controls.begin();
@@ -189,7 +189,7 @@ Control* DisplayManager::HitTest( int x, int y )
 
 int   DisplayManager::draw_children( )
 {
-	sb.draw();
+	m_sb.draw();
 	
 	list<Control*>::iterator	iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++ )

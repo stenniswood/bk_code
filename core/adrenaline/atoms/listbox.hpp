@@ -62,7 +62,8 @@ public:
 	void 			add_item			( char* mString );
 	void			set_item   			( char* mString );
 	string*			get_item   			( int index =-1     );
-	float			get_line_bottom		( int mVisibleIndex );
+	virtual float	get_line_bottom		( int mVisibleIndex );
+	virtual int		get_total_lines		( )	{ printf("listbox::gettotal_lines %d\n", LineTexts.size() ); return LineTexts.size();  };
 	
 	void			set_first_visible	( int mValue 	 );
 	virtual void  	set_text_size		( float TextSize );

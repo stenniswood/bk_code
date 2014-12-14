@@ -13,8 +13,8 @@ CFLAGS 	   =
 DEPS   	   = 
 
 # CORE CODE:
-CAN_OBJS   = CAN_Interface.o can_instance.o can_eid.o can_buff.o can_txbuff.o \
-	         bk_system_defs.o can_id_list.o 
+CAN_OBJS   = can_id_list.o 
+#CAN_Interface.o can_instance.o can_eid.o can_buff.o can_txbuff.o bk_system_defs.o 
 MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
 MISC_OBJS  = vector_math.o ini_file.o visual_memory.o audio_memory.o fft.o
 FUSE_OBJS  = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o 
@@ -28,7 +28,6 @@ REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o
 HEARTS_GAME_OBJS 	= hearts_game.o trick.o 
 BLACKJACK_GAME_OBJS = blackjack.o 
 CARDCORE_GAME_OBJS  = card.o card_player.o deck.o basic_card_game.o
-
 
 #  button_array_gui.o Container.o 
 ADRENALINE_OBJS = display.o display_manager.o mouse.o resource_manager.o
@@ -67,7 +66,8 @@ avisual: $(APP_CPP_OBJS) 					\
 		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) 	\
 		$(addprefix ../core/adrenaline/atoms/,	  $(ADRENALINE_ATOMS_OBJS)) 	\
 		$(addprefix ../core/adrenaline/molecules/, $(ADRENALINE_MOLECULES_OBJS)) \
-		$(addprefix ../core/adrenaline/graphs/,	  $(ADRENALINE_GRAPH_OBJS))
+		$(addprefix ../core/adrenaline/graphs/,	  $(ADRENALINE_GRAPH_OBJS))		\
+		$(addprefix ../core/can/,			$(CAN_OBJS))
 	g++ -o $@ $^ $(CFLAGS)  $(LIBFLAGS)
 
 clean:

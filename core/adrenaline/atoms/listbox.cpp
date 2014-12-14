@@ -149,8 +149,9 @@ void ListBox::draw_one_row( int mRow, float mY )
 
 int ListBox::draw_text()
 {
-	int num_lines = min( number_lines_visible, (int)LineTexts.size() );
-	int i=0;
+	int num_lines = min( number_lines_visible, get_total_lines() );
+	printf("ListBox::draw_text() num_lines=%d  get_total_lines=%d\n", num_lines, get_total_lines() );
+	int i=0; 
 	int screen_i=0;	
 	int start = first_visible_line;
 	int stop  = first_visible_line+num_lines;
@@ -177,7 +178,7 @@ void ListBox::adjust_height_for_num_visible_items( int mNumber_items_shown )
 */
 float ListBox::get_line_bottom( int mVisibleIndex )
 {
-	float y;
+	float y; 
 	if (isTopDown)
 	{
 		y = bottom + body_height - LineHeight * (mVisibleIndex+1);

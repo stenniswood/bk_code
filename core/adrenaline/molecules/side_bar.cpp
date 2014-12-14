@@ -20,32 +20,32 @@
 #define Debug 0
 
 
-SideBarControl::SideBarControl()
+SideBar::SideBar()
 {
 
 }
-SideBarControl::SideBarControl( int Left, int Right, int Top, int Bottom )
+SideBar::SideBar( int Left, int Right, int Top, int Bottom )
 
 {
 
 }
-SideBarControl::~SideBarControl()
+SideBar::~SideBar()
 {
 
 }
 
-void SideBarControl::Initialize()
+void SideBar::Initialize()
 {
 	Control::Initialize();	
 	background_color = 0x8F000000;
 	
 }
-void SideBarControl::calc_metrics	 	(   )
+void SideBar::calc_metrics	 	(   )
 {
 	
 }
 
-int		SideBarControl::add_control( Control* mControl, char* mText )
+int		SideBar::add_control( Control* mControl, char* mText )
 {
 	// Need to set it's location first:
 	// This control proportions them out:
@@ -70,23 +70,23 @@ int		SideBarControl::add_control( Control* mControl, char* mText )
 	paired_text.push_back( mText );
 	return 1;
 }
-void	SideBarControl::hide			 ( bool mHide )
+void	SideBar::hide			 ( bool mHide )
 {	
 	isHidden = mHide;
 	Invalidate();
 }
-void	SideBarControl::auto_hide		 ( bool mAutoHide )
+void	SideBar::auto_hide		 ( bool mAutoHide )
 {	
 	AutoHideEnabled = mAutoHide;
 	// need a timer after 5 seconds hide.
 }
 
-void SideBarControl::set_alignment( byte mAlignment  )
+void SideBar::set_alignment( byte mAlignment  )
 {
 	Alignment = mAlignment;
 }
 
-int SideBarControl::draw()
+int SideBar::draw()
 {
 	if (isHidden)	return 0;
 
@@ -101,7 +101,7 @@ int SideBarControl::draw()
 }
 
 
-int	SideBarControl::onClick(int x, int y, bool mouse_is_down)
+int	SideBar::onClick(int x, int y, bool mouse_is_down)
 {	
 	draw();
 	return -1;

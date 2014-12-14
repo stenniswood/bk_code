@@ -671,8 +671,7 @@ void init_dropdown_menu()
 	
 }
 
-CANMessageView msg_view;
-struct sCAN msg[4];
+CANMessageView 			 msg_view;
 
 void fill_data( byte* mdata, byte last)
 {
@@ -686,33 +685,17 @@ void fill_data( byte* mdata, byte last)
 	mdata[7] = last;
 }
 
-void fill_msg1(  )
+void fill_msgs(  )
 {
-	msg[0].id.group.id = 0x1234;
-	msg[0].id.group.instance = 128;
-	msg[0].header.DLC = 8;	
-	fill_data( msg[0].data, 0x11 );	
-}
-void fill_msg2(  )
-{
-	msg[1].id.group.id = 0x1234;
-	msg[1].id.group.instance = 129;
-	msg[1].header.DLC = 8;	
-	fill_data( msg[1].data, 0x22 );
-}
-void fill_msg3(  )
-{
-	msg[2].id.group.id = 0x1234;
-	msg[2].id.group.instance = 130;
-	msg[2].header.DLC = 8;
-	fill_data( msg[2].data, 0x33 );
-}
-void fill_msg4(  )
-{
-	msg[3].id.group.id = 0x1234;
-	msg[3].id.group.instance = 131;
-	msg[3].header.DLC = 8;
-	fill_data( msg[3].data, 0x44 );
+	struct sCAN can;
+	for (int i=0; i<100; i++)
+	{
+		can.id.group.id 	  = 0x0040+i;
+		can.id.group.instance = 0x20  +i;
+		can.header.DLC 		  = 8;
+		fill_data( can.data, 0x10 + i );
+		msg_view.add_message( &can );
+	}
 }
 
 void init_CAN_msg_view( )
@@ -722,17 +705,8 @@ void init_CAN_msg_view( )
 	msg_view.set_text_color	 ( 0xFFFF0000 );
 	printf("CAN_msg_view: object constructed and positioned.\n");
 	
-	fill_msg1();
-	fill_msg2();
-	fill_msg3();
-	fill_msg4();
-	printf("CAN_msg_view: 4 CAN msgs constructed.\n");	
-	
-	msg_view.add_message	 ( &msg[0] );
-	/*msg_view.add_message	 ( &msg[1] );
-	msg_view.add_message	 ( &msg[2] );
-	msg_view.add_message	 ( &msg[3] );
-	printf("CAN_msg_view: 4 CAN msgs added.\n");*/
+	fill_msgs();
+	printf("CAN_msg_view: CAN msgs added.\n");
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &msg_view );

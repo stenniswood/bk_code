@@ -17,6 +17,8 @@
 #include "horizontal_menu.hpp"
 #include "can_msg_view.hpp"
 
+#include "can_id_list.h"
+
 
 CANMessageView::CANMessageView ()
 :TabularListBox()
@@ -69,7 +71,8 @@ int		CANMessageView::add_message ( struct sCAN* msg )
    sprintf( str2, "%2x", msg->id.group.id );
    row.push_back( str2 ); 
 
-   strcpy( str2, "need lookup table" );
+   strcpy( str2 , getID_Text(msg->id.group.id) );
+   //strcpy( str2, "need lookup table" );
    row.push_back( str2 );
    
    sprintf( str2, "%2d", msg->id.group.instance );
@@ -100,7 +103,7 @@ int	CANMessageView::setup_headers()
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "Instance";
-	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.alignment  = HEADER_ALIGN_CENTER;	
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "DLC";
@@ -144,9 +147,16 @@ int 	CANMessageView::order_by_time		()
 {
  
 }
+bool pred_name( vector<string> m1, vector<string> m2 )
+{
+	if (m1[1] < m2[1])
+		return true;
+	return false;
+}
 int 	CANMessageView::order_by_msg_id		() 
 {
- 
+	// defined in Tabular Base  vector< vector<string> >	LineData;
+	//std::sort( LineData.begin(), LineData.end(), pred_name());	
 }
 int   	CANMessageView::draw_entry 			( int mState	) 
 {

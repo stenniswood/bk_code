@@ -156,17 +156,17 @@ void init_directory_lb_test()
 
 	// widths of columns
 	DirectoryListBox* tmp_dir2  = new DirectoryListBox();	
-	tmp_dir2->set_odd_color   ( 0xFFFFFFFF 	);
+	//tmp_dir2->set_odd_color   ( 0xFFFFFFFF 	);
 	tmp_dir2->set_width_height( 200, 200 	);		// height will get overwritten.
 	tmp_dir2->populate_files  ( (char*)"/home/pi/aorient/", 1 );
-
+	
 	tmp_dir2->set_position_right_of( tmp_dir, true, 0 );
 	tmp_dir2->copy_position_vert   ( tmp_dir );	
 	ParentWindowF.add_control	   ( tmp_dir2 );	
 
 	// Add to display manager:
 	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &ConnectionStatus );	
+//	MainDisplay.add_object( &ConnectionStatus );	
 	MainDisplay.add_object( &ParentWindowF );	
 }
 

@@ -23,10 +23,21 @@ struct HeaderItemInfo
 	float 	start_x;
 	float 	end_x;
 	float	width;
-	byte	alignment;		// left,center,right	
+	float	layout_weight;	
+	float	min_width;		// 
+	float	max_width;		// 
+	byte	alignment;		// left,center,right 
 };
 
 #define DEFAULT_SCROLL_WIDTH 10
+
+/*  Tabular List Box.
+	Add capabillities for:
+		Stretching.  Widths weights for proportional expansion.
+		Min/Max for widths
+		Scrolling tabs (when more than visible in the control width)
+		Automatic Padding between columns when possible.
+*/
 
 class TabularListBox : public ListBox
 {
@@ -56,6 +67,8 @@ public:
 	virtual void  	move_to							( float Left, float Bottom );
 	virtual void 	set_width_height   				( int Width, int Height );
 
+	virtual float	get_line_bottom			( int mVisibleIndex );
+	virtual int		get_total_lines			( 	)	{ printf("tabularListbox::gettotal_lines\n"); return LineData.size();  };
 	vector<string>*	get_line_data			( int mIndex );
 	void			set_headings			( vector<struct HeaderItemInfo> *mHeaderTexts );
 	void			set_column_width		( int mColumn, int mWidth );	
@@ -67,12 +80,11 @@ public:
 	void			add_row   				( vector<string> *mData  );
 	int				find_item 				( int index, int mcolumn );
 
-	virtual void	select( int mIndex );
+	virtual void	select					( int mIndex );
 	void			adjust_height_for_num_visible_items ( int mNumber_items_shown );
-	
+
 protected:
-	float			body_height;		// pixels
-	float			header_height;		// pixels
+	float			header_height;			// pixels
 	float			header_text_size;
 	long int		header_text_color;
 	long int		header_border_color;

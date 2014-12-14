@@ -16,7 +16,7 @@
 #include "display.h"
 #include "vertical_menu.hpp"
 
-
+ 
 
 
 VerticalMenu::VerticalMenu()

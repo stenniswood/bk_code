@@ -5,6 +5,10 @@
 #include "control.hpp"
 #include "icon.hpp"
 
+#include "system_status.hpp"
+#include "side_bar.hpp"
+#include "task_bar.hpp"
+
 #include <list>
 #include <string>
 using namespace std;
@@ -58,7 +62,11 @@ protected:
 	long int BackgroundColor;				
 	
 	// Linked List of objects.
-	SystemBar		sb;
+	SystemBar		m_sb;				// Top
+	TaskBar			m_task_bar;		// Left side
+	SideBar			m_soft_side;	// Right side
+	SystemStatusBar	m_status;		// Bottom
+
 	list<Control*>	controls;		// new way - not tested yet!
 	Control* Head;
 	Control* Tail;

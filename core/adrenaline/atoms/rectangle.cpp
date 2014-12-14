@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
+#include <shapes.h>
 #include "rectangle.hpp"
 
 	
@@ -47,4 +48,18 @@ void 	Rectangle::set_size	( float width, float height)
 	coords[RIGHT] = get_left()   + width;
 }
 
+void	Rectangle::draw( )
+{
+	Rect( left, bottom, get_width(), get_height() );	
+}
+
+int		Rectangle::hit_test	(float x, float y)
+{
+	if ((x > left) && (x<get_right()))
+	{
+		if ((y > get_bottom()) && (y<get_top()))
+			return 1;
+	}
+	return 0;
+}
 
