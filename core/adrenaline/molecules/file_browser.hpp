@@ -28,6 +28,8 @@ public:
 	void 			add_level			( char* mAppendPath );
 	void			show_hidden			( bool mShow=true   );
 	virtual int		onClick				( int x, int y, bool mouse_is_down=true );
+	virtual int		onCreate	  		(  );	// chance to load resources, 
+		
 	void			extract_complete_path();		// from the sequence of listboxes.
 
 	int				which_level_clicked ( float x, float y	);

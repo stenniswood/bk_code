@@ -1,13 +1,16 @@
 #ifndef _ListBox_
 #define _ListBox_
 
+#include <list> 
+#include <string>
+#include <string.h>
+
 #include "control.hpp"
 #include "scroll_bar.hpp"
 #include "scroll_control.hpp"
 
-#include <list> 
 using namespace std;
-#include <string>
+
 
 #define DEFAULT_SCROLL_WIDTH 10
 
@@ -63,7 +66,7 @@ public:
 	void			set_item   			( char* mString );
 	string*			get_item   			( int index =-1     );
 	virtual float	get_line_bottom		( int mVisibleIndex );
-	virtual int		get_total_lines		( )	{ printf("listbox::gettotal_lines %d\n", LineTexts.size() ); return LineTexts.size();  };
+	virtual int		get_total_lines		( )	{ /*printf("listbox::gettotal_lines %d\n", LineTexts.size() );*/ return LineTexts.size();  };
 	
 	void			set_first_visible	( int mValue 	 );
 	virtual void  	set_text_size		( float TextSize );
@@ -73,6 +76,7 @@ public:
 	int					get_hit_index	( int x, int y );
 	virtual Control*	HitTest			( int x, int y );
 	virtual int			onClick			( int x, int y, bool mouse_is_down=true);
+	virtual int			onCreate	  	(  );
 
 	//void			enable_scroll_bar	( bool mEnable = true );
 

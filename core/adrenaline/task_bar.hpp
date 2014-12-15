@@ -1,5 +1,5 @@
-#ifndef _SIDE_BAR_CONTROL_
-#define _SIDE_BAR_CONTROL_
+#ifndef _TASK_BAR_
+#define _TASK_BAR_
 
 #include "control.hpp"
 #include "window.hpp"

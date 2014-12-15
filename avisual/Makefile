@@ -30,7 +30,7 @@ BLACKJACK_GAME_OBJS = blackjack.o
 CARDCORE_GAME_OBJS  = card.o card_player.o deck.o basic_card_game.o
 
 #  button_array_gui.o Container.o 
-ADRENALINE_OBJS = display.o display_manager.o mouse.o resource_manager.o
+ADRENALINE_OBJS = display.o display_manager.o mouse.o resource_manager.o task_bar.o system_status.o
 ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			directory_listbox.o frame_window.o groupbox.o icon.o       \
 			leveler.o line_grouper.o listbox.o marquee.o power_level.o \
@@ -40,7 +40,7 @@ ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			horizontal_menu.o vertical_menu.o spinner.o can_msg_view.o 
 ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
-			stereo_power.o stick_figure.o system_bar.o
+			stereo_power.o stick_figure.o system_bar.o can_app.o
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o
 KINETIC_OBJS = 

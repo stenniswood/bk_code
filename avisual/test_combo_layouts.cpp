@@ -241,3 +241,10 @@ void init_okay_cancel_dlg()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object		  ( &ParentWindowF );	
 }
+
+
+
+void init_drawing_app()
+{
+
+}

@@ -8,23 +8,13 @@
 #include <unistd.h>
 #include <string.h>
 #include <string>
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-#include "Graphbase.hpp"
-#include "control.hpp"
-#include "button.hpp"
+#include "adrenaline_windows.h"
 #include "display.h"
-#include "text_view.hpp" 
-
-
-
-
-
-
-
+#include "task_bar.hpp"
 
 
 
@@ -43,14 +33,14 @@ int   	TaskBar::draw 			 (	 )
 void	TaskBar::calc_metrics	 (   ) 
 { }
 
-int		TaskBar::add_control	 ( Control* mControl, char* mText=NULL ) 
+int		TaskBar::add_control	 ( Control* mControl, char* mText) 
 { }
-void	TaskBar::hide			 ( bool mHide = true) 
+void	TaskBar::hide			 ( bool mHide ) 
 { }
-void	TaskBar::auto_hide		 ( bool mAutoHide = true) 
+void	TaskBar::auto_hide		 ( bool mAutoHide) 
 { }
-void	TaskBar::set_alignment	 ( byte mAlignment = SIDEBAR_ALIGN_CENTER ) 
+void	TaskBar::set_alignment	 ( byte mAlignment ) 
 { }
-int		TaskBar::onClick(int x, int y, bool mouse_is_down=true) 
+int		TaskBar::onClick(int x, int y, bool mouse_is_down) 
 { }
 

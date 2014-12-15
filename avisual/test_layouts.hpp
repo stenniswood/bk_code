@@ -46,6 +46,7 @@ void init_scrollbar		();
 void init_listbox		();
 void init_tab_listbox	();
 void init_CAN_msg_view	();
+void init_CAN_app		();
 
 
 // GAMES:

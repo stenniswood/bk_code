@@ -12,5 +12,4 @@ void init_file_browser();
 void init_image_gallery();
 void init_okay_cancel_dlg();
 
-
-
+void init_drawing_app();

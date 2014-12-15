@@ -173,9 +173,9 @@ void can_prep_board_description_msg( ssCAN* mMsg )
 {
 	int i;
 	byte chars_sent = 0;
-	mMsg->id  = create_CAN_eid( ID_BOARD_DESCRIPTION, MyInstance );
+	mMsg->id      = create_CAN_eid( ID_BOARD_DESCRIPTION, MyInstance );
     mMsg->data[0] = Starting_Index;
-    byte length = min(8, strlen(BoardDescription));
+    byte length   = min(8, strlen(BoardDescription));
     
    	for (i=0; i<length; i++, chars_sent++)
 	    mMsg->data[i+1] = *(BoardDescription+Starting_Index+i);

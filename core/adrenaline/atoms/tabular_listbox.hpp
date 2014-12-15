@@ -61,11 +61,11 @@ public:
 	void			print_client_rect		(   );		// body_height, scroll_bar width
 	
 	virtual int		onCreate	  			(  	);	// after loading resources, call functions which use fonts (already loaded before this call) etc.	
-	void			calc_metrics					(   );
-	void		 	calc_widths_from_text			( int mNotToExceed=-1 );
+	void			calc_metrics			(   );
+	void		 	calc_widths_from_text	( int mNotToExceed=-1 );
 	void 			calc_column_positions_from_widths( );
-	virtual void  	move_to							( float Left, float Bottom );
-	virtual void 	set_width_height   				( int Width, int Height );
+	virtual void  	move_to					( float Left, float Bottom );
+	virtual void 	set_width_height   		( int Width, int Height );
 
 	virtual float	get_line_bottom			( int mVisibleIndex );
 	virtual int		get_total_lines			( 	)	{ printf("tabularListbox::gettotal_lines\n"); return LineData.size();  };
@@ -75,7 +75,7 @@ public:
 	void 			change_header_titles	( string mHeaderTexts, int column );
 
 	// Does not copy the structure !!
-	void			add_column 				( struct HeaderItemInfo* mNewHeading );	// row data will be increased and blanked!
+	void			add_column 				( struct HeaderItemInfo* mNewHeading );		// row data will be increased and blanked!
 	void			update_col_data			( vector<string> *mNewColText, int mColumn );	// does not update the header!
 	void			add_row   				( vector<string> *mData  );
 	int				find_item 				( int index, int mcolumn );

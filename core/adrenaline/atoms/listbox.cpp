@@ -150,7 +150,7 @@ void ListBox::draw_one_row( int mRow, float mY )
 int ListBox::draw_text()
 {
 	int num_lines = min( number_lines_visible, get_total_lines() );
-	printf("ListBox::draw_text() num_lines=%d  get_total_lines=%d\n", num_lines, get_total_lines() );
+	//printf("ListBox::draw_text() num_lines=%d  get_total_lines=%d\n", num_lines, get_total_lines() );
 	int i=0; 
 	int screen_i=0;	
 	int start = first_visible_line;
@@ -162,7 +162,7 @@ int ListBox::draw_text()
 	{
 		y = get_line_bottom( screen_i );
 		draw_one_row( i, y );
-		printf( "y=%6.3f Num_lines=%d LH=%6.3f, TextSize=%6.3f above=%6.3f\n", y, num_lines, LineHeight, text_size);
+		//printf( "y=%6.3f Num_lines=%d LH=%6.3f, TextSize=%6.3f above=%6.3f\n", y, num_lines, LineHeight, text_size);
 	}
 }
 
@@ -292,6 +292,13 @@ void ListBox::select( int mIndex )
 	printf("Selected item # %d/%d  visible_line=%d\n", 
 			mIndex, LineTexts.size(), mIndex-first_visible_line);
 	selected_item = mIndex;
+}
+
+// chance to load resources, call functions which use fonts (already loaded before this call) etc.
+int ListBox::onCreate( )
+{
+	ScrollControl::onCreate( );
+	calc_metrics( );
 }
 
 // Returns the select index of the listbox:

@@ -1,6 +1,5 @@
-#ifndef _CAN_APP_H_
-#define _CAN_APP_H_
-
+#ifndef _CAN_MSG_VIEW_H_
+#define _CAN_MSG_VIEW_H_
 
 #include "tabular_listbox.hpp"
 

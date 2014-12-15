@@ -16,8 +16,11 @@
 #include "Graphbase.hpp"
 #include "bk_system_defs.h"
 #include "mouse.h"
+#include "adrenaline_windows.h"
+#include "rectangle.hpp"
 #include "display_manager.hpp"
-#include "avisual_menu.hpp"
+#include "avisual_menu.hpp"		// Specific system menu.  not part of adrenaline_windows
+
 
 
 // Offer one instance for whole app;
@@ -69,10 +72,46 @@ int	DisplayManager::onCreate(  )
 	float b = (screen_height-m_sb.get_height());
 	printf("DisplayManager::onCreate()  %d,%d, %5.1f\n", screen_width, screen_height, b );
 
+	// Top:
 	m_sb.move_to		   ( 0, b );
 	init_avisual_menu  ( &(m_sb.m_Menu) );
 	add_object( &m_sb );
 	m_sb.print_positions();
+
+	// Bottom Status
+	m_status.move_to		 ( 0, 			 m_status.get_height() );
+	m_status.set_width_height( screen_width, 64 );
+	add_object( &m_status );
+
+	// RIGHT SideBar
+	const int sidebar_width = 200;
+	m_soft_side.move_to			( screen_width-200, m_status.get_height() );
+	m_soft_side.set_width_height( 200, height-m_status.get_height()-m_sb.get_height() );
+	add_object( &m_soft_side );
+
+}
+
+Rectangle*	DisplayManager::get_useable_rect( )
+{
+	static Rectangle rect;
+	// TOP:
+	rect.set_top( m_sb.get_bottom() );
+
+	// Right Side:
+	if (m_soft_side.is_visible()==true)
+		rect.set_right( m_soft_side.get_left()-1 );
+	else
+		rect.set_right( screen_width );
+	
+	// no task bar yet!
+	rect.set_left( 0 );
+
+	// Bottom:
+	if (m_status.is_visible()==true)
+		rect.set_bottom( m_status.get_top() );
+	else
+		rect.set_bottom( 0 );
+	return &rect;
 }
 
 // Perhaps this is not needed.  need to re-architect.
@@ -80,6 +119,8 @@ void DisplayManager::call_on_creates( )
 {
 	// System Bar will always be treated separately.
 	m_sb.onCreate();
+	m_soft_side.onCreate();
+	m_status.onCreate();
 	
 	// Load all controls which are already registered.
 	printf("Creating child controls\n");
@@ -190,7 +231,12 @@ Control* DisplayManager::HitTest( int x, int y )
 int   DisplayManager::draw_children( )
 {
 	m_sb.draw();
+	m_soft_side.draw();
+	m_status.draw();
 	
+	printf("\t\tside bar	\t");	m_soft_side.print_positions();
+	printf("\t\tstatus bar	\t");	m_status.print_positions();
+		
 	list<Control*>::iterator	iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++ )
 	{

@@ -72,7 +72,7 @@ void TabularListBox::Initialize()
 int	TabularListBox::onCreate(  	)	// after loading resources, call functions which use fonts (already loaded before this call) etc.	
 {
 	printf("\t\tTabularListBox::onCreate()\n");
-	Control::onCreate();
+	ListBox::onCreate();
 
 	calc_widths_from_text( );
 	calc_column_positions_from_widths( );	
@@ -207,7 +207,7 @@ void TabularListBox::draw_one_cell( int mRow, int mCol, float mY )
 	int   indent     = col_space / 2.0;
 	float above_line_offset = (LineHeight-text_size)/2.0;
 	int x;
-	printf( "TabularListBox::draw_one_cell()  x position determined.\n" );
+	//printf( "TabularListBox::draw_one_cell()  x position determined.\n" );
 
 	// Determine the X start pixel:
 	if 		(Headings[mCol].alignment == HEADER_ALIGN_LEFT)
@@ -216,7 +216,7 @@ void TabularListBox::draw_one_cell( int mRow, int mCol, float mY )
 		x = Headings [mCol].start_x + indent;
 	else if (Headings[mCol].alignment == HEADER_ALIGN_RIGHT)
 		x = Headings[mCol].end_x - text_width;
-	printf("TabularListBox::draw_one_cell()  x position determined.\n");
+	//printf("TabularListBox::draw_one_cell()  x position determined.\n");
 
 	Text( x, mY+above_line_offset, (char*)LineData[mRow][mCol].c_str(), SerifTypeface, text_size );
 }

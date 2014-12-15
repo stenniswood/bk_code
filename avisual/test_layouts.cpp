@@ -19,26 +19,26 @@ AUTHOR	: Steve Tenniswood
 #include <shapes.h>
 #include <fontinfo.h>
 #include "CAN_Interface.h"
+#include "adrenaline_windows.h"
+#include "adrenaline_graphs.h"
 #include "display.h"
 #include "display_manager.hpp"
 #include "frame_window.hpp"
 #include <vector>
 #include "power_level.hpp"
 #include "stereo_power.hpp"
-#include "adrenaline_windows.h"
 #include "visual_memory.h"
 #include "audio_memory.h"
 #include "fft.h"
 #include "audio_app.hpp"
-#include "adrenaline_windows.h"
-#include "adrenaline_graphs.h"
+
 #include "card_games.h"
 
 #include "test_layouts.hpp"
 #include "test_combo_layouts.hpp"
 #include "test_game_layouts.hpp"
 #include "test_graph_layouts.hpp"
-#include "can_msg_view.hpp"
+//#include "can_msg_view.hpp"
 
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
@@ -671,8 +671,8 @@ void init_dropdown_menu()
 	
 }
 
-CANMessageView 			 msg_view;
 
+CANMessageView 			 msg_view;
 void fill_data( byte* mdata, byte last)
 {
 	mdata[0] = 0x12;
@@ -684,7 +684,6 @@ void fill_data( byte* mdata, byte last)
 	mdata[6] = 0xEF;
 	mdata[7] = last;
 }
-
 void fill_msgs(  )
 {
 	struct sCAN can;
@@ -697,7 +696,6 @@ void fill_msgs(  )
 		msg_view.add_message( &can );
 	}
 }
-
 void init_CAN_msg_view( )
 {
 	msg_view.move_to  		 ( 200, 200   );
@@ -710,6 +708,20 @@ void init_CAN_msg_view( )
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &msg_view );
+}
+
+CANApp can_app;
+void init_CAN_app( )
+{
+	float wide = MainDisplay.get_width();
+	float high = MainDisplay.get_height();
+
+	can_app.set_width_height( wide*(1-0.125), 3.*high/4. );
+	can_app.move_to(0.0625*wide, high*(1./8.) );
+	can_app.set_text_color	 ( 0xFFFF0000 );
+
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &can_app );
 }
 
 //////////////////////////////////////////////////////////////////////////

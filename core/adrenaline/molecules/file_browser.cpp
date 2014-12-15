@@ -175,6 +175,11 @@ void FileBrowser::collapse_to_level( int mLevelIndex )
 
 char str[] = "/home/pi/audio_test/" ;
 
+int	FileBrowser::onCreate(  )
+{
+	Window::onCreate();	
+}
+
 int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 {
 	printf(" Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		

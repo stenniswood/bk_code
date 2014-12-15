@@ -34,7 +34,9 @@ public:
 	float			get_width			  (			)	{return width; 	 };
 	float			get_height			  (			)	{return height;  };
 	float 			get_left	  		  ( 		)	{ return left;   };
+	float 			get_right	  		  ( 		)	{ return left+width;   };	
 	float 			get_bottom	  		  ( 		)	{ return bottom; };
+	float 			get_top		  		  ( 		)	{ return bottom+height; };	
 	inline bool		is_created			  ( 		)   { return created; };
 	
 	void 		 	move_bottom_to  	  ( float  mNewBottom	);
@@ -51,6 +53,7 @@ public:
 	void  			print_positions	  	  ( 				 );
 	void  			print_color_info  	  ( 				 );
 
+	bool  			is_visible			  ( ) 	{ return Visible;  };
 	void  			show				  ( ) 	{ Visible = TRUE;  };
 	void  			hide				  ( ) 	{ Visible = FALSE; };
 	void  			show_border 		  ( bool Show=true ) { HasBorder = Show; };

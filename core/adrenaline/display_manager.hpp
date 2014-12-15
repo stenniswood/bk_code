@@ -5,6 +5,7 @@
 #include "control.hpp"
 #include "icon.hpp"
 
+#include "rectangle.hpp"
 #include "system_status.hpp"
 #include "side_bar.hpp"
 #include "task_bar.hpp"
@@ -34,8 +35,10 @@ public:
 	virtual int	onCreate	(  					  );	
 	void	load_resources  (					  );
 
-	float	get_width		(	)		{  return screen_width;	 };
-	float 	get_height		(	)		{  return screen_height; };
+	float	get_width			(	)		{  return screen_width;	 };
+	float 	get_height			(	)		{  return screen_height; };
+	Rectangle*	get_useable_rect( );	// max client coordinates to avoid the sidebars, status and system bars.	
+			
 	
 	void	add_object			( Control* NewControl );
 	void	remove_object		( Control* NewControl );
@@ -66,6 +69,7 @@ protected:
 	TaskBar			m_task_bar;		// Left side
 	SideBar			m_soft_side;	// Right side
 	SystemStatusBar	m_status;		// Bottom
+
 
 	list<Control*>	controls;		// new way - not tested yet!
 	Control* Head;

@@ -120,10 +120,9 @@ void 	VerticalMenu::draw_one_row( int mRow, float mY )
 
 int   	VerticalMenu::draw		 		( 	)
 {
-	printf("VerticalMenu::draw	\n");
-	print_positions();
+	//printf("VerticalMenu::draw	\n");
+	//print_positions();
 	ListBox::draw();
-
 }
 
 int 	VerticalMenu::get_hit_index		( int Mousex, int Mousey )

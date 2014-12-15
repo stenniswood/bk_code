@@ -28,7 +28,8 @@
 #include "icon.hpp"
 #include "avisual_menu.hpp"
 #include "test_layouts.hpp"
-
+#include "draw_app.hpp"
+#include "test_combo_layouts.hpp"
 
 HorizontalMenu hm		(-1,-1);
 VerticalMenu   atoms    (-1,-1);
@@ -115,6 +116,8 @@ int show_molecule_screens( void* menuPtr, int mMenuIndex )
 	case 3: init_directory_lb_test	();		break;
 	case 4: init_file_browser		();		break;			
 	case 5: init_sidebar_test		();		break;
+	case 6: init_CAN_app			();		break;
+	case 7: init_drawing_app		();		break;	
 	default: 	break;
 	}
 }
@@ -127,6 +130,8 @@ void init_molecule_menu()
 	molecules.add_simple_command( "Directory lb" 	);
 	molecules.add_simple_command( "File Browser" 	);				
 	molecules.add_simple_command( "sidebar test" 	);
+	molecules.add_simple_command( "My guts (CAN)" 	);
+	molecules.add_simple_command( "Drawing" 		);
 
 	molecules.add_callback( 0,  show_molecule_screens  );
 	molecules.add_callback( 1,  show_molecule_screens  );	
@@ -134,6 +139,8 @@ void init_molecule_menu()
 	molecules.add_callback( 3,  show_molecule_screens  );	
 	molecules.add_callback( 4,  show_molecule_screens  );	
 	molecules.add_callback( 5,  show_molecule_screens  );	
+	molecules.add_callback( 6,  show_molecule_screens  );
+	molecules.add_callback( 7,  show_molecule_screens  );	
 }
 
 int show_game_screens( void* menuPtr, int mMenuIndex )

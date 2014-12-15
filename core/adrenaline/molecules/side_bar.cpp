@@ -45,6 +45,15 @@ void SideBar::calc_metrics	 	(   )
 	
 }
 
+float SideBar::get_short_width	 ( )	// for minimized view (ie. just icons)
+{
+	return ICON_WIDTH;
+}
+float SideBar::get_expanded_width( )	// for minimized view (ie. just icons)
+{
+	return EXPANDED_WIDTH;
+}
+
 int		SideBar::add_control( Control* mControl, char* mText )
 {
 	// Need to set it's location first:

@@ -32,6 +32,12 @@
 //#include "multiselect_listbox.hpp"
 #include "tab_control.hpp"
 
+#include "can_app.hpp"
+#include "adren_network_view.hpp"
+#include "task_bar.hpp"
+#include "system_status.hpp"
+#include "side_bar.hpp"
+
 
 
 

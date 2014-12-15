@@ -71,6 +71,15 @@ int	Control::onCreate(  )
 {	
 	created = true;
 	wrap_content();
+	printf("	Control::onCreate() Child Create:\n"); 
+	// Create All Children:
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while ( iter != m_child_controls.end() )
+	{ 	
+		(*iter)->onCreate();
+		iter++; 
+	}	
+	return 1;
 }
 
 void Control::wrap_content( )
@@ -201,6 +210,14 @@ int Control::draw()
 	StrokeWidth(2);
 	if (HasBorder) 
 		draw_border();
+
+	// Draw Any Children:
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while ( iter != m_child_controls.end() )
+	{ 	
+		(*iter)->draw();
+		iter++; 
+	};
 
 	return TRUE;
 }

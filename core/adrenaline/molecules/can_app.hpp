@@ -2,6 +2,8 @@
 #define _CAN_APP_H_
 
 #include "control.hpp"
+#include "adren_network_view.hpp"
+#include "can_msg_view.hpp"
 
 
 #define MENU_STATE_NORMAL 		1
@@ -27,19 +29,22 @@ public:
 	int				setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms );
 	int				setup_triggered_response_msg( struct sCAN* mTriggerMsg, struct sCAN* mResponse );	
 	
-	virtual int   	draw		 		(				);
+	void			fill_phony_msgs();
 
+	virtual int		onCreate	  (  );	// chance to load resources, call functions which use fonts
+	
 	int				get_hit_index		( int Mousex, int Mousey );
-//	int				set_on_click_listener( void (void*) );	
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
-
+	virtual int   	draw		 		(				);
+	
 protected:
 	//vector<stVertMenuInfo*>	m_entries;	
+	NetworkView				m_board_view;		// List of all boards present
 	CANMessageView			m_msg_view;
-	CANFilterView			m_filter_view;
-	CANAdrenalineView		m_board_view;		// List of all boards present
-	CANMessageList			m_msg_list;			// All messages in database.
-
+	//CANFilterView			m_filter_view;
+	//CANMessageList			m_msg_list;			// All messages in database.
+	Button					m_rescan;
+	
 	
 	int						m_width;
 	bool					has_scroller;

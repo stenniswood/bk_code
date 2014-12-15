@@ -1,8 +1,22 @@
-
-
-
-
-
+/*******************************************************
+* Line graph OpenVG program
+* 
+* Steve Tenniswood
+********************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <string>
+#include "VG/openvg.h"
+#include "VG/vgu.h"
+#include <shapes.h>
+#include <fontinfo.h>
+#include "Graphbase.hpp"
+#include "control.hpp"
+#include "button.hpp"
+#include "display.h"
+#include "text_view.hpp" 
 
 
 
@@ -35,7 +49,7 @@ void			Map2D::add_poly_line		( Path2d mPath 			)
 void			Map2D::define_room			( Rectangle mRoom, String mName	) 
 { 
 }
-void			Map2D::add_door			( stDoor mDoor,    String mName	) 
+void			Map2D::add_door				( stDoor mDoor,    String mName	) 
 { 
 }
 
@@ -59,6 +73,12 @@ int   			Map2D::draw 				(				 )
 }	
 int				Map2D::HitTestRoom			( int x, int y	 ) 
 { 
+	vector<Rectangle>::iterator iter = m_rooms.begin();
+	while (iter != m_rooms.end())
+	{		
+		m_rooms.
+		iter++;
+	}
 }
 
 int		 		Map2D::onClick				( int x, int y, bool mouse_is_down ) 

@@ -18,6 +18,9 @@ using namespace std;
 #define SIDEBAR_ALIGN_CENTER  0x02
 #define SIDEBAR_ALIGN_BOTTOM  0x04
 
+const int ICON_WIDTH     =100;
+const int EXPANDED_WIDTH =300;
+
 /***************************************************************
 This control puts some buttons/info on the sides of the screen.
 
@@ -36,7 +39,9 @@ public:
 	virtual int   	draw 			 (	 );
 	void			calc_metrics	 (   );
 
-
+	float			get_short_width	 ( );	// for minimized view (ie. just icons)
+	float			get_expanded_width	 ( );	// for minimized view (ie. just icons)
+	
 	int				add_control		 ( Control* mControl, char* mText=NULL );
 	void			hide			 ( bool mHide = true);
 	void			auto_hide		 ( bool mAutoHide = true);

@@ -1,5 +1,5 @@
-#ifndef _SIDE_BAR_CONTROL_
-#define _SIDE_BAR_CONTROL_
+#ifndef _SYSTEM_STATUS_
+#define _SYSTEM_STATUS_
 
 #include "control.hpp"
 #include "window.hpp"
@@ -36,6 +36,7 @@ public:
 	virtual int   	draw 			 (	 );
 	void			calc_metrics	 (   );
 
+	void			set_text		 ( char* mText );
 	int				add_control		 ( Control* mControl, char* mText=NULL );
 	void			hide			 ( bool mHide = true);
 	void			auto_hide		 ( bool mAutoHide = true);
@@ -43,13 +44,14 @@ public:
 
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
-	
 protected:
+	TextView		m_text_view;		// center of display
+	//list<string>	m_text;
+	string			m_text;	
 
 	int				num_tabs;
 	list<Control*>	controls;
-	list<string>	paired_text;
-
+	
 private:
 	byte		Alignment;
 	bool		isHidden;
