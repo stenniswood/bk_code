@@ -40,6 +40,8 @@ void SystemStatusBar::Initialize	 (   )
 { 
 	Window::Initialize();
 }
+const int margin = 10;
+
 int  SystemStatusBar::draw 			 (	 ) 
 { 
 	Control::draw();

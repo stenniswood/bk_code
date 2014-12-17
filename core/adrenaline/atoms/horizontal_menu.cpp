@@ -199,13 +199,15 @@ bool	HorizontalMenu::is_selection_valid( )
 Control* HorizontalMenu::HitTest( int x, int y )
 {
 	// Test this Horizontal Menu first.	
-	Control* result = Control::HitTest(x,y);
-	printf( "HorizontalMenu::HitTest() %d,%d =  %x\n", x,y,result );
+	Control* result = Control::HitTest(x,y);	
 	
-	if ((result==NULL) && is_selection_valid()) {
+	if ((result==NULL) && is_selection_valid()) 
+	{
 		// Test the open submenu:
 		result = m_entries[m_selection]->menu->HitTest(x,y);
 	}
+	if (result)
+		printf( "HorizontalMenu::HitTest() %d,%d =  %x\n", x,y,result );
 	return result;
 }
 

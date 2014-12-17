@@ -24,6 +24,25 @@
 #include "display.h"
 #include "CAN_base.h"
 
+HorizontalMenu   can_menu(-1,-1);
+VerticalMenu   can_view_menu(-1,-1);
+
+void init_view_menu()
+{
+	can_view_menu.add_simple_command( "Messages" 	 );
+	can_view_menu.add_simple_command( "Message Flow" );
+	can_view_menu.add_simple_command( "Graph "		 );
+	can_view_menu.add_simple_command( "Robot Limbs"  );
+	can_view_menu.add_simple_command( "Button boards");
+
+	can_view_menu.add_callback( 0, show_atom_screens  );
+	can_view_menu.add_callback( 1, show_atom_screens  );
+	can_view_menu.add_callback( 2, show_atom_screens  );
+	can_view_menu.add_callback( 3, show_atom_screens  );
+	can_view_menu.add_callback( 4, show_atom_screens  );
+}
+
+
 // Demo Messages:
 static void fill_data( byte* mdata, byte last)
 {

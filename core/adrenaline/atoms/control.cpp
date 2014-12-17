@@ -233,11 +233,15 @@ int Control::draw_border()
 
 Control* Control::ChildrenHitTest( int x, int y )
 {
+	//printf("Control::ChildrenHitTest() .\n");
 	Control* retval = NULL;
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
 	{
+		(*iter)->print_positions();
 		retval = (*iter)->HitTest( x,y );
+		if (retval)
+			return retval;
 		iter++;
 	}
 	return retval;
@@ -245,8 +249,14 @@ Control* Control::ChildrenHitTest( int x, int y )
 
 Control* Control::HitTest(int x, int y)
 {
+	Control* result = ChildrenHitTest( x, y );
+	if (result) {
+		printf("Control::HitTest()  Clicked a registered child.\n");
+		return result;
+	}
+	//printf("Control::HitTest()  Not a registered child!\n");
 	float right = left+width;
-	float top = bottom+height;
+	float top   = bottom+height;
 	
 	if ((x>left)   && (x<right)  &&
 	    (y>bottom) && (y<top))

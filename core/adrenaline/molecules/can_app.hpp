@@ -1,3 +1,4 @@
+
 #ifndef _CAN_APP_H_
 #define _CAN_APP_H_
 
@@ -44,7 +45,7 @@ protected:
 	//CANFilterView			m_filter_view;
 	//CANMessageList			m_msg_list;			// All messages in database.
 	Button					m_rescan;
-	
+	Button					m_view_graph;		// toggle between outline (msg flow) & graphing of data.
 	
 	int						m_width;
 	bool					has_scroller;

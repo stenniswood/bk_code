@@ -16,43 +16,22 @@ AUTHOR	: Steve Tenniswood
 #include <string.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
+#include <vector>
+#include <string>
 #include <shapes.h>
 #include <fontinfo.h>
 #include "CAN_Interface.h"
-#include "line_graph.hpp"
 #include "dataset.hpp"
-#include "histogram.hpp"
-#include "line_graph.hpp"
-#include "leveler.hpp"
 #include "display.h"
+#include "adrenaline_windows.h"
+#include "adrenaline_graphs.h"
+
 #include "display_manager.hpp"
-#include "button.hpp"
-#include "listbox.hpp"
-#include "checkbox.hpp"
-#include "progressbar.hpp"
-#include "text_view.hpp"
-#include "scroll_bar.hpp"
-#include "control.hpp"
-#include "icon.hpp"
-#include "listbox.hpp"
-#include "tabular_listbox.hpp"
-#include "window.hpp"
 #include "frame_window.hpp"
-#include <vector>
-#include "radiobutton.hpp"
+
 #include "test_layouts.hpp"
-#include "directory_listbox.hpp"
-#include "file_browser.hpp"
-#include "image_gallery.hpp"
-#include "bar_graph.hpp"
-#include "bar_graph_stacked.hpp"
-#include "scatter_plot.hpp"
-#include "power_level.hpp"
-#include "stereo_power.hpp"
 #include "visual_memory.h"
 #include "audio_memory.h"
-#include "wave_view.hpp"
-#include "frequency_view.hpp"
 #include "fft.h"
 #include "test_combo_layouts.hpp"
 
@@ -183,7 +162,8 @@ void init_file_browser()
 ImageGallery ig;
 void init_image_gallery()
 {
-	ig.set_position(10,1200, 700, 10);
+	Rectangle* rect = MainDisplay.get_useable_rect();
+	ig.set_position(rect->get_left(), rect->get_width(), rect->get_top(), rect->get_bottom() );
 	ig.onCreate    ();
 	ig.set_directory( "/home/pi/bk_code/abkInstant/media/" );
 	//ig.set_directory( "/media/My Book/tv/PhonePics/" ); 

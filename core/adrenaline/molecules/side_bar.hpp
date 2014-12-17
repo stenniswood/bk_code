@@ -39,7 +39,9 @@ public:
 	virtual int   	draw 			 (	 );
 	void			calc_metrics	 (   );
 
-	float			get_short_width	 ( );	// for minimized view (ie. just icons)
+	void			toggle_state	 (   );
+	
+	float			get_short_width	 (   );	// for minimized view (ie. just icons)
 	float			get_expanded_width	 ( );	// for minimized view (ie. just icons)
 	
 	int				add_control		 ( Control* mControl, char* mText=NULL );

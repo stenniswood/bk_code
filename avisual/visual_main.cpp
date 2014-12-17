@@ -131,7 +131,9 @@ void gui_interface()
 		object_clicked = MainDisplay.HitTest( x, y );
 		if (object_clicked)
 		{
-			printf("clicked an object %x!\n", object_clicked);
+			printf("clicked an object %x!\t", object_clicked);
+			object_clicked->print_positions();
+			
 			int num = object_clicked->onClick( x, y );
 			UpdateDisplaySemaphore=1;
 		} else

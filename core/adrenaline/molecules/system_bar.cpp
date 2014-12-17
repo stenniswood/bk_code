@@ -16,7 +16,7 @@
 #include "EGL/egl.h"
 #include "GLES/gl.h"
 #include "bcm_host.h"
-#include <string.h>
+#include <string>
 #include <fontinfo.h>
 #include <shapes.h>
 #include "Graphbase.hpp"
@@ -24,7 +24,10 @@
 #include "button.hpp"
 #include "display.h"
 #include "icon.hpp"
+#include "adrenaline_windows.h"
 #include "system_bar.hpp"
+
+
 
 
 SystemBar::SystemBar() 
@@ -59,15 +62,31 @@ void	SystemBar::place_items	(	)
 	m_Menu.move_to( (left+m_MenuStart_x),  bottom );
 	//printf("SystemBar::place_items:m_Menu:");
 	//m_Menu.print_positions( );
+	
+	m_show_taskbar.set_width_height( 25, height );
+	m_show_sidebar.set_width_height( 25, height );
+	
+	m_show_taskbar.move_to( 0, bottom);
+	m_show_sidebar.move_to( width-25, bottom);
+
 }
 
-int   	SystemBar::draw 		(	) 
+int   	SystemBar::draw (	) 
 { 
-	//printf("SystemBar::draw()\n");
+	printf("SystemBar::draw()\n");
 	print_positions();
+	printf("SystemBar::m_Menu::\t");
+		m_Menu.print_positions();
+	
 	//printf("SystemBar::m_Menu::draw:");
+	printf("SystemBar::m_Menu::m_show_sidebar\t");
+		m_show_sidebar.print_positions();
+	printf("SystemBar::m_Menu::m_show_taskbar\t");
+		m_show_taskbar.print_positions();
+	
 	m_Menu.print_positions();
-	m_Menu.draw();
+	//m_Menu.draw();
+	Control::draw();
 }
 
 void 	SystemBar::set_width_height  	  ( int Width, int Height )
@@ -90,9 +109,9 @@ void  	SystemBar::move_to	  		  	  ( float Left,   float  Bottom	 )
 
 Control*	SystemBar::HitTest		  ( int x, int y 	)
 {
-	Control* result = m_Menu.HitTest( x,y );
-	if (result)
-		return result;
+	//Control* result = m_Menu.HitTest( x,y );
+	//if (result)
+	//	return result;
 	return Control::HitTest(x,y); 
 }
 
@@ -101,14 +120,37 @@ int			SystemBar::onHover		  (  			 	)
 	return Control::onHover(); 
 }
 
-int		SystemBar::onClick(int x, int y, bool mouse_is_down) 
+int		SystemBar::onClick(int x, int y, bool mouse_is_down)
 { 
-	int result = m_Menu.onClick( x,y, mouse_is_down );
-	if (result) return result;
-	
-	return Control::onClick(x,y); 		
+//  Control::onClick(x,y,mouse_is_down);
+//	int result = m_Menu.onClick( x,y, mouse_is_down );
+//  if (result) return result;	
+	return Control::onClick(x,y,mouse_is_down); 		
 }
 
 int			SystemBar::onDoubleClick  ( 				)
 { 
 }
+
+void show_sidebar(void* mObj )
+{
+	printf("\n\nshow_sidebar\n");
+	Control* obj = (Control*) mObj;
+	if (obj->is_visible()==true)
+		obj->hide( );
+	else
+		obj->show( );
+}
+
+int	SystemBar::onCreate(  )
+{
+	place_items();
+		
+	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_soft_side) );
+	//m_show_taskbar.set_on_click_listener( show_taskbar, MainDisplay.m_show_sidebar );
+
+	register_child( &m_Menu );	
+	register_child( &m_show_sidebar );
+	register_child( &m_show_taskbar );
+}
+

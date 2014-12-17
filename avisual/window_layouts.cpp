@@ -11,25 +11,15 @@
 #include <shapes.h>
 #include <fontinfo.h>
 #include "CAN_Interface.h"
-#include "line_graph.hpp"
+
 #include "dataset.hpp"
-#include "histogram.hpp"
-#include "line_graph.hpp"
-#include "leveler.hpp"
 #include "display.h"
+#include "adrenaline_windows.h"
+#include "adrenaline_graphs.h"
+
 #include "display_manager.hpp"
-#include "button.hpp"
-#include "listbox.hpp"
-#include "checkbox.hpp"
-#include "progressbar.hpp"
-#include "text_view.hpp"
-#include "scroll_bar.hpp"
-#include "control.hpp"
-#include "icon.hpp"
 #include "visual_memory.h"
-#include "listbox.hpp"
-#include "tabular_listbox.hpp"
-#include "window.hpp"
+
 
 #include <vector>
 
@@ -133,8 +123,7 @@ void adren_board_list_set_headings()
 	hdr_info.text  = "Firmware";
 	hdr_info.width = 100;
 	hdr_info.alignment = HEADER_ALIGN_LEFT;			
-	adren_board_list.add_column( &hdr_info );
-		
+	adren_board_list.add_column( &hdr_info );	
 }
 
 void populate_listbox()
@@ -144,37 +133,37 @@ void populate_listbox()
 	data->push_back("sjt-linux");
 	data->push_back("192.168.1.142");
 	data->push_back("Raspberry Pi");
-//	tab_lb.add_row (data);
+	adren_board_list.add_row (data);
 	
 	data = new vector<string>;	
 	data->push_back("dev1");
 	data->push_back("192.168.1.141");
 	data->push_back("Raspberry Pi");
-//	tab_lb.add_row (data);
+	adren_board_list.add_row (data);
 
 	data = new vector<string>;	
 	data->push_back("sjtenniswood");
 	data->push_back("192.168.1.140");
 	data->push_back("Macbook Pro");
-//	tab_lb.add_row (data);
+	adren_board_list.add_row (data);
 
 	data = new vector<string>;	
 	data->push_back("sjShadows computer");
 	data->push_back("192.168.1.666");
 	data->push_back("Cat attack");
-//	tab_lb.add_row (data);
+	adren_board_list.add_row (data);
 
 	data = new vector<string>;	
 	data->push_back("merici drops");
 	data->push_back("192.168.1.777");
 	data->push_back("Windows PC");
-//	tab_lb.add_row (data);
+//	adren_board_list.add_row (data);
 	
 	data = new vector<string>;	
 	data->push_back("tv");
 	data->push_back("192.168.1.144");
 	data->push_back("Mac");
-//	tab_lb.add_row (data);
+//	adren_board_list.add_row (data);
 }
 
 void update_available_client_list()
@@ -197,7 +186,7 @@ void init_avisual()
 	char* str = new char[255];
 	strcpy (str, "This is where the incoming text will go! What is the best way to count to the second line?  Okay. I don't know what else to say.  Fourier Transforms are amazingly fast! How can I say thanks for the things he has done for me?");
 	strcpy (ConnectionStatusText, "Not connected");	
-	 	
+
 	ConnectionStatus.set_text				( ConnectionStatusText );
 	ConnectionStatus.set_text_size			( 18.0		 );
 	ConnectionStatus.set_text_color			( 0xFFFF0000 );
@@ -212,12 +201,12 @@ void init_avisual()
 	CmdText.set_background_color( 0xFF9f9f0f );
 
 	// This should be hidden until asked for via voice.
-	AvailableClients.set_position( 1000, 1200, 300, 20 );
+	AvailableClients.set_position( 1000, 1200, 400, 100 );
 	update_available_client_list();
 
 	//set_headings();
 	printf("SET_HEADINGS() - \n");
-	//populate_listbox();
+	populate_listbox();
 	printf("POPULATED LISTBOX () - \n");
 
 	adren_board_list_set_headings();
@@ -227,7 +216,7 @@ void init_avisual()
 	//adren_board_list.copy_position_vert 				(&AvailableClients);
 	//adren_board_list.set_text_size				    ( 12.0 );
 	adren_board_list.adjust_height_for_num_visible_items( 8 );
-	
+	adren_board_list.move_to(100, 100);
 	adren_board_list.calc_widths_from_text			    (   );
 	adren_board_list.calc_column_positions_from_widths  (   );
 	//adren_board_list.calc_metrics();

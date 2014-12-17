@@ -24,9 +24,9 @@ public:
 	DisplayManager( int Left, int Right, int Top, int Bottom );
 	DisplayManager( int mScreenWidth, int mScreenHeight );
 
-	void  	set_title 			( char* Title 	  );
+	virtual void	Initialize();
+	
 	void  	set_background		( char* mFileName );
-	void  	set_background_color( long int Color  );
 
 	void	init_screen		(					  );
 	void	start_screen	(					  );
@@ -37,8 +37,7 @@ public:
 
 	float	get_width			(	)		{  return screen_width;	 };
 	float 	get_height			(	)		{  return screen_height; };
-	Rectangle*	get_useable_rect( );	// max client coordinates to avoid the sidebars, status and system bars.	
-			
+	Rectangle*	get_useable_rect( );	// max client coordinates to avoid the sidebars, status and system bars.
 	
 	void	add_object			( Control* NewControl );
 	void	remove_object		( Control* NewControl );
@@ -50,34 +49,19 @@ public:
 	void  start_draw		(	);
 	int   draw				(	);	
 	int   draw_children		( 	);
-	int   draw_text			( 	);
 	int   draw_background	( 	);
 	void  end_draw			(	);
 
 	void 	call_on_creates	( 	);  // maybe not needed
 
-protected:
-	int 	left; 
-	int		right;
-	int		top;
-	int		bottom;
-	
-	long int BackgroundColor;				
-	
 	// Linked List of objects.
-	SystemBar		m_sb;				// Top
+	SystemBar		m_sb;			// Top
 	TaskBar			m_task_bar;		// Left side
 	SideBar			m_soft_side;	// Right side
 	SystemStatusBar	m_status;		// Bottom
 
-
-	list<Control*>	controls;		// new way - not tested yet!
-	Control* Head;
-	Control* Tail;
-
-	char*	text;
-	char* 	title; 
-	bool	ShowBox;
+protected:
+	//list<Control*>	controls;		// new way - not tested yet!
 
 	int		screen_width;
 	int 	screen_height;

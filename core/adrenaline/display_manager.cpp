@@ -17,10 +17,10 @@
 #include "bk_system_defs.h"
 #include "mouse.h"
 #include "adrenaline_windows.h"
+
 #include "rectangle.hpp"
 #include "display_manager.hpp"
 #include "avisual_menu.hpp"		// Specific system menu.  not part of adrenaline_windows
-
 
 
 // Offer one instance for whole app;
@@ -35,6 +35,7 @@ DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
 	screen_width   = Right-Left;
 	screen_height  = Bottom-Top;
 	init_screen();
+	Initialize();
 }
 
 DisplayManager::DisplayManager( int mScreenWidth, int mScreenHeight )
@@ -45,6 +46,7 @@ DisplayManager::DisplayManager( int mScreenWidth, int mScreenHeight )
 	screen_width   = mScreenWidth;
 	screen_height  = mScreenHeight;
 	init_screen();
+	Initialize();
 }
 
 // Graphics initialization
@@ -55,6 +57,7 @@ void  DisplayManager::init_screen()
 	mouse_init( screen_width, screen_height );
 	load_resources();	
 }
+
 // Screen initialization
 void  DisplayManager::start_screen()
 {
@@ -65,14 +68,30 @@ void  DisplayManager::end_screen( )
 {
 	End();
 }
-
-int	DisplayManager::onCreate(  )
+// Perhaps this is not needed.  need to re-architect.
+void DisplayManager::call_on_creates( )
 {
+	// System Bar will always be treated separately.
+	/*m_sb.onCreate();
+	m_soft_side.onCreate();
+	m_status.onCreate(); */
+	
+	// Load all controls which are already registered.
+	printf("Creating child controls\n");
+	/*list<Control*>::iterator	iter = m_child_controls.begin();
+	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
+	{
+		(*iter)->onCreate();
+	}*/
+	Control::onCreate();
+}
+
+void DisplayManager::Initialize()
+{
+	// Top:
 	m_sb.set_width_height( screen_width, 36 );
 	float b = (screen_height-m_sb.get_height());
 	printf("DisplayManager::onCreate()  %d,%d, %5.1f\n", screen_width, screen_height, b );
-
-	// Top:
 	m_sb.move_to		   ( 0, b );
 	init_avisual_menu  ( &(m_sb.m_Menu) );
 	add_object( &m_sb );
@@ -88,9 +107,13 @@ int	DisplayManager::onCreate(  )
 	m_soft_side.move_to			( screen_width-200, m_status.get_height() );
 	m_soft_side.set_width_height( 200, height-m_status.get_height()-m_sb.get_height() );
 	add_object( &m_soft_side );
-
 }
 
+int	DisplayManager::onCreate(  )
+{
+	Control::onCreate();
+}
+	
 Rectangle*	DisplayManager::get_useable_rect( )
 {
 	static Rectangle rect;
@@ -114,22 +137,6 @@ Rectangle*	DisplayManager::get_useable_rect( )
 	return &rect;
 }
 
-// Perhaps this is not needed.  need to re-architect.
-void DisplayManager::call_on_creates( )
-{
-	// System Bar will always be treated separately.
-	m_sb.onCreate();
-	m_soft_side.onCreate();
-	m_status.onCreate();
-	
-	// Load all controls which are already registered.
-	printf("Creating child controls\n");
-	list<Control*>::iterator	iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++, iter++ )
-	{
-		(*iter)->onCreate();
-	}
-}
 
 void DisplayManager::load_resources( )
 {
@@ -139,16 +146,14 @@ void DisplayManager::load_resources( )
 	}
 	// Load all controls which are already registered.
 	printf("Loading child resources\n");
-	list<Control*>::iterator	iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++, iter++ )
+	vector<Control*>::iterator	iter = m_child_controls.begin();
+	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
 		(*iter)->load_resources();
 	}
 }
 
-void  DisplayManager::set_title( char* Title )
-{
-}
+
 //	A more preferred way of doing the background:
 //void  DisplayManager::set_background( void* Image 	  )
 void  DisplayManager::set_background( char* mFileName )
@@ -157,15 +162,12 @@ void  DisplayManager::set_background( char* mFileName )
 }
 // "/home/pi/openvg/client/desert0.jpg";
 
-void  DisplayManager::set_background_color( long int Color )
-{
-	background_color = Color;
-}
 
 void  DisplayManager::add_object( Control* NewControl )
 {
 	NewControl->onCreate();
-	controls.push_back( NewControl );
+	//m_child_controls.push_back( NewControl );
+	register_child( NewControl );	
 }
 
 // This removes the object from the list.  Does not delete or free memory.
@@ -178,9 +180,12 @@ void  DisplayManager::remove_object( Control* NewControl )
 void  DisplayManager::remove_all_objects(  )
 {
 	// not going to actually delete/free the objects since some are static!
-	Head = NULL;
-	Tail = NULL;
-	controls.clear();
+	m_child_controls.clear();
+
+	// Put back in the bare essentials!
+	add_object( &m_status );
+	add_object( &m_sb );
+	add_object( &m_soft_side );
 }
 
 void  DisplayManager::start_draw(	)
@@ -204,51 +209,21 @@ void  DisplayManager::end_draw(	)
 	end_screen();	   // End the picture
 }
 
-/*void  DisplayManager::onClick( int x, int y, bool mouse_is_down=true )
-{
-	Control* obj = HitTest(x,y);
-	obj->onClick();
-}*/
-
-Control* DisplayManager::HitTest( int x, int y )
-{
-	Control* result = m_sb.HitTest(x,y);
-	if (result)  return result;
-	
-	list<Control*>::iterator iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++, iter++ )
-	{
-		result = (*iter)->HitTest(x,y);
-		if (result) {
-			printf ("DisplayManager::HitTest:  found a hit. child number %d\n", i );
-			return (result);
-			//return result;
-		}
-	}
-	return NULL;	
-}
-
 int   DisplayManager::draw_children( )
 {
-	m_sb.draw();
+/*	m_sb.draw();
 	m_soft_side.draw();
-	m_status.draw();
-	
+	m_status.draw(); */	
 	printf("\t\tside bar	\t");	m_soft_side.print_positions();
 	printf("\t\tstatus bar	\t");	m_status.print_positions();
-		
-	list<Control*>::iterator	iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++, iter++ )
+
+	vector<Control*>::iterator	iter = m_child_controls.begin();
+	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
 		if (Debug) printf("draw child %d\n", i);	
 		(*iter)->draw();		
 	}
 	return -1;	
-}
-
-int   DisplayManager::draw_text( 	)
-{
-	return -1;
 }
 
 int   DisplayManager::draw_background( 	)
@@ -276,6 +251,29 @@ int   DisplayManager::draw_background( 	)
 	return 1;
 }
 
+Control* DisplayManager::HitTest( int x, int y )
+{
+	//Control* result = m_sb.HitTest(x,y);
+	//if (result)  return result;
+
+	Control* retval = Control::HitTest(x,y);
+	
+/*	list<Control*>::iterator iter = m_child_controls.begin();
+	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
+	{
+		result = (*iter)->HitTest(x,y);
+		if (result) {
+			printf ("DisplayManager::HitTest:  found a hit. child number %d\n", i );
+			return (result);
+			//return result;
+		}
+	}*/
+	if (retval==this)		
+		return NULL;		// don't want display manager empty space to do anything.
+	else 
+		return retval;
+}
+
 /*Control*  DisplayManager::Find_object( Control* NewControl )
 {
 	Control* ctrl = Head;
@@ -286,4 +284,10 @@ int   DisplayManager::draw_background( 	)
 		ctrl = ctrl->getNext();
 	}
 	return NULL;
+}*/
+
+/*void  DisplayManager::onClick( int x, int y, bool mouse_is_down=true )
+{
+	Control* obj = HitTest(x,y);
+	obj->onClick();
 }*/

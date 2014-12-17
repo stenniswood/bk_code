@@ -3,7 +3,7 @@
 
 #include "leveler.hpp"
 #include "display.h"
-#include "display_manager.hpp"
+
 #include "button.hpp"
 #include "listbox.hpp"
 #include "checkbox.hpp"
@@ -22,6 +22,7 @@
 #include "image_gallery.hpp"
 #include "power_level.hpp"
 #include "stereo_power.hpp"
+#include "display_manager.hpp"
 
 #include "wave_view.hpp"
 #include "frequency_view.hpp"
@@ -37,11 +38,5 @@
 #include "task_bar.hpp"
 #include "system_status.hpp"
 #include "side_bar.hpp"
-
-
-
-
-
-
 
 
