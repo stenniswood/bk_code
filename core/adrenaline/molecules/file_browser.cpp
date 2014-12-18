@@ -11,47 +11,27 @@
 #include <shapes.h>
 #include <fontinfo.h>
 #include "CAN_Interface.h"
-#include "line_graph.hpp"
 #include "dataset.hpp"
-#include "histogram.hpp"
-#include "line_graph.hpp"
-#include "leveler.hpp"
-#include "display.h"
+#include "adrenaline_windows.h"
 #include "display_manager.hpp"
-#include "button.hpp"
-#include "listbox.hpp"
-#include "checkbox.hpp"
-#include "progressbar.hpp"
-#include "text_view.hpp"
-#include "scroll_bar.hpp"
-#include "control.hpp"
-#include "icon.hpp"
 #include "visual_memory.h"
-#include "listbox.hpp"
-#include "tabular_listbox.hpp"
-#include "window.hpp"
 #include <vector>
-#include "radiobutton.hpp"
 #include "test_layouts.hpp"
-#include "directory_listbox.hpp"
 #include "file_browser.hpp"
 
 
-static Window		ParentFrame(450, 1050, 500, 100);
-
-
 FileBrowser::FileBrowser()
-: Window( )
+: Control( )
 {
 	Initialize( );
 }
 FileBrowser::FileBrowser( int Left, int Right,  int Top, int Bottom  )
-: Window(  Left, Right, Top, Bottom  )
+: Control(  Left, Right, Top, Bottom  )
 {
 	Initialize( );
 }
 FileBrowser::FileBrowser( int Width, int Height )
-: Window( Width, Height )
+: Control( Width, Height )
 {
 	Initialize( );
 }
@@ -61,68 +41,69 @@ FileBrowser::~FileBrowser()
 
 void FileBrowser::Initialize( )
 {
-	printf("\tFileBrowser::Initialize()::\n");
-	Window::Initialize();
-	path_descriptor = NULL;
+	printf("\n\tFileBrowser::Initialize()::\n");
+	Control::Initialize();
+	path_descriptor   = NULL;
 	show_hidden_files = false;
-	//base_path = ;
-	printf("\tFileBrowser::Initialize()::done!\n");	
+	printf("\tFileBrowser::Initialize()::done!\n");
 }
 
 void FileBrowser::set_base_path( char* mBasePath )
 {
-	create_file_browser( mBasePath );
 	base_path = mBasePath;
 }
 
-void FileBrowser::select_item( int mColumn, int mItem )
-{
-}
-	
 void FileBrowser::show_hidden( bool mShow ) 
 { 
 	show_hidden_files = mShow;
 }
 
-/* Start with just 1 level */
-Window* FileBrowser::create_file_browser( char* mBasePath )
+char str[] = "/home/pi/";
+int	FileBrowser::onCreate(  )
 {
-	// Show Path across the top:
-	path_descriptor = new TextView( -1, -1 );
-	path_descriptor->set_text( mBasePath );
-	path_descriptor->onCreate();
-	pack_control( path_descriptor, PACK_FILL_PARENT, PACKER_ALIGN_TOP );
+	printf("FileBrowser::onCreate(  )\n");
+	Control::onCreate();
+	create_file_browser( );	
+	printf("FileBrowser::onCreate(  ) done\n");	
+}
 
+/* Start with just 1 level */
+Control* FileBrowser::create_file_browser( )
+{
+	// Show Path across the top : 
+	printf("FileBrowser::create_file_browser()\n");
+	path_descriptor = new TextView	( width, -1 );
+	path_descriptor->set_text		( base_path.c_str() );
+	path_descriptor->set_text_size	(14);	
+	path_descriptor->onCreate();
+	path_descriptor->move_to		(left, bottom+height-path_descriptor->get_height() );
+	//register_child( path_descriptor );
+	path_descriptor->print_positions();
 	// Create the left most file List :
-	add_level( mBasePath );
+	add_level( base_path.c_str() );
 	//print_window_positions();
 	return this;
 }
 
 /* Extends the latest level.  ie. works from the current BasePath plus
 a new item  */
-void FileBrowser::add_level( char* mAppendPath )
+void FileBrowser::add_level( string mAppendPath )
 {
-	// Need a pointer to the current latest level:
-	// from Window class:
-
-	// Widths of columns : 
-	printf( "add_level : %s \n", mAppendPath );
+	printf( "add_level : %s \n", mAppendPath.c_str() );
 	DirectoryListBox*  tmp_dir  = new DirectoryListBox();
-	//tmp_dir->onCreate();
-	
-	tmp_dir->set_odd_color   ( 0xFFFFFFFF 	);
-	tmp_dir->set_width_height( 200, 200 	);		// height will get overwritten
-	tmp_dir->populate_directories( mAppendPath, 1 );
-	//printf("FileBrowser::add_level populate files: %s\n", mAppendPath );	
-	tmp_dir->populate_files  ( mAppendPath, 1 );
+	float ht = height - path_descriptor->get_height();
 
-	int size = levels.size();
+	tmp_dir->set_odd_color   ( 0xFF9FFFFF 	);
+	tmp_dir->set_width_height( 200, ht 	);		// height will get overwritten
+	tmp_dir->populate_directories( mAppendPath.c_str(), 1 );
+	//tmp_dir->populate_files  ( mAppendPath, 1 );
+	printf( "add_level : populated directories. \n" );
+
+	int size = levels.size();	
 	vector<DirectoryListBox*>::iterator iter;
-	//printf("\tlevels=%d\n", size );
 	if (size==0) {
-		printf("First level::  pack_control \n");
-		pack_control( tmp_dir, PACK_LEFT, PACK_FILL_PARENT );
+		printf("First level::  put at left\n");
+		tmp_dir->move_to(left, bottom);
 	}
 	else {
 		printf("previous level: \n" );
@@ -130,8 +111,8 @@ void FileBrowser::add_level( char* mAppendPath )
 		(*iter)->print_positions();
 		tmp_dir->set_position_right_of( (*iter), true, 0. );
 		tmp_dir->print_positions();
-		controls.push_back( tmp_dir );
 	}
+	register_child  (tmp_dir);
 	levels.push_back(tmp_dir);
 }
 
@@ -173,17 +154,10 @@ void FileBrowser::collapse_to_level( int mLevelIndex )
 	}
 }
 
-char str[] = "/home/pi/audio_test/" ;
-
-int	FileBrowser::onCreate(  )
-{
-	Window::onCreate();	
-}
 
 int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 {
 	printf(" Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		
-	//DirectoryListBox* selected_listbox = NULL;
 	bool start_closing = false;
 	int size = levels.size();
 

@@ -2,7 +2,7 @@
 #define _SYSTEM_BAR_
 
 
-#include "control.hpp"
+//#include "control.hpp"
 #include "horizontal_menu.hpp"
 //#include "system_bar.hpp"
 
@@ -15,21 +15,20 @@ public:
 	~SystemBar( );
 	
 	virtual void 	Initialize	(	);
-	void			place_items	(	);
+	void			onPlace		(	);
 
 	virtual void 		set_width_height ( int Width, int Height 		 );
 	virtual void  		move_to	  		 ( float Left,   float  Bottom	 );
 
-
 	virtual Control*	HitTest		  ( int x, int y 	);
 	virtual int			onClick		  ( int x, int y, bool mouse_is_down=true );
 	virtual int			onCreate	  (  );	
-	virtual int   		draw 		(	);
+	virtual int   		draw 		  (	 );
 
 	virtual int			onHover		  (  			 	);
 	virtual int			onDoubleClick ( 				);
 
-	HorizontalMenu		m_Menu;	
+	HorizontalMenu*		m_Menu;	
 private:
 	float			m_MenuStart_x;
 	float			m_MenuEnd_x;

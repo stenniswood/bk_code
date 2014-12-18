@@ -71,7 +71,7 @@ int	Control::onCreate(  )
 {	
 	created = true;
 	wrap_content();
-	printf("	Control::onCreate() Child Create:\n"); 
+	//printf("	Control::onCreate() Child Create:\n"); 
 	// Create All Children:
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
@@ -97,6 +97,7 @@ void Control::wrap_content( )
 	}
 }
 
+// Allocates and copies!
 void Control::set_text( const char* NewText )
 {
 // Sometimes we can't do a free()  ie for Static string constants!
@@ -215,6 +216,8 @@ int Control::draw()
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
 	{ 	
+		//printf("drawing child control..\t");
+		//(*iter)->print_positions();
 		(*iter)->draw();
 		iter++; 
 	};

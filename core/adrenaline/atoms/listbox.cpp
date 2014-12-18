@@ -249,7 +249,7 @@ void ListBox::set_item( char* mString )
 	{
 		if (vsb) {		// if already enabled, adjust the max value.
 			vsb->set_max_value( LineTexts.size() );
-			vsb->print_scroll_info();
+			if (Debug) vsb->print_scroll_info();
 		} else {
 			enable_v_scroll_bar( true );	// if not, enable them.
 			set_v_scroll_values( LineTexts.size(), 0, first_visible_line, 
@@ -282,7 +282,7 @@ float ListBox::get_longest_line(  )
 		if (w > max_w)
 			max_w = w;
 		iter++;
-	}	
+	}
 	//printf("ListBox::get_longest_line() max_w=%6.1f\n", max_w );
 	return max_w;
 }

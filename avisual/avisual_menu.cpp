@@ -22,10 +22,9 @@
 #include <fontinfo.h>
 #include <shapes.h>
 #include "Graphbase.hpp"
-#include "control.hpp"
-#include "button.hpp"
 #include "display.h"
-#include "icon.hpp"
+#include "adrenaline_windows.h"
+#include "adrenaline_graphs.h"
 #include "avisual_menu.hpp"
 #include "test_layouts.hpp"
 #include "draw_app.hpp"
@@ -67,7 +66,9 @@ int show_atom_screens (void* menuPtr, int mMenuIndex )
 
 void init_atom_menu()
 {
+	printf("init_atom_menu()\n");
 	atoms.add_simple_command( "init_simple_button_test" );
+	printf("init_atom_menu() 1\n");
 	atoms.add_simple_command( "init_simple_textview_test" );
 	atoms.add_simple_command( "init_textview_test"		);
 	atoms.add_simple_command( "init_progressbar_test"   );
@@ -115,9 +116,8 @@ int show_molecule_screens( void* menuPtr, int mMenuIndex )
 	case 2: init_audio_view			();		break;
 	case 3: init_directory_lb_test	();		break;
 	case 4: init_file_browser		();		break;			
-	case 5: init_sidebar_test		();		break;
-	case 6: init_CAN_app			();		break;
-	case 7: init_drawing_app		();		break;	
+	case 5: init_CAN_app			();		break;
+	case 6: init_drawing_app		();		break;	
 	default: 	break;
 	}
 }
@@ -125,11 +125,10 @@ int show_molecule_screens( void* menuPtr, int mMenuIndex )
 void init_molecule_menu()
 {
 	molecules.add_simple_command( "Image Gallery" 	);
-	molecules.add_simple_command( "Okay Cancel Dialog" 	);
+	molecules.add_simple_command( "Okay Cancel Dialog" );
 	molecules.add_simple_command( "Audio Amp" 		);
 	molecules.add_simple_command( "Directory lb" 	);
 	molecules.add_simple_command( "File Browser" 	);				
-	molecules.add_simple_command( "sidebar test" 	);
 	molecules.add_simple_command( "My guts (CAN)" 	);
 	molecules.add_simple_command( "Drawing" 		);
 
@@ -140,7 +139,7 @@ void init_molecule_menu()
 	molecules.add_callback( 4,  show_molecule_screens  );	
 	molecules.add_callback( 5,  show_molecule_screens  );	
 	molecules.add_callback( 6,  show_molecule_screens  );
-	molecules.add_callback( 7,  show_molecule_screens  );	
+
 }
 
 int show_game_screens( void* menuPtr, int mMenuIndex )
@@ -200,22 +199,65 @@ void init_graph_menu()
 	graphs.add_callback( 4,  show_graph_screens  );
 }
 
-void init_avisual_menu( HorizontalMenu* hm )
+HorizontalMenu system_hmenu;
+
+void init_system_hmenu( )
 {
-	printf("init_avisual_menu\n");
+	printf("init_system_hmenu 1\n");
 	init_atom_menu		(  );
 	init_molecule_menu  (  );	
 	init_game_menu 		(  );	
 	init_graph_menu 	(  );
-
-	printf("init_avisual_menu 2\n");
-	hm->add_entry_text( "File" );
-	hm->add_entry_text( "Edit" );	
-	hm->add_entry_text( "View" );	
-	hm->add_sub_menu( "Atoms",     &atoms 	  );
-	hm->add_sub_menu( "Molecules", &molecules );
-	hm->add_sub_menu( "Games",     &games  );
-	hm->add_sub_menu( "Graphs",    &graphs );		
+	printf("init_system_hmenu 5\n");
+	
+	system_hmenu.m_entries.clear();
+	system_hmenu.add_entry_text( "File" );
+	system_hmenu.add_entry_text( "Edit" );	
+	system_hmenu.add_entry_text( "View" );	
+	system_hmenu.add_sub_menu( "Atoms",     &atoms 	  );
+	system_hmenu.add_sub_menu( "Molecules", &molecules );
+	system_hmenu.add_sub_menu( "Games",     &games  );
+	system_hmenu.add_sub_menu( "Graphs",    &graphs );		
+	printf("init_avisual_menu done\n");
 }
+
+
+//vector<IconView*>  soft_buttons;
+
+void init_default_sidebar( SideBar* mSB )
+{
+	printf("init_default_sidebar( ) \n");
+	IconView* iv = new IconView( 64., 64. );
+	iv->set_file( "/home/pi/bk_code/avisual/resources/calendar.jpg");
+	iv->set_width_height( 64., 64.);
+	mSB->add_control( iv );
+	
+	iv = new IconView( 64., 64. );
+	iv->set_file( "/home/pi/bk_code/avisual/resources/settings.jpg");
+	iv->set_width_height( 64., 64.);
+	mSB->add_control( iv );
+
+	iv = new IconView( 64., 64. );
+	iv->set_file( "/home/pi/bk_code/avisual/resources/folder2.jpg");
+	iv->set_width_height( 64., 64.);
+	mSB->add_control( iv );
+	
+	iv = new IconView( 64., 64. );
+	iv->set_file( "/home/pi/bk_code/avisual/resources/cmd_line.jpg");
+	iv->set_width_height( 64., 64.);
+	mSB->add_control( iv );
+	
+	iv = new IconView( 64., 64. );
+	iv->set_file( "/home/pi/bk_code/avisual/resources/calendar.jpg");
+	iv->set_width_height( 64., 64.);
+	mSB->add_control( iv );
+	
+	iv = new IconView( 64., 64. );
+	iv->set_file( "/home/pi/bk_code/avisual/resources/calendar.jpg");
+	iv->set_width_height( 64., 64.);
+	mSB->add_control( iv );
+
+	printf("init_default_sidebar( SideBar* mSB )\n");
+} 
 
 

@@ -101,7 +101,8 @@ void ScrollControl::enable_v_scroll_bar( bool mEnable )
 		vsb->height = height;
 		vsb->left  = (left+width)-DEFAULT_VSCROLL_WIDTH;
 		vsb->width = DEFAULT_VSCROLL_WIDTH;
-		printf("ScrollControl::enabled VScroll - \t");		vsb->print_positions();
+		if (Debug) printf("ScrollControl::enabled VScroll - \t");		
+		if (Debug) vsb->print_positions();
 		
 		vsb->set_bar_color		 ( 0x7FFF7F7F );
 		vsb->set_background_color( 0x9F000000 );

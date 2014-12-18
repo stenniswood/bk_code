@@ -23,15 +23,15 @@
 
 
 static 	struct image_info ImageInfo;
-static	VGImage folder_image; //= createImageFromJpeg( "./resources/folder.jpg", &ImageInfo );
+static	VGImage folder_image=0; //= createImageFromJpeg( "./resources/folder.jpg", &ImageInfo );
 
 
 DirectoryListBox::DirectoryListBox()
 :TabularListBox()
 {
 	printf("DirectoryListBox::ctor()\n");
-	Initialize(); 
-	printf("DirectoryListBox::initialized\n");	
+	Initialize();
+	printf("DirectoryListBox::initialized\n");
 }
 
 DirectoryListBox::DirectoryListBox( int Left, int Bottom, int mWidth, int mNumber_items_shown, int mItem_height )
@@ -61,8 +61,11 @@ void DirectoryListBox::Initialize()
 	setup_headings		 ( 			  );		// should place start_x!
 
 	// Load Directory Folder icon:
-	if (folder_image==0)
+	if (folder_image==0) {
+		printf("DirectoryListBox::Initialize()\n");
 		folder_image = createImageFromJpeg( "./resources/folder.jpg", &ImageInfo );
+	}
+	printf("DirectoryListBox::Initialize() done\n");
 }
 
 void DirectoryListBox::show_mode( int mMode	)
@@ -80,6 +83,7 @@ void DirectoryListBox::setup_headings( )
 }
 void DirectoryListBox::setup_heading_simple( )
 {
+	printf("DirectoryListBox::setup_heading_simple( )\n");
 	struct HeaderItemInfo hi;
 	hi.text      = "Filename";
 	hi.alignment = HEADER_ALIGN_LEFT;

@@ -12,9 +12,9 @@ using namespace std;
 
 #define MAX_CONTROLS 6
 
-#define SIDEBAR_ALIGN_TOP     0x01
-#define SIDEBAR_ALIGN_CENTER  0x02
-#define SIDEBAR_ALIGN_BOTTOM  0x04
+//#define SIDEBAR_ALIGN_TOP     0x01
+//#define SIDEBAR_ALIGN_CENTER  0x02
+//#define SIDEBAR_ALIGN_BOTTOM  0x04
 
 #define PACK_LEFT     0x01
 #define PACK_CENTER   0x02

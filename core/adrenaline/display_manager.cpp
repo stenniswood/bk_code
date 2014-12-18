@@ -17,10 +17,10 @@
 #include "bk_system_defs.h"
 #include "mouse.h"
 #include "adrenaline_windows.h"
-
 #include "rectangle.hpp"
 #include "display_manager.hpp"
 #include "avisual_menu.hpp"		// Specific system menu.  not part of adrenaline_windows
+
 
 
 // Offer one instance for whole app;
@@ -72,48 +72,63 @@ void  DisplayManager::end_screen( )
 void DisplayManager::call_on_creates( )
 {
 	// System Bar will always be treated separately.
-	/*m_sb.onCreate();
-	m_soft_side.onCreate();
-	m_status.onCreate(); */
 	
 	// Load all controls which are already registered.
 	printf("Creating child controls\n");
-	/*list<Control*>::iterator	iter = m_child_controls.begin();
-	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
-	{
-		(*iter)->onCreate();
-	}*/
 	Control::onCreate();
 }
 
 void DisplayManager::Initialize()
+{	
+	// put actual icons on it:
+	init_default_sidebar( &m_soft_side );
+}
+
+int	DisplayManager::onPlace( )
 {
-	// Top:
+	// System Bar on Top:
 	m_sb.set_width_height( screen_width, 36 );
 	float b = (screen_height-m_sb.get_height());
-	printf("DisplayManager::onCreate()  %d,%d, %5.1f\n", screen_width, screen_height, b );
-	m_sb.move_to		   ( 0, b );
-	init_avisual_menu  ( &(m_sb.m_Menu) );
-	add_object( &m_sb );
-	m_sb.print_positions();
+	printf("DisplayManager::onPlace()  %d,%d, %5.1f\n", screen_width, screen_height, b );
+	m_sb.move_to	    ( 0,  b );
+	m_sb.print_positions( );
+	m_sb.onPlace		( );
+	add_object			( &m_sb );
 
-	// Bottom Status
-	m_status.move_to		 ( 0, 			 m_status.get_height() );
+	// Status Bar on Bottom:
+	m_status.move_to		 ( 0, m_status.get_height() );
 	m_status.set_width_height( screen_width, 64 );
-	add_object( &m_status );
-
+	m_status.print_positions (  );
+	m_status.onPlace		 (  );
+	add_object		( &m_status );
+	
 	// RIGHT SideBar
-	const int sidebar_width = 200;
-	m_soft_side.move_to			( screen_width-200, m_status.get_height() );
-	m_soft_side.set_width_height( 200, height-m_status.get_height()-m_sb.get_height() );
+	int sidebar_width = m_soft_side.get_expanded_width();
+	float h 		  = height - m_status.get_height() - m_sb.get_height();
+	m_soft_side.move_to			( screen_width-sidebar_width, m_status.get_height() );
+	m_soft_side.set_width_height( sidebar_width, h );
 	add_object( &m_soft_side );
+	m_soft_side.onPlace( );
 }
 
 int	DisplayManager::onCreate(  )
 {
 	Control::onCreate();
+	onPlace();
 }
-	
+
+void DisplayManager::set_menu( HorizontalMenu* mHMenu )
+{
+	if (mHMenu==NULL)
+	{
+		m_sb.m_Menu = &system_hmenu;
+		m_sb.onPlace();
+	} else {
+		m_sb.m_Menu = mHMenu;
+		m_sb.onPlace();
+	}
+}	
+
 Rectangle*	DisplayManager::get_useable_rect( )
 {
 	static Rectangle rect;
@@ -155,18 +170,15 @@ void DisplayManager::load_resources( )
 
 
 //	A more preferred way of doing the background:
-//void  DisplayManager::set_background( void* Image 	  )
 void  DisplayManager::set_background( char* mFileName )
 {
 	Filename = mFileName;
 }
-// "/home/pi/openvg/client/desert0.jpg";
 
 
 void  DisplayManager::add_object( Control* NewControl )
 {
 	NewControl->onCreate();
-	//m_child_controls.push_back( NewControl );
 	register_child( NewControl );	
 }
 
@@ -188,15 +200,13 @@ void  DisplayManager::remove_all_objects(  )
 	add_object( &m_soft_side );
 }
 
-void  DisplayManager::start_draw(	)
-{
-	start_screen();
-}
+/*void  DisplayManager::start_draw(	)
+{}*/
 
 int   DisplayManager::draw(	)
 {
 	if (Debug) printf("\ndraw display manager\tstart:\n" );
-	start_draw();
+	start_screen();//	start_draw();
 	draw_background();
 	//m_sb.print_positions();
 	draw_children();	
@@ -257,22 +267,12 @@ Control* DisplayManager::HitTest( int x, int y )
 	//if (result)  return result;
 
 	Control* retval = Control::HitTest(x,y);
-	
-/*	list<Control*>::iterator iter = m_child_controls.begin();
-	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
-	{
-		result = (*iter)->HitTest(x,y);
-		if (result) {
-			printf ("DisplayManager::HitTest:  found a hit. child number %d\n", i );
-			return (result);
-			//return result;
-		}
-	}*/
-	if (retval==this)		
+	if (retval==this)
 		return NULL;		// don't want display manager empty space to do anything.
-	else 
+	else
 		return retval;
 }
+
 
 /*Control*  DisplayManager::Find_object( Control* NewControl )
 {

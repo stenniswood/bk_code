@@ -24,8 +24,23 @@
 #include "display.h"
 #include "CAN_base.h"
 
+/* When the CAN_app is active, change the menu as below */
+
 HorizontalMenu   can_menu(-1,-1);
-VerticalMenu   can_view_menu(-1,-1);
+VerticalMenu     can_view_menu(-1,-1);
+
+int show_CAN_screens( void* menuPtr, int mMenuIndex )
+{
+/*	switch(mMenuIndex) 
+	{
+	case 0: show_messages		();		break;
+	case 1: show_message_flowchart();	break;
+	case 2: show_variable_graph ();		break;
+	case 3: show_robot_limbs	();		break;
+	case 4: show_button_boards	();		break;
+	default: break;
+	} */
+}
 
 void init_view_menu()
 {
@@ -35,13 +50,19 @@ void init_view_menu()
 	can_view_menu.add_simple_command( "Robot Limbs"  );
 	can_view_menu.add_simple_command( "Button boards");
 
-	can_view_menu.add_callback( 0, show_atom_screens  );
-	can_view_menu.add_callback( 1, show_atom_screens  );
-	can_view_menu.add_callback( 2, show_atom_screens  );
-	can_view_menu.add_callback( 3, show_atom_screens  );
-	can_view_menu.add_callback( 4, show_atom_screens  );
+	can_view_menu.add_callback( 0, show_CAN_screens  );
+	can_view_menu.add_callback( 1, show_CAN_screens  );
+	can_view_menu.add_callback( 2, show_CAN_screens  );
+	can_view_menu.add_callback( 3, show_CAN_screens  );
+	can_view_menu.add_callback( 4, show_CAN_screens  );
 }
 
+void init_main_CAN_menu()
+{
+	can_menu.add_entry_text( "File" );
+	can_menu.add_entry_text( "Edit" );
+	can_menu.add_sub_menu( "View", &can_view_menu );
+}
 
 // Demo Messages:
 static void fill_data( byte* mdata, byte last)
@@ -72,14 +93,17 @@ void CANApp::fill_phony_msgs()
 CANApp::CANApp() 
 :Window()
 { 
+	Initialize();
 }
 CANApp::CANApp( int Left, int Right, int Top, int Bottom ) 
 :Window( Left,Right,Top,Bottom )
-{ 
+{
+	Initialize(); 
 }
 CANApp::CANApp( int Width, int Height  ) 
 :Window( Width, Height )
 { 
+	Initialize();
 }
 CANApp::~CANApp() 
 { 
@@ -87,6 +111,9 @@ CANApp::~CANApp()
 void 	CANApp::Initialize(	) 
 { 
 	Window::Initialize();
+	//init_view_menu();
+	//init_main_CAN_menu();
+
 	printf("CAN_msg_view: object constructed and positioned.\n");	
 	fill_phony_msgs();
 	printf("CAN_msg_view: CAN msgs added.\n");

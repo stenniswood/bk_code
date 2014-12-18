@@ -14,27 +14,26 @@ AUTHOR	: Steve Tenniswood
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
+#include <vector>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
+
 #include "CAN_Interface.h"
-#include "display.h"
+#include "adrenaline_windows.h"
+#include "adrenaline_graphs.h"
 #include "display_manager.hpp"
 #include "frame_window.hpp"
-#include <vector>
 #include "test_layouts.hpp"
-#include "power_level.hpp"
-#include "stereo_power.hpp"
-#include "adrenaline_windows.h"
+
 #include "visual_memory.h"
 #include "audio_memory.h"
 #include "fft.h"
 #include "test_combo_layouts.hpp"
 #include "audio_app.hpp"
 
-#include "adrenaline_windows.h"
-#include "adrenaline_graphs.h"
 #include "card_games.h"
 
 

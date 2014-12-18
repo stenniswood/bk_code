@@ -12,6 +12,7 @@ class Control
 {
 	friend class Window;
 public:
+	//Control( Rectangle* mRect );
 	Control( int Left,  int Right, int Top, int Bottom );
 	Control( int Width, int Height 					   );
 	Control();
@@ -19,7 +20,7 @@ public:
 
 	virtual void 	Initialize			  (					);	
 	virtual void  	set_text_size		  ( float TextSize	);
-	void  			set_text  			  ( const char* NewText	);
+	void  			set_text  			  ( const char* NewText	);	// Allocates and copies!
 	void  			set_text_color 	  	  ( long int TextColor 	);
 	void  			set_border_color      ( long mColor 	) { border_color= mColor; 	  }
 	void  			set_background_color  ( long mColor 	) { background_color= mColor; }

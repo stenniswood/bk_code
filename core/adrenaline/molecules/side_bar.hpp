@@ -14,12 +14,12 @@ using namespace std;
 
 #define MAX_CONTROLS 6
 
-#define SIDEBAR_ALIGN_TOP     0x01
-#define SIDEBAR_ALIGN_CENTER  0x02
-#define SIDEBAR_ALIGN_BOTTOM  0x04
+#define SIDEBAR_ALIGN_LEFT   0x02 
+#define SIDEBAR_ALIGN_CENTER 0x01 
+#define SIDEBAR_ALIGN_RIGHT  0x04 
 
-const int ICON_WIDTH     =100;
-const int EXPANDED_WIDTH =300;
+const int ICON_WIDTH     = 100;
+const int EXPANDED_WIDTH = 200;
 
 /***************************************************************
 This control puts some buttons/info on the sides of the screen.
@@ -28,7 +28,7 @@ This will hide or open
 Later on maybe accept drag and drop items.
 Number of controls should be limited by practice < 8
 ****************************************************************/
-class SideBar : public Window 
+class SideBar : public Control
 {
 public:
 	SideBar ( );
@@ -38,9 +38,12 @@ public:
 	virtual void	Initialize		 (   );	
 	virtual int   	draw 			 (	 );
 	void			calc_metrics	 (   );
-
-	void			toggle_state	 (   );
+	void			onPlace			 (   );
 	
+	void			clear			 ( bool mDelete = true );
+	void			toggle_state	 (   );
+	virtual void 	load_resources	 ( 	 );
+	float			get_bottom	 	 ( int mIndex   );
 	float			get_short_width	 (   );	// for minimized view (ie. just icons)
 	float			get_expanded_width	 ( );	// for minimized view (ie. just icons)
 	
@@ -49,19 +52,20 @@ public:
 	void			auto_hide		 ( bool mAutoHide = true);
 	void			set_alignment	 ( byte mAlignment = SIDEBAR_ALIGN_CENTER );
 
+	virtual int		onCreate	  		(  ) {};
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
 	
 protected:
-
-	int				num_tabs;
-	list<Control*>	controls;
-	list<string>	paired_text;
-
-private:
-	byte		Alignment;
-	bool		isHidden;
-	bool		AutoHideEnabled;	
+	int				m_state;
+	int				m_num_tabs;
+	list<string>	m_paired_text;
+	float			m_bottom_margin;	
+	
+	byte			Alignment;
+	bool			isHidden;
+	bool			AutoHideEnabled;
+	
 };
 
  

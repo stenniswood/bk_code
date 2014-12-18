@@ -63,7 +63,7 @@ int 	HorizontalMenu::calc_metrics( )
 	for (int i=0; i<m_entries.size(); i++)
 	{
 		m_entries[i]->width	= TextWidth( m_entries[i]->text, SerifTypeface, text_size );
-		//printf("%6.1f pad=%6.1f\n", m_entries[i]->width, m_menu_padding );
+		printf("%6.1f pad=%6.1f\n", m_entries[i]->width, m_menu_padding );
 		m_entries[i]->sx    = sx;
 		m_entries[i]->ex    = sx+m_entries[i]->width + m_menu_padding;
 		sx += (m_entries[i]->width + m_menu_padding);
@@ -150,6 +150,13 @@ int HorizontalMenu::draw(	)
 		}
 		l = m_entries[i]->sx;
 		//printf("%6.1f, %6.1f: %6.1f  %s\n", l, bottom, text_size, m_entries[i]->text );
+		if (l>(left+width))
+		{
+			Stroke_l( 0xFF5f0000 );
+			Fill_l  ( 0xFF5f0000 );
+			float w = (width - m_entries[i-1]->ex);
+			Rect    ( m_entries[i-1]->ex, bottom, w, height );			
+		}
 		Text( l, c, m_entries[i]->text,  SerifTypeface, text_size );
 	}
 	if ( is_selection_valid() )  {

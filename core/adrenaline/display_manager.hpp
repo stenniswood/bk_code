@@ -32,8 +32,10 @@ public:
 	void	start_screen	(					  );
 	void	end_screen		(					  );
 
+	int		onPlace			(  					  );
 	virtual int	onCreate	(  					  );	
 	void	load_resources  (					  );
+	void	set_menu	    ( HorizontalMenu* mHMenu = NULL );
 
 	float	get_width			(	)		{  return screen_width;	 };
 	float 	get_height			(	)		{  return screen_height; };
@@ -46,7 +48,7 @@ public:
 	//void 	onClick			( int x, int y, bool mouse_is_down=true );
 	Control* HitTest		( int x, int y );
 
-	void  start_draw		(	);
+	//void  start_draw		(	);
 	int   draw				(	);	
 	int   draw_children		( 	);
 	int   draw_background	( 	);
@@ -61,8 +63,6 @@ public:
 	SystemStatusBar	m_status;		// Bottom
 
 protected:
-	//list<Control*>	controls;		// new way - not tested yet!
-
 	int		screen_width;
 	int 	screen_height;
 };

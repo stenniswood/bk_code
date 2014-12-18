@@ -16,7 +16,6 @@
 #include "EGL/egl.h"
 #include "GLES/gl.h"
 #include "bcm_host.h"
-
 #include <string.h>
 #include <fontinfo.h>
 #include <shapes.h>
@@ -133,6 +132,8 @@ void IconView::read_from_file( )
 	if (strcmp(CapExtension, "JPG")==0)
 		image = createImageFromJpeg( Filename, &ImageInfo );
 	printf(" %s width=%d height=%d\n", Filename, ImageInfo.width, ImageInfo.height);
+
+	set_width_height(ImageInfo.width, ImageInfo.height);
 /*	else if (strcmp(CapExtension, "PNG")==0)
 		image = createImageFromPNG ( Filename, &ImageInfo );
 	else if (strcmp(extension, "BMP")==0)
@@ -191,7 +192,9 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 	JSAMPARRAY buffer;
 	unsigned int bstride;
 	unsigned int bbpp;
-
+	
+	printf("createImageFromJpeg()\n");
+	
 	VGImage img;
 	VGubyte *data;
 
@@ -263,15 +266,18 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 		}
 	}
 
+	printf("createImageFromJpeg() 2\n");
 	// Create VG image
 	img = vgCreateImage(rgbaFormat, II->width, II->height, VG_IMAGE_QUALITY_BETTER);
+	printf("read jpeg, %d w=%d; h=%d\n", img, II->width, II->height);
 	vgImageSubData(img, data, II->dstride, rgbaFormat, 0, 0, II->width, II->height);
-	//printf("read jpeg, %d w=%d; h=%d\n", img, II->width, II->height);
+	printf("read jpeg, %d w=%d; h=%d\n", img, data, II->width, II->height);
 
 	// Cleanup
 	jpeg_destroy_decompress(&jdc);
 	fclose(infile);
 	free(data);
 
+	printf("createImageFromJpeg() done\n");
 	return img;
 }

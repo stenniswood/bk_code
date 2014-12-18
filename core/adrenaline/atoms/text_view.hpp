@@ -12,7 +12,7 @@ public:
 	TextView( );
 	TextView( int Left, int Right, int Top, int Bottom );
 	TextView( int Width, int Height );
-	
+
 	virtual void 	Initialize			  	(				 );
 	void 			calc_margins			( float fraction );
 	void 			calc_metrics			( 				 );

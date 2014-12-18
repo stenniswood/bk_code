@@ -17,7 +17,7 @@
 #include "tabular_listbox.hpp"
 
 #define margin_percent 0.07
-#define Debug 1
+#define Debug 0
  
 TabularListBox::TabularListBox( int Left, int Right, int Top, int Bottom )
 :ListBox(Left, Right, Top, Bottom )
@@ -57,7 +57,7 @@ TabularListBox::~TabularListBox()
 
 void TabularListBox::Initialize()
 {
-	printf("TabularListBox::Initialize()\n");
+	if (Debug) printf("TabularListBox::Initialize()\n");
 	ListBox::Initialize();
 	header_text_color       = 0xFF000000;
 	header_background_color = 0xFF9f9f9f;
@@ -71,12 +71,12 @@ void TabularListBox::Initialize()
 
 int	TabularListBox::onCreate(  	)	// after loading resources, call functions which use fonts (already loaded before this call) etc.	
 {
-	printf("\t\tTabularListBox::onCreate()\n");
+	//printf("\t\tTabularListBox::onCreate()\n");
 	ListBox::onCreate();
 
 	calc_widths_from_text( );
 	calc_column_positions_from_widths( );	
-	printf("TabularListBox::onCreate() column pos \n");		
+	//printf("TabularListBox::onCreate() column pos \n");		
 }
 
 void TabularListBox::print_client_rect(   )		// body_height, scroll_bar width
@@ -103,7 +103,7 @@ void TabularListBox::calc_metrics( )
 	LineHeight           = text_size * 1.5;
 	number_lines_visible = floor( body_height/LineHeight );
 
-	printf("TabularLB: calc_metrics: height=%6.2f; body_height=%6.2f\n", height, body_height );	
+	if (Debug) printf("TabularLB: calc_metrics: height=%6.2f; body_height=%6.2f\n", height, body_height );	
 	
 	if (vsb) vsb->set_amount_visible(number_lines_visible);
 
@@ -145,7 +145,7 @@ int TabularListBox::draw_header(	)
 	float Hdr_Bottom = bottom + body_height;
 	int vspace       = ((Hdr_Top-Hdr_Bottom) - header_text_size)/2.0;
 
-	//printf("Hdr_Top=%6.1f; Hdr_bottom=%6.1f; \n", Hdr_Top, Hdr_Bottom );
+	//if (Debug) printf("Hdr_Top=%6.1f; Hdr_bottom=%6.1f; \n", Hdr_Top, Hdr_Bottom );
 	Stroke_l	( header_border_color 	 );
 	Fill_l  	( header_background_color);
 	StrokeWidth	( 2.0					 );
@@ -172,7 +172,7 @@ int TabularListBox::draw_header(	)
 		
 		printf("Header # %d  %6.1f %s\n", i, x, (char*)Headings[i].text.c_str());
 		
-		//printf("TabularListBox:draw_header: left=%6.2f; bottom=%6.2f;  width=%6.2f; height=%6.2f\n", 
+		//if (Debug) printf("TabularListBox:draw_header: left=%6.2f; bottom=%6.2f;  width=%6.2f; height=%6.2f\n", 
 		//	Headings[i].start_x, Hdr_Bottom, Headings[i].width, Hdr_Top-Hdr_Bottom );	
 		Fill_l  	( header_text_color );
 		
@@ -224,17 +224,17 @@ void TabularListBox::draw_one_cell( int mRow, int mCol, float mY )
 void TabularListBox::draw_one_row( int mRow, float mY )
 {
 	int size=Headings.size();
-	//printf("LineData rows=%d/%d; cols=%d\n", mRow, LineData.size(), size );
+	//if (Debug) printf("LineData rows=%d/%d; cols=%d\n", mRow, LineData.size(), size );
 	for (int col=0; col < size; col++)
 	{
-		//printf("\t\t%s\n", LineData[mRow][col].c_str() );
+		//if (Debug) printf("\t\t%s\n", LineData[mRow][col].c_str() );
 		draw_one_cell( mRow, col, mY);
 	}
 }
 
 float TabularListBox::get_line_bottom( int mVisibleIndex )
 {
-//	return ListBox::get_line_bottom( mVisibleIndex );
+//	if (Debug) 	return ListBox::get_line_bottom( mVisibleIndex );
 	float y;
 	if (isTopDown)
 	{
@@ -257,7 +257,7 @@ int TabularListBox::draw_vertical_lines()
 		x = Headings[col].start_x - 2;
 		if (x>(left+width))
 			break;
-		//printf("Vertical Lines: x=%6.2f\n", x);
+		//if (Debug) printf("Vertical Lines: x=%6.2f\n", x);
 		Line(x, bottom, x, bottom+body_height);	
 	}
 }
@@ -270,10 +270,10 @@ int TabularListBox::draw()
 
 	draw_line_backgrounds();	
 	draw_header();
-	printf("TabularListBox:draw_line_backgrounds() done\n");
+	if (Debug) printf("TabularListBox:draw_line_backgrounds() done\n");
 	
 	draw_text();
-	printf("TabularListBox:draw_text_() done\n");
+	if (Debug) printf("TabularListBox:draw_text_() done\n");
 	draw_vertical_lines();
 	// DRAW Scroll Bars:
 	ScrollControl::draw();
@@ -310,12 +310,12 @@ void TabularListBox::calc_widths_from_text( int mNotToExceed )
 		{
 			final_width = TextWidth( (char*)LineData[max_row][col].c_str(), SerifTypeface, text_size );
 			final_width += ColumnSpacing;
-			printf("Data Row column width:  \t\tfinal_width=%6.2f;  longestline=%s\n", final_width, LineData[max_row][col].c_str());
+			if (Debug) printf("Data Row column width:  \t\tfinal_width=%6.2f;  longestline=%s\n", final_width, LineData[max_row][col].c_str());
 		}
 
 		// Next check the length of the Header:
 		float header_width = TextWidth( (char*)Headings[col].text.c_str(), SerifTypeface, header_text_size );
-		printf("\t\t Header_width=%6.2f; %s\n", header_width, Headings[col].text.c_str() );
+		if (Debug) printf("\t\t Header_width=%6.2f; %s\n", header_width, Headings[col].text.c_str() );
 
 		if (header_width > final_width)
 			final_width = header_width;
@@ -324,7 +324,7 @@ void TabularListBox::calc_widths_from_text( int mNotToExceed )
 			final_width = mNotToExceed;
 
 		Headings[col].width = round(final_width);
-		printf("Chosen Column Width= %d\n", Headings[col].width );
+		if (Debug) printf("Chosen Column Width= %d\n", Headings[col].width );
 	}
 }
 

@@ -43,9 +43,9 @@ VerticalMenu::~VerticalMenu()
 
 void 	VerticalMenu::Initialize(	)
 {
-/*	m_width		= ;
-	has_scroller= ;
-	is_visible	= ;	*/
+//	m_width		= -1.;
+	has_scroller= false;
+	is_visible	= true;
 	set_odd_color ( 0xEFFFFFFF );
 	set_even_color( 0xEFFFFFFF );
 	isTopDown  = true;
@@ -57,16 +57,17 @@ int  VerticalMenu::calc_metrics()
 	//ListBox::calc_metrics();
 	LineHeight           = text_size * 1.5;
 	number_lines_visible = m_entries.size();
-	
+	printf  ( "VerticalMenu::calc_metrics() \n" );			
 	float tmp_width  = get_longest_line();
+	printf  ( "get_longest_line \n" );		
 	float tmp_height = (number_lines_visible*LineHeight);
 	set_width_height( tmp_width, tmp_height );
 }
 
-int  VerticalMenu::add_simple_command	( char* mText, char* mShortcut )
+int  VerticalMenu::add_simple_command( char* mText, char* mShortcut )
 {
 	set_item( mText );
-	//printf  ( "add_simple_command:: %s \n", mText );
+	printf  ( "add_simple_command:: %s \n", mText );
 	
 	struct stVertMenuInfo* m = new struct stVertMenuInfo();
 	strcpy ( m->text, mText );  
@@ -74,7 +75,9 @@ int  VerticalMenu::add_simple_command	( char* mText, char* mShortcut )
 		strcpy ( m->short_cut_key, mShortcut );		// to directly activate from keyboard 	
 	m->state = MENU_STATE_NORMAL;
 	m_entries.push_back( m );
+	printf  ( "add_simple_command:: 3 \n" );		
 	calc_metrics();
+	printf  ( "add_simple_command:: 4 \n" );			
 }
 
 int	VerticalMenu::add_callback( int mIndex, int (*mcallback)(void*, int) )

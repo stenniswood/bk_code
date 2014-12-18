@@ -55,7 +55,7 @@ void	Window::Initialize		 (   )
 
 int   	Window::draw 			 (	 )
 {
-	//printf("\tWindow::\t");	print_positions();
+	printf("\tWindow::\t");	print_positions();
 	Control::draw();
 	
 	list<Control*>::iterator	iter = controls.begin();

@@ -13,7 +13,7 @@
 #include <string>
 using namespace std;
 
-class FileBrowser : public Window
+class FileBrowser : public Control
 {
 public:
 	FileBrowser();
@@ -23,9 +23,9 @@ public:
 	
 	virtual void 	Initialize			( );
 	void			set_base_path		( char* mBasePath );
-	void			select_item			( int mColumn, int mItem );
-	Window* 		create_file_browser ( char* mBasePath   );
-	void 			add_level			( char* mAppendPath );
+	//void			select_item			( int mColumn, int mItem );
+	Control* 		create_file_browser (  );
+	void 			add_level			( string mAppendPath );
 	void			show_hidden			( bool mShow=true   );
 	virtual int		onClick				( int x, int y, bool mouse_is_down=true );
 	virtual int		onCreate	  		(  );	// chance to load resources, 
@@ -40,6 +40,7 @@ protected:
 	// How is the window going to know which control is a listbox and which is not?
 	// HitTest will tell me which one was clicked.  but I need to know which column it is
 	// etc.
+		// Need a pointer to the current latest level:
 	vector<DirectoryListBox*> levels;			// stored here in addition to packed into the window.
 
 	TextView*		path_descriptor;	

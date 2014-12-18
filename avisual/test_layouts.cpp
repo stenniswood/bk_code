@@ -280,11 +280,11 @@ void init_radio_button_test()
 	MyRadio2.set_text("FM Radio");
 	MyRadio3.set_text("XM Radio");
 	MyRadio4.set_text("Internet Radio");
-				
+
 	MyRadio2.set_position_below ( &MyRadio1 );
 	MyRadio3.set_position_below ( &MyRadio2 );
 	MyRadio4.set_position_below ( &MyRadio3 );
-	
+
 	MyRadio1.join_group( &MyRadio2 );
 	MyRadio1.join_group( &MyRadio3 );
 	MyRadio1.join_group( &MyRadio4 );
@@ -717,8 +717,8 @@ void init_CAN_app( )
 	float high = MainDisplay.get_height();
 
 	can_app.set_width_height( wide*(1-0.125), 3.*high/4. );
-	can_app.move_to(0.0625*wide, high*(1./8.) );
-	can_app.set_text_color	 ( 0xFFFF0000 );
+	can_app.move_to			( 0.0625*wide, high*(1./8.)  );
+	can_app.set_text_color	( 0xFFFF0000 );
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &can_app );

@@ -4,39 +4,19 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-#include "CAN_Interface.h"
-#include "line_graph.hpp"
-#include "dataset.hpp"
-#include "histogram.hpp"
-#include "line_graph.hpp"
-#include "leveler.hpp"
-#include "display.h"
-#include "display_manager.hpp"
-#include "button.hpp"
-#include "listbox.hpp"
-#include "checkbox.hpp"
-#include "progressbar.hpp"
-#include "text_view.hpp"
-#include "scroll_bar.hpp"
-#include "control.hpp"
-#include "icon.hpp"
-#include "visual_memory.h"
-#include "listbox.hpp"
-#include "tabular_listbox.hpp"
-#include "window.hpp"
-#include "frame_window.hpp"
 #include <vector>
-#include "radiobutton.hpp"
-#include "test_layouts.hpp"
-#include "directory_listbox.hpp"
-#include "file_browser.hpp"
-#include "image_gallery.hpp"
 #include <dirent.h> 
 #include <math.h>
+#include "CAN_Interface.h"
+#include "adrenaline_windows.h"
+#include "display_manager.hpp"
+#include "visual_memory.h"
+#include "test_layouts.hpp"
 
 /*#include <stdio.h>
 #include <stdlib.h>
@@ -133,7 +113,7 @@ void ImageGallery::load_resources( )
 		image = createImageFromJpeg( Filelist[i].c_str(), &ii );
 		printf("Loaded: %s : \n", Filelist[i].c_str() );
 		images.push_back(image);
-		ImageInfo.push_back(ii);		
+		ImageInfo.push_back(ii);
 	}
 	ImageView->set_image( &images[0], &(ImageInfo[0]) );
 	printf("setImage: error: %d\n", Filelist[i].c_str(), vgGetError() );
