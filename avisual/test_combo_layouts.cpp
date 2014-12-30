@@ -150,12 +150,13 @@ void init_directory_lb_test()
 }
 
 FileBrowser  browser(1000,600);
+//Control		browse(1000,600);
 void init_file_browser()
 {
 	printf("\n\ninit_file_browser\n\n");
 	browser.set_base_path( "/home/pi/" );
-	browser.move_to      ( 100,100 );
-	
+	browser.move_to      ( 100, 100 );
+
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &browser );
 	printf("\n\ninit_file_browser done \n\n");
@@ -225,8 +226,7 @@ void init_okay_cancel_dlg()
 }
 
 
-
-void init_drawing_app()
+void init_camera_app	()
 {
 
 }

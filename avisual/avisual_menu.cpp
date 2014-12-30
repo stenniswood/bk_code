@@ -29,6 +29,8 @@
 #include "test_layouts.hpp"
 #include "draw_app.hpp"
 #include "test_combo_layouts.hpp"
+#include "power.hpp"
+
 
 HorizontalMenu hm		(-1,-1);
 VerticalMenu   atoms    (-1,-1);
@@ -36,10 +38,15 @@ VerticalMenu   molecules(-1,-1);
 VerticalMenu   games	(-1,-1);
 VerticalMenu   graphs	(-1,-1);
 
+VerticalMenu   power_menu	(-1,-1);		// power switch pushed.
+
+
+#define ifprintf printf
+//#define ifprintf //printf
 
 int show_atom_screens (void* menuPtr, int mMenuIndex )
 {
-	//printf("init_display() DisplayNum=%d\n", number);
+	//ifprintf("init_display() DisplayNum=%d\n", number);
 	switch(mMenuIndex) 
 	{	
 	case 0:	init_simple_button_test	();		break;
@@ -66,9 +73,9 @@ int show_atom_screens (void* menuPtr, int mMenuIndex )
 
 void init_atom_menu()
 {
-	printf("init_atom_menu()\n");
+	ifprintf("init_atom_menu()\n");
 	atoms.add_simple_command( "init_simple_button_test" );
-	printf("init_atom_menu() 1\n");
+	ifprintf("init_atom_menu() 1\n");
 	atoms.add_simple_command( "init_simple_textview_test" );
 	atoms.add_simple_command( "init_textview_test"		);
 	atoms.add_simple_command( "init_progressbar_test"   );
@@ -118,6 +125,7 @@ int show_molecule_screens( void* menuPtr, int mMenuIndex )
 	case 4: init_file_browser		();		break;			
 	case 5: init_CAN_app			();		break;
 	case 6: init_drawing_app		();		break;	
+	case 7: init_camera_app			();		break;		
 	default: 	break;
 	}
 }
@@ -131,6 +139,8 @@ void init_molecule_menu()
 	molecules.add_simple_command( "File Browser" 	);				
 	molecules.add_simple_command( "My guts (CAN)" 	);
 	molecules.add_simple_command( "Drawing" 		);
+	molecules.add_simple_command( "Camera" 		);
+
 
 	molecules.add_callback( 0,  show_molecule_screens  );
 	molecules.add_callback( 1,  show_molecule_screens  );	
@@ -203,13 +213,13 @@ HorizontalMenu system_hmenu;
 
 void init_system_hmenu( )
 {
-	printf("init_system_hmenu 1\n");
+	ifprintf("init_system_hmenu 1\n");
 	init_atom_menu		(  );
 	init_molecule_menu  (  );	
 	init_game_menu 		(  );	
 	init_graph_menu 	(  );
-	printf("init_system_hmenu 5\n");
-	
+	ifprintf("init_system_hmenu 5\n");
+
 	system_hmenu.m_entries.clear();
 	system_hmenu.add_entry_text( "File" );
 	system_hmenu.add_entry_text( "Edit" );	
@@ -218,7 +228,33 @@ void init_system_hmenu( )
 	system_hmenu.add_sub_menu( "Molecules", &molecules );
 	system_hmenu.add_sub_menu( "Games",     &games  );
 	system_hmenu.add_sub_menu( "Graphs",    &graphs );		
-	printf("init_avisual_menu done\n");
+	ifprintf("init_avisual_menu done\n");
+}
+
+
+int handle_power_action( void* menuPtr, int mMenuIndex )
+{
+	switch(mMenuIndex) 
+	{
+	case 0: init_power_off		();		break;		
+	case 1: init_power_restart  ();		break;
+	case 2: init_power_sleep	();		break;
+	case 3: init_logoff_user	();		break;
+	default: break;
+	}
+}
+
+void init_power_menu()
+{
+	power_menu.add_simple_command( "Restart" 	);
+	power_menu.add_simple_command( "Log out" 	);
+	power_menu.add_simple_command( "Sleep" 		);
+	power_menu.add_simple_command( "Power Off"  );
+
+	power_menu.add_callback( 0,  handle_power_action  );
+	power_menu.add_callback( 1,  handle_power_action  );	
+	power_menu.add_callback( 2,  handle_power_action  );	
+	power_menu.add_callback( 3,  handle_power_action  );
 }
 
 
@@ -226,7 +262,7 @@ void init_system_hmenu( )
 
 void init_default_sidebar( SideBar* mSB )
 {
-	printf("init_default_sidebar( ) \n");
+	ifprintf("init_default_sidebar( ) \n");
 	IconView* iv = new IconView( 64., 64. );
 	iv->set_file( "/home/pi/bk_code/avisual/resources/calendar.jpg");
 	iv->set_width_height( 64., 64.);
@@ -257,7 +293,7 @@ void init_default_sidebar( SideBar* mSB )
 	iv->set_width_height( 64., 64.);
 	mSB->add_control( iv );
 
-	printf("init_default_sidebar( SideBar* mSB )\n");
+	ifprintf("init_default_sidebar( SideBar* mSB )\n");
 } 
 
 

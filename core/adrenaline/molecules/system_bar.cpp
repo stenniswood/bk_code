@@ -24,6 +24,7 @@
 #include "system_bar.hpp"
 #include "avisual_menu.hpp"
 
+#include "draw_app.hpp"
 
 
 SystemBar::SystemBar() 
@@ -56,14 +57,19 @@ void	SystemBar::onPlace		(	)
 	printf("SystemBar::onPlace():m_Menu=%x", m_Menu);	
 	if (m_Menu)
 	{
-
 		m_Menu->set_width_height( (m_MenuEnd_x-m_MenuStart_x),  get_height() );
 		m_Menu->move_to         ( (left+m_MenuStart_x),  bottom );
-		m_Menu->calc_metrics	();
+		m_Menu->calc_metrics	(  );
 		printf("SystemBar::onPlace:m_Menu:");
 		m_Menu->print_positions( );
 	}
-	
+
+	m_wifi.set_width_height  ( 25, height );
+	m_volume.set_width_height( 25, height );
+
+	m_wifi.move_to  ( m_MenuEnd_x, 		  bottom );
+	m_volume.move_to( m_wifi.get_right(), bottom );	
+		
 	m_show_taskbar.set_width_height( 25, height );
 	m_show_sidebar.set_width_height( 25, height );
 	
@@ -75,8 +81,9 @@ int   	SystemBar::draw (	)
 { 
 	printf("SystemBar::draw()\n");
 	print_positions();
-	printf("SystemBar::m_Menu::\t");
+	printf("SystemBar::draw():m_Menu::\t");
 	m_Menu->print_positions();
+
 		
 	//printf("SystemBar::m_Menu::draw:");
 	//m_Menu.draw();
@@ -108,9 +115,9 @@ Control*	SystemBar::HitTest		  ( int x, int y 	)
 	return Control::HitTest(x,y); 
 }
 
-int			SystemBar::onHover		  (  			 	) 
+int			SystemBar::onHover		  ( int x, int y ) 
 {
-	return Control::onHover(); 
+	return Control::onHover(x,y); 
 }
 
 int		SystemBar::onClick(int x, int y, bool mouse_is_down)
@@ -134,20 +141,58 @@ void show_sidebar(void* mObj )
 	else
 		obj->show( );
 }
+void show_wifi(void* mObj )
+{
+	printf("\n\nshow_wifi\n");
+	Control* obj = (Control*) mObj;
+	if (obj->is_visible()==true)
+		obj->hide( ); 
+	else
+		obj->show( );
+}
+void show_volume(void* mObj )
+{
+	printf("\n\nshow_volume\n");
+	Control* obj = (Control*) mObj;
+	if (obj->is_visible()==true)
+		obj->hide( ); 
+	else
+		obj->show( );
+}
+
+void SystemBar::set_menu( HorizontalMenu* mMenu )
+{
+	printf("SystemBar::set_menu ( %x ) old=%x\n", mMenu, m_Menu );
+	unregister_child( m_Menu );	
+		printf("after removal 1: \n");		
+	m_Menu = mMenu;
+	register_child( m_Menu );
+	print_children();	
+	onPlace();
+}
 
 int	SystemBar::onCreate(  )
 {
 	// Inflate the menu's:
 	static bool first_time = true;
 	if (first_time)
-	{	init_system_hmenu(  );	first_time = false; 	};	
+	{	
+		init_system_hmenu(  );	
+		first_time = false; 	
+	};	
+	//printf("\tSystem Menu:  sysmenu:%x  draw_menu:%x \n", &system_hmenu, &draw_menu );
 	m_Menu = &system_hmenu;	
 
 	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_soft_side) );
 	//m_show_taskbar.set_on_click_listener( show_taskbar, MainDisplay.m_show_sidebar );
+	//m_wifi.set_on_click_listener  ( show_wifi,   (void*)&(MainDisplay.m_wifi  ) );
+	//m_volume.set_on_click_listener( show_volume, (void*)&(MainDisplay.m_volume) );
 
-	register_child( m_Menu );	
+	m_child_controls.clear();
+	register_child( m_Menu );
 	register_child( &m_show_sidebar );
 	register_child( &m_show_taskbar );
+	register_child( &m_wifi 		);
+	register_child( &m_volume 		);
 }
 

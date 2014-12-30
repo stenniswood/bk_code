@@ -27,6 +27,7 @@
 /* When the CAN_app is active, change the menu as below */
 
 HorizontalMenu   can_menu(-1,-1);
+VerticalMenu     can_file_menu(-1,-1);
 VerticalMenu     can_view_menu(-1,-1);
 
 int show_CAN_screens( void* menuPtr, int mMenuIndex )
@@ -59,9 +60,11 @@ void init_view_menu()
 
 void init_main_CAN_menu()
 {
-	can_menu.add_entry_text( "File" );
+	can_file_menu.create_std_file_menu();
+
+ 	can_menu.add_sub_menu  ( "File", &can_file_menu );
 	can_menu.add_entry_text( "Edit" );
-	can_menu.add_sub_menu( "View", &can_view_menu );
+	can_menu.add_sub_menu  ( "View", &can_view_menu );
 }
 
 // Demo Messages:

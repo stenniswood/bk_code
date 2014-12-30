@@ -30,8 +30,8 @@ public:
 	
 	int				set_on_click_listener( void (*callback)(void*), void* mOn_click_context );
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
-	
-	
+
+	struct tm	m_local_time;	
 
 };
 

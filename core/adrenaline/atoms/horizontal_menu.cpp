@@ -63,7 +63,7 @@ int 	HorizontalMenu::calc_metrics( )
 	for (int i=0; i<m_entries.size(); i++)
 	{
 		m_entries[i]->width	= TextWidth( m_entries[i]->text, SerifTypeface, text_size );
-		printf("%6.1f pad=%6.1f\n", m_entries[i]->width, m_menu_padding );
+		printf("%s %6.1f pad=%6.1f\n", m_entries[i]->text, m_entries[i]->width, m_menu_padding );
 		m_entries[i]->sx    = sx;
 		m_entries[i]->ex    = sx+m_entries[i]->width + m_menu_padding;
 		sx += (m_entries[i]->width + m_menu_padding);
@@ -86,7 +86,10 @@ int		HorizontalMenu::add_entry_text( char* mMenuText )
 	m_entries.push_back( ptr );
 	calc_metrics();
 }
-
+void		HorizontalMenu::clear_all()
+{
+	m_entries.clear( );
+}
 int		HorizontalMenu::add_sub_menu( char* mMenuText, VerticalMenu* vm )
 {
 	stHorizMenuInfo* ptr = new struct stHorizMenuInfo;

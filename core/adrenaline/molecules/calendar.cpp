@@ -32,8 +32,13 @@ Calendar::~Calendar()
 void Calendar::Initialize(	) 
 {
 	time_t t = time(NULL);
-	struct tm tm = *localtime(&t);	
-	printf("now: %d-%d-%d %d:%d:%d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	m_local_time = tm = *localtime(&t);	
+	printf("now: %d-%d-%d %d:%d:%d\n", 
+			 m_local_time.tm_year+1900, m_local_time.tm_mon+1,
+			 m_local_time.tm_mday, 		m_local_time.tm_hour, 
+			 m_local_time.tm_min, 		m_local_time.tm_sec);
+
+
 }
 int	Calendar::show_date	( int mMonth, int mDay ) 
 { 
@@ -48,9 +53,11 @@ int Calendar::draw 		(	)
 int Calendar::draw_simple_view(	) 
 { 
 }
-int Calendar::draw_1month_view(	) 
-{ 
-}
+int Calendar::draw_1month_view_small(	) 
+{ /* 
+	Text(  Month );
+	for (	
+*/}
 int Calendar::draw_1week_view (	) 
 { 
 }

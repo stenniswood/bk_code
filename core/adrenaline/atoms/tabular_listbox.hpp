@@ -92,8 +92,6 @@ protected:
 
 	vector<struct HeaderItemInfo> 	Headings;
 	vector< vector<string> >		LineData;
-	
-private:
 
 	
 };

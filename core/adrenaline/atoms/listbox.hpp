@@ -76,9 +76,11 @@ public:
 	int					get_hit_index	( int x, int y );
 	virtual Control*	HitTest			( int x, int y );
 	virtual int			onClick			( int x, int y, bool mouse_is_down=true);
+	virtual int			onHover		  	( int x, int y	) { return 0; };
 	virtual int			onCreate	  	(  );
 
 	//void			enable_scroll_bar	( bool mEnable = true );
+	bool			has_header;
 
 protected:
 	int				first_visible_line;
@@ -87,7 +89,7 @@ protected:
 	bool			isTopDown;
 	int				body_height;
 	int				selected_item;
-		
+	
 private:
 	long int 		EvenColor;
 	long int 		OddColor;	

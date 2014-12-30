@@ -40,10 +40,12 @@ public:
 
 	virtual void 	Initialize			(	);
 	int				calc_metrics		(	);
+	int  			create_std_file_menu(	);
 
 	int				add_simple_command	( char* mText, char* mShortcut=NULL );
 	int				add_sub_menu		( char* mText, VerticalMenu* mSubMenu=NULL );	
 	int				add_callback		( int  mIndex, int (*callback)(void*, int)=NULL );	
+	int				add_callback_all_items( int (*callback)(void*, int) );	
 	int				add_entry			( stVertMenuInfo mEntry 	 );
 
 //	int				get_id				( )	{ return selected_item; };
@@ -60,11 +62,12 @@ public:
 	int				get_hit_index		( int Mousex, int Mousey );
 //	int				set_on_click_listener( void (void*) );
 	virtual int		onClick				( int x, int y, bool mouse_is_down=true );
-
+	void				clear_all()   { m_entries.clear(); };
 protected:
 	HorizontalMenu*			m_horiz_parent;
+	int		(*callback_all_items)(void*, int);		// called when any item is selected.
 
-	std::vector<stVertMenuInfo*> m_entries;
+	std::vector<stVertMenuInfo> m_entries;
 	int						m_selection;
 	bool					has_scroller;
 	bool					is_visible;

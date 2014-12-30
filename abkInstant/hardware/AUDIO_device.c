@@ -83,7 +83,7 @@ int32_t audioplay_create(AUDIOPLAY_STATE_T **handle,
       AUDIOPLAY_STATE_T *st;
 
       // buffer offsets must also be 16 byte aligned for VCHI
-      st = calloc(1, sizeof(AUDIOPLAY_STATE_T));
+      st = (AUDIOPLAY_STATE_T*)calloc(1, sizeof(AUDIOPLAY_STATE_T));
 
       if(st)
       {
@@ -110,7 +110,8 @@ int32_t audioplay_create(AUDIOPLAY_STATE_T **handle,
          error = OMX_Init();
          assert(error == OMX_ErrorNone);
 
-         ilclient_create_component(st->client, &st->audio_render, "audio_render", ILCLIENT_ENABLE_INPUT_BUFFERS | ILCLIENT_DISABLE_ALL_PORTS);
+		 ILCLIENT_CREATE_FLAGS_T flg = (ILCLIENT_ENABLE_INPUT_BUFFERS | ILCLIENT_DISABLE_ALL_PORTS);
+         ilclient_create_component(st->client, &st->audio_render, "audio_render", flg );
          assert(st->audio_render != NULL);
 
          st->list[0] = st->audio_render;
@@ -257,7 +258,7 @@ int32_t audioplay_play_buffer(AUDIOPLAY_STATE_T *st,
    hdr = st->user_buffer_list;
    while(hdr != NULL && hdr->pBuffer != buffer && hdr->nAllocLen < length)
    {
-      prev = hdr;
+      prev = (OMX_BUFFERHEADERTYPE*)hdr;
       hdr = hdr->pAppPrivate;
    }
 
@@ -449,7 +450,7 @@ uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate )
 		
 		assert(ret == 0);
 	}  
-	return ret;
+	return (uint8_t*)ret;
 }
 
 void audio_close(  )

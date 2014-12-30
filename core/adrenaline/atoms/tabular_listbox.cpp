@@ -17,12 +17,11 @@
 #include "tabular_listbox.hpp"
 
 #define margin_percent 0.07
-#define Debug 0
+#define Debug 1
  
 TabularListBox::TabularListBox( int Left, int Right, int Top, int Bottom )
 :ListBox(Left, Right, Top, Bottom )
 {
-	set_position( Left, Right, Top, Bottom );
 	Initialize();
 }
 
@@ -45,8 +44,6 @@ TabularListBox::TabularListBox(int Left, int Bottom, int mWidth, int mNumber_ite
 TabularListBox::TabularListBox()
 :ListBox()
 {
-	//printf("TabularListBox ctor \n" );
-	//set_position( 0, 0, 0, 0 );
 	Initialize();
 	width  =-1;
 	height =-1;
@@ -71,9 +68,7 @@ void TabularListBox::Initialize()
 
 int	TabularListBox::onCreate(  	)	// after loading resources, call functions which use fonts (already loaded before this call) etc.	
 {
-	//printf("\t\tTabularListBox::onCreate()\n");
 	ListBox::onCreate();
-
 	calc_widths_from_text( );
 	calc_column_positions_from_widths( );	
 	//printf("TabularListBox::onCreate() column pos \n");		
@@ -96,29 +91,33 @@ void TabularListBox::print_tab_info(   )
 
 void TabularListBox::calc_metrics( )
 {
+	ListBox::calc_metrics();
+	
 	header_height 		 = header_text_size * 1.5;
-	body_height 		 = (height - header_height);
-	if (text_size==0) 
-		text_size = 12;
-	LineHeight           = text_size * 1.5;
-	number_lines_visible = floor( body_height/LineHeight );
-
+	//body_height 		 = (height - header_height);
+	//if (text_size==0) 
+	//	text_size = 12;
+	//LineHeight           = text_size * 1.5;
+	//number_lines_visible = floor( body_height/LineHeight );
+	//if (vsb) vsb->set_amount_visible(number_lines_visible);
 	if (Debug) printf("TabularLB: calc_metrics: height=%6.2f; body_height=%6.2f\n", height, body_height );	
 	
-	if (vsb) vsb->set_amount_visible(number_lines_visible);
-
 	// The change in height, could change number_lines_visible, which would require scroll bar:
-	if (LineData.size() > number_lines_visible) {
+	/*if (LineData.size() > number_lines_visible) {
 		enable_v_scroll_bar(true);
 		set_v_scroll_values( LineData.size(), 0, first_visible_line, number_lines_visible );
-	}
+	}*/
 }
 
 void TabularListBox::set_width_height( int Width, int Height )
 {
-	ListBox::set_width_height( Width, Height );
+	int Ht = Height-(header_text_size*4);
+	printf("\tTabularListBox::set_width_height( %d, %d ) lb:Ht %d\n", Width, Height, Ht );
+	ListBox::set_width_height( Width, Ht );
 	calc_metrics();
-	if (vsb)  vsb->set_width_height( vsb->width, body_height );
+	if (vsb)  vsb->set_width_height( vsb->width, Ht );
+	print_positions();
+	ListBox::print_positions();
 }
 
 void TabularListBox::adjust_height_for_num_visible_items ( int mNumber_items_shown )
@@ -142,10 +141,10 @@ int TabularListBox::draw_header(	)
 {
 	// CALCULATE PIXEL LOCATIONS:
 	float Hdr_Top    = bottom + height;
-	float Hdr_Bottom = bottom + body_height;
+	float Hdr_Bottom = Hdr_Top - header_height;   //bottom + body_height;
 	int vspace       = ((Hdr_Top-Hdr_Bottom) - header_text_size)/2.0;
 
-	//if (Debug) printf("Hdr_Top=%6.1f; Hdr_bottom=%6.1f; \n", Hdr_Top, Hdr_Bottom );
+	if (Debug) printf("Hdr_Top=%6.1f; Hdr_bottom=%6.1f; \n", Hdr_Top, Hdr_Bottom );
 	Stroke_l	( header_border_color 	 );
 	Fill_l  	( header_background_color);
 	StrokeWidth	( 2.0					 );
@@ -357,7 +356,8 @@ void TabularListBox::move_to( float Left, float Bottom )
 
 void TabularListBox::set_headings( vector<struct HeaderItemInfo> *mHeaderTexts )
 {
-	//Headings = *mHeaderTexts;
+	has_header = true;
+	Headings = *mHeaderTexts;
 	calc_widths_from_text();
 	calc_column_positions_from_widths();		
 }
@@ -369,8 +369,9 @@ void TabularListBox::change_header_titles( string mHeaderTexts, int column )
 
 void TabularListBox::select( int mIndex )
 {
-//	printf("Selected item # %d/%d  visible_line=%d\n", mIndex, LineData.size(), 
-//				mIndex-first_visible_line);
+	if (Debug)
+		printf("Selected item # %d/%d  visible_line=%d\n", mIndex, LineData.size(), 
+				mIndex-first_visible_line);
 	selected_item = mIndex;
 }
 
@@ -398,8 +399,8 @@ void TabularListBox::add_row( vector<string> *mData )
 // Will be added to the last column!
 void TabularListBox::add_column( struct HeaderItemInfo* mNewHeading )
 {
-	Headings.push_back( *mNewHeading );
-	
+	has_header = true;
+	Headings.push_back( *mNewHeading );	
 	int rows  = LineData.size();
 	for (int i=0; i<rows; i++)
 	{
@@ -416,7 +417,6 @@ void TabularListBox::update_col_data( vector<string> *mNewColText, int mColumn  
 	for (int i=0; i<rows; i++)
 	{
 		LineData[i][mColumn] = (*mNewColText)[rows];
-		
 	}
 }
 

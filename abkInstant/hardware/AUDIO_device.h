@@ -8,6 +8,7 @@
 //#include "bcm_host.h"
 //#include "ilclient.h"
 
+
 #define BUFFER_SIZE_SAMPLES 1024
 
 typedef int int32_t;
@@ -45,6 +46,7 @@ uint32_t audioplay_get_latency(AUDIOPLAY_STATE_T *st);
 
 //static const char *audio_dest[] = {"local", "hdmi"};
 void play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
+
 
 // BK:
 int32_t audio_setup_and_play ( int dest, int samplerate, int channels, int bitdepth );

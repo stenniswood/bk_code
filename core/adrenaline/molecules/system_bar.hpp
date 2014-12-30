@@ -17,6 +17,7 @@ public:
 	virtual void 	Initialize	(	);
 	void			onPlace		(	);
 
+	void 				set_menu		 ( HorizontalMenu* mMenu 		 );
 	virtual void 		set_width_height ( int Width, int Height 		 );
 	virtual void  		move_to	  		 ( float Left,   float  Bottom	 );
 
@@ -25,7 +26,7 @@ public:
 	virtual int			onCreate	  (  );	
 	virtual int   		draw 		  (	 );
 
-	virtual int			onHover		  (  			 	);
+	virtual int			onHover		  ( int x, int y	);
 	virtual int			onDoubleClick ( 				);
 
 	HorizontalMenu*		m_Menu;	
@@ -36,13 +37,14 @@ private:
 	Button			m_show_taskbar;
 	Button			m_show_sidebar;
 	
-//	Date				m_Date;
-//	Time				m_Time;
+	Button			m_wifi;
+	Button			m_volume;		
+	
 //	vector<Control*>    m_icons;		// use something more than control* later.
-//	Volume				m_Time;
 //	Video				m_Time;	
 //	Camera				m_Time;	
-//	Connections			m_Time;
+//	Intercom			m_intercom;	
+//  VoiceCommands		m_voice_dialog;  on/off
 			
 //	void (*on_click_callback)(void*);
 //	void* on_click_context;				// often this pointer to a Control*

@@ -36,7 +36,7 @@ ListBox::ListBox(int Left, int Bottom, int mWidth, int mNumber_items_shown, int 
 ListBox::ListBox( int Width, int Height )
 :ScrollControl( Width, Height )
 {
-	
+	Initialize();	
 }
 	
 ListBox::ListBox()
@@ -60,7 +60,8 @@ void ListBox::Initialize()
 	isTopDown  		= true;
 	background_color = 0x00000000;
 	border_color 	= 0x20FFFFFF;
-
+	has_header		= false;
+	
 	text_color 		= 0xFF000000;
 	selected_item   = 1;
 	selected_color  = 0xFF2C5DCE;		// exact copy of the Mac color selected item active.
@@ -73,14 +74,22 @@ void ListBox::move_to ( float mLeft,   float  mBottom )
 }
 void ListBox::set_width_height   ( int Width, int Height )
 {
-	ScrollControl::set_width_height( Width, Height );	
+	//int d = (height - body_height);
+	//printf("ListBox::set_width_height() d=%d\n", d );
+	
+	ScrollControl::set_width_height( Width, Height );		
+	if (has_header)
+		body_height = Height - LineHeight;
+	else
+		body_height = Height;
+	if (vsb) vsb->set_width_height( vsb->get_width(), body_height );
 	calc_metrics();
 }
+
 void ListBox::calc_metrics( )
 {
 	LineHeight           = text_size * 1.5;
-	number_lines_visible = floor( height/LineHeight );
-	body_height 		 = (number_lines_visible*LineHeight);
+	number_lines_visible = floor( body_height/LineHeight );
 
 	if (vsb) {
 		 vsb->set_amount_visible(number_lines_visible);
@@ -89,6 +98,7 @@ void ListBox::calc_metrics( )
 	// The change in height, could change number_lines_visible, which would require scroll bar:
 	if (LineTexts.size() > number_lines_visible) {
 		enable_v_scroll_bar(true);
+		if (vsb) vsb->set_width_height( vsb->width, body_height );
 		set_v_scroll_values( LineTexts.size(), 0, first_visible_line, number_lines_visible );
 	}
 	//printf("number_lines_visible=%d; LineHeight=%5.3f\n", number_lines_visible, LineHeight );
@@ -151,7 +161,7 @@ int ListBox::draw_text()
 {
 	int num_lines = min( number_lines_visible, get_total_lines() );
 	//printf("ListBox::draw_text() num_lines=%d  get_total_lines=%d\n", num_lines, get_total_lines() );
-	int i=0; 
+	int i=0;
 	int screen_i=0;	
 	int start = first_visible_line;
 	int stop  = first_visible_line+num_lines;
@@ -161,7 +171,8 @@ int ListBox::draw_text()
 	for (int i=start; i<stop; i++, screen_i++ )
 	{
 		y = get_line_bottom( screen_i );
-		draw_one_row( i, y );
+		if (y<(body_height+bottom))
+			draw_one_row( i, y );
 		//printf( "y=%6.3f Num_lines=%d LH=%6.3f, TextSize=%6.3f above=%6.3f\n", y, num_lines, LineHeight, text_size);
 	}
 }
@@ -304,12 +315,12 @@ int ListBox::onCreate( )
 // Returns the select index of the listbox:
 int ListBox::get_hit_index(int mx, int my)
 {
-	printf("ListBox::get_hit_index()\n");
+	//printf("ListBox::get_hit_index()\n");
 	int   start	 = first_visible_line;
 	int   end  	 = first_visible_line + number_lines_visible;
 	int	  retval = -1;
 	float y;
-	printf("\tbottom=%6.1f, body_height=%6.1f LineHeight=%6.1f\n", bottom, body_height, LineHeight);
+	//printf("\tbottom=%6.1f, body_height=%6.1f LineHeight=%6.1f\n", bottom, body_height, LineHeight);
 
 	for ( int i=start; i<end; i++ )
 	{

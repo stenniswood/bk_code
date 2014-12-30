@@ -22,7 +22,6 @@
 #include "avisual_menu.hpp"		// Specific system menu.  not part of adrenaline_windows
 
 
-
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
 #define Debug 1
@@ -55,7 +54,7 @@ void  DisplayManager::init_screen()
 	init(&screen_width, &screen_height);	// Graphics initialization
 	printf("\nDisplayManager::\tscreen_width=%d;\tscreen_height=%d\n", screen_width, screen_height );
 	mouse_init( screen_width, screen_height );
-	load_resources();	
+	load_resources();
 }
 
 // Screen initialization
@@ -90,24 +89,25 @@ int	DisplayManager::onPlace( )
 	m_sb.set_width_height( screen_width, 36 );
 	float b = (screen_height-m_sb.get_height());
 	printf("DisplayManager::onPlace()  %d,%d, %5.1f\n", screen_width, screen_height, b );
+	print_children();
 	m_sb.move_to	    ( 0,  b );
 	m_sb.print_positions( );
 	m_sb.onPlace		( );
-	add_object			( &m_sb );
+	//add_object			( &m_sb );
 
 	// Status Bar on Bottom:
 	m_status.move_to		 ( 0, m_status.get_height() );
 	m_status.set_width_height( screen_width, 64 );
 	m_status.print_positions (  );
 	m_status.onPlace		 (  );
-	add_object		( &m_status );
+	//add_object			( &m_status );
 	
 	// RIGHT SideBar
 	int sidebar_width = m_soft_side.get_expanded_width();
 	float h 		  = height - m_status.get_height() - m_sb.get_height();
 	m_soft_side.move_to			( screen_width-sidebar_width, m_status.get_height() );
 	m_soft_side.set_width_height( sidebar_width, h );
-	add_object( &m_soft_side );
+	//add_object( &m_soft_side );
 	m_soft_side.onPlace( );
 }
 
@@ -119,15 +119,23 @@ int	DisplayManager::onCreate(  )
 
 void DisplayManager::set_menu( HorizontalMenu* mHMenu )
 {
+	printf("\t\tDisplayManager::set_menu( )\n");
 	if (mHMenu==NULL)
 	{
-		m_sb.m_Menu = &system_hmenu;
-		m_sb.onPlace();
+		m_sb.set_menu( &system_hmenu );
+		onPlace();
+		m_sb.Invalidate();
 	} else {
-		m_sb.m_Menu = mHMenu;
-		m_sb.onPlace();
+		printf("\t\tDisplayManager::set_menu( )\n");	
+		m_sb.set_menu( mHMenu );
+		m_sb.print_positions();
+		m_sb.m_Menu->print_positions();
+
+		onPlace();
+		m_sb.draw();
+		m_sb.Invalidate();		
 	}
-}	
+}
 
 Rectangle*	DisplayManager::get_useable_rect( )
 {
@@ -194,10 +202,10 @@ void  DisplayManager::remove_all_objects(  )
 	// not going to actually delete/free the objects since some are static!
 	m_child_controls.clear();
 
-	// Put back in the bare essentials!
-	add_object( &m_status );
-	add_object( &m_sb );
-	add_object( &m_soft_side );
+	// Put back in the bare essentials!		
+	register_child( &m_status );	
+	register_child( &m_sb );
+	register_child( &m_soft_side );
 }
 
 /*void  DisplayManager::start_draw(	)
@@ -208,8 +216,8 @@ int   DisplayManager::draw(	)
 	if (Debug) printf("\ndraw display manager\tstart:\n" );
 	start_screen();//	start_draw();
 	draw_background();
-	//m_sb.print_positions();
-	draw_children();	
+	draw_children();
+	m_sb.draw();	
 	end_draw();				// end is needed to see display!
 	if (Debug) printf("draw display manager\tdone!\n\n" );
 }
@@ -224,6 +232,7 @@ int   DisplayManager::draw_children( )
 /*	m_sb.draw();
 	m_soft_side.draw();
 	m_status.draw(); */	
+	
 	printf("\t\tside bar	\t");	m_soft_side.print_positions();
 	printf("\t\tstatus bar	\t");	m_status.print_positions();
 
@@ -263,12 +272,14 @@ int   DisplayManager::draw_background( 	)
 
 Control* DisplayManager::HitTest( int x, int y )
 {
-	//Control* result = m_sb.HitTest(x,y);
-	//if (result)  return result;
+	print_children();
+	printf("m_sb=%x\n", &m_sb);
+		m_sb.print_children();
 
 	Control* retval = Control::HitTest(x,y);
+	printf("\tDisplayManager::HitTest() %x \n", retval );
 	if (retval==this)
-		return NULL;		// don't want display manager empty space to do anything.
+		return NULL;	// don't want display manager empty space to do anything.
 	else
 		return retval;
 }

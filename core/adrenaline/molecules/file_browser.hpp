@@ -23,8 +23,8 @@ public:
 	
 	virtual void 	Initialize			( );
 	void			set_base_path		( char* mBasePath );
-	//void			select_item			( int mColumn, int mItem );
-	Control* 		create_file_browser (  );
+	
+	void	 		create_file_browser (  );
 	void 			add_level			( string mAppendPath );
 	void			show_hidden			( bool mShow=true   );
 	virtual int		onClick				( int x, int y, bool mouse_is_down=true );
@@ -48,8 +48,6 @@ protected:
 	string			base_path;			// our starting point for the first level.
 										// we cannot go above this. for now.
 	string			complete_path;		// compiled path of the selected items.
-
-private:
 
 
 };

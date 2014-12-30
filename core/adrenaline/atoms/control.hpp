@@ -79,12 +79,13 @@ public:
 			Control*	ChildrenHitTest( int x, int y 	);
 
 	virtual Control*	HitTest		  ( int x, int y 	);
-	virtual int			onHover		  (  			 	) { return 0; };
+	virtual int			onHover		  ( int x, int y	) { return 0; };
 	virtual int			onClick		  ( int x, int y, bool mouse_is_down=true );
 	virtual int			onDoubleClick ( 				);
 	virtual int			onReceiveFocus( 				);
 	int					isTabStop	  (					)	{ return 0; };
 	virtual int			onCreate	  (  );	// chance to load resources, call functions which use fonts (already loaded before this call) etc.
+	void          			print_children();
 
 protected:
 	std::vector<Control*>	m_child_controls;

@@ -20,8 +20,9 @@
 #include "file_browser.hpp"
 
 
+
 FileBrowser::FileBrowser()
-: Control( )
+: Control()
 {
 	Initialize( );
 }
@@ -58,33 +59,37 @@ void FileBrowser::show_hidden( bool mShow )
 	show_hidden_files = mShow;
 }
 
-char str[] = "/home/pi/";
+
 int	FileBrowser::onCreate(  )
 {
 	printf("FileBrowser::onCreate(  )\n");
+	create_file_browser( );
 	Control::onCreate();
-	create_file_browser( );	
 	printf("FileBrowser::onCreate(  ) done\n");	
 }
 
 /* Start with just 1 level */
-Control* FileBrowser::create_file_browser( )
+void FileBrowser::create_file_browser( )
 {
 	// Show Path across the top : 
 	printf("FileBrowser::create_file_browser()\n");
-	path_descriptor = new TextView	( width, -1 );
+	path_descriptor = new TextView	( width, 32 );
 	path_descriptor->set_text		( base_path.c_str() );
-	path_descriptor->set_text_size	(14);	
-	path_descriptor->onCreate();
-	path_descriptor->move_to		(left, bottom+height-path_descriptor->get_height() );
-	//register_child( path_descriptor );
+	path_descriptor->set_text_size  ( 14 );
+	//path_descriptor->onCreate		();
+	float h = bottom+height-path_descriptor->get_height();
+	printf(" %s \n", base_path.c_str() );	
+	printf(" %d \n", h );
+	path_descriptor->move_to		(left, h );
+	printf(" move_to (%6.1f, %6.1f) \n", left, h );
 	path_descriptor->print_positions();
-	// Create the left most file List :
-	add_level( base_path.c_str() );
-	//print_window_positions();
-	return this;
-}
+	//register_child( path_descriptor );
 
+	// Create the first file List :
+	add_level( base_path );
+	//print_window_positions();
+}
+ 
 /* Extends the latest level.  ie. works from the current BasePath plus
 a new item  */
 void FileBrowser::add_level( string mAppendPath )
@@ -97,7 +102,7 @@ void FileBrowser::add_level( string mAppendPath )
 	tmp_dir->set_width_height( 200, ht 	);		// height will get overwritten
 	tmp_dir->populate_directories( mAppendPath.c_str(), 1 );
 	//tmp_dir->populate_files  ( mAppendPath, 1 );
-	printf( "add_level : populated directories. \n" );
+	//printf( "add_level : populated directories. \n" );
 
 	int size = levels.size();	
 	vector<DirectoryListBox*>::iterator iter;
@@ -159,7 +164,7 @@ int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 {
 	printf(" Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		
 	bool start_closing = false;
-	int size = levels.size();
+	int  size = levels.size();
 
 	// WHICH LEVEL:
 	int level_index = which_level_clicked( Mousex, Mousey );

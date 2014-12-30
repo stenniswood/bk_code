@@ -102,8 +102,8 @@ void Control::set_text( const char* NewText )
 {
 // Sometimes we can't do a free()  ie for Static string constants!
 // The 2nd call to this function causes a glibc error!
-//	if (text) free(text);
 //	text = (char*) malloc (strlen(NewText));
+	if (text) free(text);
 	int len = strlen(NewText)+1;
 	text = new char[len];		
 	strcpy(text, NewText);	
@@ -296,10 +296,23 @@ void Control::register_child( Control* mNewChild )
 	m_child_controls.push_back( mNewChild );
 }
 
-void Control::unregister_child	( Control* mNewChild )
+void Control::print_children( )
 {
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while ( iter != m_child_controls.end() )  
+	{ 
+		printf(" Children:  %x \n", *iter ); 
+		iter++; 
+	};		
+}
+void Control::unregister_child	( Control* mNewChild )
+{
+	printf("\t\tControl::unregister_child( %x )\n", mNewChild );
+	
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( *iter != mNewChild )  { iter++; };		
+	printf("Unregistering_child( %x )\n", *iter );
+	printf("Unregistering_child( %x )\n", *iter );
 	m_child_controls.erase( iter );
 }
 

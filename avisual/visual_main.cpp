@@ -35,6 +35,8 @@
 #include "mouse.h"
 #include "test_layouts.hpp"
 
+#include "audio_app.hpp"
+
 #include "visual_memory.h"
 #include "audio_memory.h"
 
@@ -118,7 +120,10 @@ int Last_Retrieved_Number=0;
 
 void gui_interface()
 {
-	// HANDLE MOUSE EVENTS:
+	static int left_mouse_button_prev  = 0;
+	static int right_mouse_button_prev = 0;
+
+	// HANDLE MOUSE EVENTS :
 	int result = mouse_timeslice();
 	MainDisplay.end_screen();
 
@@ -127,17 +132,18 @@ void gui_interface()
 	int y = round(mouse.y);
 	if (result == LEFT_BUTTON_DOWN)
 	{
-		//printf(" Left button clicked!  mousex=(%d,%d)\n", x,y);
-		object_clicked = MainDisplay.HitTest( x, y );
-		if (object_clicked)
-		{
-			printf("clicked an object %x!\t", object_clicked);
-			object_clicked->print_positions();
-			
-			int num = object_clicked->onClick( x, y );
-			UpdateDisplaySemaphore=1;
-		} else
-			printf(" hit test returned null\n");
+		//if (left_mouse_button_prev == 0)
+		{			
+			//printf(" Left button clicked!  mousex=(%d,%d)\n", x,y);
+			object_clicked = MainDisplay.HitTest( x, y );
+			if (object_clicked)
+			{
+				//printf("clicked an object %x!\t", object_clicked);
+				int num = object_clicked->onClick( x, y );
+				UpdateDisplaySemaphore=1;
+			}  
+			left_mouse_button_prev = result;
+		}
 	}
 
 	if (ipc_memory_avis->NumberClients != Last_Retrieved_Number)

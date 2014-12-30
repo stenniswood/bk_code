@@ -78,8 +78,7 @@ void DirectoryListBox::setup_headings( )
 	if (m_display_mode==LIST_MODE)
 		setup_heading_simple();
 	else if (m_display_mode==DETAIL_MODE)
-		setup_heading_details();
-		
+		setup_heading_details();		
 }
 void DirectoryListBox::setup_heading_simple( )
 {
@@ -88,7 +87,6 @@ void DirectoryListBox::setup_heading_simple( )
 	hi.text      = "Filename";
 	hi.alignment = HEADER_ALIGN_LEFT;
 	add_column( &hi );
-
 }
 void DirectoryListBox::setup_heading_details( )
 {
@@ -108,8 +106,7 @@ void DirectoryListBox::setup_heading_details( )
 	
 	hi.text      = "Kind";
 	hi.alignment = HEADER_ALIGN_LEFT;
-	add_column( &hi );
-	
+	add_column( &hi );	
 }
 
 void DirectoryListBox::draw_one_cell( int mRow, int mCol, float mY )

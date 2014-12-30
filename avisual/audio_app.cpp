@@ -24,7 +24,14 @@ AUTHOR	: Steve Tenniswood
 #include "visual_memory.h"
 #include "audio_memory.h"
 #include "audio_app.hpp"
+#include "audio_app_menu.hpp"
 
+#include <assert.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include "bcm_host.h"
+#include "ilclient.h"
+#include "AUDIO_device.h"
 
 
 extern int UpdateDisplaySemaphore;
@@ -41,6 +48,46 @@ static Button   	Cancel	   	 (-1,-1);
 static TextView 	SampleText;
 static IconView		test_icon 	 ( 50,200 );
 static TextView 	WaveformInfo ( -1, -1);
+
+
+
+void audio_file_new			() { }		
+void audio_file_open		() { }		
+void audio_file_open_recent	() { }
+void audio_file_save		() { }		
+void audio_file_save_as		() { }	
+
+void audio_zoom_in			() { }		
+void audio_zoom_out			() { }		
+void audio_show_mixer		() { }		
+void audio_show_frequency	() { }
+void audio_show_fft  		() { }		
+
+void audio_play				() 
+{ 
+	printf("audio_play				() \n");
+	int audio_dest = 1;				// 0=headphones, 1=hdmi
+	int samplerate = 48000;			// audio sample rate in Hz
+	int channels = 2;				// numnber of audio channels   
+	int bitdepth = 16;				// number of bits per sample   
+	bcm_host_init();
+	printf("audio_play:host_init'd() \n");
+	play_api_test( samplerate, bitdepth, channels, audio_dest );
+}
+
+void audio_stop				() { }
+void audio_rewind			() { }
+void audio_select_output_device () { }
+void audio_record_from			() { }
+void audio_broadcast_to			() { }
+
+void audio_reverb			 () { }	
+void audio_equalize			 () { }	
+void audio_backwards		 () { }	
+void audio_convert_to_mono	 () { }	
+void audio_convert_to_stereo () { }	
+
+
 
 void print_combo_test_list()
 {
@@ -146,6 +193,8 @@ short* sample_waveform()
 // Parse an xml
 void init_audio_view()
 {
+	init_audio_menu();
+
 	VolumeSlider.set_width_height ( 50,200  );
 	VolumeSlider.move_to		  ( 10, 100 );	
 	VolumeSlider.set_level_percent( 50.0    );	
@@ -166,7 +215,7 @@ void init_audio_view()
 	printf(txt);
 	WaveformInfo.set_text		 ( txt );
 	WaveformInfo.set_text_size	 ( 12  );
-	
+
 	wave_view_left.set_width_height( 1000, 200 );
 	wave_view_left.move_to		   ( 220, 100 );
 	if (ipc_memory_aud != NULL)
@@ -197,10 +246,12 @@ void init_audio_view()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &VolumeSlider );	
 	MainDisplay.add_object( &WaveformInfo );	
-	MainDisplay.add_object( &spl );
+	MainDisplay.add_object( &spl 			 );
 	MainDisplay.add_object( &wave_view_left  );
 	MainDisplay.add_object( &wave_view_right );
-	MainDisplay.add_object( &freq_view );	
+	MainDisplay.add_object( &freq_view 	 );
+	MainDisplay.set_menu  ( &audio_menu  );
+	
 }
 
 
