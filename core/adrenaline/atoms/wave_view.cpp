@@ -74,7 +74,8 @@ int WaveView::draw( )
 	long int color = 0xFF00FF00;		// start at green.
 	Fill_l  (color);
 	Stroke_l(color);
-
+	StrokeWidth(1.0);
+	
 	// DRAW : 
 	float y1,y2;
 	int start 	   = 0;		// first sample visible!

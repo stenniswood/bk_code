@@ -27,6 +27,7 @@
 #include "wave_view.hpp"
 #include "frequency_view.hpp"
 
+#include "board_list_oop.hpp"
 #include "horizontal_menu.hpp"
 #include "vertical_menu.hpp"
 #include "spinner.hpp"
@@ -35,8 +36,8 @@
 
 #include "can_app.hpp"
 #include "adren_network_view.hpp"
-#include "task_bar.hpp"
 #include "system_status.hpp"
+#include "system_bar.hpp"
 #include "side_bar.hpp"
-
+#include "application.hpp"
 

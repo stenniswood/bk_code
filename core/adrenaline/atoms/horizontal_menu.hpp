@@ -31,24 +31,23 @@ public:
 	int				add_entry_text		( char* mMenuText 					);
 	int				add_sub_menu		( char* mMenuText, VerticalMenu* vm );
 	int				add_entry			( stHorizMenuInfo* mEntry 			);
-	void				clear_all		();
+	void			clear_all			( );
 	int				select				( int mSelected 					);
 
 	virtual int   	draw		 		(	);
-
 	bool			is_selection_valid	( 	);
 
-	int				get_hit_index		( int Mousex, int Mousey );
+	int				 get_hit_index		( int Mousex, int Mousey );
 	virtual Control* HitTest			( int x, int y 	);
-	virtual int		onClick				( int x, int y, bool mouse_is_down=true );
-//	int				set_on_click_listener( void (void*) );
+	virtual int		 onClick			( int x, int y, bool mouse_is_down=true );
 
+//	int				set_on_click_listener( void (void*) );
 //	a extract menu items from a .xml menu resource
 //	int 		  	load_from_resource	(	);
-	
 
 	std::vector<stHorizMenuInfo*>		m_entries;
 	int									m_selection;
+
 protected:
 	long					m_selected_color;
 	int						m_text_size;

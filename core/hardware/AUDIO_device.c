@@ -34,10 +34,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unistd.h>
 #include <semaphore.h>
 
+
 #include "bcm_host.h"
 #include "ilclient.h"
 #include "AUDIO_device.h"
 #include "tone_generator.h"
+ 
 
 
 #define N_WAVE          1024    /* dimension of Sinewave[] */
@@ -327,42 +329,6 @@ uint32_t audioplay_get_latency(AUDIOPLAY_STATE_T *st)
    return param.nU32;
 }
 
-#define CTTW_SLEEP_TIME 10
-#define MIN_LATENCY_TIME 20
-
-static const char *audio_dest[] = {"local", "hdmi"};
-
-void play_api_test(int samplerate, int bitdepth, int nchannels, int dest)
-{
-   AUDIOPLAY_STATE_T *st;
-   int32_t ret;
-   unsigned int i, j, n;
-   int phase = 0;
-   int inc = 256<<16;
-   int dinc = 0;
-   int buffer_size = (BUFFER_SIZE_SAMPLES * bitdepth * OUT_CHANNELS(nchannels))>>3;
-
-   assert(dest == 0 || dest == 1);
-
-   ret = audioplay_create(&st, samplerate, nchannels, bitdepth, 10, buffer_size);
-   assert(ret == 0);
-   printf("%d = audioplay_create( %d )\n", ret, buffer_size );
-
-   ret = audioplay_set_dest(st, audio_dest[dest]);
-   assert(ret == 0);
-
-   // iterate for 5 seconds worth of packets
-   for (n=0; n<((samplerate * 1000)/ BUFFER_SIZE_SAMPLES); n++)
-   {
-      uint8_t *buf;
-      int16_t *p;
-      uint32_t latency;
-
-      while((buf = audioplay_get_buffer(st)) == NULL)
-         usleep(10*1000);
-
-      p = (int16_t *) buf;
-
       // fill the buffer
       /*
       for (i=0; i<BUFFER_SIZE_SAMPLES; i++)
@@ -382,8 +348,114 @@ void play_api_test(int samplerate, int bitdepth, int nchannels, int dest)
             *p++ = val;
          }
       } */
-      square_wave( p, 2, 1000, BUFFER_SIZE_SAMPLES );
-      
+
+#define CTTW_SLEEP_TIME 10
+#define MIN_LATENCY_TIME 20
+
+static const char *audio_dest[] = {"local", "hdmi"};
+
+void play_waveform( Wave* mWave, int dest ) 
+{ 
+   AUDIOPLAY_STATE_T *st;
+   int32_t ret;
+
+   int buffer_size = (BUFFER_SIZE_SAMPLES * mWave->m_bits_per_sample * OUT_CHANNELS(mWave->m_number_channels))>>3;
+   assert(dest == 0 || dest == 1);
+	
+   ret = audioplay_create(&st, mWave->m_samples_per_second, mWave->m_number_channels, 
+   							   mWave->m_bits_per_sample, 10, buffer_size );
+   assert(ret == 0);
+   
+   ret = audioplay_set_dest(st, audio_dest[dest]);
+   assert(ret == 0);
+   
+   int32_t offset = 0;
+   bool done=false;
+   while(!done)
+   {
+      uint8_t *buf;
+      int16_t *p;      
+      uint32_t latency;
+
+      while((buf = audioplay_get_buffer(st)) == NULL)
+         usleep(10*1000);	// 10ms 
+	   
+	  // Fill buffer 
+	  memcpy( buf, ((uint8_t*)mWave->m_data)+offset, buffer_size );
+	  offset += buffer_size; 
+	  if (offset >= mWave->m_buffer_length) 
+	  	done = true; 
+
+      // try and wait for a minimum latency time (in ms) before
+      // sending the next packet
+      while((latency = audioplay_get_latency(st)) > (mWave->m_samples_per_second * 
+      		(MIN_LATENCY_TIME + CTTW_SLEEP_TIME) / 1000))
+         usleep(CTTW_SLEEP_TIME*1000);
+
+      ret = audioplay_play_buffer(st, buf, buffer_size);
+
+      assert(ret == 0);
+   }
+
+   audioplay_delete(st);
+}
+
+void play_api_test(int samplerate, int bitdepth, int nchannels, int dest)
+{
+   AUDIOPLAY_STATE_T *st;
+   int32_t ret;
+   unsigned int i, j, n;
+   int phase = 0;
+   int inc = 256<<16;
+   int dinc = 0;
+   int buffer_size = (BUFFER_SIZE_SAMPLES * bitdepth * OUT_CHANNELS(nchannels))>>3;
+
+   assert(dest == 0 || dest == 1);
+
+   ret = audioplay_create(&st, samplerate, nchannels, bitdepth, 10, buffer_size);
+   assert(ret == 0);
+   //printf("%d = audioplay_create( %d )\n", ret, buffer_size );
+
+   ret = audioplay_set_dest(st, audio_dest[dest]);
+   assert(ret == 0);
+
+	int 	note = -1;
+	int 	note_length = 10;
+	float 	freq1,freq2;
+	int 	period1, period2;
+	
+   // iterate for 5 seconds worth of packets
+   for (n=0; n<((samplerate * 1000)/ BUFFER_SIZE_SAMPLES); n++)
+   {
+      uint8_t *buf;
+      int16_t *p;
+      uint32_t latency;
+
+      while((buf = audioplay_get_buffer(st)) == NULL)
+         usleep(10*1000);
+
+      p = (int16_t *) buf;
+
+	  if ((note_length--)==0)
+	  {
+		  note_length = 10;
+		  note++;
+		  if (note>=88)
+			note = 0;
+
+		  freq1 =  get_note_frequency( note, samplerate );
+		  freq2 =  get_note_frequency( note+4, samplerate );
+		  printf("%d %6.1f,%6.1f\n", note, freq1, freq2);
+  
+		  period1 = get_period_in_samples( freq1, samplerate );
+		  period2 = get_period_in_samples( freq2, samplerate );
+	  }  
+	  //sine_wave_left ( p, period1, buffer_size );
+	  //sine_wave_right( p, period2, buffer_size );
+	  
+	  square_wave_left ( p, period1, buffer_size );
+	  square_wave_right( p, period2, buffer_size );
+	  // silence_channel( p, buffer_size, 0 ); 
 
       // try and wait for a minimum latency time (in ms) before
       // sending the next packet
@@ -444,9 +516,9 @@ uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate )
 		if (length > buffer_size)
 			bytes_to_send = buffer_size;
 		memcpy( buf, mBuffer, bytes_to_send );
-		
-		// try and wait for a minimum latency time (in ms) before
-		// sending the next packet
+
+		// try and wait for a minimum latency time (in ms) before 
+		// sending the next packet 
 		while((latency = audioplay_get_latency(st)) > (samplerate*(MIN_LATENCY_TIME+CTTW_SLEEP_TIME)/1000))
 		usleep(CTTW_SLEEP_TIME*1000);
 		printf("latency done\n");

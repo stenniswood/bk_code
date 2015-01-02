@@ -55,15 +55,14 @@ void	Window::Initialize		 (   )
 
 int   	Window::draw 			 (	 )
 {
-	printf("\tWindow::\t");	print_positions();
 	Control::draw();
 	
 	list<Control*>::iterator	iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++ )
 	{
-		printf("\t\t\t Drawing child %d\t", i);
-		(*iter)->print_positions();
-		//(*iter)->print_color_info();
+		if (Debug) printf("\t\t\t Drawing child %d\t", i);
+		if (Debug) (*iter)->print_positions();
+		//if (Debug) (*iter)->print_color_info();
 		(*iter)->draw();
 	}
 }

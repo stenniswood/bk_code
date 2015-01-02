@@ -19,6 +19,7 @@
 
 
 #define DEFAULT_PADDING 20
+#define Debug 0
 
 
 HorizontalMenu::HorizontalMenu ()  
@@ -52,7 +53,7 @@ void 	HorizontalMenu::Initialize (	)
 	text_size 		 = 14.;
 	m_menu_padding	 = 50.;
 	m_selection		 = -1 ;
-	printf("Colors: background=%4x; selected=%4x; text=%4x; mp=%6.1f\n", background_color, m_selected_color, text_color, m_menu_padding );
+	//printf("Colors: background=%4x; selected=%4x; text=%4x; mp=%6.1f\n", background_color, m_selected_color, text_color, m_menu_padding );
 }
 
 int 	HorizontalMenu::calc_metrics( )
@@ -63,7 +64,7 @@ int 	HorizontalMenu::calc_metrics( )
 	for (int i=0; i<m_entries.size(); i++)
 	{
 		m_entries[i]->width	= TextWidth( m_entries[i]->text, SerifTypeface, text_size );
-		printf("%s %6.1f pad=%6.1f\n", m_entries[i]->text, m_entries[i]->width, m_menu_padding );
+		//printf("%s %6.1f pad=%6.1f\n", m_entries[i]->text, m_entries[i]->width, m_menu_padding );
 		m_entries[i]->sx    = sx;
 		m_entries[i]->ex    = sx+m_entries[i]->width + m_menu_padding;
 		sx += (m_entries[i]->width + m_menu_padding);
@@ -124,7 +125,7 @@ int HorizontalMenu::draw(	)
 	Stroke_l( background_color );
 	Fill_l  ( background_color );
 	Rect    ( left, bottom, width, height );
-	print_positions();	
+	if (Debug) print_positions();	
 	//printf("HORIZONTAL_MENU::  left=%6.1f; bottom=%6.1f; width=%6.1f; height=%6.1f\n", left, bottom, width, height);
 	
 	// Color the Selected Menu:
@@ -182,10 +183,10 @@ int	HorizontalMenu::get_id(   )
 int 	HorizontalMenu::get_hit_index( int Mousex, int Mousey ) 
 {
 	if (Mousey < bottom) 			return -1;
-	if (Mousey > (bottom+height))	return -1;	
-	if (Mousex < left)	 			return -1;	
-	if (Mousex > (left+width))	 	return -1;		
-	
+	if (Mousey > (bottom+height))	return -1;
+	if (Mousex < left)	 			return -1;
+	if (Mousex > (left+width))	 	return -1;
+
 	int item_count = m_entries.size();
 	float l=0;
 	float r=0;
@@ -197,6 +198,8 @@ int 	HorizontalMenu::get_hit_index( int Mousex, int Mousey )
 		if ((Mousex > l) && (Mousex < r) )
 			return i;
 	}	
+	// if no items,
+	return -1;
 }
 
 bool	HorizontalMenu::is_selection_valid( )
@@ -210,26 +213,26 @@ Control* HorizontalMenu::HitTest( int x, int y )
 {
 	// Test this Horizontal Menu first.	
 	Control* result = Control::HitTest(x,y);	
-	
+
 	if ((result==NULL) && is_selection_valid()) 
 	{
 		// Test the open submenu:
 		result = m_entries[m_selection]->menu->HitTest(x,y);
 	}
-	if (result)
-		printf( "HorizontalMenu::HitTest() %d,%d =  %x\n", x,y,result );
+	//if (result)
+	//	printf( "HorizontalMenu::HitTest() %d,%d =  %x\n", x,y,result );
 	return result;
 }
 
-int		HorizontalMenu::onClick 	( int x, int y, bool mouse_is_down )  
+int	HorizontalMenu::onClick( int x, int y, bool mouse_is_down )
 {
 	int menu_index = get_hit_index( x,y );
 	printf( "Mouse Click  Horiz Menu Item # %d\n", menu_index );
-	if (menu_index > 0)
+	if (menu_index >= 0)
 	{
 		if (m_entries[menu_index]->menu)
 		{
-			printf("Is a SubMenu: \n");
+			printf("Is a SubMenu. \n");
 			// hide any other visible menu
 			if ( is_selection_valid() )  {
 				if (m_entries[m_selection]->menu)

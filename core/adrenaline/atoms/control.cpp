@@ -13,7 +13,7 @@
 #include "display.h"
 
 #define margin_percent 0.07
-
+#define Debug 0
 
 Control::Control(int Left, int Right, int Top, int Bottom )
 {
@@ -54,9 +54,21 @@ void Control::Initialize()
 	//printf("Ctrl: border_color=%8x; background_color=%8x\n", border_color, background_color );
 }
 
+void Control::Revalidate( )
+{
+	invalidated = false;
+	// AND Update all child controls:
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while ( iter != m_child_controls.end() )
+	{ 	
+		(*iter)->Revalidate();
+		iter++; 
+	}		
+}
+
 void Control::print_positions( )
 {
-	printf("Left=%5.1f; Bottom=%6.1f; width=%6.1f;  height=%6.1f;  \n", left, bottom, width, height );
+	printf("Left=%6.1f; Bottom=%6.1f;  width=%6.1f; height=%6.1f;  \n", left, bottom, width, height );
 }
 
 void Control::print_color_info( )
@@ -71,7 +83,7 @@ int	Control::onCreate(  )
 {	
 	created = true;
 	wrap_content();
-	//printf("	Control::onCreate() Child Create:\n"); 
+	//if (Debug) printf("	Control::onCreate() Child Create:\n"); 
 	// Create All Children:
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
@@ -82,7 +94,7 @@ int	Control::onCreate(  )
 	return 1;
 }
 
-void Control::wrap_content( )
+void Control::wrap_content( ) 
 { 	
 	if (created==false)  return;	//if fonts are not yet loaded...
 	VGfloat text_width;
@@ -241,7 +253,7 @@ Control* Control::ChildrenHitTest( int x, int y )
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
 	{
-		(*iter)->print_positions();
+		//(*iter)->print_positions();
 		retval = (*iter)->HitTest( x,y );
 		if (retval)
 			return retval;
@@ -254,7 +266,7 @@ Control* Control::HitTest(int x, int y)
 {
 	Control* result = ChildrenHitTest( x, y );
 	if (result) {
-		printf("Control::HitTest()  Clicked a registered child.\n");
+		//printf("Control::HitTest()  Clicked a registered child.\n");
 		return result;
 	}
 	//printf("Control::HitTest()  Not a registered child!\n");
@@ -274,7 +286,7 @@ int		Control::onClick(int x, int y, bool mouse_is_down)
 	Control* result = ChildrenHitTest(x,y);
 	if (result)
 	{
-		printf("Control::onClick()  Clicked a registered child.\n");
+		if (Debug) printf("Control::onClick()  Clicked a registered child.\n");
 		result->onClick(x,y,mouse_is_down);
 		return 1;
 	}
@@ -307,12 +319,11 @@ void Control::print_children( )
 }
 void Control::unregister_child	( Control* mNewChild )
 {
-	printf("\t\tControl::unregister_child( %x )\n", mNewChild );
+	if (Debug) printf("\t\tControl::unregister_child( %x )\n", mNewChild );
 	
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( *iter != mNewChild )  { iter++; };		
-	printf("Unregistering_child( %x )\n", *iter );
-	printf("Unregistering_child( %x )\n", *iter );
+	if (Debug) printf("Unregistering_child( %x )\n", *iter );
 	m_child_controls.erase( iter );
 }
 

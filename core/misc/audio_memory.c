@@ -44,7 +44,8 @@ void dump_audio_ipc()
 			printf("\n");
 		printf("%2x ", audio_shared_memory[i] );
 	}	
-} 
+}
+
 char* get_audio_text( struct wav_header* Wave_hdr )
 {
 	static char AudioInfo[512];

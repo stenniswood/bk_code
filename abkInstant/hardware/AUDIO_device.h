@@ -5,6 +5,10 @@
 #ifndef _AUDIO_DEVICE_H_
 #define _AUDIO_DEVICE_H_
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 //#include "bcm_host.h"
 //#include "ilclient.h"
 
@@ -45,6 +49,9 @@ uint32_t audioplay_get_latency(AUDIOPLAY_STATE_T *st);
 #define MIN_LATENCY_TIME 20
 
 //static const char *audio_dest[] = {"local", "hdmi"};
+
+void test_function(int id);
+void play_waveform( Wave* mWave, int dest );
 void play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
 
 
@@ -53,5 +60,8 @@ int32_t audio_setup_and_play ( int dest, int samplerate, int channels, int bitde
 uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate );
 void	 audio_close		  ( );
 
+#ifdef  __cplusplus
+}
+#endif
 
 #endif

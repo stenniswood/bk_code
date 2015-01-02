@@ -30,6 +30,7 @@ void audio_convert_to_stereo ();
 /***** END OF MENU COMMAND FUNCTIONS *****/
 
 
+void configure_wave_views(int mChannels, short* mDataCh1, short* mDataCh2 );
 
 void print_combo_test_list	(			);
 void load_combo_test_screen ( int number);

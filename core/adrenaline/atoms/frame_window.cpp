@@ -24,21 +24,19 @@ FrameWindow::FrameWindow ( )
 :Window()
 {
 	Initialize();
-	printf("\t\tWindow::ctor()\n");
 }
 
 FrameWindow::FrameWindow ( int Left, int Right, int Top, int Bottom )
 :Window(Left, Right, Top, Bottom)
 {
 	Initialize();
-	printf("\t\tWindow::ctor()\n");
 }
 FrameWindow::~FrameWindow( )
 {
 }
 void	FrameWindow::Initialize		 (   )
 {
-	printf("\t\tWindow::Initialize()\n");
+	if (Debug) printf("\t\tFrameWindow::Initialize()\n");
 	Window::Initialize();
 	body_height = height-(1.5*text_size);
 	
@@ -110,7 +108,7 @@ int   	FrameWindow::draw_close ( bool mHovering )
 		// Draw x
 		float center_x   = (close_button_coords[RIGHT]-close_button_coords[LEFT])/2.0+close_button_coords[LEFT];
 		float center_y   = (close_button_coords[TOP]-close_button_coords[BOTTOM])/2.0+close_button_coords[BOTTOM];		
-		printf("Close button:  %6.1f, %6.1f, %6.1f, %6.1f \n", close_button_coords[0],
+		if (Debug) printf("Close button:  %6.1f, %6.1f, %6.1f, %6.1f \n", close_button_coords[0],
 				close_button_coords[1], close_button_coords[2], close_button_coords[3] );
 				
 		float angle_rad  = 45.0*M_PI/180.0;
@@ -133,7 +131,7 @@ int FrameWindow::draw_min (	bool mHovering )
 	{
 		float center_x = (min_button_coords[1]-min_button_coords[0])/2.0+min_button_coords[0];
 		float center_y = (min_button_coords[2]-min_button_coords[3])/2.0+min_button_coords[3];
-		printf("Min button:  %6.1f, %6.1f, %6.1f, %6.1f \n", min_button_coords[0],
+		if (Debug) printf("Min button:  %6.1f, %6.1f, %6.1f, %6.1f \n", min_button_coords[0],
 				min_button_coords[1], min_button_coords[2], min_button_coords[3] );
 
 		Circle( center_x, center_y, MIN_MAX_CLOSE_CIRCLE_RADIUS );

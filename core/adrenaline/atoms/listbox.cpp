@@ -300,7 +300,8 @@ float ListBox::get_longest_line(  )
 
 void ListBox::select( int mIndex )
 {
-	printf("Selected item # %d/%d  visible_line=%d\n", 
+	if (Debug) 
+		printf("Selected item # %d/%d  visible_line=%d\n", 
 			mIndex, LineTexts.size(), mIndex-first_visible_line);
 	selected_item = mIndex;
 }
@@ -313,6 +314,7 @@ int ListBox::onCreate( )
 }
 
 // Returns the select index of the listbox:
+// or -1 if none.
 int ListBox::get_hit_index(int mx, int my)
 {
 	//printf("ListBox::get_hit_index()\n");
@@ -330,7 +332,7 @@ int ListBox::get_hit_index(int mx, int my)
 			retval = i;
 	}
 	string str = *get_item(retval);
-	printf("Selected Item # %d : start=%d, end=%d  %s\n", retval, first_visible_line, end, str.c_str() );
+	if (Debug) printf("Selected Item # %d : start=%d, end=%d  %s\n", retval, first_visible_line, end, str.c_str() );
 	return retval; 
 }
 
@@ -351,11 +353,13 @@ int	ListBox::onClick(int Mousex, int Mousey, bool mouse_is_down)
 
 	int   start=first_visible_line;
 	int   end  =first_visible_line+number_lines_visible;
-	printf("ListBox:: on Click()  : start=%d, end=%d\n",  first_visible_line, end);
 	float y;
 
-	printf("ListBox:: on Click()  : mousex,mousey\n");
-	print_positions();
+	if (Debug) {
+		printf("ListBox:: on Click()  : start=%d, end=%d\n",  first_visible_line, end);
+		printf("ListBox:: on Click()  : mousex,mousey\n");
+		print_positions();
+	}
 	
 	int index = get_hit_index( Mousex, Mousey );
 	select( index );

@@ -66,7 +66,7 @@ This is a sample of the vector file :
 #include "leds.h"
 #include "can_id_list.h"
 #include "system_msgs_callback.h"
-#include "board_list_oop.hpp"
+//#include "board_list_oop.hpp"
 #include "packer_motor.h"
 //#include "motor_vector.h"
 //#include "config_file.h"

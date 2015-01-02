@@ -43,7 +43,9 @@ uint32_t audioplay_get_latency(AUDIOPLAY_STATE_T *st);
 #define CTTW_SLEEP_TIME 10
 #define MIN_LATENCY_TIME 20
 
+#include "wave.hpp"
 //static const char *audio_dest[] = {"local", "hdmi"};
+void play_waveform( Wave* mWave, int dest );
 void play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
 
 // BK:

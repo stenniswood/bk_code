@@ -30,6 +30,7 @@ VerticalMenu   audio_effects	(-1,-1);
 
 int handle_audio_file_menu(void* menuPtr, int mMenuIndex )
 {
+	printf("handle_audio_file_menu()\n");
 	switch(mMenuIndex) 
 	{	
 		case 0:	audio_file_new	();			break;
@@ -39,6 +40,7 @@ int handle_audio_file_menu(void* menuPtr, int mMenuIndex )
 		case 4:	audio_file_save_as();		break;
 		default: break;
 	}
+	printf("handle_audio_file_menu() - Done!\n");
 }
 
 int handle_audio_view_menu(void* menuPtr, int mMenuIndex )
@@ -81,12 +83,9 @@ int handle_audio_effects_menu(void* menuPtr, int mMenuIndex )
 //////////////////////////////////////////////////////////
 void init_audio_File_menu( )
 {
-	audio_file.add_simple_command( "New"   		);
-	audio_file.add_simple_command( "Open"  		);
-	audio_file.add_simple_command( "Open Recent");	
-	audio_file.add_simple_command( "Save"  		);
-	audio_file.add_simple_command( "Save AS" 	);	
-	audio_file.add_callback( 0, handle_audio_file_menu  );	
+	audio_file.create_std_file_menu();
+	//audio_file.add_callback( 0, handle_audio_file_menu  );	
+	audio_file.add_callback_all_items( handle_audio_file_menu );	
 }
 
 

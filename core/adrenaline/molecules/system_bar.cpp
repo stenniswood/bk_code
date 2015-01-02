@@ -26,6 +26,8 @@
 
 #include "draw_app.hpp"
 
+#define Debug 0
+
 
 SystemBar::SystemBar() 
 :Control()
@@ -50,18 +52,20 @@ void 	SystemBar::Initialize	(	)
 
 void	SystemBar::onPlace		(	)
 { 
-	printf("\n\nSystemBar::onPlace() %6.1f,%6.1f\n",  width, height );
+	if (Debug) printf("\n\nSystemBar::onPlace() %6.1f,%6.1f\n",  width, height );
 	m_MenuEnd_x   = 3.*width/4.;
 	m_MenuStart_x = 100.;
 	
-	printf("SystemBar::onPlace():m_Menu=%x", m_Menu);	
+	if (Debug) 	printf("SystemBar::onPlace():m_Menu=%x\n", m_Menu);	
 	if (m_Menu)
 	{
-		m_Menu->set_width_height( (m_MenuEnd_x-m_MenuStart_x),  get_height() );
+		m_Menu->set_width_height( (m_MenuEnd_x-m_MenuStart_x),  height );
 		m_Menu->move_to         ( (left+m_MenuStart_x),  bottom );
 		m_Menu->calc_metrics	(  );
-		printf("SystemBar::onPlace:m_Menu:");
-		m_Menu->print_positions( );
+		if (Debug) {
+			printf("SystemBar::onPlace:m_Menu:%5.1f ",bottom);
+			m_Menu->print_positions( );
+		}
 	}
 
 	m_wifi.set_width_height  ( 25, height );
@@ -79,14 +83,12 @@ void	SystemBar::onPlace		(	)
 
 int   	SystemBar::draw (	) 
 { 
-	printf("SystemBar::draw()\n");
-	print_positions();
-	printf("SystemBar::draw():m_Menu::\t");
-	m_Menu->print_positions();
-
-		
-	//printf("SystemBar::m_Menu::draw:");
-	//m_Menu.draw();
+	if (Debug) {
+		printf("SystemBar::draw()\n");
+		print_positions();
+		printf("SystemBar::draw():m_Menu::\t");
+		m_Menu->print_positions();
+	}	
 	Control::draw();
 }
 
@@ -101,8 +103,8 @@ void 	SystemBar::set_width_height  	  ( int Width, int Height )
 void  	SystemBar::move_to	  		  	  ( float Left,   float  Bottom	 )
 {
 	Control::move_to(Left,Bottom);
-	printf("SystemBar::"); 
-	print_positions();
+	if (Debug) 	printf("SystemBar::"); 
+	if (Debug) 	print_positions();
 
 	onPlace();
 }
@@ -134,7 +136,7 @@ int			SystemBar::onDoubleClick  ( 				)
 
 void show_sidebar(void* mObj )
 {
-	printf("\n\nshow_sidebar\n");
+	if (Debug) 	printf("\n\nshow_sidebar\n");
 	Control* obj = (Control*) mObj;
 	if (obj->is_visible()==true)
 		obj->hide( ); 
@@ -143,7 +145,7 @@ void show_sidebar(void* mObj )
 }
 void show_wifi(void* mObj )
 {
-	printf("\n\nshow_wifi\n");
+	if (Debug) 	printf("\n\nshow_wifi\n");
 	Control* obj = (Control*) mObj;
 	if (obj->is_visible()==true)
 		obj->hide( ); 
@@ -152,7 +154,7 @@ void show_wifi(void* mObj )
 }
 void show_volume(void* mObj )
 {
-	printf("\n\nshow_volume\n");
+	if (Debug) 	printf("\n\nshow_volume\n");
 	Control* obj = (Control*) mObj;
 	if (obj->is_visible()==true)
 		obj->hide( ); 
@@ -162,12 +164,12 @@ void show_volume(void* mObj )
 
 void SystemBar::set_menu( HorizontalMenu* mMenu )
 {
-	printf("SystemBar::set_menu ( %x ) old=%x\n", mMenu, m_Menu );
+	if (Debug) 	printf("SystemBar::set_menu ( %x ) old=%x\n", mMenu, m_Menu );
 	unregister_child( m_Menu );	
-		printf("after removal 1: \n");		
+	if (Debug) printf("after removal 1: \n");		
 	m_Menu = mMenu;
 	register_child( m_Menu );
-	print_children();	
+	if (Debug) 	print_children();	
 	onPlace();
 }
 

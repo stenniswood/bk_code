@@ -18,6 +18,7 @@
 #include "system_status.hpp"
 
 
+#define Debug 0
 
 
 SystemStatusBar::SystemStatusBar ( ) 
@@ -39,12 +40,12 @@ SystemStatusBar::~SystemStatusBar( )
 
 void SystemStatusBar::Initialize	 (   ) 
 { 
-	printf(" SystemStatusBar::Initialize \n");
+	if (Debug) printf(" SystemStatusBar::Initialize \n");
 	m_power_button = new Button(-1,-1);
 	m_calendar     = new Button(-1,-1);
 	 
 	Control::Initialize();
-	printf(" SystemStatusBar::Initialize done\n");
+	if (Debug) printf(" SystemStatusBar::Initialize done\n");
 }
 const int margin = 10;
 
@@ -70,8 +71,8 @@ void	SystemStatusBar::onPlace		(   )
 	m_power_button->set_width_height( 64, height );
 	m_power_button->set_text("o");		// get icon!	
 	m_power_button->move_to(left, bottom);
-	m_power_button->print_positions();
-	printf(" SystemStatusBar::place()\n");
+	if (Debug) m_power_button->print_positions();
+	if (Debug) printf(" SystemStatusBar::place()\n");
 
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);	
@@ -86,8 +87,8 @@ void	SystemStatusBar::onPlace		(   )
 	m_calendar->set_width_height( m_calendar->get_width(), height);
 	float left_anchor = left+ width - m_calendar->get_width();
 	m_calendar->move_to(left_anchor, bottom);
-	m_calendar->print_positions();
-	printf(" SystemStatusBar::place()\n");
+	if (Debug) m_calendar->print_positions();
+	if (Debug) printf(" SystemStatusBar::place()\n");
 	
 	register_child( m_power_button );
 	register_child( m_calendar ); 
@@ -96,11 +97,15 @@ void	SystemStatusBar::onPlace		(   )
 int	 SystemStatusBar::add_control	 ( Control* mControl, char* mText ) 
 { 
 }
+
 void SystemStatusBar::hide			 ( bool mHide ) 
 { }
+
 void SystemStatusBar::auto_hide		 ( bool mAutoHide ) 
 { }
+
 void SystemStatusBar::set_alignment	 ( byte mAlignment  ) 
 { }
+
 int	SystemStatusBar::onClick(int x, int y, bool mouse_is_down) 
 { }

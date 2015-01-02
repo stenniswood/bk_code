@@ -31,6 +31,7 @@ AUTHOR	: Steve Tenniswood
 #include <semaphore.h>
 #include "bcm_host.h"
 #include "ilclient.h"
+#include "wave.hpp"
 #include "AUDIO_device.h"
 
 
@@ -50,9 +51,29 @@ static IconView		test_icon 	 ( 50,200 );
 static TextView 	WaveformInfo ( -1, -1);
 
 
+Wave dWave;
 
 void audio_file_new			() { }		
-void audio_file_open		() { }		
+void audio_file_open		() 
+{ 
+	static string Filename = "/home/pi/bk_code/avisual/resources/InTheBeginning.wav";
+	//static string Filename = "/home/pi/bk_code/avisual/resources/impending.wav";	
+	printf("Loading Wave from SD card:  %s\n", Filename.c_str());
+	try {
+		//dWave.m_data = new short[10512000];
+		dWave.Load (Filename.c_str());	
+	} catch (std::string msg) {
+		printf("Error :  %s\n", msg.c_str() );
+		WaveformInfo.set_text( msg.c_str() );
+	}
+	//WAVEHDR* d1 = dWave.extract_channel_data(0);
+	//WAVEHDR* d2 = dWave.extract_channel_data(1);
+	//configure_wave_views( dWave.m_number_channels, (short*)d1->lpData , (short*)d2->lpData );
+	
+	WaveformInfo.set_text( dWave.get_format_string().c_str() );
+	
+	printf("Wave Loaded!\n");
+}		
 void audio_file_open_recent	() { }
 void audio_file_save		() { }		
 void audio_file_save_as		() { }	
@@ -72,6 +93,8 @@ void audio_play				()
 	int bitdepth = 16;				// number of bits per sample   
 	bcm_host_init();
 	printf("audio_play:host_init'd() \n");
+	
+	//play_waveform( &dWave, audio_dest );
 	play_api_test( samplerate, bitdepth, channels, audio_dest );
 }
 
@@ -89,31 +112,7 @@ void audio_convert_to_stereo () { }
 
 
 
-void print_combo_test_list()
-{
-	printf("30 : Audio app \n"	 );
-	printf("31 : CAN app\n"	 );
-	printf("32 : \n"	 );
-}
-
-void load_combo_test_screen( int number )
-{
-	printf("init_display() DisplayNum=%d\n", number);
-	switch(number) 
-	{	
-	case 29: init_okay_cancel_dlg();
-			break;
-	case 30: init_audio_view();
-			break;
-	case 31: //init_CAN_app();
-			break;	
-	default : break;
-	}
-}
-
-
-
-// AUDIO GRAPHICS VARIABLES : 
+////////////////////// AUDIO GRAPHICS VARIABLES : 
 static StereoPowerLevels spl   			 (-1,-1);
 static FrequencyView	 freq_view  	 (-1,-1);
 static WaveView 		 wave_view_left  (-1,-1);
@@ -189,6 +188,21 @@ short* sample_waveform()
 	return data;
 }
 
+void configure_wave_views(int mChannels, short* mDataCh1, short* mDataCh2 )
+{
+	// Left Audio Channel Display:
+	wave_view_left.set_width_height( 1000, 200 );
+	wave_view_left.move_to		   ( 220, 100 );
+	wave_view_left.set_data		( mDataCh1 );
+
+	// Left Audio Channel Display:
+	if (mChannels>1)
+	{
+		wave_view_right.set_width_height( 1000, 200 );
+		wave_view_right.move_to		    ( 220,  310 );	
+		wave_view_right.set_data	( mDataCh2 );
+	}
+}
 // This is the "OnCreate() function!
 // Parse an xml
 void init_audio_view()
@@ -210,25 +224,16 @@ void init_audio_view()
 	spl.set_number_boxes		(  -1 	   );
 
 	WaveformInfo.set_width_height( 300, 150 );
-	WaveformInfo.move_to		 (  10, 310 );
-	char* txt = get_audio_text( &(ipc_memory_aud->audio_header));
-	printf(txt);
+	WaveformInfo.move_to		 (  10, 730 );
+	char* txt = get_audio_text( &(ipc_memory_aud->audio_header));	
 	WaveformInfo.set_text		 ( txt );
 	WaveformInfo.set_text_size	 ( 12  );
 
-	wave_view_left.set_width_height( 1000, 200 );
-	wave_view_left.move_to		   ( 220, 100 );
 	if (ipc_memory_aud != NULL)
-		wave_view_left.set_data		( (short*)ipc_memory_aud->audio_data );
-
-	if (ipc_memory_aud->audio_header.num_channels > 1)
-	{
-		wave_view_right.set_width_height( 1000, 200 );
-		wave_view_right.move_to		    ( 220,  310 );
-		if (ipc_memory_aud != NULL)
-			wave_view_right.set_data	( (short*)ipc_memory_aud->audio_data );
-	}
-
+		configure_wave_views( ipc_memory_aud->audio_header.num_channels,
+						  (short*)ipc_memory_aud->audio_data,
+						  (short*)ipc_memory_aud->audio_data   );
+	
 	freq_view.set_width_height		( 1000, 200 );
 	freq_view.move_to				( 220, 520  );
 	freq_view.set_data( sample_waveform(), 200 );

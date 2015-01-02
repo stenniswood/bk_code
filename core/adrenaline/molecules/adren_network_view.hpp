@@ -3,11 +3,13 @@
 
 #include "icon.hpp"
 #include "tabular_listbox.hpp"
+#include "board_list_oop.hpp"
+
 
 using namespace std;
 //extern char const* e_card_names[];
 
-struct stBoardInfo {
+struct stBoardInfo2 {
 	byte model;
 	byte instance;
 	byte status;			// failure, working okay, etc.
@@ -52,12 +54,12 @@ public:
 
 	//int			set_view_mode ( int mViewMode ); 
  	int				setup_headers	( );
-	int				add_board 		( struct stBoardInfo* mBInfo );
+	int				add_board 		( struct stBoardInfo2* mBInfo );
 	int				receive_msg		( struct sCAN* msg );
 	
 	int				formulate_line	( struct stBoardInfoText* mTxt );
 
-	struct stBoardInfoText* convert_to_text( struct stBoardInfo* mInfo );
+	struct stBoardInfoText* convert_to_text( struct stBoardInfo2* mInfo );
 
 	int		populate_with_boards(	);	
 	
@@ -67,7 +69,7 @@ public:
 	virtual int	draw  	( );
 
 protected:
-	vector<struct stBoardInfo>		m_board_info;
+	vector<struct stBoardInfo2>		m_board_info;
 	vector<struct stBoardInfoText>	m_board_info_text;
 	int				m_view_mode;
 	

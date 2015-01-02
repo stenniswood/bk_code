@@ -1,10 +1,10 @@
+#include <sys/timeb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <jpeglib.h>
 #include "bcm_host.h"
-
 #include <shapes.h>
 #include <fontinfo.h>
 #include "bk_system_defs.h"
@@ -14,6 +14,8 @@
 #include <list>
 #include "deck.hpp"
 
+
+#define Debug 0
 
 
 Deck::Deck()
@@ -73,15 +75,19 @@ int get_element( int nth )
 	return nth;
 }
 
+
+
 void Deck::shuffle()
 {
+	struct timeb tb;
+	srand( tb.millitm );		// Randomize the seed.
+	
 	// first start with all the numbers:  [0 1 2 3...49 50 51]
 	// delete as they are used
 	int					number_cards_remaining = 52;
 	std::list<int>		start_indices;
 	for (int i=0; i<theDeck.size(); i++)
 		start_indices.push_back( i );			
-	//printf("Ordered Sequence [0 1 2 ... %d ]  \n", theDeck.size());
 
 	// Now create a random list [ 34 2 27 43 0 ]
 	shuffled_indices.clear();
@@ -98,7 +104,7 @@ void Deck::shuffle()
 		start_indices.erase( iter );
 		number_cards_remaining--;
 	}
-	print_order(); 
+	if (Debug) print_order(); 
 }
 
 void Deck::draw_image_back( Card* card )
@@ -120,7 +126,9 @@ void Deck::print_order()
 	std::vector<int>::iterator	iter = shuffled_indices.begin();	
 	for ( ; iter != shuffled_indices.end(); iter++)
 		printf (" %d ", *iter);
+	printf("\n");
 }
+
 void Deck::order()
 {
 	for (int i=0; i<theDeck.size(); i++)
@@ -134,7 +142,7 @@ Card* Deck::find( char mValue, char mSuit )
 	for (int i=0; i<52; i++)
 	{
 		char value = theDeck[i]->get_value();
-		char suit = theDeck[i]->get_suit();
+		char suit  = theDeck[i]->get_suit();
 		if ((value==mValue) && (mSuit==suit))
 			return theDeck[i];
 	}

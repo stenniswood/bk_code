@@ -2,9 +2,9 @@
 #define _SYSTEM_BAR_
 
 
-//#include "control.hpp"
+
 #include "horizontal_menu.hpp"
-//#include "system_bar.hpp"
+
 
 
 class SystemBar : public Control 

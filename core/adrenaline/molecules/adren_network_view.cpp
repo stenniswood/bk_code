@@ -19,12 +19,15 @@
 #include <string>
 #include <fontinfo.h>
 #include <shapes.h>
-//#include "Graphbase.hpp"
+
 #include "adrenaline_windows.h"
 #include "display.h"
 #include "adren_network_view.hpp"
 #include "CAN_base.h"
 #include "can_id_list.h"
+
+
+#define Debug 0
 
 
 NetworkView::NetworkView( )
@@ -87,7 +90,7 @@ int	NetworkView::setup_headers()
 	add_column( &mNewHeading ); */
 }
 
-struct stBoardInfoText* NetworkView::convert_to_text( struct stBoardInfo* mInfo )
+struct stBoardInfoText* NetworkView::convert_to_text( struct stBoardInfo2* mInfo )
 {
 	static struct stBoardInfoText Txt;	
 	sprintf( Txt.model, 			"%d", mInfo->model    		);
@@ -115,9 +118,9 @@ int	NetworkView::formulate_line	( struct stBoardInfoText* mTxt )
 	add_row( &data );
 }
 
-int	NetworkView::add_board( struct stBoardInfo* mBInfo )
+int	NetworkView::add_board( struct stBoardInfo2* mBInfo )
 {
-	printf("NetworkView::add_board() \n");
+	if (Debug) printf("NetworkView::add_board() \n");
 	m_board_info.push_back( *mBInfo );
 	struct stBoardInfoText* Txt = convert_to_text( mBInfo );
 	m_board_info_text.push_back( *Txt );
@@ -144,7 +147,7 @@ void 	NetworkView::Initialize  (	)
 { 
 	TabularListBox::Initialize();
 	setup_headers();	
-	struct stBoardInfo bi;
+	struct stBoardInfo2 bi;
 	bi.model = 21;
 	bi.instance = 31;
 	bi.status = 0;
@@ -194,7 +197,7 @@ int	NetworkView::draw  	( )
 }
 
 
-void can_parse_board_presence_msg( sCAN* mMsg, struct stBoardInfo* mOut )
+void can_parse_board_presence_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
 {
     mOut->model    = mMsg->data[0];
     mOut->instance = mMsg->data[1];
@@ -202,7 +205,7 @@ void can_parse_board_presence_msg( sCAN* mMsg, struct stBoardInfo* mOut )
    // mOut->block    = mMsg->data[3];
 }
 
-void can_parse_board_revision_msg( sCAN* mMsg, struct stBoardInfo* mOut )
+void can_parse_board_revision_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
 {
     mOut->Hardware_Revision = mMsg->data[0];
     mOut->Software_Major = mMsg->data[1];
@@ -210,13 +213,13 @@ void can_parse_board_revision_msg( sCAN* mMsg, struct stBoardInfo* mOut )
     mOut->Manufacturer   = (mMsg->data[4]<<8) + mMsg->data[3];
 }
 
-void can_parse_serial_number_msg( sCAN* mMsg, struct stBoardInfo* mOut )
+void can_parse_serial_number_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
 {
     mOut->BKSerialNumber =  ((long)mMsg->data[0]<<24) + (mMsg->data[1]<<16) + 
     						(mMsg->data[2]<<8) + (mMsg->data[3]);
 }
 
-void can_parse_board_description_msg( sCAN* mMsg, struct stBoardInfo* mOut )
+void can_parse_board_description_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
 {
 	int i;
     byte Starting_Index = mMsg->data[0];

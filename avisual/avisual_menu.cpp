@@ -17,7 +17,6 @@
 #include "EGL/egl.h"
 #include "GLES/gl.h"
 #include "bcm_host.h"
-
 //#include <string.h>
 #include <fontinfo.h>
 #include <shapes.h>
@@ -35,14 +34,13 @@
 HorizontalMenu hm		(-1,-1);
 VerticalMenu   atoms    (-1,-1);
 VerticalMenu   molecules(-1,-1);
+VerticalMenu   apps		(-1,-1);
 VerticalMenu   games	(-1,-1);
 VerticalMenu   graphs	(-1,-1);
+VerticalMenu   power_menu(-1,-1);		// power switch pushed.
 
-VerticalMenu   power_menu	(-1,-1);		// power switch pushed.
-
-
-#define ifprintf printf
-//#define ifprintf //printf
+#define Debug 0
+#define ifprintf if (Debug) printf
 
 int show_atom_screens (void* menuPtr, int mMenuIndex )
 {
@@ -73,9 +71,9 @@ int show_atom_screens (void* menuPtr, int mMenuIndex )
 
 void init_atom_menu()
 {
-	ifprintf("init_atom_menu()\n");
+	if (Debug) printf("init_atom_menu()\n");
 	atoms.add_simple_command( "init_simple_button_test" );
-	ifprintf("init_atom_menu() 1\n");
+	if (Debug) printf("init_atom_menu() 1\n");
 	atoms.add_simple_command( "init_simple_textview_test" );
 	atoms.add_simple_command( "init_textview_test"		);
 	atoms.add_simple_command( "init_progressbar_test"   );
@@ -93,25 +91,8 @@ void init_atom_menu()
 	atoms.add_simple_command( "init_listbox"			);
 	atoms.add_simple_command( "init_tab_listbox"		);
 	atoms.add_simple_command( "init_CAN_msg_view"		);
-
-	atoms.add_callback( 0, show_atom_screens  );
-	atoms.add_callback( 1, show_atom_screens  );
-	atoms.add_callback( 2, show_atom_screens  );
-	atoms.add_callback( 3, show_atom_screens  );
-	atoms.add_callback( 4, show_atom_screens  );
-	atoms.add_callback( 5, show_atom_screens  );
-	atoms.add_callback( 6, show_atom_screens  );
-	atoms.add_callback( 7, show_atom_screens  );
-	atoms.add_callback( 8, show_atom_screens  );			
-	atoms.add_callback( 9, show_atom_screens  );			
-	atoms.add_callback( 10, show_atom_screens  );			
-	atoms.add_callback( 11, show_atom_screens  );						
-	atoms.add_callback( 12, show_atom_screens  );						
-	atoms.add_callback( 13, show_atom_screens  );						
-	atoms.add_callback( 14, show_atom_screens  );
-	atoms.add_callback( 15, show_atom_screens  );
-	atoms.add_callback( 16, show_atom_screens  );						
-	atoms.add_callback( 17, show_atom_screens  );
+	atoms.add_callback_all_items( show_atom_screens );
+	
 }
 
 int show_molecule_screens( void* menuPtr, int mMenuIndex )
@@ -129,6 +110,19 @@ int show_molecule_screens( void* menuPtr, int mMenuIndex )
 	default: 	break;
 	}
 }
+int handle_apps_screens( void* menuPtr, int mMenuIndex )
+{
+	switch(mMenuIndex) 
+	{
+	case 0: init_image_gallery		();		break;		
+	case 1: init_audio_view			();		break;
+	case 2: init_file_browser		();		break;			
+	case 3: init_CAN_app			();		break;
+	case 4: init_drawing_app		();		break;	
+	case 5: init_camera_app			();		break;
+	default: 	break;
+	}
+}
 
 void init_molecule_menu()
 {
@@ -140,15 +134,18 @@ void init_molecule_menu()
 	molecules.add_simple_command( "My guts (CAN)" 	);
 	molecules.add_simple_command( "Drawing" 		);
 	molecules.add_simple_command( "Camera" 		);
+	molecules.add_callback_all_items( show_molecule_screens );
 
-
-	molecules.add_callback( 0,  show_molecule_screens  );
-	molecules.add_callback( 1,  show_molecule_screens  );	
-	molecules.add_callback( 2,  show_molecule_screens  );	
-	molecules.add_callback( 3,  show_molecule_screens  );	
-	molecules.add_callback( 4,  show_molecule_screens  );	
-	molecules.add_callback( 5,  show_molecule_screens  );	
-	molecules.add_callback( 6,  show_molecule_screens  );
+}
+void init_apps_menu()
+{
+	apps.add_simple_command( "Image Gallery" 	);
+	apps.add_simple_command( "Audio Amp" 		);
+	apps.add_simple_command( "File Browser" 	);				
+	apps.add_simple_command( "My guts (CAN)" 	);
+	apps.add_simple_command( "Drawing" 		);
+	apps.add_simple_command( "Camera" 		);
+	apps.add_callback_all_items( handle_apps_screens );
 
 }
 
@@ -173,12 +170,7 @@ void init_game_menu()
 	games.add_simple_command( "Hearts" 		);
 	games.add_simple_command( "Reversi" 	);
 	games.add_simple_command( "Battleships" );
-
-	games.add_callback( 0,  show_game_screens  );
-	games.add_callback( 1,  show_game_screens  );	
-	games.add_callback( 2,  show_game_screens  );	
-	games.add_callback( 3,  show_game_screens  );	
-	games.add_callback( 4,  show_game_screens  );
+	games.add_callback_all_items( show_game_screens  );
 }
 
 int show_graph_screens( void* menuPtr, int mMenuIndex )
@@ -201,34 +193,31 @@ void init_graph_menu()
 	graphs.add_simple_command( "Bar     graph" );
 	graphs.add_simple_command( "Scatter graph" );
 	graphs.add_simple_command( "Combo   graph" );
-
-	graphs.add_callback( 0,  show_graph_screens  );
-	graphs.add_callback( 1,  show_graph_screens  );	
-	graphs.add_callback( 2,  show_graph_screens  );	
-	graphs.add_callback( 3,  show_graph_screens  );	
-	graphs.add_callback( 4,  show_graph_screens  );
+	graphs.add_callback_all_items( show_graph_screens  );
 }
 
 HorizontalMenu system_hmenu;
 
 void init_system_hmenu( )
 {
-	ifprintf("init_system_hmenu 1\n");
+	if (Debug) printf("init_system_hmenu 1\n");
 	init_atom_menu		(  );
 	init_molecule_menu  (  );	
+	init_apps_menu		(  );
 	init_game_menu 		(  );	
 	init_graph_menu 	(  );
-	ifprintf("init_system_hmenu 5\n");
+	if (Debug) printf("init_system_hmenu 5\n");
 
 	system_hmenu.m_entries.clear();
 	system_hmenu.add_entry_text( "File" );
 	system_hmenu.add_entry_text( "Edit" );	
 	system_hmenu.add_entry_text( "View" );	
-	system_hmenu.add_sub_menu( "Atoms",     &atoms 	  );
+	system_hmenu.add_sub_menu( "Atoms",     &atoms 	);
 	system_hmenu.add_sub_menu( "Molecules", &molecules );
+	system_hmenu.add_sub_menu( "Apps", 		&apps 	);
 	system_hmenu.add_sub_menu( "Games",     &games  );
 	system_hmenu.add_sub_menu( "Graphs",    &graphs );		
-	ifprintf("init_avisual_menu done\n");
+	if (Debug) printf("init_avisual_menu done\n");
 }
 
 
@@ -262,7 +251,7 @@ void init_power_menu()
 
 void init_default_sidebar( SideBar* mSB )
 {
-	ifprintf("init_default_sidebar( ) \n");
+	if (Debug) printf("init_default_sidebar( ) \n");
 	IconView* iv = new IconView( 64., 64. );
 	iv->set_file( "/home/pi/bk_code/avisual/resources/calendar.jpg");
 	iv->set_width_height( 64., 64.);
@@ -293,7 +282,7 @@ void init_default_sidebar( SideBar* mSB )
 	iv->set_width_height( 64., 64.);
 	mSB->add_control( iv );
 
-	ifprintf("init_default_sidebar( SideBar* mSB )\n");
+	if (Debug) printf("init_default_sidebar( SideBar* mSB )\n");
 } 
 
 

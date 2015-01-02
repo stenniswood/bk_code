@@ -19,6 +19,7 @@
 #include "test_layouts.hpp"
 #include "file_browser.hpp"
 
+#define Debug 0
 
 
 FileBrowser::FileBrowser()
@@ -42,11 +43,11 @@ FileBrowser::~FileBrowser()
 
 void FileBrowser::Initialize( )
 {
-	printf("\n\tFileBrowser::Initialize()::\n");
+	if (Debug) printf("\n\tFileBrowser::Initialize()::\n");
 	Control::Initialize();
 	path_descriptor   = NULL;
 	show_hidden_files = false;
-	printf("\tFileBrowser::Initialize()::done!\n");
+	if (Debug) printf("\tFileBrowser::Initialize()::done!\n");
 }
 
 void FileBrowser::set_base_path( char* mBasePath )
@@ -62,26 +63,26 @@ void FileBrowser::show_hidden( bool mShow )
 
 int	FileBrowser::onCreate(  )
 {
-	printf("FileBrowser::onCreate(  )\n");
+	if (Debug) printf("FileBrowser::onCreate(  )\n");
 	create_file_browser( );
 	Control::onCreate();
-	printf("FileBrowser::onCreate(  ) done\n");	
+	if (Debug) printf("FileBrowser::onCreate(  ) done\n");	
 }
 
 /* Start with just 1 level */
 void FileBrowser::create_file_browser( )
 {
 	// Show Path across the top : 
-	printf("FileBrowser::create_file_browser()\n");
+	if (Debug) printf("FileBrowser::create_file_browser()\n");
 	path_descriptor = new TextView	( width, 32 );
 	path_descriptor->set_text		( base_path.c_str() );
 	path_descriptor->set_text_size  ( 14 );
 	//path_descriptor->onCreate		();
 	float h = bottom+height-path_descriptor->get_height();
-	printf(" %s \n", base_path.c_str() );	
-	printf(" %d \n", h );
+	if (Debug) printf(" %s \n", base_path.c_str() );	
+	if (Debug) printf(" %d \n", h );
 	path_descriptor->move_to		(left, h );
-	printf(" move_to (%6.1f, %6.1f) \n", left, h );
+	if (Debug) printf(" move_to (%6.1f, %6.1f) \n", left, h );
 	path_descriptor->print_positions();
 	//register_child( path_descriptor );
 
@@ -94,7 +95,7 @@ void FileBrowser::create_file_browser( )
 a new item  */
 void FileBrowser::add_level( string mAppendPath )
 {
-	printf( "add_level : %s \n", mAppendPath.c_str() );
+	if (Debug) printf( "add_level : %s \n", mAppendPath.c_str() );
 	DirectoryListBox*  tmp_dir  = new DirectoryListBox();
 	float ht = height - path_descriptor->get_height();
 
@@ -107,15 +108,15 @@ void FileBrowser::add_level( string mAppendPath )
 	int size = levels.size();	
 	vector<DirectoryListBox*>::iterator iter;
 	if (size==0) {
-		printf("First level::  put at left\n");
+		if (Debug) printf("First level::  put at left\n");
 		tmp_dir->move_to(left, bottom);
 	}
 	else {
-		printf("previous level: \n" );
+		if (Debug) printf("previous level: \n" );
 		iter = levels.end();	iter--;
-		(*iter)->print_positions();
+		if (Debug) (*iter)->print_positions();
 		tmp_dir->set_position_right_of( (*iter), true, 0. );
-		tmp_dir->print_positions();
+		if (Debug) tmp_dir->print_positions();
 	}
 	register_child  (tmp_dir);
 	levels.push_back(tmp_dir);
@@ -133,7 +134,7 @@ void FileBrowser::extract_complete_path()		// from the sequence of listboxes.
 		complete_path += levels[i]->get_item_text() ;
 		complete_path += "/";
 	}	
-	printf("extract_complete_path : %s\n", complete_path.c_str() );
+	if (Debug) printf("extract_complete_path : %s\n", complete_path.c_str() );
 }
 
 int	FileBrowser::which_level_clicked ( float x, float y )
@@ -162,7 +163,7 @@ void FileBrowser::collapse_to_level( int mLevelIndex )
 
 int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 {
-	printf(" Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		
+	if (Debug) printf(" Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		
 	bool start_closing = false;
 	int  size = levels.size();
 
@@ -172,7 +173,7 @@ int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 	// WHICH ITEM:   (find the item within that level)
 	int item_index = levels[level_index]->get_hit_index( Mousex, Mousey );
 
-	printf("You clicked FileBrowser level:%d; item:%d\n", level_index, item_index );
+	if (Debug) printf("You clicked FileBrowser level:%d; item:%d\n", level_index, item_index );
 
 	// SELECT ITEM:
 	levels[level_index]->select( item_index );
@@ -183,7 +184,7 @@ int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 	// Now, if the selected item was a directory...
 	// add 1 new listbox showing it's contents.
 	extract_complete_path();
-	printf("FileBrowser:: extracted path=%s\n", complete_path.c_str());
+	if (Debug) printf("FileBrowser:: extracted path=%s\n", complete_path.c_str());
 
 	if (path_descriptor)
 		path_descriptor->set_text(complete_path.c_str());

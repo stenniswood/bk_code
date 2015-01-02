@@ -16,20 +16,20 @@
 #include "display.h"
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
-
 #include "display_manager.hpp"
 #include "visual_memory.h"
-
-
 #include <vector>
 
 
+#define Debug 0
+
+
 // Avisual display:
-TextView 	ConnectionStatus( 50, 1230, 750, 700 );
+static TextView 	ConnectionStatus( 50, 1230, 750, 700 );
 TextView 	CmdText;
 
 //TabularListBox  tab_lb(600, 20, 620, 5, -1);
-TabularListBox  adren_board_list;
+static TabularListBox  adren_board_list;
 
 /********************* A sample Window ****************/
 // 1900 - 1000 = 900
@@ -65,13 +65,13 @@ Leveler l5(1024, 0);
 Leveler l6(1024, 0);
 
 // L, R, T, B
-Button   	MyButt	   ( 450, 600, 400, 350 );
-ListBox  	MyBoardList( 20, 320, 700, 550  );
+static Button   	MyButt	   ( 450, 600, 400, 350 );
+static ListBox  	MyBoardList( 20, 320, 700, 550  );
 ListBox  	MyRobotList( 20, 320, 800, 500  );
-ProgressBar MyProgress ( 450, 650, 300, 275 );
-CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
+static ProgressBar MyProgress ( 450, 650, 300, 275 );
+static CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
 //ButtonArrayMot MyArray	( 700, 1070, 350, 100);
-char ConnectionStatusText[128];
+static char ConnectionStatusText[128];
 
 
 void set_headings()
@@ -168,17 +168,17 @@ void populate_listbox()
 
 void update_available_client_list()
 {
-	printf("====== List of Available Clients: ==================\n");
+	if (Debug) printf("====== List of Available Clients: ==================\n");
 	char* ptr  = ipc_memory_avis->ClientArray;
 	AvailableClients.clear_items();
 	for (int i=0; i<ipc_memory_avis->NumberClients; i++)
 	{
 		int length = strlen(ptr);
-		printf("CLient %d:%s\n", i, ptr);
+		if (Debug) printf("CLient %d:%s\n", i, ptr);
 		AvailableClients.set_item( ptr );
 		ptr += length+1;
 	}
-	printf("===================================================\n");
+	if (Debug) printf("===================================================\n");
 }
 
 void init_avisual()
@@ -205,14 +205,14 @@ void init_avisual()
 	update_available_client_list();
 
 	//set_headings();
-	printf("SET_HEADINGS() - \n");
+	if (Debug) printf("SET_HEADINGS() - \n");
 	populate_listbox();
-	printf("POPULATED LISTBOX () - \n");
-
+	if (Debug) printf("POPULATED LISTBOX () - \n");
+	
 	adren_board_list_set_headings();
 	adren_board_list.set_width_height( 300,300 );
 	adren_board_list.move_to( 10, 10 );
-
+	
 	//adren_board_list.copy_position_vert 				(&AvailableClients);
 	//adren_board_list.set_text_size				    ( 12.0 );
 	adren_board_list.adjust_height_for_num_visible_items( 8 );
@@ -220,10 +220,10 @@ void init_avisual()
 	adren_board_list.calc_widths_from_text			    (   );
 	adren_board_list.calc_column_positions_from_widths  (   );
 	//adren_board_list.calc_metrics();
-	adren_board_list.print_positions();
+	if (Debug) adren_board_list.print_positions();
+	
 	
 	//printf("CALC_METRICS() - DONE \n");
-
 	//pack_sample_window();	
 	//test_icon.set_position( 100, 200, 313, 200);
 	test_icon.set_file		( (char*)"./resources/folder.jpg" );
@@ -245,21 +245,16 @@ void init_avisual()
 	hsb.set_amount_visible	( 50 );
 	
 	l1.set_position 		( 500, 600, 300, 70 );
-	l1.set_level_percent( 50.0 );
+	l1.set_level_percent	( 50.0 );
 
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
-	//MainDisplay.set_background( "Grass.jpg" );
 	MainDisplay.add_object( &ConnectionStatus );
 	MainDisplay.add_object( &CmdText 	);
 	MainDisplay.add_object( &l1 		);
 	MainDisplay.add_object( &AvailableClients );
 	MainDisplay.add_object( &test_icon  );
-//	MainDisplay.add_object( &test_image );
-//	MainDisplay.add_object( &sb 		);
-//	MainDisplay.add_object( &hsb 		);	
 	MainDisplay.add_object( &adren_board_list );
-	//MainDisplay.add_object( &ParentWindow );		
 	MainDisplay.load_resources();
 }
 
@@ -348,29 +343,29 @@ void update_to_controls()
 /* Initial Screen.  Shows Button array and Board List */
 void init_control_test()
 {
-	printf("init_control_test() entered\n"		  );
+	if (Debug) printf("init_control_test() entered\n"		  );
 	MyButt.set_text("Push Me Button"			  );
 	MyRobotList.set_item(" No robots connected"    );
 	MyBoardList.set_item(" no boards conencted"	  );
 
-	printf("init_control_test() done with stick figure construction\n");
+	if (Debug) printf("init_control_test() done with stick figure construction\n");
 
 	MyProgress.set_percentage(80.0);	
-	printf("init_control_test() setPercentage \n");	
+	if (Debug) printf("init_control_test() setPercentage \n");	
 	
 	// Add to display manager:
 	MainDisplay.remove_all_objects();	
-	printf("init_control_test() remove_all_objects\n");	
+	if (Debug) printf("init_control_test() remove_all_objects\n");	
 	
 //	MainDisplay.add_object( &MyBoardList );
 	//MainDisplay.add_object( &sf1 );
 	//MainDisplay.add_object( &sl2 );
-	printf("init_control_test() done\n");	
+	if (Debug) printf("init_control_test() done\n");	
 	
 //	MainDisplay.add_object( &MyRobotList );	// other robots available on wifi
 	MainDisplay.add_object( &MyProgress );
 	//MainDisplay.add_object( &MyArray	);
 	
-	printf("init_control_test() done\n");
+	if (Debug) printf("init_control_test() done\n");
 }
 

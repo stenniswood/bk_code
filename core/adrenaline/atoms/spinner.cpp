@@ -16,6 +16,7 @@
 #include "display.h"
 #include "spinner.hpp"
 
+#define Debug 0
 
 void on_up_click( void* mthis )
 {
@@ -59,7 +60,7 @@ void 	SpinnerControl::Initialize(	)
 
 	m_max_value = 1000;
 	m_min_value = -10;
-	printf("SpinnerControl::Initialize(	) completed\n");
+	if (Debug) printf("SpinnerControl::Initialize(	) completed\n");
 }
 
 int		SpinnerControl::calc_metrics()
@@ -102,21 +103,21 @@ int   	SpinnerControl::draw 				(	)
 	switch(m_alignment)
 	{
 	case ALIGN_LEFT:	x = (left + margin);
-				printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
+				if (Debug) printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
 						Text( x, y,    str, SerifTypeface, text_size );	
 						break;
 	case ALIGN_CENTER:	
 						x = (left + width/2.);
-				printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
+				if (Debug) printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
 						TextMid( x, y, str, SerifTypeface, text_size );
 						break;
 	case ALIGN_RIGHT:	x = (left + width - m_up.get_width() - margin);
-				printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
+				if (Debug) printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
 						TextEnd( x, y, str, SerifTypeface, text_size );
 						break;
-	default: 	printf(" default case \n" );
+	default: 	if (Debug) printf(" default case \n" );
 				x = (left + margin);
-				printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
+				if (Debug) printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
 				Text( x, y,    str, SerifTypeface, text_size );	
 				break;
 	}

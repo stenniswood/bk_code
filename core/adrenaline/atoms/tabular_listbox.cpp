@@ -17,7 +17,7 @@
 #include "tabular_listbox.hpp"
 
 #define margin_percent 0.07
-#define Debug 1
+#define Debug 0
  
 TabularListBox::TabularListBox( int Left, int Right, int Top, int Bottom )
 :ListBox(Left, Right, Top, Bottom )
@@ -112,12 +112,12 @@ void TabularListBox::calc_metrics( )
 void TabularListBox::set_width_height( int Width, int Height )
 {
 	int Ht = Height-(header_text_size*4);
-	printf("\tTabularListBox::set_width_height( %d, %d ) lb:Ht %d\n", Width, Height, Ht );
+	if (Debug) printf("\tTabularListBox::set_width_height( %d, %d ) lb:Ht %d\n", Width, Height, Ht );
 	ListBox::set_width_height( Width, Ht );
 	calc_metrics();
 	if (vsb)  vsb->set_width_height( vsb->width, Ht );
-	print_positions();
-	ListBox::print_positions();
+	if (Debug) print_positions();
+	if (Debug) ListBox::print_positions(); 
 }
 
 void TabularListBox::adjust_height_for_num_visible_items ( int mNumber_items_shown )
@@ -169,7 +169,7 @@ int TabularListBox::draw_header(	)
 		StrokeWidth	( 2.0					 );
 		Rect( x, Hdr_Bottom, Headings[i].width, Hdr_Top-Hdr_Bottom ); 
 		
-		printf("Header # %d  %6.1f %s\n", i, x, (char*)Headings[i].text.c_str());
+		if (Debug) printf("Header # %d  %6.1f %s\n", i, x, (char*)Headings[i].text.c_str());
 		
 		//if (Debug) printf("TabularListBox:draw_header: left=%6.2f; bottom=%6.2f;  width=%6.2f; height=%6.2f\n", 
 		//	Headings[i].start_x, Hdr_Bottom, Headings[i].width, Hdr_Top-Hdr_Bottom );	

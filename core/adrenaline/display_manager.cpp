@@ -24,7 +24,8 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug 1
+#define Debug 0
+#define Debug2 0
 
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
 : IconView(  Left,  Right,  Top,  Bottom, NULL)
@@ -73,7 +74,7 @@ void DisplayManager::call_on_creates( )
 	// System Bar will always be treated separately.
 	
 	// Load all controls which are already registered.
-	printf("Creating child controls\n");
+	if (Debug) printf("Creating child controls\n");
 	Control::onCreate();
 }
 
@@ -85,51 +86,70 @@ void DisplayManager::Initialize()
 
 int	DisplayManager::onPlace( )
 {
+	if (Debug) printf("DisplayManager::onPlace() \n");
 	// System Bar on Top:
-	m_sb.set_width_height( screen_width, 36 );
-	float b = (screen_height-m_sb.get_height());
-	printf("DisplayManager::onPlace()  %d,%d, %5.1f\n", screen_width, screen_height, b );
-	print_children();
-	m_sb.move_to	    ( 0,  b );
-	m_sb.print_positions( );
-	m_sb.onPlace		( );
-	//add_object			( &m_sb );
+	float system_bar_height = 36.;
+	float status_height = 64.;
 
+	m_sb.set_width_height( screen_width, system_bar_height );
+	float b = (screen_height- system_bar_height);
+	m_sb.move_to	    ( 0,  b );
+	m_sb.onPlace		( );
+	if (Debug) 
+	{
+		printf("DisplayManager::onPlace()  %d,%d, %5.1f\n", screen_width, screen_height, b );
+		print_children();
+		m_sb.print_positions( );
+	}
+	
 	// Status Bar on Bottom:
-	m_status.move_to		 ( 0, m_status.get_height() );
-	m_status.set_width_height( screen_width, 64 );
-	m_status.print_positions (  );
+	m_status.move_to		 ( 0, 0 );
+	m_status.set_width_height( screen_width, status_height );
+	if (Debug) m_status.print_positions (  );
 	m_status.onPlace		 (  );
-	//add_object			( &m_status );
 	
 	// RIGHT SideBar
 	int sidebar_width = m_soft_side.get_expanded_width();
-	float h 		  = height - m_status.get_height() - m_sb.get_height();
-	m_soft_side.move_to			( screen_width-sidebar_width, m_status.get_height() );
+	float h 		  = height - status_height - system_bar_height;
+	// m_sb.get_height() = 36.
+	// m_status.get_height() = 64
+	m_soft_side.move_to			( screen_width-sidebar_width, status_height );
 	m_soft_side.set_width_height( sidebar_width, h );
-	//add_object( &m_soft_side );
+	if (Debug) m_soft_side.print_positions();
 	m_soft_side.onPlace( );
 }
 
 int	DisplayManager::onCreate(  )
-{
+{	
 	Control::onCreate();
 	onPlace();
 }
 
+void DisplayManager::start_app( Application* mApp )
+{
+	mApp->onCreate();
+	
+}
+
+void DisplayManager::close_app( Application* mApp	  )
+{
+
+	delete mApp;
+}	
+
 void DisplayManager::set_menu( HorizontalMenu* mHMenu )
 {
-	printf("\t\tDisplayManager::set_menu( )\n");
+	if (Debug)  printf("\t\tDisplayManager::set_menu( )\n");
 	if (mHMenu==NULL)
 	{
 		m_sb.set_menu( &system_hmenu );
 		onPlace();
 		m_sb.Invalidate();
 	} else {
-		printf("\t\tDisplayManager::set_menu( )\n");	
+		if (Debug) printf("\t\tDisplayManager::set_menu( )\n");	
 		m_sb.set_menu( mHMenu );
-		m_sb.print_positions();
-		m_sb.m_Menu->print_positions();
+		if (Debug) m_sb.print_positions();
+		if (Debug) m_sb.m_Menu->print_positions();
 
 		onPlace();
 		m_sb.draw();
@@ -168,7 +188,7 @@ void DisplayManager::load_resources( )
 		read_from_jpeg_file( );
 	}
 	// Load all controls which are already registered.
-	printf("Loading child resources\n");
+	if (Debug) printf("Loading child resources\n");
 	vector<Control*>::iterator	iter = m_child_controls.begin();
 	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
@@ -208,20 +228,26 @@ void  DisplayManager::remove_all_objects(  )
 	register_child( &m_soft_side );
 }
 
-/*void  DisplayManager::start_draw(	)
-{}*/
-
 int   DisplayManager::draw(	)
 {
-	if (Debug) printf("\ndraw display manager\tstart:\n" );
-	start_screen();//	start_draw();
+	if (Debug2) printf("\n======display manager draw===========\tStart:\n" );
+	start_screen();		//	start_draw();
 	draw_background();
 	draw_children();
 	m_sb.draw();	
 	end_draw();				// end is needed to see display!
-	if (Debug) printf("draw display manager\tdone!\n\n" );
+	if (Debug2) printf("======display manager draw===========\tDone!\n\n" );
 }
 
+/* Mark all objects as valid, since we just redrew */
+int	DisplayManager::update_invalidated(  )
+{
+	vector<Control*>::iterator	iter = m_child_controls.begin();
+	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
+	{
+		(*iter)->Revalidate();
+	}	
+}
 void  DisplayManager::end_draw(	)
 {
 	end_screen();	   // End the picture
@@ -233,13 +259,13 @@ int   DisplayManager::draw_children( )
 	m_soft_side.draw();
 	m_status.draw(); */	
 	
-	printf("\t\tside bar	\t");	m_soft_side.print_positions();
-	printf("\t\tstatus bar	\t");	m_status.print_positions();
+	if (Debug) { printf("\t\tside bar	\t");		m_soft_side.print_positions();	}
+	if (Debug) { printf("\t\tstatus bar	\t");	m_status.print_positions();			}
 
 	vector<Control*>::iterator	iter = m_child_controls.begin();
 	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
-		if (Debug) printf("draw child %d\n", i);	
+		if (Debug2) printf("draw child %d\n", i);
 		(*iter)->draw();		
 	}
 	return -1;	
@@ -272,12 +298,12 @@ int   DisplayManager::draw_background( 	)
 
 Control* DisplayManager::HitTest( int x, int y )
 {
-	print_children();
-	printf("m_sb=%x\n", &m_sb);
-		m_sb.print_children();
+	//print_children();
+	//printf("m_sb=%x\n", &m_sb);
+	//	m_sb.print_children();
 
 	Control* retval = Control::HitTest(x,y);
-	printf("\tDisplayManager::HitTest() %x \n", retval );
+	//printf("\tDisplayManager::HitTest() %x \n", retval );
 	if (retval==this)
 		return NULL;	// don't want display manager empty space to do anything.
 	else

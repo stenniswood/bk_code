@@ -111,15 +111,14 @@ CANApp::CANApp( int Width, int Height  )
 CANApp::~CANApp() 
 { 
 }
+
 void 	CANApp::Initialize(	) 
 { 
 	Window::Initialize();
 	//init_view_menu();
 	//init_main_CAN_menu();
 
-	printf("CAN_msg_view: object constructed and positioned.\n");	
 	fill_phony_msgs();
-	printf("CAN_msg_view: CAN msgs added.\n");
 }
 
 int		CANApp::calc_metrics() 
@@ -131,13 +130,12 @@ int		CANApp::onCreate(  )
 {
 	place_views();
 	fill_phony_msgs();
-	
 	Window::onCreate();
 }
 
 int		CANApp::place_views()
 {
-	printf("CANApp::place_views()\t\t");
+	//printf("CANApp::place_views()\t\t");
 	//print_positions();
 
 	m_board_view.set_width_height( width/2.-100., height/2. );	

@@ -39,6 +39,10 @@ AUTHOR	: Steve Tenniswood
 #include "test_game_layouts.hpp"
 #include "test_graph_layouts.hpp"
 //#include "can_msg_view.hpp"
+#include "window_layouts.hpp"
+
+
+#define Debug 0
 
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
@@ -55,16 +59,9 @@ static IconView		test_image;
 static IconView		test_icon ( 50,200 );
 /*************************************************************************/
 
-static Leveler l1(1024, 0);
-static Leveler l2(1024, 0);
-static Leveler l3(1024, 0);
-static Leveler l4(1024, 0);
-static Leveler l5(1024, 0);
-static Leveler l6(1024, 0);
 
 // L, R, T, B
-static Button   	MyButt	   ( 450, 600, 400, 350 );
-
+static Button   		 MyButt	   ( 450, 600, 400, 350 );
 static PowerLevel		 pl		(-1,-1);
 static StereoPowerLevels spl  	(-1,-1);
 
@@ -176,7 +173,12 @@ void load_test_screen(int number)
 	case 43: init_hearts			();		break;
 	case 44: init_reversi			();		break;
 	case 45: init_battleships		();		break;	
-	default: load_combo_test_screen( number );	break;
+	
+	case 80: init_pot_objs(); 		break;
+	case 81: init_tilt_objs(); 		break;
+	case 82: init_control_test(); 	break;
+	
+	default: 	break;
 	}
 }
 
@@ -184,7 +186,7 @@ void init_simple_button_test()
 {
 	MyButt.set_text( "Push me" );
 	MyButt.set_state(true);
-	MyButt.print_positions( );
+	if (Debug) MyButt.print_positions( );
 	
 	Button* test = new Button( -1, -1 ); 
 	test->set_text( "Try me and see" );
@@ -440,7 +442,7 @@ void pack_sample_window()
 	populate_simple_lb				(		);
 	AvailableClients.set_text_size	( 18.0  );
 
-	ParentWindowF.print_positions	( );
+	if (Debug) ParentWindowF.print_positions	( );
 	ParentWindowF.pack_control		( &MyButt, PACK_FILL_PARENT, PACKER_ALIGN_TOP  	);
 	ParentWindowF.pack_below        ( &AvailableClients, &MyButt, PACK_FILL_PARENT  );
 	ParentWindowF.pack_control		( &MyProgress, PACK_LEFT, PACKER_ALIGN_BOTTOM	);
@@ -460,7 +462,7 @@ void pack_sample_window()
 
 void init_frame_window()
 {
-	ParentWindowFrame.print_positions();
+	if (Debug) ParentWindowFrame.print_positions();
 	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &ParentWindowFrame );
@@ -501,7 +503,7 @@ void init_horiz_menu		()
 	hm.add_entry_text( "Edit" );	
 	hm.add_entry_text( "View" );	
 	hm.add_entry_text( "Window" );
-	hm.print_positions( );
+	if (Debug) hm.print_positions( );
 	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &hm );
@@ -518,7 +520,7 @@ void init_vert_menu			()
 	vm.add_simple_command( "Image Gallery"	);
 	vm.calc_metrics();
 	
-	printf("init_vert_menu\n");
+	if (Debug) printf("init_vert_menu\n");
 	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &vm );
@@ -543,38 +545,8 @@ void init_combo_menu()
 	simple.add_simple_command( "init_vert_menu"			);
 	simple.add_simple_command( "init_combo_menu"		);		
 	simple.add_simple_command( "init_spinner_menu"		);		
-	simple.add_simple_command( "init_CAN_msg_view"		);
-
-	simple.add_callback( 0, menu_callback  );
-	simple.add_callback( 1, menu_callback  );
-	simple.add_callback( 2, menu_callback  );
-	simple.add_callback( 3, menu_callback  );
-	simple.add_callback( 4, menu_callback  );
-	simple.add_callback( 5, menu_callback  );
-	simple.add_callback( 6, menu_callback  );
-	simple.add_callback( 7, menu_callback  );
-	simple.add_callback( 8, menu_callback  );			
-	simple.add_callback( 9, menu_callback  );			
-	simple.add_callback( 10, menu_callback  );			
-	simple.add_callback( 11, menu_callback  );						
-	simple.add_callback( 12, menu_callback  );						
-	simple.add_callback( 13, menu_callback  );						
-	simple.add_callback( 14, menu_callback  );
-	simple.add_callback( 15, menu_callback  );	
-
-/*	molecules.move_to			( 100, 500 			);
-	molecules.add_simple_command( "Image Gallery" 	);
-	molecules.add_simple_command( "Okay Cancel Dialog" 	);
-	molecules.add_simple_command( "Audio Amp" 	);
-	molecules.add_simple_command( "Directory lb" 	);
-	molecules.add_simple_command( "File Browser" 	);				
-	molecules.add_simple_command( "sidebar test" 	);
-	molecules.add_callback( 0,  menu_callback  );
-	molecules.add_callback( 1,  menu_callback  );	
-	molecules.add_callback( 2,  menu_callback  );	
-	molecules.add_callback( 3,  menu_callback  );	
-	molecules.add_callback( 4,  menu_callback  );	
-	molecules.add_callback( 5,  menu_callback  ); */
+	simple.add_simple_command( "init_CAN_msg_view"		);	
+	simple.add_callback_all_items( menu_callback  );
 	
 	hm.set_width_height(640, 30);
 	hm.move_to( 100, 768-36 );

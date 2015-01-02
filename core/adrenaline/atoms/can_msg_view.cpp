@@ -19,6 +19,8 @@
 
 #include "can_id_list.h"
 
+#define Debug 0
+
 
 CANMessageView::CANMessageView ()
 :TabularListBox()

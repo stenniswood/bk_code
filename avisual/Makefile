@@ -52,10 +52,11 @@ ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			progressbar.o radiobutton.o rectangle.o scroll_bar.o scroll_control.o \
 			stick_leg.o tab_control.o table_window.o tabular_listbox.o \
 			TextFile.o text_view.o tk_colors.o wave_view.o window.o    \
-			horizontal_menu.o vertical_menu.o spinner.o can_msg_view.o 
+			horizontal_menu.o vertical_menu.o spinner.o can_msg_view.o wave.o
 ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
-			stereo_power.o stick_figure.o system_bar.o can_app.o 
+			stereo_power.o stick_figure.o system_bar.o can_app.o 	\
+			application.o 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o
 KINETIC_OBJS = 

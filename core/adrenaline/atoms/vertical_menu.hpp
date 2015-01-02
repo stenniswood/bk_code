@@ -60,9 +60,11 @@ public:
 	virtual int   	draw		 		(				);
 
 	int				get_hit_index		( int Mousex, int Mousey );
+	virtual int		onHover				( int x, int y, bool mouse_is_down=true );
 //	int				set_on_click_listener( void (void*) );
 	virtual int		onClick				( int x, int y, bool mouse_is_down=true );
-	void				clear_all()   { m_entries.clear(); };
+	void			clear_all()   { m_entries.clear(); };
+
 protected:
 	HorizontalMenu*			m_horiz_parent;
 	int		(*callback_all_items)(void*, int);		// called when any item is selected.

@@ -14,6 +14,7 @@
 #include "display.h"
 
 #define margin_percent 0.07
+#define Debug 0
 
 Button::Button(int Left, int Right, int Top, int Bottom )
 :Control(Left, Right, Top, Bottom)
@@ -114,7 +115,7 @@ int	Button::set_on_click_listener( void (*callback)(void*), void* mOn_click_cont
 
 int	Button::onClick(int x, int y, bool mouse_is_down)
 {
-	printf("sunken = true.   on_click_callback=%x: %x\n", on_click_callback, on_click_context );
+	if (Debug) printf("sunken = true.   on_click_callback=%x: %x\n", on_click_callback, on_click_context );
 	if (on_click_callback)
 		on_click_callback( on_click_context );
 

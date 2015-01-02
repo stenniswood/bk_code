@@ -10,35 +10,43 @@
 #include <wiringPiSPI.h>
 #include <wiringPi.h>
 #include <pthread.h>
+#include "bk_system_defs.h"
+
 #include "pican_defines.h"
-#include "CAN_Interface.h"
+//#include "CAN_Interface.h"
 #include "packer_lcd.h"
 #include "packer_motor.h"
 #include "can_txbuff.h"
 #include "packer.h"
-#include "board_list_oop.hpp"
+#include "adrenaline_windows.h"
+#include "adrenaline_graphs.h"
+
 #include "can_id_list.h"
 #include "cmd_process.h"
-#include "buttons.h"
 #include "leds.h"
 #include "vector_math.h"
 #include "parser_tilt.h"
 #include "catagorization.h"
-#include "line_graph.hpp"
-#include "leveler.hpp"
-#include "histogram.hpp"
+
 #include "window_layouts.hpp"
 #include "callbacks.hpp"
-#include "display_manager.hpp"
 #include "vector_file.hpp"
 #include "ipc_mem_bkinstant.h"
 #include "mouse.h"
 #include "test_layouts.hpp"
 
-#include "audio_app.hpp"
+#include <assert.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include "bcm_host.h"
+#include "ilclient.h"
+#include "AUDIO_device.h"
 
+#include "audio_app.hpp"
 #include "visual_memory.h"
 #include "audio_memory.h"
+#include "wave.hpp"
+
 
 
 /*
@@ -94,20 +102,20 @@ void print_args(int argc, char *argv[])
 
 void load_screen(int mDisplay)
 {
-	printf("init_display() DisplayNum=%d\n", mDisplay);
+	if (Debug) printf("init_display() DisplayNum=%d\n", mDisplay);
 	switch(mDisplay)
 	{
-	case 0:	//init_simple_test();
+	case 0:	
 			load_test_screen(0);
-			//load_test_screen(1);
+			
 			break;
-	case 1:	init_pot_objs();
+	case 1:	
 			break;
-	case 2:	init_tilt_objs();
+	case 2:	
 			break;
-	case 3: init_control_test();
+	case 3: 
 			break;
-	case 4: init_avisual();
+	case 4: 
 			break;
 	default:	
 			break;
@@ -144,6 +152,20 @@ void gui_interface()
 			}  
 			left_mouse_button_prev = result;
 		}
+	} 
+	else if (result == RIGHT_BUTTON_DOWN)
+	{
+		
+	}
+	else
+	{
+		object_clicked = MainDisplay.HitTest( x, y );
+		//if (object_clicked)
+		{
+			//object_clicked->onHover( x, y );
+			//if (object_clicked->invalidated==true)
+			//	UpdateDisplaySemaphore=1;
+		}
 	}
 
 	if (ipc_memory_avis->NumberClients != Last_Retrieved_Number)
@@ -171,13 +193,13 @@ void ethernet_interface()		/* wifi comms */
 {
 	if ( is_new_sentence() )
 	{	
-		printf("New sentence : %s\n", get_sentence());
+		if (Debug) printf("New sentence : %s\n", get_sentence());
 		CmdText.set_text( get_sentence() );		
 		UpdateDisplaySemaphore=1;			
 	}
 	if ( is_new_connection_status() )
 	{		
-		printf("New status : %s\n", get_connection_status());	
+		if (Debug) printf("New status : %s\n", get_connection_status());	
 		ConnectionStatus.set_text( get_connection_status() );		
 		UpdateDisplaySemaphore=1;			
 	}
@@ -192,36 +214,39 @@ void behavior_interface()
 	/* Tasks, User Responses */
 }
 
+extern Wave dWave;
+
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
 	are only set when the Enable is.  maybe.		*/
 int main( int argc, char *argv[] )
 {
-	printf("======= main() ==============\n");	
-
-	print_args( argc, argv );
-	int first_param = 1;		// sudo ./pican cfg 
-	int value    	= 0;
-	DisplayNum      = 0; 
+	printf("======= main() ==============\n");		
 	init("simple_walk.csv");
-
+	DisplayNum      = 4; 
+	
 	printf("======= Checking command line arguments ==============\n");	
+	print_args( argc, argv );
 	if (argc>1)
 	{
-		if ((strcmp(argv[first_param], "help") == 0))
+		if ((strcmp(argv[1], "help") == 0))
 		{
 			print_test_list();
 			help();			
 			return 0;
 		} else {
-			DisplayNum = atoi(argv[first_param]);
-			printf("Loading Test Screen # %d\n", DisplayNum);
-			load_test_screen(DisplayNum);
-		}
+			DisplayNum = atoi(argv[1]);
+			if (Debug) printf("Loading Test Screen # %d\n", DisplayNum);
+			load_test_screen(DisplayNum); 
+		} 
 	} else 
-		load_screen(4);
+		init_avisual();
 	UpdateDisplaySemaphore=1;
 	MainDisplay.onCreate();
+
+	audio_file_open();
+	play_waveform( &dWave, 1 );
+	//audio_play();
 	
 	printf("================= Main Loop ==========================\n");	
 	while (1)

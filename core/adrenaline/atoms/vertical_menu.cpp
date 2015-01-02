@@ -71,19 +71,33 @@ int  VerticalMenu::create_std_file_menu()
 	add_simple_command( "Open"  		);
 	add_simple_command( "Open Recent"	);	
 	add_simple_command( "Save"  		);
-	add_simple_command( "Save AS" 		);
+	add_simple_command( "Save As" 		);
+	add_simple_command( "Quit" 			);
 }
+
+
+	char	text[50];
+	char	alt_key[4];				// to activate from keyboard once menu is already active.
+	char	short_cut_key[4];		// to directly activate from keyboard 
+	float	width;
+	int		state;
+	int		(*callback)(void*, int);		// called when the item is selected.
+
 
 int  VerticalMenu::add_simple_command( char* mText, char* mShortcut )
 {
 	set_item( mText );
-	printf  ( "add_simple_command:: %s \n", mText );
+	//printf  ( "add_simple_command:: %s \n", mText );
 
 	struct stVertMenuInfo m;  // = new struct stVertMenuInfo();
+	strcpy (m.alt_key, " ");
+	strcpy (m.short_cut_key, " ");
+	m.width = 0;
+	m.state = MENU_STATE_NORMAL;
+	m.callback = NULL;	
 	strcpy ( m.text, mText );  
 	if (mShortcut)
 		strcpy ( m.short_cut_key, mShortcut );		// to directly activate from keyboard 	
-	m.state = MENU_STATE_NORMAL;
 	m_entries.push_back( m );
 	calc_metrics();
 	//printf  ( "add_simple_command:: 4 \n" );			
@@ -143,13 +157,30 @@ int   	VerticalMenu::draw		 		( 	)
 
 int 	VerticalMenu::get_hit_index		( int Mousex, int Mousey )
 {
-	printf("VerticalMenu::get_hit_index()\n");
+	//printf("VerticalMenu::get_hit_index()\n");
 	return ListBox::get_hit_index( Mousex, Mousey );
 }
 
 int	VerticalMenu::set_h_parent			( HorizontalMenu* mMenu )
 {
 	m_horiz_parent = mMenu;
+}
+
+/* We need to establish a capture mouse mechanism.  Maybe not for this though.
+	Can we evaluate HitTest() for every object visible on the screen, fast enough to
+	not slow the mouse noticeably?
+	
+	Let's assume if it's in here, the HitTest() has already return true for this object.
+*/
+int	VerticalMenu::onHover( int x, int y, bool mouse_is_down )
+{
+	int result = get_hit_index( x, y );
+	if (result>=0)
+	{	
+		select( result );
+		Invalidate();
+	}	
+	return result;
 }
 
 // int 	VerticalMenu::set_on_click_listener( void (void*) )	

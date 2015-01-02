@@ -68,7 +68,7 @@ public:
 	virtual void 	set_width_height   		( int Width, int Height );
 
 	virtual float	get_line_bottom			( int mVisibleIndex );
-	virtual int		get_total_lines			( 	)	{ printf("tabularListbox::gettotal_lines\n"); return LineData.size();  };
+	virtual int		get_total_lines			( 	)	{ /*printf("tabularListbox::gettotal_lines\n");*/ return LineData.size();  };
 	vector<string>*	get_line_data			( int mIndex );
 	void			set_headings			( vector<struct HeaderItemInfo> *mHeaderTexts );
 	void			set_column_width		( int mColumn, int mWidth );	

@@ -23,6 +23,8 @@
 
 
 #define margin_percent 0.07
+#define Debug 0
+
 
 TextView::TextView(int Left, int Right, int Top, int Bottom )
 :ScrollControl(Left, Right, Top, Bottom)
@@ -166,7 +168,7 @@ int TextView::count_num_lines_present(  )
 		eol = get_end_of_line( ptr );
 		char tmp = *eol;
 		*eol = 0;
-		printf("%s : %d\n", ptr, (eol-ptr) );
+		if (Debug) printf("%s : %d\n", ptr, (eol-ptr) );
 		*eol = tmp;		
 		Lines++;
 		ptr = eol+1;
@@ -217,7 +219,7 @@ int TextView::draw()
 	// 
 	Fill_l(text_color);					// 
 	line_height 	= 1.25*text_size;
-	printf(" text_size % \n");
+	if (Debug) printf(" text_size % \n");
 	
 	int vertical    = height-line_height;
 	char* ptr       = text-1;
@@ -254,17 +256,17 @@ void TextView::calc_metrics(  )
 	int first_visible 	  = 0;
 	if (vsb)
 		first_visible     = vsb->get_position();
-	printf("TextView::calc_metrics():  max=%d; min=0; num_visible_lines=%d\n",
+	if (Debug) printf("TextView::calc_metrics():  max=%d; min=0; num_visible_lines=%d\n",
 			max, num_visible_lines );	
 	set_v_scroll_values(  max, 0, first_visible, num_visible_lines );
-	printf("first_visible=%d\n", first_visible );
+	if (Debug) printf("first_visible=%d\n", first_visible );
 }
 
 void TextView::load_file( char* mFullFilename )
 {
 	struct stat buf;
 	FILE* fd = fopen( mFullFilename, "r" );
-	printf("load_file:: filename=%s;  \t\tfd=%x\n", mFullFilename, fd);
+	if (Debug) 	printf("load_file:: filename=%s;  \t\tfd=%x\n", mFullFilename, fd);
 	if (fd==NULL)
 	{
 		text = "File not found";
@@ -277,7 +279,7 @@ void TextView::load_file( char* mFullFilename )
 		int errsv = errno;
 		//perror(" -fstat error- ");
 		int FileSize = buf.st_size;
-		printf("load_file: result=%d/%d;  fizesize=%d\n", result, errsv, FileSize);
+		if (Debug) 	printf("load_file: result=%d/%d;  fizesize=%d\n", result, errsv, FileSize);
 				
 		text = new char[FileSize];
 		int bytes_read=0;
@@ -286,9 +288,9 @@ void TextView::load_file( char* mFullFilename )
 		bytes_read = fread( text, 1, FileSize, fd );
 		if (bytes_read != FileSize)
 		{
-			printf("ERROR Loading Text File!  Bytes read=%d!\n", bytes_read );
+		if (Debug) printf("ERROR Loading Text File!  Bytes read=%d!\n", bytes_read );
 		}				
-		printf("Loaded Text File:  Bytes read=%d\n", bytes_read );
+		if (Debug) printf("Loaded Text File:  Bytes read=%d\n", bytes_read );
 		calc_metrics();
 	}
 }

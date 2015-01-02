@@ -9,6 +9,7 @@
 #endif
 
 
+
 // A Linked List (wrap this in an Item class)
 struct stBoardInfo {
 	char* Model;		// Ascii model type ie. "Button", "BigMotor", etc.

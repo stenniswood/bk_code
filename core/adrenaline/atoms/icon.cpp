@@ -27,6 +27,7 @@
 
 
 #define margin_percent 0.07
+#define Debug 0
 
 VGImage createImageFromJpeg(const char *filename, struct image_info* II);
 
@@ -40,7 +41,6 @@ IconView::IconView(  )
 {
 	Initialize();
 	set_position( 0, 0, 0, 0 );
-//	set_file(mFileName);
 }
 IconView::IconView( int Left, int Bottom )
 {
@@ -56,7 +56,7 @@ void IconView::set_file( char* mFileName )
 
 	Filename = new char[strlen(mFileName)+1];
 	strcpy (Filename, mFileName );
-	//printf("IconView: Filename=%s\n", Filename);
+	if (Debug) printf("IconView: Filename=%s\n", Filename);
 }
 
 void IconView::Initialize()
@@ -101,9 +101,9 @@ void IconView::calc_margins( )
 void IconView::read_from_jpeg_file ( )
 {
 	if (Filename==NULL) return;
-	
+
 	image = createImageFromJpeg( Filename, &ImageInfo );
-	printf("read_from_jpeg_file:  %s;  w=%d h=%d\n", Filename, ImageInfo.width,ImageInfo.height );
+	if (Debug) printf("read_from_jpeg_file:  %s;  w=%d h=%d\n", Filename, ImageInfo.width,ImageInfo.height );
 	file_loaded = true;
 	if (style & WRAP_IMAGE_SIZE)
 	{	
@@ -127,11 +127,11 @@ void IconView::read_from_file( )
 
     strcpy( CapExtension, extension );
     convertToUpper( CapExtension );
-	//printf("Extension:%s\n", CapExtension );
+	if (Debug) printf("Extension:%s\n", CapExtension );
 
 	if (strcmp(CapExtension, "JPG")==0)
 		image = createImageFromJpeg( Filename, &ImageInfo );
-	printf(" %s width=%d height=%d\n", Filename, ImageInfo.width, ImageInfo.height);
+	if (Debug) printf(" %s width=%d height=%d\n", Filename, ImageInfo.width, ImageInfo.height);
 
 	set_width_height(ImageInfo.width, ImageInfo.height);
 /*	else if (strcmp(CapExtension, "PNG")==0)
@@ -146,7 +146,7 @@ void IconView::read_from_file( )
 void IconView::load_resources( )
 {
 	read_from_file( );
-	printf("IconView:load_resources(): FN=%s;  image=%d\n", Filename, image );	
+	if (Debug) printf("IconView:load_resources(): FN=%s;  image=%d\n", Filename, image );	
 }
 
 void IconView::set_image( VGImage* mImage, struct image_info* mImageInfo )
@@ -171,7 +171,7 @@ int IconView::draw()
 	VGfloat b = bottom+bottom_margin;
 	int min_w = min(ImageInfo.width, width);
 	int min_h = min(ImageInfo.height, height);
-	if (image!=NULL)
+	if (image != 0)
 		vgSetPixels(l, b, image, 0, 0, min_w, min_h);
 }
 
@@ -192,9 +192,9 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 	JSAMPARRAY buffer;
 	unsigned int bstride;
 	unsigned int bbpp;
-	
-	printf("createImageFromJpeg()\n");
-	
+
+	if (Debug) printf("createImageFromJpeg()\n");
+
 	VGImage img;
 	VGubyte *data;
 
@@ -213,7 +213,7 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 	// Try to open image file
 	infile = fopen(filename, "rb");
 	if (infile == NULL) {
-		printf("Failed opening '%s' for reading!\n", filename);
+		if (Debug) printf("Failed opening '%s' for reading!\n", filename);
 		return VG_INVALID_HANDLE;
 	}
 	// Setup default error handling
@@ -266,18 +266,18 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 		}
 	}
 
-	printf("createImageFromJpeg() 2\n");
+	if (Debug) printf("createImageFromJpeg() 2\n");
 	// Create VG image
 	img = vgCreateImage(rgbaFormat, II->width, II->height, VG_IMAGE_QUALITY_BETTER);
-	printf("read jpeg, %d w=%d; h=%d\n", img, II->width, II->height);
+	if (Debug) printf("read jpeg, %d w=%d; h=%d\n", img, II->width, II->height);
 	vgImageSubData(img, data, II->dstride, rgbaFormat, 0, 0, II->width, II->height);
-	printf("read jpeg, %d w=%d; h=%d\n", img, data, II->width, II->height);
+	if (Debug) printf("read jpeg, %d w=%d; h=%d\n", img, data, II->width, II->height);
 
 	// Cleanup
 	jpeg_destroy_decompress(&jdc);
 	fclose(infile);
 	free(data);
 
-	printf("createImageFromJpeg() done\n");
+	if (Debug) printf("createImageFromJpeg() done\n");
 	return img;
 }
