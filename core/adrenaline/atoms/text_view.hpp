@@ -16,6 +16,7 @@ public:
 	virtual void 	Initialize			  	(				 );
 	void 			calc_margins			( float fraction );
 	void 			calc_metrics			( 				 );
+	void			print_info				(	);
 	void 			set_font				( Fontinfo* f	 );
 	virtual void 	set_width_height  	 	( int Width, int Height 		);
 	virtual void  	move_to	  		  	 	( float Left,   float  Bottom	);
@@ -28,23 +29,25 @@ public:
 	virtual void  	set_position			( int Left, int Right, int Top, int Bottom );
 	virtual void  	set_text_size		  	( float TextSize		 		);
 		
-	void center_vertical  		( BOOL on )	{ if (on) style |= CENTER_VERTICAL;	else style &= ~CENTER_VERTICAL;	};
-	void center_horizontal		( BOOL on )	{ if (on) style |= CENTER_HORIZONTAL; else style &= ~CENTER_HORIZONTAL;	};
+	void 	center_vertical  	( BOOL on )	{ if (on) style |= CENTER_VERTICAL;	else style &= ~CENTER_VERTICAL;	};
+	void 	center_horizontal	( BOOL on )	{ if (on) style |= CENTER_HORIZONTAL; else style &= ~CENTER_HORIZONTAL;	};
 
 	char* 			draw_one_line( char* mtext, int mVerticalPix );
 	virtual int   	draw   		 (	);	
 	virtual int		onClick		 (int x, int y, bool mouse_is_down=true);
 
 protected:
-	int 		line_height;
+	float 		line_height;
+	int			max_num_visible_lines;
+	int			first_visible_line;	
+	int			num_lines_present;
 
 private:
 	//char*		all_text;
 	word		style;
 	Fontinfo*	font;
-	int			left_margin;
-	int			right_margin;
-	//int			font_height;
+	float		m_left_margin;
+	float		m_right_margin;
 	
 };
 

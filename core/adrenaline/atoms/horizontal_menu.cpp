@@ -42,6 +42,7 @@ HorizontalMenu::HorizontalMenu ( int Width, int Height )
 
 HorizontalMenu::~HorizontalMenu()  
 { 
+
 }
 
 void 	HorizontalMenu::Initialize (	)  
@@ -63,28 +64,28 @@ int 	HorizontalMenu::calc_metrics( )
 	float sx = left; 
 	for (int i=0; i<m_entries.size(); i++)
 	{
-		m_entries[i]->width	= TextWidth( m_entries[i]->text, SerifTypeface, text_size );
+		m_entries[i].width	= TextWidth( m_entries[i].text, SerifTypeface, text_size );
 		//printf("%s %6.1f pad=%6.1f\n", m_entries[i]->text, m_entries[i]->width, m_menu_padding );
-		m_entries[i]->sx    = sx;
-		m_entries[i]->ex    = sx+m_entries[i]->width + m_menu_padding;
-		sx += (m_entries[i]->width + m_menu_padding);
+		m_entries[i].sx    = sx;
+		m_entries[i].ex    = sx+m_entries[i].width + m_menu_padding;
+		sx += (m_entries[i].width + m_menu_padding);
 		
-		VerticalMenu* vm = m_entries[i]->menu;
+		VerticalMenu* vm = m_entries[i].menu;
 		if (vm)
-			vm->attach_at( m_entries[i]->sx, bottom );
+			vm->attach_at( m_entries[i].sx, bottom );
 	}
 	return 0;
 }
 
 int		HorizontalMenu::add_entry_text( char* mMenuText )
 {
-	stHorizMenuInfo* ptr = new struct stHorizMenuInfo;
+	struct stHorizMenuInfo hmi;// = new struct stHorizMenuInfo;
 	int len = strlen(mMenuText);
-	ptr->text = new char[len];
-	ptr->menu = NULL;
-	strcpy(ptr->text, mMenuText);
+	hmi.text = new char[len];
+	hmi.menu = NULL;
+	strcpy(hmi.text, mMenuText);
 	
-	m_entries.push_back( ptr );
+	m_entries.push_back( hmi );
 	calc_metrics();
 }
 void		HorizontalMenu::clear_all()
@@ -93,19 +94,19 @@ void		HorizontalMenu::clear_all()
 }
 int		HorizontalMenu::add_sub_menu( char* mMenuText, VerticalMenu* vm )
 {
-	stHorizMenuInfo* ptr = new struct stHorizMenuInfo;
+	struct stHorizMenuInfo hmi;// = new struct stHorizMenuInfo;
 	int len   = strlen(mMenuText);
-	ptr->text = new char[len];
-	ptr->menu = vm;
-	strcpy( ptr->text, mMenuText );
+	hmi.text = new char[len];
+	hmi.menu = vm;
+	strcpy( hmi.text, mMenuText );
 
-	m_entries.push_back( ptr );
+	m_entries.push_back( hmi );
 	calc_metrics();
 }
 
-int 	HorizontalMenu::add_entry( stHorizMenuInfo* mEntry )
+int 	HorizontalMenu::add_entry( struct stHorizMenuInfo* mEntry )
 {
-	m_entries.push_back( mEntry );
+	m_entries.push_back( *mEntry );
 	calc_metrics();
 }
 
@@ -133,7 +134,7 @@ int HorizontalMenu::draw(	)
 	{
 		Stroke_l( m_selected_color );
 		Fill_l  ( m_selected_color );
-		Rect    ( m_entries[m_selection]->sx, bottom, m_entries[m_selection]->width, height );
+		Rect    ( m_entries[m_selection].sx, bottom, m_entries[m_selection].width, height );
 		//printf("H menu drew rectangles!\n");
 	}
 
@@ -145,29 +146,29 @@ int HorizontalMenu::draw(	)
 			Stroke_l( background_color );
 			Fill_l  ( background_color );
 			//printf  ("MenuColor: txt=%4x\n", background_color );
-			if (m_entries[i]->menu)
-				m_entries[i]->menu->draw();
+			if (m_entries[i].menu)
+				m_entries[i].menu->draw();
 		} else {
 			Stroke_l( text_color );
 			Fill_l  ( text_color );
 			//printf("MenuColor: txt=%4x\n", text_color );
 		}
-		l = m_entries[i]->sx;
+		l = m_entries[i].sx;
 		//printf("%6.1f, %6.1f: %6.1f  %s\n", l, bottom, text_size, m_entries[i]->text );
 		if (l>(left+width))
 		{
 			Stroke_l( 0xFF5f0000 );
 			Fill_l  ( 0xFF5f0000 );
-			float w = (width - m_entries[i-1]->ex);
-			Rect    ( m_entries[i-1]->ex, bottom, w, height );			
+			float w = (width - m_entries[i-1].ex);
+			Rect    ( m_entries[i-1].ex, bottom, w, height );			
 		}
-		Text( l, c, m_entries[i]->text,  SerifTypeface, text_size );
+		Text( l, c, m_entries[i].text,  SerifTypeface, text_size );
 	}
 	if ( is_selection_valid() )  {
 		//printf("H Menu selection is valid!\n");
-		if (m_entries[m_selection]->menu) {
+		if (m_entries[m_selection].menu) {
 			//printf("H Menu selection is a menu\n");		
-			m_entries[m_selection]->menu->draw();
+			m_entries[m_selection].menu->draw();
 		}
 	}
 }
@@ -193,8 +194,8 @@ int 	HorizontalMenu::get_hit_index( int Mousex, int Mousey )
 
 	for (int i=0; i<item_count; i++)
 	{
-		l = m_entries[i]->sx;		
-		r = m_entries[i]->ex;		
+		l = m_entries[i].sx;		
+		r = m_entries[i].ex;		
 		if ((Mousex > l) && (Mousex < r) )
 			return i;
 	}	
@@ -217,7 +218,7 @@ Control* HorizontalMenu::HitTest( int x, int y )
 	if ((result==NULL) && is_selection_valid()) 
 	{
 		// Test the open submenu:
-		result = m_entries[m_selection]->menu->HitTest(x,y);
+		result = m_entries[m_selection].menu->HitTest(x,y);
 	}
 	//if (result)
 	//	printf( "HorizontalMenu::HitTest() %d,%d =  %x\n", x,y,result );
@@ -230,16 +231,16 @@ int	HorizontalMenu::onClick( int x, int y, bool mouse_is_down )
 	printf( "Mouse Click  Horiz Menu Item # %d\n", menu_index );
 	if (menu_index >= 0)
 	{
-		if (m_entries[menu_index]->menu)
+		if (m_entries[menu_index].menu)
 		{
 			printf("Is a SubMenu. \n");
 			// hide any other visible menu
 			if ( is_selection_valid() )  {
-				if (m_entries[m_selection]->menu)
-					m_entries[m_selection]->menu->show(false);
+				if (m_entries[m_selection].menu)
+					m_entries[m_selection].menu->show(false);
 			}
 			m_selection = menu_index;
-			m_entries[menu_index]->menu->show(true);
+			m_entries[menu_index].menu->show(true);
 			//m_entries[menu_index]->menu->draw();
 			Invalidate();
 		}

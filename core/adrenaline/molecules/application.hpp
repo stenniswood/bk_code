@@ -5,6 +5,7 @@
 #include "horizontal_menu.hpp"
 #include "rectangle.hpp"
 
+
 extern HorizontalMenu draw_menu;
 
 
@@ -19,20 +20,26 @@ extern HorizontalMenu draw_menu;
 	
 	This onCreate then sets the menus, sidebars, and status, etc.
 */
-class Application : public Control
+class Application 
 {
 public:
 	Application ();
 	Application ( Rectangle* mRect );
-	Application ( int Width, int Height );
 	~Application();
 
-	virtual void 	Initialize		(	);
+	virtual void 	Initialize		(	);	// create all the objects here.
 	int				calc_metrics	(	);
 	int				onPlace			(	);
 
+	virtual void	setup_sidebar	(	);  // derived class adds these here
+	virtual void	setup_menu		(	);  // derived class adds these here
+	virtual void	setup_app_menu	(	);  // Name of App, About, Preferences, Quit.
+	
+	virtual void 	register_with_display_manager();
+
 	// chance to load resources, call functions which use fonts
 	virtual int		onCreate	  	(	);	// First Time application is run - load resources etc.
+											// send them to the display_manager here!
 	int				onActivate		(	);	// Future reactivation - set menus, sidebars, status, etc.
 
 	// Standard Menu Handlers:	
@@ -44,7 +51,7 @@ public:
 			void	file_quit		( );
 			
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
-	virtual int   	draw		 		(	);
+	virtual int   	draw		 	(	);
 	
 protected:
 	HorizontalMenu			m_hMenu;	

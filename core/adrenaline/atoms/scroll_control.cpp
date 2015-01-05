@@ -24,16 +24,19 @@
 ScrollControl::ScrollControl()
 : Control()
 {
+	Initialize();
 }
 
 ScrollControl::ScrollControl( int Left, int Right, int Top, int Bottom )
 : Control( Left, Right, Top, Bottom )
 {
+	Initialize();
 }
 
 ScrollControl::ScrollControl( int Width, int Height )
 : Control( Width, Height )
 {
+	Initialize();
 }
 
 ScrollControl::~ScrollControl()

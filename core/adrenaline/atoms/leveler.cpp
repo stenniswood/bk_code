@@ -21,13 +21,24 @@
 
 Leveler::Leveler(float Max, float Min)
 {
-	xAxisLabel	= (char*)"Potentiometer 1";
-	yAxisLabel  = (char*)"Percentage";
-	title 		= (char*)"Knee Joint";	
+	xAxisLabel	= (char*)"X Axis";
+	yAxisLabel  = (char*)"Y Axis";
+	title 		= (char*)"Leveler";	
+	set_text( (char*)"Leveler" );	
 	yMax 	= Max;
 	yMin 	= Min;
 }
 
+Leveler::Leveler()
+{
+	xAxisLabel	= (char*)" ";
+	yAxisLabel  = (char*)" ";
+	title 		= (char*)" ";	
+	set_text( (char*)"Leveler" );	
+	yMax 	= 100;
+	yMin 	= 0;
+
+}
 /*void Leveler::set_position(int Left, int Right, int Top, int Bottom)
 {
 	Control:set_position( Left, Right, Top, Bottom );
@@ -128,7 +139,7 @@ int Leveler::draw_l_title()
 	Fill( 255, 255, 255, alpha );
 	// Fix!! should not go outside client Rect!!
 	
-	Text( left+TIC_WIDTH, bottom+height+tenpercent, title, SerifTypeface, size );				
+	Text( left+TIC_WIDTH, bottom+height+tenpercent, text, SerifTypeface, size );				
 }
 
 float Leveler::get_level_pixel()

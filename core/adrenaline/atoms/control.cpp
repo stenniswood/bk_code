@@ -9,6 +9,7 @@
 #include <shapes.h>
 #include <fontinfo.h>
 #include "Graphbase.hpp"
+#include "rectangle.hpp"
 #include "control.hpp"
 #include "display.h"
 
@@ -174,6 +175,14 @@ void Control::copy_position_vert	  ( Control* Sibling )
 {
 	set_width_height( width, Sibling->height );
 	move_to			( left,  Sibling->bottom );	
+}
+
+void Control::set_position( Rectangle* mRect )
+{
+	move_to			( mRect->get_left(), mRect->get_bottom() ); 
+	float w = mRect->get_right() - mRect->get_left();
+	float h = mRect->get_top() - mRect->get_bottom();
+	set_width_height( w, h );	
 }
 
 void Control::set_position( int Left, int Right, int Top, int Bottom )

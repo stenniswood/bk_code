@@ -58,7 +58,7 @@ public:
 	// Linked List of objects.
 	SystemBar		m_sb;			// Top
 	TaskBar			m_task_bar;		// Left side
-	SideBar			m_soft_side;	// Right side
+	SideBar			m_side;	// Right side
 	SystemStatusBar	m_status;		// Bottom
 
 protected:

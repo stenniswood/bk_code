@@ -32,7 +32,7 @@ AUTHOR	:  Stephen Tenniswood
 
 
 char* 	audio_shared_memory;
-int 	audio_segment_id;
+int 	audio_segment_id=0;
 struct  audio_ipc_memory_map* ipc_memory_aud=NULL;
 
 void dump_audio_ipc()

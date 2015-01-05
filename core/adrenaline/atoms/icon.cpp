@@ -31,6 +31,7 @@
 
 VGImage createImageFromJpeg(const char *filename, struct image_info* II);
 
+
 IconView::IconView( int Left, int Right, int Top, int Bottom, char* mFileName )
 :Control(Left, Right, Top, Bottom)
 {
@@ -54,19 +55,22 @@ void IconView::set_file( char* mFileName )
 {
 	if (mFileName==NULL) return;
 
-	Filename = new char[strlen(mFileName)+1];
+	Filename = new char[strlen(mFileName)];
 	strcpy (Filename, mFileName );
 	if (Debug) printf("IconView: Filename=%s\n", Filename);
 }
 
 void IconView::Initialize()
 {
-	Visible   = FALSE;
-	style     = 0;
-	file_loaded = false;
+	Visible   		= FALSE;
+	style     		= 0;
+	file_loaded 	= false;
 
-	ImageInfo.width  = 0;
-	ImageInfo.height = 0;
+	ImageInfo.width   = 0;
+	ImageInfo.height  = 0;
+	ImageInfo.dstride = 0;
+	ImageInfo.dbpp    = 0;
+	ImageInfo.image   = 0;
 
 	text_color		 = 0xFF9f9f0f;
 	border_color 	 = 0xFFffffff;
@@ -87,7 +91,7 @@ void IconView::set_position ( int Left, int Right, int Top, int Bottom )
 
 void  IconView::move_to( int mLeft, int mBottom )
 {
-	left = mLeft;
+	left   = mLeft;
 	bottom = mBottom;
 }
 
@@ -95,22 +99,12 @@ void IconView::calc_margins( )
 {
 	left_margin   = width  - ImageInfo.width;
 	bottom_margin = height - ImageInfo.height;
-	if (left_margin<0)   left_margin = 0;
+	if (left_margin  <0) left_margin   = 0;
 	if (bottom_margin<0) bottom_margin = 0;
 }
+
 void IconView::read_from_jpeg_file ( )
 {
-	if (Filename==NULL) return;
-
-	image = createImageFromJpeg( Filename, &ImageInfo );
-	if (Debug) printf("read_from_jpeg_file:  %s;  w=%d h=%d\n", Filename, ImageInfo.width,ImageInfo.height );
-	file_loaded = true;
-	if (style & WRAP_IMAGE_SIZE)
-	{	
-		width = ImageInfo.width;
-		height = ImageInfo.height;
-	}
-	calc_margins(); 
 }
 
 void convertToUpper(char *str)
@@ -119,29 +113,36 @@ void convertToUpper(char *str)
     while( *p=toupper(*p) )  { p++; };
 }
 
-/* Note the file extension can only be 15 chars long */
+/* Parse based on the file extension.  And then read. */
+/* Note the file extension can only be 15 chars long  */
 void IconView::read_from_file( )
 {
+	if (Filename==NULL) return;
+	
 	char* extension = strrchr( Filename, '.' )+1;
-	char CapExtension[15];
+	char  CapExtension[15];
 
     strcpy( CapExtension, extension );
     convertToUpper( CapExtension );
-	if (Debug) printf("Extension:%s\n", CapExtension );
+	if (Debug) 
+		printf("IconView::read_from_file(): %s; Extension=%s; width=%d height=%d; \n", 
+					Filename, CapExtension, ImageInfo.width, ImageInfo.height );
 
-	if (strcmp(CapExtension, "JPG")==0)
+	if (strcmp(CapExtension, "JPG")==0)	
 		image = createImageFromJpeg( Filename, &ImageInfo );
-	if (Debug) printf(" %s width=%d height=%d\n", Filename, ImageInfo.width, ImageInfo.height);
-
-	set_width_height(ImageInfo.width, ImageInfo.height);
 /*	else if (strcmp(CapExtension, "PNG")==0)
 		image = createImageFromPNG ( Filename, &ImageInfo );
 	else if (strcmp(extension, "BMP")==0)
 		image = createImageFromPNG ( Filename, &ImageInfo ); */
+
+	file_loaded = true;
+	if (style & WRAP_IMAGE_SIZE)
+	{
+		set_width_height(ImageInfo.width, ImageInfo.height);
+	}
 	file_loaded = true;
 	calc_margins();
 }
-
 
 void IconView::load_resources( )
 {
@@ -151,7 +152,7 @@ void IconView::load_resources( )
 
 void IconView::set_image( VGImage* mImage, struct image_info* mImageInfo )
 {
-	image = *mImage;
+	image     = *mImage;
 	ImageInfo = *mImageInfo;
 }
 
@@ -164,7 +165,7 @@ int IconView::draw()
 {
 	Control::draw();
 
-	Fill_l(background_color);				// 
+	Fill_l( background_color );				// 
 	Rect  ( left, bottom, +width, +height );
 
 	VGfloat l = left+left_margin;
@@ -181,15 +182,14 @@ int	IconView::onClick(int x, int y, bool mouse_is_down)
 	return -1;
 }
 
-
 // createImageFromJpeg decompresses a JPEG image to the standard image format
 // source: https://github.com/ileben/ShivaVG/blob/master/examples/test_image.c
 VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 {
-	FILE *infile;
+	FILE   *infile;
 	struct jpeg_decompress_struct jdc;
-	struct jpeg_error_mgr jerr;
-	JSAMPARRAY buffer;
+	struct jpeg_error_mgr 		  jerr;
+	JSAMPARRAY   buffer;
 	unsigned int bstride;
 	unsigned int bbpp;
 

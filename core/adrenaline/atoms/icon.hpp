@@ -50,11 +50,11 @@ public:
 protected:
 	char*		Filename;
 	BOOL		file_loaded;
-	
+
 private:
-	word		style;
-	VGImage 	image;
-	struct image_info ImageInfo;
+	word				style;
+	VGImage 			image;
+	struct image_info 	ImageInfo;
 
 	int			left_margin;
 	int			bottom_margin;

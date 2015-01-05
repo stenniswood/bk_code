@@ -17,7 +17,7 @@
 #include "window.hpp"
 
 
-#define Debug 0
+#define Debug 1
 
 Window::Window ( )
 :Control()
@@ -81,6 +81,7 @@ void Window::pack_control( Control* mNewControl, byte mHorizontalPacking, byte m
 	set_vertical_position  ( mNewControl, mVerticalPacking   );
 	set_horizontal_position( mNewControl, mHorizontalPacking );	
 	controls.push_back	   ( mNewControl );
+	//register_child( mNewControl );
 }
 
 void Window::set_vertical_position( Control* mNewControl, byte mVerticalPacking )

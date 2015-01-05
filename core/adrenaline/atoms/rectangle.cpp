@@ -48,6 +48,12 @@ void 	Rectangle::set_size	( float width, float height)
 	coords[RIGHT] = get_left()   + width;
 }
 
+void Rectangle::print_positions()
+{
+	printf("left=%6.1f; bottom=%6.1f; width=%6.1f; height=%6.1f",
+			get_left(), get_bottom(), get_width(), get_height() );	
+}
+
 void	Rectangle::draw( )
 {
 	Rect( left, bottom, get_width(), get_height() );	

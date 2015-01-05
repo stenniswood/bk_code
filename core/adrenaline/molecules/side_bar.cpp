@@ -15,6 +15,7 @@
 #include "display.h"
 #include "side_bar.hpp"
 
+
 #define Debug 0
 
 SideBar::SideBar()
@@ -36,7 +37,6 @@ void SideBar::Initialize()
 {
 	Control::Initialize();
 	background_color = 0x8F000000;	
-	m_num_tabs = 0;
 	calc_metrics();
 
 	m_state=0;
@@ -97,12 +97,23 @@ float SideBar::get_bottom( int mIndex )
 	return (spacing *(float)mIndex) + bottom + m_bottom_margin;
 }
 
+void	SideBar::unload_controls ( )	// does not delete
+{
+	m_child_controls.clear();
+}
+void	SideBar::load_controls	 ( vector<Control*>* mSidebar_controls )
+{
+	vector<Control*>::iterator iter = mSidebar_controls->begin();
+	while (iter != mSidebar_controls->end() )
+		register_child( (*iter) );
+}
+
 int		SideBar::add_control( Control* mControl, char* mText )
 {
 	// Need to set it's location first  :
 	// This control proportions them out:
-	m_num_tabs++;
-	if (m_num_tabs > MAX_CONTROLS)
+	int num_tabs = m_child_controls.size();
+	if (num_tabs > MAX_CONTROLS)
 		return -1;	
 
 	register_child	 ( mControl );

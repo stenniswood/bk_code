@@ -9,7 +9,8 @@ Author:  Steve Tenniswood
 
 
 #include <vector>
-#include <string>
+//#include <string>
+//#include <string.h>
 using namespace std;
 
 const unsigned short WAVE_FORMAT_PCM 		= 0x0001;
@@ -30,9 +31,11 @@ typedef struct {
   DWORD nAvgBytesPerSec;
   WORD  nBlockAlign;
   WORD  wBitsPerSample;
-  //WORD  cbSize;
+  WORD  cbSize;					// pad this struct.  we read based on file contents.
+  BYTE  reserved[8];			// up to 8 bytes - junk if not in file.
 } WAVEFORMATEX;
 
+/* This structure holds a chunk of audio data */
 typedef struct wavehdr_tag {
   BYTE*              lpData;
   DWORD              dwBufferLength;
@@ -43,15 +46,6 @@ typedef struct wavehdr_tag {
   struct wavehdr_tag  *lpNext;
   DWORD*	          reserved;
 } WAVEHDR;
-
-/* This structure holds a chunk of audio data */
-/*typedef struct stWave_data {
-  BYTE*              lpData;
-  DWORD              dwBufferLength;		// Length, in bytes, of the buffer. 
-  DWORD              dwBytesRecorded;		// specifies how much data is in the buffer. 
-  DWORD              dwFlags;
-  DWORD              dwLoops;
-};*/
 
 class Wave  
 {
@@ -67,7 +61,8 @@ public:
 
 	void 			Save			( string mFileName		);
 	bool			Load			( string inFile			);
-
+	
+	float 			calc_zoom		( int mPixels, float mSamples );
 	inline long int	get_average_bytes_per_second( ) { return (m_samples_per_second*m_number_channels*2); };
 	inline long int	get_data_length_bytes		( ) { return (m_buffer_length); };
 	inline long int	get_samples_recorded		( );
@@ -78,8 +73,9 @@ public:
 	WAVEHDR*		GetWaveHeader	(				);
 	bool 			read_chunk		(FILE* mFile, char mName[4], long int* mSize);
 
+	int 			get_VG_path_coords( float* &mCoords, int mChannel, float mPixelHeight, 
+										float mZoomFactor, float left, float bottom );
 
-	float*			get_VG_path_coords( int mChannel, float mPixelHeight  );	// returns array of x,y floats.
 	
 	inline short	GetSample		(long int mSampIndex, int mChannel);
 	inline short* 	GetSamplePtr	(long int mSampIndex, int mChannel);
@@ -104,10 +100,6 @@ public:
 
 	long int		m_samp_index;
 };
-
-
-
-
 
 
 #endif 

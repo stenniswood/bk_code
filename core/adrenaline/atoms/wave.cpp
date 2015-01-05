@@ -6,6 +6,8 @@
 #include <string>
 #include <cstring>
 #include <math.h>
+//#include <string>
+#include <string.h>
 
 #include "wave.hpp"
 
@@ -15,7 +17,6 @@ using namespace std;
 	Thank you Google!
 	 Thank you Larry Page!
 	 no don't thank them so much yet.  this still could be a dead end investment.
-	 
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -195,47 +196,50 @@ bool Wave::Load(string Filename)
 	if(strncmp(tmp,"WAVE",4) != 0)	   
 	{  ErrStr ="expected a WAVE chunk in file";  throw ErrStr;  }
 	
-	// "fmt " - might need to seek for the fmt chunk.  If some other chunks come before the "fmt " one.
+	//long int pos = ftell(inFile);
+	//printf("pos=%d\n", pos );
+
+	// FORMAT "fmt "   - might need to seek for the fmt chunk.  If some other chunks come before the "fmt " one.
 	result = fread( tmp, 4, 1, inFile );	    
 	if(strncmp(tmp,"fmt ",4) != 0)	   
 	{  ErrStr = "expected a fmt chunk in wave file";  throw ErrStr;  }
-	
-	result = fread( &chunkSize, 1, 4, inFile );	// should be 16, 18, or 40
-	if (chunkSize<sizeof(WAVEFORMATEX))
-	{  ErrStr = "fmt chunk size is too small in wave file";  throw ErrStr;  }
-	
 
-	result = fread( &fmt, 1, sizeof(WAVEFORMATEX), inFile );	// should be 16, 18, or 40				
+	result = fread( &chunkSize, 1, 4, inFile );	// should be 16, 18, or 40
+	if (chunkSize>sizeof(WAVEFORMATEX))
+	{  ErrStr = "fmt chunk size is too large in wave file";  throw ErrStr;  }
+
+	//printf( "fmt  chunkSize=%d bytes;  WAVEFORMATEX=%d bytes  \n", chunkSize, sizeof(WAVEFORMATEX) );	
+	//pos = ftell(inFile);
+	//printf("pos=%d\n", pos );
+
+	result = fread( &fmt, 1, chunkSize, inFile );	// should be 16, 18, or 40				
 	//printf("size of fmt=%d.  bytes read=%d\n", sizeof(WAVEFORMATEX), result);
 	set_wave_format( &fmt );
 
-	WORD cbSize=0;		// extension size
-	result = fread( &cbSize, 1, 2, inFile );
-	if (cbSize)
-	{
-	 result = fread( extension, cbSize, 1, inFile  );
-	 printf( "fread extension, %d bytes\n", result );
-	}
-	
-		// "fact" chunk (compressed files gives number of samples)		
+	//string fmt = get_format_string();
+	//printf("wave::Load()  %s\n", fmt.c_str() );	
+
+	// FACT "fact" chunk (compressed files gives number of samples)		
 /*		result = fread( tmp, 4, 1, inFile );	    
 		if(strncmp(tmp,"fact ",4) != 0)	   
 		{  ErrStr.Format("expected a fact chunk in wave file");  throw ErrStr;  }	
 		result = fread( &chunkSize, 1, 4, inFile );	// should be 16, 18, or 40
 */
-	// READ "DATA" chunk : 
+
+	// DATA "data" CHUNK : 		
+	result = fread( tmp, 4, 1, inFile );
+	//printf("\n%d : tmp=%x %x %x %x \n", pos, tmp[0], tmp[1], tmp[2], tmp[3] );	
 	while( (strncmp(tmp,"data",4) != 0) && (!feof(inFile)) )     // Find "data" chunk:
 	{
 		fseek( inFile, -3L, SEEK_CUR );
-		result = fread( tmp, 4, 1, inFile );	
+		result = fread( tmp, 4, 1, inFile );		
 	}
 	if (feof(inFile))
 	{  ErrStr="data chunk not found in wave";  throw ErrStr; }
 
-
-	result = fread( &chunkSize, 1, 4, inFile );	// data size
-	m_buffer_length = m_bytes_recorded = chunkSize;			// chunkSize is Definitely BYTES!
-	printf("data size = %d bytes;\n", chunkSize );
+	result = fread( &chunkSize, 1, 4, inFile );			// data size
+	m_buffer_length = m_bytes_recorded = chunkSize;		// chunkSize is Definitely BYTES!
+	//printf("data size = %d bytes;\n", chunkSize );
 	
 	long int nsamples = chunkSize/2;
 	if (m_data == NULL)
@@ -243,47 +247,67 @@ bool Wave::Load(string Filename)
 		/* Why does this require 2x the memory as expected.
 		the chunkSize should be in BYTES.  and i allocate in shorts
 		so should only require 1/2.  however this causes GPF crashes! */
-		char* tmp = (char*) malloc (chunkSize);
-		//char* tmp = new char[chunkSize*2];
-		m_data    = (short*) tmp;
-		int siz   = sizeof(*m_data);
-		printf("allocated %d bytes;  required: %d /%d= %d shorts \n", 
-				siz, chunkSize, sizeof(short), nsamples );
+		//char* tmp = (char*) malloc (chunkSize);
+		m_data    = (short*) new short[nsamples];
+		printf("allocated bytes;  required: %d /%d= %d shorts \n", 
+				chunkSize, sizeof(short), nsamples );
 	}
 
 	result = fread( (void*)m_data, 1, chunkSize, inFile );	// data size
-	//for (int j=0; j<20; j++)
-	//	printf(" m_data[%d]=%4x\n", j, m_data[j] );
-
-	printf("fread %d data bytes\n", result);
 	fclose( inFile );
-
-	//if (NumRead < chunkSize)
-	//{  ErrStr.Format("Data missing in file.");  throw ErrStr; };
+	
 	return true;
 }
 
-// returns array of x,y floats.
-float* Wave::get_VG_path_coords( int mChannel, float mPixelHeight ) 
+float Wave::calc_zoom( int mPixels, float mSamples )
 {
-	int samples = get_samples_recorded();
-	int size = samples * 2;
-	float* coords = new float[size];
+/* Returns array of x,y floats
+	Zoom units are:  pixels / samples
+	So Zoom=2.0 means 2 pixels per sample.    (zoomed in)
+	So Zoom=0.5 means 1 pixels per 2 samples. (ie every other sample - zoomed out)
 
-	int index = 0;
-	for (int i=0; i<samples; i++)
+	Zoom may range from 
+	(width pixels / 2 samples)		maybe cap sooner, ie (20 pixels per 2 samples)
+			to 
+	(1 pixel / n samples recorded)
+*/ 
+	float max_samples = get_samples_recorded();
+	if ( mSamples > max_samples )
+		mSamples = max_samples;
+	
+	float zoom = mPixels / mSamples;	
+	return zoom;
+}
+
+int Wave::get_VG_path_coords( float* &mCoords, int mChannel, float mPixelHeight, 
+							float mZoomFactor, float left, float bottom )
+{
+	// By skipping every other zoom factor sample, the waveform is not interesting at all
+	// the aliasing leaves 
+	int samples = get_samples_recorded();
+	mCoords 	= new float[samples*2];
+
+	// a VGPath is an array of (x,y) pairs : 
+	int index  = 1;
+	float center = bottom+mPixelHeight/2.;
+	float scale = mPixelHeight/(2*32767.);
+	
+	for (int i = 0; i<samples; i++)
 	{
-		coords[index] = mPixelHeight * GetSample(i, mChannel) / 32767.;
-		index += 2;
+		(mCoords)[index] = center + scale * GetSample(i, mChannel);
+		index += 2;		// skip to next y value.
 	}
 
-	index = 1;
+	// Fill in the X coordinates:
+	index = 0;
 	for (int i=0; i<samples; i++)
 	{
-		coords[index] = i;
+		(mCoords)[index] = left + (i*mZoomFactor);
 		index += 2;
-	}	
+	}
+	return samples;
 }
+
 ///////////////////////////////////////////////////////////////
 // PURPOSE:  Will peruse the buffer of waveforms if needed.
 //  this is supposed to be faster since it takes out the big while loop.
@@ -318,10 +342,15 @@ string Wave::get_format_string()
 		case WAVE_FORMAT_EXTENSIBLE	:  s << "extensible Data";	break;
 		default : s << "unknown format";  break;
 	}
+    float samps_recorded = round(m_bytes_recorded/m_block_align);
+    float time = ((float)samps_recorded / (float)m_samples_per_second);
 
-	s << "\nChannels\t=" << m_number_channels    << "\n";
-	s << "Sample Rate\t="  << m_samples_per_second << "\n";
-	s << "BlockAlign\t="   << m_block_align 		 << " bytes\n";
+	s << "\nChannels\t="    << m_number_channels     << "\n";
+	s << "Sample Rate\t="   << m_samples_per_second  << "\n";
+	s << "BlockAlign\t="    << m_block_align 		 << " bytes\n";
+	s << "Size\t="			<< m_buffer_length 		 << " bytes\n";
+	s << "Samples\t="		<< m_buffer_length/m_block_align << "\n";
+	s << "Time   \t="		<< time 				 << " seconds ";
    return s.str();
 }
 
@@ -351,7 +380,7 @@ string Wave::GetTotalTimeStr()
 	return s.str();
 }
 
-long int	Wave::get_samples_recorded( )
+inline long int	Wave::get_samples_recorded( )
 {
 	float samps_recorded = round(m_bytes_recorded/m_block_align);
 	return samps_recorded;

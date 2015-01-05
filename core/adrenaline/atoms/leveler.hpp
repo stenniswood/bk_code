@@ -7,6 +7,7 @@ class Leveler : public Control
 {
 public:
 	Leveler	(float Max, float Min);
+	Leveler	();	
 	// set level percent actually moves the marker.
 	// want to expand this to set max, min, and level.
 	// so we can show any unit, not just percents!

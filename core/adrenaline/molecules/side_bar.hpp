@@ -47,6 +47,9 @@ public:
 	float			get_short_width	 (   );	// for minimized view (ie. just icons)
 	float			get_expanded_width	 ( );	// for minimized view (ie. just icons)
 	
+	void			unload_controls	 ( );	// does not delete
+	void			load_controls	 ( vector<Control*>* mSidebar_controls );
+
 	int				add_control		 ( Control* mControl, char* mText=NULL );
 	void			hide			 ( bool mHide = true);
 	void			auto_hide		 ( bool mAutoHide = true);
@@ -54,11 +57,10 @@ public:
 
 	virtual int		onCreate	  		(  ) {};
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
-	
+
 	
 protected:
 	int				m_state;
-	int				m_num_tabs;
 	list<string>	m_paired_text;
 	float			m_bottom_margin;	
 	

@@ -38,7 +38,7 @@ public:
 	void			onPlace			 (   );
 	virtual int		onCreate	  		(  );	// chance to load resources, 	
 	
-	//void			set_text		 ( char* mText );
+	void			set_text		 ( char* mText )	{ m_text_view.set_text( mText );		};
 	int				add_control		 ( Control* mControl, char* mText=NULL );
 	void			hide			 ( bool mHide = true);
 	void			auto_hide		 ( bool mAutoHide = true);

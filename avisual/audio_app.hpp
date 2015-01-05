@@ -39,6 +39,50 @@ void init_audio_view		(			);
 
 // 12, 7, 16,  not working
 
+class AudioApp : public Application
+{
+public:
+	AudioApp ();
+	AudioApp ( Rectangle* mRect );
+	~AudioApp();
+
+	virtual void 	Initialize		(	);	// create all the objects here.
+	int				onPlace			(	);
+
+	virtual void	setup_menu  	( );
+	virtual void	setup_app_menu  ( );
+	virtual void 	register_with_display_manager();	
+	
+	int				About			(	);
+	int				Preferences		(	);
+			
+	virtual void	file_new		( );
+	virtual void	file_open		( );	
+	virtual void	file_open_recent( );	
+	virtual void	file_save		( );
+	virtual void	file_save_as	( );
+		
+
+	void 			audio_play		( );
+	void 			configure_wave_views(int mChannels, short* mDataCh1, short* mDataCh2 );
+
+	void 			zoom_in			();
+	void 			zoom_out		();
+	void 			show_mixer		();
+	void 			show_frequency	();
+	void 			show_fft  		();
+
+	Wave 				dWave;			// active wave
+
+	TextView 			WaveformInfo;
+	StereoPowerLevels 	spl;
+	FrequencyView	 	freq_view;
+	WaveView 		 	wave_view_left ;
+	WaveView 		 	wave_view_right;
+	Leveler			 	VolumeSlider;
+};
+
+extern AudioApp* audio_app;
 
 #endif
 

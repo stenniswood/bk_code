@@ -67,38 +67,33 @@ int  VerticalMenu::calc_metrics()
 // New sjt - add to header!
 int  VerticalMenu::create_std_file_menu()
 {
+	m_entries.clear_all();
 	add_simple_command( "New"   		);
 	add_simple_command( "Open"  		);
 	add_simple_command( "Open Recent"	);	
 	add_simple_command( "Save"  		);
 	add_simple_command( "Save As" 		);
-	add_simple_command( "Quit" 			);
 }
-
-
-	char	text[50];
-	char	alt_key[4];				// to activate from keyboard once menu is already active.
-	char	short_cut_key[4];		// to directly activate from keyboard 
-	float	width;
-	int		state;
-	int		(*callback)(void*, int);		// called when the item is selected.
-
 
 int  VerticalMenu::add_simple_command( char* mText, char* mShortcut )
 {
+	printf( "add_simple_command:: %s \n", mText );
 	set_item( mText );
-	//printf  ( "add_simple_command:: %s \n", mText );
 
-	struct stVertMenuInfo m;  // = new struct stVertMenuInfo();
-	strcpy (m.alt_key, " ");
+	struct stVertMenuInfo m;  
+	strcpy (m.alt_key, 		 " ");
 	strcpy (m.short_cut_key, " ");
-	m.width = 0;
-	m.state = MENU_STATE_NORMAL;
-	m.callback = NULL;	
-	strcpy ( m.text, mText );  
+	m.width 	= 0;
+	m.state 	= MENU_STATE_NORMAL;
+	m.callback 	= NULL;	
+	m.menu 		= NULL;
+	strcpy (m.text, mText 		);
+	
 	if (mShortcut)
 		strcpy ( m.short_cut_key, mShortcut );		// to directly activate from keyboard 	
 	m_entries.push_back( m );
+	printf  ( "add_simple_command:: 4 \n" );
+	
 	calc_metrics();
 	//printf  ( "add_simple_command:: 4 \n" );			
 }
@@ -144,8 +139,25 @@ void 	VerticalMenu::draw_one_row( int mRow, float mY )
 	//printf("%6.1f %6.1f   %s \n", left, mY, (char*)get_item(mRow)->c_str() ); 
 	Text( left, mY, (char*)get_item(mRow)->c_str(), SerifTypeface, text_size );
 
+	if (m_entries[mRow].menu)
+		draw_triangle( mRow, mY );
+
 	// draw short cut info (if available)
 	//TextEnd( left, mY, (char*)get_item(mRow)->c_str(), SerifTypeface, text_size );
+}
+
+// indicator of sub menu.
+int	VerticalMenu::draw_triangle( int mRow, float mY )
+{
+	Stroke_l( text_color );
+	Fill_l  ( text_color );
+	float c = mY+text_size/2.;
+	float b = mY + 2;
+	float t = mY + text_size - 2;
+	float x = left + width - 15;
+	Line( x, b, x, t);
+	Line( x, t, x+10, c);
+	Line( x+10, c, x, b);
 }
 
 int   	VerticalMenu::draw		 		( 	)

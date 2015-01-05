@@ -24,6 +24,7 @@
 #include "stereo_power.hpp"
 #include "display_manager.hpp"
 
+#include "wave.hpp"
 #include "wave_view.hpp"
 #include "frequency_view.hpp"
 
@@ -40,4 +41,5 @@
 #include "system_bar.hpp"
 #include "side_bar.hpp"
 #include "application.hpp"
+
 

@@ -155,7 +155,7 @@ void load_test_screen(int number)
 
 	case 21: init_image_gallery		();		break;		
 	case 22: init_okay_cancel_dlg	();		break;
-	case 23: init_audio_view		();		break;
+	
 	case 24: init_directory_lb_test	();		break;
 	case 25: init_file_browser		();		break;			
 	case 26: init_sidebar_test		();		break;
@@ -318,8 +318,8 @@ void init_check_button_test()
 	// Aha architecture problem:  height of check1 is not determined until onCreate()
 	// yet here we need it to place check2.  
 	// Think of how to best do this after lunch.
-
-	check2.set_position_below( &check1, true, 50. );
+	
+	
 	//check1.copy_position_horiz( &check2 );
 
 	//check1.print_positions();
@@ -329,6 +329,7 @@ void init_check_button_test()
 	MainDisplay.remove_all_objects(		);	
 	MainDisplay.add_object( &check1 );
 	MainDisplay.add_object( &check2 );	
+	check2.set_position_below( &check1, true, 50. );
 }
 
 

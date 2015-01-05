@@ -185,7 +185,7 @@ int	SystemBar::onCreate(  )
 	//printf("\tSystem Menu:  sysmenu:%x  draw_menu:%x \n", &system_hmenu, &draw_menu );
 	m_Menu = &system_hmenu;	
 
-	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_soft_side) );
+	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_side) );
 	//m_show_taskbar.set_on_click_listener( show_taskbar, MainDisplay.m_show_sidebar );
 	//m_wifi.set_on_click_listener  ( show_wifi,   (void*)&(MainDisplay.m_wifi  ) );
 	//m_volume.set_on_click_listener( show_volume, (void*)&(MainDisplay.m_volume) );

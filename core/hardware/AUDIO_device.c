@@ -356,32 +356,38 @@ static const char *audio_dest[] = {"local", "hdmi"};
 
 void play_waveform( Wave* mWave, int dest ) 
 { 
-   AUDIOPLAY_STATE_T *st;
-   int32_t ret;
+	AUDIOPLAY_STATE_T *st;
+	int32_t ret;
 
-   int buffer_size = (BUFFER_SIZE_SAMPLES * mWave->m_bits_per_sample * OUT_CHANNELS(mWave->m_number_channels))>>3;
-   assert(dest == 0 || dest == 1);
+	int buffer_size = (BUFFER_SIZE_SAMPLES * mWave->m_bits_per_sample * OUT_CHANNELS(mWave->m_number_channels))>>3;
+	assert(dest == 0 || dest == 1);
 	
-   ret = audioplay_create(&st, mWave->m_samples_per_second, mWave->m_number_channels, 
-   							   mWave->m_bits_per_sample, 10, buffer_size );
-   assert(ret == 0);
+	ret = audioplay_create(&st, mWave->m_samples_per_second, mWave->m_number_channels, 
+   								mWave->m_bits_per_sample, 10, buffer_size );
+	assert(ret == 0);
+
+	ret = audioplay_set_dest( st, audio_dest[dest] );
+	assert(ret == 0);
    
-   ret = audioplay_set_dest(st, audio_dest[dest]);
-   assert(ret == 0);
-   
-   int32_t offset = 0;
-   bool done=false;
+	int32_t offset = 0;
+	bool done=false;
+	int     copy_size=buffer_size;
+	uint8_t *buf;
+	uint8_t *src = (uint8_t*)mWave->m_data;
+
    while(!done)
    {
-      uint8_t *buf;
       int16_t *p;      
       uint32_t latency;
 
       while((buf = audioplay_get_buffer(st)) == NULL)
          usleep(10*1000);	// 10ms 
-	   
-	  // Fill buffer 
-	  memcpy( buf, ((uint8_t*)mWave->m_data)+offset, buffer_size );
+
+	  // Fill buffer :
+	  copy_size = buffer_size;
+	  if ( (offset+buffer_size) > mWave->m_buffer_length)
+			copy_size = mWave->m_buffer_length - offset;
+	  memcpy( buf,  src+offset, copy_size );
 	  offset += buffer_size; 
 	  if (offset >= mWave->m_buffer_length) 
 	  	done = true; 

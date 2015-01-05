@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include <math.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
@@ -12,6 +13,8 @@
 #include "Graphbase.hpp"
 #include "control.hpp"
 #include "display.h"
+
+#include "wave.hpp"
 #include "wave_view.hpp"
 
 #define margin_percent 0.07
@@ -39,7 +42,9 @@ WaveView::WaveView()
 void WaveView::Initialize()
 {
 	background_color = 0xFF000000;
-
+	m_wave 		= NULL;
+	m_channel   = 0;
+	
 	margin		= 0.05;		// 5%
 	max 		= 32767;
 	gain		= 8.0;
@@ -65,18 +70,9 @@ float WaveView::sample_to_y( short mSampleValue )
 	return samp1_y;
 }
 
-int WaveView::draw( )
+int WaveView::draw_wave( )
 {
-	Control::draw();
-	calc_metrics();
-
-	// Pick waveform color:
-	long int color = 0xFF00FF00;		// start at green.
-	Fill_l  (color);
-	Stroke_l(color);
-	StrokeWidth(1.0);
-	
-	// DRAW : 
+	// DRAW :
 	float y1,y2;
 	int start 	   = 0;		// first sample visible!
 	int i		   = start;	
@@ -85,7 +81,93 @@ int WaveView::draw( )
 		y1 = sample_to_y( data[i]   );
 		y2 = sample_to_y( data[i+1] );
 		Line( x, y1, x+1, y2 );
-	}	
+	}
 }
 
+
+int WaveView::get_VG_path_coords( float* &mCoords, int mChannel, 
+									float mZoomFactor )
+{
+	// By skipping every other zoom factor sample, the waveform is not interesting at all
+	// the aliasing leaves 
+	int samples = m_wave->get_samples_recorded();
+	int vis_samples = (width / mZoomFactor);
+	if (vis_samples < samples)
+		samples = vis_samples;
+	mCoords = new float[samples*2];
+
+	// a VGPath is an array of (x,y) pairs : 
+	int index = 1;
+	float center = bottom + height/2.;
+	float scale  = height/(2*32767.) ;
+
+	for (int i = 0; i<samples; i++)
+	{
+		(mCoords)[index] = center + scale * m_wave->GetSample(i, mChannel);
+		index += 2;		// skip to next y value
+	}
+
+	// Fill in the X coordinates:
+	index = 0;
+	for (int i=0; i<samples; i++)
+	{
+		(mCoords)[index] = left + (i*mZoomFactor);
+		index += 2;
+	}
+	return samples;
+}
+
+int WaveView::draw_wave2( int mChannel, float mZoom )
+{
+	VGfloat *coords;
+	VGint numCoords = get_VG_path_coords( coords, mChannel, mZoom );
+	printf( "WaveView::draw_wave2()\n" );
+
+	VGint numCmds		= numCoords;
+	VGubyte * commands  = new VGubyte[numCmds];
+
+	VGPath path = vgCreatePath(VG_PATH_FORMAT_STANDARD,
+								VG_PATH_DATATYPE_F,
+								1.0f, 0.0f, 		// scale,bias
+								numCmds, numCoords,
+								VG_PATH_CAPABILITY_ALL );
+
+	commands[0] = VG_MOVE_TO_ABS;
+	for (int i=1; i<numCmds; i++)
+		commands[i] = VG_LINE_TO_ABS;
+
+	vgAppendPathData(path, numCmds, commands, coords);
+	vgDrawPath		(path, VG_STROKE_PATH			);
+	printf( "WaveView::draw_wave2() drawPath done\n" );
+	delete commands;
+	printf( "WaveView::draw_wave2() delete commands done\n" );
+	delete coords;
+	printf( "WaveView::draw_wave2() delete coords done\n" );
+}
+
+int WaveView::draw( )
+{
+	printf("WaveView::draw()\n");
+	Control::draw();
+	calc_metrics();
+
+	// Pick waveform color:
+	long int color = 0xFF00FF00;		// start at green.
+	Fill_l  (color);
+	Stroke_l(color);
+	StrokeWidth(1.0);
+
+	// 
+	printf("WaveView::draw() mid\n");
+	if (m_wave==NULL) return 0;	
+	int SamplesVisible = m_wave->get_samples_recorded()/10.;
+	if (SamplesVisible>0)
+	{
+		float zoom = m_wave->calc_zoom( width, SamplesVisible );
+		printf("SamplesVisible=%d;   zoom=%1.6f\n", SamplesVisible, zoom );
+		draw_wave2( m_channel, zoom );
+	}
+	printf("WaveView::draw() done\n");
+	return 1;
+}
 

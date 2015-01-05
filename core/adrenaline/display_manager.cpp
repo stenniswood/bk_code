@@ -24,8 +24,8 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug 0
-#define Debug2 0
+#define Debug 1
+#define Debug2 1
 
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
 : IconView(  Left,  Right,  Top,  Bottom, NULL)
@@ -81,7 +81,7 @@ void DisplayManager::call_on_creates( )
 void DisplayManager::Initialize()
 {	
 	// put actual icons on it:
-	init_default_sidebar( &m_soft_side );
+	init_default_sidebar( &m_side );
 }
 
 int	DisplayManager::onPlace( )
@@ -109,14 +109,14 @@ int	DisplayManager::onPlace( )
 	m_status.onPlace		 (  );
 	
 	// RIGHT SideBar
-	int sidebar_width = m_soft_side.get_expanded_width();
+	int sidebar_width = m_side.get_expanded_width();
 	float h 		  = height - status_height - system_bar_height;
 	// m_sb.get_height() = 36.
 	// m_status.get_height() = 64
-	m_soft_side.move_to			( screen_width-sidebar_width, status_height );
-	m_soft_side.set_width_height( sidebar_width, h );
-	if (Debug) m_soft_side.print_positions();
-	m_soft_side.onPlace( );
+	m_side.move_to			( screen_width-sidebar_width, status_height );
+	m_side.set_width_height( sidebar_width, h );
+	if (Debug) m_side.print_positions();
+	m_side.onPlace( );
 }
 
 int	DisplayManager::onCreate(  )
@@ -128,12 +128,10 @@ int	DisplayManager::onCreate(  )
 void DisplayManager::start_app( Application* mApp )
 {
 	mApp->onCreate();
-	
 }
 
 void DisplayManager::close_app( Application* mApp	  )
 {
-
 	delete mApp;
 }	
 
@@ -164,10 +162,13 @@ Rectangle*	DisplayManager::get_useable_rect( )
 	rect.set_top( m_sb.get_bottom() );
 
 	// Right Side:
-	if (m_soft_side.is_visible()==true)
-		rect.set_right( m_soft_side.get_left()-1 );
+	printf("DisplayManager::get_useable_rect( )\n");
+	
+	if (m_side.is_visible()==true)
+		rect.set_right( m_side.get_left()-1 );
 	else
 		rect.set_right( screen_width );
+	printf("right = %6.1f\n", rect.set_right() );
 	
 	// no task bar yet!
 	rect.set_left( 0 );
@@ -187,6 +188,7 @@ void DisplayManager::load_resources( )
 	{
 		read_from_jpeg_file( );
 	}
+	
 	// Load all controls which are already registered.
 	if (Debug) printf("Loading child resources\n");
 	vector<Control*>::iterator	iter = m_child_controls.begin();
@@ -224,17 +226,16 @@ void  DisplayManager::remove_all_objects(  )
 
 	// Put back in the bare essentials!		
 	register_child( &m_status );	
-	register_child( &m_sb );
-	register_child( &m_soft_side );
+	register_child( &m_sb   );
+	register_child( &m_side );
 }
 
 int   DisplayManager::draw(	)
 {
 	if (Debug2) printf("\n======display manager draw===========\tStart:\n" );
-	start_screen();		//	start_draw();
+	start_screen();
 	draw_background();
 	draw_children();
-	m_sb.draw();	
 	end_draw();				// end is needed to see display!
 	if (Debug2) printf("======display manager draw===========\tDone!\n\n" );
 }
@@ -256,11 +257,11 @@ void  DisplayManager::end_draw(	)
 int   DisplayManager::draw_children( )
 {
 /*	m_sb.draw();
-	m_soft_side.draw();
+	m_side.draw();
 	m_status.draw(); */	
 	
-	if (Debug) { printf("\t\tside bar	\t");		m_soft_side.print_positions();	}
-	if (Debug) { printf("\t\tstatus bar	\t");	m_status.print_positions();			}
+	if (Debug) { printf("\t\tside bar	\t");	m_side.print_positions();	}
+	if (Debug) { printf("\t\tstatus bar	\t");	m_status.print_positions();	}
 
 	vector<Control*>::iterator	iter = m_child_controls.begin();
 	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )

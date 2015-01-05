@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include <math.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
@@ -12,6 +13,7 @@
 #include "Graphbase.hpp"
 #include "control.hpp"
 #include "display.h"
+#include "wave.hpp"
 #include "wave_view.hpp"
 #include "frequency_view.hpp"
 

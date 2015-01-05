@@ -35,7 +35,7 @@ VG_OBJS    = libshapes.o oglinit.o
 APP_CPP_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			  ipc_mem_bkinstant.o audio_app.o test_layouts.o test_combo_layouts.o \
 			  test_game_layouts.o test_graph_layouts.o avisual_menu.o draw_app.o  \
-			  power.o audio_app_menu.o 
+			  power.o audio_app_menu.o draw_app2.o 
 IPC_OBJS   = 
 ILCLIENT_OBJS = ilclient.o ilcore.o
 

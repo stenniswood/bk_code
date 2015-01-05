@@ -44,7 +44,7 @@ void init_drawing_app()
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( drawing );
-	MainDisplay.set_menu( &draw_menu );
+	MainDisplay.set_menu  ( &draw_menu );
 	printf("\ninit_drawing_app done \n");
 }
 
@@ -119,7 +119,6 @@ void init_main_draw_menu()
 	init_draw_app_menu();	
 	init_draw_file_menu();	
 	init_draw_view_menu();
-
 
 	draw_menu.add_sub_menu  ( "Draw App", &draw_app_menu );
 	draw_menu.add_sub_menu  ( "File",     &draw_file_menu );

@@ -17,16 +17,15 @@
 #include "EGL/egl.h"
 #include "GLES/gl.h"
 #include "bcm_host.h"
-//#include <string.h>
 #include <fontinfo.h>
 #include <shapes.h>
-#include "Graphbase.hpp"
-#include "display.h"
+
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
 #include "avisual_menu.hpp"
 #include "test_layouts.hpp"
 #include "draw_app.hpp"
+#include "audio_app.hpp"
 #include "test_combo_layouts.hpp"
 #include "power.hpp"
 
@@ -101,42 +100,44 @@ int show_molecule_screens( void* menuPtr, int mMenuIndex )
 	{
 	case 0: init_image_gallery		();		break;		
 	case 1: init_okay_cancel_dlg	();		break;
-	case 2: init_audio_view			();		break;
 	case 3: init_directory_lb_test	();		break;
 	case 4: init_file_browser		();		break;			
-	case 5: init_CAN_app			();		break;
-	case 6: init_drawing_app		();		break;	
-	case 7: init_camera_app			();		break;		
 	default: 	break;
 	}
 }
+
 int handle_apps_screens( void* menuPtr, int mMenuIndex )
 {
+	printf("handle_apps_screens()\n");
 	switch(mMenuIndex) 
 	{
 	case 0: init_image_gallery		();		break;		
-	case 1: init_audio_view			();		break;
+	case 1: if (audio_app==NULL)
+				audio_app = new AudioApp();
+			if (audio_app)
+				audio_app->register_with_display_manager();
+			break;
 	case 2: init_file_browser		();		break;			
 	case 3: init_CAN_app			();		break;
 	case 4: init_drawing_app		();		break;	
-	case 5: init_camera_app			();		break;
+	case 5: if (draw_app==NULL)
+				draw_app= new DrawApp();
+			draw_app->register_with_display_manager();
+	case 6: init_camera_app			();		break;
 	default: 	break;
 	}
+	printf("handle_apps_screens() done\n");
 }
 
 void init_molecule_menu()
 {
 	molecules.add_simple_command( "Image Gallery" 	);
 	molecules.add_simple_command( "Okay Cancel Dialog" );
-	molecules.add_simple_command( "Audio Amp" 		);
 	molecules.add_simple_command( "Directory lb" 	);
 	molecules.add_simple_command( "File Browser" 	);				
-	molecules.add_simple_command( "My guts (CAN)" 	);
-	molecules.add_simple_command( "Drawing" 		);
-	molecules.add_simple_command( "Camera" 		);
 	molecules.add_callback_all_items( show_molecule_screens );
-
 }
+
 void init_apps_menu()
 {
 	apps.add_simple_command( "Image Gallery" 	);
@@ -144,9 +145,9 @@ void init_apps_menu()
 	apps.add_simple_command( "File Browser" 	);				
 	apps.add_simple_command( "My guts (CAN)" 	);
 	apps.add_simple_command( "Drawing" 		);
+	apps.add_simple_command( "Drawing2" 	);
 	apps.add_simple_command( "Camera" 		);
 	apps.add_callback_all_items( handle_apps_screens );
-
 }
 
 int show_game_screens( void* menuPtr, int mMenuIndex )

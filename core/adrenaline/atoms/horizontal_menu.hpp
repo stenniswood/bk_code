@@ -45,7 +45,7 @@ public:
 //	a extract menu items from a .xml menu resource
 //	int 		  	load_from_resource	(	);
 
-	std::vector<stHorizMenuInfo*>		m_entries;
+	std::vector<stHorizMenuInfo>		m_entries;
 	int									m_selection;
 
 protected:

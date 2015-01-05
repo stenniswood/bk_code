@@ -3,6 +3,7 @@
   
 #include <vector>
 #include "../core/can/bk_system_defs.h"
+#include "rectangle.hpp"
 
 #define DefaultPadding 15
 class Window;
@@ -28,6 +29,7 @@ public:
 	// set_position should call move_to() and set_width_height() both are virtual.  so this need not be!
 	virtual void 	wrap_content	  	  ( 				);
 
+	void			set_position	  	  ( Rectangle* mRect );
 	void		 	set_position	  	  ( int Left, int Right, int Top, int Bottom );
 	virtual void 	set_width_height  	  ( int Width, int Height 		 )  { width = Width; height=Height; };
 	virtual void  	move_to	  		  	  ( float Left,   float  Bottom	 );

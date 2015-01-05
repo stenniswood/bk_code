@@ -11,11 +11,7 @@
 #include <wiringPi.h>
 #include <pthread.h>
 #include "bk_system_defs.h"
-
 #include "pican_defines.h"
-//#include "CAN_Interface.h"
-#include "packer_lcd.h"
-#include "packer_motor.h"
 #include "can_txbuff.h"
 #include "packer.h"
 #include "adrenaline_windows.h"
@@ -45,8 +41,6 @@
 #include "audio_app.hpp"
 #include "visual_memory.h"
 #include "audio_memory.h"
-#include "wave.hpp"
-
 
 
 /*
@@ -66,18 +60,21 @@ void create_threads()
 /***********************************************************************/
 int bkInstant_connected = FALSE;
 
-void init( const char* mVectorFileName )
+void init_ipc( const char* mVectorFileName )
 {
 	// Ready-to-send, Receive buffer full 
 	create_threads();
 	bkInstant_connected = connect_shared_abkInstant_memory(); 
 
+	
 	if (aud_allocate_memory() == -1)
 	{
 		printf("Cannot allocate memory.\n");
 		return;
 	}
 	aud_attach_memory();
+
+	//can_connected 		= connect_shared_CAN_memory(); 
 }
 
 void help()
@@ -100,28 +97,6 @@ void print_args(int argc, char *argv[])
 	printf("\n");
 }
 
-void load_screen(int mDisplay)
-{
-	if (Debug) printf("init_display() DisplayNum=%d\n", mDisplay);
-	switch(mDisplay)
-	{
-	case 0:	
-			load_test_screen(0);
-			
-			break;
-	case 1:	
-			break;
-	case 2:	
-			break;
-	case 3: 
-			break;
-	case 4: 
-			break;
-	default:	
-			break;
-	}
-	if (Debug) printf("init_display() completed!\n");
-}
 
 int icount=0;
 int Last_Retrieved_Number=0;
@@ -155,7 +130,6 @@ void gui_interface()
 	} 
 	else if (result == RIGHT_BUTTON_DOWN)
 	{
-		
 	}
 	else
 	{
@@ -168,6 +142,7 @@ void gui_interface()
 		}
 	}
 
+	//printf("ipc_memory_avis=%x\n", ipc_memory_avis);
 	if (ipc_memory_avis->NumberClients != Last_Retrieved_Number)
 	{
 		update_available_client_list();
@@ -222,7 +197,7 @@ extern Wave dWave;
 int main( int argc, char *argv[] )
 {
 	printf("======= main() ==============\n");		
-	init("simple_walk.csv");
+	init_ipc("simple_walk.csv");
 	DisplayNum      = 4; 
 	
 	printf("======= Checking command line arguments ==============\n");	
@@ -244,8 +219,8 @@ int main( int argc, char *argv[] )
 	UpdateDisplaySemaphore=1;
 	MainDisplay.onCreate();
 
-	audio_file_open();
-	play_waveform( &dWave, 1 );
+	//audio_file_open();
+	//play_waveform( &dWave, 1 );
 	//audio_play();
 	
 	printf("================= Main Loop ==========================\n");	
@@ -257,7 +232,7 @@ int main( int argc, char *argv[] )
 
 		// Want to be able to open the screen leaving everything as is.
 		// then do an end again to render the mouse.
-		
+
 		/*sequencer_interface();
 		voice_interface();
 		behavior_interface(); */

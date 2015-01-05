@@ -57,7 +57,9 @@ public:
 
 	int   			show	 			( bool mVisible	);	
 	virtual void 	draw_one_row		( int mRow, float mY );	
+	int			   	draw_triangle 		( int mRow, float mY );	// indicator of sub menu.
 	virtual int   	draw		 		(				);
+
 
 	int				get_hit_index		( int Mousex, int Mousey );
 	virtual int		onHover				( int x, int y, bool mouse_is_down=true );
