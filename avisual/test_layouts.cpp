@@ -40,7 +40,7 @@ AUTHOR	: Steve Tenniswood
 #include "test_graph_layouts.hpp"
 //#include "can_msg_view.hpp"
 #include "window_layouts.hpp"
-
+ 
 
 #define Debug 0
 
@@ -173,7 +173,7 @@ void load_test_screen(int number)
 	case 43: init_hearts			();		break;
 	case 44: init_reversi			();		break;
 	case 45: init_battleships		();		break;	
-	
+ 
 	case 80: init_pot_objs(); 		break;
 	case 81: init_tilt_objs(); 		break;
 	case 82: init_control_test(); 	break;
@@ -488,7 +488,7 @@ VerticalMenu   simple   (-1,-1);
 //VerticalMenu   molecules(-1,-1);
 static VerticalMenu   games	(-1,-1);
 
-int menu_callback(void* menuPtr, int mMenuIndex )
+int menu_callback(void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	printf("menu_callback( %4x, %d )\n", menuPtr, mMenuIndex );
 	load_test_screen( mMenuIndex );

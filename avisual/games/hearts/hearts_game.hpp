@@ -18,7 +18,8 @@ public:
 
 	// Deals cards, places one in the center.
 	void	setup					(						);
-
+	void	onPlace					(						);
+	
 	virtual int		number_of_cards_to_start( int mNumber_of_players);
 	void	discard_one				(						);
 	int		remove_cards			(						);
@@ -27,7 +28,7 @@ public:
 	void	evaluate_winners		(						);	
 	//void 	set_graphic_center		( float cx, float cy 	);	
 	//void	place_players			( float radius 			);		// place places around the game's center point.
-	void	add_to_display_manager	( DisplayManager* dm 	);	
+	void	register_with_display_manager( 					);	
 	Card*	draw_one				(						);
 
 protected:

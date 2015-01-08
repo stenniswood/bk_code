@@ -90,16 +90,21 @@ int		HeartsGame::remove_cards(	)
 	}
 }
 
-void	HeartsGame::add_to_display_manager( DisplayManager* dm )
+void	HeartsGame::onPlace			(	)
 {
-	dm->add_object( &trick );
+	
+}
+
+void	HeartsGame::register_with_display_manager(  )
+{
+	MainDisplay.add_object( &trick );
 	int i=0;
 
 	// Display Manager Players : 
 	vector<CardPlayer*>::iterator	iter = players.begin();
 	while (  iter != players.end()  )
 	{
-		dm->add_object( (*iter) );
+		MainDisplay.add_object( (*iter) );
 		iter++;
 	}	
 }

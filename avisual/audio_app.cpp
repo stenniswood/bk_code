@@ -39,9 +39,7 @@ AUTHOR	: Steve Tenniswood
 
 extern int UpdateDisplaySemaphore;
 
-
 AudioApp* audio_app = NULL;
-
 
 void AudioApp::file_new			() 
 { 
@@ -64,8 +62,6 @@ void AudioApp::file_open	()
 	WAVEHDR* d2 = dWave.extract_channel_data(1);
 	configure_wave_views( dWave.m_number_channels, (short*)d1->lpData , (short*)d2->lpData );
 	WaveformInfo.set_text( dWave.get_format_string().c_str() );
-	
-	
 	printf("Wave Loaded!\n");
 }
 
@@ -205,15 +201,25 @@ wave_view_left(-1,-1), wave_view_right(-1,-1), VolumeSlider(-1,-1)
 
 void	AudioApp::setup_app_menu(	)
 {
-	// over ride this to setup the menu.	
+	Application::setup_app_menu();
 }
 
 void	AudioApp::setup_menu  	( )
 {
+	Application::setup_menu();
+
 	try {
 		printf("AudioApp::setup_menu() \n");
 		init_audio_menu( &m_hMenu );
+
+		//m_hMenu.m_entries.clear();
+		//audio_menu->add_sub_menu( "Audio Master", &audio_master );
+		//m_hMenu.add_sub_menu( "File",     &audio_file 		);
+		m_hMenu.add_sub_menu( "View",     &audio_view 		);
+		m_hMenu.add_sub_menu( "Play",     &audio_play_menu 	);
+		m_hMenu.add_sub_menu( "Effects",  &audio_effects 	);
 		printf("AudioApp::setup_menu() init audio menu done\n");		
+
 	} catch (std::bad_alloc& ba)
 	{
 		std::cerr << "bad_alloc caught: " << ba.what() << '\n';
@@ -233,29 +239,32 @@ int	AudioApp::Preferences		(	)
 // create all the objects here.
 void 	AudioApp::Initialize		(	)
 {
-	//printf("AudioApp::Initialize\n");
-	Application::Initialize();
-	setup_menu();
-
-	m_welcome_status = "Generic Application";
-	MainDisplay.m_status.set_text( m_welcome_status.c_str() );
+	/*  Base class is initialized in the base class constructor.
+		ie. The Application::Initialize is invoked there (not this one)
+		Even though the function is virtual, for the base class,
+		it calls the same level (base class) Initialize()
+		Application::Initialize();	This will get called anyway!
+		Therefore it is uneccessary and should not be put in.
+	*/
+	m_application_name = "Audio Master";
+	m_welcome_status   = m_application_name;
 	
-	VolumeSlider.set_width_height ( 70,200  );
-	VolumeSlider.move_to		  ( 30, 100 );	
 	VolumeSlider.set_level_percent( 50.0    );	
 	VolumeSlider.set_max		  ( 100.0   );
+	VolumeSlider.set_width_height ( 70,200  );
+	VolumeSlider.move_to		  ( 30, 100 );	
 	VolumeSlider.set_text		  ( "Volume" );
 
 	// also spl stereo power level: 
-	spl.set_width_height		( 100, 200 );
-	spl.move_to					( 100, 100 );
 	spl.set_max					( 100.0	   );
 	spl.set_min					(   0.0	   );
 	spl.set_level_left			(  50.0    );
 	spl.set_level_right			(  50.0    );
 	spl.set_number_boxes		(  -1 	   );
+	spl.set_width_height		( 100, 200 );
+	spl.move_to					( 100, 100 );
 	//printf("AudioApp::Initialize spl done\n");
-	
+
 	WaveformInfo.set_width_height( 300, 150 );
 	WaveformInfo.move_to		 (  10, 730 );
 	char* txt=NULL;
@@ -264,11 +273,10 @@ void 	AudioApp::Initialize		(	)
 		txt = get_audio_text	( &(ipc_memory_aud->audio_header));	
 		printf("AudioApp::Initialize txt=%s\n",txt);		
 		WaveformInfo.set_text	( txt );		
-	} 
-	//WaveformInfo.set_text	("hello");
+	}
 	WaveformInfo.set_text_size	 ( 12  );
 
-	//printf("AudioApp::Initialize 2\n");
+	//printf("AudioApp::Initialize 2\n"); 
 	//if (ipc_memory_aud != NULL)
 		configure_wave_views( ipc_memory_aud->audio_header.num_channels,
 						  (short*)ipc_memory_aud->audio_data,
@@ -280,6 +288,10 @@ void 	AudioApp::Initialize		(	)
 	//freq_view.set_data( freqs, 64 );
 	printf("AudioApp::Initialize 3\n");
 	
+	setup_app_menu();
+	setup_menu    ();
+	onPlace();	
+
 	// CREATE Audio Visual Thread : 
 	int iret1 = pthread_create( &audio_view_thread_id, NULL, process_audio, NULL);
 	if (iret1)
@@ -300,6 +312,7 @@ void AudioApp::register_with_display_manager()
 	MainDisplay.add_object( &wave_view_right );
 	MainDisplay.add_object( &freq_view 	 	 );
 	MainDisplay.set_menu  ( &m_hMenu  	 	 );
+	//MainDisplay.m_status.set_text( m_welcome_status.c_str() );	
 }
 
 void AudioApp::configure_wave_views(int mChannels, short* mDataCh1, short* mDataCh2 )

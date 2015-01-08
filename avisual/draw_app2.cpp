@@ -22,68 +22,49 @@
 #include "Graphbase.hpp"
 #include "adrenaline_windows.h"
 #include "draw_app.hpp"
+#include "draw_app2.hpp"
 #include "CAN_base.h"
 
 
 
-VerticalMenu     draw_app_menu (-1,-1);
-VerticalMenu     draw_file_menu(-1,-1);
-VerticalMenu     draw_view_menu(-1,-1);
 
-DrawingApp*  drawing;
+//static VerticalMenu     draw_file_menu(-1,-1);
+static VerticalMenu     draw_edit_menu(-1,-1);
+static VerticalMenu     draw_view_menu(-1,-1);
 
-int draw_app_menu_actions( void* menuPtr, int mMenuIndex )
+DrawApp*  draw_app = NULL;
+
+/*static int draw_file_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 
 	{
-	case 0: drawing->About();			break;
-	case 4: show_button_boards	();		break;
+	case 0: draw_app->file_new	 	();		break;
+	case 1: draw_app->file_open	 	();		break;
+	case 2: draw_app->file_open_recent();	break;
+	case 3: draw_app->file_save	 	();		break;
+	case 4: draw_app->file_save_as	();		break;
+	default: break;
+	} 
+} */
+
+static int draw_view_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
+{
+	switch(mMenuIndex) 
+	{
+	case 0: draw_app->show_grid	();		break;
 	default: break;
 	} 
 }
 
-int draw_file_menu_actions( void* menuPtr, int mMenuIndex )
-{
-	switch(mMenuIndex) 
-	{
-	case 0: drawing->file_new	 ();		break;
-	default: break;
-	} 
-}
-
-int draw_view_menu_actions( void* menuPtr, int mMenuIndex )
-{
-	switch(mMenuIndex) 
-	{
-	case 0: show_messages		();		break;
-	case 4: show_button_boards	();		break;
-	default: break;
-	} 
-}
-
-
-void init_draw_app_menu()
-{
-	draw_app_menu.add_simple_command( "About"		);
-	draw_app_menu.add_simple_command( "Preferences" );
-	draw_app_menu.add_simple_command( "Quit"    	);
-	draw_app_menu.add_callback_all_items( 0, draw_app_menu_actions  );
-}
-
-void init_draw_view_menu()
-{
-	draw_view_menu.add_simple_command( "Graph "		 );
-	draw_view_menu.add_simple_command( "Robot Limbs"  );
-	draw_view_menu.add_simple_command( "Button boards");
-	draw_view_menu.add_callback_all_items( draw_view_menu_actions  );
-} 
-
+/************************************************************************/
 
 DrawApp::DrawApp () 
-{ 
+{
+	Initialize(); 
 }
 DrawApp::DrawApp ( Rectangle* mRect ) 
-{ 
+{
+	Initialize(); 
 }
 DrawApp::~DrawApp() 
 { 
@@ -91,38 +72,54 @@ DrawApp::~DrawApp()
 
 void 	DrawApp::Initialize		(	) 
 { 
+	/*  Base class is initialized in the base class constructor.
+		ie. The Application::Initialize is invoked there (not this one)
+		Even though the function is virtual, for the base class,
+		it calls the same level (base class) Initialize()
+		Application::Initialize();	This will get called anyway!
+		Therefore it is uneccessary and should not be put in.
+	*/
+
+	m_main_window = new Drawing2D();
+	m_application_name = "Drawing App";
+	
+	setup_app_menu();
+	setup_menu    ();
+	onPlace();	
+
 }	// create all the objects here.
 
-int				DrawApp::onPlace			(	) 
+int		DrawApp::onPlace		(	) 
 { 
+	Application::onPlace( );
+
+}
+
+void	DrawApp::setup_app_menu( )
+{
+	Application::setup_app_menu( );
 }
 
 void	DrawApp::setup_menu  	( ) 
 { 
-	draw_app_menu.clear_all();
+	Application::setup_menu();
+
 	draw_view_menu.clear_all();
+	draw_view_menu.add_simple_command( "Graph "		 );
+	draw_view_menu.add_simple_command( "Robot Limbs"  );
+	draw_view_menu.add_simple_command( "Button boards");
+	draw_view_menu.add_callback_all_items( draw_view_menu_actions  );
 
-	draw_file_menu.create_std_file_menu();
-	draw_file_menu.add_callback_all_items( draw_file_menu_actions );
-
-	init_draw_app_menu ();
-	init_draw_view_menu();
-
-	m_hMenu.clear_all();
-	m_hMenu.add_sub_menu  ( "Draw App", &draw_app_menu  );
-	m_hMenu.add_sub_menu  ( "File",     &draw_file_menu );
 	m_hMenu.add_entry_text( "Edit" );
 	m_hMenu.add_sub_menu  ( "View",     &draw_view_menu );
 }
 
-void	DrawApp::setup_app_menu  ( ) 
-{ 
-}
 void 	DrawApp::register_with_display_manager() 
 { 
 	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( drawing );
-	MainDisplay.set_menu  	( &m_Hmenu );
+	MainDisplay.add_object	( m_main_window );
+	MainDisplay.m_status.set_text("Draw App");
+	MainDisplay.set_menu  	( &m_hMenu );
 }	
 
 int				DrawApp::About			(	) 
@@ -149,27 +146,14 @@ void	DrawApp::file_save_as	( )
 { 
 }
 
-void 			DrawApp::draw_play		( ) 
-{ 
-}
-void 			DrawApp::configure_wave_views(int mChannels, short* mDataCh1, short* mDataCh2 ) 
-{ 
-}
-
-void 			DrawApp::zoom_in			() 
-{ 
-}
-void 			DrawApp::zoom_out		() 
-{ 
-}
-void 			DrawApp::show_mixer		() 
-{ 
-}
-void 			DrawApp::show_frequency	() 
-{ 
-}
-void 			DrawApp::show_fft  		() 
-{ 
+void DrawApp::show_grid		( )
+{
 }
 
 
+void DrawApp::zoom_in			() 
+{ 
+}
+void DrawApp::zoom_out			()
+{ 
+}

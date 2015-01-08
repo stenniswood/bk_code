@@ -70,7 +70,14 @@ float WaveView::sample_to_y( short mSampleValue )
 	return samp1_y;
 }
 
-int WaveView::draw_wave( )
+void WaveView::set_data( short* mData )
+{ 
+	data = mData;
+	set_samples_visible( m_wave->get_samples_recorded() );
+	
+}
+	
+/*int WaveView::draw_wave( )
 {
 	// DRAW :
 	float y1,y2;
@@ -82,7 +89,7 @@ int WaveView::draw_wave( )
 		y2 = sample_to_y( data[i+1] );
 		Line( x, y1, x+1, y2 );
 	}
-}
+}*/
 
 
 int WaveView::get_VG_path_coords( float* &mCoords, int mChannel, 
@@ -117,16 +124,17 @@ int WaveView::get_VG_path_coords( float* &mCoords, int mChannel,
 	return samples;
 }
 
-int WaveView::draw_wave2( int mChannel, float mZoom )
+int WaveView::create_path( int mChannel, float mZoom )
 {
-	VGfloat *coords;
+	if (m_wave==NULL) return 0;	
+	
 	VGint numCoords = get_VG_path_coords( coords, mChannel, mZoom );
-	printf( "WaveView::draw_wave2()\n" );
+	printf( "WaveView::create_path()\n" );
+	
+	numCmds	  = numCoords;
+	commands  = new VGubyte[numCmds];
 
-	VGint numCmds		= numCoords;
-	VGubyte * commands  = new VGubyte[numCmds];
-
-	VGPath path = vgCreatePath(VG_PATH_FORMAT_STANDARD,
+	path 	  = vgCreatePath(VG_PATH_FORMAT_STANDARD,
 								VG_PATH_DATATYPE_F,
 								1.0f, 0.0f, 		// scale,bias
 								numCmds, numCoords,
@@ -137,12 +145,38 @@ int WaveView::draw_wave2( int mChannel, float mZoom )
 		commands[i] = VG_LINE_TO_ABS;
 
 	vgAppendPathData(path, numCmds, commands, coords);
-	vgDrawPath		(path, VG_STROKE_PATH			);
+
 	printf( "WaveView::draw_wave2() drawPath done\n" );
+}
+
+int WaveView::delete_path( )
+{
 	delete commands;
-	printf( "WaveView::draw_wave2() delete commands done\n" );
 	delete coords;
+	//
+	printf( "WaveView::draw_wave2() delete commands done\n" );
+	//
 	printf( "WaveView::draw_wave2() delete coords done\n" );
+
+}
+
+/* Times we want to re-create the path:
+
+		Zoom change.
+		Scroll of waveform.
+		Live audio as buffers arrive.
+
+	Anytime the waveform on the screen changes.
+*/
+
+void WaveView::set_samples_visible( int SamplesVisible )
+{
+	float zoom = m_wave->calc_zoom( width, SamplesVisible );
+	if (SamplesVisible>0)
+	{
+		printf("SamplesVisible=%d;   zoom=%1.6f\n", SamplesVisible, zoom );
+		create_path( m_channel, zoom );
+	}
 }
 
 int WaveView::draw( )
@@ -157,16 +191,7 @@ int WaveView::draw( )
 	Stroke_l(color);
 	StrokeWidth(1.0);
 
-	// 
-	printf("WaveView::draw() mid\n");
-	if (m_wave==NULL) return 0;	
-	int SamplesVisible = m_wave->get_samples_recorded()/10.;
-	if (SamplesVisible>0)
-	{
-		float zoom = m_wave->calc_zoom( width, SamplesVisible );
-		printf("SamplesVisible=%d;   zoom=%1.6f\n", SamplesVisible, zoom );
-		draw_wave2( m_channel, zoom );
-	}
+	vgDrawPath(path, VG_STROKE_PATH );
 	printf("WaveView::draw() done\n");
 	return 1;
 }

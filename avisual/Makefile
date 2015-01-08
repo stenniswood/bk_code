@@ -40,8 +40,8 @@ IPC_OBJS   =
 ILCLIENT_OBJS = ilclient.o ilcore.o
 
 REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o
-HEARTS_GAME_OBJS 	= hearts_game.o trick.o 
-BLACKJACK_GAME_OBJS = blackjack.o 
+HEARTS_GAME_OBJS 	= hearts_game.o hearts_app.o trick.o 
+BLACKJACK_GAME_OBJS = blackjack.o blackjack_app.o 
 CARDCORE_GAME_OBJS  = card.o card_player.o deck.o basic_card_game.o
 
 #  button_array_gui.o Container.o 

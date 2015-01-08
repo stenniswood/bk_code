@@ -1,7 +1,9 @@
 
 #include "hearts_game.hpp"
+#include "hearts_app.hpp"
 
 #include "blackjack.hpp"
+#include "blackjack_app.hpp"
 #include "deck.hpp"
 #include "control.hpp"
 #include "card.hpp"

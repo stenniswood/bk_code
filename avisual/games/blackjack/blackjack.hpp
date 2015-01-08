@@ -12,11 +12,12 @@
 class BlackJack : public Control
 {
 public:
-	BlackJack( int mNumber_of_players );
+	BlackJack( int mNumber_of_m_players );
 	
 	void		deal			(	);
 	void		score			(	);
 	int			get_score		( int mPlayerIndex );
+	void 		onPlace			(   );
 
 	CardPlayer*	get_player		( int mPlayerIndex=-1 );
 	CardPlayer*	next_player		( 	);
@@ -29,7 +30,7 @@ public:
 
 	void 		set_graphic_center( );	
 	void 		place_buttons	( int mPlayerIndex =-1	);
-	void		place_players	( float radius 		);	// place places around the game's center point.
+	void		place_m_players	( float radius 		);	// place places around the game's center point.
 														// house at top.  square first, then circle.
 	void		add_to_display_manager( DisplayManager* dm );	
 	void		load_resources	(	) { deck[0]->load_resources();  };	
@@ -42,7 +43,7 @@ public:
 
 private:
 	std::vector<Deck*>			deck;
-	std::vector<CardPlayer*>	players;
+	std::vector<CardPlayer*>	m_players;
 	CardPlayer*					house;
 	Button hit ;
 	Button stay;
@@ -50,11 +51,11 @@ private:
 
 	int		whos_turn_is_it;		// player index
 	int 	deck_index;
-	int 	number_of_players;
+	int 	number_of_m_players;
 	int		number_of_decks;
 
-	float 	cx;
-	float	cy;
+	float 	m_cx;
+	float	m_cy;
 };
 
 

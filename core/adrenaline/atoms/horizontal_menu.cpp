@@ -11,9 +11,7 @@
 #include <shapes.h>
 #include <fontinfo.h>
 #include "Graphbase.hpp"
-#include "control.hpp"
-#include "listbox.hpp"
-#include "display.h"
+#include "adrenaline_windows.h"
 #include "horizontal_menu.hpp"
 #include "vertical_menu.hpp"
 
@@ -54,6 +52,7 @@ void 	HorizontalMenu::Initialize (	)
 	text_size 		 = 14.;
 	m_menu_padding	 = 50.;
 	m_selection		 = -1 ;
+	m_application	 = NULL;
 	//printf("Colors: background=%4x; selected=%4x; text=%4x; mp=%6.1f\n", background_color, m_selected_color, text_color, m_menu_padding );
 }
 
@@ -94,12 +93,13 @@ void		HorizontalMenu::clear_all()
 }
 int		HorizontalMenu::add_sub_menu( char* mMenuText, VerticalMenu* vm )
 {
-	struct stHorizMenuInfo hmi;// = new struct stHorizMenuInfo;
-	int len   = strlen(mMenuText);
+	vm->set_h_parent( this );		// back link here.
+	struct stHorizMenuInfo hmi; 
+	int len  = strlen(mMenuText);
 	hmi.text = new char[len];
 	hmi.menu = vm;
 	strcpy( hmi.text, mMenuText );
-
+	
 	m_entries.push_back( hmi );
 	calc_metrics();
 }

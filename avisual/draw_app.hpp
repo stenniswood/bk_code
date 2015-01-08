@@ -8,9 +8,8 @@
 
 extern HorizontalMenu draw_menu;
 
-void init_drawing_app();
+void init_drawing_app	();
 void init_main_draw_menu();
-
 
 #define MENU_STATE_NORMAL 		1
 #define MENU_STATE_GRAYED 		2

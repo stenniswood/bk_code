@@ -6,6 +6,7 @@
 
 //forward:
 class VerticalMenu;
+class Application;
 
 struct stHorizMenuInfo {
 	char*	text;
@@ -47,7 +48,8 @@ public:
 
 	std::vector<stHorizMenuInfo>		m_entries;
 	int									m_selection;
-
+	Application*						m_application;   // associated with the menu.
+	
 protected:
 	long					m_selected_color;
 	int						m_text_size;

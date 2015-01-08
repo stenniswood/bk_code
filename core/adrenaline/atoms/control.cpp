@@ -179,9 +179,9 @@ void Control::copy_position_vert	  ( Control* Sibling )
 
 void Control::set_position( Rectangle* mRect )
 {
-	move_to			( mRect->get_left(), mRect->get_bottom() ); 
-	float w = mRect->get_right() - mRect->get_left();
-	float h = mRect->get_top() - mRect->get_bottom();
+	move_to( mRect->get_left(), mRect->get_bottom() ); 
+	float w = mRect->get_width(); // - mRect->get_left();
+	float h = mRect->get_height(); // - mRect->get_bottom();
 	set_width_height( w, h );	
 }
 

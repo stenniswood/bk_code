@@ -2,11 +2,11 @@
 #define _APPLICATION_
 
 #include "control.hpp"
-#include "horizontal_menu.hpp"
 #include "rectangle.hpp"
 
+#include "horizontal_menu.hpp"
+#include "vertical_menu.hpp"
 
-extern HorizontalMenu draw_menu;
 
 
 #define MENU_STATE_NORMAL 		1
@@ -48,15 +48,22 @@ public:
 	virtual void	file_open_recent( );	
 	virtual void	file_save		( );
 	virtual void	file_save_as	( );
-			void	file_quit		( );
+
+	int				About			(	);
+	int				Preferences		(	);
+	int				Quit			(	);	
 			
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	virtual int   	draw		 	(	);
-	
+
 protected:
 	HorizontalMenu			m_hMenu;	
+	VerticalMenu			m_app_menu;		// 
+	VerticalMenu			m_file_menu;	// standard file menu too.	
+
 	vector<Control*>		m_sidebar_controls;	
 	string					m_welcome_status;
+	string					m_application_name;
 	Control*				m_main_window;
 	
 };

@@ -87,7 +87,7 @@ int ImageGallery::onCreate()
 
 	pack_control( PrevImage, PACK_LEFT,  		PACK_FILL_PARENT );
 	pack_control( NextImage, PACK_RIGHT, 		PACK_FILL_PARENT );
-	//pack_control( ImageView, PACK_FILL_PARENT, 	PACK_FILL_PARENT ); 
+	pack_control( ImageView, PACK_FILL_PARENT, 	PACK_FILL_PARENT ); 
 }
 
 

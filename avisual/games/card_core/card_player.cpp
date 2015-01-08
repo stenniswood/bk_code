@@ -141,7 +141,6 @@ Card* CardPlayer::get_hit_index( float x, float y )
 int	CardPlayer::draw( )
 {
 	Control::draw();
-	//float spacing = determine_card_spacing();
 
 	//printf("CardPlayer::draw()  %x \n", this );
 	//Control::print_positions();

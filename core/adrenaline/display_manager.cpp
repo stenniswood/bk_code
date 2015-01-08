@@ -162,13 +162,13 @@ Rectangle*	DisplayManager::get_useable_rect( )
 	rect.set_top( m_sb.get_bottom() );
 
 	// Right Side:
-	printf("DisplayManager::get_useable_rect( )\n");
+	if (Debug) printf("DisplayManager::get_useable_rect( )\n");
 	
 	if (m_side.is_visible()==true)
 		rect.set_right( m_side.get_left()-1 );
 	else
 		rect.set_right( screen_width );
-	printf("right = %6.1f\n", rect.set_right() );
+	//printf("right = %6.1f\n", rect.get_right() );
 	
 	// no task bar yet!
 	rect.set_left( 0 );

@@ -46,6 +46,7 @@ void 	VerticalMenu::Initialize(	)
 	set_odd_color ( 0xEFFFFFFF );
 	set_even_color( 0xEFFFFFFF );
 
+	m_horiz_parent	   = NULL;
 	callback_all_items = NULL;
 	has_scroller	= false;
 	is_visible		= true;
@@ -67,7 +68,7 @@ int  VerticalMenu::calc_metrics()
 // New sjt - add to header!
 int  VerticalMenu::create_std_file_menu()
 {
-	m_entries.clear_all();
+	m_entries.clear();
 	add_simple_command( "New"   		);
 	add_simple_command( "Open"  		);
 	add_simple_command( "Open Recent"	);	
@@ -92,7 +93,7 @@ int  VerticalMenu::add_simple_command( char* mText, char* mShortcut )
 	if (mShortcut)
 		strcpy ( m.short_cut_key, mShortcut );		// to directly activate from keyboard 	
 	m_entries.push_back( m );
-	printf  ( "add_simple_command:: 4 \n" );
+	//printf  ( "add_simple_command:: 4 \n" );
 	
 	calc_metrics();
 	//printf  ( "add_simple_command:: 4 \n" );			
@@ -103,7 +104,7 @@ int	VerticalMenu::add_callback( int mIndex, int (*mcallback)(void*, int) )
 	m_entries[mIndex].callback = mcallback;	
 }
 
-int	VerticalMenu::add_callback_all_items( int (*callback)(void*, int) )
+int	VerticalMenu::add_callback_all_items( int (*callback)(void*, int, Application*) )
 {
 	callback_all_items = callback;
 }
@@ -195,6 +196,12 @@ int	VerticalMenu::onHover( int x, int y, bool mouse_is_down )
 	return result;
 }
 
+Application*	VerticalMenu::get_application(   )
+{
+	if (m_horiz_parent==NULL) return NULL;
+	return  m_horiz_parent->m_application;
+}
+
 // int 	VerticalMenu::set_on_click_listener( void (void*) )	
 int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 {
@@ -202,9 +209,10 @@ int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 	if ((result < m_entries.size()) && (result >= 0))
 	{
 		printf("VerticalMenu:: Selected Item #%d: %s\n", result, m_entries[result].text );
-		if (callback_all_items)
-			callback_all_items( NULL, result );
-			
+		if (callback_all_items) {
+			Application* app = get_application(   );
+			callback_all_items( NULL, result, app );
+		}	
 		if (m_entries[result].callback)
 			m_entries[result].callback( NULL, result );
 	}

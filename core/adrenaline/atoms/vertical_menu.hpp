@@ -45,12 +45,13 @@ public:
 	int				add_simple_command	( char* mText, char* mShortcut=NULL );
 	int				add_sub_menu		( char* mText, VerticalMenu* mSubMenu=NULL );	
 	int				add_callback		( int  mIndex, int (*callback)(void*, int)=NULL );	
-	int				add_callback_all_items( int (*callback)(void*, int) );	
+	int				add_callback_all_items( int (*callback)(void*, int, Application*) );	
 	int				add_entry			( stVertMenuInfo mEntry 	 );
 
 //	int				get_id				( )	{ return selected_item; };
 	int				set_state			( int mState, int mIndex );
 	int				set_h_parent		( HorizontalMenu* mMenu  );
+	Application*	get_application		(   );
 		
 	// This will move it's upper left corner to the horizontal menu:
 	int				attach_at			( float x, float y );
@@ -69,7 +70,8 @@ public:
 
 protected:
 	HorizontalMenu*			m_horiz_parent;
-	int		(*callback_all_items)(void*, int);		// called when any item is selected.
+
+	int		(*callback_all_items)(void*, int, Application*);		// called when any item is selected.
 
 	std::vector<stVertMenuInfo> m_entries;
 	int						m_selection;

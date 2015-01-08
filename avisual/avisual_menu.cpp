@@ -25,9 +25,12 @@
 #include "avisual_menu.hpp"
 #include "test_layouts.hpp"
 #include "draw_app.hpp"
+#include "draw_app2.hpp"
 #include "audio_app.hpp"
 #include "test_combo_layouts.hpp"
 #include "power.hpp"
+#include "blackjack_app.hpp"
+
 
 
 HorizontalMenu hm		(-1,-1);
@@ -41,7 +44,7 @@ VerticalMenu   power_menu(-1,-1);		// power switch pushed.
 #define Debug 0
 #define ifprintf if (Debug) printf
 
-int show_atom_screens (void* menuPtr, int mMenuIndex )
+int show_atom_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	//ifprintf("init_display() DisplayNum=%d\n", number);
 	switch(mMenuIndex) 
@@ -94,7 +97,7 @@ void init_atom_menu()
 	
 }
 
-int show_molecule_screens( void* menuPtr, int mMenuIndex )
+int show_molecule_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 
 	{
@@ -106,7 +109,7 @@ int show_molecule_screens( void* menuPtr, int mMenuIndex )
 	}
 }
 
-int handle_apps_screens( void* menuPtr, int mMenuIndex )
+int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	printf("handle_apps_screens()\n");
 	switch(mMenuIndex) 
@@ -120,9 +123,14 @@ int handle_apps_screens( void* menuPtr, int mMenuIndex )
 	case 2: init_file_browser		();		break;			
 	case 3: init_CAN_app			();		break;
 	case 4: init_drawing_app		();		break;	
-	case 5: if (draw_app==NULL)
+	case 5: if (draw_app==NULL) {
 				draw_app= new DrawApp();
-			draw_app->register_with_display_manager();
+				printf("draw_app new\n");
+			}
+			if (draw_app) {
+				draw_app->register_with_display_manager();
+				printf("draw_app registered with dm\n");
+			}
 	case 6: init_camera_app			();		break;
 	default: 	break;
 	}
@@ -150,7 +158,7 @@ void init_apps_menu()
 	apps.add_callback_all_items( handle_apps_screens );
 }
 
-int show_game_screens( void* menuPtr, int mMenuIndex )
+int show_game_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 
 	{
@@ -174,7 +182,7 @@ void init_game_menu()
 	games.add_callback_all_items( show_game_screens  );
 }
 
-int show_graph_screens( void* menuPtr, int mMenuIndex )
+int show_graph_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 
 	{
@@ -222,7 +230,7 @@ void init_system_hmenu( )
 }
 
 
-int handle_power_action( void* menuPtr, int mMenuIndex )
+int handle_power_action( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 
 	{

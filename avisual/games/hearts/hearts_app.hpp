@@ -1,25 +1,24 @@
-#ifndef _DRAW_APP2_LAYOUTS_
-#define _DRAW_APP2_LAYOUTS_
-
+#ifndef _HEARTS_APP_
+#define _HEARTS_APP_
 
 /**** These function handle the menu commands:   ****/
-void draw_zoom_in			();
-void draw_zoom_out			();
-
 
 /***** END OF MENU COMMAND FUNCTIONS *****/
 
-void configure_wave_views	( int mChannels, short* mDataCh1, short* mDataCh2 );
 
-class DrawApp : public Application
+void init_hearts( );
+
+
+class HeartsApp : public Application
 {
 public:
-	DrawApp ();
-	DrawApp ( Rectangle* mRect );
-	~DrawApp();
+	HeartsApp ();
+	HeartsApp ( Rectangle* mRect );
+	~HeartsApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 	int				onPlace			(	);
+	virtual int		onCreate	  	(	);	// First Time application is run - load resources etc.
 
 	virtual void	setup_menu  	( );
 	virtual void	setup_app_menu  ( );
@@ -27,7 +26,7 @@ public:
 	
 	int				About			(	);
 	int				Preferences		(	);
-	//int				Quit			(	);	
+	int				Quit			(	);	
 
 	virtual void	file_new		( );
 	virtual void	file_open		( );	
@@ -35,15 +34,9 @@ public:
 	virtual void	file_save		( );
 	virtual void	file_save_as	( );
 
-	void 			show_grid		( );
-
-	void 			zoom_in			();
-	void 			zoom_out		();
-
-
 };
 
-extern DrawApp* draw_app;
+extern HeartsApp* hearts_app;
 
 #endif
 

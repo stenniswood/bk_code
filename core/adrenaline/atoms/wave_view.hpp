@@ -4,8 +4,6 @@
 //#include "../core/can/bk_system_defs.h"
 #include "bk_system_defs.h"
 
-
-
 #define DefaultPadding 15
 class Window;
 
@@ -21,18 +19,18 @@ public:
 	~WaveView();
 
 	void 		Initialize();
-	void		set_data	 ( short* mData )	{ data = mData;	};
-	void		set_max  	 ( short mMax 	)	{ if (mMax==-1) max = 32767; else max=mMax; }; 
-	void		show_number_boxes( int mBoxes );
+	void		set_data	 		( short* mData );
+	void		set_max  	 		( short mMax   )	{ if (mMax==-1) max = 32767; else max=mMax; };
+	void		show_number_boxes	( int mBoxes   );
 
+	void 		set_samples_visible ( int SamplesVisible );
 
-	float		sample_to_y ( short mSampleValue );
-	int 		get_VG_path_coords( float* &mCoords, int mChannel, 
-									float mZoomFactor );
+	float		sample_to_y 	   ( short mSampleValue );
+	int 		get_VG_path_coords ( float* &mCoords, int mChannel, float mZoomFactor );									
+	int 		create_path ( int mChannel, float mZoom );	
+	int 		delete_path ( );
 
 	void 		draw_box 	( float mx, float my, long int mColor );
-	int 		draw_wave ( );
-	int 		draw_wave2( int mChannel, float mZoom );	
 	virtual int draw		( );
 	void 		calc_metrics( );
 
@@ -41,6 +39,11 @@ public:
 	Wave*	m_wave;
 	byte	m_channel;
 
+	VGfloat *	coords;
+	VGubyte * 	commands;
+	VGint 		numCmds;
+	VGPath 		path;
+	
 protected:
 	short*	data;
 	long int data_length;
