@@ -1,9 +1,26 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <string>
+#include <ctype.h>
+#include <jpeglib.h>
+#include <dirent.h> 
+#include <sys/stat.h>
+#include <errno.h>
 
+#include "VG/openvg.h"
+#include "VG/vgu.h"
+#include "EGL/egl.h"
+#include "GLES/gl.h"
+#include "bcm_host.h"
+#include <fontinfo.h>
+#include <shapes.h>
 
-
-
-
-
+#include "adrenaline_windows.h"
+#include "file_editor_app.hpp"
+#include "file_editor.hpp"
+#include "rectangle.hpp"
 
 
 FileEditor::FileEditor() 
@@ -12,12 +29,13 @@ FileEditor::FileEditor()
 }
 
 FileEditor::FileEditor( Rectangle* mRect ) 
-: Control(Rectangle* mRect)
+: Control()
 { 
+	Control::set_position(mRect);
 }
 
 FileEditor::FileEditor( int Width, int Height ) 
-: Control(int Width, int Height)
+: Control( Width,  Height)
 { 
 }
 
@@ -31,7 +49,7 @@ void 	FileEditor::Initialize(	)
 }
 
 
-void			FileEditor::open_directory( string mPath ) 
+void	FileEditor::open_directory( string mPath ) 
 { 
 	DIR           *d;
 	struct dirent *dir;
@@ -47,28 +65,30 @@ void			FileEditor::open_directory( string mPath )
 			if (dir->d_type==DT_REG)  
 			{
 				is_hidden_file = (dir->d_name[0]=='.')?true:false;
-				if ((show_hidden_files==false) && (is_hidden_file))
+				//if ((show_hidden_files==false) && (is_hidden_file))
+				if (is_hidden_file)
 				{
 					continue;		// skip!
 				}
 				line_text = new vector<string>;
 				line_text->push_back( dir->d_name );
-				add_row( line_text );
-				icon_id.push_back( FILE_ID );
+				if (m_open_documents)
+					m_open_documents->add_row( line_text );
+				//icon_id.push_back( FILE_ID );
 			}        
 		}
 		//rewinddir(d);
 		closedir(d);
 		//calc_widths_from_text();
-		calc_column_positions_from_widths();
+		m_open_documents->calc_column_positions_from_widths();
 	}
 }	// all files in 1 directory.
 
-void			FileEditor::open_file	( string mFilename ) 
+void	FileEditor::open_file	( string mFilename ) 
 { 
 }
 
-void			FileEditor::close_file	(  ) 
+void	FileEditor::close_file	(  ) 
 { 
 }
 
@@ -76,6 +96,6 @@ int   	FileEditor::draw 		(	)
 { 
 }	
 
-int		FileEditor::onClick(int x, int y, bool mouse_is_down=true) 
+int		FileEditor::onClick(int x, int y, bool mouse_is_down) 
 { 
 }

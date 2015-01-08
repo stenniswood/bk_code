@@ -28,21 +28,6 @@ VerticalMenu   audio_play_menu	(-1,-1);
 VerticalMenu   audio_effects	(-1,-1);
 
 
-/*int handle_audio_file_menu( void* menuPtr, int mMenuIndex, Application* mApp )
-{
-	printf("handle_audio_file_menu()\n");
-	switch(mMenuIndex)
-	{
-		case 0:	mApp->file_new		();		break;
-		case 1:	mApp->file_open		();		break;
-		case 2:	mApp->file_open_recent	();		break;	
-		case 3:	mApp->file_save		();		break;
-		case 4:	mApp->file_save_as	();		break;
-		default: break;
-	}
-	printf("handle_audio_file_menu() - Done!\n");
-}*/
-
 int handle_audio_view_menu(void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 

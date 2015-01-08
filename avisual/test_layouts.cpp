@@ -31,6 +31,8 @@ AUTHOR	: Steve Tenniswood
 #include "audio_memory.h"
 #include "fft.h"
 #include "audio_app.hpp"
+#include "can_app.hpp"
+
 
 #include "card_games.h"
 
@@ -683,7 +685,7 @@ void init_CAN_msg_view( )
 	MainDisplay.add_object( &msg_view );
 }
 
-CANApp can_app;
+/*CANApp can_app;
 void init_CAN_app( )
 {
 	float wide = MainDisplay.get_width();
@@ -695,7 +697,7 @@ void init_CAN_app( )
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &can_app );
-}
+} */
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

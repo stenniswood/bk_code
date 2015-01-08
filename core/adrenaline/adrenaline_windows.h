@@ -37,9 +37,12 @@
 #include "tab_control.hpp"
 
 #include "can_app.hpp"
+#include "can_msg_view.hpp"
+
 #include "adren_network_view.hpp"
 #include "system_status.hpp"
 #include "system_bar.hpp"
 #include "side_bar.hpp"
+
 
 

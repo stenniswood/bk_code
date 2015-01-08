@@ -9,7 +9,8 @@ void draw_zoom_out			();
 
 /***** END OF MENU COMMAND FUNCTIONS *****/
 
-void configure_wave_views	( int mChannels, short* mDataCh1, short* mDataCh2 );
+void init_drawing_app( );
+
 
 class DrawApp : public Application
 {

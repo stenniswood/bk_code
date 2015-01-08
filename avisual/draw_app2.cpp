@@ -34,18 +34,15 @@ static VerticalMenu     draw_view_menu(-1,-1);
 
 DrawApp*  draw_app = NULL;
 
-/*static int draw_file_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
+void init_drawing_app( )
 {
-	switch(mMenuIndex) 
-	{
-	case 0: draw_app->file_new	 	();		break;
-	case 1: draw_app->file_open	 	();		break;
-	case 2: draw_app->file_open_recent();	break;
-	case 3: draw_app->file_save	 	();		break;
-	case 4: draw_app->file_save_as	();		break;
-	default: break;
-	} 
-} */
+	printf("init_apps()\n");
+	if (draw_app==NULL)	
+		draw_app = new HeartsApp();
+	if (draw_app)
+		draw_app->register_with_display_manager();
+}
+
 
 static int draw_view_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 {

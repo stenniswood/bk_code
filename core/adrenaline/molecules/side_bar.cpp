@@ -116,8 +116,8 @@ int		SideBar::add_control( Control* mControl, char* mText )
 	if (num_tabs > MAX_CONTROLS)
 		return -1;	
 
-	register_child	 ( mControl );
-	onPlace();
+	register_child( mControl );
+	onPlace( );
 	return 1;
 }
 

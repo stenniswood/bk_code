@@ -145,7 +145,6 @@ int WaveView::create_path( int mChannel, float mZoom )
 		commands[i] = VG_LINE_TO_ABS;
 
 	vgAppendPathData(path, numCmds, commands, coords);
-
 	printf( "WaveView::draw_wave2() drawPath done\n" );
 }
 
@@ -191,7 +190,10 @@ int WaveView::draw( )
 	Stroke_l(color);
 	StrokeWidth(1.0);
 
-	vgDrawPath(path, VG_STROKE_PATH );
+	if (m_wave) {
+		set_samples_visible( m_wave->get_samples_recorded() / 10. );
+		vgDrawPath(path, VG_STROKE_PATH );
+	}
 	printf("WaveView::draw() done\n");
 	return 1;
 }

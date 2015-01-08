@@ -2,7 +2,7 @@
 #define _FILE_EDITOR_
 
 #include "control.hpp"
-#include <vector_file>
+#include <vector>
 using namespace std;
 
 class FileEditor : public Control 
@@ -23,7 +23,7 @@ public:
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
 protected:
-	ListBox*			m_open_documents;	//
+	TabularListBox*			m_open_documents;	//
 	vector<string>		m_file_names;		// 1 to 1 on the ListBox.
 
 	vector<TextView*>	m_editor;		// change to TextEdit!

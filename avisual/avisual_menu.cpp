@@ -30,6 +30,8 @@
 #include "test_combo_layouts.hpp"
 #include "power.hpp"
 #include "blackjack_app.hpp"
+#include "file_editor_app.hpp"
+#include "video_app.hpp"
 
 
 
@@ -108,6 +110,14 @@ int show_molecule_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 	default: 	break;
 	}
 }
+void init_molecule_menu()
+{
+	molecules.add_simple_command( "Image Gallery" 	);
+	molecules.add_simple_command( "Okay Cancel Dialog" );
+	molecules.add_simple_command( "Directory lb" 	);
+	molecules.add_simple_command( "File Browser" 	);				
+	molecules.add_callback_all_items( show_molecule_screens );
+}
 
 int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 {
@@ -120,40 +130,26 @@ int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 			if (audio_app)
 				audio_app->register_with_display_manager();
 			break;
-	case 2: init_file_browser		();		break;			
+	case 2: init_file_browser		();		break;
 	case 3: init_CAN_app			();		break;
 	case 4: init_drawing_app		();		break;	
-	case 5: if (draw_app==NULL) {
-				draw_app= new DrawApp();
-				printf("draw_app new\n");
-			}
-			if (draw_app) {
-				draw_app->register_with_display_manager();
-				printf("draw_app registered with dm\n");
-			}
-	case 6: init_camera_app			();		break;
+	case 5: init_drawing_app		();		break;
+	case 6: init_file_editor_app	();		break;
+	case 7: init_Video_app			();		break;
 	default: 	break;
 	}
 	printf("handle_apps_screens() done\n");
 }
 
-void init_molecule_menu()
-{
-	molecules.add_simple_command( "Image Gallery" 	);
-	molecules.add_simple_command( "Okay Cancel Dialog" );
-	molecules.add_simple_command( "Directory lb" 	);
-	molecules.add_simple_command( "File Browser" 	);				
-	molecules.add_callback_all_items( show_molecule_screens );
-}
-
 void init_apps_menu()
 {
 	apps.add_simple_command( "Image Gallery" 	);
-	apps.add_simple_command( "Audio Amp" 		);
+	apps.add_simple_command( "Audio Master" 	);
 	apps.add_simple_command( "File Browser" 	);				
-	apps.add_simple_command( "My guts (CAN)" 	);
+	apps.add_simple_command( "CAN App" 		);
 	apps.add_simple_command( "Drawing" 		);
 	apps.add_simple_command( "Drawing2" 	);
+	apps.add_simple_command( "File Editor" 	);
 	apps.add_simple_command( "Camera" 		);
 	apps.add_callback_all_items( handle_apps_screens );
 }

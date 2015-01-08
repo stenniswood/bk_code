@@ -41,7 +41,7 @@ extern int UpdateDisplaySemaphore;
 
 AudioApp* audio_app = NULL;
 
-void AudioApp::file_new			() 
+void AudioApp::file_new		() 
 { 
 	
 }		
@@ -54,6 +54,7 @@ void AudioApp::file_open	()
 	try {
 		//dWave.m_data = new short[10512000];
 		dWave.Load(Filename.c_str());	
+		
 	} catch (std::string msg) {
 		printf("Error :  %s\n", msg.c_str() );
 		WaveformInfo.set_text( msg.c_str() );

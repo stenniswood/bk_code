@@ -22,6 +22,7 @@ BOOL 		 isRxMessageAvailable();
 struct sCAN* GetMessagePtr( byte mIndex 				  		  );
 struct sCAN* GetNextRxMsg ( );
 int			 GetRxMode    ( );
+
 // "PROTECTED/HELPER" Functions:
 void addNormalHistory ( struct sCAN* mMsg );
 void addMailboxHistory( struct sCAN* mMsg );

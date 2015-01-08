@@ -27,18 +27,6 @@
 //static VerticalMenu     bj_file_menu(-1,-1);
 HeartsApp* 	hearts_app = NULL;
 
-/*static int draw_file_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
-{
-	switch(mMenuIndex)
-	{
-	case 0: mApp->file_new	 	();		break;
-	case 1: mApp->file_open	 	();		break;
-	case 2: mApp->file_open_recent();	break;
-	case 3: mApp->file_save	 	();		break;
-	case 4: mApp->file_save_as	();		break;
-	default: break;
-	} 
-}*/
 
 void init_hearts( )
 {

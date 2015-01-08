@@ -89,6 +89,7 @@ void	Application::setup_sidebar	(	)  // derived class adds these here
 	// SideBar 
 	Control* tmp = new IconView();
 	m_sidebar_controls.push_back( tmp );	
+	MainDisplay.m_side.load_controls( &m_sidebar_controls );
 }
 
 void	Application::setup_menu		(	)  // derived class adds these here

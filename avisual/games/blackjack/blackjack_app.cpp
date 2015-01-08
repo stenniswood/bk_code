@@ -27,23 +27,10 @@
 //static VerticalMenu     bj_file_menu(-1,-1);
 BlackJackApp* 	bj_app = NULL;
 
-static int draw_file_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
-{
-	switch(mMenuIndex)
-	{
-	case 0: bj_app->file_new	 	();		break;
-	case 1: bj_app->file_open	 	();		break;
-	case 2: bj_app->file_open_recent();		break;
-	case 3: bj_app->file_save	 	();		break;
-	case 4: bj_app->file_save_as	();		break;
-	default: break;
-	} 
-}
 
 void init_blackjack( )
 {
 	printf("init_blackjack()\n");
-	
 	if (bj_app==NULL)	
 		bj_app = new BlackJackApp();
 	if (bj_app)
@@ -96,7 +83,6 @@ int		BlackJackApp::onPlace		(	)
 int		BlackJackApp::onCreate(	)	
 {
 	Application::onCreate();
-	
 }
 
 void	BlackJackApp::setup_menu  	( )
@@ -104,8 +90,7 @@ void	BlackJackApp::setup_menu  	( )
 	Application::setup_menu();
 //	bj_file_menu.create_std_file_menu();
 //	bj_file_menu.add_callback_all_items( draw_file_menu_actions );
-//	m_hMenu.add_sub_menu( "File", &bj_file_menu  );	
-
+//	m_hMenu.add_sub_menu( "File", &bj_file_menu  );
 } 
 
 void	BlackJackApp::setup_app_menu( )
