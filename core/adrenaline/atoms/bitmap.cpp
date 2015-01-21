@@ -1,6 +1,7 @@
 /*******************************************************
-* OpenVG Image wrapper class
 * Bitmap()
+* 	Loads from file.  .PNG, .JPG, .BMP
+*	
 *
 * Steve Tenniswood
 ********************************************************/
@@ -8,13 +9,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include <ctype.h>
 #include <jpeglib.h>
 #include <iostream>
 #include <fstream>
 #include <assert.h>
 #include <vector>
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "EGL/egl.h"
@@ -22,44 +23,44 @@
 #include "bcm_host.h"
 #include <fontinfo.h>
 #include <shapes.h>
-#include "Graphbase.hpp"
-#include "control.hpp"
-#include "button.hpp"
-#include "display.h"
-#include "icon.hpp"
+
+//#include "control.hpp"
+//#include "button.hpp"
+//#include "display.h"
+//#include "icon.hpp"
 #include "bitmap.hpp"
+
+
+using namespace std;
 
 
 Bitmap::Bitmap()
 {
+
 }
 
 // Initializes the object with a device-dependent memory bitmap that has a specified width, height, and bit pattern.
 void Bitmap::CreateBitmap( int nWidth, int nHeight, const void* lpBits )
 {
+
 }
 
 //Returns a pointer to a Bitmap object when given a handle to a Windows HBITMAP bitmap.
 int Bitmap::GetBitmapInfo( BITMAP* pBitMap )
 {
+
 }	
 
 //Fills a BITMAP structure with information about the bitmap.
 //The number of bytes copied to the buffer if the method was successful; otherwise 0.
-byte* Bitmap::GetBitmapBits( long dwCount, void* lpBits )
+uint8_t* Bitmap::GetBitmapBits( long dwCount, void* lpBits )
 {
+
 }
 	
 long Bitmap::SetBitmapBits	( long dwCount, const void* lpBits 	)
 {
-}
 
-VGImage Bitmap::createImageFromPNG  ( const char *filename, struct image_info* II )
-{
-}
-
-bool	Bitmap::LoadBitmap			( LPCTSTR lpszResourceName  	)
-{
 }
 
 //Returns the width and height of the bitmap. The height and width are assumed to have been set previously by the SetBitmapDimension member function.
@@ -69,6 +70,19 @@ sSize Bitmap::GetBitmapDimension( )
 
 sSize Bitmap::SetBitmapDimension( int nWidth,  int nHeight )
 {
+}
+
+
+bool	Bitmap::LoadBitmap( const char* mFileName )
+{
+	struct image_info ii;
+	char* extension = strchr( mFileName, '.' ) + 1;
+	if (strcmp(extension, "JPG")==0)
+		createImageFromJpeg( mFileName, &ii );
+	else if (strcmp(extension, "PNG")==0)
+		createImageFromPNG( mFileName, &ii );
+	else if (strcmp(extension, "BMP")==0)
+		createImageFromBMP(mFileName);
 }
 
 // createImageFromJpeg decompresses a JPEG image to the standard image format
@@ -165,75 +179,93 @@ VGImage Bitmap::createImageFromJpeg( const char *filename, struct image_info* II
 	return img;
 }
 
+VGImage Bitmap::createImageFromPNG  ( const char *filename, struct image_info* II )
+{
 
-using namespace std;
+}
+
+
+
 
 #define readInt(fd) 
 
 VGImage* Bitmap::createImageFromBMP(const char* filename) 
 {
+	string errMsg;
 	char text[256];
-	int  FileSize;
-	FILE* input = fopen(filename, 'r' );
-	//input.open(filename, ifstream::binary);
-	//assert( !input.fail() || !"Could not find file" );
 	char buffer[2];
- 	//input.read(buffer, 2);
-	int bytes_read = fread( buffer, 1, 2, input );
+	int  FileSize;
 	
-	assert(buffer[0] == 'B' && buffer[1] == 'M' || !"Not a bitmap file");
-	//input.ignore(8);
-	bytes_read = fread( buffer, 1, 8, input );	// skip 8 bytes 
-	int dataOffset;  // = read(input);
-	bytes_read = fread( &dataOffset, 1, 1, input );
+	FILE* input = fopen(filename, "rb" );
+	if (input==NULL)
+	{ errMsg = "Could not find file";	throw errMsg;	};
 
-	// Read the header : 
-	int headerSize;
-	//int headerSize = readInt(input);
-	bytes_read = fread( &headerSize, 1, 1, input );
+	// "BM"
+	int bytes_read = fread( buffer, 1, 2, input );	
+	assert(buffer[0] == 'B' && buffer[1] == 'M' || !"Not a bitmap file");
+	
+	// Ignore 8 bytes.	Ignore file size and 4 reserved bytes
+	bytes_read = fread( buffer, 1, 8, input );	// skip 8 bytes 
+
+	// Read Offset to the Bitmap data:
+	long int dataOffset;  		
+	bytes_read = fread( &dataOffset, 1, 4, input );	// 4 bytes
+
+	// READ HEADER : 
+	long int headerSize;
+	bytes_read = fread( &headerSize, 1, 4, input );
 	
 	int width;
 	int height;
+	short planes;
+	short bpp;
 	short tmp;
+	BITMAPINFOHEADER bih ;
+	BITMAPV4HEADER   bv4h;
+	BITMAPV5HEADER   bv5h;
 	switch(headerSize) {
-		case 40:
-			//V3
-			fread( &width,  1, sizeof(int), input );
-			fread( &height, 1, sizeof(int), input );
-			//width  = readInt(input);
-			//height = readInt(input);
-			//input.ignore(2);
-			fread( buffer, 1, 2, input );
-			fread( &tmp,    1, 2, input );
-			//assert(readShort(input) == 24 || !"Image is not 24 bits per pixel");
-			assert(tmp == 24 || !"Image is not 24 bits per pixel");			
-			fread( &tmp,    1, 2, input );
-			//assert(readShort(input) == 0  || !"Image is compressed");
+		case 12:	/* Windows 2.x, OS/2 V1	*/
+			fread( &width,  1, 2, input );
+			fread( &height, 1, 2, input );
+			fread( &planes,  1, 2, input );	// ignore 2.  Num Color planes.
+			fread( &bpp,    1, 2, input );	// bpp
+			break;
+
+		case 40:	/* Windows NT, 3.x  :   	BITMAPINFOHEADER */
+			//Adds 16bpp and 32bpp formats. Adds RLE compression.
+			bytes_read = fread( &bih,    1, sizeof(BITMAPINFOHEADER), input );			
+			assert(bytes_read == 40  || !"Image is compressed");
+			/*fread( &width,  1, 2, input );
+			fread( &height, 1, 2, input );
+			fread( &planes,  1, 2, input );	// ignore 2.  Num Color planes.
+			fread( &bpp,    1, 2, input );	// bpp			
+			fread( &tmp,    1, 2, input );	//  
 			assert(tmp == 0  || !"Image is compressed");
+			*/
 			break;
-		case 12:
-			//OS/2 V1
-			fread( &width,  1, sizeof(int), input );
-			fread( &height, 1, sizeof(int), input );
-			//width  = readShort(input);
-			//height = readShort(input);
-			//input.ignore(2);
-			fread( buffer, 1, 2, input );
-			fread( &tmp,    1, 2, input );			
-			//assert(readShort(input) == 24 || !"Image is not 24 bits per pixel");
-			assert(tmp == 24 || !"Image is not 24 bits per pixel");
+		case 52: // Adds RGB bit masks.	Undocumented info.
+			assert(!"Can't load Adobe Photoshop bitmaps");
+			break;			
+		case 56: //	Adds alpha channel bit mask.    	BITMAPV3INFOHEADER
+			assert(!"Can't load Adobe Photoshop bitmaps");
 			break;
-		case 64:
-			//OS/2 V2
+		case 64:  // OS/2 V2
+			// Adds halftoning. Adds RLE and Huffman 1D compression.
 			assert(!"Can't load OS/2 V2 bitmaps");
 			break;
-		case 108:
-			//Windows V4
-			assert(!"Can't load Windows V4 bitmaps");
+		case 108: //Windows NT 4 and 95					BITMAPV4HEADER			
+			bytes_read = fread( &bv4h,    1, sizeof(BITMAPV4HEADER), input );			
+			assert(bytes_read == 108  || !"Image header not read");
+			//	Adds color space type and gamma correction
+			// assert(!"Can't load Windows NT4 & 95 bitmaps");
+			printf(" Windows NT4 & 95 bitmaps - may have problems. (untested)");
 			break;
-		case 124:
-			//Windows V5
-			assert(!"Can't load Windows V5 bitmaps");
+		case 124: //Windows V5							BITMAPV5HEADER
+			bytes_read = fread( &bv4h,    1, sizeof(BITMAPV5HEADER), input );			
+			assert(bytes_read == 124  || !"Image header not read");
+			printf(" Windows NT5 & 98 bitmaps - may have problems. (untested)");			
+			// Adds ICC color profiles
+			// assert(!"Can't load Windows NT5 & 98 bitmaps");
 			break;
 		default:
 			assert(!"Unknown bitmap format");
