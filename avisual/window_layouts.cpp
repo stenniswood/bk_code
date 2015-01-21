@@ -26,7 +26,7 @@
 
 // Avisual display:
 static TextView 	ConnectionStatus( 50, 1230, 750, 700 );
-TextView 	CmdText;
+TextView 			CmdText;
 
 //TabularListBox  tab_lb(600, 20, 620, 5, -1);
 static TabularListBox  adren_board_list;

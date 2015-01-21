@@ -17,6 +17,7 @@
 #include "vertical_menu.hpp"
 
   
+#define Debug 0
 
 
 VerticalMenu::VerticalMenu()
@@ -78,7 +79,7 @@ int  VerticalMenu::create_std_file_menu()
 
 int  VerticalMenu::add_simple_command( char* mText, char* mShortcut )
 {
-	printf( "add_simple_command:: %s \n", mText );
+	if (Debug) printf( "add_simple_command:: %s \n", mText );
 	set_item( mText );
 
 	struct stVertMenuInfo m;  
@@ -208,7 +209,7 @@ int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 	int result = get_hit_index( x, y );
 	if ((result < m_entries.size()) && (result >= 0))
 	{
-		printf("VerticalMenu:: Selected Item #%d: %s\n", result, m_entries[result].text );
+		if (Debug) printf("VerticalMenu:: Selected Item #%d: %s\n", result, m_entries[result].text );
 		if (callback_all_items) {
 			Application* app = get_application(   );
 			callback_all_items( NULL, result, app );

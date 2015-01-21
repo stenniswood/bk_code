@@ -32,7 +32,7 @@
 #include "blackjack_app.hpp"
 #include "file_editor_app.hpp"
 #include "video_app.hpp"
-
+#include "window_layouts.hpp"
 
 
 HorizontalMenu hm		(-1,-1);
@@ -135,7 +135,8 @@ int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 	case 4: init_drawing_app		();		break;	
 	case 5: init_drawing_app		();		break;
 	case 6: init_file_editor_app	();		break;
-	case 7: init_Video_app			();		break;
+	case 7: init_pot_objs			();		break;	
+	case 8: init_Video_app			();		break;
 	default: 	break;
 	}
 	printf("handle_apps_screens() done\n");
@@ -150,6 +151,7 @@ void init_apps_menu()
 	apps.add_simple_command( "Drawing" 		);
 	apps.add_simple_command( "Drawing2" 	);
 	apps.add_simple_command( "File Editor" 	);
+	apps.add_simple_command( "Potentiometer");	// simple app showing Big Motor board potentiometer/encoder results.
 	apps.add_simple_command( "Camera" 		);
 	apps.add_callback_all_items( handle_apps_screens );
 }
