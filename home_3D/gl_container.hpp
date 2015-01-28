@@ -13,8 +13,7 @@ struct Vertex
 
 extern const int NUMBER_OF_CUBE_INDICES;   
 extern const int NUMBER_OF_QUAD_INDICES;
-
-const int number_of_vertices = 10;
+const  int number_of_vertices = 10;
 
 
 class glContainer
@@ -22,25 +21,29 @@ class glContainer
 public:
 	glContainer();
 
-	void	change_top_color   ( long mColor );	
-	void	change_bottom_color( long mColor );
-	void 	generate_IBO();
-	void 	generate_VBO();
-	
-	void	generate_vertices();
+	void 	Relocate( float mX, float mY, float mZ );
+	void 	create  			( );
 
-	void	grab_top(  );
-	void	grab_bottom( );
-	void	grab_left( );
-	void	grab_right( );
+	void 	change_color	   	( long mColor );
+	void	change_top_color   	( long mColor );	
+	void	change_bottom_color	( long mColor );
+	void 	generate_IBO		(	);
+	void 	generate_VBO		(	);
+	
+	void	generate_vertices	(	);
+
+	void	grab_top			( 	);
+	void	grab_bottom			( 	);
+	void	grab_left	( );
+	void	grab_right	( );
 
 	void	add_offset( float mX, float mY, float mZ ); // to all vertices.
 	void	draw(); 
 	void	print_info();
 	
-	float width;
-	float height;
-	float depth;
+	float 	width;
+	float 	height;
+	float 	depth;
 
 	float	m_x;
 	float	m_y;

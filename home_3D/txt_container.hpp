@@ -10,6 +10,10 @@
 //#include "gl_container.hpp"
 #include <string>
 #include "imageloader.h"
+#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
 using namespace std;
 
 const int BOTTOM_SIDE_ID = 0;
@@ -26,19 +30,20 @@ public:
 	txtContainer();
 	void			load_image				(string mFilename);
 	GLuint			generate_TBO			();
+	GLuint 			generate_TBOi			();
 	GLuint			generate_texture_coords	( );
 	void			generate_VBOTexCoords	( );
-	
+
 	virtual void	draw(); 
 	virtual void	print_info();
-	
 
 	GLuint			m_TBO;				// The image 
 	GLuint			m_VBOTexCoords;		// The coordinates
-	GLuint			m_NumTexCoords;		// 
-	float*			m_pTexCoords;
+	vector<float>	m_TexCoords;
 	int				m_side_applied;
+
 	Image* 			m_image;
+	Mat 			m_src;
 };
 
 #endif

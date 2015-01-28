@@ -2,11 +2,11 @@ CC = g++
 CFLAGS = 
 PROG = home3d
 
-SRCS = main.o imageloader.o room2.o 
-ATOMS_SRCS = palette.o cabinet.o extrusion.o ibeam.o stairway.o \
-			 txt_container.o wall.o gl_container.o cylinder.o	\
-			 robot_leg_piece.o Texture.o
-MOLECULES_SRCS = table.o brickwall.o
+SRCS = main.cpp imageloader.cpp room2.cpp 
+ATOMS_SRCS = palette.cpp cabinet.cpp extrusion.cpp ibeam.cpp stairway.cpp \
+			 txt_container.cpp wall.cpp gl_container.cpp cylinder.cpp	\
+			 robot_leg_piece.cpp Texture.cpp
+MOLECULES_SRCS = table.cpp brickwall.cpp
 ALL_SRCS = $(SRCS) $(ATOMS_SRCS) $(MOLECULES_SRCS)
 
 ifeq ($(shell uname),Darwin)
@@ -17,11 +17,6 @@ endif
 LIBS +=  -lpthread -lm -L./lib -lfreenect -L/usr/local/lib/ 			 \
 		-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_calib3d \
 		-lopencv_ml -lopencv_objdetect -lopencv_ts -lopencv_imgcodecs
-
-%.o: %.cpp $(DEPS)
-	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
-%.o: %.c $(DEPS) 
-	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
 
 all: $(PROG)
 

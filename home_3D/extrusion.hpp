@@ -28,22 +28,24 @@ public:
 	glExtrusion( );
 	void			create(float mLength = -1);
 	void			Relocate( float mX, float mY, float mZ );
-	
+
 	virtual void	generate_layer_vertices	( );
 	void			extrude_vertices		( float mExtrusionLength, int mLoftAxis );
 	void 			generate_vertices_colors( );
 	virtual void	generate_vertices		( );
-	
+	void 			change_color			( long mColor );
+
 	virtual GLbyte 	generate_disc_indices( GLbyte mStartingVertexIndex );
 	virtual void 	generate_side_indices( 	    );
 	virtual void 	generate_indices	 ( 		);
-
+	void 			generate_otherside_indices();
+	
 	void 	generate_IBO			( );
 	void 	generate_VBO			( );
 	void	draw					( );
 
 	void	print_indices			( );
-	void	print_vertices			( );
+	void	print_vertices			( bool mShowColors = true );
 
 	float	m_x;
 	float	m_y;
@@ -59,12 +61,11 @@ public:
 	int		m_layer_one_indices;
 	int		m_number_side_indices;		// 2x m_disc_indices
 	vector<GLubyte>	m_indices;
-	
+
 	// VBO:
-	int   	m_number_of_vertices;		// 2x m_layer_one_vertices
-	int   	m_layer_one_vertices;
-	Vertex*  m_vertices;
-	
+	int   	m_layer_one_vertices;		// 2x m_layer_one_vertices
+	vector<struct Vertex>	m_vertices;
+
 	GLuint	m_VBO;
 	GLuint	m_IBO;
 };

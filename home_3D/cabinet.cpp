@@ -83,38 +83,45 @@ void glCabinet::Initialize( )
 void  glCabinet::generate_cabinet_side_vertices( )
 {
 	m_layer_one_vertices = 6;
-	m_vertices = (Vertex*)malloc( sizeof(Vertex)*(m_layer_one_vertices*2) );
+	//m_vertices = (Vertex*)malloc( sizeof(Vertex)*(m_layer_one_vertices*2) );
+	struct Vertex v;
 
 	// Square with a notch for the feet!	
 	// Start at the back bottom:
-	m_vertices[0].position[0] =  0.0;
-	m_vertices[0].position[1] =  0.;
-	m_vertices[0].position[2] =  0.0;
+	v.position[0] =  0.0;
+	v.position[1] =  0.;
+	v.position[2] =  0.0;
+	m_vertices.push_back( v );
 
 	// Then up to the top (not the counter added later)
-	m_vertices[1].position[0] =  0.0;
-	m_vertices[1].position[1] =  m_height;
-	m_vertices[1].position[2] =  0.0;
-
+	v.position[0] =  0.0;
+	v.position[1] =  m_height;
+	v.position[2] =  0.0;
+	m_vertices.push_back( v );
+	
 	// top front:
-	m_vertices[2].position[0] =  0.0;
-	m_vertices[2].position[1] =  m_height;
-	m_vertices[2].position[2] =  m_depth;
-
+	v.position[0] =  0.0;
+	v.position[1] =  m_height;
+	v.position[2] =  m_depth;
+	m_vertices.push_back( v );
+	
 	// front (top of toe):
-	m_vertices[3].position[0] =  0.0;
-	m_vertices[3].position[1] =  m_toe_height;
-	m_vertices[3].position[2] =  m_depth;
-
+	v.position[0] =  0.0;
+	v.position[1] =  m_toe_height;
+	v.position[2] =  m_depth;
+	m_vertices.push_back( v );
+	
 	// front (back of toe):
-	m_vertices[4].position[0] =  0.0;
-	m_vertices[4].position[1] =  m_toe_height;
-	m_vertices[4].position[2] =  m_depth-m_toe_inward;
-
+	v.position[0] =  0.0;
+	v.position[1] =  m_toe_height;
+	v.position[2] =  m_depth-m_toe_inward;
+	m_vertices.push_back( v );
+	
 	// front (back of toe):
-	m_vertices[5].position[0] =  0.0;
-	m_vertices[5].position[1] =  0.0;
-	m_vertices[5].position[2] =  m_depth-m_toe_inward;
+	v.position[0] =  0.0;
+	v.position[1] =  0.0;
+	v.position[2] =  m_depth-m_toe_inward;
+	m_vertices.push_back( v );
 }
 
 void glCabinet::generate_vertices()

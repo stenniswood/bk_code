@@ -14,6 +14,9 @@
 #define  TOP_AND_BOTTOM 2
 #define  BUFFER_OFFSET(i) ((char *)NULL + (i))
 
+#define Debug 0
+
+
 glExtrusion::glExtrusion( )
 {
 	m_x = 0.0;
@@ -22,6 +25,12 @@ glExtrusion::glExtrusion( )
 	m_color 	 = 0xFFFFFFFF;
 	m_ends_color = 0xFF0020FF;
 	m_is_closed  = true;
+	m_VBO = 0;
+	m_IBO = 0;
+	m_layer_one_vertices = 0;
+	m_layer_one_indices  = 0;
+	m_number_side_indices= 0;
+	m_extrusion_length = 10.0;
 }
 
 void glExtrusion::Relocate( float mX, float mY, float mZ )
@@ -34,20 +43,23 @@ void glExtrusion::Relocate( float mX, float mY, float mZ )
 /* Override this function to generate the polygon. */
 void glExtrusion::generate_layer_vertices()
 {
+	struct Vertex v;
+	v.position[0] =  0.0;
+	v.position[1] =  0.0;
+	v.position[2] =  0.0;
+	m_vertices.push_back( v );
+
+	v.position[0] =  1.0;
+	v.position[1] =  0.0;
+	v.position[2] =  1.0;
+	m_vertices.push_back( v );
+	
+	v.position[0] =  1.0;
+	v.position[1] =  0.0;
+	v.position[2] =  0.0;
+	m_vertices.push_back( v );
+
 	m_layer_one_vertices = 3;
-	m_vertices = (Vertex*)malloc( sizeof(Vertex)*(m_layer_one_vertices*2) );
-
-	m_vertices[0].position[0] =  0.0;
-	m_vertices[0].position[1] =  0.0;
-	m_vertices[0].position[2] =  0.0;
-
-	m_vertices[1].position[0] =  1.0;
-	m_vertices[1].position[1] =  0.0;
-	m_vertices[1].position[2] =  1.0;
-
-	m_vertices[2].position[0] =  1.0;
-	m_vertices[2].position[1] =  0.0;
-	m_vertices[2].position[2] =  0.0;
 }
 
 // creates a copy of the polygon, lofted by distance.
@@ -56,23 +68,42 @@ void glExtrusion::extrude_vertices( float mExtrusionLength, int mLoftAxis )
 	if (mLoftAxis>2) return;
 	if (mLoftAxis<0) return;
 
+	struct Vertex v;
+	
 	// CEILING (DUPLICATE & SET HEIGHT)
 	// Duplicate all Floor points with ceiling height.
 	int d=0;
+	// was ; i<m_layer_one_vertices;
+	m_layer_one_vertices = m_vertices.size();
 	for (int i=0; i<m_layer_one_vertices; i++)
 	{
-		d=m_layer_one_vertices+i;
-		m_vertices[d].position[0] = m_vertices[i].position[0];
-		m_vertices[d].position[1] = m_vertices[i].position[1];
-		m_vertices[d].position[2] = m_vertices[i].position[2];		
-		m_vertices[d].position[mLoftAxis] = mExtrusionLength;
+		memcpy ( &v, &(m_vertices[i]), sizeof (struct Vertex) );
+//		v.position[0] = m_vertices[i].position[0];
+//		v.position[1] = m_vertices[i].position[1];
+//		v.position[2] = m_vertices[i].position[2];		
+		v.position[mLoftAxis] = mExtrusionLength;
+		m_vertices.push_back( v );
 	}
-	m_number_of_vertices = m_layer_one_vertices*2;
+}
+
+/* NOTE: This must be called before the VBO is generated!!
+	Has no effect after generate_VBO()
+*/
+void glExtrusion::change_color( long mColor )
+{
+	if (Debug) printf("change_color( %4x ) %d\n", mColor, m_vertices.size() );
+	for (int i=0; i<m_vertices.size(); i++)
+	{
+		m_vertices[i].color[0] = ((mColor & 0x00FF0000)>>16);
+		m_vertices[i].color[1] = ((mColor & 0x0000FF00)>>8);
+		m_vertices[i].color[2] = ((mColor & 0x000000FF));		
+		m_vertices[i].color[3] = ((mColor & 0xFF000000)>>24);
+	}
 }
 
 void glExtrusion::generate_vertices_colors()
 {
-	for (int i=0; i<m_number_of_vertices; i++)
+	for (int i=0; i<m_vertices.size(); i++)
 	{
 		if (i<m_layer_one_vertices)	// Bottom Blue
 		{
@@ -100,15 +131,14 @@ void glExtrusion::generate_VBO()
 {
 	//Create a new VBO and use the variable id to store the VBO id
 	glGenBuffers( 1, &m_VBO );
-	glBindBuffer( GL_ARRAY_BUFFER, m_VBO );	//Make the new VBO active  GL_COLOR_ARRAY
+	glBindBuffer( GL_ARRAY_BUFFER, m_VBO );	// Make the new VBO active  GL_COLOR_ARRAY
 
 	// Generate & Upload vertex data to the video device 
-	int size;
-	size = m_number_of_vertices * sizeof(Vertex);
-	glBufferData( GL_ARRAY_BUFFER, size, m_vertices, GL_STATIC_DRAW );
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);	// vertex positions	
-	glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)(offsetof(struct Vertex,color)));	// color
-	glBindBuffer( GL_ARRAY_BUFFER, m_VBO );
+	int size = m_vertices.size() * sizeof(Vertex);
+	glBufferData		 ( GL_ARRAY_BUFFER, size, m_vertices.data(), GL_STATIC_DRAW );
+	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, 0);	// vertex positions	
+	glVertexAttribPointer( 2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)(offsetof(struct Vertex,color)));	// color
+	glBindBuffer		 ( GL_ARRAY_BUFFER, m_VBO );
 
 	//Draw Triangle from VBO - do each time window, view point or data changes
 	//Establish its 3 coordinates per vertex with zero stride in this array; necessary here
@@ -120,6 +150,20 @@ void glExtrusion::generate_VBO()
 }
 
 //======================= INDICES =======================================
+
+/* This must be done before the side indices can be created!!  */
+void glExtrusion::generate_otherside_indices()
+{
+	GLubyte	matching_index;
+	m_layer_one_indices = m_indices.size();
+	//printf("generate_otherside_indices()  m_layer_one_indices=%d\n", m_layer_one_indices );
+	
+	for (int vi=0; vi<m_layer_one_indices; vi++)
+	{
+		matching_index = m_indices[vi] + m_layer_one_vertices;
+		m_indices.push_back( matching_index );
+	}
+}	
 GLbyte glExtrusion::generate_disc_indices( GLbyte mStartingVertexIndex )
 {
 	// FOR A CONVEX POLYGON : 
@@ -173,12 +217,11 @@ void glExtrusion::generate_IBO()
 }
 //======================= END OF INDICES ================================
 
-
 void glExtrusion::create(float mLength)
 {
 	if (mLength>0) 
 		m_extrusion_length = mLength;
-		
+
 	generate_vertices();	
 	generate_indices();	
 
@@ -194,25 +237,30 @@ void glExtrusion::print_indices( )
 	printf("print_indices()\n");
 	for (int i=0; i<m_indices.size(); i++)
 	{
-		if ((i%m_layer_one_indices)==0)
+		if ((i % m_layer_one_indices)==0)
 			printf("-------------\n");
 		printf("%d : %d\n", i, m_indices[i] );
 	}
 }
 
-void glExtrusion::print_vertices( )
+void glExtrusion::print_vertices( bool mShowColors )
 {
-	printf("print_vertices() Number of Vertices=%d\n", m_number_of_vertices);
-	for (int i=0; i<m_number_of_vertices; i++)
+	printf("print_vertices()  Number of Vertices=%d\n", m_vertices.size() );
+	for (int i=0; i<m_vertices.size(); i++)
 	{
-		if ((i%m_layer_one_vertices)==0)
-			printf("-------------\n");
-		printf("%d : %5.3f %5.3f %5.3f\n", i, 
+		//if ((i%m_layer_one_vertices)==0)
+		//	printf("-------------\n");
+		printf("%d : %5.1f %5.1f %5.1f\t", i, 
 					m_vertices[i].position[0],
 					m_vertices[i].position[1],
 					m_vertices[i].position[2] );
+		if (mShowColors)
+			printf(": %d\t%d\t%d\t%d\n",
+					m_vertices[i].color[0],
+					m_vertices[i].color[1],
+					m_vertices[i].color[2],
+					m_vertices[i].color[3] );		
 	}
-
 }
 
 void glExtrusion::draw()

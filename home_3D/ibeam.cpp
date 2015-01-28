@@ -30,60 +30,74 @@ glIbeam::glIbeam( float mExtrusionLength )
 void	glIbeam::generate_layer_vertices( )
 {
 	m_layer_one_vertices = 13;
-	m_vertices = (Vertex*)malloc( sizeof(Vertex)*(m_layer_one_vertices*2) );
+	//m_vertices = (Vertex*)malloc( sizeof(Vertex)*(m_layer_one_vertices*2) );
+	struct Vertex v;
 	
 	// Go along bottom first:
-	m_vertices[0].position[0] =  0.0;
-	m_vertices[0].position[1] =  0.0;
-	m_vertices[0].position[2] =  0.0;
+	v.position[0] =  0.0;
+	v.position[1] =  0.0;
+	v.position[2] =  0.0;
+	m_vertices.push_back( v );
+	
+	v.position[0] =  IBEAM_WIDTH;
+	v.position[1] =  0.;
+	v.position[2] =  0.0;
+	m_vertices.push_back( v );
+	
+	v.position[0] =  IBEAM_WIDTH;
+	v.position[1] =  IBEAM_THICKNESS;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
+	
+	v.position[0] =  IBEAM_WIDTH-IBEAM_TUCK_IN;
+	v.position[1] =  IBEAM_THICKNESS;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
+	
+	v.position[0] =  IBEAM_WIDTH-IBEAM_TUCK_IN;
+	v.position[1] =  IBEAM_HEIGHT;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
+	
+	v.position[0] =  IBEAM_WIDTH;
+	v.position[1] =  IBEAM_HEIGHT;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
 
-	m_vertices[1].position[0] =  IBEAM_WIDTH;
-	m_vertices[1].position[1] =  0.;
-	m_vertices[1].position[2] =  0.0;
+	v.position[0] =  IBEAM_WIDTH;
+	v.position[1] =  IBEAM_HEIGHT+IBEAM_THICKNESS;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
 
-	m_vertices[2].position[0] =  IBEAM_WIDTH;
-	m_vertices[2].position[1] =  IBEAM_THICKNESS;
-	m_vertices[2].position[2] =  0.;
+	v.position[0] =  0.0;
+	v.position[1] =  IBEAM_HEIGHT+IBEAM_THICKNESS;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
 
-	m_vertices[3].position[0] =  IBEAM_WIDTH-IBEAM_TUCK_IN;
-	m_vertices[3].position[1] =  IBEAM_THICKNESS;
-	m_vertices[3].position[2] =  0.;
+	v.position[0] =  0.0;
+	v.position[1] =  IBEAM_HEIGHT;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
 
-	m_vertices[4].position[0] =  IBEAM_WIDTH-IBEAM_TUCK_IN;
-	m_vertices[4].position[1] =  IBEAM_HEIGHT;
-	m_vertices[4].position[2] =  0.;
+	v.position[0] =  IBEAM_TUCK_IN;
+	v.position[1] =  IBEAM_HEIGHT;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
 
-	m_vertices[5].position[0] =  IBEAM_WIDTH;
-	m_vertices[5].position[1] =  IBEAM_HEIGHT;
-	m_vertices[5].position[2] =  0.;
+	v.position[0] =  IBEAM_TUCK_IN;
+	v.position[1] =  IBEAM_THICKNESS;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
+	
+	v.position[0] =  0.0;
+	v.position[1] =  IBEAM_THICKNESS;
+	v.position[2] =  0.;
+	m_vertices.push_back( v );
 
-	m_vertices[6].position[0] =  IBEAM_WIDTH;
-	m_vertices[6].position[1] =  IBEAM_HEIGHT+IBEAM_THICKNESS;
-	m_vertices[6].position[2] =  0.;
-
-	m_vertices[7].position[0] =  0.0;
-	m_vertices[7].position[1] =  IBEAM_HEIGHT+IBEAM_THICKNESS;
-	m_vertices[7].position[2] =  0.;
-
-	m_vertices[8].position[0] =  0.0;
-	m_vertices[8].position[1] =  IBEAM_HEIGHT;
-	m_vertices[8].position[2] =  0.;
-
-	m_vertices[9].position[0] =  IBEAM_TUCK_IN;
-	m_vertices[9].position[1] =  IBEAM_HEIGHT;
-	m_vertices[9].position[2] =  0.;
-
-	m_vertices[10].position[0] =  IBEAM_TUCK_IN;
-	m_vertices[10].position[1] =  IBEAM_THICKNESS;
-	m_vertices[10].position[2] =  0.;
-
-	m_vertices[11].position[0] =  0.0;
-	m_vertices[11].position[1] =  IBEAM_THICKNESS;
-	m_vertices[11].position[2] =  0.;
-
-	m_vertices[12].position[0] =  0.0;
-	m_vertices[12].position[1] =  0.0;
-	m_vertices[12].position[2] =  0.0;
+	v.position[0] =  0.0;
+	v.position[1] =  0.0;
+	v.position[2] =  0.0;
+	m_vertices.push_back( v );
 }
 
 GLbyte 	glIbeam::generate_disc_indices( GLbyte mStartVertexIndex )

@@ -34,34 +34,32 @@
 
 #include <math.h>
 #include "imageloader.h"
-#include "gl_container.hpp"
-#include "cylinder.hpp"
-#include "room.hpp"
-#include "table.hpp"
-#include "stairway.hpp"
-#include "cabinet.hpp"
-#include "ibeam.hpp"
-#include "robot_leg_piece.hpp"
+#include "all_objects.h"
 
+/*************** OBJECTS ***********************/
+Palette		  palette;
+glWall		  wall;
+glBrickWall	  brick_wall;
 glLegSegment  upper_leg;
-glIbeam		ibeam(12.*8.);
-glCabinet	cabinet;
-glStairway  stairs;
-glTable		table;
-glRoom		apartment;
-glContainer box;
-glContainer box2;
-glContainer tray;
-glContainer tray2;
-glCylinder  cyl (12);
-glCylinder  cyl2(24);
-#define GROUND_SIZE 800.
+glIbeam		  ibeam(12.*8.);
+glCabinet	  cabinet;
+glStairway    stairs;
+glTable		  table;
+glRoom		  apartment;
+glContainer  box;
+glContainer  box2;
+glContainer  tray;
+glContainer  tray2;
+glCylinder   cyl (12);
+glCylinder   cyl2(24);
+/************ END OF OBJECTS ****************/
 
+#define GROUND_SIZE 800.
 
 using namespace std;
 
 const float BOX_SIZE = 27.0f; //The length of each side of the cube
-float _angle = 0;            //The rotation of the box
+float _angle  = 0;            //The rotation of the box
 float y_angle = 0;           //The rotation of the box
 float x_angle = 0;           //The rotation of the box
 float z_angle = 0;           //The rotation of the box
@@ -78,6 +76,7 @@ GLdouble upX, upY, upZ;
 GLdouble centerRadius = 100.;
 GLdouble centerAngle  = 0.0 ;
 GLdouble angle_increment = 5.*3.1415/180.;
+
 void rotate( )
 {
 	if (centerAngle > 2*M_PI)	centerAngle = 0.	;
@@ -85,7 +84,7 @@ void rotate( )
 
 	centerX = centerRadius * sin(centerAngle) + eyeX;
 	centerZ = centerRadius * cos(centerAngle) + eyeZ;
-	printf("centerAngle=%6.3f cx=%6.2f; cy=%6.2f \n", centerAngle, centerX, centerY );
+	//printf("centerAngle=%6.3f cx=%6.2f; cy=%6.2f \n", centerAngle, centerX, centerY );
 }
 
 void move_forward( float mAmount )
@@ -93,7 +92,7 @@ void move_forward( float mAmount )
 	float F_vec_x = eyeX - centerX;
 	float F_vec_y = eyeY - centerY;
 	float F_vec_z = eyeZ - centerZ;
-	float sum = F_vec_x + F_vec_y + F_vec_z;
+	float sum = fabs(F_vec_x) + fabs(F_vec_y) + fabs(F_vec_z);
 	
 	F_vec_x *= mAmount/sum;
 	F_vec_z *= mAmount/sum;
@@ -111,7 +110,7 @@ void move_sideways( float mAmount )
 	float F_vec_x = eyeX - centerX;
 	float F_vec_y = eyeY - centerY;
 	float F_vec_z = eyeZ - centerZ;
-	float sum = F_vec_x + F_vec_y + F_vec_z;
+	float sum = fabs(F_vec_x) + fabs(F_vec_y) + fabs(F_vec_z);
 
 	F_vec_x *= mAmount/sum;
 	F_vec_z *= mAmount/sum;
@@ -135,8 +134,8 @@ void handleKeypress(unsigned char key, int x, int y) {
 		case 'q': eyeY -= 5.; centerY -= 5.; break;
 		case 'r': eyeY += 5.; centerY += 5.; break;
 
-		case 'e': move_forward( 2.);  	break;
-		case 'c': move_forward( -2.); 	break; 
+		case 'c': move_forward( 2.);  	break;
+		case 'e': move_forward( -2.); 	break; 
 		case 's': move_sideways( 2.);	break;
 		case 'f': move_sideways( -2.); 	break;
 
@@ -169,11 +168,10 @@ void initRendering() {
 	glEnable(GL_LIGHT0);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_COLOR_MATERIAL);
-	
-	//Image* image = loadBMP("vtr.bmp");
-	Image* image = loadBMP("me_in_car.bmp");	
-	_textureId = loadTexture(image);
-	delete image;
+
+	//Image* image = loadBMP("textures/me_in_car.bmp");	
+	//_textureId = loadTexture(image);
+	//delete image;
 }
 
 void handleResize(int w, int h) {
@@ -181,123 +179,70 @@ void handleResize(int w, int h) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	//gluPerspective(45.0, (float)w / (float)h, 1.0, 200.0);
-	gluPerspective(75.0, (float)w / (float)h, 1.0, 400.0);	
+	gluPerspective(45.0, (float)w / (float)h, 1.0, 800.0);	
 }
 
-
-
-void drawScene() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	
-	//glTranslatef(0.0f, 0.0f, -200.0f);
-	
-	GLfloat ambientLight[] = {0.5f, 0.5f, 0.5f, 1.0f};
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);
-	
-	GLfloat lightColor[] = {0.7f, 0.7f, 0.7f, 1.0f};
-	GLfloat lightPos[] = {-2 * BOX_SIZE, 200,  4 * BOX_SIZE, 1.0f};
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-	
-	gluLookAt( eyeX,   	  eyeY,      eyeZ,  
-			   centerX,   centerY,   centerZ,  
-//			   upX,   	  upY,   	upZ   );
-			   0,   	  1.0,   	0   );
-				
-	//glTranslatef(eyeX, eyeY, eyeZ);
-/*	glRotatef(x_angle, 1.0f, 0.0f, 0.0f);
-	glRotatef(y_angle, 0.0f, 1.0f, 0.0f);
-	glRotatef(z_angle, 0.0f, 0.0f, 1.0f);		*/
-	
-	glShadeModel(GL_FLAT);
-
-	//glTranslatef(x, y, z);
-		
+void draw_objects()
+{
 	// Draw triangle VBO : 
-	ibeam.draw();
+	//ibeam.draw();
+	//palette.draw();
+	brick_wall.draw();	
+	//wall.draw	();
 	
 	//upper_leg.draw();
 	table.draw();
 	apartment.draw();
-	tray.draw();
+	//tray.draw();
 	//box.draw ();
 	//box2.draw();
-	stairs.draw();
+	//stairs.draw();
 	//cyl.draw ();
 	//cyl2.draw();
 	//cabinet.draw();
-	
-	// Draw ground:
-	glBegin   (GL_QUADS);
-	glNormal3f(0.0, 1.0f, 0.0f );
-	glColor3f (0.7f, 0.7f, 0.7f);
-	glVertex3f(-GROUND_SIZE, 0, -GROUND_SIZE);
-	glVertex3f( GROUND_SIZE, 0, -GROUND_SIZE);
-	glVertex3f( GROUND_SIZE, 0, GROUND_SIZE );
-	glVertex3f(-GROUND_SIZE, 0, GROUND_SIZE );
-	glEnd();	
-	
-	// insert top face... etc. here:
-	glBegin(GL_QUADS);	
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, _textureId);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glColor3f(1.0f, 1.0f, 1.0f);
-	// Insert //Front Face code here...
-
-	glNormal3f(0.0, 0.0f, 1.0f);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-BOX_SIZE / 2, -BOX_SIZE / 2, BOX_SIZE / 2);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(BOX_SIZE / 2, -BOX_SIZE / 2, BOX_SIZE / 2);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(BOX_SIZE / 2, BOX_SIZE / 2, BOX_SIZE / 2);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(-BOX_SIZE / 2, BOX_SIZE / 2, BOX_SIZE / 2);
-
-	glDisable(GL_TEXTURE_2D);
-	glEnd();
-		
-	glutSwapBuffers();
 }
-
-//Called every 25 milliseconds
-void update(int value) {
-	if (pause==false) {	
-		_angle += 1.0f;
-		if (_angle > 360) {
-			_angle -= 360;
-		}
-		glutPostRedisplay();
-	}
-	glutTimerFunc(25, update, 0);
-}
-
 void init_objects()
 {
-	//upper_leg
+	wall.m_wall_length = 17.*12.;
+//	wall.add_door( 2.*12., 28. );
+//	wall.add_door( 6.*12., 28. );
+//	wall.add_door( 10.*12., 28. );
+	
+	struct stSize s;
+	s.width = 36.;  s.height = 48.;
+//	wall.add_window( 4.*12., s, 3.*12. );	
+
+	//wall.set_texture(7);			
+	wall.create  ( 15.*12., 10.*12. );
+	wall.Relocate( 0.     ,   0., 475. );	
+	wall.m_angle = 30.0; 
+ 
+	brick_wall.create( 15.*12, 8);
+	brick_wall.Relocate(-150., 0., -150.);
+	
+//	palette.create();
+//	palette.Relocate( -150., 0., -150.);
 	
 	ibeam.m_y = 12.*9.;
 	ibeam.create();
 	
-	apartment.generate_VBO();
-	apartment.generate_IBO();
+	apartment.create_apartment();
 
-	cabinet.Relocate( 0., 0, 0. );
-	cabinet.generate_VBO();
-	cabinet.generate_IBO();
-
-	table.Relocate( 144./2., 0, 160./2. );
+	table.Relocate( 90.+24, 0, 291.-42.);
 	table.generate_vertices();
 	table.generate_VBO();
 	table.generate_IBO();
 
+/*	cabinet.Relocate( 0., 0, 0. );
+	cabinet.generate_VBO();
+	cabinet.generate_IBO();
+
 	stairs.generate_VBO();
 	stairs.generate_IBO();
+	stairs.m_angle = 90.;
+	stairs.m_x = - stairs.m_width*2.;
+	stairs.m_y = - stairs.get_height() + 50.;
+	stairs.m_z = - 50.;	
 	
 	tray.width  = 18.;
 	tray.height = 5.;
@@ -337,7 +282,57 @@ void init_objects()
 	cyl2.generate_vertices();
 	cyl2.generate_VBO();
 	cyl2.generate_IBO(); 
+	*/
 }
+
+void drawScene() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	
+	//glTranslatef(0.0f, 0.0f, -200.0f);
+	
+	GLfloat ambientLight[] = {0.5f, 0.5f, 0.5f, 1.0f};
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight);
+	
+	GLfloat lightColor[] = {0.7f, 0.7f, 0.7f, 1.0f};
+	GLfloat lightPos[] = {-2 * BOX_SIZE, 200,  4 * BOX_SIZE, 1.0f};
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+	
+	gluLookAt( eyeX,   	  eyeY,      eyeZ,  
+			   centerX,   centerY,   centerZ,  
+			   0,   	  1.0,   	0   );
+	
+	//glShadeModel(GL_FLAT);
+		
+	draw_objects();
+	
+	// Draw ground:
+	glBegin   (GL_QUADS);
+	glNormal3f(0.0, 1.0f, 0.0f );
+	glColor3f (0.7f, 0.7f, 0.7f);
+	glVertex3f(-GROUND_SIZE, 0, -GROUND_SIZE);
+	glVertex3f( GROUND_SIZE, 0, -GROUND_SIZE);
+	glVertex3f( GROUND_SIZE, 0, GROUND_SIZE );
+	glVertex3f(-GROUND_SIZE, 0, GROUND_SIZE );
+	glEnd();	
+			
+	glutSwapBuffers();
+}
+
+//Called every 25 milliseconds
+void update(int value) {
+	if (pause==false) {	
+		_angle += 1.0f;
+		if (_angle > 360) {
+			_angle -= 360;
+		}
+		glutPostRedisplay();
+	}
+	glutTimerFunc(25, update, 0);
+}
+
 
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
@@ -432,3 +427,25 @@ int main(int argc, char** argv) {
 
 	glEnd();
 */	
+
+	// insert top face... etc. here:
+/*	glBegin(GL_QUADS);	
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, _textureId);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glColor3f(1.0f, 1.0f, 1.0f);
+	// Insert //Front Face code here...
+
+	glNormal3f(0.0, 0.0f, 1.0f);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-BOX_SIZE / 2, -BOX_SIZE / 2, BOX_SIZE / 2);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(BOX_SIZE / 2, -BOX_SIZE / 2, BOX_SIZE / 2);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(BOX_SIZE / 2, BOX_SIZE / 2, BOX_SIZE / 2);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-BOX_SIZE / 2, BOX_SIZE / 2, BOX_SIZE / 2);
+
+	glDisable(GL_TEXTURE_2D);
+	glEnd(); */

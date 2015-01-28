@@ -25,7 +25,6 @@
 
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
-
 #include "imageloader.h"
 
 using namespace std;
@@ -145,7 +144,6 @@ Image* loadBMP(const char* filename)
 	input.ignore(8);
 	int dataOffset = readInt(input);
 
-
 	//Read the header
 	int headerSize = readInt(input);
 	unsigned int width;
@@ -186,25 +184,27 @@ Image* loadBMP(const char* filename)
 			assert(!"Unknown bitmap format");
 	}
 
-	//Read the data
-	int bytes_per_pixel = bpp >> 3;		// divide by 8
+	//Read the data :
+	int bytes_per_pixel = bpp >> 3;		// divide by 8 
+	int bytesPerRow;
 	printf(" bpp=%d  bytes_per_pixel=%d  \n", bpp, bytes_per_pixel );
 	unsigned int format;
 	unsigned int type;
+	
 	if (bytes_per_pixel == 4) {
+		bytesPerRow = (width * bytes_per_pixel);
 		format = GL_RGBA;
-		type = GL_UNSIGNED_INT_8_8_8_8;
+		type   = GL_UNSIGNED_INT_8_8_8_8;
 	} else if (bytes_per_pixel == 3) {
+		bytesPerRow = ((width * 3 + 3) / 4) * 4 - (width * 3 % 4);
 		format = GL_RGB;
-		type = GL_UNSIGNED_BYTE;		
+		type   = GL_UNSIGNED_BYTE;		
 	}
 	
-	//int bytesPerRow = ((width * 3 + 3) / 4) * 4 - (width * 3 % 4);
 	// if 3 bytes per pixel, have to quad align it!
 	int pheight = (height>0) ? height : -height;
 	height = pheight;
 	printf("width=%d; height=%d\n", width, height);
-	int bytesPerRow = (width * bytes_per_pixel);
 	int size = bytesPerRow * pheight;
 	printf("size =%d\n", size);
 	char* tmp = new char[size]();
@@ -213,12 +213,12 @@ Image* loadBMP(const char* filename)
 	input.read(pixels.get(), size);
 	
 	//Get the data into the right format
-	auto_array<char> pixels2(new char[width * pheight * bytes_per_pixel]);
+	auto_array<char> pixels2(new char[bytes_per_pixel*width * pheight]);
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {
 			for(int c = 0; c < bytes_per_pixel; c++) {
-				pixels2[bytes_per_pixel * (width * y + x) + c] =
-			    pixels [bytesPerRow * y + bytes_per_pixel * x + (bytes_per_pixel-1 - c)];
+				pixels2[bytes_per_pixel*width * y + bytes_per_pixel*x + c] =
+			    pixels [bytesPerRow * y + bytes_per_pixel*x + (bytes_per_pixel-1 - c)];
 			}
 		}
 	}

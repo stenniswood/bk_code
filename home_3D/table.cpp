@@ -12,10 +12,9 @@
 
 glTable::glTable(  )
 {
-	m_table_length = 57.;	// Actual Measurements!
-	m_table_width  = 38.;
+	m_table_length = 57.;	// 57 Actual Measurements!
+	m_table_width  = 38.;	// 38
 	m_table_height = 29.;
-
 	Initialize();
 }
 
@@ -93,7 +92,8 @@ void 	glTable::generate_VBO( )
 	for (int i=0; i<m_table_legs.size(); i++)
 		m_table_legs[i].generate_VBO();		
 
-	m_table_top.load_image("PistonsHalf.bmp");
+	m_table_top.load_image("textures/oak_wood.jpg");	
+//	m_table_top.load_image("textures/PistonsHalf.bmp");
 	m_table_top.generate_TBO( );
 	m_table_top.generate_texture_coords( );
 	m_table_top.generate_VBOTexCoords	( ); 

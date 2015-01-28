@@ -35,15 +35,16 @@ void glInner::generate_shank_vertices( )		// 2D
 	const int SAMPLES = 36.;
 	float angle       = 0.0;
 	float increment   = 2.*M_PI/SAMPLES;
-
+	struct Vertex v;
 	for (int i=0; i<SAMPLES; i++)	
 	{		
-		m_vertices[i].position[0] = shank_radius*sin(angle);
-		m_vertices[i].position[1] = 0.0;
-		m_vertices[i].position[2] = shank_radius*cos(angle);
+		v.position[0] = shank_radius*sin(angle);
+		v.position[1] = 0.0;
+		v.position[2] = shank_radius*cos(angle);
+		m_vertices.push_back( v );
 		angle += increment;
 	}
-	m_number_of_vertices += SAMPLES;
+	//m_number_of_vertices += SAMPLES;
 }
 void glInner::generate_round_vertices( )		// 2D
 {
@@ -51,40 +52,45 @@ void glInner::generate_round_vertices( )		// 2D
 	// not sure which quadrant we'll need.  Let's try going from [-PI/2 to +PI/2]
 	float angle       = -2.*M_PI/4.;			
 	float increment   = M_PI/SAMPLES;	// half circle only!
-
+	struct Vertex v;
+	
 	for (int i=0; i<SAMPLES; i++)	
 	{		
-		m_vertices[i].position[0] = round_radius*sin(angle);
-		m_vertices[i].position[1] = 0.0;
-		m_vertices[i].position[2] = round_radius*cos(angle);
+		v.position[0] = round_radius*sin(angle);
+		v.position[1] = 0.0;
+		v.position[2] = round_radius*cos(angle);
+		m_vertices.push_back( v );
 		angle += increment;
 	}
-	m_number_of_vertices += SAMPLES;	
 }
 
 
 void	glInner::generate_layer_vertices( )
 {
 	m_layer_one_vertices = 13;
-	m_vertices = (Vertex*)malloc( sizeof(Vertex)*(m_layer_one_vertices*2) );
-
+	//m_vertices = (Vertex*)malloc( sizeof(Vertex)*(m_layer_one_vertices*2) );
+	struct Vertex v;
+	
 	// Go along bottom first:
-	m_vertices[0].position[0] =  0.0;
-	m_vertices[0].position[1] =  0.0;
-	m_vertices[0].position[2] =  0.0;
+	v.position[0] =  0.0;
+	v.position[1] =  0.0;
+	v.position[2] =  0.0;
+	m_vertices.push_back( v );
 
-	m_vertices[1].position[0] =  m_leg_length;
-	m_vertices[1].position[1] =  0.;
-	m_vertices[1].position[2] =  0.0;
+	v.position[0] =  m_leg_length;
+	v.position[1] =  0.;
+	v.position[2] =  0.0;
+	m_vertices.push_back( v );
 
-	m_vertices[2].position[0] =  m_leg_length;
-	m_vertices[2].position[1] =  0.;
-	m_vertices[2].position[2] =  LEG_THICKNESS;
+	v.position[0] =  m_leg_length;
+	v.position[1] =  0.;
+	v.position[2] =  LEG_THICKNESS;
+	m_vertices.push_back( v );
 
-	m_vertices[3].position[0] =  0.0;
-	m_vertices[3].position[1] =  0.0;
-	m_vertices[3].position[2] =  LEG_THICKNESS;
-
+	v.position[0] =  0.0;
+	v.position[1] =  0.0;
+	v.position[2] =  LEG_THICKNESS;
+	m_vertices.push_back( v );
 }
 
 GLbyte 	glInner::generate_disc_indices( GLbyte mStartingVertexIndex )

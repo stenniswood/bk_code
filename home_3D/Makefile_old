@@ -1,0 +1,26 @@
+CC = g++
+CFLAGS = 
+PROG = home3d
+
+SRCS = main.cpp imageloader.cpp gl_container.cpp cylinder.cpp   \
+		table.cpp stairway.cpp cabinet.cpp extrusion.cpp ibeam.cpp 		\
+		robot_leg_piece.cpp txt_container.cpp brickwall.cpp wall.cpp 	\
+		palette.cpp room2.cpp
+
+
+ifeq ($(shell uname),Darwin)
+	LIBS = -framework OpenGL -framework GLUT 
+else
+	LIBS = -lglut
+endif
+LIBS +=  -lpthread -lm -L./lib -lfreenect -L/usr/local/lib/ 			 \
+		-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_calib3d \
+		-lopencv_ml -lopencv_objdetect -lopencv_ts -lopencv_imgcodecs
+
+all: $(PROG)
+
+$(PROG):	$(SRCS)
+	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
+
+clean:
+	rm -f $(PROG)

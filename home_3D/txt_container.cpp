@@ -8,6 +8,16 @@
 #include "gl_container.hpp"
 #include "txt_container.hpp"
 
+// Include OpenCV here for the imread function!  
+#include <stdio.h>
+#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+// Include OpenCV here for the imread function!
+
+using namespace cv;
 using namespace std;
 
 
@@ -21,15 +31,54 @@ txtContainer::txtContainer(  )
 
 void txtContainer::load_image( string mFilename )
 {
-	m_image = loadBMP( mFilename.c_str() );
-	printf("load_image=%x\n", m_image );
+	printf("txtContainer::load_image( %s )\n", mFilename.c_str() );
+//	m_image = loadBMP( mFilename.c_str() );
+	m_src = imread(mFilename);
+	imshow( "Display Image", m_src );	
+	
+//	cvtColor( src, m_src,    );
+//	cvtColor( dst, cdst, COLOR_GRAY2BGR );
+//	printf("load_image=%x\n", m_image );
 }
 
 GLuint txtContainer::generate_TBO() 
 {
-	if (m_image)
+//	if (m_image)
 	{
-		glEnable(GL_TEXTURE_2D);		
+		uint8_t* pixelPtr   = (uint8_t*)m_src.data;
+		int channels        = m_src.channels();
+		int bytes_per_pixel = m_src.elemSize();
+		int format,type;
+		switch(channels) {
+		case 1: break;
+		case 2: break;
+		case 3: format = GL_RGB;	type = GL_UNSIGNED_BYTE;
+				break;
+		case 4: format = GL_RGBA;	type = GL_UNSIGNED_INT_8_8_8_8;
+				break;
+		default: break;
+		}
+		printf("txtContainer: rows=%d; cols=%d\n", m_src.rows, m_src.cols);
+		glEnable(GL_TEXTURE_2D);
+		glGenTextures(1, &m_TBO );
+		glBindTexture(GL_TEXTURE_2D, m_TBO);
+		glTexImage2D(GL_TEXTURE_2D,
+				 0,
+				 format,
+				 m_src.cols, m_src.rows,
+				 0,
+				 format,	 type,
+			 	 pixelPtr );
+		printf("txtContainer: m_TBO=%d\n", m_TBO);
+	}
+	return m_TBO;
+}
+
+GLuint txtContainer::generate_TBOi() 
+{
+	if (m_image==NULL) return 0;
+	
+		glEnable(GL_TEXTURE_2D);
 		glGenTextures(1, &m_TBO );
 		glBindTexture(GL_TEXTURE_2D, m_TBO);
 		glTexImage2D(GL_TEXTURE_2D,
@@ -40,7 +89,6 @@ GLuint txtContainer::generate_TBO()
 				 m_image->format,
 				 m_image->type,
 				 m_image->pixels );
-	}
 	return m_TBO;
 }
 
@@ -49,19 +97,20 @@ GLuint txtContainer::generate_texture_coords( )
 	// Texture coords [0.0..1.0]   1.0 represents the far edge of the image.
 	// Pretty sure we need 1 coordinate for each vertex.
 	//   So if we're just doing 1 face.  It should mean just 4 text coords.
-	m_NumTexCoords = 8;
-	m_pTexCoords = new float[m_NumTexCoords*2];
-	m_pTexCoords[0] = 0.0;			m_pTexCoords[1] = 0.0;
-	m_pTexCoords[2] = 1.0;			m_pTexCoords[3] = 0.0;	
-	m_pTexCoords[4] = 1.0;			m_pTexCoords[5] = 1.0;
-	m_pTexCoords[6] = 0.0;			m_pTexCoords[7] = 1.0;
+	//m_NumTexCoords = 8;
+	const float fs = 0.25;
+	
+	m_TexCoords.push_back( 0.0 );			m_TexCoords.push_back( 0.0 );
+	m_TexCoords.push_back( 0.0 );			m_TexCoords.push_back( fs );	
+	m_TexCoords.push_back( fs );			m_TexCoords.push_back( fs );
+	m_TexCoords.push_back( fs );			m_TexCoords.push_back( 0.0 );
 
-	m_pTexCoords[ 8] = 0.0;			m_pTexCoords[9] = 0.0;
-	m_pTexCoords[10] = 1.0;			m_pTexCoords[11] = 0.0;	
-	m_pTexCoords[12] = 1.0;			m_pTexCoords[13] = 1.0;
-	m_pTexCoords[14] = 0.0;			m_pTexCoords[15] = 1.0;
+	m_TexCoords.push_back( 0.0 );			m_TexCoords.push_back( 0.0 );
+	m_TexCoords.push_back( 0.0 );			m_TexCoords.push_back( fs );
+	m_TexCoords.push_back( fs );			m_TexCoords.push_back( fs );
+	m_TexCoords.push_back( fs );			m_TexCoords.push_back( 0.0 );
 
-	return m_NumTexCoords;
+	return m_TexCoords.size()/2;
 }
 
 void txtContainer::generate_VBOTexCoords()
@@ -70,19 +119,19 @@ void txtContainer::generate_VBOTexCoords()
     glGenBuffers( 1, &m_VBOTexCoords );                 // Get A Valid Name
     glBindBuffer( GL_ARRAY_BUFFER, m_VBOTexCoords );        // Bind The Buffer
     // Load The Data
-    glBufferData( GL_ARRAY_BUFFER, m_NumTexCoords*2*sizeof(float), 
-    				 m_pTexCoords, GL_STATIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, m_TexCoords.size()*sizeof(float), 
+    				 m_TexCoords.data(), GL_STATIC_DRAW );
 }
 
 void txtContainer::draw()
 {
-//	glContainer::draw();
 	glTranslatef(m_x, m_y, m_z);
+	glColor3f (1.0f, 1.0f, 1.0f);
 		
 	//Make the new VBO active. Repeat here incase changed since initialisation
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO	);		
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO );
-	
+
 	glVertexPointer(3, GL_FLOAT, 		 sizeof(struct Vertex), NULL);
 	glColorPointer (4, GL_UNSIGNED_BYTE, sizeof(struct Vertex), (GLvoid*)(offsetof(struct Vertex,color)));
 
@@ -93,30 +142,26 @@ void txtContainer::draw()
 	{
 		glEnable		(GL_TEXTURE_2D);
 		glBindBuffer	(GL_TEXTURE_2D, m_TBO );	
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glBindBuffer	(GL_ARRAY_BUFFER, m_VBOTexCoords );	
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 	0, NULL); 
+		glTexCoordPointer  (2, GL_FLOAT,   0, NULL); 
 
 //		glDrawElements(GL_QUAD_STRIP, NUMBER_OF_CUBE_INDICES, GL_UNSIGNED_BYTE, 
 //				(GLvoid*)((char*)NULL));
-		glDrawElements(GL_QUADS, NUMBER_OF_QUAD_INDICES, GL_UNSIGNED_BYTE, 
-					(GLvoid*)((char*)NULL));
-		
+		glDrawElements(GL_QUADS, 8, GL_UNSIGNED_BYTE, 
+					   (GLvoid*)((char*)NULL));
+
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);					
 		glDisable	(GL_TEXTURE_2D);	
 	}
-	//else 	//GL_QUAD_STRIP
-
 
 	// glDrawArrays(GL_TRIANGLE_STRIP, 0, m_number_of_vertices );
-	// GL_POLYGON, GL_LINE_LOOP
-	glTranslatef(-m_x, -m_y, -m_z);		 
-
+	glTranslatef(-m_x, -m_y, -m_z);
 }
 
 void txtContainer::print_info()
@@ -126,4 +171,5 @@ void txtContainer::print_info()
 	printf(" width=%6.3f;  height=%6.3f; depth=%6.3f> \n", 
 			width, height, depth );
 }
+
 

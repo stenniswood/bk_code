@@ -20,10 +20,13 @@ public:
 	void 	generate_VBO( );		
 	void	draw(); 
 	
+	float	get_height();
+	
 	float 	 m_rise;
 	float 	 m_run;		
 	float 	 m_width;
-
+	int		 m_number_of_steps;
+	
 	bool	 m_is_closed;
 	unsigned long int m_color;
 	GLbyte   m_number_of_indices;
@@ -36,6 +39,7 @@ public:
 	GLuint	m_VBO;
 	GLuint	m_IBO;
 
+	float 	m_angle;
 	float	m_x;
 	float	m_y;
 	float	m_z;	

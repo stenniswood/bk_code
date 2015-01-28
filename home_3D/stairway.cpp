@@ -25,6 +25,7 @@ glStairway::glStairway(  )
 	m_run	= 10.;		// rise + run == 18.
 	m_width =  3.*12;		// 
 
+	m_number_of_steps = 15;
 	m_color = 0xFFFFFFFF;
 	m_is_closed = true;		// always for a stairway!
 }
@@ -170,8 +171,8 @@ void glStairway::generate_IBO()
 }
 
 void glStairway::generate_VBO()
-{	
-	generate_side_vertices (15);
+{		
+	generate_side_vertices (m_number_of_steps);
 	generate_side2_vertices(  );	
 	generate_vertices_colors( );
 
@@ -193,11 +194,18 @@ void glStairway::generate_VBO()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 }
 
+float glStairway::get_height()
+{
+	return (m_rise * m_number_of_steps);
+}
 
 void glStairway::draw()
 {
-	glTranslatef(m_x, m_y, m_z);
+	glPushMatrix();
 
+	glTranslatef(m_x, m_y, m_z);
+	glRotatef 	(m_angle, 0.0f, 1.0f, 0.0f );
+	
 	//Make the new VBO active. Repeat here incase changed since initialisation
 	glBindBuffer(GL_ARRAY_BUFFER, 		  m_VBO	);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO );
@@ -226,6 +234,6 @@ void glStairway::draw()
 		glDrawElements(GL_LINE_LOOP, m_floor_indices, GL_UNSIGNED_BYTE, 
 						(GLvoid*)BUFFER_OFFSET(m_floor_indices+side_indices) );
 
-	glTranslatef(-m_x, -m_y, -m_z);		
+	glPopMatrix();
 }
 	
