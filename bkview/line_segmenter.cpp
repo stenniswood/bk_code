@@ -19,6 +19,17 @@ The algorithm is:
 #include <pthread.h>
 #include <math.h>
 
+#include <stdio.h>
+#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "line_segmenter.h"
+
+using namespace cv;
+using namespace std;
+
 #if defined(__APPLE__)
 #include <GLUT/glut.h>
 #include <OpenGL/gl.h>
@@ -30,12 +41,8 @@ The algorithm is:
 #endif
 
 
-int line_regression(int n, const float x[], const float y[], float* m, float* b, float* r);
-
-using namespace std;
-int16_t  v_delta[640];
-int16_t  h_delta[480];	// for scans from top down.
-
+extern uint16_t t_gamma[2048];
+/******* TYPES **********************************/
 struct segment 
 {
 	int col_start;		// start column
@@ -44,10 +51,6 @@ struct segment
 	float slope_stddev;	
 	int	tag_for_splitting;	// 1 means split; 0 means leave as is.
 };
-
-const int PEAK_TYPE_SLOPE_CHANGE = 0;
-const int PEAK_TYPE_FALLING = 1;
-const int PEAK_TYPE_RISING = 2;
 
 struct peak_info 
 {
@@ -58,20 +61,44 @@ struct peak_info
 	int line_below;
 	int group;		// the raw peaks get grouped for line fit etc.
 };
+
+/******* VARIABLES **********************************/
+int16_t  v_delta[640];
+int16_t  h_delta[480];			// for scans from top down.
+uint8_t	 proc_image[640*480*3];
+
+const int PEAK_TYPE_SLOPE_CHANGE = 0;
+const int PEAK_TYPE_FALLING = 1;
+const int PEAK_TYPE_RISING = 2;
+
 vector<struct peak_info>  			m_peaks;				// for 1 line
-int 								m_lines_start_row;		// first row (line) the m_all_lines starts at.
 vector<vector<struct peak_info> >	m_lines;
 vector<struct segment> 				m_segs;
 
-struct segment 			segs[64];
-int    					num_segs = 0;
-//float  					v_avg   [64];
-//float  					v_stddev[64];
-
 void clear_processing()
 {
+	m_segs.clear();
 	m_peaks.clear();
 	m_lines.clear();
+}
+
+uint8_t* process_depth_changes(uint16_t* mdepth)
+{
+	clear_processing();
+
+	// DERIVATIVES
+	for (int l=0; l<480-1; l++)
+	{
+		calc_deltas( &(mdepth[(l*640)]), v_delta, false );
+		find_peaks( v_delta );
+	} 
+	correlate_peaks();		// connect the line_above and line_belows.
+	//filter_peaks();		// filter crashes when erasing a point.
+	//group_peaks();		// assign group numbers to each group connected above.
+	//extract_seeds();		// now put a starter of each group into a vector.
+	//linefit_groups();	
+	colorize_seg_ends2(proc_image, false);
+	return proc_image;
 }
 
 /* Computes derivative over 1 row.  */
@@ -193,7 +220,6 @@ void shortest_length()
 		}
 	}
 }
-
 
 void filter_peaks()
 {
@@ -477,111 +503,6 @@ void calc_averages_raw( int16_t *m_delta, float* m_average )
 	}
 }
 
-void calc_averages_1seg( int Seg, int16_t *m_delta )
-{
-	int i=0;
-	int segment_size;
-
-	segment_size = (segs[Seg].col_end - segs[Seg].col_start);
-	segs[Seg].slope_avg = 0;
-	for (i=segs[Seg].col_start; i<segs[Seg].col_end; i++)
-		segs[Seg].slope_avg += m_delta[i];
-	segs[Seg].slope_avg /= segment_size;
-}
-
-// compute the stddev for each average.
-void calc_stddevs_1seg( int Seg, int16_t *m_delta )
-{
-	int i=0;
-	int segment_size;
-	
-	segment_size = (segs[Seg].col_end - segs[Seg].col_start);
-	segs[Seg].slope_stddev = 0;
-	for (i=segs[Seg].col_start; i<segs[Seg].col_end; i++)		
-		segs[Seg].slope_stddev += pow( m_delta[i] - segs[Seg].slope_avg, 2 );
-	segs[Seg].slope_stddev /= segment_size;
-}
-
-void calc_averages_seg( int16_t *m_delta )
-{
-	int i=0,j=0;
-	int segment_size;
-	
-	for (j=0; j<num_segs; j++)
-	{
-		segment_size = (segs[j].col_end - segs[j].col_start);
-		segs[j].slope_avg = 0;
-		for (i=segs[j].col_start; i<segs[j].col_end; i++)		
-			segs[j].slope_avg += m_delta[i];
-		segs[j].slope_avg /= segment_size;
-	}
-}
-
-// compute the stddev for each average.
-void calc_stddevs_seg( int16_t *m_delta )
-{
-	int i=0,j=0;
-	int segment_size;
-	
-	for (j=0; j<num_segs; j++)
-	{
-		segment_size = (segs[j].col_end - segs[j].col_start);
-		segs[j].slope_stddev = 0;
-		for (i=segs[j].col_start; i<segs[j].col_end; i++)		
-			segs[j].slope_stddev += pow( m_delta[i] - segs[j].slope_avg, 2 );
-		segs[j].slope_stddev /= segment_size;
-	}
-}
-
-
-// compute the stddev for each average.
-void calc_stddevs( int16_t *m_delta, float* m_average, float* m_stddevs )
-{
-	int segment_size = 10;
-	int i,j=0;
-	for (i=1; i<640; i++)
-	{
-		m_stddevs[j] += pow( m_delta[i] - m_average[j], 2 );
-
-		if ((i%segment_size)==0)
-		{
-			m_stddevs[j] /= segment_size;
-			j++;
-			m_stddevs[j] = 0;			
-		}
-	}
-}
-
-void calc_thresholds( int16_t *m_delta, float* m_average, float* m_stddevs )
-{
-	int   segment_size = 10;
-	int i=0;
-	int j=0;
-	num_segs = 0;
-	float plus_6sigma  = m_average[j] + 6. * m_stddevs[j];
-	float minus_6sigma = m_average[j] - 6. * m_stddevs[j];
-
-	segs[num_segs].col_start = 0;
-	for (i=1; i<640; i++)
-	{
-		if ((m_delta[i] > plus_6sigma) || (m_delta[i] < minus_6sigma))
-		{
-			printf(" %d;  H:%6.2f, L:%6.2f \n", m_delta[i], plus_6sigma, minus_6sigma);
-			segs[num_segs].col_end   = i;
-			num_segs++;
-			segs[num_segs].col_start = i+1;
-		}			
-
-		if ((i % segment_size)==0)
-		{		
-			//printf("next_segment...\n");	
-			j++;
-			plus_6sigma  = m_average[j] + 6. * m_stddevs[j];
-			minus_6sigma = m_average[j] - 6. * m_stddevs[j];
-		}
-	}
-}
-
 /* This draws a graph on top of the image for debugging. */
 void plot_array( uint16_t* mArray, uint16_t max_value, uint8_t *mImage )
 {
@@ -605,16 +526,16 @@ void plot_array( uint16_t* mArray, uint16_t max_value, uint8_t *mImage )
 void colorize_seg_ends2(uint8_t *image, bool mOnlyGroups )
 {
 	int rl = 640*3;			// row length
-	int column=0;
+	int column=0;			// 
 	int line=0;				// [m_lines_start_row... + m_lines.size()]
-	int line_index = m_lines_start_row;	// 
+	int line_index = 0;	// 
 	int index;
 	// SCAN ALL LINES (that we have) : 
 	//printf("start_row=%d; + rows=%d\n", m_lines_start_row, m_lines.size() );
-	for (line=m_lines_start_row; line<(m_lines_start_row+m_lines.size()); line++)
+	for (line=0; line<(0+m_lines.size()); line++)
 	{
 		index = line * rl;
-		line_index = line - m_lines_start_row;
+		line_index = line - 0;
 		// SCAN ALL PEAKS (that we have)
 		//printf( "%d peaks=%d\n", line, m_lines[line_index].size() );
 		for (int p=0; p<m_lines[line_index].size(); p++)
@@ -648,49 +569,6 @@ void colorize_seg_ends2(uint8_t *image, bool mOnlyGroups )
 	}	
 }
 
-void colorize_seg_ends(uint8_t *m_draw_image_line )
-{
-	int rl = 640*3;	// row length
-	int i=0;
-	for (; i<num_segs; i++)
-	{
-		m_draw_image_line[3*segs[i].col_start+0] = 0;
-		m_draw_image_line[3*segs[i].col_start+1] = 255;
-		m_draw_image_line[3*segs[i].col_start+2] = 0;
-
-		m_draw_image_line[3*segs[i].col_end+0] = 255;
-		m_draw_image_line[3*segs[i].col_end+1] = 0;
-		m_draw_image_line[3*segs[i].col_end+2] = 0;		
-
-		// DRAW TRIPLICATE:
-		m_draw_image_line[3*segs[i].col_start+rl+0] = 0;
-		m_draw_image_line[3*segs[i].col_start+rl+1] = 255;
-		m_draw_image_line[3*segs[i].col_start+rl+2] = 0;
-
-		m_draw_image_line[3*segs[i].col_end+rl+0] = 255;
-		m_draw_image_line[3*segs[i].col_end+rl+1] = 0;
-		m_draw_image_line[3*segs[i].col_end+rl+2] = 0;		
-
-		// DRAW TRIPLICATE:
-		m_draw_image_line[3*segs[i].col_start+2*rl+0] = 0;
-		m_draw_image_line[3*segs[i].col_start+2*rl+1] = 255;
-		m_draw_image_line[3*segs[i].col_start+2*rl+2] = 0;
-
-		m_draw_image_line[3*segs[i].col_end+2*rl+0] = 255;
-		m_draw_image_line[3*segs[i].col_end+2*rl+1] = 0;
-		m_draw_image_line[3*segs[i].col_end+2*rl+2] = 0;		
-
-		// DRAW TRIPLICATE:
-		m_draw_image_line[3*segs[i].col_start+3*rl+0] = 0;
-		m_draw_image_line[3*segs[i].col_start+3*rl+1] = 255;
-		m_draw_image_line[3*segs[i].col_start+3*rl+2] = 0;
-
-		m_draw_image_line[3*segs[i].col_end+3*rl+0] = 255;
-		m_draw_image_line[3*segs[i].col_end+3*rl+1] = 0;
-		m_draw_image_line[3*segs[i].col_end+3*rl+2] = 0;
-
-	}
-}
 
 #define sqr(h) h*h
 
@@ -727,42 +605,24 @@ int line_regression(int n, const float x[], const float y[], float* m, float* b,
 			sqrt((sumx2 - sqr(sumx)/n) *
 			(sumy2 - sqr(sumy)/n));
    }
-
    return 0; 
 }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////// PRINT ROUTINES //////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 void print_segs( )
 {
-	int i=0;
-	printf("Segments:\n");
-	for (; i<num_segs; i++)
+	int i;
+	printf("Segments %d:\n", m_segs.size() );
+	for (i=0; i<m_segs.size(); i++)
 	{
-		printf ("%d:  <%d, %d> \n", i, segs[i].col_start, segs[i].col_end );		
-	}
-	printf("\n");
-}
-
-void print_seg_stats( )
-{
-	int i=0;
-	printf("Segment Stats %d:\n", num_segs);
-	for (i=0; i<num_segs; i++)
 		printf("%d\t", i );
-
-	for (i=0; i<num_segs; i++)
-		printf("%d\t", segs[i].col_start );
-
-	for (i=0; i<num_segs; i++)
-		printf("%d\t", segs[i].col_end );
-
-	for (i=0; i<num_segs; i++)
-		printf("%4.4f\t", segs[i].slope_avg );
-
-	for (i=0; i<num_segs; i++)
-		printf("%4.4f\t", segs[i].slope_stddev );
-
+		printf("%d\t",    m_segs[i].col_start );
+		printf("%d\t",    m_segs[i].col_end   );
+		printf("%4.4f\t", m_segs[i].slope_avg );	
+		printf("%4.4f\t", m_segs[i].slope_stddev );
+	}
 	printf("\n");
 }
 

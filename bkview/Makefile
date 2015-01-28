@@ -13,19 +13,18 @@ VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 #		-pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST \
 #		-DUSE_VCHIQ_ARM -Wno-psabi 
 
-
 ifeq ($(shell uname),Darwin)
 	LIBS = -framework OpenGL -framework GLUT 
 else
 	LIBS = -lglut
 endif
-LIBS +=  -lpthread -lm -L./lib -lfreenect
-
-
+LIBS +=  -lpthread -lm -L./lib -lfreenect -L/usr/local/lib/ \
+		-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_calib3d \
+		-lopencv_ml -lopencv_objdetect -lopencv_ts -lopencv_imgcodecs
 DEPS   	   = 
 
 # CORE CODE:
-BKVIEW_OBJS  = glview.o 
+BKVIEW_OBJS  = bkview.o line_segmenter.o rectangular.o 
 
 # APP CODE
 VOICE_OBJS 	= 

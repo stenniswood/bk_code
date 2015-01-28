@@ -180,3 +180,185 @@ void scan_split_segment( int16_t *m_delta )
 			split_segment( i, m_delta );
 	}
 }
+
+
+void calc_averages_1seg( int Seg, int16_t *m_delta )
+{
+	int i=0;
+	int segment_size;
+
+	segment_size = (segs[Seg].col_end - segs[Seg].col_start);
+	segs[Seg].slope_avg = 0;
+	for (i=segs[Seg].col_start; i<segs[Seg].col_end; i++)
+		segs[Seg].slope_avg += m_delta[i];
+	segs[Seg].slope_avg /= segment_size;
+}
+
+// compute the stddev for each average.
+void calc_stddevs_1seg( int Seg, int16_t *m_delta )
+{
+	int i=0;
+	int segment_size;
+	
+	segment_size = (segs[Seg].col_end - segs[Seg].col_start);
+	segs[Seg].slope_stddev = 0;
+	for (i=segs[Seg].col_start; i<segs[Seg].col_end; i++)		
+		segs[Seg].slope_stddev += pow( m_delta[i] - segs[Seg].slope_avg, 2 );
+	segs[Seg].slope_stddev /= segment_size;
+}
+
+void calc_averages_seg( int16_t *m_delta )
+{
+	int i=0,j=0;
+	int segment_size;
+	
+	for (j=0; j<num_segs; j++)
+	{
+		segment_size = (segs[j].col_end - segs[j].col_start);
+		segs[j].slope_avg = 0;
+		for (i=segs[j].col_start; i<segs[j].col_end; i++)		
+			segs[j].slope_avg += m_delta[i];
+		segs[j].slope_avg /= segment_size;
+	}
+}
+
+// compute the stddev for each average.
+void calc_stddevs_seg( int16_t *m_delta )
+{
+	int i=0,j=0;
+	int segment_size;
+	
+	for (j=0; j<num_segs; j++)
+	{
+		segment_size = (segs[j].col_end - segs[j].col_start);
+		segs[j].slope_stddev = 0;
+		for (i=segs[j].col_start; i<segs[j].col_end; i++)		
+			segs[j].slope_stddev += pow( m_delta[i] - segs[j].slope_avg, 2 );
+		segs[j].slope_stddev /= segment_size;
+	}
+}
+
+
+// compute the stddev for each average.
+void calc_stddevs( int16_t *m_delta, float* m_average, float* m_stddevs )
+{
+	int segment_size = 10;
+	int i,j=0;
+	for (i=1; i<640; i++)
+	{
+		m_stddevs[j] += pow( m_delta[i] - m_average[j], 2 );
+
+		if ((i%segment_size)==0)
+		{
+			m_stddevs[j] /= segment_size;
+			j++;
+			m_stddevs[j] = 0;			
+		}
+	}
+}
+
+void calc_thresholds( int16_t *m_delta, float* m_average, float* m_stddevs )
+{
+	int   segment_size = 10;
+	int i=0;
+	int j=0;
+	num_segs = 0;
+	float plus_6sigma  = m_average[j] + 6. * m_stddevs[j];
+	float minus_6sigma = m_average[j] - 6. * m_stddevs[j];
+
+	segs[num_segs].col_start = 0;
+	for (i=1; i<640; i++)
+	{
+		if ((m_delta[i] > plus_6sigma) || (m_delta[i] < minus_6sigma))
+		{
+			printf(" %d;  H:%6.2f, L:%6.2f \n", m_delta[i], plus_6sigma, minus_6sigma);
+			segs[num_segs].col_end   = i;
+			num_segs++;
+			segs[num_segs].col_start = i+1;
+		}			
+
+		if ((i % segment_size)==0)
+		{		
+			//printf("next_segment...\n");	
+			j++;
+			plus_6sigma  = m_average[j] + 6. * m_stddevs[j];
+			minus_6sigma = m_average[j] - 6. * m_stddevs[j];
+		}
+	}
+}
+void colorize_seg_ends(uint8_t *m_draw_image_line )
+{
+	int rl = 640*3;	// row length
+	int i=0;
+	for (; i<num_segs; i++)
+	{
+		m_draw_image_line[3*segs[i].col_start+0] = 0;
+		m_draw_image_line[3*segs[i].col_start+1] = 255;
+		m_draw_image_line[3*segs[i].col_start+2] = 0;
+
+		m_draw_image_line[3*segs[i].col_end+0] = 255;
+		m_draw_image_line[3*segs[i].col_end+1] = 0;
+		m_draw_image_line[3*segs[i].col_end+2] = 0;		
+
+		// DRAW TRIPLICATE:
+		m_draw_image_line[3*segs[i].col_start+rl+0] = 0;
+		m_draw_image_line[3*segs[i].col_start+rl+1] = 255;
+		m_draw_image_line[3*segs[i].col_start+rl+2] = 0;
+
+		m_draw_image_line[3*segs[i].col_end+rl+0] = 255;
+		m_draw_image_line[3*segs[i].col_end+rl+1] = 0;
+		m_draw_image_line[3*segs[i].col_end+rl+2] = 0;		
+
+		// DRAW TRIPLICATE:
+		m_draw_image_line[3*segs[i].col_start+2*rl+0] = 0;
+		m_draw_image_line[3*segs[i].col_start+2*rl+1] = 255;
+		m_draw_image_line[3*segs[i].col_start+2*rl+2] = 0;
+
+		m_draw_image_line[3*segs[i].col_end+2*rl+0] = 255;
+		m_draw_image_line[3*segs[i].col_end+2*rl+1] = 0;
+		m_draw_image_line[3*segs[i].col_end+2*rl+2] = 0;		
+
+		// DRAW TRIPLICATE:
+		m_draw_image_line[3*segs[i].col_start+3*rl+0] = 0;
+		m_draw_image_line[3*segs[i].col_start+3*rl+1] = 255;
+		m_draw_image_line[3*segs[i].col_start+3*rl+2] = 0;
+
+		m_draw_image_line[3*segs[i].col_end+3*rl+0] = 255;
+		m_draw_image_line[3*segs[i].col_end+3*rl+1] = 0;
+		m_draw_image_line[3*segs[i].col_end+3*rl+2] = 0;
+
+	}
+}
+
+void print_segs( )
+{
+	int i=0;
+	printf("Segments:\n");
+	for (; i<num_segs; i++)
+	{
+		printf ("%d:  <%d, %d> \n", i, segs[i].col_start, segs[i].col_end );		
+	}
+	printf("\n");
+}
+
+void print_seg_stats( )
+{
+	int i=0;
+	printf("Segment Stats %d:\n", num_segs);
+	for (i=0; i<num_segs; i++)
+		printf("%d\t", i );
+
+	for (i=0; i<num_segs; i++)
+		printf("%d\t", segs[i].col_start );
+
+	for (i=0; i<num_segs; i++)
+		printf("%d\t", segs[i].col_end );
+
+	for (i=0; i<num_segs; i++)
+		printf("%4.4f\t", segs[i].slope_avg );
+
+	for (i=0; i<num_segs; i++)
+		printf("%4.4f\t", segs[i].slope_stddev );
+
+	printf("\n");
+}

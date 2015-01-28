@@ -43,8 +43,18 @@
 
 #include <math.h>
 
+#include <stdio.h>
+#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "line_segmenter.h"
+
+using namespace cv;
+using namespace std;
+
 uint16_t t_gamma[2048];
-#include "line_segmenter.cpp"
 
 pthread_t freenect_thread;
 volatile int die = 0;
@@ -53,7 +63,8 @@ int g_argc;
 char **g_argv;
 
 int window;
-bool pause;
+bool pause=false;
+bool save=true;
 
 pthread_mutex_t gl_backbuf_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -240,8 +251,12 @@ void keyPressed(unsigned char key, int x, int y)
 	if (key == 'p') {
 		pause = true;
 	}
+	if (key == 'l') {
+		save = true;
+	}
 	if (key == ' ') {
 		pause = false;
+		save  = false;
 	}
 	if (key == '1') {
 		freenect_set_led(f_dev,LED_GREEN);
@@ -289,7 +304,6 @@ void ReSizeGLScene(int Width, int Height)
 	glOrtho (0, 1280, 0, 480, -5.0f, 5.0f);
 	glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
 }
 
 void InitGL(int Width, int Height)
@@ -354,24 +368,21 @@ B) A concave Corner
 
 	By scanning several lines, the wall edge should be at specific locations on all
 		lines.  this will bolster confidence.
-		So 
-
 C) A convex Corner
-
 E) Scan for ceiling
-
 D) Later add:
 		1) a convex corner with header.
 		2) a doorway (even partial visible)
 		3) a post
 		4) a barrier (ie. wall to the floor)
 		5) cabinets (ie. wall with protuding box top and bottom.
-
 */
+
+string FilenameBase = "DepthImage_";
 
 void depth_cb( freenect_device *dev, void *v_depth, uint32_t timestamp )
 {
-	int line;
+	static long int file_counter=0;
 	int i=0;
 	uint16_t *depth = (uint16_t*)v_depth;
 
@@ -380,18 +391,6 @@ void depth_cb( freenect_device *dev, void *v_depth, uint32_t timestamp )
 		pthread_mutex_unlock(&gl_backbuf_mutex);
 		return;
 	}
-		
-/*	for (int column=0; column<640-1; column++)
-	{
-		calc_h_deltas( &(depth[(column*640)]), h_delta, false );
-		find_peaks( h_delta );
-	}*/
-	
-	// Find Wall edge:
-	// histogram type anaylsis on the peaks.
-	// When they're obviously underneath each other.  (ie. distance between < threshold)
-	//		there could be a jump ie same peaks have different indexes on different lines. but don't handle this yet. simplicity.
-	//average_peaks();
 	
 	pthread_mutex_lock(&gl_backbuf_mutex);
 	for (i=0; i<640*480; i++) {
@@ -402,21 +401,37 @@ void depth_cb( freenect_device *dev, void *v_depth, uint32_t timestamp )
 		depth_mid[3*i+1] = 255-lb;
 		depth_mid[3*i+2] = 255-lb;
 	}
-	colorize_seg_ends2( depth_mid, true );  
-	// Now analyze corner ( )
-	line = 150;
-	calc_deltas( &(depth[(line*640)]), v_delta, false );	
-	
-	//plot_array( &(depth[line*640]), 255, depth_mid );
-	//plot_array( (uint16_t *)v_delta, 100, depth_mid );	
-	int index;
-	for (i=0; i<640; i++) 
-	{
-		index = line*640*3 + 3*i;
-		depth_mid[index+0] = 0;
-		depth_mid[index+1] = 255;
-		depth_mid[index+2] = 0;	
+
+	Mat d_image( Size(640, 480), CV_8UC3, depth_mid, Mat::AUTO_STEP );
+	char extension[80];
+	if (save==true) {
+		sprintf( extension, "DepthImage_%d.bmp", file_counter++ );
+		FilenameBase = extension;
+		imwrite(FilenameBase, d_image );
+		save = false;
 	}
+
+#if 0
+	Mat dst, cdst;
+	Canny(d_image, dst, 50, 200, 3);
+	cvtColor( dst, cdst, COLOR_GRAY2BGR );
+#else
+	uint8_t* edge_img = process_depth_changes( depth );	// colorizes an image
+	Mat  dst( Size(640, 480), CV_8UC1, edge_img, Mat::AUTO_STEP ); 
+	Mat cdst( Size(640, 480), CV_8UC3, edge_img, Mat::AUTO_STEP ); 
+#endif    
+    
+    vector<Vec4i> lines;
+    HoughLinesP(dst, lines, 1, CV_PI/180, 50, 50, 10 );
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        Vec4i l = lines[i];
+        line( dst, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, LINE_AA);
+    }
+    imshow( "Display Image", cdst );
+
+	//pause = true;
+	
 	got_depth++;
 	pthread_cond_signal(&gl_frame_cond);
 	pthread_mutex_unlock(&gl_backbuf_mutex);
@@ -500,6 +515,8 @@ int main(int argc, char **argv)
 	rgb_mid     = (uint8_t*)malloc(640*480*3);
 	rgb_front   = (uint8_t*)malloc(640*480*3);
 
+	// opencv window for showing results:
+	//namedWindow("Display Image", WINDOW_AUTOSIZE );
 
 	printf("Kinect camera test\n");
 
@@ -551,8 +568,6 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-
-
 
 			/*	break;
 			case 1:
@@ -615,4 +630,20 @@ int main(int argc, char **argv)
 	group_peaks();			// assign group numbers to each group connected above.
 	extract_seeds();		// now put a starter of each group into a vector.
 	linefit_groups();	
+
+	colorize_seg_ends2( depth_mid, true );  
+	// Now analyze corner ( )
+	line = 150;
+	calc_deltas( &(depth[(line*640)]), v_delta, false );	
+	
+	//plot_array( &(depth[line*640]), 255, depth_mid );
+	//plot_array( (uint16_t *)v_delta, 100, depth_mid );	
+	int index;
+	for (i=0; i<640; i++) 
+	{
+		index = line*640*3 + 3*i;
+		depth_mid[index+0] = 0;
+		depth_mid[index+1] = 255;
+		depth_mid[index+2] = 0;	
+	}
 */
