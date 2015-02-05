@@ -400,13 +400,12 @@ void init_objects()
 	cyl.generate_vertices();	
 	cyl.generate_VBO();
 	cyl.generate_IBO();	
-
+*/
 	printf("=============================\n");
 	cyl2.m_x = 4.;
 	cyl2.m_y = 2.;
 	cyl2.m_radius = 5.;
 	cyl2.create( 20., 1 );
-*/
 
 }
 

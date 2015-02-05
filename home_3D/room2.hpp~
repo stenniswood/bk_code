@@ -17,6 +17,7 @@ class glRoom
 public:
 	glRoom	(  );
 
+
 	void 	create_apartment( );
 	void	draw(); 
 
