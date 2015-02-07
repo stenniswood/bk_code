@@ -353,7 +353,6 @@ bool  glWall::add_door( float mPositionLengthwise, float mWidth, float mHeight )
 abWall* glWall::extract_2d_line_info()
 {
 	static abWall Abstract;
-	Abstract.clear();
 	Abstract.m_wall_length  = m_wall_length;
 	Abstract.m_wall_height  = m_wall_height;
 	Abstract.m_angle  	  	 = m_y_angle;	

@@ -106,7 +106,6 @@ void glRoom::create_apartment()
 	// Outside End
 	s.width = 34.0;  s.height = 34.0;	
 	w.add_window( 97.5+6., s, 46.0 );
-	
 	w.create( 160.+36.+95. );
 	w.m_y_angle = -90.0;
 	w.m_z = 0.;
@@ -184,16 +183,12 @@ void glRoom::create_apartment()
 	w.clear();
 }
 
-/*void glRoom::create( )
-{
-	for (int w=0; w<m_walls.size(); w++)
-		m_walls[w].create();
-}*/
-
 void glRoom::draw()
 {
 	for (int w=0; w<m_walls.size(); w++)
 		m_walls[w].draw();
+		
+	m_2D.draw();
 }
 
 // SHORTCUT(ALIAS):

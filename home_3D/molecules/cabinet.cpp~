@@ -134,6 +134,7 @@ void glCabinet::Initialize( )
 	m_drawer.m_x	= offset;
 	m_drawer.m_y  	= m_height - face_plate_height+1 - DRAWER_BELOW_TOP;
 	m_drawer.m_z	= 0.1*m_depth;
+	printf("Body complete m_y=%6.3f / %6.3f\n", m_drawer.m_y, m_height );
 
 	// origin is right side, back.
 	// Door origin is bottom left corner.

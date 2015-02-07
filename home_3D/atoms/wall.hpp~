@@ -66,6 +66,8 @@ public:
 	struct Vertex	get_door_center_coord(  int mDoorIndex  );	// 
 	struct Vertex	get_door_far_coord	 (  int mDoorIndex  );	// 
 
+	void 	test_push( );
+
 	// VERTICES:
 	void	generate_wall_vertices	( );
 	void	generate_door_vertices	( );

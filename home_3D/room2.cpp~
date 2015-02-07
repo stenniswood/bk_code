@@ -44,9 +44,6 @@ void glRoom::create_apartment()
 	w.add_door( 122.     , 30. );
 	w.add_door( 122.+40.5, 30. );
 	w.add_door( 122.+40.5+64.5 );
-	w.test_push();		
-	w.test_push();		
-	w.test_push();			
 	w.create  ( 36.+116.+120.  );
 	w.m_y_angle = 0.0;
 	w.m_z = 160.;
@@ -187,16 +184,12 @@ void glRoom::create_apartment()
 	w.clear();
 }
 
-/*void glRoom::create( )
-{
-	for (int w=0; w<m_walls.size(); w++)
-		m_walls[w].create();
-}*/
-
 void glRoom::draw()
 {
 	for (int w=0; w<m_walls.size(); w++)
 		m_walls[w].draw();
+		
+	m_2D.draw();
 }
 
 // SHORTCUT(ALIAS):

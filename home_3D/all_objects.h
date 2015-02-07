@@ -20,6 +20,8 @@
 #include "cabinet.hpp"
 #include "counter.hpp"
 
+#include "route.hpp"
+
 #include "paper.hpp"
 #include "abstract_wall.hpp"
 #include "Map2D.hpp"

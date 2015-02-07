@@ -148,7 +148,7 @@ void glMap2D::print_2D_info( )
 	printf("============ Abstract Wall Info ====================\n");
 	for (int w=0; w<m_awalls.size(); w++)
 	{	printf("WALL #%2d\t", w );
-		m_awalls[w].print_info();
+		if (m_awalls[w].print_info()==false) printf("\n");
 	}
 	for (int w=0; w<m_awalls.size(); w++)
 	{	printf("WALL #%2d", w );

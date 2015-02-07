@@ -63,7 +63,7 @@ public:
 
 	void 	extract_corners(vector<abWall>*   mWalls );
 	void 	print_info   ( );
-	bool 	print_dw_info( );
+	void 	print_dw_info( );
 	void	print_corners( );
 	
 	// INDICES:	

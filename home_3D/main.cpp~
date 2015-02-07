@@ -47,17 +47,17 @@ glStairway    stairs;
 glTable		  table;
 txtContainer  mebox;
 glRoom		  apartment;
-glContainer  box;
-glContainer  box2;
-glContainer  tray;
-glContainer  tray2;
-glCylinder   cyl (12);
-glCylinder   cyl2(24);
-glCounter	 KitchenSinkCounter(5.*18., 26., 37. );
-glDrawer	 drawer;
+glContainer   box;
+glContainer   box2;
+glContainer   tray;
+glContainer   tray2;
+glCylinder    cyl (12);
+glCylinder    cyl2(24);
+glCounter	  KitchenSinkCounter(5.*18., 26., 37. );
+glDrawer	  drawer;
 glDoor		door;
 glPaper		paper;
-glCabinetEndPiece cab_end( 2.5*12, 2.5*12, 3.0*12 );
+glRoute		route;
 /************ END OF OBJECTS ****************/
 
 #define GROUND_SIZE 800.
@@ -196,6 +196,7 @@ void handleKeypress(unsigned char key, int x, int y) {
 				  break;
 		case ' ':  printf("Angle=%6.2f; CenterX=%6.2f; CenterY=%6.2f\n", centerAngle,
 							centerAngle, centerX, centerY );
+					pause = !pause;
 					break;
 		case 'n':  t =  drawer.m_fraction_open+0.05;
 					drawer.open(t); 
@@ -205,9 +206,13 @@ void handleKeypress(unsigned char key, int x, int y) {
 					drawer.open(t);
 					door.open(t);
 					break;
-
-		case 'o': eyeX -= 5.; centerX -= 5.; break;
+/*		case 'o': eyeX -= 5.; centerX -= 5.; break;		// look up.
 		case 'p': eyeX += 5.; centerX += 5.; break;
+		case 'q': eyeY -= 5.; centerY -= 5.; break;
+		case 'r': eyeY += 5.; centerY += 5.; break;  */
+		
+		case 'o': centerY += 5.; break;		// look up.
+		case '.': centerY -= 5.; break;		
 		case 'q': eyeY -= 5.; centerY -= 5.; break;
 		case 'r': eyeY += 5.; centerY += 5.; break;
 
@@ -216,10 +221,10 @@ void handleKeypress(unsigned char key, int x, int y) {
 		case 's': move_sideways(  2.);	break;
 		case 'f': move_sideways( -2.); 	break;
 
-		//case ' ': pause = !pause; break;
 		case 27: //Escape key
 			exit(0);
 	}
+	glutPostRedisplay();
 	//printf("tmp=%6.3f\n", tmp);
 }
 
@@ -263,26 +268,29 @@ void handleResize(int w, int h) {
 void draw_objects()
 {
 	// Draw triangle VBO : 
-	ibeam.draw();
-	door.draw();
-	//palette.draw();
-	//brick_wall.draw();	
 	//wall.draw();
-	//paper.draw();	
-	KitchenSinkCounter.draw();  //problem drawing drawer.	
-	//cab_end.draw();
+	//cabinet.draw();
+	//door.draw();
 	
+	ibeam.draw();
+	//palette.draw();
+	brick_wall.draw();
+	//mebox.draw();
+	//paper.draw();
+	
+	KitchenSinkCounter.draw();  //problem drawing drawer.	
+ 
 	//upper_leg.draw();
 	table.draw();
 	apartment.draw();
-	//mebox.draw();
+	route.draw();
+
+	//stairs.draw();
 	//tray.draw();
 	//box.draw ();
 	//box2.draw();
-	//stairs.draw();
 	//cyl.draw ();
-	cyl2.draw();
-	//cabinet.draw();
+	//cyl2.draw();
 }
 void init_objects()
 {
@@ -313,13 +321,26 @@ void init_objects()
 	door.close(1.0);
 	door.relocate( 75., 20, 75.);	*/
 
-	ibeam.m_x = 0.;
+	route.create_sample2();
+	route.compute_slopes();
+	route.compute_robot_steps( 30., true );
+	route.generate_steps_vertices();
+	route.generate_VBO  ();
+	route.generate_IBO  ();
+
+	ibeam.m_x =     0.;
 	ibeam.m_y = 12.*3.;
-	ibeam.m_z = 0.;
+	ibeam.m_z =     0.;
 	ibeam.m_ends_color = 0xFFFF0000;
 	ibeam.m_color      = 0xFFFFFFFF;
 	ibeam.m_is_closed = true;
 	ibeam.create(12*8., 2);
+
+//	palette.create();
+//	palette.relocate( -150., 0., -150.);
+
+	brick_wall.create  ( 15.*12, 8        );
+	brick_wall.Relocate( -150. , 0., -150.);
 
 	mebox.width  = 60.;
 	mebox.height = 10.;
@@ -343,12 +364,6 @@ void init_objects()
 	//paper.Initialize();
 	//paper.create();
 	//paper.relocate( 0, 10.0, 0.0);
-
-	brick_wall.create  ( 15.*12, 8        );
-	brick_wall.Relocate( -150. , 0., -150.);
-	
-//	palette.create();
-//	palette.relocate( -150., 0., -150.);
 		
 	apartment.create_apartment();
 	glMap2D* map = apartment.create_2D_drawing ();	
@@ -400,12 +415,13 @@ void init_objects()
 	cyl.generate_vertices();	
 	cyl.generate_VBO();
 	cyl.generate_IBO();	
-*/
+
 	printf("=============================\n");
 	cyl2.m_x = 4.;
 	cyl2.m_y = 2.;
 	cyl2.m_radius = 5.;
 	cyl2.create( 20., 1 );
+*/
 
 }
 
@@ -426,10 +442,9 @@ void drawScene() {
 	
 	gluLookAt( eyeX,   	  eyeY,      eyeZ,  
 			   centerX,   centerY,   centerZ,  
-			   0,   	  1.0,   	0   );
-	
-	//glShadeModel(GL_FLAT);
-		
+			   0,   	  1.0,   	0   );	
+
+	//glShadeModel(GL_FLAT);		
 	draw_objects();
 	
 	// Draw ground:
@@ -441,19 +456,45 @@ void drawScene() {
 	glVertex3f( GROUND_SIZE, 0, GROUND_SIZE );
 	glVertex3f(-GROUND_SIZE, 0, GROUND_SIZE );
 	glEnd();	
-			
+
 	glutSwapBuffers();
 }
 
-//Called every 25 milliseconds
-void update(int value) {
-	if (pause==false) {	
-		_angle += 1.0f;
-		if (_angle > 360) {
-			_angle -= 360;
+/*
+	Called every 25 milliseconds
+	Runs thru the house along the path specified in "route"
+*/
+void update(int value) 
+{
+	static int pause_count  = 0;
+	static int vertex_index = 0;	
+/*	if ((pause==false) && (pause_count==0))
+	{
+		float F_vec_x = eyeX - centerX;
+		float F_vec_y = eyeY - centerY;
+		float F_vec_z = eyeZ - centerZ;
+	
+		eyeX = route.m_vertices[vertex_index].position[0];
+		eyeY = 12.*6.;  			// 6 feet above floor
+		eyeZ = route.m_vertices[vertex_index].position[2];
+
+		centerY = eyeY;
+		int size = route.m_vertices.size();
+		// Let's just move ahead 10 steps.
+		if (vertex_index < size-10 )
+		{
+			centerX = route.m_vertices[vertex_index+10].position[0];
+			centerZ = route.m_vertices[vertex_index+10].position[2];
+		} else {
+			centerX = route.m_vertices[size-1].position[0];
+			centerZ = route.m_vertices[size-1].position[2];
+			vertex_index = 0;
+			pause_count = 40;
 		}
-		glutPostRedisplay();
-	}
+		vertex_index++;
+	} else pause_count--;*/
+
+	glutPostRedisplay();
 	glutTimerFunc(25, update, 0);
 }
 

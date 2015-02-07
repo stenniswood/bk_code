@@ -95,7 +95,7 @@ void	glIbeam::generate_layer_vertices( )
 	m_vertices.push_back( v );
 	
 	m_layer_one_vertices = m_vertices.size();	
-	//printf("Ibeam vertices=%lu\n", m_vertices.size() );
+	printf("Ibeam vertices=%lu\n", m_vertices.size() );
 }
 
 GLuint 	glIbeam::generate_disc_indices( GLuint mStartVertexIndex )
@@ -107,7 +107,7 @@ GLuint 	glIbeam::generate_disc_indices( GLuint mStartVertexIndex )
 	m_indices.push_back(8 +mStartVertexIndex);	m_indices.push_back(5+mStartVertexIndex);	
 	m_indices.push_back(7 +mStartVertexIndex);	m_indices.push_back(6+mStartVertexIndex);
 	m_layer_one_indices	= m_indices.size();
-	//printf("Ibeam indices=%lu\n", m_indices.size() );
+	printf("Ibeam indices=%lu\n", m_indices.size() );
 	return m_layer_one_indices;
 }
 

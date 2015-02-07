@@ -3,7 +3,7 @@ CFLAGS =
 PROG = home3d
 INC		   = ./ ./atoms/ ./molecules/ /usr/local/include
 
-SRCS 	   = main.o imageloader.o room2.o 
+SRCS 	   = main.o imageloader.o room2.o route.o 
 ATOMS_SRCS = gl_atom.o gl_object.o Texture.o extrusion.o ibeam.o stairway.o door.o \
 			 txt_container.o wall.o gl_container.o cylinder.o robot_leg_piece.o \
 			 paper.o abstract_wall.o Map2D.o

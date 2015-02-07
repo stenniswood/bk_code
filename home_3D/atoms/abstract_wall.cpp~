@@ -156,7 +156,6 @@ bool abWall::print_dw_info( )
 		printf("\tDoor   #%d : Distance: %6.1f\t", d, m_doors[d].PositionLengthwise );
 		printf("w=%6.1f; h=%6.1f;\n", m_doors[d].Width, m_doors[d].Height );
 		if (d<m_doors.size()-1) printf("\t");
-		retval = true;
 	}
 	for (int w=0; w<m_windows.size(); w++)
 	{
@@ -165,9 +164,7 @@ bool abWall::print_dw_info( )
 				m_windows[w].Width, m_windows[w].Height );
 		printf("Sill Height=%6.1f;  \n", m_windows[w].SillHeight );
 		if (w<(m_windows.size()-1)) printf("\t");
-		retval = true;
 	}
-	return retval;
 }
 
 void abWall::print_info( )

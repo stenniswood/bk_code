@@ -38,7 +38,7 @@ void glCylinder::generate_layer_vertices( )
 		m_vertices.push_back( v );
 	}
 	m_layer_one_vertices = m_vertices.size();
-	//printf("glCylinder::generate_layer_vertices()  %d\n", m_layer_one_vertices );
+	printf("glCylinder::generate_layer_vertices()  %d\n", m_layer_one_vertices );
 }
 
 GLuint glCylinder::generate_disc_indices( GLuint mStartingVertexIndex )

@@ -33,5 +33,6 @@ $(PROG): $(SRCS)  \
 
 clean:
 	rm -f $(PROG)
+	rm -rf ./*.o
 	rm -rf ./atoms/*.o 
 	rm -rf ./molecules/*.o 

@@ -16,7 +16,6 @@ public:
 	~glMap2D(  );	
 
 	void	compute_corners	 ();
-	void	refit_route(glRoute mMap, bool mLeftFootFirst = false); // adjusts safe distance from walls, etc.
 	
 	// FOR 2D Drawing (and maze solving) : 
 	void	create_2D_drawing( );
