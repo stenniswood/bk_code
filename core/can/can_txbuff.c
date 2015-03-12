@@ -17,7 +17,6 @@ AUTHOR	:  Stephen Tenniswood
 #include "bk_system_defs.h" 
 #include "can_eid.h"
 #include "CAN_Interface.h"
-//#include "can.h"
 #include "can_id_list.h"
 #include "can_instance.h"
 #include "can_buff.h"
@@ -35,7 +34,7 @@ BOOL AddToSendList( struct sCAN* mMsg )
 {
 	BOOL ok = FALSE;
 	calls++;
-	
+
 	copy_can_msg( &(Transmitting[TxHead]), mMsg );
 	TxHead++;
 	if (TxHead >= MAX_CAN_TXMSG_MEMORY_SIZE)
@@ -55,8 +54,8 @@ BOOL AddToSendList( struct sCAN* mMsg )
 // called by ISR()
 BOOL SendNext()
 {
-	//printf("SendNext t=%d; h=%d;\n",TxTail, TxHead );
-	
+	//printf("SendNext t=%d; h=%d;\n", TxTail, TxHead );
+
 	ReadyToSendAnother = FALSE;
 	if (TxTail == TxHead) 
 	{		
@@ -69,6 +68,8 @@ BOOL SendNext()
 		
 		byte buff_num = send_message( &(Transmitting[TxTail]) );
 		TxTail++;
+		if (TxTail >= MAX_CAN_TXMSG_MEMORY_SIZE)
+			TxTail = 0;		
 		Request_To_Send( buff_num ); 	
 		// have to finish the CANISR before calling this 2nd time!!! stuck in ISR with 
 		// no return!		
@@ -76,6 +77,21 @@ BOOL SendNext()
 	}
 	//printf("<<SendNext t=%d; h=%d;\n",TxTail, TxHead);
 	return TRUE;
+}
+
+// called by ISR()
+void SendNext2()
+{
+	TransmissionInProgress = TRUE;
+	//printf(">>SendNext t=%d; h=%d;\n", TxTail, TxHead);
+	
+	byte buff_num = send_message( &(Transmitting[TxTail]) );
+	TxTail++;
+	if (TxTail >= MAX_CAN_TXMSG_MEMORY_SIZE)
+		TxTail = 0;		
+	Request_To_Send( buff_num ); 	
+	// have to finish the CANISR before calling this 2nd time!!! otherwise,
+	// stuck in ISR with no return!	
 }
 
 struct sCAN* GetTxMessagePtr( byte mIndex )
@@ -86,9 +102,14 @@ struct sCAN* GetTxMessagePtr( byte mIndex )
 
 void can_tx_timeslice()
 {
-	if ((TxHead > TxTail) && (TransmissionInProgress == FALSE))
+	if (TxTail == TxHead) 
+	{		
+		TxTail=0; TxHead=0;
+		return ;
+	}
+	else if ((TransmissionInProgress == FALSE))
 	{
-		SendNext();
+		SendNext2();
 	}
 	
 }

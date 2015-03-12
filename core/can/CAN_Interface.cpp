@@ -202,7 +202,6 @@ BOOL msg_callbacks( struct sCAN* mMsg, byte mCANBufferNumber )
 	}
 	if (rx_model_call_back != NULL)		// Board based Handler
 		retval = rx_model_call_back(mMsg);
-
 	return retval;
 }
 
@@ -247,7 +246,7 @@ void CAN_isr()
 	byte inte   = read_register( CANINTE );
 	byte rxbuff = 0;
 	byte rxFlagMask = 0x01;
-	byte Rx = FALSE;
+	byte Rx         = FALSE;
 	//printf("ISR %x:%x:%x\n", status, intf, inte);
   do {
 	if ((intf & 0x01) & (inte&0x01))
@@ -290,7 +289,7 @@ void CAN_isr()
 			bit_modify( CANINTF, 0x08, 0x00 );
 			digitalWrite( TX1RTS, 1 );
 			
-			//printf("Cleared TXB1 INTF\n");
+			//printf("TXB1 INTF\n");
 			ReadyToSendAnother = TRUE;
 			TransmissionInProgress = FALSE;
 	}
@@ -446,7 +445,7 @@ void print_speed( int mSpeed )
 *************************************************************************/
 void Reset()
 {
-   // RESET 2515 CHIP:
+   // RESET 2515 CHIP :
    uint8_t    buff[1];
    buff[0]    = SPI_RESET;
    int result = wiringPiSPIDataRW (channel, buff, 1);

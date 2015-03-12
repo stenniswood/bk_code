@@ -2,7 +2,6 @@
 #include <wiringPi.h>
 #include "can_eid.h"
 #include "CAN_base.h"
-//#include "can_instance.h"
 #include "can_board_msg.h"
 #include "pican_defines.h"
 #include "leds.h"
@@ -177,7 +176,6 @@ void pack_move_dual_speed( struct sCAN* mMsg,   byte mDestInstance,
 	mMsg->data[2] = hi(Speed);		// 65 535
 	mMsg->data[3] = lo(Speed);		// 10 000
 }
-
 
 /*
 mStopNumber	:	[0,1] Only 2 stops per motor

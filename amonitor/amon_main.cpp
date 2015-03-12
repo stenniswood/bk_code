@@ -23,7 +23,6 @@
 #include "filter_file.hpp"
 
 
-
 int can_speed = CANSPEED_500;
 
 // Wiring PI pin number (gpio pin 15)
@@ -62,11 +61,8 @@ void init(int CAN_Speed )
 	digitalWrite( TX0RTS, 1  	 	);
 	digitalWrite( TX1RTS, 1 	 	);
 	digitalWrite( TX2RTS, 1 	 	);
-	gpio_init();
+	gpio_init   ( );
 
-	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
-	CAN_init( CAN_Speed, 0 );
-	read_register( CANSTAT );
 
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
 	// and attach myInterrupt() to the interrupt
@@ -87,6 +83,10 @@ void init(int CAN_Speed )
 	  exit(1);
 	}
 	set_model_rx_callback( parse_chevy_id );
+	
+	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
+	CAN_init( CAN_Speed, 0 );
+	read_register( CANSTAT );
 	
 	//printf("\nPiCAN Board present & Responding.\n" );
 	//printf("*****************************************\n");
@@ -121,7 +121,6 @@ int main( int argc, char *argv[] )
 {
 	print_args( argc, argv );
 	
-
 	if (argc>1) {
 		if (strcmp(argv[1], "500k")==0)
 		{
