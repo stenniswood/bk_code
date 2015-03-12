@@ -483,7 +483,7 @@ int proc_vec( int argc, char *argv[], byte first_param )
 			//printf("\n");
 			// PUT RESULTS INTO Vectors[0]
 			// set_NextPos();		
-			send_angle_vector( 0 );
+			//send_angle_vector( 0 );
 	}
 }
 
