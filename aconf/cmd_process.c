@@ -53,8 +53,7 @@ void send_screen1( byte minstance )
 
 int proc_dev( int argc, char *argv[] )
 {
-	printf("DEVICE LIST...\n");		
-
+	printf("DEVICE LIST...\n");
 //				printf("Requesting Device List\n");
 //				FreeBoardList();
 	pack_board_presence_request( &msg1, ASK_PRESENCE );
@@ -294,13 +293,14 @@ int proc_mot( int argc, char *argv[], byte first_param )
 		short spd = (short)(atof(argv[first_param+4])*100);
 		printf ("angle=%10.3f; speed=%x\n",  angle, spd );
 		pack_move_to_angle( &msg1, instance, angle, spd );
+		print_message( &msg1 );
 		AddToSendList( &msg1 );
 	} else if (strcmp(argv[first_param+2], "speed") == 0)
 	{
 		speed    = atof(argv[first_param+3]);
 		printf("speed=%10.3f\n", speed);
 		pack_move_speed( &msg1, instance, speed );
-		//print_message( &msg1 );
+		print_message( &msg1 );
 		AddToSendList( &msg1 );
 	}  else if (strcmp(argv[first_param+2], "coast") == 0)
 	{
