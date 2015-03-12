@@ -41,7 +41,7 @@ byte  MsgIDCounter = 0;
 // SerialNumber)
 
 
-/// CREATE THREADS: 
+// CREATE THREADS: 
 pthread_t unknown_thread_id;
 void* unknown_thread(void* n)
 {
@@ -54,6 +54,7 @@ void* unknown_thread(void* n)
 		usleep( 1000 );
 	}	
 }
+
 void create_threads()
 {	
 	// CREATE TIMER THREAD :
@@ -136,9 +137,6 @@ void init()
 	digitalWrite( TX2RTS, 1 	 );
 	//gpio_init();
 
-	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
-	write_register( CANINTE, 0x00   );
-	CAN_init	  ( CANSPEED_250, 0 );
 	
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
 	// and attach myInterrupt() to the interrupt
@@ -161,6 +159,10 @@ void init()
 	set_system_rx_callback( callback_board_presence );
 	set_model_rx_callback ( can_msg_callback 		);	
 
+	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
+	write_register( CANINTE, 0x00   );
+	CAN_init	  ( CANSPEED_250, 0 );
+
 	//printf("\nPiCAN Board present & Responding.\n" );
 	//printf("*****************************************\n");
 	write_register( CANINTE,  0x1F );	// enable 2 TXs & 1 RX	
@@ -168,7 +170,6 @@ void init()
 	write_register( CANCTRL,  0x00 );	// 
 	
 	OS_InitTask();			// System Timer Thread is created here!
-	create_threads();
 }
 
 void BeforeExit()
@@ -212,10 +213,11 @@ int main( int argc, char *argv[] )
 	byte instance   = 0;
 	if ((strcmp(argv[first_param], "help") == 0) || (argc<1))
 	{
-			help();
-			return 0;
+		help();
+		return 0;
 	}
 	init();
+	create_threads();
 
 	//printf(" STOP MOTOR : get ID text 4B %s \n", getID_Text(0x004B) );
 	printf("=====================================================\n");
@@ -269,7 +271,7 @@ int main( int argc, char *argv[] )
 	else if (strcmp(argv[first_param], "dev") == 0)
 	{
 		proc_dev( argc, argv );
-	}	
+	}
 	else if (strcmp(argv[first_param], "led") == 0)
 	{
 		proc_led( argc, argv, first_param );
