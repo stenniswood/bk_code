@@ -36,6 +36,10 @@
 #include "robot.hpp"
 #include "config_file.h"
 
+
+Robot	robot;
+
+
 Robot::Robot( )
 {	
 	Initialize();
@@ -97,26 +101,65 @@ BOOL Robot::is_destination_reached( )
 	return result;
 }
 
-	
+void Robot::set_vectors_limbs(  )
+{
+	seq.set_limbs( *this );
+}
+
 void Robot::print_current_positions(  )
 {
 	if (Enable==false)  return ;
 	
-	printf("Pot Values : ");
+	printf("Robot positions : \n");
 	for (int l=0; l < limbs.size(); l++)
 	{
-		printf("Limb[%d] : ", l );
-		limbs[l].print_current_positions();
+		if (limbs[l].Enable)
+		{
+			printf("%d Limb[%d] : \n", seq.Current_Vindex, l );
+			limbs[l].print_current_positions();
+		}
 	}
-	printf("\n");	
+	printf("\n");
 }
 
-void Robot::set_new_destinations( sRobotVector& mVectors )
+void Robot::print_vector( int mIndex, bool mAngles )
 {
-	if (Enable==false)  return ; 
+	if (mIndex == -1)  mIndex = seq.Current_Vindex;
+
+	printf("Vector[%d] \n", mIndex );
+	if (mAngles)
+		for (int l=0; l<limbs.size(); l++)		
+		{	if (limbs[l].Enable) {
+				printf("Limb[%d] ", l);
+				seq.limbs[l].vectors[mIndex].print_vector( );
+			}
+		}
+	else
+		for (int l=0; l<limbs.size(); l++)
+		{	if (limbs[l].Enable) {
+				printf("Limb[%d] ", l);
+				seq.limbs[l].vectors[mIndex].print_counts( );	
+			}
+		}
+}
+
+void Robot::next_vector( )
+{
+	seq.Current_Vindex++;
+	// Update to New Vector index : 
+	if ( seq.Current_Vindex >= seq.limbs[0].vectors.size() )
+	{		
+			seq.Current_Vindex      =0;
+			seq.iterations_completed++;
+	}
+}
+
+void Robot::set_new_destinations(  )
+{
+	if (Enable==false)  return ;
 	for (int l=0; l<limbs.size(); l++)
 	{
-		limbs[l].set_new_destinations( mVectors.limbs[l], mVectors.Current_Vindex );		
+		limbs[l].set_new_destinations( seq.limbs[l], seq.Current_Vindex );
 	}
 }
 

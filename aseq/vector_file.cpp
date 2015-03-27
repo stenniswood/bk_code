@@ -93,33 +93,46 @@ sOneVector::sOneVector()
 	data_type = POSITION_VECTORS_COUNT;	// default
 }
 
+void sOneVector::print_counts()
+{
+	printf(" Vector (counts): ");
+	//printf("data_type=%d:%x\n", data_type, limb );	
+	for (int i=0; i<Data.size(); i++)
+		printf(" %5d:%5.2f", get_count(i), Data[i] );
+	printf("\n");
+}
+
 void sOneVector::print_vector()
 {
-	printf(" Vector : ");
+	printf("Vector (angles): ");
 	for (int i=0; i<Data.size(); i++)
-		printf(" %5.1f ", Data[i] );
+	    printf(" %5.1f ", get_angle(i) );
 	printf("\n");
 }
 
 float sOneVector::get_angle(byte index)
 {	
+	float retval=-1;
 	if (data_type==POSITION_VECTORS_ANGLE)
-		return Data[index];
+		retval = Data[index];
 	else if (data_type==POSITION_VECTORS_COUNT)
-		return (Data[index] - limb->actuators[index].ZeroOffset)* DegreesPerCount;
-	else if (data_type==POSITION_VECTORS_ANGLE)
-		return -1;
+		retval = limb->actuators[index].compute_angle(Data[index]);
+	return retval;
 }
 
-word sOneVector::get_count(byte index)
+/* Note:  negative counts are not allowed.  A/D can't go negative voltages.
+   and the cast on RPI automatically seems to make any negative number a 0.
+*/
+int sOneVector::get_count(byte index)
 {
+	int retval = -1;
 	if (data_type==POSITION_VECTORS_ANGLE)
-		return Data[index];
+		retval = limb->actuators[index].compute_position( Data[index] );
 	else if (data_type==POSITION_VECTORS_COUNT)
-		return (Data[index] - limb->actuators[index].ZeroOffset)* DegreesPerCount;
-	else if (data_type==POSITION_VECTORS_ANGLE)
-		return -1;	
+		retval = (word)(Data[index]);
+	return retval;
 }
+
 
 
 /************************************************************
@@ -131,6 +144,35 @@ sVectorSet::sVectorSet()
 	data_type		   = POSITION_VECTORS_ANGLE;
 }
 
+// updates all vectors.
+void sVectorSet::set_data_type( byte mDataType )	
+{
+	data_type = mDataType;
+	for (int v=0; v<vectors.size(); v++)
+		vectors[v].data_type = mDataType;	
+}
+
+void sVectorSet::set_limb( Appendage* mlimb )
+{
+	for (int i=0; i<vectors.size(); i++)
+		vectors[i].limb = mlimb;
+}
+
+/* Speed between 2 consequtive vectors 
+Return	:	speed (counts per second)
+*/
+float sVectorSet::calc_average_speed_cps( int mStartIndex, int mActuator )
+{
+	size_t  size = vectors.size();
+	if (mStartIndex >= size) 	mStartIndex = size-1;
+
+	float distance = vectors[mStartIndex+1].get_count(mActuator) - 
+					 vectors[mStartIndex].get_count(mActuator);
+	float speed    = distance / (playback_period_ms/1000.);
+	return speed;
+}
+
+/* Prints entire set of all vectors! */
 void sVectorSet::print_vectors( )
 {
 	printf("Vectors: \n");	
@@ -142,12 +184,12 @@ void sVectorSet::print_vectors( )
 	}
 }
 
+
 /************************************************************
 ****  ROBOT VECTOR SET 		sRobotVector			 ********
 *************************************************************/
 sRobotVector::sRobotVector()
 {	
-		
 	Current_Vindex 		 =  0;
 	iterations_requested = -1;	
 	iterations_completed =  0;
@@ -161,16 +203,16 @@ void sRobotVector::set_playback_period_all_lists(int mPeriod)
 	}
 }
 
-void sRobotVector::set_data_type_all_lists(byte mType, word mSpeed)
+/*
+INPUT:
+	mType	:	FLOAT or INT
+	mSpeed	:	POSITION_VECTORS_ANGLE, POSITION_VECTORS_COUNT, SPEED_VECTORS
+*/
+void sRobotVector::set_data_type_all_lists(byte mType)
 {
+	data_type  = mType ;
 	for (int i=0; i<limbs.size(); i++)
-	{
-		limbs[i].data_type = mType;		// INT or FLOAT
-		if (mSpeed)
-			limbs[i].data_type |= SPEED_VECTORS;
-		else 
-			limbs[i].data_type |= POSITION_VECTORS;
-	}
+		limbs[i].set_data_type( data_type );
 }
 
 float sRobotVector::get_destination( int mAppendageIndex, int mActuator )
@@ -194,36 +236,32 @@ void sRobotVector::read_header(FILE* f)
 
 	// TIME SLICE Period (rate of vector playback)	
 	getLine(f, data);
-	
 	int playback_period_ms = atoi(data);
 	
 	set_playback_period_all_lists( playback_period_ms );
-	//printf("playback_period = %d\n", limbs[0].playback_period_ms );
+	printf("playback_period = %d\n", playback_period_ms );
 
 	// DATA TYPE = "float" or "int" 
 	getLine(f, data);	
 	printf("data type = %s\n", data);
-	if (strcmp(data,"float")==0)
-		data_type = FLOAT;
-	else if (strcmp(data,"int")==0)
-		data_type = INT;
 
 	// POSITION OR SPEED VECTORS:
 	getLine(f, data);
-	printf ("data type = %s\n", data);
-	if (strcmp(data,"position")==0)
-		data_type = FLOAT;
-	else if (strcmp(data,"speed")==0)
-		data_type = INT;
 
-	// POSITION_VECTORS_ANGLE, POSITION_VECTORS_COUNT
-	set_data_type_all_lists( data_type, 0 );
+	if (strcmp(data,"counts")==0)
+		data_type = POSITION_VECTORS_COUNT;
+	else if (strcmp(data,"angles")==0)
+		data_type = POSITION_VECTORS_ANGLE;
+	else if (strcmp(data,"speeds")==0)	
+		data_type = SPEED_VECTORS;
+	printf ("data type = %s:%d\n", data, data_type);
+	
 }
 
 /* 
 Read 1 vector from the file : 
 */
-int sRobotVector::read_line(FILE* f, byte mdata_type )
+int sRobotVector::read_line(FILE* f, byte mdata_type)
 {
 	if (feof(f)) 			return 0;
  	char  data[255];
@@ -231,14 +269,12 @@ int sRobotVector::read_line(FILE* f, byte mdata_type )
 
  	getLine( f, data );  
  	printf("readline: %s\n", data );
- 	
  	if (data[0]==0) return 0;
  	
 	char** array = split	 ( data,',', &number_strings );
  	if (number_strings<=1)   return 0;
 	
 	float* line  = atof_array( array, number_strings 	 );
-//	int*   line  = atoi_array( array, number_strings 	 );
 
 	// Limb index : 
 	int    limb_index = atoi( array[0] ); 
@@ -246,43 +282,57 @@ int sRobotVector::read_line(FILE* f, byte mdata_type )
 	//printf("Vector: n=%d, Limb[%d] dimen=%d \n", number_strings, limb_index, dimension ); 
 
 	// Dimension
-	//	printf("New vector dimension=%d\n", ConfigInfo.LimbInfo[limb_index]->Dimension );
 	struct sOneVector v;
 	float tmp;
-	
+
 	// Datum (position or speed; float or int)
+	//printf("Datum: ");
 	for (int i=0; i<dimension; i++)
 	{
 		  tmp = atof(array[i+2]);
 		  //printf(" %6.2f ", tmp );
 		  v.Data.push_back( tmp );
-
-		 /* if ((data_type & FLOAT)==FLOAT) {
-			  printf("%6.2f, ",v.Data[i]);
-		  } else { 
-			  v->.iData[i] = atoi(array[i+2]); 
-			  printf("%d, ",v.Data[i] );
-		  } */
 	}
-	//printf("\t");
+	//printf("\n");  
 	list_append_vector( limb_index, v );
 	//printf("read done.\n");
 	return 1; 
 }
+
+/* Note: If you wish to print based on the Appendages the robot
+	actually has enabled.  Use the Robot.print_vector() function. */
+void sRobotVector::print_vector( int mIndex, bool mAngles )
+{
+	if (mIndex==-1)  mIndex=Current_Vindex;
+
+	printf("Vector[%d] \n", mIndex );
+	if (mAngles)
+		for (int l=0; l<limbs.size(); l++)		
+			limbs[l].vectors[mIndex].print_vector( );
+	else
+		for (int l=0; l<limbs.size(); l++)
+			limbs[l].vectors[mIndex].print_counts( );	
+}
+
+void sRobotVector::set_limbs( Robot& mrobot )
+{
+	for (int l=0; l<limbs.size(); l++)
+		limbs[l].set_limb( &(mrobot.limbs[l]) );
+}
+	
 void sRobotVector::init_limbs(  )
 {
 	class sVectorSet list;
 	list.playback_period_ms = 40;
 	list.data_type = 0;	
-	//printf("%d Appendages\n", Appendages.size() );
-	for (int i=0; i<Appendages.size(); i++)
-		limbs.push_back( list );
 
+	for (int i=0; i<robot.limbs.size(); i++)
+		limbs.push_back( list );
 }
+
 void sRobotVector::read_vector_file( char* mFilename )
-{	
+{
 	init_limbs();
-	
 	printf("=== Reading Motion Vector file:  %s ===\n", mFilename );
 	f = fopen(mFilename, "r");
 	if (f==NULL) {
@@ -296,16 +346,14 @@ void sRobotVector::read_vector_file( char* mFilename )
 	{
 		result = read_line( f, data_type );
 	}
+	printf("data_type= %d\n", data_type );
 	printf("Read %d vectors\n", limbs[0].vectors.size() );
+	// POSITION_VECTORS_ANGLE, POSITION_VECTORS_COUNT
+	set_data_type_all_lists( data_type );
     printf("=== End of Motion Vector file ===\n");
-    //print_vectors( 1 );
+    /*limbs[0].print_vectors( );
+      printf("-------------------------");
+      limbs[1].print_vectors( );
+      printf("=== End of Motion Vector file ===\n");
+	*/
 }
-
-
-/*float* atof_array(byte Dimension, char** mArray)
-{
-	float* Angles = malloc( Dimension*sizeof(float) );
-	for (int i=0; i<Dimension; i++)
-		Angles[i] = atof(mArray[i]);
-	return Angles;
-	}*/

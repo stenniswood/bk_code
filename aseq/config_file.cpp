@@ -56,8 +56,7 @@ Comments Should not appear in the file.
 using namespace std;
 
 char  	line		  [255];
-char 	ConfigFileName[] = "seq_config.ini";
-vector<Appendage> Appendages;
+char 	ConfigFileName[] = "config.ini";
 
 
 int* atoi_array( char** string, int num )
@@ -103,15 +102,16 @@ void read_instance_line( FILE* f, Robot& mRobot )
 	byte limb_index         = numbers[0];		// Extract the Appendage Index : 
 	byte actuators			= numbers[1];
 	printf("Parsing Limb[%d] has %d actuators; Instances: ", limb_index, actuators);
+	if (limb_index > mRobot.limbs.size())
+	{
+		printf("Error reading config : Supplied vector index is more than the robot has!\n");
+		exit(0);
+	}
+
 	Motor ni;
 	for (int i=2; i<num_params; i++)
-	{
+	{		
 		ni.Instance = numbers[i];
-		if (limb_index > mRobot.limbs.size())
-		{
-			printf("Error reading config : Supplied vector index is more than the robot has!\n");
-			exit(0);
-		}
 		mRobot.limbs[limb_index].actuators.push_back( ni );
 		printf("%d, ", numbers[i]);
 	}
@@ -158,7 +158,7 @@ void read_enable_line( FILE* f, Robot& mRobot )
 	printf("Parsing Limb[%d] has %d actuators; Enabled: ", limb_index, actuators);
 	for (int i=2; i<num_params; i++)
 	{
-		if (limb_index > Appendages.size())
+		if (limb_index > mRobot.limbs.size())
 		{
 			printf("Error reading config : Supplied vector index is more than the robot has!\n");
 			exit(0);
@@ -184,7 +184,7 @@ void read_zero_offsets( FILE* f, Robot& mRobot )
 	printf("Parsing Limb[%d] has %d actuators; Zeros: ", limb_index, actuators);
 	for (int i=2; i<num_params; i++)
 	{
-		if (limb_index > Appendages.size())
+		if (limb_index > mRobot.limbs.size())
 		{
 			printf("Error reading config : Supplied vector index is more than the robot has!\n");
 			exit(0);
@@ -262,6 +262,18 @@ void read_config( char* mFilename, Robot& mRobot )
 		getLine( f, line );
 		strcpy ( mRobot.limbs[i].Name, line );
 		printf("%s\n", mRobot.limbs[i].Name );
+	}
+	// READ LIMB ENABLES : 	
+	for (int i=0; i<Number_of_appendages; i++)
+	{
+		getLine( f, line );
+		if (strcmp(line, "ENABLED")==0) {
+			printf("limb[%d] : Enabled\n", i );
+			mRobot.limbs[i].Enable = true;
+		} else {
+			printf("limb[%d] : Disabled\n", i );
+			mRobot.limbs[i].Enable = false;
+		}		
 	}
 
 	// READ ACTUATORS : 

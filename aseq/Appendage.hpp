@@ -13,6 +13,7 @@ public:
 
 	void	Initialize				   ( );
 	void 	print_current_positions	   ( );
+	void	print_current_angles	   ( );
 	
 	int		find_actuator_instance	   ( byte mInstance 	);
 	void	update_submitted_timestamps( struct timeval mts );

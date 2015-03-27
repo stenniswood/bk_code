@@ -17,7 +17,7 @@ public:
 	void	update_submitted_timestamps( struct timeval mts );
 
 	BOOL 	is_destination_reached     ( );
-	void	set_new_destinations	   ( sRobotVector& mVectors );
+	void	set_new_destinations	   (  );
 
 	void 	set_current_position_as_destination( );	// should stop all motors.
 	void 	compute_speeds			   ( );
@@ -30,6 +30,11 @@ public:
 	word 	ReadsAllowed;		// number of CAN positioning reads before duty will be updated
 
 	vector<Appendage> limbs;
+	
+	void	print_vector		( int mIndex, bool mAngles );
+	void 	set_vectors_limbs	( );
+	void	next_vector			( );
+	sRobotVector	  seq;		// one sequence of moves
 
 	// Semi Constant Variables (change very infrequently)
 	bool 	Enable;		// If FALSE, does not participate in the sequencing
@@ -38,6 +43,8 @@ public:
 private:
 
 };
+
+extern Robot robot;
 
 
 #endif

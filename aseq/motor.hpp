@@ -33,7 +33,10 @@ public:
 	float 	calc_motor_torque	( float mDuty );
 	float 	compute_duty		( float mDestination );
 	float	calc_gravity_boost	( );
-	float 	compute_angle		( );
+	float 	compute_angle		( word  PotValue );
+	int 	compute_position	( float mAngle  );
+
+	void  	set_destination		( int mDestinationCount, float mRequestedSpeed );
 	int  	check_stops			( );
 	int  	update_position		( struct sCAN* mMsg );	// handles incoming ID_MOTOR_VALUE & recomputes duty.
 	bool	correct_direction_out_of_stop( float mDuty );
@@ -45,22 +48,38 @@ public:
 	void  	send_stop			( );
 	void  	send_moveto_angle	( float mAngle=9999. );
 	void  	send_config			( byte mindex, byte mValue, byte mMask=0xFF );
+	void	print_speeds		( );
 	void	print_positioning	( );
 	void	print_stop			( int mStopNum );
-	
-	float  	calc_reaction_torque( Motor& mMotor, float mAlpha );
+
+	float	calc_stopping_distance( float mSpeed, float mDeceleration );	
+	float  	calc_reaction_torque  ( Motor& mMotor, float mAlpha       );
 	
 	// CHANGE FREQUENTLY (ie realtime) : 
 	word	StartPotValue;		 // Reading when the send_speed() was called.
 	word	DestinationPotValue; // Reading when the send_speed() was called.	
 	word	CurrPotValue;		 // Latest reading
+	word 	BeginBrakingCount;	 // Trigger for breaking (pid control)
 	bool	DestinationReached;	 // 
 	int		MotorStopped;
+	float	compute_braking_speed( word mDistance );
 
 	float	CurrAngle;			// in Degrees 
 	float	NextAngleDeg;		// Destination when in Angle mode. in Degrees * 10 
-	float	SpeedTimesTen;		// [-100.0 , 100.0] 
-	word	CurrentTimesTen;	// fixed point
+
+	float	DutyPercent;		// [-100.0 , 100.0] 
+	float	RequestedSpeed;		// Counts per second
+	float	MeasuredSpeed;		// Counts per second	
+
+	// PID CONTROL VARIABLES:
+	float	position_error_sum;		// Integral
+	float	speed_error_sum;		// Integral
+	float	position_error_prev;	// Derivative
+	float	speed_error_prev;		// Derivative
+	void	reset_pid();
+	
+	// MOTOR CURRENT DRAW:
+	word	CurrentTimesTen;	// Motor current draw (fixed point)
 
 	struct timeval submitted;
 	struct timeval completed;
@@ -70,8 +89,11 @@ public:
 
 	// Semi Constant Variables (change very infrequently)
 	byte 	Instance;
+	bool	use_stops;			// if true, then always check limits.
 	struct  sStopInfo stop1;
 	struct  sStopInfo stop2;
+	word	deceleration_rate_cps;	// Depends on the load.  How to determine?! algorithm to sense?
+
 
 	word	ZeroOffset;			// in counts.
 	BOOL 	MotorEnable;		// If FALSE, does not participate in the sequencing

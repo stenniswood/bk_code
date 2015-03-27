@@ -33,15 +33,12 @@
 #include "buttons.h"
 #include "OS_Dispatch.h"
 #include "OS_timers.h"
-
 #include "Appendage.hpp"
 #include "bigmotor_callbacks.hpp"
 #include "timer.h"
 #include "vector_file.h"
 #include "robot.hpp"
 #include "config_file.h"
-
-
 
 
 // Wiring PI pin number (gpio pin 15)
@@ -72,10 +69,6 @@ bool FirstIssued = false;
 
 struct timeval start_ts;
 
-sRobotVector rv;
-Robot		 robot;
-
-
 void Button2r_isr()
 {
 	CAN_init( CANSPEED_250, 0 );
@@ -104,8 +97,7 @@ pthread_t scheduler_thread_id;
 void* scheduler_thread(void* n)
 {
 	while (1)
-	{	
-		//printf("unknown_thread()\n");
+	{
 		can_tx_timeslice();
 		usleep( 100 );
 	}
@@ -134,39 +126,27 @@ void next_sequence_handler(int sig, siginfo_t *si, void *uc)
 	counter++;
 	if ((counter%20)==0)  // Every Second, update Thrust Reqested
 	{
-		assert( robot.limbs.size() == rv.limbs.size() );
+		assert( robot.limbs.size() == robot.seq.limbs.size() );
 		
 		// PLACE values into Actuators : 			
-		printf( "\nSEQ: New Vector: \n" ); 
-		for (int a=0; a<robot.limbs.size(); a++)
-		{
-			printf("%d Appendage[%d] ",rv.Current_Vindex, a );
-			rv.limbs[a].vectors[rv.Current_Vindex].print_vector(  );
-			if (do_not_send==false)
-				robot.limbs[a].set_new_destinations( rv.limbs[a], rv.Current_Vindex );
-
-			FirstIssued = true;
-		}
-		
-		// Get TimeStamp : 		
+		printf( "\nSEQ: New Vector: %d/%d\n", robot.seq.Current_Vindex, robot.seq.limbs[0].vectors.size() ); 
 		if (do_not_send==false)
 		{
+			// Get TimeStamp : 		
 			gettimeofday(&tv,NULL);
-			robot.limbs[0].update_submitted_timestamps( tv );
-			robot.limbs[1].update_submitted_timestamps( tv );		
+			robot.update_submitted_timestamps( tv );
 		}
-		// speeds will get updated on next messages received.
-	
-		// Update to New Vector index : 
-		rv.Current_Vindex++;
-		if ( rv.Current_Vindex >= rv.limbs[0].vectors.size() )
-		{		
-				rv.Current_Vindex      =0;
-				rv.iterations_completed++;
-		}
+		robot.set_new_destinations();	// set DestinatinPotValue
+		robot.print_vector( robot.seq.Current_Vindex, false );
+		//robot.seq.limbs[0].vectors[i].print_counts( );
+		robot.print_current_positions();
+
+		robot.next_vector();			
+		FirstIssued = true;
 		
-		//printf( "\nSEQ: New Vector: done.\n" );
+		// speeds will get updated on next messages received
 		
+		//printf( "\nSEQ: New Vector: done.\n" );		
 		/* Our algorithm will work as follows :
 				Issue the vectors on a periodic basis.  Ie this timer.
 				Compare a timestamp from point of issue, to the destination reached.
@@ -500,7 +480,9 @@ int main( int argc, char *argv[] )
 			set_model_rx_callback( can_position_meas_responder );			
 			const int NUM_SAMPLES = 10;
 			
-			rv.read_vector_file( SequenceFileName );
+			robot.set_vectors_limbs();
+			robot.seq.read_vector_file( SequenceFileName );
+			robot.set_vectors_limbs();
 						
 			/* Here we'll read the Pot values for all motors.  Average 10 samples.
 			   and print the results. */			
@@ -535,15 +517,16 @@ int main( int argc, char *argv[] )
 			if (argc > 2)
 				SequenceFileName = argv[2];
 			if (argc > 3)
-				rv.iterations_requested = atoi(argv[3]);	// -1 means infinite
+				robot.seq.iterations_requested = atoi(argv[3]);	// -1 means infinite
 
-			rv.read_vector_file( SequenceFileName );
+			robot.seq.read_vector_file( SequenceFileName );
+			robot.set_vectors_limbs();
 			setup_scheduler();
-			printf("Repeating %d iterations\n", rv.iterations_requested );
+			printf("Repeating %d iterations\n", robot.seq.iterations_requested );
 			printf("====================looping===========================\n");
 
-			while ((rv.iterations_requested==-1) || 
-					(rv.iterations_completed < rv.iterations_requested))
+			while ((robot.seq.iterations_requested==-1) || 
+					(robot.seq.iterations_completed < robot.seq.iterations_requested))
 			{ /* timer based - next_sequence_handler() is called periodically 
 			     CAN_isr() callback handles the positions.  */
 			}
@@ -559,17 +542,17 @@ int main( int argc, char *argv[] )
 				SequenceFileName = argv[2];
 			}
 			if (argc > 3)
-				rv.iterations_requested = atoi(argv[3]);	// -1 means infinite
+				robot.seq.iterations_requested = atoi(argv[3]);	// -1 means infinite
 
-			rv.read_vector_file( SequenceFileName );
+			robot.seq.read_vector_file( SequenceFileName );			
+			robot.set_vectors_limbs(  );	//
 			setup_scheduler();
-			//printf(" Vector list has %d\n", rv.limbs[0].vectors.size() );
 
-			printf("Repeating %d iterations\n", rv.iterations_requested );
+			printf("Repeating %d iterations\n", robot.seq.iterations_requested );
 			printf("====================looping===========================\n");
 
-			while ((rv.iterations_requested==-1) || 
-					(rv.iterations_completed < rv.iterations_requested))
+			while ((robot.seq.iterations_requested==-1) || 
+					(robot.seq.iterations_completed < robot.seq.iterations_requested))
 			{
 			  /* timer based - next_sequence_handler(); 
 			     is called periodically 

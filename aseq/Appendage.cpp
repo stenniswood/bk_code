@@ -122,15 +122,26 @@ bool Appendage::vector_fully_read( )
 		return 	true;
 	return false;	
 }
-	
-void Appendage::print_current_positions(  )
+
+void Appendage::print_current_angles(  )
 {
 	if (Enable==false)  return ;
 	
-	printf("PotValues: ");
+	printf("angles: ");
+	for (int a=0; a<actuators.size(); a++)
+	{
+		printf(" %6.2f ", actuators[a].CurrAngle );
+	}
+	printf("\n");	
+}
+
+void Appendage::print_current_positions(  )
+{
+	if (Enable==false)  return;	
+	//printf("counts: ");
 	for (int a=0; a < actuators.size(); a++)
 	{
-		printf(" %4x ", actuators[a].CurrPotValue );
+		actuators[a].print_positioning();
 	}
 	printf("\n");	
 }
@@ -140,15 +151,16 @@ void Appendage::set_new_destinations( struct sVectorSet& mVectors, int mVectorIn
 	if (Enable==false)  return ;
 	for (int a=0; a<actuators.size(); a++)
 	{
-		actuators[a].DestinationReached  = false;
-		actuators[a].StartPotValue       = actuators[a].CurrPotValue;
-		actuators[a].DestinationPotValue = mVectors.vectors[mVectorIndex].Data[a];
+		int tmp = mVectors.vectors[mVectorIndex].get_count( a );
+		float speed = mVectors.calc_average_speed_cps( mVectorIndex, a );
+		//printf("get_count()=%d\n", tmp);
+		actuators[a].set_destination( tmp, speed );
 	}
 }
 
 /*********************************************************************
 Send Motor_Speed commands to each instance in the vector.
-INPUT :	 speeds will be in the Actuator (SpeedTimesTen)
+INPUT :	 speeds will be in the Actuator 
 RETURN:  none 
  *********************************************************************/
 void Appendage::send_speed_messages( )
@@ -156,7 +168,7 @@ void Appendage::send_speed_messages( )
 	if (Enable==false)  return ;
 	for (int a=0; a<actuators.size(); a++)
 	{
-		// speeds are in the actuator - "SpeedTimesTen"
+		// speeds are in the actuator - "DutyPercent"
 		// This also computes the speed!
 		actuators[a].send_speed_pid();
 	}
@@ -164,7 +176,7 @@ void Appendage::send_speed_messages( )
 
 /*********************************************************************
 Send Motor_Speed commands to each instance in the vector.
-INPUT :	 speeds will be in the Actuator (SpeedTimesTen)
+INPUT :	 speeds will be in the Actuator ()
 RETURN:  none 
  *********************************************************************/
 void Appendage::compute_speeds( )
@@ -172,7 +184,7 @@ void Appendage::compute_speeds( )
 	if (Enable==false)  return ;
 	for (int a=0; a<actuators.size(); a++ )
 	{
-		// speeds are in the actuator - "SpeedTimesTen"
+		// speeds are in the actuator - ""
 		actuators[a].compute_duty( actuators[a].DestinationPotValue );
 	}
 }
@@ -191,10 +203,10 @@ void Appendage::send_moveto_angle_messages(  )
 	if (Enable==false)  return ;
 	for (int a=0; a < actuators.size(); a++ )
 	{
-		printf("Instances=%x; NextAngle=%x SpeedTimesTen=%3.1f\n", 
+		printf("Instances=%x; NextAngle=%x RequestedSpeed=%3.1f\n", 
 			actuators[a].Instance, 
 			actuators[a].NextAngleDeg,
-			actuators[a].SpeedTimesTen  );
+			actuators[a].RequestedSpeed  );
 		actuators[a].send_moveto_angle( actuators[a].NextAngleDeg );		
 	}
 }

@@ -37,9 +37,9 @@ word latest_pot33;
 BOOL get_appendage_actuator( int* Aindex, int* actuator_index, byte mInstance )
 {
 	*Aindex = 0;
-	for (int a=0; a<Appendages.size(); a++)
+	for (int a=0; a<robot.limbs.size(); a++)
 	{
-		*actuator_index = Appendages[*Aindex].find_actuator_instance( mInstance );
+		*actuator_index = robot.limbs[*Aindex].find_actuator_instance( mInstance );
 		if (*actuator_index != -1)
 			return TRUE;
 	}	
@@ -74,7 +74,7 @@ BOOL can_position_test_responder( struct sCAN* mMsg )
 			latest_pot33 = tmp.PotValue;
 			printf("Enc/Pot:, %5d, %5d, %5d, %4.6f\n", latest_pot31, latest_pot32, 
 								latest_pot33, mtime );
-			Appendages[0].Reads++;
+			robot.limbs[0].Reads++;
 		}
 
 	}	
@@ -92,15 +92,15 @@ BOOL can_position_meas_responder( struct sCAN* mMsg )
 		// WHICH APPENDAGE & WHICH ACTUATOR ?
 		BOOL found = get_appendage_actuator( &Aindex, &actuator_index, mMsg->id.group.instance );				
 		// RETURN IF NOT ENABLED:
-		if (Appendages[Aindex].Enable==false)
+		if (robot.limbs[Aindex].Enable==false)
 			return FALSE;
-		if (Appendages[Aindex].actuators[actuator_index].MotorEnable==FALSE)
+		if (robot.limbs[Aindex].actuators[actuator_index].MotorEnable==FALSE)
 			return FALSE;
 
 		// PARSE TELEGRAM : 
 		can_parse_motor_value( mMsg, &(tmp.PotValue), &(tmp.CurrentTimesTen),
 							   (short*)&(tmp.SpeedTimesTen) );
-		Appendages[Aindex].actuators[actuator_index].CurrPotValue = tmp.PotValue;
+		robot.limbs[Aindex].actuators[actuator_index].CurrPotValue = tmp.PotValue;
 
 		gettimeofday( &ts, NULL );
 		long seconds  = ts.tv_sec  - start_ts.tv_sec;
@@ -108,13 +108,13 @@ BOOL can_position_meas_responder( struct sCAN* mMsg )
 		float usec    = (float)useconds / 1000.0;
 		float mtime   = ((seconds) + useconds/1000000.0);
 
-		Appendages[Aindex].ElementsFilled |= (1<<actuator_index);
-		if (Appendages[Aindex].vector_fully_read()) 			// checks elementsFilled
+		robot.limbs[Aindex].ElementsFilled |= (1<<actuator_index);
+		if (robot.limbs[Aindex].vector_fully_read()) 			// checks elementsFilled
 		{
 			printf("Measurements:, \n" );			
-			for (int a=0; a<Appendages[0].actuators.size(); a++)
-				printf(" %4d, ", Appendages[0].actuators[a].CurrPotValue );
-			Appendages[0].Reads++;
+			for (int a=0; a<robot.limbs[0].actuators.size(); a++)
+				printf(" %4d, ", robot.limbs[0].actuators[a].CurrPotValue );
+			robot.limbs[0].Reads++;
 		}
 	}	
 }
@@ -136,30 +136,30 @@ BOOL can_motor_position_responder( struct sCAN* mMsg )
 		// WHICH APPENDAGE & WHICH ACTUATOR ?
 		BOOL found = get_appendage_actuator( &Aindex, &actuator_index, mMsg->id.group.instance );				
 		// RETURN IF NOT ENABLED:
-		if (Appendages[Aindex].Enable==false)
+		if (robot.limbs[Aindex].Enable==false)
 			return FALSE;
-		if (Appendages[Aindex].actuators[actuator_index].MotorEnable==FALSE)
+		if (robot.limbs[Aindex].actuators[actuator_index].MotorEnable==FALSE)
 			return FALSE;
-		printf("ID_MOTOR_VALUE\n");
+		//printf("ID_MOTOR_VALUE\n");
 
 		if (FirstIssued==false)
-			Appendages[Aindex].set_current_position_as_destination( );
+			robot.limbs[Aindex].set_current_position_as_destination( );
 				
-		Appendages[Aindex].actuators[actuator_index].update_position( mMsg );
+		robot.limbs[Aindex].actuators[actuator_index].update_position( mMsg );
 
 		// Print DEBUG:
-		if ((mMsg->id.group.instance == 31) || (mMsg->id.group.instance == 32) || (mMsg->id.group.instance == 33))
+/*		if ((mMsg->id.group.instance == 31) || (mMsg->id.group.instance == 32) || (mMsg->id.group.instance == 33))
 			printf(" %d PotRead=%d; spd=%5.2f\t", 
 					mMsg->id.group.instance, 
-					Appendages[Aindex].actuators[actuator_index].CurrPotValue,
-					Appendages[Aindex].actuators[actuator_index].SpeedTimesTen );
+					robot.limbs[Aindex].actuators[actuator_index].CurrPotValue,
+					robot.limbs[Aindex].actuators[actuator_index].SpeedTimesTen );*/
 
-		Appendages[Aindex].ElementsFilled |= (1<<actuator_index);		// Mark it 
-		if (Appendages[Aindex].vector_fully_read()) 			// checks elementsFilled
+		robot.limbs[Aindex].ElementsFilled |= (1<<actuator_index);		// Mark it 
+		if (robot.limbs[Aindex].vector_fully_read()) 			// checks elementsFilled
 		{
 			//printf( "APPENDAGE FULLY READ %d !\n", LimbVectors.size() );
 			can_vector_read_complete_responder( Aindex );	// Moves to next vector!
-			Appendages[Aindex].ElementsFilled = 0;
+			robot.limbs[Aindex].ElementsFilled = 0;
 		}		
 		return TRUE;
 	}
@@ -181,20 +181,19 @@ BOOL can_motor_position_responder( struct sCAN* mMsg )
  *********************************************************************/
 BOOL can_vector_read_complete_responder( byte mAppendageIndex )
 {		
-	Appendages[mAppendageIndex].Reads++;	
+	robot.limbs[mAppendageIndex].Reads++;	
 	
-		BOOL reached = Appendages[mAppendageIndex].is_destination_reached( );
-		if (reached)
-		{
+	BOOL reached = robot.limbs[mAppendageIndex].is_destination_reached( );
+	if (reached)
+	{
 			//print_current_positions( mAppendageIndex );
 			//printf( "Destn %d reached!\n", Current_Vindex );
 			// Stop all motors on this appendage.
-			//for (int i=0; i<Appendages[mAppendageIndex].actuators.size(); i++)
-			//	Appendages[mAppendageIndex].actuators[i].SpeedTimesTen = 0;
-		}
-	
-	//printf( "APPENDAGE READ COMPLETE %d!\n", 	Appendages[mAppendageIndex].Reads );
-	//Appendages[mAppendageIndex].compute_speeds( ); Not Needed! automatically done in next:
+			//for (int i=0; i<robot.limbs[mAppendageIndex].actuators.size(); i++)
+			//	robot.limbs[mAppendageIndex].actuators[i].SpeedTimesTen = 0;
+	}
+	//printf( "APPENDAGE READ COMPLETE %d!\n", 	robot.limbs[mAppendageIndex].Reads );
+	//robot.limbs[mAppendageIndex].compute_speeds( ); Not Needed! automatically done in next:
 	return TRUE;
 }
 
