@@ -29,32 +29,39 @@ public:
 	Motor();
 	Motor(float mMaxRatedTorque, float mStallCurrent);
 
-	void	Initialize			( );
-	float 	calc_motor_torque	( float mDuty );
-	float 	compute_duty		( float mDestination );
-	float	calc_gravity_boost	( );
-	float 	compute_angle		( word  PotValue );
-	int 	compute_position	( float mAngle  );
+	void	Initialize				( 						);
+	float	get_control_speed		( 						);
+	bool	is_breaking_region		( word mCount			);
+	
+	float 	compute_motor_torque	( float mDuty 			);
+	float 	compute_angle			( word  PotValue 		);
+	int 	compute_position		( float mAngle  		);
+	
+	float 	compute_duty		  	( float mDestination 	);		// PID
+	float	compute_gravity_boost 	( 						);
+	float	compute_braking_speed 	( word mDistance 		);
+	
+	float	compute_stopping_distance( float mSpeed,  float mDeceleration );
+	float  	compute_reaction_torque  ( Motor& mMotor, float mAlpha        );
 
 	void  	set_destination		( int mDestinationCount, float mRequestedSpeed );
-	int  	check_stops			( );
-	int  	update_position		( struct sCAN* mMsg );	// handles incoming ID_MOTOR_VALUE & recomputes duty.
-	bool	correct_direction_out_of_stop( float mDuty );
+	int  	check_stops			( 						);
+	int  	update_position		( struct sCAN* mMsg 	);	// handles incoming ID_MOTOR_VALUE & recomputes duty.
+	bool	correct_direction_out_of_stop( float mDuty	);
 
-	bool 	destination_reached ( float mTolerance );
+	bool 	destination_reached ( float mTolerance 		);
 	bool 	within_tolerance	( float mDestination, float mTolerance );
-	void  	send_speed_pid		(  );
-	void  	send_speed			( float mDuty );
-	void  	send_stop			( );
-	void  	send_moveto_angle	( float mAngle=9999. );
-	void  	send_config			( byte mindex, byte mValue, byte mMask=0xFF );
-	void	print_speeds		( );
-	void	print_positioning	( );
-	void	print_stop			( int mStopNum );
-
-	float	calc_stopping_distance( float mSpeed, float mDeceleration );	
-	float  	calc_reaction_torque  ( Motor& mMotor, float mAlpha       );
 	
+	void  	send_speed_pid		(  						);
+	void  	send_speed			( float mDuty 			);
+	void  	send_stop			( 						);
+	void  	send_moveto_angle	( float mAngle=9999. 	);
+	void  	send_config			( byte mindex, byte mValue, byte mMask=0xFF );
+
+	void	print_speeds		( 				);
+	void	print_positioning	( 				);
+	void	print_stop			( int mStopNum 	);
+
 	// CHANGE FREQUENTLY (ie realtime) : 
 	word	StartPotValue;		 // Reading when the send_speed() was called.
 	word	DestinationPotValue; // Reading when the send_speed() was called.	
@@ -62,7 +69,6 @@ public:
 	word 	BeginBrakingCount;	 // Trigger for breaking (pid control)
 	bool	DestinationReached;	 // 
 	int		MotorStopped;
-	float	compute_braking_speed( word mDistance );
 
 	float	CurrAngle;			// in Degrees 
 	float	NextAngleDeg;		// Destination when in Angle mode. in Degrees * 10 
@@ -93,7 +99,6 @@ public:
 	struct  sStopInfo stop1;
 	struct  sStopInfo stop2;
 	word	deceleration_rate_cps;	// Depends on the load.  How to determine?! algorithm to sense?
-
 
 	word	ZeroOffset;			// in counts.
 	BOOL 	MotorEnable;		// If FALSE, does not participate in the sequencing

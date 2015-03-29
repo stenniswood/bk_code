@@ -84,12 +84,12 @@ void Motor::Initialize()
 }
 
 /**********************************************************************
-Name	:	calc_motor_torque()
+Name	:	compute_motor_torque()
 Purpose	:	
 Inputs	:	mDuty	- [0..1.0] fraction of the motor power (PWM Duty)
 Return	:	Amount of Torque 
 **********************************************************************/
-float Motor::calc_motor_torque( float mDuty ) 
+float Motor::compute_motor_torque( float mDuty ) 
 {
 	return (MaxRatedTorque * mDuty);
 }
@@ -103,7 +103,7 @@ bool Motor::destination_reached( float mTolerance )
 	struct timeval tv;
 			
 	if (within_tolerance( DestinationPotValue, mTolerance )) 
-	{			
+	{	
 		// ie only the first time it's reached
 		printf("  Reached within tol: %d %5.1f ", DestinationPotValue, mTolerance );			
 		gettimeofday(&tv, NULL);
@@ -167,12 +167,29 @@ void Motor::reset_pid()
 	speed_error_prev	= 0;
 }
 
-float Motor::calc_stopping_distance( float mSpeed, float mDeceleration )
+float Motor::compute_stopping_distance( float mSpeed, float mDeceleration )
 {
 	// dist = a t * t / 2 
 	float time = mSpeed / mDeceleration;
 	float stopping_distance = 0.5 * mDeceleration * time * time;
+	// BeginBrakingCount = stopping_distance;
 	return stopping_distance;
+}
+
+float Motor::get_control_speed( 	)
+{
+	if (is_breaking_region(CurrPotValue))
+	{
+		
+	} else {
+		return RequestedSpeed;
+	}
+}
+
+bool Motor::is_breaking_region( word mCount )
+{
+	float delta = (StartPotValue - DestinationPotValue);
+	bool breaking_mode = 	
 }
 
 /* 
@@ -205,7 +222,6 @@ float Motor::compute_duty( float mDestination )
 	position_error 		= ( mDestination   - CurrPotValue  );
 	speed_error 		= ( RequestedSpeed - MeasuredSpeed );
 
-	
 	float duty 			= position_duty + speed_duty;	
 	
 	if (MotorDirection==-1)
@@ -308,7 +324,7 @@ void Motor::set_destination( int mDestinationCount, float mRequestedSpeed )
 	// CALCULATE WHEN TO START BRAKING : 	
 	//  0.014/20ms= 0.014/0.020 = 0.7
 	float deceleration_rate_cpss = 0.7;   // counts / second / second	
-	float distance_to_stop = calc_stopping_distance( mRequestedSpeed, deceleration_rate_cps  );
+	float distance_to_stop = compute_stopping_distance( mRequestedSpeed, deceleration_rate_cps  );
 
 	DestinationReached  = false;
 	StartPotValue       = CurrPotValue;
@@ -385,7 +401,7 @@ void Motor::send_config( byte mindex, byte mValue, byte mMask )
 		 
    LengthCenterOfMass  *  mg sin(theta)
 */
-float  Motor::calc_gravity_boost(  )
+float  Motor::compute_gravity_boost(  )
 {	
 	float boost = K_const * sin(CurrAngle);
 	return boost;
@@ -402,7 +418,7 @@ float  Motor::calc_gravity_boost(  )
 	there is no reaction.
 	Alpha may be negative.
 */
-float  Motor::calc_reaction_torque( Motor& mMotor, float mAlpha )
+float  Motor::compute_reaction_torque( Motor& mMotor, float mAlpha )
 {
 	float boost = mMotor.DutyPercent * mAlpha; 
 	DutyPercent += boost;
