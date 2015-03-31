@@ -82,7 +82,7 @@ void init(int CAN_Speed )
 	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
 	  exit(1);
 	}
-	set_model_rx_callback( parse_chevy_id );
+	//set_model_rx_callback( parse_chevy_id );
 	
 	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
 	CAN_init( CAN_Speed, 0 );

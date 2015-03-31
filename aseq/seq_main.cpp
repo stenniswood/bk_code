@@ -119,17 +119,23 @@ void create_threads()
 	Use this to dispatch the vectors only.
 	The speeds/pids will be updated when position messages arrive. */
 struct timeval tv;
+struct timeval starttime;
 bool do_not_send = false;
 
 void next_sequence_handler(int sig, siginfo_t *si, void *uc)
 {
 	counter++;
-	if ((counter%20)==0)  // Every Second, update Thrust Reqested
-	{
+	//if ((counter%20)==0)  // Every Second, update Thrust Reqested
+	//{
 		assert( robot.limbs.size() == robot.seq.limbs.size() );
+		gettimeofday(&tv,NULL);
+		float dtime = tv.tv_sec - starttime.tv_sec;
+		dtime  += (tv.tv_usec - starttime.tv_usec)/1000;
 		
 		// PLACE values into Actuators : 			
-		printf( "\nSEQ: New Vector: %d/%d\n", robot.seq.Current_Vindex, robot.seq.limbs[0].vectors.size() ); 
+		printf( "\n%sSEQ: New Vector: timestamp=%6.3f  %d/%d%s\n", KGRN, dtime,						
+						robot.seq.Current_Vindex, robot.seq.limbs[0].vectors.size(), KNRM ); 
+
 		if (do_not_send==false)
 		{
 			// Get TimeStamp : 		
@@ -158,7 +164,7 @@ void next_sequence_handler(int sig, siginfo_t *si, void *uc)
 		(acceleration/decel calculated)
 		And later subtract the effect of gravity.		
 		*/
-	}
+	//}
 }
 
 void init_hardware()
@@ -236,10 +242,16 @@ void setup_scheduler()
 	robot.limbs[1].ElementsFilled = 0;
 	FirstIssued = true;
 	
+	long period_ns = robot.seq.limbs[0].playback_period_ms * 1000000;	
+	printf("===== playback_period_ms = %l \n", robot.seq.limbs[0].playback_period_ms );	
+	//long period_ns = 1000000;
+	
+	gettimeofday( &starttime, NULL );
+
 	// SETUP OS timer:
 	set_handler ( &sa,  next_sequence_handler );
 	create_timer( &sev, &timerid 			  );
-	start_timer ( &its, fifty_ms, timerid     );
+	start_timer ( &its, period_ns, timerid     );
 }
 
 void read_cnfs()
@@ -377,7 +389,7 @@ void jog()
 		
 		if (dir==0)		// Seek Home!
 		{
-			robot.limbs[limb].actuators[actuator].DestinationPotValue = 
+			robot.limbs[limb].actuators[actuator].DestinationCount = 
 						robot.limbs[limb].actuators[actuator].ZeroOffset;
 			robot.limbs[limb].actuators[actuator].send_speed_pid();
 			while(1==1) { };			// Fix!
@@ -496,7 +508,7 @@ int main( int argc, char *argv[] )
 					sum_pot_values[a] = 0.0;
 			}
 			for (int a=0; a<robot.limbs[0].actuators.size(); a++)
-					sum_pot_values[a] += robot.limbs[0].actuators[a].CurrPotValue;
+					sum_pot_values[a] += robot.limbs[0].actuators[a].CurrCount;
 			for (int a=0; a<robot.limbs[0].actuators.size(); a++)
 					sum_pot_values[a] /= NUM_SAMPLES;
 			printf("\nResults Pot Averages (%d samples): \n", NUM_SAMPLES);

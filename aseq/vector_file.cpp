@@ -133,8 +133,6 @@ int sOneVector::get_count(byte index)
 	return retval;
 }
 
-
-
 /************************************************************
 **** sVectorSet SET ********
 ************************************************************/
@@ -168,6 +166,7 @@ float sVectorSet::calc_average_speed_cps( int mStartIndex, int mActuator )
 
 	float distance = vectors[mStartIndex+1].get_count(mActuator) - 
 					 vectors[mStartIndex].get_count(mActuator);
+	//printf("calc_average_speed_cps() distance=", distance);	
 	float speed    = distance / (playback_period_ms/1000.);
 	return speed;
 }

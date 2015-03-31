@@ -1,3 +1,7 @@
+/*
+  Test.h - Test library for Wiring - implementation
+  Copyright (c) 2006 John Doe.  All right reserved.
+*/
 // include core Wiring API
 // #include "WProgram.h"
 // include this library's description file
@@ -10,13 +14,12 @@
 #include <wiringPi.h>
 #include <inttypes.h>
 #include "mcp2515.h"
-#include "mcp2515_defs.h"
-#include "CAN_Interface.hpp"
+#include "CAN_Interface.h"
 #include <wiringPiSPI.h>
 #include <wiringPi.h>
 #include "pican_defines.h"
-#include "can_txbuff.hpp"
-#include "can_rxbuff.hpp"
+#include "can_txbuff.h"
+#include "can_buff.h"
 #include "can_eid.h"
 #include "can_id_list.h"
 #ifdef WIFI_SOCKET
@@ -24,7 +27,7 @@
 #endif
 
 
-uint8_t ReadyToSendAnother = FALSE; 
+uint8_t ReadyToSendAnother = FALSE;
 
 //int value;
 uint8_t channel=0;	// SPI channel on Pi.  ie. CE0 not CE1
@@ -79,81 +82,6 @@ void can_setup_receive_mob( byte mMobNumber, short mMaskLow, short mMaskHigh, by
 {
 	int8_t savecanpage;
 }
-void setMask( uint8_t mByte, long int mMask )
-{
-	if (mByte)
-	{
-		// SET MASKS TO ZEROS :
-		write_register(RXM0SIDH, 0x00);
-		write_register(RXM0SIDL, 0x00);
-		write_register(RXM0EID8, 0x00);
-		write_register(RXM0EID0, 0x00);
-	} else {
-		// SET MASKS TO ZEROS :
-		write_register(RXM1SIDH, 0x00);
-		write_register(RXM1SIDL, 0x00);
-		write_register(RXM1EID8, 0x00);
-		write_register(RXM1EID0, 0x00);
-	}
-}
-
-/**********************************************************************//**
-*  Purpose	  :  Initialize CAN - Pin directions, SPI init, Chip Reset & Init,
-				 Verify speed, setup 2515 pins & filters.
-
-*  @param speed - Speed of the CAN network (bits/second) [CANSPEED_95,CANSPEED_125,CANSPEED_250,CANSPEED_500]
-*  @return	  true = success
-*************************************************************************/
-BOOL CAN_init(int speed, uint8_t mLoopbackMode)
-{
-    // SPI PINS : 
-    int spi_speed = 8000000;
-    if( wiringPiSPISetup(channel, spi_speed)==-1)
-    {
-		printf("Could not initialise SPI\n");
-		printf("Make sure you run this as root: sudo ./aconf\n");
-		return FALSE;
-    }
-    else printf("SPI Port opened at %d bps\n", spi_speed );
-
-	Reset();
-	uint8_t result = set_baud_rate( speed );
-	if (result == 0)
-	{
-		printf("CAN_INIT error:  Cannot set registers!\n" );
-		exit(1);
-	}
-
-	// deactivate the RXnBF Pins (High Impedance State)
-	write_register(BFPCTRL, 0);
-
-	// set TXnRTS as Ready-to-Send control:
-	write_register( TXRTSCTRL,  0x07 );		// was 0x07
-
-	// turn off filters => receive any message
-	/* Note BUKT is very important.  It lets us use RXB1 interrupts!
-		if it's not there, we never get a RXB1 */
-	write_register(RXB0CTRL, (1<<RXM1)|(1<<RXM0)|(1<<BUKT) );
-	write_register(RXB1CTRL, (1<<RXM1)|(1<<RXM0)		   );
-
-	setMask( 0, 0x00000000 );			
-	setMask( 1, 0x00000000 );			
-
-	// reset device to normal mode
-	if (mLoopbackMode)
-		write_register(CANCTRL, 0x40); 	// Loopback mode
-	else
-		write_register(CANCTRL, 0x00); 	// reset device to normal mode
-
-	write_register( TXB0CTRL, 0x01 );	// set priorities
-	write_register( TXB1CTRL, 0x02 );	
-	write_register( TXB2CTRL, 0x03 );	
-
-	enable_tx_ints();					
-	enable_rx_ints();					
-	return TRUE;						
-}
-
 
 /*****************************************************************************
 Name		: set_system_rx_callback()
@@ -165,7 +93,7 @@ DESCRIPTION:  CAN ISR will call the function sent here on a Receive interrupt
 ******************************************************************************/
 void set_system_rx_callback( BOOL (*mCallback)(struct sCAN*) )
 {
-	//printf("set_system_rx_callback(%d)\n", mCallback);
+	printf("set_system_rx_callback(%d)\n", mCallback);
 	rx_system_call_back = mCallback;
 }
 
@@ -179,7 +107,7 @@ DESCRIPTION:  CAN ISR will call the function sent here on a Receive interrupt
 ******************************************************************************/
 void set_model_rx_callback( BOOL (*mCallback)(struct sCAN*) )
 {
-	//printf("set_model_rx_callback(%d)\n", mCallback);
+	printf("set_model_rx_callback(%d)\n", mCallback);
 	rx_model_call_back = mCallback;
 }
 
@@ -202,9 +130,9 @@ BOOL msg_callbacks( struct sCAN* mMsg, byte mCANBufferNumber )
 	}
 	if (rx_model_call_back != NULL)		// Board based Handler
 		retval = rx_model_call_back(mMsg);
+
 	return retval;
 }
-
 
 void print_interrupt_type(byte status)
 {
@@ -230,6 +158,64 @@ void print_interrupt_type(byte status)
 	}
 }
 
+/**********************************************************************//**
+*  Purpose	  :  Initialize CAN - Pin directions, SPI init, Chip Reset & Init,
+				 Verify speed, setup 2515 pins & filters.
+				 
+*  @param speed - Speed of the CAN network (bits/second) [CANSPEED_95,CANSPEED_125,CANSPEED_250,CANSPEED_500]
+*  @return	  true = success
+*************************************************************************/
+BOOL Init(int speed, uint8_t mLoopbackMode)
+{
+    // SPI PINS:
+    int spi_speed = 500000;
+    if( wiringPiSPISetup(channel, spi_speed)==-1)
+    {
+		printf("Could not initialise SPIn");
+		printf("Make sure you run this as root: sudo ./picans");
+		return FALSE;
+    }
+    //printf("SPI Port opened at %d bps\n", speed );
+    //printf("Constructed CANInterface ");
+
+	Reset();
+	uint8_t result = SetChipSpeed( speed );
+	if (result == 0)
+	{
+		printf("CAN_INIT error:  Cannot set registers!\n" );
+		exit(1);
+	}
+
+	// deactivate the RXnBF Pins (High Impedance State)
+	write_register(BFPCTRL, 0);
+
+	// set TXnRTS as Ready-to-Send control:
+	write_register( TXRTSCTRL,  0x07 );		// was 0x07
+
+	// turn off filters => receive any message
+	/* Note BUKT is very important.  It lets us use RXB1 interrupts!
+		if it's not there, we never get a RXB1 */
+	write_register(RXB0CTRL, (1<<RXM1)|(1<<RXM0)|(1<<BUKT) );
+	write_register(RXB1CTRL, (1<<RXM1)|(1<<RXM0)		   );
+
+	setMask( 0, 0x00000000 );
+	setMask( 1, 0x00000000 );
+
+	// reset device to normal mode
+	if (mLoopbackMode)
+		write_register(CANCTRL, 0x40); // Loopback mode
+	else
+		write_register(CANCTRL, 0x00); // reset device to normal mode
+
+	write_register( TXB0CTRL, 0x01 );	// set priorities
+	write_register( TXB1CTRL, 0x02 );
+	write_register( TXB2CTRL, 0x03 );
+
+	enable_tx_ints();
+	enable_rx_ints();
+
+	return TRUE;
+}
 
 /* Because this is a shared interrupt.  TX & RX have to be handled 
    in the same function call.  If we clear one of them (ie RX) 
@@ -240,119 +226,78 @@ void print_interrupt_type(byte status)
 */
 void CAN_isr()
 {
-	//printf("<<---CAN Received Interrupt--- \n");
+	//printf("<<<<<<<--------CAN Received Interrupt------ \n");
 	byte status = read_register( CANSTAT );
 	byte intf   = read_register( CANINTF );
 	byte inte   = read_register( CANINTE );
 	byte rxbuff = 0;
 	byte rxFlagMask = 0x01;
-	byte Rx         = FALSE;
+	byte Rx = FALSE;
 	//printf("ISR %x:%x:%x\n", status, intf, inte);
   do {
-	if (intf & 0x01)	{ rxbuff=0;  rxFlagMask=0x01; Rx=TRUE; }
-	if (intf & 0x02)	{ rxbuff=1;  rxFlagMask=0x02; Rx=TRUE; } 
+	if ((intf & 0x01) & (inte&0x01))
+		{ rxbuff = 0;  rxFlagMask = 0x01; Rx=TRUE; }
+	if ((intf & 0x02) & (inte&0x02))
+		{ rxbuff = 1;  rxFlagMask = 0x02; Rx=TRUE; }
+		
 	if (Rx)
 	{
 		// clear interrupt flag - Done Automatically by using SPI_READ_RX cmd 
-		/* Page 64 for 2515 says that only the RXnIF flag is reset.  so it seems
-		if a tx flag were set it would come back here. */
-		//printf("rx%d:intf=%x;e=%x\n", rxbuff, intf,inte);
-		//printf("rx%d", rxbuff);
+		/* Page 64 of 2515 says that only the RXnIF flag is reset.  so it seems
+		if a tx flag were set it would come back here.*/
 		get_message ( &rxmessage, rxbuff 		);
-		bit_modify  ( CANINTF, rxFlagMask, 0x00 ); 
-		AddToRxList ( &rxmessage );
+		bit_modify  ( CANINTF, rxFlagMask, 0x00 );
+		QueueMessage( &rxmessage );
+		
 		if (msg_callbacks( &rxmessage, rxbuff) == FALSE)
 		{
-			// printf(" Rx0:%x:%x\n", status, intf);
+			//printf(" Rx0:%x:%x\n", status, intf);				
 		}
-		// This is a serial transfer of the text.  Slow! May cause the overruns.
 		//print_message( &rxmessage );
-
+		
 #ifdef WIFI_SOCKET
 			if (isTransporting_CAN())
 				Cmd_client_send_CAN( &rxmessage );
 #endif
 	}
-	if (intf & 0x04 )
+	if ((intf & 0x04) & (inte&0x04))
 	{
-			bit_modify  ( CANINTF, 0x04, 0x00 );
-			digitalWrite( TX0RTS, 1 );
-			
+			bit_modify( CANINTF, 0x04, 0x00 );
 			//printf("TXB0 INTF\n");
-			ReadyToSendAnother     = TRUE;		// Set a flag and send next in the main loop.
+			ReadyToSendAnother = TRUE;		// Set a flag and send next in the main loop.
 			TransmissionInProgress = FALSE;
 	}
-	if (intf & 0x08 )
+	if ((intf & 0x08) & (inte&0x08))
 	{
 			bit_modify( CANINTF, 0x08, 0x00 );
-			digitalWrite( TX1RTS, 1 );
-			
-			//printf("TXB1 INTF\n");
+			//printf("Cleared TXB1 INTF\n");
 			ReadyToSendAnother = TRUE;
 			TransmissionInProgress = FALSE;
 	}
-	if (intf & 0x10)
+	if ((intf & 0x10) & (inte&0x10))
 	{
 			bit_modify( CANINTF, 0x10, 0x00 );	
-			digitalWrite( TX2RTS, 1 );
-			
 			//printf("Cleared TXB2 INTF\n");
 			ReadyToSendAnother = TRUE;
 			TransmissionInProgress = FALSE;
 	}
 	
 	// Clear any error:  Need to handled better though.
-	if ( intf & 0xE0 )
+	if (( intf & 0xE0 ))
 	{
-		byte eflg  	= read_register( EFLG );
-		byte txctrl	= read_register( TXB0CTRL );
-		byte tec	= read_register( TEC );
-		byte rec	= read_register( REC );
-		write_register( EFLG, 0 );
-		printf("EF=%x; intf=%x; rec=%x; tec=%x\n", eflg, intf, rec,tec);
-		//printf("EF\n");
-		bit_modify( CANINTF, 0xE0, 0x00 );
-		write_register( REC, 0 );
-		write_register( TEC, 0 );
+		byte eflg  = read_register( EFLG );
+		byte txctrl= read_register( TXB0CTRL );
+		byte tec= read_register( TEC );
+		byte rec= read_register( REC );
+		printf("EF=%x; intf=%x; txctrl=%x; rec=%x; tec=%x\n", eflg, intf, txctrl, rec,tec);
+		bit_modify( CANINTF, 0xE0, 0x00 );		
 	}
-	Rx=FALSE;
 	intf = read_register( CANINTF );
 } while( inte & intf);
-	
+	//printf("< %x \n", intf );	
 	return ;
+	//printf("<<<<<<<------eoi---------\n");
 } 
-
-void enable_interrupt( byte mMask )
-{
-	byte regval = read_register(CANINTE);
-	regval |= mMask;
-	write_register( CANINTE, regval );	
-}
-void disable_interrupt( byte mMask )
-{
-	byte regval = read_register(CANINTE);
-	regval &= ~(mMask);
-	write_register( CANINTE, regval );	
-}
-void enable_tx_ints()
-{	enable_interrupt( 0x1C);	}
-void enable_rx_ints()
-{	enable_interrupt(0x03);	}
-
-void disable_tx_ints()
-{	disable_interrupt(0x1C);	}
-void disable_rx_ints()
-{	disable_interrupt(0x03);	}
-
-void enable_err_ints()
-{	enable_interrupt(0x20);	}
-void enable_wakeup_ints()
-{	enable_interrupt(0x40);	}
-void disable_err_ints()
-{	disable_interrupt(0x20);	}
-void disable_wakeup_ints()
-{	disable_interrupt(0x40);	}	
-
 
 void print_register_name( uint8_t mAddress )
 {
@@ -378,31 +323,6 @@ void print_register_name( uint8_t mAddress )
 	Default   : printf("Unknown"); 	  break;
 	}
 }
-
-void print_tx_register_name( uint8_t mAddress )
-{
-	uint8_t address = mAddress & 0x0F;
-	switch(address)
-	{
-	case 0x00 : printf ("TXB0CTRL"	);   break;
-	case 0x01 : printf ("TXB0SIDH"  ); 	 break;
-	case 0x02 : printf ("TXB0SIDL"	);   break;
-	case 0x03 : printf ("TXB0EID8"	);   break;
-	case 0x04 : printf ("TXB0EID0"	);   break;
-	case 0x05 : printf ("TXB0DLC "	);   break;
-	case 0x06 : printf ("TXB0D0  "	);   break;
-	case 0x07 : printf ("TXB0D1  "	);   break;
-	
-	case 0x08 : printf ("TXB0D2  "	);   break;
-	case 0x09 : printf ("TXB0D3  "	);   break;
-	case 0x0A : printf ("TXB0D4  "	);   break;
-	case 0x0B : printf ("TXB0D5  "	);   break;
-	case 0x0C : printf ("TXB0D6  "	);   break;	
-	case 0x0D : printf ("TXB0D7  "	);   break;
-	Default   : printf("Unknown"); 	  break;
-	}
-}
-
 float print_baud_prescaler( int mCNF1 )
 {
 	//printf("Clock Speed = 16Mhz\n");
@@ -432,10 +352,16 @@ void print_speed( int mSpeed )
 	case CANSPEED_250 : printf("250 kbps\n");	break;
 	case CANSPEED_500 : printf("500 kbps\n");	break;
 	case CANSPEED_95  : printf("95  kbps\n");	break;
-	case CANSPEED_33  : printf("33.33kbps\n");	break;	
 	default: break;
 	}
 }
+
+/**********************************************************************//**
+*  Purpose	  :  Construct CAN
+*  @param speed - Speed of the CAN network (bits/second) [CANSPEED_95,CANSPEED_125,CANSPEED_250,CANSPEED_500]
+*  @return	  true = success
+*************************************************************************/
+
 
 /**********************************************************************//**
 *  Purpose	  :  Reset() - Reset the 2515 chip
@@ -444,7 +370,7 @@ void print_speed( int mSpeed )
 *************************************************************************/
 void Reset()
 {
-   // RESET 2515 CHIP :
+   // RESET 2515 CHIP:
    uint8_t    buff[1];
    buff[0]    = SPI_RESET;
    int result = wiringPiSPIDataRW (channel, buff, 1);
@@ -538,74 +464,64 @@ void MultiRegisterRead( uint8_t mAddress1, uint8_t* mValueArray, int mArrayLengt
    int result = wiringPiSPIDataRW( channel, buff, mArrayLength+2 );
 }
 
-/****************************************************************************//**
-INPUT:
-	byte*	mRegValues	array of 3 (CNF3,CNF2,CNF1)
-RETURN:
-	1 = Baud Rate found.
-********************************************************************************/
-byte get_CNF_reg_values( byte* mRegValues, int speed)
-{
-	/* Base Tq Freq = 2*(BRP+1) / Fosc = 2*(4) / 16Mhz  = 1/2Mhz = 0.500 usec
-	3 * .500us = 1.5us => 666kbaud */
-	if (speed == CANSPEED_500)
-	{
-		mRegValues[0] = BT1_500Kbps;            // CNF3 => 2 Phase2 segs
-		mRegValues[1] = BT2_500Kbps;            // CNF2  
-		mRegValues[2] = BT3_500Kbps;            // CNF1  TQ=16mhz/2*2=4mhz =>0.250us;  SJW=00 or 01;    
-	}
-	else if (speed == CANSPEED_250)
-    {
-		/* For 250kbaud use :  Tq = 8;  BRP=3;  SJW=2; SAM; */
-		mRegValues[0] = BT1_250Kbps;            // CNF3 => 2 Phase2 segs
-		mRegValues[1] = BT2_250Kbps;            // CNF2  
-		mRegValues[2] = BT3_250Kbps;            // CNF1  BRP=4; TQ=16mhz/4*2=>0.500us;  SJW=00 or 01;
-		/* Match Button Board as closely as possible.
-				8 = 3 + 2 + 2 + 1       */
-	}
-	else if (speed == CANSPEED_125)
-	{
-		mRegValues[0] = BT1_125Kbps;            // CNF3 => 2 Phase2 segs
-		mRegValues[1] = BT2_125Kbps;            // CNF2  
-		mRegValues[2] = BT3_125Kbps;            // CNF1  BRP=4; TQ=16mhz/4*2=>0.500us;  SJW=00 or 01;   
-	}	
-	else if(speed == CANSPEED_95)
-	{
-		mRegValues[0] = BT1_95K2bps;            // CNF3 => 2 Phase2 segs
-		mRegValues[1] = BT2_95K2bps;            // CNF2  
-		mRegValues[2] = BT3_95K2bps;            // CNF1  BRP=4; TQ=16mhz/4*2=>0.500us;  SJW=00 or 01;   
-	}
-	else if(speed == CANSPEED_33)
-	{
-		mRegValues[0] = BT1_33K3bps;            // CNF3 => 2 Phase2 segs
-		mRegValues[1] = BT2_33K3bps;            // CNF2  
-		mRegValues[2] = BT3_33K3bps;            // CNF1  BRP=4; TQ=16mhz/4*2=>0.500us;  SJW=00 or 01;   
-	}
-	else 
-		return 0;
-	return 1;
-}
-
 /**********************************************************************//**
 *  Purpose	  :  Setup CAN Bus speed
 *  @param speed - Speed of the CAN network (bits/second) [CANSPEED_95,CANSPEED_125,CANSPEED_250,CANSPEED_500]
 *  @return	  true = success
 *************************************************************************/
 //void set_baud( byte mSpeed, byte mPropSegs, byte Phase1Segs, byte Phase2Segs  )
-byte set_baud_rate( int speed )
+byte SetChipSpeed( int speed )
 {
 	uint8_t speed_value = ((1<<SJW1)|speed);
+	uint8_t mRegValues[4];
 	uint8_t RegValues [4];
-	get_CNF_reg_values( RegValues, speed );
-	MultiRegisterWrite( CNF3, RegValues, 3 );
-}
+	uint8_t RegRead   [3];
+	print_speed( speed );
+	float tq = print_baud_prescaler( speed );
 
-BOOL verify_baud_rate( int speed )
-{
-	uint8_t speed_value = ((1<<SJW1)|speed);
-	uint8_t RegValues[4];
-	uint8_t RegRead  [4];	
-	get_CNF_reg_values( RegValues, speed );
+	/* Base Tq Freq = 2*(BRP+1) / Fosc = 2*(4) / 16Mhz  = 1/2Mhz = 0.500 usec
+	3 * .500us = 1.5us => 666kbaud */
+
+	if (speed == CANSPEED_250)
+	{
+		if (0) {
+			/* For 250kbaud use :  Tq = 16;  BRP=1;  SJW=2; SAM; 
+			 CNF1 = 0x41;
+			 CNF2 = 0xEA;	// add BTL?
+			 CNF3 = 0x05	*/
+			mRegValues[0] = 0x05;		// CNF3
+			mRegValues[1] = 0xEA;		// CNF2
+			mRegValues[2] = 0x01;		// CNF1  BRP=1=>.250us;  SyncJumpWidth=2xlength;  
+		} else {
+			/* For 250kbaud use :  Tq = 8;  BRP=1;  SJW=2; SAM; 
+			 Alternate:
+			 CNF1 = 0x03
+			 CNF2 = 0xD1
+			 CNF3 = 0x01	 */
+			mRegValues[0] = 0x01;		// CNF3 => 2 Phase2 segs
+			// or 0x01;  but where is the final sjw bit as in mega16m1 ( oh in by default)
+			mRegValues[1] = 0xCA;		// CNF2	 
+			mRegValues[2] = 0x03;		// CNF1  BRP=4; TQ=16mhz/4*2=>0.500us;  SJW=00 or 01;
+			/* Match Button Board as closely as possible.
+				8 = 3 + 2 + 2 + 1	*/
+		}
+	}
+	else if(speed == CANSPEED_95)
+	{
+		mRegValues[0] = (1<<PHSEG21);  // Bitrate 250kbps at 16 MHz.  	write to CNF3
+		mRegValues[1] = (1<<BTLMODE)|(1<<PHSEG11)|(1<<PHSEG2); //	write to CNF2 fix to go back to 500 kbps
+	}
+	else
+	{
+		mRegValues[0] = (1<<PHSEG21);  //Bitrate 250kbps at 16 MHz.  	write to CNF3
+		mRegValues[1] = (1<<BTLMODE)|(1<<PHSEG11); 			//	write to CNF2 fix to go back to 500 kbps
+	}
+	//mRegValues[2] = speed_value;							 //	write to CNF1
+	//mRegValues[3] = (1<<RX1IE)|(1<<RX0IE);	// CANINTE - activate interrupts
+	//print_bit_timing( mRegValues[1], mRegValues[0], tq );
+	//printf("\nSetChipSpeed: %x %x %x %x \n", mRegValues[0], mRegValues[1], mRegValues[2], mRegValues[3] );
+	memcpy ( RegValues, mRegValues, 3 );
+	MultiRegisterWrite( CNF3, mRegValues, 3 );
 
 	// Verify Operation by reading back what we just wrote:	
 	RegRead[2] = read_register(CNF1);
@@ -615,11 +531,63 @@ BOOL verify_baud_rate( int speed )
 	if ((RegRead[0] == RegValues[0]) && 
 		(RegRead[1] == RegValues[1]) && 
 		(RegRead[2] == RegValues[2]) )
-	{		
+		{
+		//printf("\nReturned    : %x %x %x \n", RegRead[0], RegRead[1], RegRead[2] );
 		return 1;
-	}
-	//else printf("\nReturned    : %x %x %x \n", RegRead[0], RegRead[1], RegRead[2] );
+		}
 	return 0;
+}
+
+void enable_interrupt( byte mMask )
+{
+	byte regval = read_register(CANINTE);
+	regval |= mMask;
+	write_register( CANINTE, regval );	
+}
+void disable_interrupt( byte mMask )
+{
+	byte regval = read_register(CANINTE);
+	regval &= ~(mMask);
+	write_register( CANINTE, regval );	
+}
+void enable_tx_ints()
+{	enable_interrupt( 0x1C);	}
+void enable_rx_ints()
+{	enable_interrupt(0x03);	}
+
+void disable_tx_ints()
+{	disable_interrupt(0x1C);	}
+void disable_rx_ints()
+{	disable_interrupt(0x03);	}
+
+/*
+void enable_err_ints()
+{	enable_interrupt(0x1C);	}
+void enable_wakeup_ints()
+{	enable_interrupt(0x1C);	}
+
+void disable_err_ints()
+{	disable_interrupt(0x1C);	}
+void disable_wakeup_ints()
+{	disable_interrupt(0x1C);	}	*/
+
+
+void setMask( uint8_t mByte, long int mMask )
+{
+	if (mByte)
+	{
+		// SET MASKS TO ZEROS :
+		write_register(RXM0SIDH, 0x00);
+		write_register(RXM0SIDL, 0x00);
+		write_register(RXM0EID8, 0x00);
+		write_register(RXM0EID0, 0x00);
+	} else {
+		// SET MASKS TO ZEROS :
+		write_register(RXM1SIDH, 0x00);
+		write_register(RXM1SIDL, 0x00);
+		write_register(RXM1EID8, 0x00);
+		write_register(RXM1EID0, 0x00);
+	}
 }
 
 
@@ -633,14 +601,8 @@ uint8_t check_message(void)
 	uint8_t flags = read_rx_status();
 	//printf("RX Status= %x\n", flags);
 	
-	if (flags & (0x40)) { 
-		printf("Message RECEIVED on Rx0\n");  
-		return 1; 
-	}
-	if (flags & (0x80)) { 
-		printf("Message RECEIVED on Rx1\n");  
-		return 2; 
-	}
+	if (flags & (0x40)) { printf("Message RECEIVED on Rx0\n");  return 1; }
+	if (flags & (0x80)) { printf("Message RECEIVED on Rx1\n");  return 2; }
 	return 0;
 //	old way return (!digitalRead(MCP2515_INT));
 }
@@ -694,9 +656,11 @@ uint8_t read_rx_status()
 	return buff[1];
 }
 
+/* ---------------------------------------------------------------------------- */
+
+// check if there is a free buffer to send messages
 /**********************************************************************//**
 *  Purpose	  :  Read CAN controller register
-*  			check if there is a free buffer to send messages
 *  @param[in]   address - which register to read
 *  @param[in]   data - value to put into the register
 *  @return	register value
@@ -711,6 +675,8 @@ uint8_t check_free_buffer(void)
 	}
 	return true;
 }
+
+/* ---------------------------------------------------------------------------- */
 
 /**********************************************************************//**
 *  Purpose	  :  Retrieve the complete CAN message
@@ -734,15 +700,15 @@ uint8_t get_message(struct sCAN *message, byte mBuffNumber )
 
 	uint8_t buff[15];
 	buff[0] = SPI_READ_RX | addr;
-	buff[1] = 0xFF;  // SIDH
-	buff[2] = 0xFF;	 // SIDL
-	buff[3] = 0xFF;	 // ID8
-	buff[4] = 0xFF;	 // ID0
-	buff[5] = 0xFF;	 // DLC
-	buff[6] = 0xFF;	 // RXB0D0
-	buff[7] = 0xFF;	 // RXB0D1
-	buff[8] = 0xFF;	 // RXB0D2
-	buff[9] = 0xFF;	 // RXB0D3
+	buff[1] = 0xFF; // SIDH
+	buff[2] = 0xFF;	// SIDL
+	buff[3] = 0xFF;	// ID8
+	buff[4] = 0xFF;	// ID0
+	buff[5] = 0xFF;	// DLC
+	buff[6] = 0xFF;	// RXB0D0
+	buff[7] = 0xFF;	// RXB0D1
+	buff[8] = 0xFF;	// RXB0D2
+	buff[9] = 0xFF;	// RXB0D3
 	buff[10] = 0xFF; // RXB0D4
 	buff[11] = 0xFF; // RXB0D5
 	buff[12] = 0xFF; // RXB0D6
@@ -751,11 +717,12 @@ uint8_t get_message(struct sCAN *message, byte mBuffNumber )
 	int result = wiringPiSPIDataRW(channel, buff, 15);	// buff is updated with new data
 
 	// read id
-	byte ide = (buff[2] & 0x08)>0;		// SIDL & 0x08
-	if (ide)
-		parse_CAN_eid_b( &(message->id), &(buff[1]) );
-	else
-		parse_CAN_id( &(message->id), &(buff[1]) );
+	parse_CAN_eid_b( &(message->id), &(buff[1]) );
+	
+/*	message->id.id_array[0] = buff[1];
+	message->id.id_array[1] = buff[2];
+	message->id.id_array[2] = buff[3];
+	message->id.id_array[3] = buff[4]; */
 
 	// Read DLC:
 	uint8_t length = buff[5] & 0x0f;
@@ -830,15 +797,14 @@ uint8_t Request_To_Send( uint8_t mTxBufferBit )
 		case 4:	digitalWrite( TX2RTS, 0 );		break;
 		default: 		break;
 	}
-	//delay (10);	
-/*	switch (mTxBufferBit)
+	delay (10);	
+	switch (mTxBufferBit)
 	{
 		case 1:	digitalWrite( TX0RTS, 1 );		break;
 		case 2:	digitalWrite( TX1RTS, 1 );		break;
 		case 4:	digitalWrite( TX2RTS, 1 );		break;
 		default: 		break;
-	} */
-
+	}
 /*Software method:
 	uint8_t value = SPI_RTS | mTxBufferBit;
 	if (mTxBufferBit)  
@@ -859,38 +825,41 @@ void transfer_message(uint8_t mabc_address, struct sCAN *message)
 {
 	int t;
 	byte buff[14];
-	buff[0] = SPI_WRITE_TX | mabc_address;		// occupies lowest 11 bits
-	buff[1] = message->id.id_array[0];			// TXBnSIDH	(Standard ID)
-	buff[2] = message->id.id_array[1] | 0x08;	// TXBnSIDL	(Standard ID)
-	buff[3] = message->id.id_array[2];			// TXBnEID8	
-	buff[4] = message->id.id_array[3];			// TXBnEID0
+	buff[0] = SPI_WRITE_TX | mabc_address;	// occupies lowest 11 bits
+	buff[1] = message->id.id_array[0];		// TXBnSIDH	(Standard ID)
+	buff[2] = message->id.id_array[1] | 0x08;		// TXBnSIDL	(Standard ID)
+	buff[3] = message->id.id_array[2];		// TXBnEID8	
+	buff[4] = message->id.id_array[3];		// TXBnEID0
 
 	uint8_t length = message->header.DLC & 0x0f;
-	if (message->header.rtr)  {
+	if (message->header.rtr) {
 		// a rtr-frame has a length, but contains no data
-		buff[5] = ((1<<RTR) | length);	//printf("RTR!\n");
-	} else {
-		buff[5] = length;  				// TXBnDLC
-		for (t=0;t<length;t++) 
-			buff[6+t] = message->data[t];		
+		printf("RTR!\n");
+		buff[5] = ((1<<RTR) | length);
+	} else { 
+		buff[5] = length;  	// TXBnDLC
+		for (t=0;t<length;t++) {
+			buff[6+t] = message->data[t];
+		}
 	}
 	/*printf("RAW SPI BUFFER: ");
 	for (int i=0; i<(6+length); i++)
 		printf(" %2x ", buff[i]);  */
+	int result = wiringPiSPIDataRW(channel, buff, 6+length);  // buff is updated with new data
+	delayMicroseconds(1);
 	//printf("transfer_message result = %x\n", result);
-	int result = wiringPiSPIDataRW(channel, buff, 6+length);  // buff is updated with new data 
-	delayMicroseconds(1); 
 }
 
 uint8_t send_message(struct sCAN* message)
 {
+	print_message(message);
 	uint8_t txbuff_num = Determine_tx_buffer();
 	uint8_t addr       = Determine_tx_address( txbuff_num );
  	transfer_message( addr, message );
 	//Request_To_Send( txbuff_num );		// x1 x2 or x4 only values!
+	//printf("Message sent\n" );
 	return txbuff_num;
 }
-
 uint8_t can_send_msg_no_wait(byte unused, struct sCAN* message)
 {
 	return send_message(message);
@@ -916,48 +885,3 @@ uint8_t print_message(struct sCAN* msg)
 	else
 		printf("\tDF\n");
 }
-
-/***********************************
-Input: 	mTxMob 	-	[0..2]
-************************************/
-void tx_register_dump(byte mTxMob)
-{
-	//  TXB0CTRL = 0x30	
-		printf("Transmit Registers (mob %d)\n", mTxMob);
-		uint8_t val=0;
-        byte bank  = TXB0CTRL+( mTxMob<<4 );
-        for (byte offset=0; offset<14; offset++)
-        { 
-        	val=read_register( bank+offset );	
-        	print_tx_register_name(bank+offset);    
-        	printf("\t=%x\n",val);
-        }
-//        for (int i=0; i<8; i++)  {
- //       	val=read_register( TXB2D0+i+bank );	print_tx_register_name(CANINTE);    printf("\t=%x\n",val);
-   //     }
-}
-
-void register_dump()
-{
-	// READ CAN:
-	uint8_t adr=0;
-	uint8_t val=0;
-	
-	val=read_register( CNF1 );		print_register_name(CNF1 );  	 printf("=%x\n",val);
-	val=read_register( CNF2 );		print_register_name(CNF2 );  	 printf("=%x\n",val);
-	val=read_register( CNF3 );		print_register_name(CNF3 );  	 printf("=%x\n",val);
-	val=read_register( CANINTE );	print_register_name(CANINTE);    printf("\t=%x\n",val);
-	val=read_register( CANINTF );	print_register_name(CANINTF);    printf("\t=%x\n",val);
-	val=read_register( EFLG );		print_register_name(EFLG   );    printf("\t=%x\n",val);
-	val=read_register( CANSTAT );	print_register_name(CANSTAT);    printf("\t=%x\n",val);
-	val=read_register( CANCTRL );	print_register_name(CANCTRL);    printf("\t=%x\n",val);
-
-	val=read_register( TEC );		print_register_name(TEC    );    printf("\t=%x\n",val);
-	val=read_register( REC );		print_register_name(REC    );    printf("\t=%x\n",val);
-	val=read_register( BFPCTRL );	print_register_name(BFPCTRL);  	 printf("\t=%x\n",val);
-	val=read_register( TXRTSCTRL );	print_register_name(TXRTSCTRL);  printf("\t=%x\n",val);
-	val=read_register( RXB0CTRL );	print_register_name(RXB0CTRL );  printf("\t=%x\n",val);
-	val=read_register( RXB1CTRL );	print_register_name(RXB1CTRL );  printf("\t=%x\n",val);
-}
-
-

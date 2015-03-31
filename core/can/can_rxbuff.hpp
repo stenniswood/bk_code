@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#define MAX_CAN_MSG_MEMORY_SIZE 100
+#define MAX_CAN_MSG_MEMORY_SIZE 500
 
 #define NO_HISTORY_OP_MODE 		0
 #define NORMAL_HISTORY_OP_MODE 	1

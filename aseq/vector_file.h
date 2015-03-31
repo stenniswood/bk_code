@@ -9,8 +9,6 @@ class Appendage;
 extern "C" {
 #endif
 
-
-
 // Datatype definitions
 #define UNDEFINED_TYPE  0x00
 #define FLOAT 			0x80

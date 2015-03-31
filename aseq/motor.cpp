@@ -19,7 +19,6 @@
 #include "system_msgs_callback.h"
 #include "board_list.h"
 #include "packer.h"
-
 #include "vector_file.h"
 #include "packer_motor.h"
 #include "motor_vector.h"
@@ -28,6 +27,11 @@
 #include "robot.hpp"
 #include "config_file.h"
 
+
+float radians(float mDegrees)
+{
+	return (mDegrees * M_PI / 180.0 );	
+}
 
 /**********************************************************************
 Name	:	Constructor()
@@ -55,13 +59,13 @@ void Motor::Initialize()
 	Instance 		= 0;
 	use_stops		= true;
 	stop1.Angle 	= 0.0;
-	stop1.PotValue  = 10;
+	stop1.PotValue  =  10;
 	stop2.Angle 	= 0.0;
 	stop2.PotValue  = 1014;
 
-	StartPotValue	= 0;		// First reading
-	CurrPotValue	= 0;		// Latest reading
-	DestinationPotValue	= 0;	// Vector position
+	StartCount		= 0;		// First reading
+	CurrCount		= 0;		// Latest reading
+	DestinationCount= 0;		// Vector position
 	DestinationReached = false;	
 	
 	CurrAngle		= 0;		// in Degrees 
@@ -70,7 +74,10 @@ void Motor::Initialize()
 	RequestedSpeed  = 0.;		// Counts per second
 	MeasuredSpeed   = 0.;		// Counts per second
 	DutyPercent		= 0.;
-
+	K_const			= 9.8 * 2;	// ~20 percent boost at 90 degrees
+ 
+ 	// 10 degrees/sec/sec = 34 counts/sec/sec
+	deceleration_rate_cpss = 614;   // counts / second / second	
 	CurrentTimesTen	= 0.;		// fixed point
 
 	ZeroOffset		= 512;		// center	
@@ -81,6 +88,8 @@ void Motor::Initialize()
 	MaxRatedTorque	= 1.;		// inch*lbs  around (1,546 for 82666)
 	StallCurrent	= 100.;		// 	
 	Duty			= 0.;		// 	
+
+	init_params();
 }
 
 /**********************************************************************
@@ -102,27 +111,27 @@ bool Motor::destination_reached( float mTolerance )
 	if (DestinationReached==true)  return true;	
 	struct timeval tv;
 			
-	if (within_tolerance( DestinationPotValue, mTolerance )) 
+	if (within_tolerance( DestinationCount, mTolerance )) 
 	{	
 		// ie only the first time it's reached
-		printf("  Reached within tol: %d %5.1f ", DestinationPotValue, mTolerance );			
+		printf("  Reached within tol: %d %5.1f ", DestinationCount, mTolerance );			
 		gettimeofday(&tv, NULL);
 		completed = tv;
 		DestinationReached=true;
 		return true;
 	}
-	
+
 	// Overshoot ? 
 	bool overshot = false;
-	if (StartPotValue < DestinationPotValue)
+	if (StartCount < DestinationCount)
 	{
-		//Then an overshoot would be when CurrPotValue is over DestinationPotValue				
-		overshot = (CurrPotValue > DestinationPotValue) ? (true):(false);	
+		//Then an overshoot would be when CurrCount is over DestinationCount				
+		overshot = (CurrCount > DestinationCount) ? (true):(false);	
 	} else {
-		//Then an overshoot would be when CurrPotValue is under DestinationPotValue	
-		overshot = (CurrPotValue < DestinationPotValue) ? (true):(false);		
+		//Then an overshoot would be when CurrCount is under DestinationCount	
+		overshot = (CurrCount < DestinationCount) ? (true):(false);		
 	}
-	float mag = fabs(DestinationPotValue - CurrPotValue);
+	float mag = fabs(DestinationCount - CurrCount);
 	if (overshot)
 	{
 		DestinationReached=true;
@@ -139,7 +148,7 @@ bool Motor::within_tolerance( float mDestination, float mTolerance )
 	if (MotorEnable==FALSE)
 		return true;		// move ahead
 
-	float delta = fabs(mDestination - CurrPotValue);
+	float delta = fabs(mDestination - CurrCount);
 	//printf("withinTol: %5.2f/ %5.2f \n", delta, mTolerance );
 	if (delta < mTolerance)
 		return true;
@@ -156,15 +165,31 @@ int Motor::compute_position( float mAngle )
 float Motor::compute_angle( word PotValue )
 {
 	float Angle = (PotValue-ZeroOffset) * DegreesPerCount;
-	return Angle;
+	return Angle;	
+}
+
+void Motor::compute_curr_angle( )
+{
+	CurrAngle = compute_angle(CurrCount);
 }
 
 void Motor::reset_pid()
 {
-	position_error_sum = 0;
-	speed_error_sum	   = 0;
+	position_error_sum  = 0;
+	speed_error_sum	    = 0;
 	position_error_prev = 0;
 	speed_error_prev	= 0;
+}
+
+void Motor::init_params()
+{
+	Kp_position_alpha = 1.0;
+	Ki_position_alpha = 0.01;
+	Kd_position_alpha = -0.35;
+	
+	Kp_speed_alpha = 1.0;
+	Ki_speed_alpha = 0.5;
+	Kd_speed_alpha = 0.5;
 }
 
 float Motor::compute_stopping_distance( float mSpeed, float mDeceleration )
@@ -172,62 +197,136 @@ float Motor::compute_stopping_distance( float mSpeed, float mDeceleration )
 	// dist = a t * t / 2 
 	float time = mSpeed / mDeceleration;
 	float stopping_distance = 0.5 * mDeceleration * time * time;
-	// BeginBrakingCount = stopping_distance;
+	
+	if (is_destination_greater())
+		BeginBrakingCount = DestinationCount - stopping_distance;
+	else 
+		BeginBrakingCount = DestinationCount + stopping_distance;
 	return stopping_distance;
 }
 
-float Motor::get_control_speed( 	)
+bool Motor::is_destination_greater( )
 {
-	if (is_breaking_region(CurrPotValue))
-	{
-		
-	} else {
-		return RequestedSpeed;
-	}
+	float dist = (DestinationCount - StartCount);
+	if (dist>0)
+		return true;
+	else 
+		return false;
 }
 
 bool Motor::is_breaking_region( word mCount )
 {
-	float delta = (StartPotValue - DestinationPotValue);
-	bool breaking_mode = 	
+	// braking if  (BeginBrakingCount < mCount < DestinationCount)
+	//					820								1000
+	//					95								  25
+	bool retval;
+	float delta = (StartCount - DestinationCount);
+	if (delta<0) {
+		if (mCount>BeginBrakingCount)  return true;
+		else return false;
+	} else {
+		if (mCount<BeginBrakingCount)  
+			retval = true;
+		else 
+			retval = false;
+	} 
+	return false;
 }
 
-/* 
-	Based on PID control :  
-
+/* Use this to find the speed along the deceleration line. 
+	ie. after the BeginBrakingCount has been triggered and before
+	the destination has been reached.
 */
-float Motor::compute_duty( float mDestination )
+float Motor::compute_braking_speed( )
 {
-	float  position_alpha = 1.0;
-	float  speed_alpha    = 1.0;
+	// Assuming perfect constant deceleration :
+	// Compute the time :  d = 1/2 a t*t
+	float distance = (DestinationCount - CurrCount);
+	float operand  = distance*2 / deceleration_rate_cpss;
+	float time     = sqrt( fabs(operand) );
+	return deceleration_rate_cpss * time;
+}
+
+/* Done.
+	Computes the speed assuming constant acceleration from the start point.
+	and that the original speed there was zero.
+*/
+float Motor::compute_accel_speed( )
+{
+	// Compute the time :  d= 1/2 a * t * t
+	float distance = fabs(CurrCount - StartCount);
+	float operand  = distance*2 / deceleration_rate_cpss;
+	float time     = sqrt( operand );
+	return deceleration_rate_cpss * time;
+}
+
+float Motor::get_control_speed( )
+{
+	float spd;
+	if (is_breaking_region(CurrCount))
+	{
+		spd = compute_braking_speed( );		
+		printf("brake speed=%6.3f ", spd);
+	} else
+		spd = compute_accel_speed  ( );
+
+	if (spd > RequestedSpeed)
+		spd = RequestedSpeed;
+	//printf("Curr=%d; Control_speed=%6.3f \t", CurrCount, spd);
+	return spd;
+}
+
+#define MAX_P_DUTY 775 
+
+/* 
+	Based on PID control :
+*/
+float Motor::compute_duty( )
+{	
+	float  position_error;
+	float  speed_error 	 ;
+	bool   first_iteration = false;
 	
-	float  position_error = 0.0;
-	float  speed_error 	  = 0.0;
-	position_error 		= ( mDestination - CurrPotValue );
-	speed_error 		= ( RequestedSpeed - MeasuredSpeed );
+	float  control_speed  = get_control_speed();	
+	//printf("control_speed=%6.3f\n", control_speed );
+
+	// GET ERROR:
+	position_error 		  = ( DestinationCount - CurrCount  );
+	speed_error 		  = ( control_speed - MeasuredSpeed );
 
 	// PID (P)	
-	float position_duty = position_alpha * position_error;
-	float speed_duty 	= speed_alpha * speed_error;	
+	float pcomp_position_duty = Kp_position_alpha * position_error;
+	float pcomp_speed_duty 	  = Kp_speed_alpha    * speed_error;
 
 	// PID (I)
-	  position_error_sum  += position_error;
-	  speed_error_sum	  += speed_error;
-	position_error 		= ( mDestination   - CurrPotValue  );
-	speed_error 		= ( RequestedSpeed - MeasuredSpeed );
-	
+	if (position_error_sum==0)	first_iteration = true;	
+	position_error_sum  += position_error;
+	speed_error_sum	    += speed_error;
+	float icomp_position_duty = Ki_position_alpha * position_error_sum;
+	float icomp_speed_duty    = Ki_speed_alpha    * speed_error_sum;
+
 	// PID (D)
-	float  position_error_prev = position_error;
-	float  speed_error_prev	   = speed_error;
-	position_error 		= ( mDestination   - CurrPotValue  );
-	speed_error 		= ( RequestedSpeed - MeasuredSpeed );
+	position_error_deriv = position_error - position_error_prev;
+	speed_error_deriv    = speed_error - speed_error_prev;	
+	if (first_iteration)	position_error_deriv = 0;
+	float  dcomp_position_duty = Kd_position_alpha * position_error_deriv;
+	float  dcomp_speed_duty    = Kd_speed_alpha    * speed_error_deriv;
 
-	float duty 			= position_duty + speed_duty;	
-	
+	position_error_prev = position_error;		// update for next time!
+	speed_error_prev    = speed_error;
+
+	float p_duty = pcomp_position_duty + icomp_position_duty + dcomp_position_duty;
+	float s_duty = pcomp_speed_duty    + icomp_speed_duty    + dcomp_speed_duty;
+
+	p_duty += compute_gravity_boost();
+	s_duty += compute_gravity_boost();
 	if (MotorDirection==-1)
-		duty = -duty;
+	{
+		p_duty = -p_duty;
+		s_duty = -s_duty;
+	}
 
-	DutyPercent = duty * 100.;
+	DutyPercent = 100 * p_duty / MAX_P_DUTY;
 	if (DutyPercent > 100.0)	DutyPercent = 100.0;
 	if (DutyPercent < -100.0)	DutyPercent = -100.0;
 	return DutyPercent;
@@ -252,8 +351,9 @@ void Motor::print_stop( int mStopNum )
 
 void Motor::print_positioning( )
 {
+	if (MotorEnable)
 	printf(" Start=%5d; Curr=%5d; Dest=%5d; \n", 
-			StartPotValue, CurrPotValue, DestinationPotValue );	
+			StartCount, CurrCount, DestinationCount );	
 }
 void Motor::print_speeds( )
 {
@@ -266,7 +366,8 @@ void  Motor::send_speed_pid(  )
 {
 	if (MotorEnable==FALSE) return;
 
-	DutyPercent = compute_duty( DestinationPotValue );
+	DutyPercent = compute_duty( );
+	//printf("\t\t\tDUTY=%5.1f\n", DutyPercent);
 	//print_positioning();
 	send_speed( DutyPercent );
 }
@@ -314,6 +415,8 @@ If Destination is beyond the stop limits, it will be truncated at the limits.
 */
 void Motor::set_destination( int mDestinationCount, float mRequestedSpeed )
 {
+	if (MotorEnable==FALSE)	return;
+	
 	// BOUND BY STOP LIMITS:
 	if (mDestinationCount < stop1.PotValue)
 		mDestinationCount = stop1.PotValue;
@@ -323,44 +426,34 @@ void Motor::set_destination( int mDestinationCount, float mRequestedSpeed )
 
 	// CALCULATE WHEN TO START BRAKING : 	
 	//  0.014/20ms= 0.014/0.020 = 0.7
-	float deceleration_rate_cpss = 0.7;   // counts / second / second	
-	float distance_to_stop = compute_stopping_distance( mRequestedSpeed, deceleration_rate_cps  );
-
+	float distance_to_stop = compute_stopping_distance( mRequestedSpeed, 
+														deceleration_rate_cpss  );
+	RequestedSpeed		= mRequestedSpeed;
 	DestinationReached  = false;
-	StartPotValue       = CurrPotValue;
-	DestinationPotValue = mDestinationCount;	
+	StartCount       	= CurrCount;
+	DestinationCount 	= mDestinationCount;
 
-	BeginBrakingCount = mDestinationCount - distance_to_stop;
+	reset_pid();
 	printf("RequestedSpeed=%6.2f; decel=%5.3f; distance_to_stop=%6.3f; \n", 
 				mRequestedSpeed, deceleration_rate_cpss,
 				distance_to_stop );
 }
+//i give up on these algorithms.  i don't know how to make them work
 
-/* Use this to find the speed along the deceleration line. 
-	ie. after the BeginBrakingCount has been triggered and before
-	the destination has been reached.
-*/
-float Motor::compute_braking_speed( word mDistance )
-{
-	// Speed is zero at   DestinationPotValue.  
-	// then 
-			Acce * (mDistance - DestinationPotValue);
-		
-	StartPotValue
-	
-//	BeginBrakingCount
-
-}
+//	BeginBrakingCount = DestinationCount - distance;
+//  Speed is zero at DestinationCount
+//	float time = MeasuredSpeed / acceleration;
+//  float distance
 
 int Motor::check_stops( )
 {
 	MotorStopped = 0;
 	if (stop1.Enabled)
-		if (CurrPotValue < stop1.PotValue)
+		if (CurrCount < stop1.PotValue)
 			MotorStopped = 1;
 
 	if (stop2.Enabled)
-		if (CurrPotValue > stop2.PotValue)
+		if (CurrCount > stop2.PotValue)
 			MotorStopped = 2;
 //	printf("check_stops() = %d\n", MotorStopped);
 	return MotorStopped;
@@ -401,9 +494,9 @@ void Motor::send_config( byte mindex, byte mValue, byte mMask )
 		 
    LengthCenterOfMass  *  mg sin(theta)
 */
-float  Motor::compute_gravity_boost(  )
+float  Motor::compute_gravity_boost( )
 {	
-	float boost = K_const * sin(CurrAngle);
+	float boost = K_const * sin( radians(CurrAngle) );
 	return boost;
 
 	// K will be found thru a self adjusting algorithm.
@@ -435,10 +528,10 @@ int Motor::update_position( struct sCAN* mMsg )
 
 	can_parse_motor_value( mMsg, &(tmp.PotValue), 
 							     &(tmp.CurrentTimesTen), 
-						   (short*)&(tmp.SpeedTimesTen) );
-	
-	CurrPotValue = tmp.PotValue;
-	CurrAngle = compute_angle(CurrPotValue);
+						 (short*)&(tmp.SpeedTimesTen) );
+	CurrCount = tmp.PotValue;
+
+	compute_curr_angle( );
 	check_stops();
 	send_speed_pid();
 
@@ -447,7 +540,14 @@ int Motor::update_position( struct sCAN* mMsg )
 	BOOL reached = destination_reached( 10 );
 	if (reached) {
 		//printf( "Destn reached!" ); printf("\n");
-	}
-	
+	}	
 }
 
+	// PRINT STATS:
+	/*printf("p_error=%6.1f; p_error_sum=%6.1f; p_error_deriv=%6.1f ", 
+			position_error, position_error_sum, position_error_deriv );
+	  printf("p_duty=%6.1f+%6.1f+%6.1f=%6.1f\n", 
+			pcomp_position_duty, icomp_position_duty, dcomp_position_duty, p_duty ); */
+	//position_error, position_error_sum, position_error_deriv, p_duty );
+	//printf("s_error=%6.1f;  s_error_sum=%6.1f;  s_error_deriv=%6.1f s_duty=%6.1f", 
+	//		speed_error, speed_error_sum, speed_error_deriv, s_duty );

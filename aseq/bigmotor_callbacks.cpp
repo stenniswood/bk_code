@@ -100,7 +100,7 @@ BOOL can_position_meas_responder( struct sCAN* mMsg )
 		// PARSE TELEGRAM : 
 		can_parse_motor_value( mMsg, &(tmp.PotValue), &(tmp.CurrentTimesTen),
 							   (short*)&(tmp.SpeedTimesTen) );
-		robot.limbs[Aindex].actuators[actuator_index].CurrPotValue = tmp.PotValue;
+		robot.limbs[Aindex].actuators[actuator_index].CurrCount = tmp.PotValue;
 
 		gettimeofday( &ts, NULL );
 		long seconds  = ts.tv_sec  - start_ts.tv_sec;
@@ -113,7 +113,7 @@ BOOL can_position_meas_responder( struct sCAN* mMsg )
 		{
 			printf("Measurements:, \n" );			
 			for (int a=0; a<robot.limbs[0].actuators.size(); a++)
-				printf(" %4d, ", robot.limbs[0].actuators[a].CurrPotValue );
+				printf(" %4d, ", robot.limbs[0].actuators[a].CurrCount );
 			robot.limbs[0].Reads++;
 		}
 	}	
@@ -151,7 +151,7 @@ BOOL can_motor_position_responder( struct sCAN* mMsg )
 /*		if ((mMsg->id.group.instance == 31) || (mMsg->id.group.instance == 32) || (mMsg->id.group.instance == 33))
 			printf(" %d PotRead=%d; spd=%5.2f\t", 
 					mMsg->id.group.instance, 
-					robot.limbs[Aindex].actuators[actuator_index].CurrPotValue,
+					robot.limbs[Aindex].actuators[actuator_index].CurrCount,
 					robot.limbs[Aindex].actuators[actuator_index].SpeedTimesTen );*/
 
 		robot.limbs[Aindex].ElementsFilled |= (1<<actuator_index);		// Mark it 

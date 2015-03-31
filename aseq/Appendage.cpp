@@ -82,9 +82,7 @@ void Appendage::update_submitted_timestamps( struct timeval mts )
 {
 	if (Enable==false)  return;
 	for (byte a=0; a < actuators.size(); a++)
-	{
 		actuators[a].submitted = mts;
-	}		
 }
 
 /*********************************************************************
@@ -153,6 +151,8 @@ void Appendage::set_new_destinations( struct sVectorSet& mVectors, int mVectorIn
 	{
 		int tmp = mVectors.vectors[mVectorIndex].get_count( a );
 		float speed = mVectors.calc_average_speed_cps( mVectorIndex, a );
+		if (speed>MAX_MOTOR_SPEED)
+			speed = MAX_MOTOR_SPEED;
 		//printf("get_count()=%d\n", tmp);
 		actuators[a].set_destination( tmp, speed );
 	}
@@ -185,7 +185,7 @@ void Appendage::compute_speeds( )
 	for (int a=0; a<actuators.size(); a++ )
 	{
 		// speeds are in the actuator - ""
-		actuators[a].compute_duty( actuators[a].DestinationPotValue );
+		actuators[a].compute_duty( );
 	}
 }
 
@@ -217,8 +217,8 @@ void Appendage::set_current_position_as_destination( )
 	if (Enable==false)  return ;
 	for (int a=0; a<actuators.size(); a++)
 	{
-		actuators[a].StartPotValue = actuators[a].CurrPotValue;
-		actuators[a].DestinationPotValue = actuators[a].CurrPotValue;
+		actuators[a].StartCount = actuators[a].CurrCount;
+		actuators[a].DestinationCount = actuators[a].CurrCount;
 	}
 }
 
