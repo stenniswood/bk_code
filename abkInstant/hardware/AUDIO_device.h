@@ -51,8 +51,8 @@ uint32_t audioplay_get_latency(AUDIOPLAY_STATE_T *st);
 //static const char *audio_dest[] = {"local", "hdmi"};
 
 void test_function(int id);
-void play_waveform( Wave* mWave, int dest );
-void play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
+//void play_waveform( Wave* mWave, int dest );
+//void play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
 
 
 // BK:

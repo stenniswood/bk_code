@@ -1,6 +1,6 @@
 CC		   = g++
 OPTIONS	   = -fpermissive -Wwrite-strings -Wno-deprecated -w
-INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/      \
+INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/  \
 			  ./nlp_protocol/ ../nlp_protocol/  ./nlp_adrenaline/ ./voice/ \
 			  ./threads/ /home/pi/abkInstant/  ./hardware/ ../core/libs/ilclient/ \
 			  /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/ 			  
@@ -32,11 +32,11 @@ CFLAGS+=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POS
 CAN_OBJS   =  CAN_Interface.o can_instance.o can_eid.o can_rxbuff.o can_txbuff.o \
 	          bk_system_defs.o can_id_list.o 
 MSG_OBJS   =  packer_lcd.o packer_motor.o packer.o parser_tilt.o 
-MISC_OBJS  =  buttons.o leds.o vector_math.o ini_file.o audio_memory.o
+MISC_OBJS  =  buttons.o leds.o vector_math.o ini_file.o
 FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 VG_OBJS    =  libshapes.o oglinit.o
 APP_CPP_OBJS= instant_main.o string_util.o
-IPC_OBJS    = picamscan_memory.o sway_memory.o visual_memory.o 
+IPC_OBJS    = picamscan_memory.o sway_memory.o visual_memory.o audio_memory.o 
 THREAD_OBJS = audio_thread.o video_thread.o can_thread.o file_thread.o \
 			  file_tx_thread.o hmi_thread.o thread_control.o serverthread.o 
 HARDWARE_OBJS = AUDIO_device.o 
@@ -64,7 +64,7 @@ instant: $(APP_CPP_OBJS) 										\
 		$(addprefix ./nlp_protocol/, 	$(NLP_PROTOCOL_OBJS)) 	\
 		$(addprefix ./threads/, 		$(THREAD_OBJS)) 		\
 		$(addprefix ./hardware/, 		$(HARDWARE_OBJS)) 		\
-		$(addprefix ../core/misc/, 		$(IPC_OBJS)) 			\
+		$(addprefix ../core/ipc/, 		$(IPC_OBJS)) 			\
 		$(addprefix ../core/can/, 		$(CAN_OBJS)) 			\
 		$(addprefix ../core/msg/, 		$(MSG_OBJS)) 			\
 		$(addprefix ../core/misc/,		$(MISC_OBJS))  			\
