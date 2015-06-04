@@ -94,16 +94,16 @@ static void dump_raw_ipc()
 		printf("%2x ", can_shared_memory[i] );
 	}	
 }
- 
+  
 int can_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct can_ipc_memory_map);
 
 	/* Allocate a shared memory segment. */
-	can_segment_id = shmget( IPC_KEY, shared_segment_size, IPC_CREAT | 0666 );
+	can_segment_id = shmget( IPC_KEY_CAN, shared_segment_size, IPC_CREAT | 0666 );
 
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	if (Debug) printf ("shared memory segment_id=%d\n", can_segment_id );
+	if (Debug) printf ("CAN shm segment_id=%d\n", can_segment_id );
 	return can_segment_id;	
 }
 
@@ -112,7 +112,7 @@ int can_attach_memory()
 	/* Attach the shared memory segment. */
 	can_shared_memory = (char*) shmat (can_segment_id, 0, 0);
 	ipc_memory_can	  = (struct can_ipc_memory_map*)can_shared_memory;
-	if (Debug) printf ("shared memory attached at address %p\n", can_shared_memory); 	
+	if (Debug) printf ("CAN shm attached at address %p\n", can_shared_memory); 	
 }
 
 void can_reattach_memory()
@@ -120,7 +120,7 @@ void can_reattach_memory()
 	/* Reattach the shared memory segment, at a different address. */ 
 	can_shared_memory = (char*) shmat (can_segment_id, (void*) 0x5000000, 0); 
 	ipc_memory_can	  = (struct can_ipc_memory_map*)can_shared_memory;	
-	if (Debug) printf ("shared memory reattached at address %p\n", can_shared_memory); 
+	if (Debug) printf ("CAN shm reattached at address %p\n", can_shared_memory); 
 }
 
 void can_detach_memory()
@@ -135,7 +135,7 @@ int can_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (can_segment_id, IPC_STAT, &shmbuffer);
 	int segment_size = shmbuffer.shm_segsz;
-	if (Debug) printf ("segment size: %d\n", segment_size);
+	if (Debug) printf ("CAN segment size: %d\n", segment_size);
 	return segment_size;
 }
 void can_fill_memory()
@@ -194,7 +194,7 @@ void ipc_add_can_rx_message( struct sCAN* mMsg )
 		ipc_memory_can->RxOverFlow = 1;
 }
 
-BOOL   		 isRxMessageAvailable( )
+BOOL   		_isRxMessageAvailable( )
 {
 	return (ipc_memory_can->RxTail > ipc_memory_can->RxHead);
 }

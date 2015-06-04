@@ -13,16 +13,12 @@
 #include <pthread.h>
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
-#include "packer_lcd.h"
-#include "packer_motor.h"
 #include "can_txbuff.h"
-#include "packer.h"
 #include "can_id_list.h"
 #include "cmd_process.h"
 #include "buttons.h"
 #include "leds.h"
 #include "vector_math.h"
-#include "parser_tilt.h"
 #include "catagorization.h"
 #include "serverthread.h"
 #include "client.h"
@@ -31,6 +27,8 @@
 #include "sway_memory.h"
 #include "audio_memory.h"
 #include "picamscan_memory.h"
+#include "client_memory.h"
+#include "CAN_memory.h"
 #include "udp_transponder.hpp"
 #include "thread_control.h"
 
@@ -38,19 +36,18 @@
 // Right now this is user settable.  Need to detect:
 BOOL	PiCAN_Present=FALSE;
 
-
 struct sCAN MMsg;
-byte count = 0;
-int  	fd;
-long  	SerialNumber_ = 0x56789CD;
-#define Debug 0
-pthread_t udp_tx_thread_id;
-pthread_t udp_rx_thread_id;
-pthread_t server_thread_id;
-  
+byte 		count = 0;
+int  		fd;
+long  		SerialNumber_ = 0x56789CD;
+#define 	Debug 0
+pthread_t 	udp_tx_thread_id;
+pthread_t 	udp_rx_thread_id;
+pthread_t 	server_thread_id;
+
 void create_threads()
 {	
-	// CREATE UDP - Transponder :
+	// CREATE UDP - Transponder : 
 	const char *message1 = "every second";
 	int iret1 = pthread_create( &udp_tx_thread_id, NULL, udp_transponder_function, (void*) message1);
 	if (iret1)
@@ -77,48 +74,62 @@ void create_threads()
 	// CLIENT PROTOCOL... thread needed?  No.
 }
 
+
 #define USE_AVISUAL 1
+#define USE_CAN		1
 #define USE_SWAY	1
 #define USE_PICAMSCAN	0
 #define USE_AUDIO	1
 
-/* Inter Process Communications (via shared memory)		*/
+/* Inter Process Communications (via shared memory)		
+*/
 void establish_ipc()
 {
+	printf("************************* SHARED MEMORY *****************************");
+	cli_allocate_memory();
+	cli_attach_memory  ();
+	cli_fill_memory	   ();
+
 	if (USE_AVISUAL)
 	{
 		vis_allocate_memory();
 		vis_attach_memory  ();
 		vis_fill_memory	   ();
-		//dump_line();
-	} else 
-		vis_deallocate_memory( 98307 );	
+	} 
+	else vis_deallocate_memory( 98307 );
 
 	if (USE_SWAY)
 	{
 		sway_allocate_memory();
 		sway_attach_memory  (); 
 		sway_fill_memory	();
-	} else 
-		sway_deallocate_memory();	
+	} 
+	else sway_deallocate_memory();	
 
 	if (USE_PICAMSCAN) 
 	{
-		vis_allocate_memory();
-		vis_attach_memory  ();
-		vis_fill_memory	   ();
-		//dump_line();
-	} else 
-		vis_deallocate_memory( 98307 );	
-		
+		picam_allocate_memory();
+		picam_attach_memory  ();
+		picam_fill_memory	 ();
+	} 
+//	else picam_deallocate_memory(  );	// 98307
+	
 	if (USE_AUDIO)
 	{
 		aud_allocate_memory();
 		aud_attach_memory  (); 
 		aud_fill_memory	   ();
-	} else 
-		aud_deallocate_memory();
+	}  
+	else aud_deallocate_memory();
 
+	if (USE_CAN)
+	{
+		can_allocate_memory();
+		can_attach_memory  (); 
+		can_fill_memory	   ();
+	} 
+//	else can_deallocate_memory();
+	printf("****************** END SHARED MEMORY SETUP *******************");	
 }
 
 void init( )
@@ -137,7 +148,8 @@ void init( )
 	button_init ( );
 	init_leds   ( );
 	//fuse_init ( );
-
+	establish_ipc();
+		
 	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
 
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
@@ -159,7 +171,6 @@ void init( )
 	  exit(1);
 	}
 	create_threads();
-	establish_ipc();
 
 	//CAN_init( CANSPEED_250, 0 );	
 	/* The CAN_isr() callbacks are not recommended.  They're only for 
@@ -213,16 +224,60 @@ void can_interface()
 	}		*/
 }
 
-void ethernet_interface()
-{	/* wifi comms */ }
-void voice_interface()
-{	/* NLP/Synthesis */ }
+/* Note the client can do any of these:
+	establish a connection
+	audio  						(send and/or receive)
+	file transfer				
+	image transfer				
+	HMI							
+	CAN							
+*/
+void handle_client_request()
+{
+	// client can 
+	char* space = strchr(ipc_memory_client->Sentence, ' ');
+	*space = 0;
+	int result = strcmp(ipc_memory_client->Sentence, "CONNECT");			
+	if (result==0)
+		connect_to_robot(*(space+1) );
+			
+	
+/*	result = strcmp(ipc_memory_client->Sentence, "AUDIO");
+	result = strcmp(ipc_memory_client->Sentence, "VIDEO");
+	result = strcmp(ipc_memory_client->Sentence, "FILE"); */
+
+}
+
+void scan_inputs()
+{
+	// CHECK CLIENT MEMORY FOR REQUEST:
+	if (ipc_memory_client->RequestCount > ipc_memory_client->AcknowledgedCount)
+	{
+		//handle_client_request();
+	}
+	
+}
+		
+void update_outputs()
+{
+	// Update Client List:
+	int size = numberclients;
+	for (int i=0; i<size; i++)
+		cli_ipc_add_new_client( mClientText );
+		
+	
+}
+
+
+void ethernet_interface()	{	/* wifi comms 	 */ }
+void voice_interface()		{	/* NLP/Synthesis */ }
 
 char filespath[64];
 char filename[64];
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
 	are only set when the Enable is.  maybe.		*/
+
 int main( int argc, char *argv[] )
 {
 	print_args( argc, argv );
@@ -236,15 +291,15 @@ int main( int argc, char *argv[] )
 			return 0;
 		}
 	}
-	init();		
-	printf("===============================================\n");		
-
-	// FORCE CLIENT CONNECTION:
+	init();
+	printf("===============================================\n");
+	
 	TransportCAN = FALSE;
 	if (argc>1)
 	{
+		// FORCE CLIENT CONNECTION :
 		int error = connect_to_robot(argv[1]);
-		if (error==0)
+		if (error==0)	// Success,
 		{
 			WifiConnected = TRUE;
 			TransportCAN  = TRUE;
@@ -258,11 +313,17 @@ int main( int argc, char *argv[] )
 	printf("================= Checking command line arguments ========================\n");	
 
 	printf("================= Main Loop ==========================\n");
+	int count = 0;
 	while (1) 
 	{
-		can_interface();
-		ethernet_interface();
-		voice_interface();
+		//printf("Loop %d\n", count++);
+		can_interface();			// empty
+		ethernet_interface();		// empty
+		voice_interface();			// empty
+	
+		scan_inputs();
+		update_outputs();
+		delay(1000);		
 	}
 }
 

@@ -21,6 +21,7 @@ DATE 	:  8/8/2013
 AUTHOR	:  Stephen Tenniswood
 ********************************************************************/
 #include <stdio.h> 
+#include <string.h>
 #include <stdlib.h> 
 #include <sys/shm.h> 
 #include <sys/stat.h>
@@ -30,10 +31,12 @@ AUTHOR	:  Stephen Tenniswood
 //#include "atmel_spi.h"
 
 
-word Analog_Values[NUM_ANALOG_CHANNELS];
+char* 	picam_shared_memory;
+int 	picam_segment_id;
+struct  picam_ipc_memory_map* ipc_memory_picam;
 
-char* 	shared_memory;
-int 	segment_id;
+
+
 byte	pi_LED_state;
 int 	LS_Values;
 word 	Buttons;
@@ -43,9 +46,22 @@ void picam_save_segment_id()
 {
 	FILE* fd = fopen("picamscan_shared_memory_segment_id.cfg", "rw");
 	//char* segment_id = itoa(segment_id);	
-	fprintf( fd, "%d", segment_id );
+	fprintf( fd, "%d", picam_segment_id );
 	fclose( fd );
 }
+
+int picam_allocate_memory( )
+{
+	const int 	shared_segment_size = sizeof(struct picam_ipc_memory_map);
+
+	/* Allocate a shared memory segment. */
+	picam_segment_id = shmget( IPC_KEY_PICAM, shared_segment_size, IPC_CREAT | 0666 );
+
+	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+	printf ("PICAM shared memory segment_id=%d\n", picam_segment_id );
+	return picam_segment_id;
+}
+
 
 int picam_attach_memory() 
 {
@@ -54,15 +70,15 @@ int picam_attach_memory()
 	const int 	shared_segment_size = 0x6400;
 
 	/* Allocate a shared memory segment. */
-	segment_id = shmget (IPC_PRIVATE, shared_segment_size,
+	picam_segment_id = shmget (IPC_PRIVATE, shared_segment_size,
 					 	 IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
 
 	/* Attach the shared memory segment. */
-	shared_memory = (char*) shmat (segment_id, 0, 0);
-	printf ("shared memory attached at address %p\n", shared_memory); 
+	picam_shared_memory = (char*) shmat(picam_segment_id, 0, 0);
+	printf ("shared memory attached at address %p\n", picam_shared_memory); 
 	
 	/* Determine the segment’s size. */
-	shmctl (segment_id, IPC_STAT, &shmbuffer);
+	shmctl (picam_segment_id, IPC_STAT, &shmbuffer);
 	segment_size = shmbuffer.shm_segsz;
 	printf ("segment size: %d\n", segment_size);
 }
@@ -70,26 +86,42 @@ int picam_attach_memory()
 void picam_reattach_memory()
 {
 	/* Reattach the shared memory segment, at a different address. */ 
-	shared_memory = (char*) shmat (segment_id, (void*) 0x5000000, 0); 
-	printf ("shared memory reattached at address %p\n", shared_memory); 
+	picam_shared_memory = (char*) shmat (picam_segment_id, (void*) 0x5000000, 0); 
+	printf ("shared memory reattached at address %p\n", picam_shared_memory); 
 }
 
 void picam_detach_memory()
 {
 	/* Detach the shared memory segment. */
-	shmdt (shared_memory);
+	shmdt (picam_shared_memory);
 }
 
 void picam_deallocate_memory()
 {
 	/* Deallocate the shared memory segment. */ 
-	shmctl (segment_id, IPC_RMID, 0);
+	shmctl (picam_segment_id, IPC_RMID, 0);
 }
+
+int picam_get_segment_size()
+{
+	struct 		shmid_ds	shmbuffer;
+	/* Determine the segment’s size. */
+	shmctl (picam_segment_id, IPC_STAT, &shmbuffer);
+	int segment_size = shmbuffer.shm_segsz;
+	//printf ("segment size: %d\n", segment_size);
+	return segment_size;
+}
+
+void picam_fill_memory()
+{
+	memset( picam_shared_memory, 0, picam_get_segment_size() );
+}
+
 
 /* Update all the variable for the PiCamScan board */
 void update_variables()
 {
-	ipc_write_analogs();
+	//ipc_write_analogs();
 	ipc_read_lowside_outputs();
 	ipc_write_buttons();
 	ipc_write_leds();
@@ -99,30 +131,27 @@ void update_variables()
 	the writes will be transfer to the cell phone.
 	the reads  will be transfering from the cell phone.
 */
-void ipc_write_analogs()
+void ipc_write_analogs( word* Analog_Values )
 {
-	word* analog_mem = (word*) shared_memory + ANALOG_OFFSET;
-	*(analog_mem+0) = Analog_Values[0];
-	*(analog_mem+1) = Analog_Values[1];
-	*(analog_mem+2) = Analog_Values[2];
-	*(analog_mem+3) = Analog_Values[3];
-				
-	*(analog_mem+4) = Analog_Values[4];
-	*(analog_mem+5) = Analog_Values[5];
-	*(analog_mem+6) = Analog_Values[6];
-	*(analog_mem+7) = Analog_Values[7];	
+	ipc_memory_picam->Analog[0] = Analog_Values[0];
+	ipc_memory_picam->Analog[1] = Analog_Values[1];
+	ipc_memory_picam->Analog[2] = Analog_Values[2];
+	ipc_memory_picam->Analog[3] = Analog_Values[3];
+	
+	ipc_memory_picam->Analog[4] = Analog_Values[4];
+	ipc_memory_picam->Analog[5] = Analog_Values[5];
+	ipc_memory_picam->Analog[6] = Analog_Values[6];
+	ipc_memory_picam->Analog[7] = Analog_Values[7];				
 }
 
 void ipc_read_lowside_outputs()
 {
-	word* lowside_byte = (word*) shared_memory + LOWSIDE_OFFSET;
-	LS_Values = *lowside_byte;	
+	LS_Values = ipc_memory_picam->Lowside_driver1;
 }
 
 void ipc_write_buttons()
 {
-	word* button_byte = (word*) shared_memory + LOWSIDE_OFFSET;
-	Buttons = *button_byte;	
+	Buttons = ipc_memory_picam->buttons;
 }
 
 /* 	Leds could come from this module, or from bk_Instant, depending on the application.
@@ -131,8 +160,7 @@ void ipc_write_buttons()
 	led drivers   */
 void ipc_write_leds()
 {
-	word* leds_byte = (word*) shared_memory + LOWSIDE_OFFSET;
-	pi_LED_state = *leds_byte;	
+	pi_LED_state = ipc_memory_picam->leds_byte;
 }
 
 

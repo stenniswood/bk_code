@@ -67,10 +67,10 @@ int vis_allocate_memory( )
 	const int 	shared_segment_size = sizeof(struct avisual_ipc_memory_map);
 
 	/* Allocate a shared memory segment. */
-	visual_segment_id = shmget( IPC_KEY, shared_segment_size, IPC_CREAT | 0666 );
+	visual_segment_id = shmget( IPC_KEY_VIS, shared_segment_size, IPC_CREAT | 0666 );
 
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	printf ("shared memory segment_id=%d\n", visual_segment_id );
+	printf ("Visual shm segment_id=%d\n", visual_segment_id );
 	return visual_segment_id;	
 }
 
@@ -79,7 +79,7 @@ int vis_attach_memory()
 	/* Attach the shared memory segment. */
 	visual_shared_memory = (char*) shmat (visual_segment_id, 0, 0);
 	ipc_memory_avis			 = (struct avisual_ipc_memory_map*)visual_shared_memory;
-	printf ("shared memory attached at address %p\n", visual_shared_memory); 	
+	printf ("Visual shm attached at address %p\n", visual_shared_memory); 	
 }
 
 void vis_reattach_memory()
@@ -87,7 +87,7 @@ void vis_reattach_memory()
 	/* Reattach the shared memory segment, at a different address. */ 
 	visual_shared_memory = (char*) shmat (visual_segment_id, (void*) 0x5000000, 0); 
 	ipc_memory_avis			 = (struct avisual_ipc_memory_map*)visual_shared_memory;	
-	printf ("shared memory reattached at address %p\n", visual_shared_memory); 
+	printf ("Visual shm reattached at address %p\n", visual_shared_memory); 
 }
 
 void vis_detach_memory()
@@ -102,7 +102,7 @@ int vis_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (visual_segment_id, IPC_STAT, &shmbuffer);
 	int segment_size = shmbuffer.shm_segsz;
-	printf ("segment size: %d\n", segment_size);
+	printf ("Visual segment size: %d\n", segment_size);
 	return segment_size;
 }
 void vis_fill_memory()

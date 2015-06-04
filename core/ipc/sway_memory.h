@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 
-#define IPC_KEY 1234
+#define IPC_KEY_SWAY 1236
 
 extern char* 	segway_shared_memory;
 extern int 		segway_segment_id;

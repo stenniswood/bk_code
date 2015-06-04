@@ -52,10 +52,10 @@ int sway_allocate_memory( )
 	const int 	shared_segment_size = sizeof(struct asegway_ipc_memory_map);
 
 	/* Allocate a shared memory segment. */
-	sway_segment_id = shmget( IPC_KEY, shared_segment_size, IPC_CREAT | 0666 );
+	sway_segment_id = shmget( IPC_KEY_SWAY, shared_segment_size, IPC_CREAT | 0666 );
 
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	printf ("shared memory segment_id=%d\n", sway_segment_id );
+	printf ("SWAY shared memory segment_id=%d\n", sway_segment_id );
 	return sway_segment_id;
 }
 
@@ -72,12 +72,12 @@ int sway_attach_memory()
 	/* Attach the shared memory segment. */
 	sway_shared_memory = (char*) shmat (sway_segment_id, 0, 0);
 	ipc_memory_sway = (struct  asegway_ipc_memory_map*)sway_shared_memory;
-	printf ("shared memory attached at address %p\n", sway_shared_memory); 
+	printf ("SWAY shared memory attached at address %p\n", sway_shared_memory); 
 	
 	/* Determine the segment’s size. */
 	shmctl (sway_segment_id, IPC_STAT, &shmbuffer);
 	segment_size = shmbuffer.shm_segsz;
-	printf ("segment size: %d\n", segment_size);
+	printf ("SWAY segment size: %d\n", segment_size);
 }
 
 void sway_reattach_memory()
@@ -85,7 +85,7 @@ void sway_reattach_memory()
 	/* Reattach the shared memory segment, at a different address. */ 
 	sway_shared_memory = (char*) shmat (sway_segment_id, (void*) 0x5000000, 0); 
 	ipc_memory_sway = (struct  asegway_ipc_memory_map*)sway_shared_memory;	
-	printf ("shared memory reattached at address %p\n", sway_shared_memory); 
+	printf ("SWAY shared memory reattached at address %p\n", sway_shared_memory); 
 }
 
 void sway_detach_memory()
@@ -107,7 +107,7 @@ int sway_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (sway_segment_id, IPC_STAT, &shmbuffer);
 	int segment_size = shmbuffer.shm_segsz;
-	printf ("segment size: %d\n", segment_size);
+	printf ("SWAY segment size: %d\n", segment_size);
 	return segment_size;
 }
 

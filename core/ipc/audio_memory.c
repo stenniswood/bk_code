@@ -75,7 +75,7 @@ int aud_allocate_memory( )
 	audio_segment_id = shmget( IPC_AUDIO_KEY, shared_segment_size, IPC_CREAT | 0666 );
 
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	printf ("audio shared memory segment_id=%d\n", audio_segment_id );
+	printf ("AUDIO shared memory segment_id=%d\n", audio_segment_id );
 	return audio_segment_id;	
 }
 
@@ -84,7 +84,7 @@ int aud_attach_memory()
 	/* Attach the shared memory segment. */
 	audio_shared_memory = (char*) shmat (audio_segment_id, 0, 0);
 	ipc_memory_aud			 = (struct audio_ipc_memory_map*)audio_shared_memory;
-	printf ("shared memory attached at address %p\n", audio_shared_memory); 	
+	printf ("AUDIO shared memory attached at address %p\n", audio_shared_memory); 	
 }
 
 void aud_reattach_memory()
@@ -92,7 +92,7 @@ void aud_reattach_memory()
 	/* Reattach the shared memory segment, at a different address. */ 
 	audio_shared_memory = (char*) shmat (audio_segment_id, (void*) 0x5000000, 0); 
 	ipc_memory_aud			 = (struct audio_ipc_memory_map*)audio_shared_memory;	
-	printf ("shared memory reattached at address %p\n", audio_shared_memory); 
+	printf ("AUDIO shared memory reattached at address %p\n", audio_shared_memory); 
 }
 
 void aud_detach_memory()
@@ -107,7 +107,7 @@ int aud_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (audio_segment_id, IPC_STAT, &shmbuffer);
 	int segment_size = shmbuffer.shm_segsz;
-	printf ("segment size: %d\n", segment_size);
+	printf ("AUDIO segment size: %d\n", segment_size);
 	return segment_size;
 }
 void aud_fill_memory()

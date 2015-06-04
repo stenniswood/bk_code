@@ -13,7 +13,7 @@ extern "C" {
 
 #include "CAN_base.h"
 
-#define IPC_KEY 1239
+#define IPC_KEY_CAN 1239
 
 extern char* 	can_shared_memory;
 extern int 		can_segment_id;
@@ -44,16 +44,16 @@ struct can_ipc_memory_map
 //void dump_ipc				();	// formated as CAN messages & string.
 
 // The SERVER calls these to setup the memory.  (ie. abkInstant or amon )
-int  CAN_allocate_memory	();
-void CAN_deallocate_memory	(int msegment_id);
+int  can_allocate_memory	();
+void can_deallocate_memory	(int msegment_id);
 
 // CLIENT uses these to connect:
-int  CAN_attach_memory		();
-void CAN_reattach_memory	();
-void CAN_detach_memory		();
+int  can_attach_memory		();
+void can_reattach_memory	();
+void can_detach_memory		();
 
-int  CAN_get_segment_size	();
-void CAN_fill_memory		();
+int  can_get_segment_size	();
+void can_fill_memory		();
 
 
 void ipc_write_can_connection_status( char* mStatus   );
@@ -61,7 +61,7 @@ void ipc_write_can_message( struct sCAN* mMsg );
 
 void ipc_add_can_rx_message( struct sCAN* mMsg );
 
-BOOL   		 isRxMessageAvailable( );
+BOOL   		 _isRxMessageAvailable( );
 struct sCAN* GetNext			 ( );
 
 

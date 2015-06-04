@@ -174,7 +174,7 @@ void* udp_receive_function(void* msg)
   struct in_addr       client_ip_addr;  // Client IP address
   int                  addr_len;        // Internet address length
   char                 out_buf[4096];   // Output buffer for data
-  char                 in_buf [4096];    // Input buffer for data
+  char                 in_buf [4096];   // Input buffer for data
   int                  retcode;         // Return code
 
   //   - AF_INET is Address Family Internet and SOCK_DGRAM is datagram
@@ -216,8 +216,7 @@ void* udp_receive_function(void* msg)
 	  
 	  // Filter out our own broadcast - not interested in it!
 	  char name[255];
-	  gethostname(name, 255);	  
-	  
+	  gethostname(name, 255);
 	  
 	  // Print an informational message of IP address and port of the client
 	  if (Debug) printf("UDP Rx: Client IP = %s\tport = %d) \n", inet_ntoa(client_ip_addr),

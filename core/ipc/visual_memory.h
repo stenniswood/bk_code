@@ -3,7 +3,7 @@ extern "C" {
 #endif
 
 
-#define IPC_KEY 1234
+#define IPC_KEY_VIS 1234
 
 extern char* 	visual_shared_memory;
 extern int 		visual_segment_id;
@@ -16,6 +16,7 @@ struct avisual_ipc_memory_map
 {
 	long int StatusCounter;
 	char	 ConnectionStatus[64];
+
 	long int SentenceCounter;
 	char	 Sentence        [128];	
 	int		 NumberClients;

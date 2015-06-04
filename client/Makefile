@@ -1,10 +1,8 @@
 CC		   = g++
 OPTIONS	   = -fpermissive -Wwrite-strings -Wno-deprecated -w
 INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/  \
-			  ./nlp_protocol/ ../nlp_protocol/  ./nlp_adrenaline/ ./voice/ \
-			  ./threads/ /home/pi/abkInstant/  ./hardware/ ../core/libs/ilclient/ \
-			  /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/ 			  
-#			  /opt/vc/include/interface/vcos/pthreads/ 
+			   ../core/libs/ilclient/ \
+			  /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/
 
 SELF_INC   = ../../abkInstant/ ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
@@ -14,7 +12,6 @@ LIBFLAGS   = -L../core/libs/ilclient -L/opt/vc/lib -L../core/libs/vgfont \
 			-lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -lshapes \
 			-lwiringPi -lm -lEGL_static  -lvcfiled_check  \
 			-lvchostif -lvmcs_rpc_client -lilclient 
-# -lkhrn_static 
 DEPS   	   = 
 #CFLAGS 	   = -fpermissive -Wwrite-strings 
 #CFLAGS    += -DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -U_FORTIFY_SOURCE -Wall -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -ftree-vectorize -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -Wno-psabi
@@ -25,19 +22,17 @@ CFLAGS+=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POS
 		-pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST \
 		-DUSE_VCHIQ_ARM -Wno-psabi 
 
-
-//LDFLAGS    = -L/opt/vc/lib/ -lGLESv2 -lEGL -ljpeg -lkhrn_static -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt  
+#LDFLAGS    = -L/opt/vc/lib/ -lGLESv2 -lEGL -ljpeg -lkhrn_static -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt  
 
 # CORE CODE:
 CAN_OBJS   =  CAN_Interface.o can_instance.o can_eid.o can_rxbuff.o can_txbuff.o \
 	          bk_system_defs.o can_id_list.o 
 MSG_OBJS   =  packer_lcd.o packer_motor.o packer.o parser_tilt.o 
-MISC_OBJS  =  buttons.o leds.o vector_math.o ini_file.o 
+MISC_OBJS  =  buttons.o leds.o vector_math.o ini_file.o
 FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 VG_OBJS    =  libshapes.o oglinit.o
-APP_CPP_OBJS= instant_main.o string_util.o
-IPC_OBJS    = picamscan_memory.o sway_memory.o visual_memory.o audio_memory.o \
-				client_memory.o CAN_memory.o
+APP_CPP_OBJS= client_main.o client.o package_commands.o 
+IPC_OBJS    = picamscan_memory.o client_memory.o
 THREAD_OBJS = audio_thread.o video_thread.o can_thread.o file_thread.o \
 			  file_tx_thread.o hmi_thread.o thread_control.o serverthread.o 
 HARDWARE_OBJS = AUDIO_device.o 
@@ -60,16 +55,8 @@ NLP_ADRENALINE_OBJS  =	 Adrenaline_nlp.o     	Adren_bigmotor_talk.o  		\
 %.o: %.c $(DEPS) 
 	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
 
-instant: $(APP_CPP_OBJS) 										\
-		$(addprefix ./nlp_adrenaline/, 	$(NLP_ADRENALINE_OBJS)) \
-		$(addprefix ./nlp_protocol/, 	$(NLP_PROTOCOL_OBJS)) 	\
-		$(addprefix ./threads/, 		$(THREAD_OBJS)) 		\
-		$(addprefix ./hardware/, 		$(HARDWARE_OBJS)) 		\
-		$(addprefix ../core/ipc/, 		$(IPC_OBJS)) 			\
-		$(addprefix ../core/can/, 		$(CAN_OBJS)) 			\
-		$(addprefix ../core/msg/, 		$(MSG_OBJS)) 			\
-		$(addprefix ../core/misc/,		$(MISC_OBJS))  			\
-		$(addprefix /home/pi/openvg/,	$(VG_OBJS))
+client: $(APP_CPP_OBJS) 										\
+		$(addprefix ../core/ipc/, 		$(IPC_OBJS))
 	g++ -o $@  -Wl,--whole-archive $^  $(LIBFLAGS) -Wl,--no-whole-archive -rdynamic
 
 clean:
@@ -86,7 +73,3 @@ clean:
 	rm -rf ./voice/*.o 	
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 
-#../core/can/%.o:%.c $(DEPS)
-#	$(CC)  $(addprefix -I,$(INC)) $(addprefix -I,$(SELF_INC)) -c -o $@ $<  $(OPTIONS) -std=c99 $(CFLAGS)
-#../core/misc/%.o:%.c $(DEPS)
-#	$(CC) $(addprefix -I,$(INC)) $(addprefix -I,$(SELF_INC)) -c -o $@ $<  $(OPTIONS) $(CFLAGS)
