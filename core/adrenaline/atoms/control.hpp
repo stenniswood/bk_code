@@ -71,6 +71,8 @@ public:
 
 	void			Revalidate			( );
 	void			Invalidate			( )			{ invalidated = true; };
+	bool			is_invalid			( );
+	
 	// Once registered, will be tested in the HitTest & OnClick()
 	void			register_child		( Control* mNewChild );
 	void			unregister_child	( Control* mNewChild );	
@@ -88,13 +90,11 @@ public:
 	virtual int			onReceiveFocus( 				);
 	int					isTabStop	  (					)	{ return 0; };
 	virtual int			onCreate	  (  );	// chance to load resources, call functions which use fonts (already loaded before this call) etc.
-	void          			print_children();
+	void          		print_children();
 
-	
 	bool				invalidated;		// forces a redraw in display manager.  not implemented yet.	
 protected:
 	std::vector<Control*>	m_child_controls;
-	
 
 	bool		created;
 	

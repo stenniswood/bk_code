@@ -51,7 +51,7 @@ IconView::IconView( int Left, int Bottom )
 	style |= WRAP_IMAGE_SIZE;
 }
 
-void IconView::set_file( char* mFileName )
+void IconView::set_file( const char* mFileName )
 {
 	if (mFileName==NULL) return;
 

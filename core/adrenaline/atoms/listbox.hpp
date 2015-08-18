@@ -62,8 +62,8 @@ public:
 	void			set_top_down		( bool mIsTopDown ) { isTopDown = mIsTopDown; };
 	void 			clear_items			( );
 
-	void 			add_item			( char* mString );
-	void			set_item   			( char* mString );
+	void 			add_item			( const char* mString );
+	void			set_item   			( const char* mString );
 	string*			get_item   			( int index =-1     );
 	virtual float	get_line_bottom		( int mVisibleIndex );
 	virtual int		get_total_lines		( )	{ /*printf("listbox::gettotal_lines %d\n", LineTexts.size() );*/ return LineTexts.size();  };

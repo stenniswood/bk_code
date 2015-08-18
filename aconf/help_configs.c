@@ -142,6 +142,18 @@ void help_Analog()
 {
 	printf("\n******** Analog Configuration Bits: \t\t\t====\n");
 	printf("=== BYTE #1  => \n");	/**** CONFIG BYTE 1 - BIT DEFS ****/
+	printf(" MODE_ENABLE_ADC_CHIP1		 0x01\n"	);
+	printf(" MODE_ENABLE_ADC_CHIP2		 0x02\n"	);
+	printf(" MODE_ENABLE_ADC_CHIP3		 0x04\n"	);
+	printf(" MODE_ENABLE_ADC_CHIP4 		 0x08\n"	);
+	printf(" MODE_SEND_DERIVATIVES_1 	 0x10\n"	);
+	printf(" MODE_SEND_DERIVATIVES_2 	 0x20\n"	);
+	printf(" MODE_SEND_DERIVATIVES_3 	 0x40\n"	);
+	printf(" MODE_SEND_DERIVATIVES_4 	 0x80\n"	);
+	printf(" Board chip layout :\n");
+	printf("1	3\n");
+	printf("4	2\n");
+
 
 	printf("=== BYTE #2  => \n");	/**** CONFIG BYTE 2 - BIT DEFS ****/
 	printf("\tUpper nibble of config_byte_2 defines the update rate.\n");
@@ -153,6 +165,14 @@ void help_Analog()
 	printf("\t	0x4x	- Report every 100ms\n");
 
 	printf("=== BYTE #3  => \n");	/**** CONFIG BYTE 3 - BIT DEFS ****/
+	printf(" MODE_ENABLE_ADC_CHIP1_MID4	0x01 disable channels4-7\n");	// disable channels 4-7
+	printf(" MODE_ENABLE_ADC_CHIP2_MID4	0x02\n");	// 
+	printf(" MODE_ENABLE_ADC_CHIP3_MID4	0x04\n");	// 
+	printf(" MODE_ENABLE_ADC_CHIP4_MID4	0x08\n");	// 
+	printf(" MODE_ENABLE_ADC_CHIP1_UPPER8	0x10 disable channels8-15\n");	// disable channels 8-15
+	printf(" MODE_ENABLE_ADC_CHIP2_UPPER8	0x20\n");	// 
+	printf(" MODE_ENABLE_ADC_CHIP3_UPPER8	0x40\n");	// 
+	printf(" MODE_ENABLE_ADC_CHIP4_UPPER8	0x80\n");	// 
 
 	printf("=== BYTE #4  => \n");	/**** CONFIG BYTE 4 - BIT DEFS ****/
 

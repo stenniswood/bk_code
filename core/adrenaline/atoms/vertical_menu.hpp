@@ -42,7 +42,7 @@ public:
 	int				calc_metrics		(	);
 	int  			create_std_file_menu(	);
 
-	int				add_simple_command	( char* mText, char* mShortcut=NULL );
+	int				add_simple_command	( const char* mText, char* mShortcut=NULL );
 	int				add_sub_menu		( char* mText, VerticalMenu* mSubMenu=NULL );	
 	int				add_callback		( int  mIndex, int (*callback)(void*, int)=NULL );	
 	int				add_callback_all_items( int (*callback)(void*, int, Application*) );	

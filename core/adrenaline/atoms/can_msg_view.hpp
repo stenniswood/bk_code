@@ -20,6 +20,7 @@ public:
  
  	int				setup_headers		( );
 	int				add_message 		( struct sCAN* msg );
+	int				handle_incoming_msg	( struct sCAN* msg );
 
 	int 			order_by_time		( );
 	int 			order_by_msg_id		( );

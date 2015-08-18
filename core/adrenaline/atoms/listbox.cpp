@@ -247,12 +247,12 @@ void ListBox::clear_items( )
 	Invalidate();
 }
 
-void ListBox::add_item( char* mString )
+void ListBox::add_item( const char* mString )
 {
 	set_item(mString);
 }
 
-void ListBox::set_item( char* mString )
+void ListBox::set_item( const char* mString )
 {
 	LineTexts.push_back(mString);
 	

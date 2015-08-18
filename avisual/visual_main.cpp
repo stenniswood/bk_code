@@ -41,7 +41,7 @@
 #include "audio_app.hpp"
 #include "visual_memory.h"
 #include "audio_memory.h"
-
+#include "CAN_memory.h"
 
 /*
 	What's displayed here is going to be under the control of bkInstant.
@@ -59,6 +59,7 @@ void create_threads()
 }
 /***********************************************************************/
 int bkInstant_connected = FALSE;
+int can_connected = FALSE;
 
 void init_ipc( const char* mVectorFileName )
 {
@@ -66,15 +67,18 @@ void init_ipc( const char* mVectorFileName )
 	create_threads();
 	bkInstant_connected = connect_shared_abkInstant_memory(); 
 
-	
 	if (aud_allocate_memory() == -1)
 	{
 		printf("Cannot allocate memory.\n");
 		return;
 	}
 	aud_attach_memory();
-
-	//can_connected 		= connect_shared_CAN_memory(); 
+	
+	can_connect_shared_memory(FALSE);
+/*	can_segment_id = 1234;
+	can_connected  = can_attach_memory();	
+	if (can_connected==-1)	can_connected = 0; */	
+	//	connect_shared_CAN_memory();
 }
 
 void help()
@@ -116,7 +120,7 @@ void gui_interface()
 	if (result == LEFT_BUTTON_DOWN)
 	{
 		//if (left_mouse_button_prev == 0)
-		{			
+		{	
 			//printf(" Left button clicked!  mousex=(%d,%d)\n", x,y);
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
@@ -142,6 +146,9 @@ void gui_interface()
 		}
 	}
 
+	// Scan for objects which have been invalidated and need redrawing.
+	//UpdateDisplaySemaphore = MainDisplay.any_invalid_children();
+
 	//printf("ipc_memory_avis=%x\n", ipc_memory_avis);
 	if (ipc_memory_avis->NumberClients != Last_Retrieved_Number)
 	{
@@ -155,11 +162,15 @@ void gui_interface()
 		UpdateDisplaySemaphore = 0;
 		//update_to_controls();
 		// hide mouse: (mouse has the old image stored in it's buffer)
-		MainDisplay.draw();
+		MainDisplay.draw();		
+		MainDisplay.update_invalidated();
+		
 		// so now just resave the buffer with new contents:
 		save_mouse();		
+		//printf("done with save_mouse()\n");		
 	}
 }
+
 
 void sequencer_interface()
 {	/* select script, play, loop, link, etc */ }
@@ -229,7 +240,11 @@ int main( int argc, char *argv[] )
 		gui_interface();
 		if (bkInstant_connected)
 			ethernet_interface();
-
+		printf("done with ethernet_interface()\n");
+		
+		MainDisplay.idle_tasks();		
+		printf("done with MainDisplay.idle_tasks()\n");
+		
 		// Want to be able to open the screen leaving everything as is.
 		// then do an end again to render the mouse.
 

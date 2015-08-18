@@ -4,7 +4,7 @@
 #include "control.hpp"
 #include "adren_network_view.hpp"
 #include "can_msg_view.hpp"
-
+#include "adrenaline_windows.h"
 
 #define MENU_STATE_NORMAL 		1
 #define MENU_STATE_GRAYED 		2
@@ -24,11 +24,11 @@ public:
 	virtual void 	Initialize(	);
 	int				calc_metrics();
 	int				place_views();
-	 
+
 	int				handle_incoming_msg	( struct sCAN* msg );
 	int				setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms );
 	int				setup_triggered_response_msg( struct sCAN* mTriggerMsg, struct sCAN* mResponse );	
-	
+
 	void			fill_phony_msgs();
 
 	virtual int		onCreate	  (  );	// chance to load resources, call functions which use fonts

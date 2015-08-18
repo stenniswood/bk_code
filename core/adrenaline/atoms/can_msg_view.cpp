@@ -57,6 +57,18 @@ int		CANMessageView::calc_metrics()
  
 }
 
+int	CANMessageView::handle_incoming_msg	( struct sCAN* msg )
+{
+	int instance;
+	int channel;
+	int value;
+	int in_filter = 1;
+	if (in_filter)
+	{	
+		add_message( msg );
+	}			
+}
+
 int		CANMessageView::add_message ( struct sCAN* msg )
 { 
    //std::vector<std::string>*  row = new std::vector<std::string>;

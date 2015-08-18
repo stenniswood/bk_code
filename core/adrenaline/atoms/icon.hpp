@@ -26,7 +26,7 @@ public:
 	~IconView();
 	void 			Initialize();
 	
-	void			set_file			( char* FileName );
+	void			set_file			( const char* FileName );
 	void			set_image			( VGImage* mImage, struct image_info* mImageInfo );
 	void			calc_margins		( );
 	void			read_from_jpeg_file	( );

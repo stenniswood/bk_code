@@ -127,7 +127,7 @@ int	NetworkView::add_board( struct stBoardInfo2* mBInfo )
 	formulate_line( Txt );
 }
 
-int	NetworkView::receive_msg ( struct sCAN* msg )
+int	NetworkView::handle_incoming_msg( struct sCAN* msg )
 {
 	switch(msg->id.group.id)
 	{

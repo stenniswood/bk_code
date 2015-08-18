@@ -55,7 +55,7 @@ public:
 	//int			set_view_mode ( int mViewMode ); 
  	int				setup_headers	( );
 	int				add_board 		( struct stBoardInfo2* mBInfo );
-	int				receive_msg		( struct sCAN* msg );
+	int				handle_incoming_msg		( struct sCAN* msg );
 	
 	int				formulate_line	( struct stBoardInfoText* mTxt );
 

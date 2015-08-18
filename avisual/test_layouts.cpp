@@ -63,13 +63,13 @@ static IconView		test_icon ( 50,200 );
 
 
 // L, R, T, B
-static Button   		 MyButt	   ( 450, 600, 400, 350 );
+//static Button   		 MyButt	   ( 450, 600, 400, 350 );
 static PowerLevel		 pl		(-1,-1);
 static StereoPowerLevels spl  	(-1,-1);
 
 //static ListBox  	MyList	   ( 20, 320, 700, 550  );
-static ProgressBar  MyProgress ( 450, 650, 400, 375 );
-static CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
+//static ProgressBar  MyProgress ( 450, 650, 400, 375 );
+//static CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
 
 static RadioButton 	MyRadio1 ( -1, -1 );
 static RadioButton 	MyRadio2 ( -1, -1 );
@@ -429,7 +429,7 @@ void populate_simple_lb()
 	AvailableClients.set_item(" MAC1 " );
 	AvailableClients.set_item(" MAC2 " );		
 	AvailableClients.set_item(" MAC3 " );		
-}
+} 
 
 void pack_sample_window()
 {

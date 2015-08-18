@@ -24,8 +24,8 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug 1
-#define Debug2 1
+#define Debug 0
+#define Debug2 0
 
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
 : IconView(  Left,  Right,  Top,  Bottom, NULL)
@@ -82,6 +82,7 @@ void DisplayManager::Initialize()
 {	
 	// put actual icons on it:
 	init_default_sidebar( &m_side );
+	m_current_running_app = -1;
 }
 
 int	DisplayManager::onPlace( )
@@ -127,13 +128,37 @@ int	DisplayManager::onCreate(  )
 
 void DisplayManager::start_app( Application* mApp )
 {
-	mApp->onCreate();
+//	mApp->onCreate();
+	m_running_apps.push_back( mApp );
+	m_current_running_app = m_running_apps.size()-1;
+	printf("DISPLAY MANAGER:  START APP #%d .......... \n", m_current_running_app );
+
+	// register with DM 
+	remove_all_objects(	);
+	add_object( mApp->m_main_window 	 );
+	set_menu  ( &(mApp->m_hMenu)  	 	 );
+	m_side.load_controls( &(mApp->m_sidebar_controls) );	
+	m_status.set_text( mApp->m_welcome_status.c_str() );	
+
 }
 
-void DisplayManager::close_app( Application* mApp	  )
+void DisplayManager::idle_tasks( )
 {
+	if ((m_current_running_app>=0) && (m_current_running_app<m_running_apps.size())) {
+		//printf("idle task: %d \n", m_current_running_app );
+		m_running_apps[m_current_running_app]->background_time_slice();	
+	}	
+}
+
+void DisplayManager::close_app( Application* mApp )
+{
+	for (int i=0; i<m_running_apps.size(); i++)
+	{
+		if (m_running_apps[i] == mApp)
+			m_running_apps.erase( m_running_apps.begin()+i );
+	}
 	delete mApp;
-}	
+}
 
 void DisplayManager::set_menu( HorizontalMenu* mHMenu )
 {
@@ -240,6 +265,16 @@ int   DisplayManager::draw(	)
 	if (Debug2) printf("======display manager draw===========\tDone!\n\n" );
 }
 
+int DisplayManager::any_invalid_children()
+{
+	vector<Control*>::iterator	iter = m_child_controls.begin();
+	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
+	{
+		if 	((*iter)->is_invalid())
+			return TRUE;	
+	}	
+	return FALSE;
+}
 /* Mark all objects as valid, since we just redrew */
 int	DisplayManager::update_invalidated(  )
 {

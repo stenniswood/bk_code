@@ -119,8 +119,11 @@ void init_molecule_menu()
 	molecules.add_callback_all_items( show_molecule_screens );
 }
 
+
+
 int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 {
+	Application* tmp_app=NULL;
 	printf("handle_apps_screens()\n");
 	switch(mMenuIndex) 
 	{
@@ -131,7 +134,10 @@ int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 				audio_app->register_with_display_manager();
 			break;
 	case 2: init_file_browser		();		break;
-	case 3: init_CAN_app			();		break;
+	case 3: //init_CAN_app();
+			can_app = new CANApp();
+			MainDisplay.start_app( can_app );		
+			break;
 	case 4: init_drawing_app		();		break;	
 	case 5: init_drawing_app		();		break;
 	case 6: init_file_editor_app	();		break;
@@ -246,11 +252,7 @@ void init_power_menu()
 	power_menu.add_simple_command( "Log out" 	);
 	power_menu.add_simple_command( "Sleep" 		);
 	power_menu.add_simple_command( "Power Off"  );
-
-	power_menu.add_callback( 0,  handle_power_action  );
-	power_menu.add_callback( 1,  handle_power_action  );	
-	power_menu.add_callback( 2,  handle_power_action  );	
-	power_menu.add_callback( 3,  handle_power_action  );
+	power_menu.add_callback_all_items( handle_power_action );
 }
 
 

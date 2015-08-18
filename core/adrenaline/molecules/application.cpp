@@ -133,11 +133,13 @@ void Application::register_with_display_manager()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( m_main_window 	 );
 	MainDisplay.set_menu  ( &m_hMenu  	 	 );
-
+	printf("register_with_display_manager- mid \n");
+	
 	// Establish the sidebar controls:
 	// Create Sidebar items:
-	MainDisplay.m_side.load_controls( &m_sidebar_controls );	
+//	MainDisplay.m_side.load_controls( &m_sidebar_controls );	
 	MainDisplay.m_status.set_text( m_welcome_status.c_str() );	
+	printf("register_with_display_manager- done \n");	
 }
 
 int		Application::onPlace( ) 
@@ -157,6 +159,13 @@ int		Application::onPlace( )
 		//m_main_window->set_width_height( client_rect->get_width(), client_rect->get_height() );
 		//m_main_window->move_to			( client_rect->get_left(), client_rect->get_bottom() );		
 	}	
+}
+
+/* Return:  1=> all done.
+			0=> need more time. */
+int	Application::background_time_slice(	)
+{
+	return 1;
 }
 
 int		Application::onActivate	() 
@@ -199,7 +208,7 @@ int	Application::Quit	()
 	if (Debug) printf("Application::Quit() done \n");
 }
 
-int		Application::onClick(int x, int y, bool mouse_is_down=true) 
+int		Application::onClick(int x, int y, bool mouse_is_down) 
 { 
 }
 int   	Application::draw		 	(	) 

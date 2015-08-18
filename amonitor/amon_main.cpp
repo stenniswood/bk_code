@@ -18,12 +18,16 @@
 #include "packer.h"
 #include "system_msgs_callback.h"
 #include "chevy_codes.h" 
-
 #include "ini_file.hpp"		// Preferences
-#include "filter_file.hpp"
+#include "CAN_memory.h"
 
 
-int can_speed = CANSPEED_500;
+// Tail for this amon app.
+int RxTail_cmdline=0;
+int RxTail_cmdline_laps=0;
+
+
+int can_speed = CANSPEED_250;
 
 // Wiring PI pin number (gpio pin 15)
 #define CAN_INT_PIN 	3
@@ -120,7 +124,7 @@ void print_args(int argc, char *argv[])
 int main( int argc, char *argv[] )
 {
 	print_args( argc, argv );
-	
+
 	if (argc>1) {
 		if (strcmp(argv[1], "500k")==0)
 		{
@@ -145,18 +149,19 @@ int main( int argc, char *argv[] )
 		if (argc>2)
 		{
 			printf("Reading Filter file: %s \n", argv[2] );			
-			FilterFile filt( argv[2] );
-			filt.Read_n_Add(         );
+//			FilterFile filt( argv[2] );
+//			filt.Read_n_Add(         );
 		}
 	}
-
-	init(can_speed);
 	printf("===============================================\n");
-	//register_dump();
-	//printf("===============================================\n");	
-	while (1) { 
-		if (isRxMessageAvailable())
-			print_message( GetNextRxMsg() );
+	int result = can_connect_shared_memory(TRUE);
+	printf("===============================================\n");		
+	init(can_speed);
+	register_dump();
+	
+	while (1) {
+		if (shm_isRxMessageAvailable(&RxTail_cmdline, &RxTail_cmdline_laps))
+			print_message( shm_GetNextRxMsg(&RxTail_cmdline) );
 	};	
 }
 

@@ -30,7 +30,8 @@ public:
 	virtual void 	Initialize		(	);	// create all the objects here.
 	int				calc_metrics	(	);
 	int				onPlace			(	);
-
+	virtual int		background_time_slice(	);
+	
 	virtual void	setup_sidebar	(	);  // derived class adds these here
 	virtual void	setup_menu		(	);  // derived class adds these here
 	virtual void	setup_app_menu	(	);  // Name of App, About, Preferences, Quit.
@@ -56,7 +57,7 @@ public:
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	virtual int   	draw		 	(	);
 
-protected:
+
 	HorizontalMenu			m_hMenu;	
 	VerticalMenu			m_app_menu;		// 
 	VerticalMenu			m_file_menu;	// standard file menu too.	

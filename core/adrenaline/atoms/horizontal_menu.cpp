@@ -76,7 +76,7 @@ int 	HorizontalMenu::calc_metrics( )
 	return 0;
 }
 
-int		HorizontalMenu::add_entry_text( char* mMenuText )
+int		HorizontalMenu::add_entry_text( const char* mMenuText )
 {
 	struct stHorizMenuInfo hmi;// = new struct stHorizMenuInfo;
 	int len = strlen(mMenuText);
@@ -91,7 +91,7 @@ void		HorizontalMenu::clear_all()
 {
 	m_entries.clear( );
 }
-int		HorizontalMenu::add_sub_menu( char* mMenuText, VerticalMenu* vm )
+int		HorizontalMenu::add_sub_menu( const char* mMenuText, VerticalMenu* vm )
 {
 	vm->set_h_parent( this );		// back link here.
 	struct stHorizMenuInfo hmi; 

@@ -41,14 +41,14 @@ char*		Status;
 
 int connect_shared_abkInstant_memory( )
 {
-	printf("connect_shared_abkInstant_memory()  \t");
+	printf("connect_shared_abkInstant_memory()  \n");
 	if (vis_allocate_memory( ) == -1)
 	{
 		printf("Can't find shared memory from abkInstant!\n");
 		return 0;
 	}
 	vis_attach_memory( );
-	printf("Sentence = %s\n", ipc_memory_avis->Sentence );
+	//printf("Sentence = %s\n", ipc_memory_avis->Sentence );
 	//dump_ipc();
 	//printf("Sizeof(int) = %d\n", sizeof(int) );
 	return 1;

@@ -23,6 +23,8 @@
 #include "adrenaline_windows.h"
 #include "display.h"
 #include "CAN_base.h"
+
+
 #include "can_window.hpp"
 
 /* When the CAN_app is active, change the menu as below */
@@ -44,7 +46,7 @@ int show_CAN_screens( void* menuPtr, int mMenuIndex )
 	} */
 }
 
-void init_view_menu()
+/*void init_view_menu()
 {
 	can_view_menu.add_simple_command( "Messages" 	 );
 	can_view_menu.add_simple_command( "Message Flow" );
@@ -57,7 +59,7 @@ void init_view_menu()
 	can_view_menu.add_callback( 2, show_CAN_screens  );
 	can_view_menu.add_callback( 3, show_CAN_screens  );
 	can_view_menu.add_callback( 4, show_CAN_screens  );
-}
+}*/
 
 void init_main_CAN_menu()
 {
@@ -140,7 +142,7 @@ int		CANMessages::place_views()
 	//print_positions();
 
 	m_board_view.set_width_height( width/2.-100., height/2. );	
-	m_board_view.move_to		 ( left, bottom+height/2.   );
+	m_board_view.move_to		 ( left, bottom+100   );
 	//m_board_view.print_positions ( );
 
 	m_rescan.set_text			  ( "Rescan" );
@@ -161,8 +163,9 @@ int		CANMessages::place_views()
 int		CANMessages::handle_incoming_msg	( struct sCAN* msg ) 
 {
 	//struct sCAN* result = m_filter_view.filter_incoming_msg( msg );
-	//if (result)	
-		m_msg_view.add_message( msg );
+	//if (result)		
+	m_msg_view.handle_incoming_msg( msg );	
+	m_board_view.handle_incoming_msg(msg);
 	// test if it's a trigger for another message.
 	//     then send response	
 }

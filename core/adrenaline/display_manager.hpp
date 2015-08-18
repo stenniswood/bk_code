@@ -2,10 +2,11 @@
 #define _DISPLAY_MANAGER_H_
 
 #include "adrenaline_windows.h"
-
 #include "rectangle.hpp"
 #include "task_bar.hpp"
+#include "application.hpp"
 
+#include <vector>
 #include <list>
 #include <string>
 using namespace std;
@@ -28,6 +29,7 @@ public:
 	void	start_screen		(					  );
 	void	end_screen			(					  );
 
+	int 	any_invalid_children();
 	int		update_invalidated	(  					  );
 	int		onPlace				(  					  );
 	virtual int	onCreate		(  					  );	
@@ -35,6 +37,7 @@ public:
 	void	set_menu	    	( HorizontalMenu* mHMenu = NULL );
 	void	start_app			( Application* mApp	  );
 	void	close_app			( Application* mApp	  );
+	void	idle_tasks			();
 
 	float	get_width			(	)		{  return screen_width;	 };
 	float 	get_height			(	)		{  return screen_height; };
@@ -55,15 +58,16 @@ public:
 
 	void 	call_on_creates	( 	);  // maybe not needed
 
+	vector<Application*>	m_running_apps;
+	int					m_current_running_app;
+	
 	// Linked List of objects.
 	SystemBar		m_sb;			// Top
 	TaskBar			m_task_bar;		// Left side
 	SideBar			m_side;	// Right side
 	SystemStatusBar	m_status;		// Bottom
 
-protected:
-	vector<Application*>	m_running_apps;
-	
+protected:	
 	int		screen_width;
 	int 	screen_height;
 };

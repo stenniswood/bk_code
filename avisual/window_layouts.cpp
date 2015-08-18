@@ -65,11 +65,11 @@ Leveler l5(1024, 0);
 Leveler l6(1024, 0);
 
 // L, R, T, B
-static Button   	MyButt	   ( 450, 600, 400, 350 );
 static ListBox  	MyBoardList( 20, 320, 700, 550  );
+Button   	MyButt	   ( 450, 600, 400, 350 );
 ListBox  	MyRobotList( 20, 320, 800, 500  );
-static ProgressBar MyProgress ( 450, 650, 300, 275 );
-static CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
+ProgressBar MyProgress ( 450, 650, 300, 275 );
+CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
 //ButtonArrayMot MyArray	( 700, 1070, 350, 100);
 static char ConnectionStatusText[128];
 
@@ -175,7 +175,7 @@ void update_available_client_list()
 	{
 		int length = strlen(ptr);
 		if (Debug) printf("CLient %d:%s\n", i, ptr);
-		AvailableClients.set_item( ptr );
+		AvailableClients.set_item( (const char*)ptr );
 		ptr += length+1;
 	}
 	if (Debug) printf("===================================================\n");

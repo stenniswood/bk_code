@@ -5,9 +5,9 @@ INC		   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 			 ../core/libs/vgfont/  ./voice/ ./kinetic/ ./ ../core/adrenaline/graphs/ 	\
 			 ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/ \
 			 ../core/adrenaline/ ../core/adrenaline/atoms/ ../core/adrenaline/molecules/ \
-			 ./apps/  ../core/libs/ilclient/  
+			 ./apps/  ../core/libs/ilclient/  ./apps/CAN/ ./apps/audio/
 
-SELF_INC   = ../../avisual/ ./ ../
+SELF_INC   = ../../avisual/ ./ ../ 
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 		 	 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
 LIBFLAGS   = -L../core/libs/ilclient/ -L/opt/vc/lib -L../core/libs/vgfont/  \
@@ -28,7 +28,8 @@ DEPS   	   =
 # CORE CODE:
 CAN_OBJS   = can_id_list.o 
 #CAN_Interface.o can_instance.o can_eid.o can_buff.o can_txbuff.o bk_system_defs.o 
-MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
+#MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
+MSG_OBJS   =  parser_tilt.o 
 MISC_OBJS  = vector_math.o ini_file.o fft.o
 HARDWARE_OBJS = AUDIO_device.o sinewave.o tone_generator.o
 FUSE_OBJS  = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o 
@@ -37,9 +38,12 @@ AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			  ipc_mem_bkinstant.o test_layouts.o test_combo_layouts.o \
 			  test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
 			  power.o 
-APPS_OBJS =  audio_app.o draw_app.o audio_app_menu.o draw_app2.o file_editor_app.o \
-			 can_app.o video_app.o video.o
+APPS_OBJS =  draw_app.o draw_app2.o file_editor_app.o \
+			  video_app.o video.o 
+CAN_APP_OBJS = can_app.o gyro_window.o analog_board_app.o
+AUDIO_APP_OBJS = audio_app.o audio_app_menu.o 
 
+#ipc_can_rxbuff.o 
 IPC_OBJS   = CAN_memory.o visual_memory.o audio_memory.o 
 ILCLIENT_OBJS = ilclient.o ilcore.o
 
@@ -88,9 +92,12 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ../core/adrenaline/atoms/,	   $(ADRENALINE_ATOMS_OBJS)) 	 \
 		$(addprefix ../core/adrenaline/molecules/, $(ADRENALINE_MOLECULES_OBJS)) \
 		$(addprefix ../core/adrenaline/graphs/,	   $(ADRENALINE_GRAPH_OBJS))	 \
+		$(addprefix ../core/msg/,			$(MSG_OBJS))  			\
 		$(addprefix ../core/can/,			$(CAN_OBJS))			\
 		$(addprefix ../core/ipc/,			$(IPC_OBJS))			\
-		$(addprefix ./apps/,				$(APPS_OBJS))
+		$(addprefix ./apps/,				$(APPS_OBJS))			\
+		$(addprefix ./apps/audio/,			$(AUDIO_APP_OBJS))		\
+		$(addprefix ./apps/CAN/,			$(CAN_APP_OBJS))
 	g++ -o $@ $^  $(LIBFLAGS)  $(LDFLAGS)
 
 clean:

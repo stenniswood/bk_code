@@ -16,7 +16,9 @@
 #include <wiringPi.h>
 #include "pican_defines.h"
 #include "can_txbuff.hpp"
-#include "can_rxbuff.hpp"
+//#include "can_rxbuff.hpp"		use CAN_memory.c routines instead.  This facilitates cross application sharing.
+#include "CAN_memory.h"
+
 #include "can_eid.h"
 #include "can_id_list.h"
 #ifdef WIFI_SOCKET

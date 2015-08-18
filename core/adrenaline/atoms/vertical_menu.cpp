@@ -77,7 +77,7 @@ int  VerticalMenu::create_std_file_menu()
 	add_simple_command( "Save As" 		);
 }
 
-int  VerticalMenu::add_simple_command( char* mText, char* mShortcut )
+int  VerticalMenu::add_simple_command( const char* mText, char* mShortcut )
 {
 	if (Debug) printf( "add_simple_command:: %s \n", mText );
 	set_item( mText );

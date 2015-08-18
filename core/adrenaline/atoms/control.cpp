@@ -52,6 +52,8 @@ void Control::Initialize()
 	background_color = 0xCF202020;
 	border_color	 = 0xFFFFFFFF;
 	text_color		 = 0xFFFFFFFF;
+	invalidated 	 = true;		// force a draw on init.
+	
 	//printf("Ctrl: border_color=%8x; background_color=%8x\n", border_color, background_color );
 }
 
@@ -65,6 +67,18 @@ void Control::Revalidate( )
 		(*iter)->Revalidate();
 		iter++; 
 	}		
+}
+bool Control::is_invalid( )
+{
+	if (invalidated) return true;
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while ( iter != m_child_controls.end() )
+	{
+		if ((*iter)->is_invalid())
+			return true;		
+		iter++;
+	}	
+	return false;
 }
 
 void Control::print_positions( )

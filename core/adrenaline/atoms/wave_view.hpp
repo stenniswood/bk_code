@@ -3,9 +3,10 @@
 
 //#include "../core/can/bk_system_defs.h"
 #include "bk_system_defs.h"
-
 #define DefaultPadding 15
 class Window;
+
+
 
 /* This class shows an audio waveform
    green, yellow, red color gradients.  with rectangular boxes. */
