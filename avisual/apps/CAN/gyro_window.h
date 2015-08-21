@@ -1,7 +1,6 @@
 #ifndef _GYRO_VIEW_H_
 #define _GYRO_VIEW_H_
 
-
 #include "control.hpp"
 #include "button.hpp"
 #include "window.hpp"
@@ -19,24 +18,23 @@
 #define MENU_STATE_CIRCLED 		4
 #define MENU_STATE_EMPHASIZED 	5
 
-
 class GyroView : public Window
 {
 public:
 	GyroView ( );
 	GyroView ( int Left, int Right, int Top, int Bottom );
-	GyroView ( int Width, int Height 					 );
+	GyroView ( int Width, int Height 					);
 	~GyroView( );
 
 	virtual void 	Initialize  ( );
-	int				calc_metrics();
-	int				place_views ();
+	int				calc_metrics( );
+	int				place_views ( );
 
 	int				handle_incoming_msg	( struct sCAN* msg );
 	int				setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms );
 	int				setup_triggered_response_msg( struct sCAN* mTriggerMsg, struct sCAN* mResponse );	
 	void			register_with_display_manager();
-	
+
 	void			fill_phony_msgs();
 
 	virtual int		onCreate	  (  );	// chance to load resources, call functions which use fonts
@@ -47,8 +45,8 @@ public:
 
 protected:
 
-	DataSet* 	accel[3];
-	DataSet* 	gyro[3];
+	DataSet* 	accel [3];
+	DataSet* 	gyro  [3];
 	DataSet* 	magnet[3];
 
 	Histogram* 	hg ;		

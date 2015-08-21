@@ -113,6 +113,7 @@ void 	CANApp::Initialize		(	)
 	m_msg_view    = NULL; // new CANMessageView  ();		
 	m_board_view  = NULL; // new NetworkView();
 	m_main_window = m_msgs;
+	printf("CANApp::Initialize()\n");
 
 	m_application_name = "CAN App";
 	m_rx_tail 	   = 0;
@@ -122,7 +123,7 @@ void 	CANApp::Initialize		(	)
 	setup_menu    ();
 	setup_sidebar ();
 	onPlace();	
-
+	printf("CANApp::Initialize() done.\n");
 }	// create all the objects here.
 
 int		CANApp::onPlace		(	) 
@@ -178,7 +179,6 @@ void CANApp::setup_sidebar(	)
 	
 	tmp->load_resources( );
 	MainDisplay.m_side.add_control( tmp, "Refresh" );
-	
 }
 char CAN_App_Status[] = "CAN App";
 
@@ -218,7 +218,7 @@ void 	CANApp::show_network	( )	// Adrenaline Network.
 void 	CANApp::show_sequencer	( )	// Robot sequencer
 {
 }
-void 	CANApp::show_gyro	( )	// Robot sequencer
+void 	CANApp::show_gyro	( )		// Robot sequencer
 {
 	printf("CANApp::show_gyro() called\n");
 	m_main_window = m_gyro;
@@ -245,27 +245,27 @@ void 	CANApp::timing			(	)
 }
 int		CANApp::background_time_slice(	)
 {	
-	//printf("CANApp::background_time_slice(	)\n");	
+	struct sCAN* ptr=NULL;
+
 	// CHECK CAN : 
-	struct sCAN* ptr;
-	while (shm_isRxMessageAvailable(m_rx_tail, m_rx_tail_laps) )
-	{
-		ptr = shm_GetNextRxMsg(m_rx_tail);
-
-		// Distribute to All Views :
-		if (m_analog)
-			m_analog->handle_incoming_msg( ptr );
-		if (m_gyro)
-			m_gyro->handle_incoming_msg( ptr );
-/*		if (m_msgs)
-			m_msgs->handle_incoming_msg( ptr ); */
-/*		if (m_msg_view)
-			m_msg_view->handle_incoming_msg( ptr );*/
-
-		if (m_board_view)
-			m_board_view->handle_incoming_msg( ptr );
-			
-	};
+	while (shm_isRxMessageAvailable( &m_rx_tail, &m_rx_tail_laps) )
+	{	
+		ptr = shm_GetNextRxMsg (&m_rx_tail, &m_rx_tail_laps);
+		if (ptr) 
+		{
+			// Distribute to All Views :
+/*			if (m_analog)
+				m_analog->handle_incoming_msg( ptr );
+			if (m_gyro)
+				m_gyro->handle_incoming_msg  ( ptr ); */
+			if (m_msgs)
+				m_msgs->handle_incoming_msg( ptr ); 
+/*			if (m_msg_view)
+				m_msg_view->handle_incoming_msg( ptr );
+			if (m_board_view)
+				m_board_view->handle_incoming_msg( ptr ); */			
+		}
+	};	
 	return 0;
 }
 

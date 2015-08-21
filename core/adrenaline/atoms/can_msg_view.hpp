@@ -32,7 +32,7 @@ public:
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 
 protected:
-	std::vector<sCAN*>	m_msgs;
+	std::vector<struct sCAN*>	m_msgs;
 	int				m_width;
 	bool			has_scroller;	
 };

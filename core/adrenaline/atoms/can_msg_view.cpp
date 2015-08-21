@@ -57,16 +57,33 @@ int		CANMessageView::calc_metrics()
  
 }
 
+//struct sCAN cant;
+
 int	CANMessageView::handle_incoming_msg	( struct sCAN* msg )
 {
 	int instance;
 	int channel;
 	int value;
 	int in_filter = 1;
+	static int count = 0;
+//		if (msg->id.group.id == ID_ANALOG_MEASUREMENT)
+	
 	if (in_filter)
 	{	
-		add_message( msg );
-	}			
+		if (count++ < 50)
+		{	
+			if (msg->header.DLC > 8)
+				printf("DLC=%d\n", msg->header.DLC );
+				
+			msg->header.DLC 		  = 8;
+			
+			add_message( msg );
+			printf("CANMessageView:: %d\n", count );			
+			Invalidate();
+		}
+
+	}		
+	return 0;	
 }
 
 int		CANMessageView::add_message ( struct sCAN* msg )
@@ -78,30 +95,34 @@ int		CANMessageView::add_message ( struct sCAN* msg )
    memcpy( tmpC, msg, sizeof(struct sCAN) );
    m_msgs.push_back( tmpC );
    
-   std::string str;
+   std::string 				 str;
    std::vector<std::string>  row;   
 
-   char str2[30];
+	// NOW CONVERT Data to Text, and add to the table : 
+	// ID Column:
+   char str2[50];
    sprintf( str2, "%2x", msg->id.group.id );
    row.push_back( str2 ); 
 
+	// MSG ID NAME :
    strcpy( str2 , getID_Text(msg->id.group.id) );
-   //strcpy( str2, "need lookup table" );
-   row.push_back( str2 );
-   
-   sprintf( str2, "%2d", msg->id.group.instance );
+   //strcpy( str2 , "unknown" );   
    row.push_back( str2 );
 
-   sprintf( str2, "%2d", msg->header.DLC, str2 );
+	// INSTANCE:   
+   sprintf( str2, "%2x", msg->id.group.instance );
    row.push_back( str2 );
-   
+	// DLC
+   sprintf( str2, "%d", msg->header.DLC );
+   row.push_back( str2 );
+   // DATA[0..8]
 	str2[0] = 0;
 	for (int i=0; i<msg->header.DLC; i++)
 	{
 		sprintf( str2, "%2x", msg->data[i] );
 		row.push_back( str2 );
-	}
-	add_row( &row );
+	} 
+	add_row( &row ); 
 }
 
 int	CANMessageView::setup_headers()

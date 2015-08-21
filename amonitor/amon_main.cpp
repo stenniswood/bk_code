@@ -158,10 +158,21 @@ int main( int argc, char *argv[] )
 	printf("===============================================\n");		
 	init(can_speed);
 	register_dump();
-	
+
+	int dump_count=0;	
 	while (1) {
 		if (shm_isRxMessageAvailable(&RxTail_cmdline, &RxTail_cmdline_laps))
-			print_message( shm_GetNextRxMsg(&RxTail_cmdline) );
+			print_message( shm_GetNextRxMsg(&RxTail_cmdline, &RxTail_cmdline_laps) );
+		else {
+			dump_count++;
+			if (dump_count>40096)
+			{
+				dump_count = 0;
+				/*printf("Head: %d, %d\n", ipc_memory_can->RxHead, 
+											ipc_memory_can->RxHeadLap);	
+				printf("Tail: %d, %d\n", RxTail_cmdline, RxTail_cmdline_laps); */
+			}
+		}
 	};	
 }
 

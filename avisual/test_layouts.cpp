@@ -47,14 +47,13 @@ AUTHOR	: Steve Tenniswood
 #define Debug 0
 
 
-static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
 static TextView 		LongText		( 50, 1230, 750, 500 );
 static TabularListBox	tab_lb			( 600, 900, 750, 50  );
 
 /********************* A sample Window ***********************************/
 static FrameWindow	ParentWindowFrame(450, 1050, 500, 100);
 static Window		ParentWindowF(450, 1050, 500, 100);
-//static Window		ViewWindow	 (0, 1080, 760, 0);
+
 static TextView 	SampleText;
 static ListBox  	AvailableClients;
 static IconView		test_image;
@@ -320,7 +319,6 @@ void init_check_button_test()
 	// Aha architecture problem:  height of check1 is not determined until onCreate()
 	// yet here we need it to place check2.  
 	// Think of how to best do this after lunch.
-	
 	
 	//check1.copy_position_horiz( &check2 );
 

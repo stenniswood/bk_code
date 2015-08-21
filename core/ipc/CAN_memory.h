@@ -29,13 +29,13 @@ struct can_ipc_memory_map
 	char	 	ConnectionStatus[64];	// such as "board not present", or "CAN hardware operational",
 										// or "CAN over tcp/ip"
 	int 		RxHeadLap;				// counts each roll over.
-	byte 	 	RxHead;
+	int 	 	RxHead;
 	//byte 	 	RxTail;		 each user should keep his own copy.
 	struct sCAN Received[MAX_CAN_RX_MESSAGES];
 	byte		RxOverFlow;		// indicator if not receiving quickly enough.
 
-	byte 	 	TxHead;
-	byte 	 	TxTail;
+	int 	 	TxHead;
+	int 	 	TxTail;
 	struct sCAN Transmit[MAX_CAN_TX_MESSAGES];
 	byte		TxOverFlow;		// indicator if trying to send too quickly.
 };
@@ -68,7 +68,7 @@ void ipc_add_can_rx_message( struct sCAN* mMsg );
 void 		 copy_can_msg ( struct sCAN* mDest, struct sCAN* mSrc );
 void 		 AddToRxList  ( struct sCAN* mMsg );
 BOOL   		 shm_isRxMessageAvailable( int* mTail, int* mTailLaps  );
-struct sCAN* shm_GetNextRxMsg		 ( int* mTail );
+struct sCAN* shm_GetNextRxMsg		 ( int* mTail, int* mTailLaps );
 
 
 void CAN_save_segment_id(char* mFilename);

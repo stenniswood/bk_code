@@ -122,11 +122,13 @@ void establish_ipc()
 	}  
 	else aud_deallocate_memory();
 
+	can_connect_shared_memory(FALSE);
+
 	if (USE_CAN)
 	{
-		can_allocate_memory();
-		can_attach_memory  (); 
-		can_fill_memory	   ();
+//		can_allocate_memory();
+//		can_attach_memory  (); 
+//		can_fill_memory	   ();
 	} 
 //	else can_deallocate_memory();
 	printf("****************** END SHARED MEMORY SETUP *******************");	

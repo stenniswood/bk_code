@@ -902,7 +902,7 @@ uint8_t print_message(struct sCAN* msg)
 {	
 	printf(" ID=%2X:%4X:%d; ", msg->id.group.block, 
 			 msg->id.group.id, msg->id.group.instance );
-	printf("  %s\t", getID_Text( msg->id.group.id ) );
+	printf("  %30s\t", getID_Text( msg->id.group.id ) );
 	printf("DLC=%d; ", msg->header.DLC );
 	printf("D[]=");
 	int i;

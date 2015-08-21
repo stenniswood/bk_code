@@ -112,7 +112,7 @@ void gui_interface()
 
 	// HANDLE MOUSE EVENTS :
 	int result = mouse_timeslice();
-	MainDisplay.end_screen();
+	MainDisplay.end_screen();			// 
 
 	Control* object_clicked = NULL;
 	int x = round(mouse.x);
@@ -125,9 +125,10 @@ void gui_interface()
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
 			{
-				//printf("clicked an object %x!\t", object_clicked);
+				//printf("clicked an object %x!\n", object_clicked);
 				int num = object_clicked->onClick( x, y );
 				UpdateDisplaySemaphore=1;
+				//printf("clicked an object - called onClick() DONE\n");				
 			}  
 			left_mouse_button_prev = result;
 		}
@@ -147,15 +148,18 @@ void gui_interface()
 	}
 
 	// Scan for objects which have been invalidated and need redrawing.
-	//UpdateDisplaySemaphore = MainDisplay.any_invalid_children();
+	UpdateDisplaySemaphore = MainDisplay.any_invalid_children();
+	//printf("any_invalid_children= %d\n", UpdateDisplaySemaphore );			
 
 	//printf("ipc_memory_avis=%x\n", ipc_memory_avis);
-	if (ipc_memory_avis->NumberClients != Last_Retrieved_Number)
-	{
-		update_available_client_list();
-		Last_Retrieved_Number = ipc_memory_avis->NumberClients;
-		UpdateDisplaySemaphore = 1;
-	}
+	if (ipc_memory_avis)
+		if (ipc_memory_avis->NumberClients != Last_Retrieved_Number)
+		{
+			update_available_client_list();
+			Last_Retrieved_Number = ipc_memory_avis->NumberClients;
+			UpdateDisplaySemaphore = 1;
+		}
+	//printf("ipc_memory_avis past.\n" );				
     ////////////////////////////////////////
 	if (UpdateDisplaySemaphore)
 	{
@@ -163,13 +167,18 @@ void gui_interface()
 		//update_to_controls();
 		// hide mouse: (mouse has the old image stored in it's buffer)
 		MainDisplay.draw();		
+		//printf("MainDisplay.draw() Done.\n");
 		MainDisplay.update_invalidated();
-		
+		//printf("MainDisplay.update_invalidated() Done.\n");
+				
 		// so now just resave the buffer with new contents:
 		save_mouse();		
 		//printf("done with save_mouse()\n");		
 	}
 }
+
+// Where does it evalutate Menu's and call their callbacks?
+
 
 
 void sequencer_interface()
@@ -233,17 +242,16 @@ int main( int argc, char *argv[] )
 	//audio_file_open();
 	//play_waveform( &dWave, 1 );
 	//audio_play();
-	
+
 	printf("================= Main Loop ==========================\n");	
 	while (1)
 	{	
 		gui_interface();
-		if (bkInstant_connected)
-			ethernet_interface();
-		printf("done with ethernet_interface()\n");
-		
+		//if (bkInstant_connected)
+		//	ethernet_interface();
+
 		MainDisplay.idle_tasks();		
-		printf("done with MainDisplay.idle_tasks()\n");
+		//printf("done with MainDisplay.idle_tasks()\n");
 		
 		// Want to be able to open the screen leaving everything as is.
 		// then do an end again to render the mouse.
@@ -253,4 +261,3 @@ int main( int argc, char *argv[] )
 		behavior_interface(); */
 	}
 }
-

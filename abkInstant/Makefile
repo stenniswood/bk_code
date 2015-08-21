@@ -37,7 +37,7 @@ FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 VG_OBJS    =  libshapes.o oglinit.o
 APP_CPP_OBJS= instant_main.o string_util.o
 IPC_OBJS    = picamscan_memory.o sway_memory.o visual_memory.o audio_memory.o \
-				client_memory.o CAN_memory.o
+		CAN_memory.o client_memory.o CAN_memory.o
 THREAD_OBJS = audio_thread.o video_thread.o can_thread.o file_thread.o \
 			  file_tx_thread.o hmi_thread.o thread_control.o serverthread.o 
 HARDWARE_OBJS = AUDIO_device.o 

@@ -25,8 +25,8 @@
 
 
 // Avisual display:
-static TextView 	ConnectionStatus( 50, 1230, 750, 700 );
-TextView 			CmdText;
+TextView 	ConnectionStatus( 50, 1230, 750, 700 );
+TextView 	CmdText;
 
 //TabularListBox  tab_lb(600, 20, 620, 5, -1);
 static TabularListBox  adren_board_list;
@@ -70,7 +70,7 @@ Button   	MyButt	   ( 450, 600, 400, 350 );
 ListBox  	MyRobotList( 20, 320, 800, 500  );
 ProgressBar MyProgress ( 450, 650, 300, 275 );
 CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
-//ButtonArrayMot MyArray	( 700, 1070, 350, 100);
+//ButtonArrayMot MyArray( 700, 1070, 350, 100);
 static char ConnectionStatusText[128];
 
 

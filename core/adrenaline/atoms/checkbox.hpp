@@ -4,6 +4,9 @@
 #include "control.hpp"
 
 
+// Define a CAllback function.
+
+
 // Offset from <left,bottom> to the check box.
 #define BOX_PADDING 4
 
@@ -22,6 +25,8 @@ public:
 	// override set_position to update box_rectangle.
 	int				set_height_to_text();
 	int				set_check(bool CheckOn=true);
+	bool			is_checked()	{ return checked;  };
+	
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
 protected:

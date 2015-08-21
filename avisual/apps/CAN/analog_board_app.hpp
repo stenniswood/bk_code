@@ -28,6 +28,11 @@ public:
 	int				calc_metrics();
 	int				place_views();
 
+	void			configure_screen();	// based on which checkboxes enabled.
+	void			show_group ( int mChip, int mNumberVisible );
+	void			place_group( int mStartIndex, int mEndIndex, float mBottom );
+
+
 	int				handle_incoming_msg	( struct sCAN* msg );
 	int				setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms );
 	int				setup_triggered_response_msg( struct sCAN* mTriggerMsg, struct sCAN* mResponse );	
@@ -42,6 +47,13 @@ public:
 
 protected:
 	vector<Leveler*>			m_indicators;
+	int						m_group_start_index[4];
+	int						m_group_end_index[4];
+	
+	CheckBox* 				m_chip_enable1;
+	CheckBox* 				m_chip_enable2;
+	CheckBox* 				m_chip_enable3;
+	CheckBox* 				m_chip_enable4;
 	
 	Button					m_rescan;
 	Button					m_view_graph;		// toggle between outline (msg flow) & graphing of data.

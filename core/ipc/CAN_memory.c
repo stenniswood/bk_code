@@ -19,6 +19,7 @@ READS:
 DATE 	:  8/8/2013
 AUTHOR	:  Stephen Tenniswood
 ********************************************************************/
+#define _XOPEN_SOURCE
 #include <stdio.h> 
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -199,33 +200,42 @@ void AddToRxList( struct sCAN* mMsg )
 BOOL  shm_isRxMessageAvailable( int* mTail, int* mTailLaps )
 {
 	BOOL Overrun = FALSE;
-	int tail_count = *mTailLaps 				   * MAX_CAN_RX_MESSAGES + *mTail;
-	int head_count = ipc_memory_can->RxHeadLap * MAX_CAN_RX_MESSAGES + ipc_memory_can->RxHead;
-		 		
+	if ((ipc_memory_can==NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+		return FALSE;
+
+	int tail_count = *mTailLaps 			   * MAX_CAN_RX_MESSAGES + *mTail;	
+	int head_count = ipc_memory_can->RxHeadLap * MAX_CAN_RX_MESSAGES + ipc_memory_can->RxHead;	
 	int msgs_qued = head_count - tail_count;	
 	if (msgs_qued >= MAX_CAN_RX_MESSAGES)		// overrun
-	{			
-		Overrun   = TRUE;
+	{											// scoot tail up keeping as many msgs as possible.
+		Overrun    = TRUE;
 		*mTailLaps = ipc_memory_can->RxHeadLap - 1;
 		tail_count = head_count - (MAX_CAN_RX_MESSAGES-10);	// allow room for 10 more, since the Tail is slower than the head.
 		*mTail = (tail_count - *mTailLaps * MAX_CAN_RX_MESSAGES);		
 	}
 	
+//	if (head_count < tail_count)
+//		printf("h/t: %d/%d \n", head_count, tail_count );
 	/* Not new way.
 	if (ipc_memory_can->RxTail == ipc_memory_can->RxHead)
 		ipc_memory_can->RxTail = ipc_memory_can->RxHead = 0; 
-	(ipc_memory_can->RxHead > ipc_memory_can->RxTail);		*/
-	
+	(ipc_memory_can->RxHead > ipc_memory_can->RxTail);		*/	
 	return (head_count > tail_count);
 }
 
-struct sCAN* shm_GetNextRxMsg( int* mTail )
+struct sCAN* shm_GetNextRxMsg( int* mTail, int* mTailLaps )
 {
 	static struct sCAN tmp;	
+
+	if ((ipc_memory_can==NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+		return NULL;
+	
 	copy_can_msg( &tmp, &(ipc_memory_can->Received[*mTail]) );
-	*mTail++;
-	if (*mTail>MAX_CAN_RX_MESSAGES)
+	(*mTail)++;
+	if (*mTail > MAX_CAN_RX_MESSAGES) {
 		*mTail = 0;
+		(*mTailLaps)++;
+	}
 	
 	if (ipc_memory_can->RxHead == *mTail)
 		ipc_memory_can->RxOverFlow = 0;	// clear it since no more.

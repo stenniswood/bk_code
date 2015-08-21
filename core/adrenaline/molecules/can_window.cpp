@@ -86,7 +86,8 @@ static void fill_data( byte* mdata, byte last)
 void CANMessages::fill_phony_msgs()
 {
 	struct sCAN can;
-	for (int i=0; i<100; i++)
+	int i=0;
+//	for (int i=0; i<100; i++)
 	{
 		can.id.group.id 	  = 0x0040+i;
 		can.id.group.instance = 0x20  +i;
@@ -121,7 +122,7 @@ void 	CANMessages::Initialize(	)
 	//init_view_menu();
 	//init_main_CAN_menu();
 
-	fill_phony_msgs();
+	//fill_phony_msgs();
 }
 
 int		CANMessages::calc_metrics() 
@@ -132,7 +133,7 @@ int		CANMessages::calc_metrics()
 int		CANMessages::onCreate(  )
 {
 	place_views();
-	fill_phony_msgs();
+	//fill_phony_msgs();
 	Window::onCreate();
 }
 
@@ -164,8 +165,10 @@ int		CANMessages::handle_incoming_msg	( struct sCAN* msg )
 {
 	//struct sCAN* result = m_filter_view.filter_incoming_msg( msg );
 	//if (result)		
-	m_msg_view.handle_incoming_msg( msg );	
-	m_board_view.handle_incoming_msg(msg);
+
+		m_msg_view.handle_incoming_msg( msg );	
+		//m_board_view.handle_incoming_msg(msg);
+
 	// test if it's a trigger for another message.
 	//     then send response	
 }
