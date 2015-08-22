@@ -145,6 +145,10 @@ int GyroView::place_views()
 
 int	GyroView::handle_incoming_msg	( struct sCAN* msg )
 {
+	float gyro_sum_x = 0;
+	float gyro_sum_y = 0;
+	float gyro_sum_z = 0;
+	
 	int instance;
 	int channel;
 	int value;
@@ -163,9 +167,12 @@ int	GyroView::handle_incoming_msg	( struct sCAN* msg )
 		instance = msg->id.group.instance;
 		channel = msg->data[0];
 		parse_gyro_msg( msg );
-		gyro[0]->add(RawxyzGyro.x);
-		gyro[1]->add(RawxyzGyro.y);
-		gyro[2]->add(RawxyzGyro.z);				
+		gyro_sum_x += RawxyzGyro.x;
+		gyro_sum_y += RawxyzGyro.y;
+		gyro_sum_z += RawxyzGyro.z;
+		gyro[0]->add(gyro_sum_x);
+		gyro[1]->add(gyro_sum_y);
+		gyro[2]->add(gyro_sum_z);				
 		Invalidate();		
 	}
 	if (msg->id.group.id == ID_MAGNET_XYZ)

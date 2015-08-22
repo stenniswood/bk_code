@@ -254,10 +254,10 @@ int		CANApp::background_time_slice(	)
 		if (ptr) 
 		{
 			// Distribute to All Views :
-/*			if (m_analog)
+			if (m_analog)
 				m_analog->handle_incoming_msg( ptr );
 			if (m_gyro)
-				m_gyro->handle_incoming_msg  ( ptr ); */
+				m_gyro->handle_incoming_msg  ( ptr ); 
 			if (m_msgs)
 				m_msgs->handle_incoming_msg( ptr ); 
 /*			if (m_msg_view)
