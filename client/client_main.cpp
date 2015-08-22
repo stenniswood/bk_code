@@ -60,17 +60,13 @@ pthread_t server_thread_id;
 */
 void establish_ipc()
 {
-
-	int connect_shared_client_memory();
-
-	int result = cli_allocate_memory();
-	printf("Connect allocate CLIENT MEMORY: %d \n", result );
-	//client_segment_id = 98307;
-	
-	cli_attach_memory  (); 	
-	
-	print_clients();
-	//cli_dump_ipc();
+	int result = connect_shared_client_memory(FALSE);
+	if (result<=0) {
+		printf("Error:  Cannot attach to abkInstant.  No shared memory established.\n");
+		printf("    You must start the Instant server first!\n");
+		exit(1);
+	} 
+	print_clients();	
 }
 
 /* void init( ) {	} */
@@ -158,7 +154,6 @@ int main( int argc, char *argv[] )
 	establish_ipc();		
 	int index = 0;
 	char* str_ptr = NULL;
-	
 
 	// PARSE ARGUMENTS : 
 	if (argc>1)

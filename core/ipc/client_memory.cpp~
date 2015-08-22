@@ -20,6 +20,7 @@ DATE 	:  8/8/2013
 AUTHOR	:  Stephen Tenniswood
 ********************************************************************/
 #include <stdio.h> 
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
 #include <sys/ipc.h>
@@ -59,9 +60,17 @@ void cli_save_segment_id(char* mFilename)
 }
 int cli_read_segment_id(char* mFilename)
 {
+	char tline[40];
 	FILE* fd = fopen( mFilename, "r" );
-	fscanf( fd, "%d", &client_segment_id );
+	if (fd==NULL)  {
+		printf("CLI_read_segment_id - ERROR: %s %s\n", strerror(errno), mFilename );	
+		return -1;
+	}
+	int result = fread( tline, 1, 20, fd);		//	fscanf( fd, "%d", &can_segment_id );
+	tline[result] = 0;
+	client_segment_id = atol( tline );
 	fclose( fd );
+	printf("cli_segment_id= %d \n", client_segment_id );	
 	return client_segment_id;
 }
 
@@ -219,7 +228,6 @@ char segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
 /* The allocating should be done by abkInstant. */
 int connect_shared_client_memory( char mAllocate )
 {
-	//printf("connect_shared_client_memory()  \t");
 	if (mAllocate)
 	{
 		int result = cli_allocate_memory( );
@@ -231,10 +239,10 @@ int connect_shared_client_memory( char mAllocate )
 		cli_save_segment_id( segment_id_filename );
 		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
 			return 1;
-	} else  {
+	} else  {	
+		printf("Reading segment id: %s\n", segment_id_filename);
 		cli_read_segment_id(segment_id_filename);	
-		can_attach_memory();	
-		//dump_ipc();
+		cli_attach_memory();	
 		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
 			return 1;			
 	}
