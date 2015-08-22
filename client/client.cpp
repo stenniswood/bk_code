@@ -62,7 +62,7 @@ char 	recvBuff[1024];
 // using the nlp port.  
 int connect_to_robot(char *ip_address )
 {
-	printf("====Connect_to_robot...ip=%s\n", ip_address);
+	//printf("\n\nConnecting to %s\n", ip_address);
     struct sockaddr_in	serv_addr; 
 	struct in_addr      addr;
     
@@ -83,7 +83,7 @@ int connect_to_robot(char *ip_address )
         return 1;
     } 
 
-	printf("ROBOT CLIENT Connecting to : %s:%d\n", ip_address, BK_MEDIA_PORT );
+	printf("Connecting to : %s:%d\n", ip_address, BK_MEDIA_PORT );
     if( connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
        printf("\n Error : Connect Failed \n");

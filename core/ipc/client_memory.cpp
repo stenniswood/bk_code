@@ -27,11 +27,12 @@ AUTHOR	:  Stephen Tenniswood
 #include <sys/types.h>
 #include <unistd.h>
 #include <list>
+#include <arpa/inet.h>
+#include <errno.h>
 
 #include "bk_system_defs.h"
 #include "interrupt.h"
-#include "client_memory.h"
-
+#include "client_memory.hpp"
 
 char* 	client_shared_memory;
 int 	client_segment_id;
@@ -63,7 +64,7 @@ int cli_read_segment_id(char* mFilename)
 	fclose( fd );
 	return client_segment_id;
 }
- 
+
 int cli_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct client_ipc_memory_map);
@@ -71,24 +72,37 @@ int cli_allocate_memory( )
 	
 	/* Allocate a shared memory segment. */
 	client_segment_id = shmget( IPC_KEY_CLI, shared_segment_size, IPC_CREAT | 0666 );
-
+	if (client_segment_id==-1)
+		printf("cli_allocate_memory - ERROR: %s \n", strerror(errno) );
+	else 
+		printf ("Client shm segment_id=%d\n", client_segment_id );
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	printf ("Client shm segment_id=%d\n", client_segment_id );
 	return client_segment_id;
 }
 
 int cli_attach_memory()
 {
 	/* Attach the shared memory segment. */
+	int error=0;
 	client_shared_memory 	 = (char*) shmat (client_segment_id, 0, 0);
+	if (client_shared_memory==(char*)-1) {
+		printf("cli_attach_memory - ERROR: %s \n", strerror(errno) );
+		return 0;
+	} else 
+		printf ("Client shm attached at address %p\n", client_shared_memory); 	
+	
 	ipc_memory_client		 = (struct client_ipc_memory_map*)client_shared_memory;
-	printf ("Client shm attached at address %p\n", client_shared_memory); 	
+	return 1;
 }
 
 void cli_reattach_memory()
 {
 	/* Reattach the shared memory segment, at a different address. */ 
 	client_shared_memory = (char*) shmat (client_segment_id, (void*) 0x5000000, 0); 
+	if (client_shared_memory==(char*)-1) {
+		printf("cli_attach_memory - ERROR: %s \n", strerror(errno) );
+		return;
+	}
 	ipc_memory_client	 = (struct client_ipc_memory_map*)client_shared_memory;	
 	printf ("Client shm reattached at address %p\n", client_shared_memory); 
 }
@@ -185,25 +199,46 @@ READS:
 DATE 	:  8/8/2013
 AUTHOR	:  Stephen Tenniswood
 ********************************************************************/
-
 long int	SentenceCounter=0;
 char*		Sentence;
 long int	StatusCounter=0;
 char*		Status;
 
-int connect_shared_client_memory( )
+
+#define MACHINE_TYPE 	APPLE
+
+#if (MACHINE_TYPE==APPLE)
+char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/client/cli_shared_memseg_id.cfg";
+#elif (MACHINE_TYPE==RPI)
+char segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
+#else 
+char segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
+#endif
+
+
+/* The allocating should be done by abkInstant. */
+int connect_shared_client_memory( char mAllocate )
 {
-	printf("connect_shared_client_memory()  \t");
-	if (cli_allocate_memory( ) == -1)
+	//printf("connect_shared_client_memory()  \t");
+	if (mAllocate)
 	{
-		printf("Can't find shared memory from abkInstant!\n");
-		return 0;
+		int result = cli_allocate_memory( );
+		if (result == -1)	{
+			printf("Cannot allocate shared memory!\n");
+		}
+		cli_attach_memory( );
+		cli_fill_memory  ( );				
+		cli_save_segment_id( segment_id_filename );
+		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
+			return 1;
+	} else  {
+		cli_read_segment_id(segment_id_filename);	
+		cli_attach_memory();	
+		//dump_ipc();
+		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
+			return 1;			
 	}
-	cli_attach_memory( );
-	printf("Sentence = %s\n", ipc_memory_client->Sentence );
-	//dump_ipc();
-	//printf("Sizeof(int) = %d\n", sizeof(int) );
-	return 1;
+	return 0;	
 }
 
 char* get_connection_status()
@@ -263,11 +298,14 @@ BOOL is_new_sentence()
 	ipc_memory_client->NumberClients++;
 }*/
 
-void cli_ipc_add_new_client( list<struct in_addr> mbeacon_ip_list )
+/*
+	Puts a new ip into the shared memory  ipc_memory_client->ClientArray[]
+*/
+void cli_ipc_add_new_client( std::list<struct in_addr> mbeacon_ip_list )
 {
 	// Number of clients:
 	ipc_memory_client->NumberClients    = mbeacon_ip_list.size();
-	list<struct in_addr>::iterator iter = mbeacon_ip_list.begin();
+	std::list<struct in_addr>::iterator iter = mbeacon_ip_list.begin();
 	int byte_array_size = 0;
 	char* ptr 			= ipc_memory_client->ClientArray;
 

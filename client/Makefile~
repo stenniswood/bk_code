@@ -6,9 +6,8 @@ INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/ 
 SELF_INC   = ../../abkInstant/ ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 			 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
-LIBFLAGS   = -L../core/libs/vgfont -lpthread -lm
-
-# -L../core/libs/ilclient -lilclient 
+LIBFLAGS   = -L../core/libs/ilclient  -L../core/libs/vgfont \
+			 -lpthread -lm -lilclient 
 			 
 DEPS   	   = 
 #CFLAGS 	   = -fpermissive -Wwrite-strings 
