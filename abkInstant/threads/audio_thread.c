@@ -27,8 +27,8 @@ Tenniswood - 2014
 #include "utilities.h"
 #include "audio_memory.h"
 
-#include "bcm_host.h"
-#include "ilclient.h"
+//#include "bcm_host.h"
+//#include "ilclient.h"
 
 #include "AUDIO_device.h"
 

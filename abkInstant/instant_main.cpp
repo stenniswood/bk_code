@@ -8,8 +8,6 @@
 #include <math.h>
 #include <string>
 #include <vector>
-#include <wiringPiSPI.h>
-#include <wiringPi.h>
 #include <pthread.h>
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
@@ -134,19 +132,6 @@ void establish_ipc()
 
 void init( )
 {	
-	int result = wiringPiSetup();
-	// Ready-to-send, Receive buffer full
-	pinMode		( CAN_INT_PIN, INPUT );
-	pinMode		( RX0BF, INPUT 	 	 );
-	pinMode		( RX1BF, INPUT 	 );
-	pinMode		( TX0RTS, OUTPUT );
-	pinMode		( TX1RTS, OUTPUT );
-	pinMode		( TX2RTS, OUTPUT );	
-	digitalWrite( TX0RTS, 1 );
-	digitalWrite( TX1RTS, 1 );
-	digitalWrite( TX2RTS, 1 );
-	button_init ( );
-	init_leds   ( );
 	//fuse_init ( );
 	establish_ipc();
 		
@@ -154,22 +139,6 @@ void init( )
 
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
 	// and attach myInterrupt() to the interrupt
-	if ( wiringPiISR(CAN_INT_PIN, INT_EDGE_FALLING, &CAN_isr) < 0 ) {
-	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
-	  exit(1);
-	} 
-	if ( wiringPiISR(BUTTON1_INT_PIN, INT_EDGE_FALLING, &Button1_isr) < 0 ) {
-	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
-	  exit(1);
-	}
-	if ( wiringPiISR(BUTTON2_INT_PIN, INT_EDGE_FALLING, &Button2_isr) < 0 ) {
-	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
-	  exit(1);
-	}
-	if ( wiringPiISR(BUTTON3_INT_PIN, INT_EDGE_FALLING, &Button3_isr) < 0 ) {
-	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
-	  exit(1);
-	}
 	create_threads();
 
 	//CAN_init( CANSPEED_250, 0 );	
@@ -323,7 +292,7 @@ int main( int argc, char *argv[] )
 	
 		scan_inputs();
 		update_outputs();
-		delay(1000);		
+		sleep(1000);		
 	}
 }
 

@@ -297,13 +297,13 @@ int can_connect_shared_memory(char mAllocate)
 		can_attach_memory();
 		can_fill_memory	 ();
 		CAN_save_segment_id("/home/pi/bk_code/amonitor/acan_shared_memseg_id.cfg");			
-		if ()
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(can_ipc_memory_map*)-1))
 			return 1;
 
 	} else  {
 		CAN_read_segment_id("/home/pi/bk_code/amonitor/acan_shared_memseg_id.cfg");	
 		can_attach_memory();		
-		if ()
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(can_ipc_memory_map*)-1))
 			return 1;
 	}
 	return 0;

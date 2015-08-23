@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
-#include <wiringPiSPI.h>
-#include <wiringPi.h>
 #include "bk_system_defs.h"
 #include "mcp2515.h"
 #include "pican_defines.h"

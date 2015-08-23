@@ -1,5 +1,4 @@
 #include "bk_system_defs.h"
-#include <wiringPi.h>
 #include "can_eid.h"
 #include "CAN_base.h"
 #include "can_board_msg.h"

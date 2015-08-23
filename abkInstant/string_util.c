@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <wiringPi.h>
 #include <string.h>
 #include "bk_system_defs.h"
 #include "string_util.h"

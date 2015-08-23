@@ -1,7 +1,6 @@
 #include "bk_system_defs.h"
 #include <stdio.h>
 #include <string.h>
-#include <wiringPi.h>
 #include "can_eid.h"
 #include "CAN_base.h"
 //#include "can_instance.h"
