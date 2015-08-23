@@ -22,12 +22,11 @@
 #include "catagorization.h"
 #include "serverthread.h"
 #include "client.h"
-#include "can_rxbuff.h"
 #include "visual_memory.h"
 #include "sway_memory.h"
 #include "audio_memory.h"
 #include "picamscan_memory.h"
-#include "client_memory.h"
+#include "client_memory.hpp"
 #include "CAN_memory.h"
 #include "udp_transponder.hpp"
 #include "thread_control.h"
@@ -86,9 +85,8 @@ void create_threads()
 void establish_ipc()
 {
 	printf("************************* SHARED MEMORY *****************************");
-	cli_allocate_memory();
-	cli_attach_memory  ();
-	cli_fill_memory	   ();
+	// Allocate a shared memory so we can accept user commands (ie. connect, send audio, etc)
+	int result = connect_shared_client_memory(TRUE);
 
 	if (USE_AVISUAL)
 	{
@@ -263,11 +261,11 @@ void scan_inputs()
 void update_outputs()
 {
 	// Update Client List:
-	int size = numberclients;
+/*	int size = ipc_memory_client->NumberClients;
 	for (int i=0; i<size; i++)
 		cli_ipc_add_new_client( mClientText );
 		
-	
+*/	
 }
 
 

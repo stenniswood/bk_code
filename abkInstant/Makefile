@@ -28,8 +28,8 @@ CFLAGS+=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POS
 
 //LDFLAGS    = -L/opt/vc/lib/ -lGLESv2 -lEGL -ljpeg -lkhrn_static -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt  
 
-# CORE CODE:
-CAN_OBJS   =  CAN_Interface.o can_instance.o can_eid.o can_rxbuff.o can_txbuff.o \
+# CORE CODE: can_rxbuff.o
+CAN_OBJS   =  CAN_Interface.o can_instance.o can_eid.o  can_txbuff.o \
 	          bk_system_defs.o can_id_list.o 
 MSG_OBJS   =  packer_lcd.o packer_motor.o packer.o parser_tilt.o 
 MISC_OBJS  =  buttons.o leds.o vector_math.o ini_file.o 
