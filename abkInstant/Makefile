@@ -1,17 +1,38 @@
+PLATFORM = RPI
+#PLATFORM = linux_desktop
+#PLATFORM = Mac
+ifeq ($(PLATFORM), RPI)
+HARDWARE_PATH = ./hardware/rpi/
+endif
+ifeq ($(PLATFORM), linux_desktop)
+HARDWARE_PATH = ./hardware/linux_desktop/
+endif
+ifeq ($(PLATFORM), Mac)
+HARDWARE_PATH = ./hardware/mac/
+endif
+
 CC		   = g++
 OPTIONS	   = -fpermissive -Wwrite-strings -Wno-deprecated -w
 INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/  \
 			  ./nlp_protocol/ ../nlp_protocol/  ./nlp_adrenaline/ ./voice/ \
 			  ./threads/ /home/pi/abkInstant/  ./hardware/ ../core/libs/ilclient/ \
 			  /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/ 	\
-			  ./hardware/linux_desktop/
+			  ./hardware/rpi/
 #			  /opt/vc/include/interface/vcos/pthreads/ 
 
 SELF_INC   = ../../abkInstant/ ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 			 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
-LIBFLAGS   = -L../core/libs/ilclient -L/opt/vc/lib -L../core/libs/vgfont \
-			-lpthread -lrt -lm
+LIBFLAGS   = -L/opt/vc/lib -L../core/libs/vgfont \
+			-lpthread -lrt -lm 
+
+ifeq ($(PLATFORM), Mac)
+LIBFLAGS 	+= -L./hardware/mac/ -framework AudioToolbox -framework CoreFoundation
+endif
+ifeq ($(PLATFORM), RPI)
+LIBFLAGS 	+= -L../core/libs/ilclient -lopenmaxil -lvchiq_arm -lilclient -lvcos -lbcm_host -L./hardware/rpi/
+endif
+
 
 DEPS   	   = 
 #CFLAGS 	   = -fpermissive -Wwrite-strings 
@@ -39,6 +60,9 @@ THREAD_OBJS = audio_thread.o video_thread.o can_thread.o file_thread.o \
 			  file_tx_thread.o hmi_thread.o thread_control.o serverthread.o 
 HARDWARE_OBJS = AUDIO_device.o 
 ILCLIENT_OBJS = ilclient.o ilcore.o
+#ifeq ($(PLATFORM), RPI)
+#LIB_ILCLIENT = $(addprefix ../core/libs/ilclient/, $(ILCLIENT_OBJS))	
+#endif
 
 # APP CODE
 NLP_PROTOCOL_OBJS  		= udp_transponder.o GENERAL_protocol.o	\
@@ -60,19 +84,20 @@ NLP_ADRENALINE_OBJS  =	 Adrenaline_nlp.o     	Adren_bigmotor_talk.o  		\
 instant: $(APP_CPP_OBJS) 										\
 		$(addprefix ./nlp_adrenaline/, 	$(NLP_ADRENALINE_OBJS)) \
 		$(addprefix ./nlp_protocol/, 	$(NLP_PROTOCOL_OBJS)) 	\
-		$(addprefix ./threads/, 		$(THREAD_OBJS)) 		\
-		$(addprefix ./hardware/linux_desktop/, $(HARDWARE_OBJS)) \
-		$(addprefix ../core/ipc/, 		$(IPC_OBJS)) 			\
-		$(addprefix ../core/can/, 		$(CAN_OBJS)) 			\
-		$(addprefix ../core/msg/, 		$(MSG_OBJS)) 			\
-		$(addprefix ../core/misc/,		$(MISC_OBJS))
+		$(addprefix ./threads/, 	$(THREAD_OBJS)) 		\
+		$(addprefix ./hardware/rpi/, 	$(HARDWARE_OBJS)) \
+		$(addprefix ../core/ipc/, 	$(IPC_OBJS)) 			\
+		$(addprefix ../core/can/, 	$(CAN_OBJS)) 			\
+		$(addprefix ../core/msg/, 	$(MSG_OBJS)) 			\
+		$(addprefix ../core/misc/,	$(MISC_OBJS))
 	g++ -o $@  -Wl,--whole-archive $^  $(LIBFLAGS) -Wl,--no-whole-archive -rdynamic
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.png *.pdf *.bak 
 	rm -rf ../core/can/*.o 
 	rm -rf ../core/msg/*.o 
-	rm -rf ../core/misc/*.o 
+	rm -rf ../core/misc/*.o
+	rm -rf ../core/ipc/*.o 
 	rm -rf ../core/fusion/*.o 	
 	rm -rf ./adrenaline/*.o 
 	rm -rf ./hardware/*.o 	

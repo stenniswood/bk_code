@@ -9,8 +9,9 @@
 extern "C" {
 #endif
 
-//#include "bcm_host.h"
-//#include "ilclient.h"
+#include <semaphore.h>
+#include "bcm_host.h"
+#include "ilclient.h"
 
 
 #define BUFFER_SIZE_SAMPLES 1024
