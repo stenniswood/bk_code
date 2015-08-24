@@ -72,6 +72,11 @@ void  handle_client_list( struct in_addr* client_ip_addr, char in_buf[] )
 */
 void update_client_list()
 {
+	if (ipc_memory_avis==NULL)
+	{ 
+		printf(" avisual memory not allocated!\n");
+		return ;
+	}
 	// Number of clients.
 	ipc_memory_avis->NumberClients = beacon_ip_list.size();
 	list<struct in_addr>::iterator iter = beacon_ip_list.begin();
