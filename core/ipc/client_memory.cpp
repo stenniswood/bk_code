@@ -30,7 +30,6 @@ AUTHOR	:  Stephen Tenniswood
 #include <list>
 #include <arpa/inet.h>
 #include <errno.h>
-
 #include "bk_system_defs.h"
 #include "interrupt.h"
 #include "client_memory.hpp"
@@ -38,6 +37,7 @@ AUTHOR	:  Stephen Tenniswood
 char* 	client_shared_memory;
 int 	client_segment_id;
 struct  client_ipc_memory_map* ipc_memory_client =NULL;
+
  
 void cli_dump_ipc()
 {
@@ -52,10 +52,17 @@ void cli_dump_ipc()
 
 void cli_save_segment_id(char* mFilename)
 {
-	FILE* fd = fopen(mFilename, "w");
+	FILE* fd = fopen(mFilename, "w+");
+	if (fd==NULL) {
+		printf("Cannot open file %s. %s \n", mFilename, strerror(errno) );
+		
+	}
 	//FILE* fd = fopen("client_shared_memseg_id.cfg", "w");
 	printf("Segment_id=%d\n", client_segment_id );
-	fprintf( fd, "%d", client_segment_id );
+	char line[80];
+	//fprintf( fd, "%d", client_segment_id );
+	sprintf( line, "%d", client_segment_id );
+	fwrite ( line, strlen(line), 1, fd  );
 	fclose( fd );
 }
 int cli_read_segment_id(char* mFilename)
@@ -214,15 +221,17 @@ long int	StatusCounter=0;
 char*		Status;
 
 
-#define MACHINE_TYPE 	APPLE
+#define MACHINE_TYPE LINUX
 
-#if (MACHINE_TYPE==APPLE)
+/*#if (MACHINE_TYPE==APPLE)
 char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/client/cli_shared_memseg_id.cfg";
 #elif (MACHINE_TYPE==RPI)
 char segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
-#else 
+#elif (MACHINE_TYPE==LINUX) */
+char segment_id_filename[] = "/home/steve/bk_code/client/cli_shared_memseg_id.cfg";
+/*#else 
 char segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
-#endif
+#endif */
 
 
 /* The allocating should be done by abkInstant. */
@@ -236,7 +245,8 @@ int connect_shared_client_memory( char mAllocate )
 		}
 		cli_attach_memory( );
 		cli_fill_memory  ( );				
-		cli_save_segment_id( segment_id_filename );
+		printf("Saving segment id: ");
+		cli_save_segment_id( segment_id_filename );		
 		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
 			return 1;
 	} else  {	

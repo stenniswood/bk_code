@@ -72,27 +72,28 @@ void create_threads()
 }
 
 
-#define USE_AVISUAL 1
+#define USE_AVISUAL 0
 #define USE_CAN		1
-#define USE_SWAY	1
+#define USE_SWAY	0
 #define USE_PICAMSCAN	0
-#define USE_AUDIO	1
+#define USE_AUDIO	0
 
 /* Inter Process Communications (via shared memory)		
 */
 void establish_ipc()
 {
-	printf("************************* SHARED MEMORY *****************************");
+	printf("************************* SHARED MEMORY *****************************\n");
 	// Allocate a shared memory so we can accept user commands (ie. connect, send audio, etc)
 	int result = connect_shared_client_memory(TRUE);
 
+	printf("************************* avisual SHARED MEMORY *****************************\n");
 	if (USE_AVISUAL)
 	{
 		vis_allocate_memory();
 		vis_attach_memory  ();
 		vis_fill_memory	   ();
 	} 
-	else vis_deallocate_memory( 98307 );
+	//else vis_deallocate_memory( 98307 );
 
 	if (USE_SWAY)
 	{
@@ -100,7 +101,7 @@ void establish_ipc()
 		sway_attach_memory  (); 
 		sway_fill_memory	();
 	} 
-	else sway_deallocate_memory();	
+	//	else sway_deallocate_memory();	
 
 	if (USE_PICAMSCAN) 
 	{
@@ -109,6 +110,7 @@ void establish_ipc()
 		picam_fill_memory	 ();
 	} 
 //	else picam_deallocate_memory(  );	// 98307
+
 	
 	if (USE_AUDIO)
 	{
@@ -116,12 +118,12 @@ void establish_ipc()
 		aud_attach_memory  (); 
 		aud_fill_memory	   ();
 	}  
-	else aud_deallocate_memory();
+	//else aud_deallocate_memory();
 
-	can_connect_shared_memory(FALSE);
 
 	if (USE_CAN)
 	{
+	 result =  can_connect_shared_memory(FALSE);
 //		can_allocate_memory();
 //		can_attach_memory  (); 
 //		can_fill_memory	   ();
@@ -209,12 +211,10 @@ void handle_client_request()
 	int result = strcmp(ipc_memory_client->Sentence, "CONNECT");			
 	if (result==0)
 		connect_to_robot(*(space+1) );
-			
 	
 /*	result = strcmp(ipc_memory_client->Sentence, "AUDIO");
 	result = strcmp(ipc_memory_client->Sentence, "VIDEO");
 	result = strcmp(ipc_memory_client->Sentence, "FILE"); */
-
 }
 
 void scan_inputs()
