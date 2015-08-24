@@ -2,8 +2,7 @@ RPI = 1
 linux_desktop = 2
 Mac = 3
 
-PLATFORM = $(RPI)
-#PLATFORM = $(linux_desktop)
+PLATFORM = $(linux_desktop)
 #PLATFORM = $(Mac)
 
 ifeq ($(PLATFORM), $(RPI))
@@ -22,8 +21,9 @@ INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/ 
 			  ./nlp_protocol/ ../nlp_protocol/  ./nlp_adrenaline/ ./voice/ \
 			  ./threads/ /home/pi/abkInstant/  ./hardware/ ../core/libs/ilclient/ \
 			  /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/ 	\
-			  ./hardware/rpi/
+			  $(HARDWARE_PATH)
 #			  /opt/vc/include/interface/vcos/pthreads/ 
+
 
 SELF_INC   = ../../abkInstant/ ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
@@ -89,7 +89,7 @@ instant: $(APP_CPP_OBJS) 										\
 		$(addprefix ./nlp_adrenaline/, 	$(NLP_ADRENALINE_OBJS)) \
 		$(addprefix ./nlp_protocol/, 	$(NLP_PROTOCOL_OBJS)) 	\
 		$(addprefix ./threads/, 	$(THREAD_OBJS)) 		\
-		$(addprefix ./hardware/rpi/, 	$(HARDWARE_OBJS)) \
+		$(addprefix $(HARDWARE_PATH), 	$(HARDWARE_OBJS)) \
 		$(addprefix ../core/ipc/, 	$(IPC_OBJS)) 			\
 		$(addprefix ../core/can/, 	$(CAN_OBJS)) 			\
 		$(addprefix ../core/msg/, 	$(MSG_OBJS)) 			\
