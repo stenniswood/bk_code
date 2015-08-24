@@ -52,11 +52,11 @@ void cli_dump_ipc()
 
 void cli_save_segment_id(char* mFilename)
 {
-	FILE* fd = fopen(mFilename, "w+");
+	FILE* fd = fopen(mFilename, "w");
 	if (fd==NULL) {
-		printf("Cannot open file %s. %s \n", mFilename, strerror(errno) );
-		
+		printf("Cannot open file %s. %s \n", mFilename, strerror(errno) );		
 	}
+	
 	//FILE* fd = fopen("client_shared_memseg_id.cfg", "w");
 	printf("Segment_id=%d\n", client_segment_id );
 	char line[80];
@@ -221,14 +221,16 @@ long int	StatusCounter=0;
 char*		Status;
 
 
-#define MACHINE_TYPE LINUX
 
-/*#if (MACHINE_TYPE==APPLE)
+#if (PLATFORM==Mac)
 char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/client/cli_shared_memseg_id.cfg";
-#elif (MACHINE_TYPE==RPI)
+#elif (PLATFORM==RPI)
 char segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
-#elif (MACHINE_TYPE==LINUX) */
+#elif (PLATFORM==linux_desktop)
 char segment_id_filename[] = "/home/steve/bk_code/client/cli_shared_memseg_id.cfg";
+#endif
+
+
 /*#else 
 char segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
 #endif */

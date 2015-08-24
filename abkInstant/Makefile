@@ -1,13 +1,18 @@
-PLATFORM = RPI
-#PLATFORM = linux_desktop
-#PLATFORM = Mac
-ifeq ($(PLATFORM), RPI)
+RPI = 1
+linux_desktop = 2
+Mac = 3
+
+PLATFORM = $(RPI)
+#PLATFORM = $(linux_desktop)
+#PLATFORM = $(Mac)
+
+ifeq ($(PLATFORM), $(RPI))
 HARDWARE_PATH = ./hardware/rpi/
 endif
-ifeq ($(PLATFORM), linux_desktop)
+ifeq ($(PLATFORM), $(linux_desktop))
 HARDWARE_PATH = ./hardware/linux_desktop/
 endif
-ifeq ($(PLATFORM), Mac)
+ifeq ($(PLATFORM), $(Mac))
 HARDWARE_PATH = ./hardware/mac/
 endif
 
@@ -26,26 +31,25 @@ VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 LIBFLAGS   = -L/opt/vc/lib -L../core/libs/vgfont \
 			-lpthread -lrt -lm 
 
-ifeq ($(PLATFORM), Mac)
+ifeq ($(PLATFORM), $(Mac))
 LIBFLAGS 	+= -L./hardware/mac/ -framework AudioToolbox -framework CoreFoundation
 endif
-ifeq ($(PLATFORM), RPI)
+ifeq ($(PLATFORM), $(RPI))
 LIBFLAGS 	+= -L../core/libs/ilclient -lopenmaxil -lvchiq_arm -lilclient -lvcos -lbcm_host -L./hardware/rpi/
 endif
 
-
 DEPS   	   = 
-#CFLAGS 	   = -fpermissive -Wwrite-strings 
+#CFLAGS    = -fpermissive -Wwrite-strings 
 #CFLAGS    += -DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -U_FORTIFY_SOURCE -Wall -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -ftree-vectorize -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -Wno-psabi
 
 CFLAGS+=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX \
 		-D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
 		-U_FORTIFY_SOURCE -Wall -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -ftree-vectorize \
 		-pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST \
-		-DUSE_VCHIQ_ARM -Wno-psabi 
+		-DUSE_VCHIQ_ARM -Wno-psabi  -DPLATFORM=$(PLATFORM) \
+		-DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
 
-
-//LDFLAGS    = -L/opt/vc/lib/ -lGLESv2 -lEGL -ljpeg -lkhrn_static -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt  
+#LDFLAGS    = -L/opt/vc/lib/ -lGLESv2 -lEGL -ljpeg -lkhrn_static -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt  
 
 # CORE CODE: can_rxbuff.o CAN_Interface.o buttons.o leds.o can_instance.o can_txbuff.o
 CAN_OBJS   =  can_eid.o bk_system_defs.o can_id_list.o 
@@ -107,7 +111,3 @@ clean:
 	rm -rf ./voice/*.o 	
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 
-#../core/can/%.o:%.c $(DEPS)
-#	$(CC)  $(addprefix -I,$(INC)) $(addprefix -I,$(SELF_INC)) -c -o $@ $<  $(OPTIONS) -std=c99 $(CFLAGS)
-#../core/misc/%.o:%.c $(DEPS)
-#	$(CC) $(addprefix -I,$(INC)) $(addprefix -I,$(SELF_INC)) -c -o $@ $<  $(OPTIONS) $(CFLAGS)
