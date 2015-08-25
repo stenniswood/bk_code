@@ -14,10 +14,10 @@
 #define Debug 0
 
 //----- Defines ---------------------------------------------------------------
-#define  PORT_NUM           1050  // Port number used
+#define  PORT_NUM           1050  		// Port number used
 
 void* udp_transponder_function(void* msg)
-{ 
+{
   int                  client_s;        // Client socket descriptor
   struct sockaddr_in   server_addr;     // Server Internet address
   int                  addr_len;        // Internet address length
@@ -129,7 +129,6 @@ void* udp_receive_function(void* msg)
 	  // Filter out our own broadcast - not interested in it!
 	  char name[255];
 	  gethostname(name, 255);	  
-	  //if (name == )
 	  
 	  // Print an informational message of IP address and port of the client
 	  if (Debug) printf("UDP Rx: Client IP = %s\tport = %d) \n", inet_ntoa(client_ip_addr),

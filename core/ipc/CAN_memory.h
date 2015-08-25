@@ -17,7 +17,7 @@ extern "C" {
 
 extern char* 	can_shared_memory;
 extern int 		can_segment_id;
-extern struct   can_ipc_memory_map* ipc_memory_can;
+extern struct   can_ipc_memory_map* ipc_memory_can; 
 
 #define MAX_CAN_RX_MESSAGES 300
 #define MAX_CAN_TX_MESSAGES 300

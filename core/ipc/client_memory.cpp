@@ -100,7 +100,7 @@ int cli_attach_memory()
 {
 	/* Attach the shared memory segment. */
 	int error=0;
-	client_shared_memory 	 = (char*) shmat (client_segment_id, 0, 0);
+	client_shared_memory = (char*) shmat (client_segment_id, 0, 0);
 	if (client_shared_memory==(char*)-1) {
 		printf("cli_attach_memory - ERROR: %s \n", strerror(errno) );
 		return 0;
@@ -140,9 +140,10 @@ int cli_get_segment_size()
 }
 void cli_fill_memory()
 {
-	memset(client_shared_memory, 0, cli_get_segment_size());
-	for (int i=0; i<1000; i++)
-		client_shared_memory[i] = (i%255); 
+	int size = cli_get_segment_size();
+	memset(client_shared_memory, 0, size);
+//	for (int i=0; i<size; i++)
+//		client_shared_memory[i] = (i%128); 
 }
 
 void cli_deallocate_memory(int msegment_id)
@@ -161,24 +162,25 @@ void cli_ipc_write_command_text( char* mSentence )
 {
 	int length = strlen(mSentence);	
 	int MaxAllowedLength = sizeof(ipc_memory_client->Sentence);	
-	if (length>MaxAllowedLength)
+	if (length>MaxAllowedLength) {
 		length = MaxAllowedLength;
-		
+		mSentence[MaxAllowedLength] = 0;
+	}
 	ipc_memory_client->RequestCount++;
 
 	//printf("%d:Copying %d bytes to shared mem.\n", SentenceCounter, length);
 	strcpy(ipc_memory_client->Sentence, mSentence);
 	printf("|%s|\n", ipc_memory_client->Sentence );
-	//dump_ipc();
 }
 
 void cli_ipc_write_connection_status( char* mStatus )
 {
 	int length = strlen(mStatus);	
 	int MaxAllowedLength = sizeof(ipc_memory_client->ConnectionStatus);
-	if (length > MaxAllowedLength)
+	if (length > MaxAllowedLength) {
 		length = MaxAllowedLength;	// do not write into memory of next variable.
-
+		mStatus[MaxAllowedLength] = 0;
+	}
 	ipc_memory_client->StatusCounter++;
 
 	//printf("%d:Copying %d bytes to shared mem.\n", StatusCounter, length );
@@ -221,19 +223,14 @@ long int	StatusCounter=0;
 char*		Status;
 
 
-
+ 
 #if (PLATFORM==Mac)
-char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/client/cli_shared_memseg_id.cfg";
+char cli_segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/client/cli_shared_memseg_id.cfg";
 #elif (PLATFORM==RPI)
-char segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
+char cli_segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
 #elif (PLATFORM==linux_desktop)
-char segment_id_filename[] = "/home/steve/bk_code/client/cli_shared_memseg_id.cfg";
+char cli_segment_id_filename[] = "/home/steve/bk_code/client/cli_shared_memseg_id.cfg";
 #endif
-
-
-/*#else 
-char segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
-#endif */
 
 
 /* The allocating should be done by abkInstant. */
@@ -248,12 +245,12 @@ int connect_shared_client_memory( char mAllocate )
 		cli_attach_memory( );
 		cli_fill_memory  ( );				
 		printf("Saving segment id: ");
-		cli_save_segment_id( segment_id_filename );		
+		cli_save_segment_id( cli_segment_id_filename );		
 		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
 			return 1;
 	} else  {	
-		printf("Reading segment id: %s\n", segment_id_filename);
-		cli_read_segment_id(segment_id_filename);	
+		printf("Reading segment id: %s\n", cli_segment_id_filename);
+		cli_read_segment_id(cli_segment_id_filename);	
 		cli_attach_memory();	
 		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
 			return 1;			
@@ -348,6 +345,8 @@ void cli_ipc_add_new_client( std::list<struct in_addr> mbeacon_ip_list )
 
 void print_clients()
 {
+	if (ipc_memory_client==NULL) return 0;
+	
 	int size = ipc_memory_client->NumberClients;
 	printf("There are %d available clients.\n", size );
 
@@ -357,7 +356,7 @@ void print_clients()
 	for (int i=0; i<size; i++)
 	{
 		printf(" %s \n", ptr );
-		ptr2 = strchr( ptr, 0 );
+		ptr2 = strchr( ptr, 0 )+1;
 		if (ptr2)
 			ptr = ptr2;
 	}

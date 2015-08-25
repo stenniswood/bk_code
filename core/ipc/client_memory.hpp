@@ -17,7 +17,7 @@ struct client_ipc_memory_map
 	
 	long int RequestCount;
 	char	 Sentence        [128];						// verbal commands (NLP) activate connection requests.	
-	long int AcknowledgedCount;
+	long int AcknowledgedCount; 
 	
 	int		 NumberClients;
 	char	 ClientArray[MAX_CLIENT_ARRAY_SIZE];		// String array (dimension of NumberClients)

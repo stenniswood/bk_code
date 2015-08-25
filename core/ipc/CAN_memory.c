@@ -127,7 +127,7 @@ void can_reattach_memory()
 		printf ("CAN shm reattached at address %p\n", can_shared_memory); 	
 	ipc_memory_can	  = (struct can_ipc_memory_map*)can_shared_memory;	
 }
-
+ 
 void can_detach_memory()
 {
 	/* Detach the shared memory segment. */
@@ -282,6 +282,15 @@ int CAN_read_segment_id(char* mFilename)
 }
 
 
+#if (PLATFORM==Mac)
+char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/amonitor/acan_shared_memseg_id.cfg";
+#elif (PLATFORM==RPI)
+char segment_id_filename[] = "/home/pi/bk_code/amonitor/acan_shared_memseg_id.cfg";
+#elif (PLATFORM==linux_desktop)
+char segment_id_filename[] = "/home/steve/bk_code/amonitor/acan_shared_memseg_id.cfg";
+#endif
+
+
 int can_connect_shared_memory(char mAllocate)
 {
 	if (mAllocate) {		
@@ -296,12 +305,12 @@ int can_connect_shared_memory(char mAllocate)
 		
 		can_attach_memory();
 		can_fill_memory	 ();
-		CAN_save_segment_id("/home/pi/bk_code/amonitor/acan_shared_memseg_id.cfg");			
+		CAN_save_segment_id(segment_id_filename);			
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(can_ipc_memory_map*)-1))
 			return 1;
 
 	} else  {
-		CAN_read_segment_id("/home/pi/bk_code/amonitor/acan_shared_memseg_id.cfg");	
+		CAN_read_segment_id(segment_id_filename);	
 		can_attach_memory();		
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(can_ipc_memory_map*)-1))
 			return 1;

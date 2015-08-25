@@ -72,10 +72,9 @@ int connect_to_robot(char *ip_address )
         return 1;
     }
 
-    memset(&serv_addr, '0', sizeof(serv_addr)); 
+    memset(&serv_addr, '0', sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port   = htons(BK_MEDIA_PORT);
-
 
     if(inet_pton(AF_INET, ip_address, &serv_addr.sin_addr)<=0)
     {

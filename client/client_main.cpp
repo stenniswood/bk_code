@@ -39,7 +39,6 @@
 // Right now this is user settable.  Need to detect:
 BOOL	PiCAN_Present=FALSE;
 
-
 struct sCAN MMsg;
 byte count = 0;
 int  	fd;
@@ -65,11 +64,9 @@ void establish_ipc()
 		printf("Error:  Cannot attach to abkInstant.  No shared memory established.\n");
 		printf("    You must start the Instant server first!\n");
 		exit(1);
-	} 
-	print_clients();	
+	}
+	print_clients();
 }
-
-/* void init( ) {	} */
   
 void help()
 {
@@ -177,17 +174,32 @@ int main( int argc, char *argv[] )
 		}
 		else if (strcmp(argv[1], "connect")==0)
 		{
-			strcpy( working_buffer, "connect" );
+			strcpy( working_buffer, "connect " );
 			strcat( working_buffer, argv[2]   );
 			printf("\n\nConnect command:  %s\n", working_buffer );			
 			cli_ipc_write_command_text( working_buffer );			
 		}
 		else if (strcmp(argv[1], "send")==0)
 		{
-			//TransportCAN = FALSE;
+			strcpy( working_buffer, "send " );
+			strcat( working_buffer, argv[2] );
+			printf("\n\nConnect command:  %s\n", working_buffer );			
+			cli_ipc_write_command_text( working_buffer );			
+
 			//CAN,AUDIO,VIDEO,file,Mouse/keyboard
-			parse_send_cmds(argv, argc, 2);						
+			//parse_send_cmds(argv, argc, 2);						
 		}
+		else if (strcmp(argv[1], "stop")==0)
+		{
+			strcpy( working_buffer, "stop " );
+			strcat( working_buffer, argv[2] );
+			printf("\n\nConnect command:  %s\n", working_buffer );			
+			cli_ipc_write_command_text( working_buffer );			
+
+			//CAN,AUDIO,VIDEO,file,Mouse/keyboard
+			//parse_send_cmds(argv, argc, 2);						
+ 		}
+
 	}
 	printf("================= DONE ========================\n");	
 }
