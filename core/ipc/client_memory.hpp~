@@ -4,7 +4,7 @@
 
 #include <list>
 
-#define IPC_KEY_CLI 1274
+#define IPC_KEY_CLI  1274
 #define MAX_CLIENT_ARRAY_SIZE 2048
 
 /******************** CLIENT MEMORY MAP *****************/
@@ -17,7 +17,7 @@ struct client_ipc_memory_map
 	
 	long int RequestCount;
 	char	 Sentence        [128];						// verbal commands (NLP) activate connection requests.	
-	long int AcknowledgedCount;
+	long int AcknowledgedCount; 
 	
 	int		 NumberClients;
 	char	 ClientArray[MAX_CLIENT_ARRAY_SIZE];		// String array (dimension of NumberClients)
@@ -53,7 +53,7 @@ void print_clients			();
 
 /************************************************************/
 
-int connect_shared_client_memory(char mAllocate=FALSE);
+int connect_shared_client_memory( char mAllocate=FALSE );
 char* get_connection_status		();
 char* get_sentence				();
 int   read_status_counter		();
