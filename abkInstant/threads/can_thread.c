@@ -22,7 +22,7 @@ Tenniswood - 2014
 #include <pthread.h>
 
 #include "bk_system_defs.h"
-#include "devices.h"
+//#include "devices.h"
 #include "thread_control.h"
 #include "can_thread.h"
 

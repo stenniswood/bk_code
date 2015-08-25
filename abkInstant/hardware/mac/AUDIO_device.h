@@ -5,24 +5,30 @@
 #ifndef _AUDIO_DEVICE_H_
 #define _AUDIO_DEVICE_H_
 
-#ifdef  __cplusplus
+/*#ifdef  __cplusplus
 extern "C" {
-#endif
+#endif */
 
+#include <semaphore.h>
 //#include "bcm_host.h"
 //#include "ilclient.h"
-
 
 #define BUFFER_SIZE_SAMPLES 1024
 
 typedef int int32_t;
 
+struct WAVE_HEADER 
+{
+	short 	format;				// PCM=1
+	short 	channels_rxd;	
+	int 	sample_rate;	
+	int		byte_rate;	
+	short 	block_align;		
+	short 	bits_per_sample;		
+};
+
 typedef struct {
    sem_t 				sema;
-   ILCLIENT_T*			client;
-   COMPONENT_T*			audio_render;
-   COMPONENT_T*			list[2];
-   OMX_BUFFERHEADERTYPE *user_buffer_list; // buffers owned by the client
    uint32_t 			num_buffers;
    uint32_t 			bytes_per_sample;
 } AUDIOPLAY_STATE_T;
@@ -55,13 +61,14 @@ void test_function(int id);
 //void play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
 
 
+
 // BK:
 int32_t audio_setup_and_play ( int dest, int samplerate, int channels, int bitdepth );
 uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate );
 void	 audio_close		  ( );
 
-#ifdef  __cplusplus
+/*#ifdef  __cplusplus
 }
-#endif
+#endif */
 
 #endif

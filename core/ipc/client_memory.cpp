@@ -345,7 +345,7 @@ void cli_ipc_add_new_client( std::list<struct in_addr> mbeacon_ip_list )
 
 void print_clients()
 {
-	if (ipc_memory_client==NULL) return 0;
+	if (ipc_memory_client==NULL) return ;
 	
 	int size = ipc_memory_client->NumberClients;
 	printf("There are %d available clients.\n", size );

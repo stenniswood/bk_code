@@ -108,7 +108,7 @@ int can_attach_memory()
 {
 	/* Attach the shared memory segment. */
 	can_shared_memory = (char*)shmat( can_segment_id, 0, 0 );
-	if (can_shared_memory==-1) {
+	if (can_shared_memory==(char*)-1) {
 		printf("can_attach_memory - ERROR: %s \n", strerror(errno) );
 		return 0;
 	} else 
@@ -121,7 +121,7 @@ void can_reattach_memory()
 {
 	/* Reattach the shared memory segment, at a different address. */ 
 	can_shared_memory = (char*) shmat (can_segment_id, (void*) 0x5000000, 0); 
-	if (can_shared_memory==-1) {
+	if (can_shared_memory==(char*)-1) {
 		printf("can_attach_memory - ERROR: %s \n", strerror(errno) );
 	} else 
 		printf ("CAN shm reattached at address %p\n", can_shared_memory); 	

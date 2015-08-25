@@ -1,3 +1,5 @@
+/* Geared for the binary protocol 	*/
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -10,7 +12,6 @@
 #include <time.h> 
 #include "bk_system_defs.h"
 #include "protocol.h"
-#include "devices.h"
 #include "CAN_Interface.hpp"
 #include "can_txbuff.hpp"
 

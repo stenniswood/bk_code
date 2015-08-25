@@ -12,6 +12,7 @@ extern BOOL WifiConnected;
 int		are_importing_CAN();
 int		are_exporting_CAN();
 
+int 		send_file_transmit_request();
 
 // Rebroadcast a CAN message.
 int 		Cmd_client_CAN_Start( );

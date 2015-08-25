@@ -1,9 +1,17 @@
+/************************************************************************	
+This establishes a connection to another bkInstant media center. via the 
+nlp port.  This allows sending voice commands to a "robot".  
+
+In test right now is:
+incoming file for you from 192.168.1.144:
+*************************************************************************/
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
@@ -101,6 +109,14 @@ int connect_to_robot(char *ip_address )
     return 0;
 }
 
+int send_file_transmit_request()
+{
+	printf("send_file_transmit_request:  \n");
+	std::string msg = "incoming file for you from 192.168.1.144:";
+	bytes = write(sockfd, msg.c_str(), msg.length() );	
+	printf("%d bytes written\n",bytes);
+}
+
 int client_send_buffer()
 {
 	//bytes = write(sockfd, coBuff, length );	
@@ -110,7 +126,7 @@ int Cmd_client_CAN_Start( )
 {
 	CAN_SendingOn = TRUE;
 	printf("Cmd_client_CAN_Start:  CAN message stream enabled...\n");
-	int length = Cmd_CAN_Start( coBuff );
+	int length = Cmd_CAN_Start( coBuff ); 
 	DumpBuffer( coBuff, length );
 	bytes = write(sockfd, coBuff, length );
 	printf("Cmd_client_CAN_Start:  %d bytes written\n", bytes );

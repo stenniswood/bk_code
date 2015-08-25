@@ -9,15 +9,15 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <time.h> 
-#include "protocol.h"
-#include "devices.h"
 #include <termios.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "serverthread.h"
 #include <string>
 #include <list>
+#include "protocol.h"
+//#include "devices.h"
 
+#include "serverthread.h"
 #include "GENERAL_protocol.h"
 #include "CAN_protocol.h"
 #include "HMI_protocol.h"
@@ -26,6 +26,7 @@
 #include "AUDIO_protocol.h"
 #include "CAMERA_protocol.h"
 #include "visual_memory.h"
+#include "bk_system_defs.h"
 
 
 #define MAX_SENTENCE_LENGTH 255
@@ -38,7 +39,7 @@ fd_set	 		socks;
 int 	 		listenfd = 0, connfd = 0;    
 
 #define OUTPUT_BUFFER_SIZE 65535
-static BYTE 	oBuff[OUTPUT_BUFFER_SIZE];
+static BYTE 	general_socket_buff[OUTPUT_BUFFER_SIZE];
 static void 	exit1() {	while (1==1) {  }; }
 
 int 			bytes_txd;

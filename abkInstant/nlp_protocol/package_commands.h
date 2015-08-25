@@ -31,6 +31,7 @@ int Cmd_Audio_End  ( BYTE* mBuffer 								   		);
 int Cmd_Text_Msg( BYTE* mBuffer, char*  mMessage						 );
 
 // REQUESTS:
+int Req_CAN_Listen( BYTE* mBuffer );
 int Req_CAN	 	( BYTE* mBuffer, BYTE mPin, boolean mHigh				 );
 int Req_CAN_mask( BYTE* mBuffer, BYTE mPin, boolean mHigh				 );	
 int Req_Picture ( BYTE* mBuffer, BYTE* mImage, int mWidth, int mHeight 	 );

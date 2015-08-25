@@ -25,7 +25,7 @@ Tenniswood 2014
 #include <vector>
 #include <string>
 #include "bk_system_defs.h"
-#include "devices.h"
+//#include "devices.h"
 #include "thread_control.h"
 #include "file_thread.h"
 #include "hmi_thread.h"

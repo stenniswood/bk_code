@@ -360,11 +360,12 @@ int main( int argc, char *argv[] )
 	init();
 	printf("===============================================\n");
 	
-	TransportCAN = FALSE;
+	CAN_SendingOn   = FALSE;
+	CAN_ListeningOn = FALSE;
 	if (argc>1)
 	{
 		// FORCE CLIENT CONNECTION :
-		int error = connect_to_robot(argv[1]);
+		/*int error = connect_to_robot(argv[1]);
 		if (error==0)	// Success,
 		{
 			WifiConnected = TRUE;
@@ -374,7 +375,7 @@ int main( int argc, char *argv[] )
 			strcpy(filename, "test" );
 			create_file_tx_thread( argv[1], filespath, filename, BASE_FILE_PORT );
 			//Cmd_client_CAN_Start( );
-		}
+		}*/
 	}
 	printf("================= Checking command line arguments ========================\n");	
 

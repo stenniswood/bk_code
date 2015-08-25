@@ -4,7 +4,7 @@
 
 #include <list>
 
-#define IPC_KEY_CLI 1274
+#define IPC_KEY_CLI  1274 
 #define MAX_CLIENT_ARRAY_SIZE 2048
 
 /******************** CLIENT MEMORY MAP *****************/

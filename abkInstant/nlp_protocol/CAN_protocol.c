@@ -7,11 +7,11 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <time.h> 
-#include "protocol.h"
-#include "devices.h"
 #include <string.h>
 #include <string>
 #include <list>
+#include "protocol.h"
+#include "devices.h"
 
 
 #include "GENERAL_protocol.h"
@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+BOOL CAN_ListeningOn;	// if true we will be receiving CAN Traffic.
+BOOL CAN_SendingOn;		// if true we will be sending CAN Traffic.
 
 static std::list<std::string>  	subject_list;
 static std::list<std::string> 	verb_list;

@@ -300,6 +300,22 @@ void Formulate_AUDIO_Response(UINT mToken)
 {
 }
 
+/*****************************************************************
+Show contents of buffer on the console.  Usefull for debugging.
+*****************************************************************/
+void DumpBuffer( BYTE* mbuff, int mlength)
+{
+	int i;
+	printf("\nBuffer: %d bytes", mlength);
+	for (i=0; i<mlength; i++)
+	{
+		if ((i%8)==0)
+			printf("\n");
+		printf(" %2x", *(mbuff+i) );
+	}
+	printf("\n");
+}
+
 
 /*****************************************************************
 Do the work of the Telegram :

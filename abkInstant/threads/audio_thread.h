@@ -26,15 +26,16 @@ typedef struct wav_header
     int 		subchunk2_size;
 };
 ********************************************************************/
-
-extern	BOOL	audio_terminate_requested;
-
-
+#define AUDIO_OUTPUT_BUFFER_SIZE 65535
+extern	BOOL		audio_terminate_requested;
+extern byte		 	audio_socket_buffer[AUDIO_OUTPUT_BUFFER_SIZE+100];
 
 void Print_General_Msg_Acknowledgement(UINT mToken);
 void Print_Msg_Acknowledgement(UINT mToken);
 BOOL Process_GeneralPurpose_Telegram( UINT  mToken, char* mMessage, int DataLength, int mconnfd );
 BOOL Process_Telegram( UINT  mToken, char* mMessage, WORD mDataLength, int mconnfd );
+
+void SendAudioTelegram( BYTE* mBuffer, int mSize);
 
 void* audio_server_thread(void* msg);
 

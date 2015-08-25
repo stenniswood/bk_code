@@ -20,16 +20,13 @@ Tenniswood - 2014
 #include <termios.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include "bk_system_defs.h"
-#include "devices.h"
+//#include "devices.h"
 #include "thread_control.h"
 #include "audio_thread.h"
 #include "utilities.h"
 #include "audio_memory.h"
-
-//#include "bcm_host.h"
-//#include "ilclient.h"
-
 #include "AUDIO_device.h"
 
 
@@ -52,8 +49,8 @@ static struct   sockaddr_in p_in;	// To be stored in UserList for each user.
 static fd_set	socks;
 static int 	 	listenfd = 0, connfd = 0;
 
-#define OUTPUT_BUFFER_SIZE 65535
-static byte 	oBuff[OUTPUT_BUFFER_SIZE];
+
+byte		 	audio_socket_buffer[AUDIO_OUTPUT_BUFFER_SIZE+100];
 BOOL 			start_new_file = TRUE;
 
 struct wav_header wave_header;		// first packet.
@@ -143,7 +140,7 @@ BOOL handle_audio_data( )
 }
 
 /* It's possible to also send audio to other end with the same socket. */
-static void SendTelegram( byte* mBuffer, int mSize)
+void SendAudioTelegram( BYTE* mBuffer, int mSize)
 {
 	//printf("Sending: ");
 	write(connfd, mBuffer, mSize ); 

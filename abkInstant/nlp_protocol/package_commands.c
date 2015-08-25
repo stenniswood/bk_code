@@ -129,6 +129,14 @@ int Req_GPIO_cmd( BYTE* mBuffer, BYTE mPin, boolean mHigh)
 	return 9;	
 }
 
+
+int Req_CAN_Listen( BYTE* mBuffer )
+{
+	package_int( mBuffer, 0, REQ_CAN_LISTEN );	// Token
+	package_int( mBuffer, 4, 0 );				// Length
+	return 8;
+}
+
 int Req_CAN( BYTE* mBuffer, BYTE mPin, boolean mHigh				)
 {}
 int Req_CAN_mask( BYTE* mBuffer, BYTE mPin, boolean mHigh			)	

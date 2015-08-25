@@ -21,7 +21,7 @@ Tenniswood - 2014
 #include <unistd.h>
 #include <pthread.h>
 #include "bk_system_defs.h"
-#include "devices.h"
+//#include "devices.h"
 #include "thread_control.h"
 #include "video_thread.h"
 
@@ -32,7 +32,7 @@ Tenniswood - 2014
 
 static BOOL 	save_requested = FALSE;
 static BOOL 	play_requested = FALSE;
-static BOOL	video_terminate_requested = FALSE;
+	   BOOL		video_terminate_requested = FALSE;
 static int   	port	= 6000;
 
 #define  VIDEO_BUFFER_SIZE 65535
