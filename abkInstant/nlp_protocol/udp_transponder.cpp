@@ -11,7 +11,8 @@
 #include <netdb.h>        // Needed for sockets stuff
 #include "udp_transponder.hpp"
 #include "visual_memory.h"
-
+#include "bk_system_defs.h" 
+#include "client_memory.hpp"
 
 #define Debug 0
 
@@ -72,31 +73,53 @@ void  handle_client_list( struct in_addr* client_ip_addr, char in_buf[] )
 */
 void update_client_list()
 {
-	if (ipc_memory_avis==NULL)
+	if (ipc_memory_avis)
 	{ 
-		printf(" avisual memory not allocated!\n");
-		return ;
+		ipc_memory_avis->NumberClients = beacon_ip_list.size();
+		list<struct in_addr>::iterator iter = beacon_ip_list.begin();
+		int byte_array_size = 0;
+		char* ptr = ipc_memory_avis->ClientArray;
+		
+		// Now add each client as a string followed by a null terminator.  Hence a string array.
+		while(( iter != beacon_ip_list.end()) && (byte_array_size<MAX_CLIENT_ARRAY_SIZE))
+		{
+			char* ip_str = inet_ntoa(*iter);
+			int len = strlen(ip_str);
+			
+			// Copy 1 client:
+			memcpy( ptr,  ip_str, len );
+			ptr[len] = 0;
+			
+			// Adjust for next client:
+			ptr      += (len+1);		// skip null terminator!
+			byte_array_size += (len+1);	// null terminator
+			iter++;
+		}
 	}
-	// Number of clients.
-	ipc_memory_avis->NumberClients = beacon_ip_list.size();
-	list<struct in_addr>::iterator iter = beacon_ip_list.begin();
-	int byte_array_size = 0;
-	char* ptr = ipc_memory_avis->ClientArray;
 	
-	// Now add each client as a string followed by a null terminator.  Hence a string array.
-	while(( iter != beacon_ip_list.end()) && (byte_array_size<MAX_CLIENT_ARRAY_SIZE))
-	{
-		char* ip_str = inet_ntoa(*iter);
-		int len = strlen(ip_str);
-		
-		// Copy 1 client:
-		memcpy( ptr,  ip_str, len );
-		ptr[len] = 0;
-		
-		// Adjust for next client:
-		ptr      += (len+1);		// skip null terminator!
-		byte_array_size += (len+1);	// null terminator
-		iter++;
+	// Number of clients.
+	if (ipc_memory_client)
+	{	
+		ipc_memory_client->NumberClients    = beacon_ip_list.size();
+		list<struct in_addr>::iterator iter = beacon_ip_list.begin();
+		int byte_array_size = 0;
+		char* ptr = ipc_memory_client->ClientArray;
+
+		// Now add each client as a string followed by a null terminator.  Hence a string array.
+		while(( iter != beacon_ip_list.end()) && (byte_array_size<MAX_CLIENT_ARRAY_SIZE))
+		{
+			char* ip_str = inet_ntoa(*iter);
+			int len      = strlen(ip_str);
+			
+			// Copy 1 client:
+			memcpy( ptr,  ip_str, len );
+			ptr[len] = 0;
+			
+			// Adjust for next client:
+			ptr      += (len+1);		// skip null terminator!
+			byte_array_size += (len+1);	// null terminator
+			iter++;
+		}
 	}
 }
 //--------------------- END CLIENT LIST ---------------------------------------

@@ -187,7 +187,7 @@ void* server_thread(void*)
     	socklen_t size = (socklen_t)sizeof(client_addr);
         connfd = accept(listenfd, (struct sockaddr*)&client_addr, &size ); 
 		printf("=== Socket opened ===\n");
-		update_ipc_status( &client_addr );
+		update_ipc_status( &client_addr ); 
 		
 		// REPEAT UNTIL REQ_SHUT_DOWN is encountered:
 		while (!done)
