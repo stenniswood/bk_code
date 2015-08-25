@@ -2,7 +2,7 @@ RPI = 1
 linux_desktop = 2
 Mac = 3
 
-PLATFORM = $(linux_desktop)
+PLATFORM = $(RPI)
 #PLATFORM = $(Mac)
 
 ifeq ($(PLATFORM), $(RPI))

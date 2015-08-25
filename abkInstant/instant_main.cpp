@@ -42,8 +42,12 @@ pthread_t 	udp_tx_thread_id;
 pthread_t 	udp_rx_thread_id;
 pthread_t 	server_thread_id;
 
+
 void create_threads()
-{	
+{
+	/* These threads are located in :   
+	*/
+	
 	// CREATE UDP - Transponder : 
 	const char *message1 = "every second";
 	int iret1 = pthread_create( &udp_tx_thread_id, NULL, udp_transponder_function, (void*) message1);
@@ -53,7 +57,7 @@ void create_threads()
 		exit(EXIT_FAILURE);
 	}
 
-	// UDP Receiver : 
+	// UDP Receiver :  
 	int iret2 = pthread_create( &udp_rx_thread_id, NULL, udp_receive_function, (void*) message1);
 	if (iret2)
 	{
@@ -123,12 +127,8 @@ void establish_ipc()
 
 	if (USE_CAN)
 	{
-	 result =  can_connect_shared_memory(FALSE);
-//		can_allocate_memory();
-//		can_attach_memory  (); 
-//		can_fill_memory	   ();
+	    result =  can_connect_shared_memory(FALSE);
 	} 
-//	else can_deallocate_memory();
 	printf("****************** END SHARED MEMORY SETUP *******************");	
 }
 
@@ -143,17 +143,8 @@ void init( )
 	// and attach myInterrupt() to the interrupt
 	create_threads();
 
-	//CAN_init( CANSPEED_250, 0 );	
-	/* The CAN_isr() callbacks are not recommended.  They're only for 
-	   quick routines.  The messages are queued and retrieved in the background! 
-	//set_system_rx_callback( callback_board_presence );
-	//set_model_rx_callback( callback_main );				*/
-	//bl.RequestBoardsPresent( REQUEST_TYPE_PRESENCE );
-
 	printf("done with board request()!\n");
 
-	//printf("\nPiCAN Board present & Responding.\n" );
-	//printf("*****************************************\n");
 }
   
 void help()
@@ -195,6 +186,31 @@ void can_interface()
 	}		*/
 }
 
+#if (PLATFORM==Mac)
+char amon_command[] = "~/bk_code/amonitor/amon";
+#elif (PLATFORM==RPI)
+char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon";
+#elif (PLATFORM==linux_desktop)
+char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
+#endif
+
+
+int start_amon() 
+{
+    int pid;
+    switch (pid=fork()) {
+        case -1:
+			printf("fork() = -1\n");
+            return 0;
+        case 0:
+            execvp(amon_command, NULL);
+            printf("returned from ececvp\n");
+        default:
+            return 0;
+    }
+    return 1;
+}
+
 /* Note the client can do any of these:
 	establish a connection
 	audio  						(send and/or receive)
@@ -205,26 +221,109 @@ void can_interface()
 */
 void handle_client_request()
 {
-	// client can 
-	char* space = strchr(ipc_memory_client->Sentence, ' ');
-	*space = 0;
-	int result = strcmp(ipc_memory_client->Sentence, "CONNECT");			
+	if (ipc_memory_client==NULL)	return;
+ 
+ 	printf ("Sentence:%s|\n", ipc_memory_client->Sentence );
+	int result = strcmp(ipc_memory_client->Sentence, "whoami");
 	if (result==0)
-		connect_to_robot(*(space+1) );
+		printf("whoami\n");
+
+	result = strcmp(ipc_memory_client->Sentence, "list");
+	if (result==0)
+		printf("list\n");
+
+	result = strcmp(ipc_memory_client->Sentence, "disconnect");
+	if (result==0)
+		result = disconnect_from_robot( );
+
+	// AFTER THIS BEGIN 2+ WORD COMMANDS:
+	char* space = strchr(ipc_memory_client->Sentence, ' ');
+	if (space==NULL)  {  return;	};
+	*space = 0;
+	space++;
 	
-/*	result = strcmp(ipc_memory_client->Sentence, "AUDIO");
-	result = strcmp(ipc_memory_client->Sentence, "VIDEO");
-	result = strcmp(ipc_memory_client->Sentence, "FILE"); */
+	result = strcmp(ipc_memory_client->Sentence, "connect");
+	if (result==0) {
+		printf("connecting..\n");
+		result = connect_to_robot( (space+1) );
+	}
+
+	result = strcmp(ipc_memory_client->Sentence, "send");			
+	if (result==0)
+	{
+		printf("sending..\n");
+		result = strcmp(space, "can");			
+		if (result==0)
+		{
+			start_amon();
+			printf("sending..CAN\n");
+			Cmd_client_CAN_Start();
+		}
+		result = strcmp(space, "audio");
+		if (result==0)
+		{
+		}
+		result = strcmp(space, "video");			
+		if (result==0)
+		{
+		}
+		result = strcmp(space, "file");			
+		if (result==0)
+		{
+			send_file_transmit_request();
+		}
+		result = strcmp(space, "mouse");			
+		if (result==0)
+		{
+		}
+		result = strcmp(space, "keyboard");
+		if (result==0)
+		{
+		}
+		
+	}
+
+	result = strcmp(ipc_memory_client->Sentence, "stop");
+	if (result==0)
+	{
+		printf("stoping..\n");
+		result = strcmp(space, "can");			
+		if (result==0)
+		{
+		}
+		result = strcmp(space, "audio");
+		if (result==0)
+		{
+		}
+		result = strcmp(space, "video");			
+		if (result==0)
+		{
+		}
+		result = strcmp(space, "file");			
+		if (result==0)
+		{
+		}
+		result = strcmp(space, "mouse");			
+		if (result==0)
+		{
+		}
+		result = strcmp(space, "keyboard");
+		if (result==0)
+		{
+		}	
+	}
 }
 
 void scan_inputs()
 {
+	//printf("%d %d\n", ipc_memory_client->RequestCount, ipc_memory_client->AcknowledgedCount);
 	// CHECK CLIENT MEMORY FOR REQUEST:
 	if (ipc_memory_client->RequestCount > ipc_memory_client->AcknowledgedCount)
 	{
-		//handle_client_request();
-	}
-	
+		printf("calling handle_client_request() \n");
+		handle_client_request();
+		ipc_memory_client->AcknowledgedCount++;
+	}	
 }
 		
 void update_outputs()
@@ -232,17 +331,15 @@ void update_outputs()
 	// Update Client List:
 /*	int size = ipc_memory_client->NumberClients;
 	for (int i=0; i<size; i++)
-		cli_ipc_add_new_client( mClientText );
-		
+		cli_ipc_add_new_client( mClientText );		
 */	
 }
-
 
 void ethernet_interface()	{	/* wifi comms 	 */ }
 void voice_interface()		{	/* NLP/Synthesis */ }
 
 char filespath[64];
-char filename[64];
+char filename [64];
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
 	are only set when the Enable is.  maybe.		*/
@@ -289,10 +386,9 @@ int main( int argc, char *argv[] )
 		can_interface();			// empty
 		ethernet_interface();		// empty
 		voice_interface();			// empty
-	
 		scan_inputs();
 		update_outputs();
-		sleep(1000);		
+		usleep(100000);
 	}
 }
 

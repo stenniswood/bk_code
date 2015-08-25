@@ -1,3 +1,18 @@
+RPI   = 1
+linux_desktop = 2
+Mac   = 3
+PLATFORM = $(RPI)
+
+ifeq ($(PLATFORM), $(RPI))
+HARDWARE_PATH = ./hardware/rpi/
+endif
+ifeq ($(PLATFORM), $(linux_desktop))
+HARDWARE_PATH = ./hardware/linux_desktop/
+endif
+ifeq ($(PLATFORM), $(Mac))
+HARDWARE_PATH = ./hardware/mac/
+endif
+
 CC		   = g++
 OPTIONS	   = -fpermissive -Wwrite-strings -Wno-deprecated -w
 INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/  \
@@ -18,7 +33,7 @@ CFLAGS+=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POS
 		-D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
 		-U_FORTIFY_SOURCE -Wall -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -ftree-vectorize \
 		-pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST \
-		-DUSE_VCHIQ_ARM -Wno-psabi 
+		-DUSE_VCHIQ_ARM -Wno-psabi  -DRPI=$(RPI) -DMac=$(Mac) -Dlinux_desktop=$(linux_desktop) -DPLATFORM=$(PLATFORM)
 
 #LDFLAGS    = -L/opt/vc/lib/ -lGLESv2 -lEGL -ljpeg -lkhrn_static -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt  
 
