@@ -27,7 +27,6 @@
 #include "CAMERA_protocol.h"
 #include "visual_memory.h"
 #include "bk_system_defs.h"
-#include "client_memory.hpp"
 
 
 #define MAX_SENTENCE_LENGTH 255

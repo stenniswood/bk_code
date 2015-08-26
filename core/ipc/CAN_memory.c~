@@ -61,30 +61,6 @@ static uint8_t print_message(struct sCAN* msg)
 	else
 		printf("\tDF\n");
 }
- 
-uint8_t sprint_message(char* mBuffer, struct sCAN* msg)
-{	
-	char buffer[80];
-	sprintf(mBuffer, " ID=%2X:%4X:%d; ", msg->id.group.block, 
-			 msg->id.group.id, msg->id.group.instance );
-	//printf("  %s\t", getID_Text( msg->id.group.id ) );
-	sprintf(buffer, "DLC=%d; ", msg->header.DLC );		strcat (mBuffer, buffer);
-	sprintf(buffer, "D[]=");					strcat (mBuffer, buffer);
-	int i;
-	for (i=0; i<8; i++)
-	{
-		if (i >= msg->header.DLC) {	
-			sprintf(buffer, "   ");						
-			strcat (mBuffer, buffer); 
-		}
-		else
-		{	sprintf(buffer, "%2x ", msg->data[i]);		strcat (mBuffer, buffer); }
-	}
-	if (msg->header.rtr==1)	
-	{	sprintf(buffer, "\tRTR\n");				strcat (mBuffer, buffer);	}
-	else
-	{	sprintf(buffer, "\tDF\n");				strcat (mBuffer, buffer);	}
-}
 
 
 static void dump_ipc()

@@ -94,7 +94,7 @@ static void can_parse_thread_params(char* mMsg)
 
 	}
 	*delim2 = ':';
-		printf("%s\n", mMsg );			
+	
 	port 	     = atoi( delim2+1 );
 	printf("Recevied Port=%d\n", port );
 }

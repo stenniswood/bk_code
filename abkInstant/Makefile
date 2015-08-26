@@ -80,7 +80,7 @@ HARDWARE_OBJS += CAN_device.o
 LIBFLAGS 	+= -L../core/libs/ilclient -lopenmaxil -lvchiq_arm -lilclient -lvcos -lbcm_host -L./hardware/rpi/ -L/opt/vc/lib -lrt -L../core/libs/vgfont
 endif
 ifeq ($(PLATFORM), $(linux_desktop))
-LIBFLAGS 	+= -L../core/libs/ilclient -lopenmaxil -lvchiq_arm -lilclient -lvcos -lbcm_host -L./hardware/rpi/ -L/opt/vc/lib -lrt
+LIBFLAGS 	+= -L../core/libs/ilclient -L./hardware/rpi/ -L/opt/vc/lib -lrt
 endif
 
 

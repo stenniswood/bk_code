@@ -153,7 +153,7 @@ int Cmd_client_send_CAN( struct sCAN* Msg )
 	//int length = Cmd_CAN( coBuff, Msg );
 	//DumpBuffer( coBuff, length );
 
-	uint8_t test = sprint_message( (char*)coBuff, Msg ); 
+	uint8_t test = sprint_message( (char*)coBuff, Msg );
 	int length   = strlen((char*)coBuff);
 	bytes = write(sockfd, coBuff, length );
 	printf("Cmd_client_send_CAN:  %d bytes written\n", bytes);	

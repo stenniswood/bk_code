@@ -245,7 +245,7 @@ void handle_client_request()
 	result = strcmp(ipc_memory_client->Sentence, "connect");
 	if (result==0) {
 		printf("connecting..\n");
-		result = connect_to_robot( space );
+		result = connect_to_robot( (space+1) );
 	}
 
 	result = strcmp(ipc_memory_client->Sentence, "send");			

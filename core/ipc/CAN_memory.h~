@@ -62,7 +62,6 @@ int  can_connect_shared_memory(char mAllocate);
 void ipc_write_can_connection_status( char* mStatus   );
 void ipc_write_can_message( struct sCAN* mMsg );
 
-uint8_t sprint_message(char* mBuffer, struct sCAN* msg);
 
 void ipc_add_can_rx_message( struct sCAN* mMsg );
 /***** Rx Buffer Functions (replaces former "can_rxbuff.cpp"):	******/

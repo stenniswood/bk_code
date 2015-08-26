@@ -166,17 +166,17 @@ The message can be:
 "receive&save"
 "receive&play&save"
 *******************************/
-char message_params[40];
 void create_CAN_thread( BOOL mPlay, BOOL mSave, int Port )
 {	
 	// FORM THE PARAMETER LIST:
+	static char message[] = "none:none:600001";	
 	if (mPlay)
-		memcpy (message_params, "play", 4);		// play on piCAN
+		memcpy (message, "play", 4);		// play on piCAN
 	if (mSave)
-		memcpy (message_params+5, "send", 4);
-	sprintf(message_params+10, "%d", Port);
+		memcpy (message+5, "send", 4);
+	sprintf(message+10, "%d", Port);
 
-	int iret1 = pthread_create( &can_thread_id, NULL, CAN_server_thread, (void*) message_params);
+	int iret1 = pthread_create( &can_thread_id, NULL, CAN_server_thread, (void*) message);
 	if (iret1)
 	{
 		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
