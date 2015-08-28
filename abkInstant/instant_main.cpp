@@ -29,6 +29,7 @@
 #include "udp_transponder.hpp"
 #include "thread_control.h"
 
+#include "CAN_protocol.h"
 
 // Right now this is user settable.  Need to detect:
 BOOL	PiCAN_Present=FALSE;
@@ -381,6 +382,10 @@ int main( int argc, char *argv[] )
 
 	printf("================= Main Loop ==========================\n");
 	int count = 0;
+	//Init_CAN_Protocol();
+	sleep(1);
+	//Parse_CAN_Statement( "incoming CAN");
+	//create_CAN_thread( FALSE,  TRUE );
 	while (1) 
 	{
 		//printf("Loop %d\n", count++);

@@ -170,12 +170,16 @@ char message_params[40];
 void create_CAN_thread( BOOL mPlay, BOOL mSave, int Port )
 {	
 	// FORM THE PARAMETER LIST:
+	memset( message_params, ' ', 40);
 	if (mPlay)
 		memcpy (message_params, "play", 4);		// play on piCAN
 	if (mSave)
 		memcpy (message_params+5, "send", 4);
 	sprintf(message_params+10, "%d", Port);
+	message_params[4]=':';
+	message_params[9]=':';
 
+	printf("sending msg=%s\n", message_params);
 	int iret1 = pthread_create( &can_thread_id, NULL, CAN_server_thread, (void*) message_params);
 	if (iret1)
 	{
@@ -249,6 +253,8 @@ void terminate_file_thread( )
 
 pthread_t file_tx_thread_id;
 pthread_t audio_tx_thread_id;
+pthread_t can_tx_thread_id;
+
 
 /*****************************
 The message can be:
@@ -360,10 +366,10 @@ void create_CAN_tx_thread	  	( BOOL mPlay, BOOL mSave, int Port )
 	printf("can_thread.message=%s\n", message);
 
 	// CREATE THREAD : 
-	int iret1 = pthread_create( &can_tx_thread_id, NULL, can_transmit_thread, (void*) message);
-	if (iret1)
+	//int iret1 = pthread_create( &can_tx_thread_id, NULL, can_transmit_thread, (void*) message);
+	//if (iret1)
 	{
-		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
+		//fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
 		exit(EXIT_FAILURE);
 	}
 }

@@ -154,7 +154,7 @@ BOOL Parse_CAN_Statement( char* mSentence )
 			// Maybe want to verify the source IP address for security purposes
 			// later on.  Not necessary now!
 			printf( "Listening for incoming CAN data...\n");
-			create_CAN_thread( FALSE,  TRUE );
+			create_CAN_thread( TRUE,  FALSE );
 			retval = TRUE;
 		}
 		if ( (strcmp(verb->c_str(), "send") ==0) ||

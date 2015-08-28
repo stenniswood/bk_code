@@ -245,7 +245,7 @@ void handle_client_request()
 	result = strcmp(ipc_memory_client->Sentence, "connect");
 	if (result==0) {
 		printf("connecting..\n");
-		result = connect_to_robot( (space+1) );
+		result = connect_to_robot( space );
 	}
 
 	result = strcmp(ipc_memory_client->Sentence, "send");			
@@ -381,6 +381,10 @@ int main( int argc, char *argv[] )
 
 	printf("================= Main Loop ==========================\n");
 	int count = 0;
+	Init_CAN_Protocol();
+	sleep(1);
+	//Parse_CAN_Statement( "incoming CAN");
+	//create_CAN_thread( FALSE,  TRUE );
 	while (1) 
 	{
 		//printf("Loop %d\n", count++);

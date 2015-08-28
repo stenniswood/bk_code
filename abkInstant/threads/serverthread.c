@@ -30,7 +30,7 @@
 #include "client_memory.hpp"
 
 
-#define MAX_SENTENCE_LENGTH 255
+#define MAX_SENTENCE_LENGTH 1024
 char	 		header[MAX_SENTENCE_LENGTH];
 
 static char 	ip_addr[16]; 			// for user feedback

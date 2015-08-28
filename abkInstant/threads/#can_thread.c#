@@ -80,19 +80,21 @@ static void can_parse_thread_params(char* mMsg)
 	if (delim) *delim = 0;
 	if (strcmp(mMsg, "play") == 0)		// This means send CAN data out on PiCAN
 	{
-		printf("Play Found\n");
+		printf("PLay Found\n");
 		// init audio play
 	}
-	*delim = ':';		// restore			
+	if (delim) *delim = ':';		// restore
+		printf("%s\n", mMsg );
+			
 	char* delim2 = strchr(delim+1, ':');
 	if (delim2) *delim2 = 0;
-
-	if (strcmp(delim+1, "send") == 0)	// Means send Rxd CAN data out on ethernet to client.
+		printf("%s\n", mMsg );			
+	if (strcmp(delim2+1, "send") == 0)	// Means send Rxd CAN data out on ethernet to client.
 	{
-		printf("Send Found\n");	
+
 	}
 	*delim2 = ':';
-	
+		printf("%s\n", mMsg );			
 	port 	     = atoi( delim2+1 );
 	printf("Recevied Port=%d\n", port );
 }
