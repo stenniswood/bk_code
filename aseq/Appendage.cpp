@@ -121,6 +121,31 @@ bool Appendage::vector_fully_read( )
 	return false;	
 }
 
+void Appendage::disable_outputs( )
+{
+	for (int a=0; a<actuators.size(); a++)
+		actuators[a].ActiveOutputs = FALSE;
+}
+void Appendage::enable_outputs( )
+{
+	for (int a=0; a<actuators.size(); a++)
+		actuators[a].ActiveOutputs = TRUE;
+}
+	
+// handles incoming msg
+int Appendage::handle_CAN_message( struct sCAN* mMsg )
+{
+	if (Enable==false) return 0;
+	
+	int handled = 0;
+	for (int a=0; a<actuators.size(); a++)
+	{
+		handled = actuators[a].handle_CAN_message( mMsg );
+		if (handled)
+			ElementsFilled |= (1<<a);		// Mark it			
+	}	
+}
+
 void Appendage::print_current_angles(  )
 {
 	if (Enable==false)  return ;

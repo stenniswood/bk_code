@@ -6,6 +6,7 @@
 #include <math.h>
 #include <time.h>
 #include <sys/time.h>
+#include <time.h>
 
 #include "bk_system_defs.h"
 #include "can_eid.h"
@@ -26,6 +27,7 @@
 #include "Appendage.hpp"
 #include "robot.hpp"
 #include "config_file.h"
+
 
 
 float radians(float mDegrees)
@@ -81,6 +83,7 @@ void Motor::Initialize()
 	CurrentTimesTen	= 0.;		// fixed point
 
 	ZeroOffset		= 512;		// center	
+	ActiveOutputs	= TRUE;
 	MotorEnable		= TRUE;		// If FALSE, does not participate in the sequencing
 	MotorDirection	= 1;		// 
 	MotorStopped	= 0;		// not stopped!
@@ -164,14 +167,11 @@ int Motor::compute_position( float mAngle )
 
 float Motor::compute_angle( word PotValue )
 {
-	float Angle = (PotValue-ZeroOffset) * DegreesPerCount;
+	float Angle = (PotValue - ZeroOffset) * DegreesPerCount;
 	return Angle;	
 }
 
-void Motor::compute_curr_angle( )
-{
-	CurrAngle = compute_angle(CurrCount);
-}
+
 
 void Motor::reset_pid()
 {
@@ -349,6 +349,17 @@ void Motor::print_stop( int mStopNum )
 	{  printf("Stop2: ");	print_stop_( stop2 );	}
 }
 
+void Motor::print_state( )	// Position, speed, stops active, torque applied, etc.  1 liner.
+{
+	if (MotorEnable==FALSE)
+		printf("Motor Disabled!\n");
+	else {
+		printf("Mot#=%3d; Pot=%4d; ZeroO=%4d; Angle=%7.2f degs;\tMeas_Spd=%7.3f Req_Spd=%7.3f degs/sec; Duty=%7.3f\n", 
+				Instance, CurrCount, ZeroOffset, CurrAngle, MeasuredSpeed, RequestedSpeed, DutyPercent );	
+		if (MotorStopped)
+			printf("Stop %d\n",MotorStopped );
+	}
+}
 void Motor::print_positioning( )
 {
 	if (MotorEnable)
@@ -361,7 +372,7 @@ void Motor::print_speeds( )
 					 RequestedSpeed, MeasuredSpeed, DutyPercent );	
 }
 
-// Computes the speed, then sends it.
+// Computes the torque, then sends it.
 void  Motor::send_speed_pid(  )
 {
 	if (MotorEnable==FALSE) return;
@@ -518,22 +529,75 @@ float  Motor::compute_reaction_torque( Motor& mMotor, float mAlpha )
 	return boost;	
 }
 
-/* 
-	Handles incoming ID_MOTOR_VALUE & recomputes duty.
-
-*/
-int Motor::update_position( struct sCAN* mMsg )
+int Motor::handle_CAN_message( struct sCAN* mMsg 	)	// handles incoming ID_MOTOR_VALUE & recomputes duty.
 {
-	struct stMotorStateInfo tmp;
+	if (MotorEnable==FALSE)  return 0;
 
-	can_parse_motor_value( mMsg, &(tmp.PotValue), 
-							     &(tmp.CurrentTimesTen), 
-						 (short*)&(tmp.SpeedTimesTen) );
-	CurrCount = tmp.PotValue;
+	if (mMsg->id.group.id == Feedback_Msg_id)
+	{
+		if (Feedback_Msg_id == ID_ANALOG_MEASUREMENT)
+		{
+			if (Feedback_index == mMsg->data[0])
+			{
+				PrevCount = CurrCount;
+				CurrCount = (mMsg->data[1]<<8) + mMsg->data[2];
+				printf("ID_ANALOG_MEASUREMENT %3d ", Feedback_index );
+				update_position();
+				print_state();
+				return 1;
+			}
+		}
+		else if (Feedback_Msg_id == ID_MOTOR_VALUE)
+		{
+			if (mMsg->id.group.instance == Instance)
+			{			
+				struct stMotorStateInfo tmp;
+				can_parse_motor_value( mMsg, &(tmp.PotValue), 
+											 &(tmp.CurrentTimesTen), 
+									 (short*)&(tmp.SpeedTimesTen) );
+				PrevCount = CurrCount;
+				CurrCount = tmp.PotValue;
+				update_position();
+				print_state();
+				return 1;
+			}
+		}
+		
+	} else if (mMsg->id.group.id == ID_MOTOR_STATUS)  {
+		return 1;	
+	} else if (mMsg->id.group.id == ID_MOTOR_SPEED)   {
+		//can_parse_motor_speed( mMsg, &tmp.Angle, &tmp.CurrentTimesTen, (short*)&tmp.SpeedTimesTen );	
+		return 1;	
+	} else if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_ANGLE, 0)) )
+	{	
+		return 1;
+	}
+	return 0;
+}
 
-	compute_curr_angle( );
+/* 
+	After incoming CAN msg has been processed, this will recompute duty and
+	stops accordingly.
+*/
+int Motor::update_position(  )
+{	
+	// Compute Time Lapse since last call here:
+	PrevTime = CurrTime;	
+	gettimeofday(&CurrTime, NULL);
+	
+	struct timeval time_lapse;
+	timersub( &CurrTime, &PrevTime, &time_lapse );
+
+	float time_lapse_secs = time_lapse.tv_sec + ((float)time_lapse.tv_usec/1000000.);
+	printf("Time Lapse=%6.4f  ", time_lapse_secs);
+	
+	// Update Angle:
+	CurrAngle = compute_angle(CurrCount);
+	PrevAngle = compute_angle(PrevCount);	
+
+	// Compute Speed:
+	MeasuredSpeed = (CurrAngle - PrevAngle) / time_lapse_secs;	
 	check_stops();
-	send_speed_pid();
 
 	// Check over current here... (once current reading have been tested/verified)
 			
@@ -541,6 +605,9 @@ int Motor::update_position( struct sCAN* mMsg )
 	if (reached) {
 		//printf( "Destn reached!" ); printf("\n");
 	}	
+
+	if (ActiveOutputs)
+		send_speed_pid();
 }
 
 	// PRINT STATS:

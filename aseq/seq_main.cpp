@@ -418,11 +418,6 @@ int main( int argc, char *argv[] )
 	int value    	= 0;
 	int resample_iterations = 0;
 	delay(10);
-	init();						// 
-	create_threads();
-	
-	// Configure board to send their raw positions : 
-	configure_motor_reports();
 	
 	if (argc > 1)
 	{
@@ -431,6 +426,11 @@ int main( int argc, char *argv[] )
 				help();
 				return 0;
 		}		
+
+		init();			
+		create_threads();		
+		// Configure board to send their raw positions : 
+		configure_motor_reports();
 
 		if ( (strcmp(argv[1], "set_stop") == 0) ||
 		     (strcmp(argv[1], "calibrate") == 0) )		
@@ -487,15 +487,20 @@ int main( int argc, char *argv[] )
 
 		if ((strcmp(argv[1], "meas") == 0) || (strcmp(argv[1], "measure") == 0))		
 		{
-			/* Measure should not move the motors at all.  The normal callback_board_presence
-			   move them. */
-			set_model_rx_callback( can_position_meas_responder );			
+			/* Measure should not move the motors at all.  
+				The normal callback_board_presence move them. */
+			for (int l=0; l<robot.limbs.size(); l++)
+				robot.limbs[l].disable_outputs();
+				
+			set_model_rx_callback ( can_motor_position_responder );				
+			//set_model_rx_callback( can_position_meas_responder );	 deprecated since disable outputs!
+
 			const int NUM_SAMPLES = 10;
 			
 			robot.set_vectors_limbs();
 			robot.seq.read_vector_file( SequenceFileName );
 			robot.set_vectors_limbs();
-						
+			
 			/* Here we'll read the Pot values for all motors.  Average 10 samples.
 			   and print the results. */			
 			while (robot.limbs[0].Reads < NUM_SAMPLES)

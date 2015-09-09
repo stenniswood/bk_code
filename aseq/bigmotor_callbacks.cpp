@@ -25,6 +25,9 @@
 #include "config_file.h"
 #include "bigmotor_callbacks.hpp"
 
+#include "robot.hpp"
+
+
 word latest_pot = 0;
 
 struct timeval ts;
@@ -82,39 +85,19 @@ BOOL can_position_test_responder( struct sCAN* mMsg )
 
 BOOL can_position_meas_responder( struct sCAN* mMsg )
 {
-	struct stMotorStateInfo tmp;
-	int Aindex         = 0;
-	int actuator_index = 0;
+	// Distribute the message to all limbs of the robot:
+	// (the limbs will distribute to each actuator).
+
+	robot.handle_CAN_message( mMsg );
 	
+
 	/* Is the CAN msg a MOTOR ANGLE? */
 	if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_VALUE, 0)) )
 	{
-		// WHICH APPENDAGE & WHICH ACTUATOR ?
-		BOOL found = get_appendage_actuator( &Aindex, &actuator_index, mMsg->id.group.instance );				
-		// RETURN IF NOT ENABLED:
-		if (robot.limbs[Aindex].Enable==false)
-			return FALSE;
-		if (robot.limbs[Aindex].actuators[actuator_index].MotorEnable==FALSE)
-			return FALSE;
-
-		// PARSE TELEGRAM : 
-		can_parse_motor_value( mMsg, &(tmp.PotValue), &(tmp.CurrentTimesTen),
-							   (short*)&(tmp.SpeedTimesTen) );
-		robot.limbs[Aindex].actuators[actuator_index].CurrCount = tmp.PotValue;
-
-		gettimeofday( &ts, NULL );
-		long seconds  = ts.tv_sec  - start_ts.tv_sec;
-		long useconds = ts.tv_usec - start_ts.tv_usec;
-		float usec    = (float)useconds / 1000.0;
-		float mtime   = ((seconds) + useconds/1000000.0);
-
-		robot.limbs[Aindex].ElementsFilled |= (1<<actuator_index);
-		if (robot.limbs[Aindex].vector_fully_read()) 			// checks elementsFilled
+		//if (robot.limbs[Aindex].vector_fully_read()) 			// checks elementsFilled
 		{
-			printf("Measurements:, \n" );			
-			for (int a=0; a<robot.limbs[0].actuators.size(); a++)
-				printf(" %4d, ", robot.limbs[0].actuators[a].CurrCount );
-			robot.limbs[0].Reads++;
+			//printf("Measurements:, \n" );			
+			//robot.limbs[0].Reads++;
 		}
 	}	
 }
@@ -127,48 +110,22 @@ INCOMING CAN BIGMOTOR MESSAGE CALLBACK():
 ************************************************************/
 BOOL can_motor_position_responder( struct sCAN* mMsg )
 {
-	int Aindex         = 0;
-	int actuator_index = 0;
+	// Distribute the message to the robot:
+	robot.handle_CAN_message( mMsg );		// limbs, then actuators, etc.
 
 	/* Is the CAN msg a MOTOR ANGLE? */
 	if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_VALUE, 0)) )
 	{
-		// WHICH APPENDAGE & WHICH ACTUATOR ?
-		BOOL found = get_appendage_actuator( &Aindex, &actuator_index, mMsg->id.group.instance );				
-		// RETURN IF NOT ENABLED:
-		if (robot.limbs[Aindex].Enable==false)
-			return FALSE;
-		if (robot.limbs[Aindex].actuators[actuator_index].MotorEnable==FALSE)
-			return FALSE;
-		//printf("ID_MOTOR_VALUE\n");
-
+		// So that no spurious movements occur before we know our requested destination.
 		if (FirstIssued==false)
-			robot.limbs[Aindex].set_current_position_as_destination( );
-				
-		robot.limbs[Aindex].actuators[actuator_index].update_position( mMsg );
+			for (int l=0; l<robot.limbs.size(); l++)
+				robot.limbs[l].set_current_position_as_destination( );
 
-		// Print DEBUG:
-/*		if ((mMsg->id.group.instance == 31) || (mMsg->id.group.instance == 32) || (mMsg->id.group.instance == 33))
-			printf(" %d PotRead=%d; spd=%5.2f\t", 
-					mMsg->id.group.instance, 
-					robot.limbs[Aindex].actuators[actuator_index].CurrCount,
-					robot.limbs[Aindex].actuators[actuator_index].SpeedTimesTen );*/
-
-		robot.limbs[Aindex].ElementsFilled |= (1<<actuator_index);		// Mark it 
-		if (robot.limbs[Aindex].vector_fully_read()) 			// checks elementsFilled
+		// When all actuators on a particular limb have been received,
+//		if (robot.limbs[Aindex].vector_fully_read()) 					// checks elementsFilled
 		{
-			//printf( "APPENDAGE FULLY READ %d !\n", LimbVectors.size() );
-			can_vector_read_complete_responder( Aindex );	// Moves to next vector!
-			robot.limbs[Aindex].ElementsFilled = 0;
+//			can_vector_read_complete_responder( Aindex );	// Moves to next vector!
 		}		
-		return TRUE;
-	}
-	else if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_ANGLE, 0)) )
-	{	
-	}
-	else if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_SPEED, 0)) )
-	{
-		//can_parse_motor_speed( mMsg, &tmp.Angle, &tmp.CurrentTimesTen, (short*)&tmp.SpeedTimesTen );
 		return TRUE;
 	}
 	return FALSE;
@@ -181,6 +138,7 @@ BOOL can_motor_position_responder( struct sCAN* mMsg )
  *********************************************************************/
 BOOL can_vector_read_complete_responder( byte mAppendageIndex )
 {		
+	robot.limbs[mAppendageIndex].ElementsFilled = 0;
 	robot.limbs[mAppendageIndex].Reads++;	
 	
 	BOOL reached = robot.limbs[mAppendageIndex].is_destination_reached( );

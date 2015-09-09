@@ -129,7 +129,7 @@ void read_direction_line( FILE* f, Robot& mRobot )
 	// PARSE DELIMINATORS INTO AN ARRAY:
 	byte limb_index         = numbers[0];		// Extract the Appendage Index
 	byte actuators			= numbers[1];
-	printf("Parsing Limb[%d] has %d actuators; Directions: ", limb_index, actuators);
+	printf("Limb[%d] Actuator + Directions:\t", limb_index);
 	for (int i=2; i<num_params; i++)
 	{
 		if (limb_index > mRobot.limbs.size())
@@ -139,10 +139,62 @@ void read_direction_line( FILE* f, Robot& mRobot )
 		}
 
 		mRobot.limbs[limb_index].actuators[i-2].MotorDirection = numbers[i];
-		printf("actuator[%d]=%d, ", i-2, numbers[i]);
+		printf("[%d]=%d, ", i-2, numbers[i]);
 	}
 	printf("\n");
 }
+
+void read_feedback_msg_ids( FILE* f, Robot& mRobot )
+{
+	// READ FROM FILE:
+	getLine( f, line );
+	int num_params=0;
+	char** params = split( line, ',', &num_params );
+
+	// PARSE MSG IDS INTO AN ARRAY :
+	byte limb_index         = atoi(params[0]);		// Extract the Limb (Appendage) Index
+	for (int i=1; i<num_params; i++)
+	{		
+		if (limb_index > mRobot.limbs.size())
+		{
+			printf("Error reading config : Supplied vector index %d is more than the robot has!\n", limb_index);
+			exit(0);
+		}
+		char* s = params[i];
+		while (*s == ' ') s++;
+		int id = getID( s );
+		mRobot.limbs[limb_index].actuators[i-1].Feedback_Msg_id = id;
+		printf("Limb[%d][%d] Feedback Msg ID=|%s|%d\n", limb_index, i-1, s, id );
+	}
+}
+
+/* if the Feedback Msg ID is ID_ANALOG_MEASUREMENT, then we need to know what 
+   index (data[0]) corresponds to each actuator
+*/
+void read_feedback_indices( FILE* f, Robot& mRobot )
+{
+	// READ FROM FILE:
+	getLine( f, line );
+	int numbers[64];
+	int num_params=0;
+	parse_number_line( line, numbers, &num_params );
+	
+	// PARSE DELIMINATORS INTO AN ARRAY:
+	byte limb_index         = numbers[0];		// Extract the Appendage Index 
+
+	for (int i=1; i<num_params; i++)
+	{
+		if (limb_index > mRobot.limbs.size())
+		{
+			printf("Error reading config : Supplied vector index is more than the robot has!\n");
+			exit(0);
+		}
+		printf("Limb[%d][%d] feedback index=%d\n", limb_index, i-1, numbers[i] );
+		mRobot.limbs[limb_index].actuators[i-1].Feedback_index = numbers[i];
+	}
+
+}
+
 
 void read_enable_line( FILE* f, Robot& mRobot )
 {
@@ -155,7 +207,7 @@ void read_enable_line( FILE* f, Robot& mRobot )
 	// PARSE DELIMINATORS INTO AN ARRAY:
 	byte limb_index         = numbers[0];		// Extract the Appendage Index
 	byte actuators			= numbers[1];
-	printf("Parsing Limb[%d] has %d actuators; Enabled: ", limb_index, actuators);
+	printf("Limb[%d] Actuator Enables:\t", limb_index );
 	for (int i=2; i<num_params; i++)
 	{
 		if (limb_index > mRobot.limbs.size())
@@ -164,8 +216,9 @@ void read_enable_line( FILE* f, Robot& mRobot )
 			exit(0);
 		}
 		if (numbers[i])	numbers[i] = TRUE;		// 2,3,4,etc ==> 1		
-		mRobot.limbs[limb_index].actuators[i-2].MotorEnable = numbers[i];
-		printf("actuator[%d]=%d, ", i-2, numbers[i]);
+		//mRobot.limbs[limb_index].actuators[i-2].MotorEnable = numbers[i];
+		mRobot.limbs[limb_index].actuators[i-2].ActiveOutputs = numbers[i];
+		printf("[%d]=%d, ", i-2, numbers[i] );
 	}
 	printf("\n");
 }
@@ -181,7 +234,7 @@ void read_zero_offsets( FILE* f, Robot& mRobot )
 	// PARSE DELIMINATORS INTO AN ARRAY:
 	byte limb_index         = numbers[0];		// Extract the Appendage Index
 	byte actuators			= numbers[1];
-	printf("Parsing Limb[%d] has %d actuators; Zeros: ", limb_index, actuators);
+	printf("Limb[%d] Actuator Zeros:\t\t", limb_index );
 	for (int i=2; i<num_params; i++)
 	{
 		if (limb_index > mRobot.limbs.size())
@@ -214,7 +267,7 @@ void read_stop_line(FILE* f, Robot& mRobot)
 	byte limb_index         = atoi(params[0]);
 	byte actuator_index		= atoi(params[1]);
 	byte stop_index			= atoi(params[2]);
-	printf("Parsing Limb:%d Actuator:%d Stop:%d  \t", limb_index, actuator_index, stop_index);
+	printf("Limb[%d][%d] Stop #%d:  \t", limb_index, actuator_index, stop_index);
 	if (limb_index > mRobot.limbs.size() )
 	{
 		printf("Error reading config : Supplied vector index is more than the robot has!\n");
@@ -284,7 +337,15 @@ void read_config( char* mFilename, Robot& mRobot )
 		// initializes with data from the file.		
 		read_instance_line( f, mRobot );
 	}
-
+	printf("\n");
+	// READ Feedback Message IDs
+	for (int i=0; i<Number_of_appendages; i++)
+		read_feedback_msg_ids( f, mRobot );
+	// READ Feedback Indices:
+	for (int i=0; i<Number_of_appendages; i++)
+		read_feedback_indices( f, mRobot );
+	printf("\n");
+	
 	// READ DEFAULT DIRECTIONS (-1 needed if feedback direction is opposite motor direction): 
 	for (int i=0; i<Number_of_appendages; i++)
 		read_direction_line( f, mRobot );

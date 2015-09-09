@@ -1,6 +1,6 @@
 cc		 = g++
 OPTIONS	 =  -lm
-INC		 = ../core/can ../core/msg ../core/misc 
+INC		 = ../core/can ../core/msg ../core/misc ../core/ipc
 SELF_INC = ./
 CFLAGS 	= -lwiringPi -lm -lrt
 DEPS   	= 
@@ -31,5 +31,6 @@ clean:
 	rm -rf *.o $(PRG).elf 
 	rm -rf ../core/can/*.o 
 	rm -rf ../core/msg/*.o 
+	rm -rf ../core/misc/*.o 
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 

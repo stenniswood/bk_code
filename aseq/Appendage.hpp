@@ -15,6 +15,7 @@ public:
 	void 	print_current_positions	   ( );
 	void	print_current_angles	   ( );
 	
+	int  	handle_CAN_message	       ( struct sCAN* mMsg 	);	// handles incoming msg	
 	int		find_actuator_instance	   ( byte mInstance 	);
 	void	update_submitted_timestamps( struct timeval mts );
 
@@ -22,6 +23,8 @@ public:
 	bool	vector_fully_read		   ( );		// at least 1 update on all enabled motors.
 	void	set_new_destinations	   ( struct sVectorSet& mVectors, int mVectorIndex );
 
+	void	enable_outputs			   ( );
+	void	disable_outputs			   ( );	
 	void 	update_position			   ( );
 	void 	set_current_position_as_destination( );	// should stop all motors.
 	void 	compute_speeds			   ( );

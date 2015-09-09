@@ -13,6 +13,7 @@ public:
 	void	Initialize				   ( );
 	void 	print_current_positions	   ( );
 	
+	int  	handle_CAN_message	    	( struct sCAN* mMsg 	);	// handles incoming msg	
 	int		find_actuator_by_instance  ( byte mInstance, int* Aindex, int* actuator_index );
 	void	update_submitted_timestamps( struct timeval mts );
 

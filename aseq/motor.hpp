@@ -57,7 +57,8 @@ public:
 
 	void  	set_destination			( int mDestinationCount, float mRequestedSpeed );
 	int  	check_stops				( 						);
-	int  	update_position			( struct sCAN* mMsg 	);	// handles incoming ID_MOTOR_VALUE & recomputes duty.
+	int  	update_position			( 						);	// handles incoming ID_MOTOR_VALUE & recomputes duty.
+	int  	handle_CAN_message	    ( struct sCAN* mMsg 	);	// handles incoming msg
 	bool	correct_direction_out_of_stop( float mDuty	);
 
 	bool 	destination_reached 	( float mTolerance 		);
@@ -71,17 +72,19 @@ public:
 
 	void	print_speeds			( 				);
 	void	print_positioning		( 				);
+	void	print_state				( 				);	// Position, speed, stops active, torque applied, etc.  1 liner.
 	void	print_stop				( int mStopNum 	);
 
 	// CHANGE FREQUENTLY (ie realtime) : 
 	word	StartCount;		 	 // Reading when the send_speed() was called.
 	word	DestinationCount; 	 // Reading when the send_speed() was called.	
+	word	PrevCount;			 // Latest reading
 	word	CurrCount;			 // Latest reading
 	word 	BeginBrakingCount;	 // Trigger for breaking (pid control)
 	bool	DestinationReached;	 // 
-	int		MotorStopped;
+	int		MotorStopped;		 // Indicator of which Stop is in: 0 none, 1, 2.
 
-
+	float	PrevAngle;
 	float	CurrAngle;				// in Degrees 
 	float	NextAngleDeg;			// Destination when in Angle mode. in Degrees * 10 
 
@@ -111,8 +114,12 @@ public:
 	// MOTOR CURRENT DRAW:
 	word	CurrentTimesTen;		// Motor current draw (fixed point)
 
+	//struct timespec
 	struct timeval submitted;
 	struct timeval completed;
+	struct timeval CurrTime;
+	struct timeval PrevTime;
+
 
 	word 	Reads;					// number of CAN positioning reads done since duty was last updated
 	word 	ReadsAllowed;			// number of CAN positioning reads before duty will be updated
@@ -125,10 +132,13 @@ public:
 	float	deceleration_rate_cpss;	// Depends on the load.  How to determine?! algorithm to sense?
 
 	word	ZeroOffset;				// in counts.
-	BOOL 	MotorEnable;			// If FALSE, does not participate in the sequencing
-	short 	MotorDirection;			// 
+	BOOL	ActiveOutputs;			// Similar to MotorEnable, if false does not send the duty to the motor.
+	BOOL 	MotorEnable;			// If FALSE, does not participate in the sequencing (
+	// If MotorEnable==TRUE but ActiveOutputs==FALSE, the incoming messages will be updated, but no drive to motors.
+	short 	MotorDirection;			// 1 => increasing counts is positive direction;  0=> decreasing counts is positive angle.
 
-
+	byte	Feedback_index;
+	int		Feedback_Msg_id;
 
 private:
 	float MaxRatedTorque;			// inch*lbs  around (1,546 for 82666)

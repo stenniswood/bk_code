@@ -53,6 +53,15 @@ void Robot::Initialize()
 	strcpy (Name, "Onesimus");
 }
 
+// handles incoming msg	
+int Robot::handle_CAN_message( struct sCAN* mMsg )	
+{
+	for (byte l=0; l < limbs.size(); l++)
+	{
+		limbs[l].handle_CAN_message( mMsg );
+	}	
+}
+
 /*********************************************************************
  Scan one of the Left & Right Leg Appendages to find the 
 	one containing the instance number.  
