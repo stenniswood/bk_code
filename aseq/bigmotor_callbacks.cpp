@@ -83,15 +83,12 @@ BOOL can_position_test_responder( struct sCAN* mMsg )
 	}	
 }
 
-BOOL can_position_meas_responder( struct sCAN* mMsg )
+/*BOOL can_position_meas_responder( struct sCAN* mMsg )
 {
 	// Distribute the message to all limbs of the robot:
 	// (the limbs will distribute to each actuator).
-
 	robot.handle_CAN_message( mMsg );
-	
-
-	/* Is the CAN msg a MOTOR ANGLE? */
+	// Is the CAN msg a MOTOR ANGLE? 
 	if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_VALUE, 0)) )
 	{
 		//if (robot.limbs[Aindex].vector_fully_read()) 			// checks elementsFilled
@@ -100,7 +97,7 @@ BOOL can_position_meas_responder( struct sCAN* mMsg )
 			//robot.limbs[0].Reads++;
 		}
 	}	
-}
+}*/
 
 /************************************************************
 INCOMING CAN BIGMOTOR MESSAGE CALLBACK(): 

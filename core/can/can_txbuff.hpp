@@ -11,8 +11,8 @@ extern "C" {
 #define MAILBOX_HISTORY_OP_MODE 2
 
 extern byte    TxTail;
-extern uint8_t CANTxMessageQueued;
-extern byte	export_message[MAX_CAN_TXMSG_MEMORY_SIZE];
+extern uint8_t 	CANTxMessageQueued;
+extern byte		export_message[MAX_CAN_TXMSG_MEMORY_SIZE];
 
 //BOOL 		 Addtest( struct sCAN* mMsg );
 void 		 copy_can_msg 	( struct sCAN* mDest, struct sCAN* mSrc );

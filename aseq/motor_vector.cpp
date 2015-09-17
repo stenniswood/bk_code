@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <vector>
+#include <string>
 
 #include "bk_system_defs.h"
 #include "can_eid.h"

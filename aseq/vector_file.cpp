@@ -54,6 +54,7 @@ This is a sample of the vector file :
 #include <wiringPi.h>
 #include <string.h>
 #include <vector>
+#include <string>
 
 #include "gpio.h"
 #include "mcp2515.h"

@@ -5,7 +5,9 @@
 extern "C" {
 #endif
 
-char* getID_Text(word mID);
+char* getID_Text(word mID   );
+int   getID     (char* mName);
+
 
 /* FOLLOWING IS A LIST OF THE IDENTIFIERS (16 bit):	
 	(Block ID not specified; Instance ID determined at RunTime)  

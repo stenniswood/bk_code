@@ -1,4 +1,4 @@
-/*  ***MotorPack is an equivalent cpp class***
+/**** MotorPack is an equivalent cpp class ****
 
 	We may choose to setup several appendages for the robot.
 	ie. LeftLeg, Right Leg, LeftArm, Right Arm
@@ -6,7 +6,7 @@
 
 	how many vectors and how many boards in each depends on the application.
 	So how can we make this dynamically changeable?
-		
+	
 */
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,6 +17,7 @@
 #include <sys/time.h>
 #include <vector>
 #include <string.h>
+#include <string>
 #include "bk_system_defs.h"
 #include "can_eid.h"
 #include "CAN_Interface.h"
@@ -25,7 +26,6 @@
 #include "pican_defines.h"
 #include "leds.h"
 #include "can_id_list.h"
-
 #include "vector_file.h"
 #include "motor.hpp"
 #include "Appendage.hpp"
@@ -36,7 +36,6 @@
 #include "motor_vector.h"
 #include "can_txbuff.h"
 #include "config_file.h"
-
 
 
 Appendage::Appendage( )
@@ -54,7 +53,6 @@ void Appendage::Initialize()
 	Reads = 0;				
 	ReadsAllowed = 0;		
 	ElementsFilled = 0;		
-	ElementsFilled = 0;	
 	Enable = true;
 	strcpy (Name, "noname");
 }
@@ -85,6 +83,58 @@ void Appendage::update_submitted_timestamps( struct timeval mts )
 		actuators[a].submitted = mts;
 }
 
+bool Appendage::is_done_averaging( )
+{
+	bool retval = false;
+	for (byte a=0; a < actuators.size(); a++)
+	{
+		bool result = ( actuators[a].Reads <= actuators[a].ReadsAllowed );		
+		if (result)
+			return false;		
+	}
+	return true;
+}
+
+void Appendage::start_measurement_averaging( int mNumSamples )
+{
+	Reads = 0;
+	ReadsAllowed = mNumSamples;
+
+	for (byte a=0; a < actuators.size(); a++)
+	{
+		actuators[a].SumCurrCounts = 0;
+		actuators[a].Reads = 0;
+		actuators[a].ReadsAllowed = mNumSamples;
+	}
+}
+
+
+const int HIP_ROTATE_INDEX 	 = 9;
+const int HIP_FA_SWING_INDEX = 0;
+const int KNEE_SWING_INDEX   = 1;
+const int ANKLE_SWING_INDEX  = 2;
+
+// from highest to lowest actuator.	( for swing leg )
+/* Measurements come from torso gyro. 
+mTorso_fa_Angle - should be measured from horizon (=0.0 deg)
+mTorso_io_Angle - should be measured from horizon (=0.0 deg)
+*/
+void Appendage::propogate_gravity_angle_down( float mTorso_fa_Angle, float mTorso_io_Angle )	
+{
+	// Almost always propogate down the legs, b/c we have the gyros in the torso.
+	actuators[HIP_FA_SWING_INDEX].gravity_angle = mTorso_fa_Angle;
+	
+	/* Note: For now we don't have any Hip Rotate motor.  This angle means we would have
+			to use the _io_ angle also!  Add this later after we know the algorithm works
+			without side to side tipping.			 
+	*/
+	float angle = actuators[HIP_FA_SWING_INDEX].gravity_angle + actuators[HIP_FA_SWING_INDEX].CurrAngle;
+
+	actuators[KNEE_SWING_INDEX].gravity_angle  = angle;
+	angle = actuators[KNEE_SWING_INDEX].gravity_angle + actuators[KNEE_SWING_INDEX].CurrAngle;	
+	actuators[ANKLE_SWING_INDEX].gravity_angle = angle;	
+}
+	
 /*********************************************************************
 
 *********************************************************************/
@@ -104,32 +154,43 @@ BOOL Appendage::is_destination_reached( )
 	return result;
 }
 
-// at least 1 update on all enabled motors.
-bool Appendage::vector_fully_read( )
+void Appendage::clear_reads( int mNumExpected )
 {
-	if (Enable==false)  return true;
-	
-	byte bitfield = 0;
-	// What should it look like? :
-	for (int i=0; i<actuators.size(); i++)
-		if (actuators[i].MotorEnable)
-			bitfield |= (1<<i);
-
-	// Compared to what it looks like : 
-	if (ElementsFilled == bitfield)
-		return 	true;
-	return false;	
+	Reads = 0;	
+	ReadsAllowed = mNumExpected;
+	for (int a=0; a<actuators.size(); a++)  {
+		actuators[a].Reads = 0;
+		actuators[a].ReadsAllowed = mNumExpected;
+	}
 }
 
-void Appendage::disable_outputs( )
+// at least 1 update on all enabled motors.
+bool Appendage::is_vector_fully_read( )
+{
+	if (Enable==false)  return true;
+
+	for (int a=0; a<actuators.size(); a++)
+		if (actuators[a].MotorEnable)
+			if (actuators[a].Reads < actuators[a].ReadsAllowed)
+				return false;
+
+	return 	true;
+}
+
+void Appendage::deactivate_outputs( )
 {
 	for (int a=0; a<actuators.size(); a++)
 		actuators[a].ActiveOutputs = FALSE;
 }
-void Appendage::enable_outputs( )
+void Appendage::activate_outputs( )
 {
 	for (int a=0; a<actuators.size(); a++)
 		actuators[a].ActiveOutputs = TRUE;
+}
+void Appendage::activate_enabled_outputs( )
+{
+	for (int a=0; a<actuators.size(); a++)
+		actuators[a].ActiveOutputs = actuators[a].MotorEnable;
 }
 	
 // handles incoming msg
@@ -141,9 +202,13 @@ int Appendage::handle_CAN_message( struct sCAN* mMsg )
 	for (int a=0; a<actuators.size(); a++)
 	{
 		handled = actuators[a].handle_CAN_message( mMsg );
-		if (handled)
-			ElementsFilled |= (1<<a);		// Mark it			
 	}	
+
+	// Special Action to be done when all actuators have received an updated position.	
+	if (is_vector_fully_read())  {
+		Reads++;
+		//printf("VECTOR FULLY READ!!!!\n");
+	}
 }
 
 void Appendage::print_current_angles(  )
@@ -169,11 +234,21 @@ void Appendage::print_current_positions(  )
 	printf("\n");	
 }
 
+void Appendage::print_averages( )
+{
+	printf("Limb: %s\n", Name );
+	for (int a=0; a < actuators.size(); a++)
+	{
+		actuators[a].print_average();
+	}	
+}
+
 void Appendage::set_new_destinations( struct sVectorSet& mVectors, int mVectorIndex )
 {
 	if (Enable==false)  return ;
 	for (int a=0; a<actuators.size(); a++)
 	{
+		// GET COUNT & CALC REQUESTED SPEED : 
 		int tmp = mVectors.vectors[mVectorIndex].get_count( a );
 		float speed = mVectors.calc_average_speed_cps( mVectorIndex, a );
 		if (speed>MAX_MOTOR_SPEED)

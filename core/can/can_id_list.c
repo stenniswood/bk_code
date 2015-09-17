@@ -117,3 +117,101 @@ char* getID_Text(word mID)
 			break;
 	}
 }
+
+
+int getID(char* mName)
+{
+	if (strcmp(mName, "ID_BOARD_PRESENCE_REQUEST")==0)
+		return ID_BOARD_PRESENCE_REQUEST;	
+	if (strcmp(mName, "ID_BOARD_PRESENCE_BROADCAST")==0)
+		return ID_BOARD_PRESENCE_BROADCAST;
+	if (strcmp(mName, "ID_BOARD_REVISION")==0)
+		return ID_BOARD_REVISION;				
+	if (strcmp(mName, "ID_BOARD_SERIAL_NUMBER")==0)
+		return ID_BOARD_SERIAL_NUMBER;		
+	if (strcmp(mName, "ID_BOARD_DESCRIPTION")==0)
+		return ID_BOARD_DESCRIPTION;			
+	if (strcmp(mName, "ID_INSTANCE_CLAIM")==0)
+		return ID_INSTANCE_CLAIM;				
+	if (strcmp(mName, "ID_INSTANCE_QUERY")==0)
+		return ID_INSTANCE_QUERY;				
+	if (strcmp(mName, "ID_INSTANCE_ASSIGN")==0)
+		return ID_INSTANCE_ASSIGN;			
+	if (strcmp(mName, "ID_INSTANCE_RESTART")==0)
+		return ID_INSTANCE_RESTART;			
+	if (strcmp(mName, "ID_SYSTEM_BAUD_CHANGE")==0)
+		return ID_SYSTEM_BAUD_CHANGE;			
+	if (strcmp(mName, "ID_SYSTEM_SHUT_DOWN")==0)
+		return ID_SYSTEM_SHUT_DOWN;			
+	if (strcmp(mName, "ID_SYSTEM_CONFIGURE")==0)
+		return ID_SYSTEM_CONFIGURE;			
+	if (strcmp(mName, "ID_SYSTEM_CONFIGURE_REPORT")==0)
+		return ID_SYSTEM_CONFIGURE_REPORT;		
+	if (strcmp(mName, "ID_SYSTEM_LED_REQUEST")==0)
+		return ID_SYSTEM_LED_REQUEST;			
+	if (strcmp(mName, "ID_BUTTON_PRESSED")==0)
+		return ID_BUTTON_PRESSED;				
+	if (strcmp(mName, "ID_BUTTON_ROSTER")==0)
+		return ID_BUTTON_ROSTER;				
+	if (strcmp(mName, "ID_MARK_MOTOR_STOP")==0)
+		return ID_MARK_MOTOR_STOP;			
+	if (strcmp(mName, "ID_MOVE_TO_ANGLE")==0)
+		return ID_MOVE_TO_ANGLE;				
+	if (strcmp(mName, "ID_MOVE_SPEED")==0)
+		return ID_MOVE_SPEED;					
+	if (strcmp(mName, "ID_SET_MAX_MOTOR_ACCEL")==0)
+		return ID_SET_MAX_MOTOR_ACCEL;		
+	if (strcmp(mName, "ID_CALIBRATED_STOP")==0)
+		return ID_CALIBRATED_STOP;			
+	if (strcmp(mName, "ID_MOTOR_ANGLE")==0)
+		return ID_MOTOR_ANGLE;				
+	if (strcmp(mName, "ID_MOTOR_VALUE")==0)
+		return ID_MOTOR_VALUE;				
+	if (strcmp(mName, "ID_MOTOR_SPEED")==0)
+		return ID_MOTOR_SPEED;				
+	if (strcmp(mName, "ID_MOVE_DUAL_SPEED")==0)
+		return ID_MOVE_DUAL_SPEED;			
+	if (strcmp(mName, "ID_MOTOR_ACCEL")==0)
+		return ID_MOTOR_ACCEL;				
+	if (strcmp(mName, "ID_MOTOR_STATUS")==0)
+		return ID_MOTOR_STATUS;				
+	if (strcmp(mName, "ID_LCD_COMMAND")==0)
+		return ID_LCD_COMMAND;				
+	if (strcmp(mName, "ID_LCD_DRAW_TEXT")==0)
+		return ID_LCD_DRAW_TEXT;				
+	if (strcmp(mName, "ID_COLLECT_GRAPH_DATA")==0)
+		return ID_COLLECT_GRAPH_DATA;			
+	if (strcmp(mName, "ID_TILT_CHANGE_SENSITIVITY")==0)
+		return ID_TILT_CHANGE_SENSITIVITY;	
+	if (strcmp(mName, "ID_ACCEL_XYZ")==0)
+		return ID_ACCEL_XYZ;					
+	if (strcmp(mName, "ID_GYRO_XYZ")==0)
+		return ID_GYRO_XYZ;					
+	if (strcmp(mName, "ID_MAGNET_XYZ")==0)
+		return ID_MAGNET_XYZ;					
+	if (strcmp(mName, "ID_POSITION_XYZ")==0)
+		return ID_POSITION_XYZ;				
+	if (strcmp(mName, "ID_POSITION_ABC")==0)
+		return ID_POSITION_ABC;				
+	if (strcmp(mName, "ID_VELOCITY_XYZ")==0)
+		return ID_VELOCITY_XYZ;				
+	if (strcmp(mName, "ID_VELOCITY_ABC")==0)
+		return ID_VELOCITY_ABC;				
+	if (strcmp(mName, "ID_ACCELERATION_XYZ")==0)
+		return ID_ACCELERATION_XYZ;			
+	if (strcmp(mName, "ID_ACCELERATION_ABC")==0)
+		return ID_ACCELERATION_ABC;			
+	if (strcmp(mName, "ID_PWM_CHANNEL_UPDATE")==0)
+		return ID_PWM_CHANNEL_UPDATE;			
+	if (strcmp(mName, "ID_CORR_FACTOR_UPDATE")==0)
+		return ID_CORR_FACTOR_UPDATE;			
+	if (strcmp(mName, "ID_THRUST_UPDATE")==0)
+		return ID_THRUST_UPDATE;				
+	if (strcmp(mName, "ID_ANALOG_MEASUREMENT")==0)
+		return ID_ANALOG_MEASUREMENT;			
+	if (strcmp(mName, "ID_STOP_MOTOR")==0)
+		return ID_STOP_MOTOR;
+
+	return -1;
+
+}

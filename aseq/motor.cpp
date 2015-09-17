@@ -7,6 +7,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <time.h>
+#include <string>
 
 #include "bk_system_defs.h"
 #include "can_eid.h"
@@ -76,7 +77,7 @@ void Motor::Initialize()
 	RequestedSpeed  = 0.;		// Counts per second
 	MeasuredSpeed   = 0.;		// Counts per second
 	DutyPercent		= 0.;
-	K_const			= 9.8 * 2;	// ~20 percent boost at 90 degrees
+
  
  	// 10 degrees/sec/sec = 34 counts/sec/sec
 	deceleration_rate_cpss = 614;   // counts / second / second	
@@ -91,8 +92,6 @@ void Motor::Initialize()
 	MaxRatedTorque	= 1.;		// inch*lbs  around (1,546 for 82666)
 	StallCurrent	= 100.;		// 	
 	Duty			= 0.;		// 	
-
-	init_params();
 }
 
 /**********************************************************************
@@ -106,44 +105,6 @@ float Motor::compute_motor_torque( float mDuty )
 	return (MaxRatedTorque * mDuty);
 }
 
-// Safe way of checking.  It Looks for overshoot which is past tolerance and
-// considers this reach also.
-bool Motor::destination_reached( float mTolerance )
-{
-	if (MotorEnable == FALSE) 	   return true;
-	if (DestinationReached==true)  return true;	
-	struct timeval tv;
-			
-	if (within_tolerance( DestinationCount, mTolerance )) 
-	{	
-		// ie only the first time it's reached
-		printf("  Reached within tol: %d %5.1f ", DestinationCount, mTolerance );			
-		gettimeofday(&tv, NULL);
-		completed = tv;
-		DestinationReached=true;
-		return true;
-	}
-
-	// Overshoot ? 
-	bool overshot = false;
-	if (StartCount < DestinationCount)
-	{
-		//Then an overshoot would be when CurrCount is over DestinationCount				
-		overshot = (CurrCount > DestinationCount) ? (true):(false);	
-	} else {
-		//Then an overshoot would be when CurrCount is under DestinationCount	
-		overshot = (CurrCount < DestinationCount) ? (true):(false);		
-	}
-	float mag = fabs(DestinationCount - CurrCount);
-	if (overshot)
-	{
-		DestinationReached=true;
-		printf(" overshoot=%d %5.2f ", overshot, mag );	
-		gettimeofday(&tv, NULL);
-		completed = tv;
-	}
-	return overshot;
-}
 
 bool Motor::within_tolerance( float mDestination, float mTolerance )
 {
@@ -165,44 +126,10 @@ int Motor::compute_position( float mAngle )
 	return PotValue;
 }
 
-float Motor::compute_angle( word PotValue )
+float Motor::compute_angle( word mPotValue )
 {
-	float Angle = (PotValue - ZeroOffset) * DegreesPerCount;
+	float Angle = (mPotValue - ZeroOffset) * DegreesPerCount;
 	return Angle;	
-}
-
-
-
-void Motor::reset_pid()
-{
-	position_error_sum  = 0;
-	speed_error_sum	    = 0;
-	position_error_prev = 0;
-	speed_error_prev	= 0;
-}
-
-void Motor::init_params()
-{
-	Kp_position_alpha = 1.0;
-	Ki_position_alpha = 0.01;
-	Kd_position_alpha = -0.35;
-	
-	Kp_speed_alpha = 1.0;
-	Ki_speed_alpha = 0.5;
-	Kd_speed_alpha = 0.5;
-}
-
-float Motor::compute_stopping_distance( float mSpeed, float mDeceleration )
-{
-	// dist = a t * t / 2 
-	float time = mSpeed / mDeceleration;
-	float stopping_distance = 0.5 * mDeceleration * time * time;
-	
-	if (is_destination_greater())
-		BeginBrakingCount = DestinationCount - stopping_distance;
-	else 
-		BeginBrakingCount = DestinationCount + stopping_distance;
-	return stopping_distance;
 }
 
 bool Motor::is_destination_greater( )
@@ -214,128 +141,10 @@ bool Motor::is_destination_greater( )
 		return false;
 }
 
-bool Motor::is_breaking_region( word mCount )
-{
-	// braking if  (BeginBrakingCount < mCount < DestinationCount)
-	//					820								1000
-	//					95								  25
-	bool retval;
-	float delta = (StartCount - DestinationCount);
-	if (delta<0) {
-		if (mCount>BeginBrakingCount)  return true;
-		else return false;
-	} else {
-		if (mCount<BeginBrakingCount)  
-			retval = true;
-		else 
-			retval = false;
-	} 
-	return false;
-}
-
-/* Use this to find the speed along the deceleration line. 
-	ie. after the BeginBrakingCount has been triggered and before
-	the destination has been reached.
-*/
-float Motor::compute_braking_speed( )
-{
-	// Assuming perfect constant deceleration :
-	// Compute the time :  d = 1/2 a t*t
-	float distance = (DestinationCount - CurrCount);
-	float operand  = distance*2 / deceleration_rate_cpss;
-	float time     = sqrt( fabs(operand) );
-	return deceleration_rate_cpss * time;
-}
-
-/* Done.
-	Computes the speed assuming constant acceleration from the start point.
-	and that the original speed there was zero.
-*/
-float Motor::compute_accel_speed( )
-{
-	// Compute the time :  d= 1/2 a * t * t
-	float distance = fabs(CurrCount - StartCount);
-	float operand  = distance*2 / deceleration_rate_cpss;
-	float time     = sqrt( operand );
-	return deceleration_rate_cpss * time;
-}
-
-float Motor::get_control_speed( )
-{
-	float spd;
-	if (is_breaking_region(CurrCount))
-	{
-		spd = compute_braking_speed( );		
-		printf("brake speed=%6.3f ", spd);
-	} else
-		spd = compute_accel_speed  ( );
-
-	if (spd > RequestedSpeed)
-		spd = RequestedSpeed;
-	//printf("Curr=%d; Control_speed=%6.3f \t", CurrCount, spd);
-	return spd;
-}
-
-#define MAX_P_DUTY 775 
-
-/* 
-	Based on PID control :
-*/
-float Motor::compute_duty( )
-{	
-	float  position_error;
-	float  speed_error 	 ;
-	bool   first_iteration = false;
-	
-	float  control_speed  = get_control_speed();	
-	//printf("control_speed=%6.3f\n", control_speed );
-
-	// GET ERROR:
-	position_error 		  = ( DestinationCount - CurrCount  );
-	speed_error 		  = ( control_speed - MeasuredSpeed );
-
-	// PID (P)	
-	float pcomp_position_duty = Kp_position_alpha * position_error;
-	float pcomp_speed_duty 	  = Kp_speed_alpha    * speed_error;
-
-	// PID (I)
-	if (position_error_sum==0)	first_iteration = true;	
-	position_error_sum  += position_error;
-	speed_error_sum	    += speed_error;
-	float icomp_position_duty = Ki_position_alpha * position_error_sum;
-	float icomp_speed_duty    = Ki_speed_alpha    * speed_error_sum;
-
-	// PID (D)
-	position_error_deriv = position_error - position_error_prev;
-	speed_error_deriv    = speed_error - speed_error_prev;	
-	if (first_iteration)	position_error_deriv = 0;
-	float  dcomp_position_duty = Kd_position_alpha * position_error_deriv;
-	float  dcomp_speed_duty    = Kd_speed_alpha    * speed_error_deriv;
-
-	position_error_prev = position_error;		// update for next time!
-	speed_error_prev    = speed_error;
-
-	float p_duty = pcomp_position_duty + icomp_position_duty + dcomp_position_duty;
-	float s_duty = pcomp_speed_duty    + icomp_speed_duty    + dcomp_speed_duty;
-
-	p_duty += compute_gravity_boost();
-	s_duty += compute_gravity_boost();
-	if (MotorDirection==-1)
-	{
-		p_duty = -p_duty;
-		s_duty = -s_duty;
-	}
-
-	DutyPercent = 100 * p_duty / MAX_P_DUTY;
-	if (DutyPercent > 100.0)	DutyPercent = 100.0;
-	if (DutyPercent < -100.0)	DutyPercent = -100.0;
-	return DutyPercent;
-}
-
 void print_stop_( struct sStopInfo mstop )
 {
 	if (mstop.Enabled)
-		printf("Enabled");
+		printf("Enabled ");
 	else 
 		printf("Disabled");
 	printf(";  Angle=%6.2f;  Pot=%d\n", mstop.Angle, mstop.PotValue );
@@ -354,10 +163,11 @@ void Motor::print_state( )	// Position, speed, stops active, torque applied, etc
 	if (MotorEnable==FALSE)
 		printf("Motor Disabled!\n");
 	else {
-		printf("Mot#=%3d; Pot=%4d; ZeroO=%4d; Angle=%7.2f degs;\tMeas_Spd=%7.3f Req_Spd=%7.3f degs/sec; Duty=%7.3f\n", 
+		printf("Mot#=%3d; Pot=%4d; ZeroO=%4d; Angle=%7.2f degs;\tMeas_Spd=%7.3f Req_Spd=%7.3f degs/sec; Duty=%7.3f  ", 
 				Instance, CurrCount, ZeroOffset, CurrAngle, MeasuredSpeed, RequestedSpeed, DutyPercent );	
 		if (MotorStopped)
 			printf("Stop %d\n",MotorStopped );
+		else printf("\n"); 
 	}
 }
 void Motor::print_positioning( )
@@ -372,17 +182,6 @@ void Motor::print_speeds( )
 					 RequestedSpeed, MeasuredSpeed, DutyPercent );	
 }
 
-// Computes the torque, then sends it.
-void  Motor::send_speed_pid(  )
-{
-	if (MotorEnable==FALSE) return;
-
-	DutyPercent = compute_duty( );
-	//printf("\t\t\tDUTY=%5.1f\n", DutyPercent);
-	//print_positioning();
-	send_speed( DutyPercent );
-}
-
 void  Motor::send_speed( float mDuty )
 {
 	bool proceed = true;
@@ -391,7 +190,7 @@ void  Motor::send_speed( float mDuty )
 	}
 
 	if ((MotorEnable) && (proceed))
-	{		
+	{
 		// takes [-100.0 , 100.0]
 		pack_move_speed( &msg1, Instance, mDuty );
 		short Speed    = mDuty * 100;	// *100 = 10,000 
@@ -401,60 +200,30 @@ void  Motor::send_speed( float mDuty )
 	}
 }
 
+/* Need to take into account 3 things:
+		The sign of the duty.
+		Which stop 1 or 2.
+		The motor's positive duty is increasing or decreasing counts.  depends on the physical.		
+*/
 bool Motor::correct_direction_out_of_stop( float mDuty )
 {
+	/* This code has been tested and is correct!  */
 	short sign = (mDuty>0) ? 1:-1;
 	//printf("sign=%d Stopped=%d, MDir=%d\n", sign, MotorStopped, MotorDirection );
-
+	
 	if (MotorStopped == 1)
-	{	if (sign == MotorDirection)
+	{	
+		if (sign == MotorDirection)
 			return true;
 	} else if (MotorStopped == 2)
-	{	if (sign != MotorDirection)
+	{	
+		// + duty and motordir is -
+		if (sign != MotorDirection)
 			return true;
 	}
 	return false;
 }
 
-/*
-INPUT:
-mDestinationCount	:	Counts
-mRequestedSpeed		:	Counts / second
-		For example (90 degrees = ~300 counts) in 1.0 second 
-		= 300/1.0 = 300 cps.
-If Destination is beyond the stop limits, it will be truncated at the limits.
-*/
-void Motor::set_destination( int mDestinationCount, float mRequestedSpeed )
-{
-	if (MotorEnable==FALSE)	return;
-	
-	// BOUND BY STOP LIMITS:
-	if (mDestinationCount < stop1.PotValue)
-		mDestinationCount = stop1.PotValue;
-	else if (mDestinationCount > stop2.PotValue)
-		mDestinationCount = stop2.PotValue;
-	//printf("After destCount=%d;\n", mDestinationCount );
-
-	// CALCULATE WHEN TO START BRAKING : 	
-	//  0.014/20ms= 0.014/0.020 = 0.7
-	float distance_to_stop = compute_stopping_distance( mRequestedSpeed, 
-														deceleration_rate_cpss  );
-	RequestedSpeed		= mRequestedSpeed;
-	DestinationReached  = false;
-	StartCount       	= CurrCount;
-	DestinationCount 	= mDestinationCount;
-
-	reset_pid();
-	printf("RequestedSpeed=%6.2f; decel=%5.3f; distance_to_stop=%6.3f; \n", 
-				mRequestedSpeed, deceleration_rate_cpss,
-				distance_to_stop );
-}
-//i give up on these algorithms.  i don't know how to make them work
-
-//	BeginBrakingCount = DestinationCount - distance;
-//  Speed is zero at DestinationCount
-//	float time = MeasuredSpeed / acceleration;
-//  float distance
 
 int Motor::check_stops( )
 {
@@ -466,7 +235,8 @@ int Motor::check_stops( )
 	if (stop2.Enabled)
 		if (CurrCount > stop2.PotValue)
 			MotorStopped = 2;
-//	printf("check_stops() = %d\n", MotorStopped);
+
+	//printf("check_stops() = %d\n", MotorStopped);
 	return MotorStopped;
 }
 
@@ -499,35 +269,6 @@ void Motor::send_config( byte mindex, byte mValue, byte mMask )
 	AddToSendList( &msg1 );	
 }
 
-/* Need: a duty which corresponds counteracts the force of gravity.
-		 This will get added to the desired duty. (may be negative or
-		 positive)
-		 
-   LengthCenterOfMass  *  mg sin(theta)
-*/
-float  Motor::compute_gravity_boost( )
-{	
-	float boost = K_const * sin( radians(CurrAngle) );
-	return boost;
-
-	// K will be found thru a self adjusting algorithm.
-	// ie we set up some pendulumn motion and adjust K until : 
-	//  get a constant period	
-}
-
-/* For the swing leg - air born.  We need some mutual
-	compensation for the action/reaction.  ie hip needs
-	+10% when knee moves.  The motor will react due to pots.
-	but we want to add a little umph matching knee so that 
-	there is no reaction.
-	Alpha may be negative.
-*/
-float  Motor::compute_reaction_torque( Motor& mMotor, float mAlpha )
-{
-	float boost = mMotor.DutyPercent * mAlpha; 
-	DutyPercent += boost;
-	return boost;	
-}
 
 int Motor::handle_CAN_message( struct sCAN* mMsg 	)	// handles incoming ID_MOTOR_VALUE & recomputes duty.
 {
@@ -541,9 +282,12 @@ int Motor::handle_CAN_message( struct sCAN* mMsg 	)	// handles incoming ID_MOTOR
 			{
 				PrevCount = CurrCount;
 				CurrCount = (mMsg->data[1]<<8) + mMsg->data[2];
-				printf("ID_ANALOG_MEASUREMENT %3d ", Feedback_index );
 				update_position();
-				print_state();
+				if (ActiveOutputs)
+				{
+					printf("ID_ANALOG_MEASUREMENT %4x ", Feedback_index );
+					print_state();
+				}
 				return 1;
 			}
 		}
@@ -575,6 +319,12 @@ int Motor::handle_CAN_message( struct sCAN* mMsg 	)	// handles incoming ID_MOTOR
 	return 0;
 }
 
+void Motor::print_average()
+{
+	printf("Mot#%d (%x) : Average Count= %6.3f  N=%d \n", Instance, Feedback_index, 
+													average_CurrCounts, Reads-1);
+}
+
 /* 
 	After incoming CAN msg has been processed, this will recompute duty and
 	stops accordingly.
@@ -589,7 +339,21 @@ int Motor::update_position(  )
 	timersub( &CurrTime, &PrevTime, &time_lapse );
 
 	float time_lapse_secs = time_lapse.tv_sec + ((float)time_lapse.tv_usec/1000000.);
-	printf("Time Lapse=%6.4f  ", time_lapse_secs);
+	if ((MotorEnable) && (ActiveOutputs)) 
+		printf("Time Lapse=%6.4f  ", time_lapse_secs);
+	
+	// AVERAGING MEASUREMENTS:	
+	if (Reads<ReadsAllowed)
+	{
+		SumCurrCounts += CurrCount;		// Clear the sum when you want to start averaging!
+		Reads++;
+	} else if (Reads==ReadsAllowed)	
+	{
+		average_CurrCounts = (float)SumCurrCounts /(float)Reads;		// Clear the sum when you want to start averaging!		
+		Reads++;			
+	} else { /* Leave it, SumCurrCounts now holds the average measurement. */ 
+				Reads = ReadsAllowed+1;
+	}
 	
 	// Update Angle:
 	CurrAngle = compute_angle(CurrCount);
@@ -601,20 +365,47 @@ int Motor::update_position(  )
 
 	// Check over current here... (once current reading have been tested/verified)
 			
-	BOOL reached = destination_reached( 10 );
-	if (reached) {
-		//printf( "Destn reached!" ); printf("\n");
-	}	
-
-	if (ActiveOutputs)
-		send_speed_pid();
 }
+	
+#include "config_string_utils.h"
 
-	// PRINT STATS:
-	/*printf("p_error=%6.1f; p_error_sum=%6.1f; p_error_deriv=%6.1f ", 
-			position_error, position_error_sum, position_error_deriv );
-	  printf("p_duty=%6.1f+%6.1f+%6.1f=%6.1f\n", 
-			pcomp_position_duty, icomp_position_duty, dcomp_position_duty, p_duty ); */
-	//position_error, position_error_sum, position_error_deriv, p_duty );
-	//printf("s_error=%6.1f;  s_error_sum=%6.1f;  s_error_deriv=%6.1f s_duty=%6.1f", 
-	//		speed_error, speed_error_sum, speed_error_deriv, s_duty );
+bool Motor::read_config_data( Preferences& mprefs, int mIndex )
+{
+	const char* ptr = NULL;
+	char  key[80];
+
+	sprintf(key, "actuator_%d_name", mIndex );
+	ptr = mprefs.find_string( key );
+	if (ptr==NULL)
+		printf(" ptr=%x \n", ptr );
+	else 
+		strcpy( Name, ptr );
+	
+	sprintf(key, "actuator_%d_instance", mIndex );
+	Instance 	= mprefs.find_int	( key );
+
+	sprintf(key, "actuator_%d_feedback_message", mIndex );
+	ptr 	= mprefs.find_string( key );
+	if (strcmp(ptr, "ID_ANALOG_MEASUREMENT")==0 )
+		Feedback_Msg_id = ID_ANALOG_MEASUREMENT;
+	else 	if (strcmp(ptr, "ID_MOTOR_VALUE")==0 )
+		Feedback_Msg_id = ID_MOTOR_VALUE;
+
+	sprintf(key, "actuator_%d_feedback_index", mIndex );
+	Feedback_index  = mprefs.find_int	( key );		
+	sprintf(key, "actuator_%d_feedback_zero_offset", mIndex );	
+	ZeroOffset		= mprefs.find_int	( key );
+
+	sprintf(key, "actuator_%d_direction", mIndex );	
+	MotorDirection  = mprefs.find_int	( key );
+	sprintf(key, "actuator_%d_enable", mIndex );	
+	MotorEnable 	= mprefs.find_bool ( key );
+	sprintf(key, "actuator_%d_stop_1_angle", mIndex );
+	stop1.Angle  	= mprefs.find_float	( key );
+	sprintf(key, "actuator_%d_stop_1_value", mIndex );	
+	stop1.PotValue  = mprefs.find_int	( key );	
+	sprintf(key, "actuator_%d_stop_2_angle", mIndex );	
+	stop2.Angle  	= mprefs.find_float	( key );
+	sprintf(key, "actuator_%d_stop_2_value", mIndex );	
+	stop2.PotValue  = mprefs.find_int	( key );
+}

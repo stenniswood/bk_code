@@ -1,8 +1,14 @@
 #ifndef _PREFERENCES_HPP_
 #define _PREFERENCES_HPP_
 
+
 #include <string>
 #include <list>
+using namespace std;
+
+
+
+
 
 class sKeyValuePair
 {
@@ -48,6 +54,7 @@ public:
 	const char* 			find_string	 ( const char* mKey );
 	float 					find_float	 ( const char* mKey );
 	int 					find_int	 ( const char* mKey );
+	bool 					find_bool	 ( const char* mKey );	
 
 	// For compatability legacy:
 	float 	getFloatValue(  );
@@ -64,9 +71,9 @@ protected:
 	char* FileName;
 
 	char  Line[128];
-	char  key[64];		// temporary var
-	char  value[64];		// temporary var
-			
+	char  key[80];			// temporary var
+	char  value[80];		// temporary var
+
 private:
 
 };

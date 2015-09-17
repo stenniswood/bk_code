@@ -4,13 +4,13 @@ INC		 = ../core/can ../core/msg ../core/misc ../core/ipc
 SELF_INC = ./
 CFLAGS 	= -lwiringPi -lm -lrt
 DEPS   	= 
-OBJ     = seq_main.o board_list.o motor_vector.o cmd_process.o leds.o \
-	      config_file.o string_util.o vector_file.o motor.o Appendage.o robot.o \
+OBJ     = seq_main.o board_list.o motor_vector.o cmd_process.o leds.o  config_file.o \
+	      string_util.o vector_file.o motor.o motor_control.o Appendage.o robot.o \
 	      angular_vectors_isolated_hip.o bigmotor_callbacks.o 
-
+# 
 CAN_OBJS =  CAN_Interface.o can_instance.o can_eid.o can_rxbuff.o can_txbuff.o   \
 	        bk_system_defs.o can_id_list.o system_msgs_callback.o 
-MISC_OBJS = buttons.o leds.o vector_math.o timer.o
+MISC_OBJS = buttons.o leds.o vector_math.o timer.o preferences.o 
 MSG_OBJS  = packer_lcd.o packer_motor.o packer.o
 CPPOBJ 	  = 
 

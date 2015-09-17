@@ -5,6 +5,8 @@
 using namespace std;
 
 
+
+
 class Robot
 {
 public:
@@ -12,13 +14,24 @@ public:
 
 	void	Initialize				   ( );
 	void 	print_current_positions	   ( );
-	
+	void 	print_averages			   ( );	
+	void	clear_reads				   ( int mNumExpected );
+	bool	are_reads_completed		   ( );	
+	void	start_measurement_averaging( int mNumSamples );
+	bool	done_averaging			   ( );
+	void	load_config				   ( char* mFilename );
+
+	void	deactivate_outputs			( );	
+	void	activate_outputs			( );	
+	void	activate_enabled_outputs	( );	
+
 	int  	handle_CAN_message	    	( struct sCAN* mMsg 	);	// handles incoming msg	
 	int		find_actuator_by_instance  ( byte mInstance, int* Aindex, int* actuator_index );
 	void	update_submitted_timestamps( struct timeval mts );
 
 	BOOL 	is_destination_reached     ( );
-	void	set_new_destinations	   (  );
+	void	set_new_destinations	   ( sRobotVector* mSeq );
+
 
 	void 	set_current_position_as_destination( );	// should stop all motors.
 	void 	compute_speeds			   ( );

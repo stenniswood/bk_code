@@ -12,6 +12,7 @@
 #include <vector>
 #include <pthread.h>
 #include <assert.h> 
+#include <string>
 
 #include "gpio.h"
 #include "mcp2515.h"
@@ -27,6 +28,7 @@
 #include "board_list.h"
 
 #include "motor.hpp"
+#include "motor_control.hpp"
 #include "motor_vector.h"
 #include "can_id_list.h"
 #include "cmd_process.h"
@@ -38,7 +40,7 @@
 #include "timer.h"
 #include "vector_file.h"
 #include "robot.hpp"
-#include "config_file.h"
+//#include "config_file.h"
 
 
 // Wiring PI pin number (gpio pin 15)
@@ -122,27 +124,36 @@ struct timeval tv;
 struct timeval starttime;
 bool do_not_send = false;
 
+/* Here we marry a vector in the sequencer with the robot limbs. 
+
+*/
 void next_sequence_handler(int sig, siginfo_t *si, void *uc)
 {
+	if (FirstIssued==false) {
+		robot.activate_enabled_outputs();
+		printf(" FIRST ISSUE:  activate_enabled_outputs\n");		
+	}
 	counter++;
 	//if ((counter%20)==0)  // Every Second, update Thrust Reqested
 	//{
+
+		// Compute time elapsed from start until now:
 		assert( robot.limbs.size() == robot.seq.limbs.size() );
 		gettimeofday(&tv,NULL);
 		float dtime = tv.tv_sec - starttime.tv_sec;
 		dtime  += (tv.tv_usec - starttime.tv_usec)/1000;
 		
-		// PLACE values into Actuators : 			
+		// PLACE values into Actuators : 	(GREEN LETTERS!)		
 		printf( "\n%sSEQ: New Vector: timestamp=%6.3f  %d/%d%s\n", KGRN, dtime,						
 						robot.seq.Current_Vindex, robot.seq.limbs[0].vectors.size(), KNRM ); 
-
 		if (do_not_send==false)
 		{
 			// Get TimeStamp : 		
 			gettimeofday(&tv,NULL);
-			robot.update_submitted_timestamps( tv );
+			robot.update_submitted_timestamps( tv );	// goes into each actuator "submitted" timestamp.
 		}
-		robot.set_new_destinations();	// set DestinatinPotValue
+		// Sequencer of vectors is stored in "sRobotVector seq" of robot.hpp		
+		robot.set_new_destinations( &(robot.seq) );	  // set DestinatinPotValue to 
 		robot.print_vector( robot.seq.Current_Vindex, false );
 		//robot.seq.limbs[0].vectors[i].print_counts( );
 		robot.print_current_positions();
@@ -220,14 +231,17 @@ void init_interrupts()
 //	write_register( CANCTRL,  0x00 );	// 
 }
 
+char 	ConfigureFileName2[] = "config_new.ini";
+
 void init()
 {
 	init_hardware();
 	printf("READING CONFIGURE...\n");	
-	read_config( ConfigFileName, robot );
-	
+	//read_config( ConfigFileName, robot );
+	robot.load_config( ConfigureFileName2 );
+
 	init_interrupts();
-	
+
 	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
 	CAN_init      ( CANSPEED_250, 0);
 	read_register ( CANSTAT );
@@ -237,13 +251,9 @@ void init()
 
 
 void setup_scheduler()
-{
-	robot.limbs[0].ElementsFilled = 0;
-	robot.limbs[1].ElementsFilled = 0;
-	FirstIssued = true;
-	
+{	
 	long period_ns = robot.seq.limbs[0].playback_period_ms * 1000000;	
-	printf("===== playback_period_ms = %l \n", robot.seq.limbs[0].playback_period_ms );	
+	printf("===== playback_period_ms = %lu \n", robot.seq.limbs[0].playback_period_ms );	
 	//long period_ns = 1000000;
 	
 	gettimeofday( &starttime, NULL );
@@ -275,8 +285,9 @@ void help()
 	
 	printf("COMMANDS : \n\n");
 	printf("help\t\tShow this text.\n\n"	 						  );	
-	printf("report\t\tConfigure BigMotor boards to report their:\n" );
-	printf("\t[rate:1,2,4,8]\tTime period between reports:  10, 20, 50, 100 ms.\n"	 );
+	
+	printf("config_motors\t\tConfigure BigMotor boards to report their rate. \n" );
+//	printf("\t[rate:1,2,4,8]\tTime period between reports:  10, 20, 50, 100 ms.\n"	 );
 	printf("\t[report type: none,value,angle]\n"	 		);
 	printf("\t\tvalue\t: Potentiometer Values\n"	 		);
 	printf("\t\tangle\t: Calibrated angles\n"	 			);
@@ -334,13 +345,16 @@ INPUT:
 	mReports	: Which reports to send (VALUE, ANGLE, etc)
 return 			: void
 *************************************************************************/
-void configure_motor_reports(  )
+void configure_motor_reports( bool mOn )
 {
 	byte mReports = MODE_SEND_POSITION_RAW;
-	byte mRate = MODE_SEND_UPDATES_20ms; 
-	for ( int index=0; index < robot.limbs.size(); index++ )
-		// Does all motors on Appendage[index] : 
-		robot.limbs[index].configure_motor_reports( mRate, mReports );
+	byte mRate    = MODE_SEND_UPDATES_20ms; 
+	if (mOn==false) {
+		mReports = 0;
+		mRate    = MODE_SEND_UPDATES_NONE;
+	}
+	
+	robot.configure_motor_reports( mRate, mReports );			
 }
 
 void jog()
@@ -429,8 +443,6 @@ int main( int argc, char *argv[] )
 
 		init();			
 		create_threads();		
-		// Configure board to send their raw positions : 
-		configure_motor_reports();
 
 		if ( (strcmp(argv[1], "set_stop") == 0) ||
 		     (strcmp(argv[1], "calibrate") == 0) )		
@@ -455,9 +467,16 @@ int main( int argc, char *argv[] )
 				}
 			}
 		}	// end of "set_stop"	
-
+		if (strcmp(argv[1], "config_motors") == 0) 
+		{
+			if (strcmp(argv[2], "on") == 0) 
+				// Configure board to send their raw positions : 
+				configure_motor_reports( true );
+			else
+				configure_motor_reports( false );
+		}
 		if ( (strcmp(argv[1], "read_stop") == 0) ||
-		     (strcmp(argv[1], "read") == 0) )		
+		     (strcmp(argv[1], "read") == 0) )
 		{
 			byte stop  = atoi( argv[2] );							
 			word value = atoi( argv[3] );					
@@ -489,38 +508,17 @@ int main( int argc, char *argv[] )
 		{
 			/* Measure should not move the motors at all.  
 				The normal callback_board_presence move them. */
-			for (int l=0; l<robot.limbs.size(); l++)
-				robot.limbs[l].disable_outputs();
-				
-			set_model_rx_callback ( can_motor_position_responder );				
-			//set_model_rx_callback( can_position_meas_responder );	 deprecated since disable outputs!
+			robot.deactivate_outputs();
 
-			const int NUM_SAMPLES = 10;
-			
-			robot.set_vectors_limbs();
-			robot.seq.read_vector_file( SequenceFileName );
-			robot.set_vectors_limbs();
-			
+			robot.start_measurement_averaging( 20 );			
+			set_model_rx_callback ( can_motor_position_responder );
+
 			/* Here we'll read the Pot values for all motors.  Average 10 samples.
 			   and print the results. */			
-			while (robot.limbs[0].Reads < NUM_SAMPLES)
-			{	}
-			printf("Reads = %d\n", robot.limbs[0].Reads );
-			float sum_pot_values[100];			
-			for (int a=0; a<robot.limbs[0].actuators.size(); a++)
-			{
-					robot.limbs[0].actuators[a].MotorEnable = FALSE;
-					sum_pot_values[a] = 0.0;
-			}
-			for (int a=0; a<robot.limbs[0].actuators.size(); a++)
-					sum_pot_values[a] += robot.limbs[0].actuators[a].CurrCount;
-			for (int a=0; a<robot.limbs[0].actuators.size(); a++)
-					sum_pot_values[a] /= NUM_SAMPLES;
-			printf("\nResults Pot Averages (%d samples): \n", NUM_SAMPLES);
-			printf(" ZeroOffset ");
-			for (int a=0; a<robot.limbs[0].actuators.size(); a++)
-					printf(" %5.2f ", sum_pot_values[a] );	
-			printf("\n\n");		
+			while (robot.done_averaging()==false)	{	}
+
+			printf("Data collected.  Average positions:\n");			
+			robot.print_averages();		
 		}
 		if ( strcmp(argv[1], "jog") == 0 )
 		{
@@ -559,12 +557,32 @@ int main( int argc, char *argv[] )
 				SequenceFileName = argv[2];
 			}
 			if (argc > 3)
-				robot.seq.iterations_requested = atoi(argv[3]);	// -1 means infinite
+				robot.seq.iterations_requested = atoi(argv[3]);	 // -1 means infinite
 
+			robot.deactivate_outputs();
+			robot.clear_reads( 1 );
+			bool result = false;
+			while (result==false) {
+				result = robot.are_reads_completed();
+			};
+			
 			robot.seq.read_vector_file( SequenceFileName );			
-			robot.set_vectors_limbs(  );	//
-			setup_scheduler();
+			robot.set_vectors_limbs   (  );
 
+
+			printf("MotorEnable 0,1,2 =%d,%d,%d \n", 
+					robot.limbs[1].actuators[0].MotorEnable,
+					robot.limbs[1].actuators[1].MotorEnable,
+					robot.limbs[1].actuators[2].MotorEnable );
+
+			printf("ActiveOutputs_0,1,2 =%d,%d,%d \n", 
+					robot.limbs[1].actuators[0].ActiveOutputs,
+					robot.limbs[1].actuators[1].ActiveOutputs,
+					robot.limbs[1].actuators[2].ActiveOutputs );
+
+
+			setup_scheduler();					// sets a timer for  next_sequence_handler()
+			
 			printf("Repeating %d iterations\n", robot.seq.iterations_requested );
 			printf("====================looping===========================\n");
 
@@ -584,3 +602,7 @@ int main( int argc, char *argv[] )
 
 
 
+/*	This was in "meas" :
+			robot.set_vectors_limbs();
+			robot.seq.read_vector_file( SequenceFileName );
+			robot.set_vectors_limbs(); */

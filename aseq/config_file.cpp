@@ -32,6 +32,7 @@ Comments Should not appear in the file.
 #include <wiringPi.h>
 #include <string.h>
 #include <vector> 
+#include <string>
 
 #include "bk_system_defs.h"
 #include "can_eid.h"
@@ -46,6 +47,7 @@ Comments Should not appear in the file.
 #include "packer_motor.h"
 #include "motor_vector.h"
 #include "motor.hpp"
+#include "motor_control.hpp"
 #include "Appendage.hpp"
 #include "vector_file.h"
 
@@ -108,7 +110,7 @@ void read_instance_line( FILE* f, Robot& mRobot )
 		exit(0);
 	}
 
-	Motor ni;
+	MotorControl ni;
 	for (int i=2; i<num_params; i++)
 	{		
 		ni.Instance = numbers[i];
@@ -216,7 +218,7 @@ void read_enable_line( FILE* f, Robot& mRobot )
 			exit(0);
 		}
 		if (numbers[i])	numbers[i] = TRUE;		// 2,3,4,etc ==> 1		
-		//mRobot.limbs[limb_index].actuators[i-2].MotorEnable = numbers[i];
+		mRobot.limbs[limb_index].actuators[i-2].MotorEnable = numbers[i];
 		mRobot.limbs[limb_index].actuators[i-2].ActiveOutputs = numbers[i];
 		printf("[%d]=%d, ", i-2, numbers[i] );
 	}
@@ -284,9 +286,11 @@ void read_stop_line(FILE* f, Robot& mRobot)
 
 	if (stop_index == 1)
 	{
+		mRobot.limbs[limb_index].actuators[actuator_index].stop1.Enabled  = TRUE;	
 		mRobot.limbs[limb_index].actuators[actuator_index].stop1.Angle    = angle;
 		mRobot.limbs[limb_index].actuators[actuator_index].stop1.PotValue = value;
 	} else {
+		mRobot.limbs[limb_index].actuators[actuator_index].stop1.Enabled  = TRUE;	
 		mRobot.limbs[limb_index].actuators[actuator_index].stop2.Angle    = angle;
 		mRobot.limbs[limb_index].actuators[actuator_index].stop2.PotValue = value;	
 	}

@@ -16,7 +16,10 @@
 #include <sys/time.h>
 #include <vector>
 #include <string.h>
+#include <string>
+
 #include "bk_system_defs.h"
+#include "preferences.hpp"
 #include "can_eid.h"
 #include "CAN_Interface.h"
 #include "can_instance.h"
@@ -35,6 +38,8 @@
 #include "Appendage.hpp"
 #include "robot.hpp"
 #include "config_file.h"
+
+#include "config_string_utils.h"
 
 
 Robot	robot;
@@ -90,6 +95,24 @@ void Robot::update_submitted_timestamps( struct timeval mts )
 		limbs[l].update_submitted_timestamps( mts );
 	}		
 }
+
+void Robot::deactivate_outputs( )
+{
+	for (byte l=0; l < limbs.size(); l++)
+		limbs[l].deactivate_outputs( );
+}	
+void Robot::activate_outputs( )
+{
+	for (byte l=0; l < limbs.size(); l++)
+		limbs[l].activate_outputs( );
+}
+/* Because there are Activate outputs and motor enables.   */
+void Robot::activate_enabled_outputs( )
+{
+	for (byte l=0; l < limbs.size(); l++)
+		limbs[l].activate_enabled_outputs( );
+	printf("activate_enabled_outputs() ACTIVATED!\n");
+}	
 
 /*********************************************************************
 When all limbs are at their destinations.
@@ -163,12 +186,12 @@ void Robot::next_vector( )
 	}
 }
 
-void Robot::set_new_destinations(  )
+void Robot::set_new_destinations( sRobotVector* mSeq )
 {
 	if (Enable==false)  return ;
 	for (int l=0; l<limbs.size(); l++)
 	{
-		limbs[l].set_new_destinations( seq.limbs[l], seq.Current_Vindex );
+		limbs[l].set_new_destinations( mSeq->limbs[l], mSeq->Current_Vindex );
 	}
 }
 
@@ -231,6 +254,105 @@ void Robot::set_current_position_as_destination( )
 	}
 }
 
+void Robot::start_measurement_averaging( int mNumSamples )
+{
+	for (byte l=0; l < limbs.size(); l++)
+		limbs[l].start_measurement_averaging( mNumSamples );
+}
+
+void Robot::print_averages( )
+{
+	for (int l=0; l<limbs.size(); l++) {
+		limbs[l].print_averages( );		
+	}
+}
+
+void Robot::clear_reads( int mNumExpected )
+{
+	for (int l=0; l<limbs.size(); l++) {
+		limbs[l].clear_reads(mNumExpected);
+		Reads = 0;	
+		limbs[l].ReadsAllowed = mNumExpected;
+
+	}
+}
+bool Robot::are_reads_completed (  )
+{
+	for (int l=0; l<limbs.size(); l++)  { 
+		if (limbs[l].is_vector_fully_read()==false ) {
+			//printf("Limb #%d - not completed\n", l );
+			return false;
+		}
+	}	
+	return true;
+}
+	
+bool Robot::done_averaging(  )
+{
+	for (int l=0; l<limbs.size(); l++)
+	{
+		if (limbs[l].is_done_averaging()==false) {
+			//printf("Reads=%d, Allowed=%d\n", limbs[l].Reads, limbs[l].ReadsAllowed );
+			return false;		
+		}
+	}
+	return true;
+}
+
+/* Load the config file.
+	
+*/
+void Robot::load_config( char* mFilename )
+{
+/*	ControlSpeedCalculator csc;
+	csc.m_start_value		= 100;
+	csc.m_destination_value = 500;
+	csc.m_time_delta 		= 1.0;
+	csc.m_average_speed 	= 400;
+	csc.m_deceleration		= 500 ;
+	csc.compute_speeds();
+	csc.print_speeds();
+	printf("========================\n"); */
+	
+	Preferences  prefs(mFilename);
+	prefs.load_all_keys();
+	
+	Appendage 		appendage;
+	MotorControl 	mot_control;
+	int 			num_actuators;
+	char* 			ptr;
+
+	FILE* cfd;
+	int number_limbs = prefs.find_int("number_limbs");
+	//int number_limbs = read_int_token( cfd, "number_limbs" );
+	char key[80];
+	
+	for (int l=0; l<number_limbs; l++)
+	{	
+		sprintf(key, "limb_%d_name", l );
+		string str = prefs.find_string(key);		
+		//ptr = read_string_token( cfd, "limb_name" );
+		strcpy( appendage.Name, str.c_str() );
+
+		sprintf(key, "limb_%d_enabled", l );
+		appendage.Enable = prefs.find_bool( key );
+
+		sprintf(key, "limb_%d_number_actuators", l );
+		num_actuators = prefs.find_int( key );
+
+		for (int a=0; a<num_actuators; a++)
+			appendage.actuators.push_back( mot_control );
+
+		limbs.push_back( appendage );
+	}
+
+	for (int l=0; l<number_limbs; l++)
+		for (int a=0; a<limbs[l].actuators.size(); a++)
+		{
+			limbs[l].actuators[a].read_config_data( prefs, a );
+		}
+}
+
 /************************************************************************* 
 Configure all BigMotor boards associated with this motor vector.
 INPUT:
@@ -241,12 +363,10 @@ return 			: void
 void Robot::configure_motor_reports( byte mRate, byte mReports )
 {
 	if (Enable==false)  return ;
+	
 	for (int l=0; l<limbs.size(); l++)
 	{
 		limbs[l].configure_motor_reports( mRate, mReports );
-	}
+	}	
 }
-
-
-
 

@@ -26,11 +26,14 @@ To Fly!
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
+#include <map>
 #include "mcp2515.h"
 #include "pican_defines.h"
 #include "bk_system_defs.h"
 #include "can_id_list.h"
 #include "preferences.hpp"
+
+
 
 
 Preferences::Preferences( char* mFileName )
@@ -51,7 +54,7 @@ BOOL Preferences::file_exists()
 char Preferences::load_all_keys( )
 {
 	printf("Load all keys...\n");
-	open(TRUE);
+	open  (TRUE);
 	int LineCount = 1;
 	char retval	  = 0;
 	bool blank    = false;
@@ -60,14 +63,21 @@ char Preferences::load_all_keys( )
 	while ((!feof(fd)) && (retval==0))
 	{
 		blank = readln_nb();
+		//printf("%s\n", Line);
 
 		if ((strchr(Line, '=')==0) || (blank==true))
-		{  close();  return LineCount;  }
-
-		printf( "%s :: key=%s  value=%s \n", Line, (const char*)getKey(), (const char*)getValue() );
-		ptr = new sKeyValuePair( (const char*)getKey(), (const char*)getValue() );
-		key_table.push_back( ptr );
-		LineCount++;
+		{  
+			close();  
+			return LineCount;  
+		}
+		if (blank==false)  {		
+			char* k_ptr = ( char*)getKey();
+			char* v_ptr = ( char*)getValue();
+			printf("key=%s \t\t\t value=%s\n", key, value );
+			ptr = new sKeyValuePair( key, value );
+			key_table.push_back( ptr );
+			LineCount++;
+		}
 	}
 	close();	
 	return retval;
@@ -86,11 +96,27 @@ struct sKeyValuePair* 	Preferences::find_key ( const char* mKey )
 	return NULL;
 }
 
+bool Preferences::find_bool( const char* mKey )
+{
+	struct sKeyValuePair* ptr = find_key(mKey);
+	if (ptr==NULL)
+		return NULL;
+	if ((ptr->value.compare("TRUE")==0) ||
+		(ptr->value.compare("ENABLE")==0) ||
+		(ptr->value.compare("ENABLED")==0) ||
+		(ptr->value.compare("YES")==0) ||
+		(ptr->value.compare("ON")==0) )
+		return true;
+	else 		
+		return false;
+}
+	
 const char*  Preferences::find_string ( const char* mKey )
 {
 	struct sKeyValuePair* ptr = find_key(mKey);
 	if (ptr==NULL)
 		return NULL;
+
 	return (ptr->value.c_str());
 }
 
@@ -133,11 +159,10 @@ bool Preferences::readln_nb(  )
 		blank = true;	// Start
 		for (int i=0; ((i<length) && (Line[i])); i++)
 		{
-			if ((Line[i] != ' ') && (Line[i] != '\t'))
+			if ((Line[i] != ' ') && (Line[i] != '\t') && (Line[i] != '\n') && (Line[i] != '\r'))
 				blank = false;
 		}
 		if (length==0) blank=true;
-
 	} while (blank && (!feof(fd)) );
 	return blank;
 }
@@ -150,7 +175,8 @@ void Preferences::readln( )
 	while (!feof(fd))
 	{
 		Line[i] = fgetc(fd);
-		if (Line[i] == '\n') {
+		if ((Line[i] == '\n') || (Line[i] == '\n')) 
+		{
 			Line[i] = 0;
 			return ;
 		}
@@ -168,21 +194,25 @@ void Preferences::write( char* mstr )
 char* Preferences::getKey( )
 {
 	char* delim = strchr(Line, '=' );
-	*delim = 0;
-	strcpy(key, Line);
-	*delim = '=';
+	if (delim) {
+		*delim = 0;
+		strcpy(key, Line);
+		*delim = '=';
+	}
 	return key;
 }
 char* Preferences::getValue( )
 {
-	char* delim = strchr(Line,'=');
-	return delim+1;
+	char* delim = strchr(Line, '=');
+	if (delim)
+		strcpy(value, delim+1);
+	return value;
 }
 
 float Preferences::getFloatValue(  )
 {
-	char* delim = strchr(Line, '=');
-	return (atof(delim+1));
+	getValue();	
+	return (atof(value));
 }
 
 int Preferences::getIntValue( )
