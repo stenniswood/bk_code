@@ -6,7 +6,8 @@ CFLAGS 	= -lwiringPi -lm -lrt
 DEPS   	= 
 OBJ     = seq_main.o board_list.o motor_vector.o cmd_process.o leds.o  config_file.o \
 	      string_util.o vector_file.o motor.o motor_control.o Appendage.o robot.o \
-	      angular_vectors_isolated_hip.o bigmotor_callbacks.o teach_pendant.o 
+	      angular_vectors_isolated_hip.o bigmotor_callbacks.o teach_pendant.o seq_init.o
+	      
 
 CAN_OBJS =  CAN_Interface.o can_instance.o can_eid.o can_rxbuff.o can_txbuff.o   \
 	        bk_system_defs.o can_id_list.o system_msgs_callback.o 

@@ -169,7 +169,7 @@ void Robot::print_vector( int mIndex, bool mAngles )
 	else
 		for (int l=0; l<limbs.size(); l++)
 		{	if (limbs[l].Enable) {
-				printf("Limb[%d] ", l);
+				printf("Limb[%d] \n", l);
 				seq.limbs[l].vectors[mIndex].print_counts( );	
 			}
 		}

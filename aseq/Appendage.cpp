@@ -172,7 +172,10 @@ bool Appendage::is_vector_fully_read( )
 	for (int a=0; a<actuators.size(); a++)
 		if (actuators[a].MotorEnable)
 			if (actuators[a].Reads < actuators[a].ReadsAllowed)
+			{
+				printf("Actuator %d is not received. %s \n", a, Name );
 				return false;
+			}
 
 	return 	true;
 }

@@ -39,134 +39,25 @@
 #include "timer.h"
 #include "vector_file.h"
 #include "robot.hpp"
-//#include "config_file.h"
 #include "teach_pendant.hpp"
+#include "seq_init.hpp"
 
-
-// Wiring PI pin number (gpio pin 15)
-#define CAN_INT_PIN 3
-#define BUTTON1_INT_PIN 4
-#define BUTTON2_INT_PIN 5
-#define BUTTON3_INT_PIN 6
 
 #define fifty_ms    50000000
-char 	ConfigureFileName2[] = "config_new.ini";
-
-short MsgCounter   = 0;
-byte  MsgIDCounter = 0;
-// Each module sends a message to identify itself (type of device, and 
-// SerialNumber)
-const byte AdrenalineEdgeID  = 0x01;
-const byte AdrenalineBlueID  = 0x02;
-const byte AdrenalinePWMID   = 0x03;
-const byte AdrenalinePowerID = 0x04;
-const byte AdrenalineRawID   = 0x05;
-long  SerialNumber_      	 = 0x56789CD;
 
 int counter = 0;
-char user_input[255];
-char cmd[4];
-byte instance;
-byte value;
+//char user_input[255];
+//char cmd[4];
+//byte instance;
+//byte value;
 bool FirstIssued = false;
-TeachPendant 	teach_pendant;
 struct timeval	start_ts;
-
-void Button1r_isr()
-{
-	printf("Button 1 Pressed Interrupt - reg_dump()\n");
-	register_dump   ( );
-	tx_register_dump(0);	
-}
-void Button2r_isr()
-{
-	CAN_init( CANSPEED_250, 0 );
-	printf("Button 2 Pressed - Reset CAN \n");	
-}
-void Button3r_isr()
-{
-	printf("Pause Sequencer.\n");
-	printf("--------------->>>>>>>\n");
-	char txt[] = {"hello!!!"};
-	pack_lcd_write_text( &msg1, 0, txt);
-	AddToSendList( &msg1 );
-	printf("--------------->>>>>>>\n");
-}
-
-/////////////////////////////////////////////////////////////////
-// CREATE CAN THREAD : 
-pthread_t scheduler_thread_id;
-void* scheduler_thread(void* n)
-{
-	while (1)
-	{
-		can_tx_timeslice();
-		usleep( 100 );
-	}
-}
-
-void create_threads()
-{
-	// CREATE TIMER THREAD :
-	const char *message1 = "second";
-	int iret1 = pthread_create( &scheduler_thread_id, NULL, scheduler_thread, (void*) message1 );
-	if (iret1)
-	{
-		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
-		exit(EXIT_FAILURE);
-	}
-}
-
-/* Set Callback rate at 20Hz 
-	Use this to dispatch the vectors only.
-	The speeds/pids will be updated when position messages arrive. */
 struct timeval tv;
 struct timeval starttime;
-	struct sCAN msg;
-	char str[80];	
-
-void setup_teach()
-{
-	teach_pendant.add_dial( 0x16, "Rotate");
-	teach_pendant.add_dial( 0x15, "Hip"  );
-	teach_pendant.add_dial( 0x14, "Knee" );
-	teach_pendant.add_dial( 0x13, "Ankle");
-}
 
 
-void update_lcd()
-{
-	char tmp[20];	
-	int instance = 41;
-	printf("UpdateLCD\n\n");
-	pack_lcd_clear_screen( &msg, instance );
-	AddToSendList( &msg );
-	usleep(2000);
-	
-	pack_lcd_cursor_to( &msg, instance, 0, 1, 0 );
-	AddToSendList( &msg );	
-	usleep(2000);
-	sprintf(str, "Teach Pe");
-	pack_lcd_write_text	( &msg, instance, str );
-	AddToSendList( &msg );
-	usleep(2000);
-	sprintf(str, "ndant:");
-	pack_lcd_write_text	( &msg, instance, str );
-	AddToSendList( &msg );
-	usleep(2000);
-		
-	for (int i=0; i<4; i++)
-	{
-		pack_lcd_cursor_to( &msg, instance, i+2, 2, 0 );
-		AddToSendList( &msg );
-		usleep(2500);
-		
-		sprintf(str, "# %d=%d", i, teach_pendant.m_dials[i].CurrCount );
-		pack_lcd_write_text	( &msg, instance, str );
-		AddToSendList( &msg );
-		usleep(2500);
-	} 
-}
+
+
 /* 
 	Here we marry a vector in the sequencer with the robot limbs.
 */
@@ -193,10 +84,14 @@ void next_sequence_handler(int sig, siginfo_t *si, void *uc)
 
 	// PLACE values INTO ACTUATORS : 
 	robot.print_vector( robot.seq.Current_Vindex, false );
+	printf("next_sequence_handler() print_vector Done \n");	
 	robot.set_new_destinations( &(robot.seq), dtime );	  // set DestinatinPotValue 
+	printf("next_sequence_handler() set_new_destinations Done \n");	
 	robot.print_current_positions();
+	printf("next_sequence_handler() print_current_positions Done \n");	
 	robot.next_vector();			// Advance to the next vector
-
+	printf("next_sequence_handler() next_vector Done \n");
+	
 /*	Note: Sequencer of vectors is stored in "sRobotVector seq" of robot.hpp		
 	      speeds will get updated on next messages received
 	
@@ -213,73 +108,6 @@ void next_sequence_handler(int sig, siginfo_t *si, void *uc)
 	*/
 }
 
-void init_hardware()
-{
-	int result = wiringPiSetup();
-	// Ready-to-send, Receive buffer full
-	pinMode		( CAN_INT_PIN, INPUT );
-	pinMode		( RX0BF,  INPUT 	 );
-	pinMode		( RX1BF,  INPUT  );
-	pinMode		( TX0RTS, OUTPUT );
-	pinMode		( TX1RTS, OUTPUT );
-	pinMode		( TX2RTS, OUTPUT );	
-	digitalWrite( TX0RTS, 1 );
-	digitalWrite( TX1RTS, 1 );
-	digitalWrite( TX2RTS, 1 );
-}
-
-/* Note:
-	Calling this first _before_ CAN_init()
-	Fixed the problem of interrupts not working (ie. not receiving data)
-	So to explain:  If an interrupt occurred before the handler was there...
-		The interrupt trigger is on the falling edge (not the low level!)
-		So we miss the first interrupt, and the flag doesn't get cleared to
-		let the INT line go high again and catch the next edge!	
-*/
-void init_interrupts()
-{
-	set_system_rx_callback( callback_board_presence 	 );
-
-	// set Pin 17/0 generate an interrupt on high-to-low transitions
-	// and attach myInterrupt() to the interrupt
-	if ( wiringPiISR(CAN_INT_PIN, INT_EDGE_FALLING, &CAN_isr) < 0 ) {
-	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
-	  exit(1);
-	}
-	if ( wiringPiISR(BUTTON1_INT_PIN, INT_EDGE_FALLING, &Button1r_isr) < 0 ) {
-	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
-	  exit(1);
-	}
-	if ( wiringPiISR(BUTTON2_INT_PIN, INT_EDGE_FALLING, &Button2r_isr) < 0 ) {
-	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
-	  exit(1);
-	}
-	if ( wiringPiISR(BUTTON3_INT_PIN, INT_EDGE_FALLING, &Button3r_isr) < 0 ) {
-	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
-	  exit(1);
-	}
-}
-
-
-
-void init()
-{
-	init_hardware();
-	printf("READING CONFIGURE...\n");	
-	//read_config( ConfigFileName, robot );
-	robot.load_config( ConfigureFileName2 );
-
-	init_interrupts();
-
-	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
-	CAN_init      ( CANSPEED_250, 0);
-	read_register ( CANSTAT );
-	write_register( CANINTE,  0x1F );	// enable 2 TXs & 1 RX	
-	printf("Finished Init!\n");
-
-	setup_teach();
-}
-
 void setup_scheduler()
 {	
 	long period_ns = robot.seq.limbs[0].playback_period_ms * 1000000;	
@@ -294,79 +122,9 @@ void setup_scheduler()
 	start_timer ( &its, period_ns, timerid     );
 }
 
-void read_cnfs()
-{
-	printf( "\tCNF1: " );
-	int result = read_register( CNF1 );
-	printf("\tCNF2: " );
-	result = read_register( CNF2 );
-	printf("\tCNF3: " );
-	result = read_register( CNF3 );
-}
 
+// void help() is in "seq_init.cpp"
 
-void help()
-{
-	printf("\nAdrenaline Motion Sequencer!   \n\n"				   	   );
-	printf(" The app takes a configure file and a vector file. "	   );
-	printf(" The config file ('sequence.ini' by default)\n specifies the number");
-	printf(" of limbs, and actuators on each limb.  For each actuator, the instance ids,");
-	printf(" \n enables, zeroOffsets, default direction, and calibrated stops.\n\n"	);
-	
-	printf("COMMANDS : \n\n");
-	printf("help\t\tShow this text.\n\n"	 						  );	
-	
-	printf("config_motors\t\tConfigure BigMotor boards to report their rate. \n" );
-//	printf("\t[rate:1,2,4,8]\tTime period between reports:  10, 20, 50, 100 ms.\n"	 );
-	printf("\t[report type: none,value,angle]\n"	 		);
-	printf("\t\tvalue\t: Potentiometer Values\n"	 		);
-	printf("\t\tangle\t: Calibrated angles\n"	 			);
-	printf("\t\tnone\t: Turn off BigMotor reports\n\n"		);
-
-	printf("meas\t\tMeasures the Pot/Encoder counts (average of 10 samples). Use to find zero Offsets. Motors stopped during test.\n\n");
-	printf("test\t\tRuns the motor up to [speed].  records positions and speed during. \n"	);
-	printf("\t\t\tPress \"return\" to stop motor.  \n"	);
-	printf("\t\t\t[speed] may be [-100 to 100] \n\n"	);
-		
-	printf("calibrate||set_stop\t\tConfigure a BigMotor stop angle:.\n"	 				);
-	printf("\t[instance]\t\tInstance number of the board to calibrate.\n"	 			);
-	printf("\t[stop number:0,1]\tStop number to calibrate.\n"	 						);
-	printf("\t[float:Angle in Degrees] Angle that the stop corresponds to (degrees).\n"	);
-	printf("\t[word: Pot Value]\tPotentiometer Value for the angle (-1 indicates current Pot value)\n\n");
-
-	printf("play\tDisplays the sequecing on the terminal. Use to verify files & app before running.\n");	
-	printf("\t[sequence file]\t\tSpecifies .csv file with vector samples.\n"			);
-	printf("\t[repeat times]\t\tSpecifies how many times the sequence should be repeated.\n\n");
-	
-	printf("run\tSpecifies instance numbers & number of vectors.\n"	 					);	
-	printf("\t[sequence file]\t\tSpecifies .csv file with vector samples.\n"			);
-	printf("	\t(default=\"sequence.csv\") \n"	 									);		
-	printf("\t[resample iterations]\tSpecifies n number of resampling iterations.\n"	);
-	printf("					  Actual rate will be 2^n number of samples.\n"  		);
-	printf("\t[repeat times]\t\tSpecifies how many times the sequence should be repeated.\n");
-	printf("			  \t use -1 for infinite.\n"									 );
-	printf("\n"	 );
-}
-
-void print_args(int argc, char *argv[])
-{
-	printf("%d ARGS: ", argc);
-	for (int i=0; i< argc; i++)
-	{
-		printf(" %s ", argv[i] );
-	}
-	printf("\n");
-}
-
-// Taken from "AdrenalineFirmware\BigMotorEn\motor.h"
-#define MODE_SEND_UPDATES_NONE	0x00	// 
-#define MODE_SEND_UPDATES_10ms	0x10	// 
-#define MODE_SEND_UPDATES_20ms	0x20	// 
-#define MODE_SEND_UPDATES_50ms	0x40	// 
-#define MODE_SEND_UPDATES_100ms	0x80	// 
-#define MODE_SEND_POSITION_RAW	0x01 	// Measured Pot/Encoder, CurrentLeft, CurrentRight, Speed
-#define MODE_SEND_POSITION_CALC 0x02 	// Calculated quantities: Angle (deg*100), Current (Amps*100)
-#define MODE_SEND_STATUS		0x04 	// 
 
 /************************************************************************* 
 Configure all BigMotor boards associated with this limb.
@@ -387,67 +145,6 @@ void configure_motor_reports( bool mOn )
 	robot.configure_motor_reports( mRate, mReports );			
 }
 
-void jog()
-{	
-	int limb = 0;
-	int actuator = 0;
-	float duty = 20.;
-	int dir=1;
-	
-	char c=0;
-	while (c != 'q') 
-	{
-		switch (c)
-		{
-		case 0: break;
-		case '-':   duty -= 10.;	if (duty<10.) duty=10.;		
-				printf("duty = %6.2f\n", duty );
-				break;
-		case '=':   duty += 10.;	if (duty>100.) duty=100.;	
-				printf("duty = %6.2f\n", duty );				
-				break;		
-		
-		case 'o': 	limb=0;		actuator=0;		dir=-1;		break;
-		case 'p': 	limb=0;		actuator=0;		dir=+1;		break;
-		case 'l': 	limb=0;		actuator=1;		dir=-1;		break;
-		case ';': 	limb=0;		actuator=1;		dir=+1;		break;
-		case '.': 	limb=0;		actuator=2;		dir=-1;		break;
-		case '/': 	limb=0;		actuator=2;		dir=+1;		break;
-
-		case 't': 	limb=1;		actuator=0;		dir=-1;		break;
-		case 'y': 	limb=1;		actuator=0;		dir=+1;		break;
-		case 'g': 	limb=1;		actuator=1;		dir=-1;		break;
-		case 'h': 	limb=1;		actuator=1;		dir=+1;		break;
-		case 'b': 	limb=1;		actuator=2;		dir=-1;		break;
-		case 'n': 	limb=1;		actuator=2;		dir=+1;		break;
-		
-		// seek home:
-		case 'w': 	limb=0;		actuator=0;		dir=0;		break;
-		case 's': 	limb=0;		actuator=1;		dir=0;		break;
-		case 'x': 	limb=0;		actuator=2;		dir=0;		break;
-		case 'e': 	limb=1;		actuator=0;		dir=0;		break;
-		case 'd': 	limb=1;		actuator=1;		dir=0;		break;
-		case 'c': 	limb=1;		actuator=2;		dir=0;		break;										
-		default: break;
-		}	
-		
-		if (dir==0)		// Seek Home!
-		{
-			robot.limbs[limb].actuators[actuator].DestinationCount = 
-						robot.limbs[limb].actuators[actuator].ZeroOffset;
-			//robot.limbs[limb].actuators[actuator].send_speed_pid();			
-			while(1==1) { };			// Fix!
-		}
-		else {
-			// Now pulse it for a short time:
-			robot.limbs[limb].actuators[actuator].send_speed( duty );
-			delay(1000);
-			robot.limbs[limb].actuators[actuator].send_speed( 0.   );
-		}
-		c = getchar(); 	 
-	};		// wait till pot reaches max/min.
-	printf("Space pressed\n");
-}
 
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
@@ -470,7 +167,6 @@ int main( int argc, char *argv[] )
 				help();
 				return 0;
 		}		
-
 		init();			
 		create_threads();		
 
@@ -619,18 +315,12 @@ int main( int argc, char *argv[] )
 			     CAN_isr() callback handles the positions. 
 			    */
 			   // printf("Looping...\n");
-			   teach_pendant.print();
-			    update_lcd();
-			    usleep(500000);
+			   //teach_pendant.print();
+			   // update_lcd();
+			   // usleep(500000);
 			}
 			printf("all iterations requested have completed.  Done.\n");		
 		}
 	}
 }
 
-
-
-/*	This was in "meas" :
-			robot.set_vectors_limbs();
-			robot.seq.read_vector_file( SequenceFileName );
-			robot.set_vectors_limbs(); */

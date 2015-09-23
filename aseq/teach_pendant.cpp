@@ -22,8 +22,12 @@
 #include "board_list.h"
 #include "packer.h"
 #include "packer_motor.h"
+#include "packer_lcd.h"
 //#include "config_file.h"
+#include "seq_init.hpp"
 #include "teach_pendant.hpp"
+
+
 
 
 TeachPendant::TeachPendant()
