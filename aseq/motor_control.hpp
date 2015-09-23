@@ -32,6 +32,7 @@ public:
 	void	compute_speeds();
 	void	print_speeds  ();
 		
+	int		m_postive_direction;
 	int		m_start_value;	
 	int		m_destination_value;
 	float	m_time_delta;
@@ -47,17 +48,20 @@ public:
 	MotorControl();
 	MotorControl(float mMaxRatedTorque, float mStallCurrent);
 
-	void	Initialize				( 						);
-	bool	init_calculator			(						);
+	virtual void	Initialize		( 						);
+	bool	set_calculator_data		( float mTimeDelta		);
 	virtual bool read_config_data	( Preferences& mprefs, int mIndex );
 
+	bool 	is_destination_greater	( );
 	bool	is_breaking_region		( word mCount			);
 	void	run_algorithm			( 						);
+	void 	print_positioning		( );
 	
-	void  	set_destination			( int mDestinationCount, float mRequestedSpeed );
+	void  	set_destination			( int mDestinationCount, float mRequestedSpeed, float mTimeDelta );
 	bool 	destination_reached 	( float mTolerance 		);	
 	float 	compute_motor_torque	( float mDuty 			);
 
+	float 	compute_duty_step_error ( float mPower 			);
 	float 	compute_duty		  	( 					 	);		// PID
 	float	compute_gravity_boost 	( 						);
 	float	compute_braking_speed 	( 				 		);
@@ -66,19 +70,15 @@ public:
 
 	float	compute_stopping_distance( float mSpeed,  float mDeceleration );
 	float  	compute_reaction_torque  ( Motor& mMotor, float mAlpha        );
-	
-	void  	send_speed_pid			(  						);
+
 	virtual int  	handle_CAN_message	    ( struct sCAN* mMsg 	);	// handles incoming msg
 
-	// CHANGE FREQUENTLY (ie realtime) : 
+
+	// ******  CHANGE FREQUENTLY (ie realtime) : 
 	word	StartCount;		 	 // Reading when the send_speed() was called.
 	word	DestinationCount; 	 // Reading when the send_speed() was called.	
 	word 	BeginBrakingCount;	 // Trigger for breaking (pid control)
 	bool	DestinationReached;	 // 
-
-	float	NextAngleDeg;			// Destination when in Angle mode. in Degrees * 10 
-
-	//float	RequestedSpeed;			// Counts per second
 
 	// PID CONTROL VARIABLES:
 	float	position_error_sum;		// Integral
@@ -111,3 +111,5 @@ private:
 
 
 #endif
+//	float	NextAngleDeg;			// Destination when in Angle mode. in Degrees * 10 
+//  float	RequestedSpeed;			// Counts per second

@@ -16,9 +16,10 @@ public:
 	void	Initialize				   ( );
 	void 	print_current_positions	   ( );
 	void	print_current_angles	   ( );
+	void	print_active_outputs		( );
 	void	print_averages				( );	
 	void 	clear_reads					( int mNumExpected );
-	bool	is_done_averaging			( );
+	int		is_done_averaging			( );
 	void	start_measurement_averaging( int mNumSamples );
 	
 	void	propogate_gravity_angle_down( float mTorso_fa_Angle, float mTorso_io_Angle );	// from highest to lowest actuator.	( for swing leg )
@@ -29,7 +30,7 @@ public:
 
 	BOOL 	is_destination_reached     ( );
 	bool	is_vector_fully_read	   ( );		// at least 1 update on all enabled motors.
-	void	set_new_destinations	   ( struct sVectorSet& mVectors, int mVectorIndex );
+	void	set_new_destinations	   ( struct sVectorSet& mVectors, int mVectorIndex, float mTimeDelta );
 
 	void	activate_outputs		   ( );
 	void	activate_enabled_outputs   ( );	

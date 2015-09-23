@@ -269,11 +269,6 @@ void CAN_isr()
 		}
 		// This is a serial transfer of the text.  Slow! May cause the overruns.
 		//print_message( &rxmessage );
-
-#ifdef WIFI_SOCKET
-			if (isTransporting_CAN())
-				Cmd_client_send_CAN( &rxmessage );
-#endif
 	}
 	if (intf & 0x04 )
 	{
@@ -311,8 +306,7 @@ void CAN_isr()
 		byte tec	= read_register( TEC );
 		byte rec	= read_register( REC );
 		write_register( EFLG, 0 );
-		printf("EF=%x; intf=%x; rec=%x; tec=%x\n", eflg, intf, rec,tec);
-		//printf("EF\n");
+		printf("EF=%x intf=%x r/t=%x/%x\n", eflg, intf, rec,tec);
 		bit_modify( CANINTF, 0xE0, 0x00 );
 		write_register( REC, 0 );
 		write_register( TEC, 0 );

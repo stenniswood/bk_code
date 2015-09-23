@@ -42,7 +42,7 @@ public:
 	Motor();
 	Motor(float mMaxRatedTorque, float mStallCurrent);
 
-	void	Initialize				( 						);
+	virtual void	Initialize		( 						);
 	virtual bool	read_config_data( Preferences& mprefs, int mIndex );	
 	bool	is_destination_greater	( 						);
 	
@@ -67,18 +67,14 @@ public:
 	void	print_positioning		( 				);
 	void	print_state				( 				);	// Position, speed, stops active, torque applied, etc.  1 liner.
 	void	print_stop				( int mStopNum 	);
-
+     
 	/*** VARIABLES ***/
 	// CHANGE FREQUENTLY (ie realtime) : 
-	word	StartCount;		 	 // Reading when the send_speed() was called.
-	word	DestinationCount; 	 // Reading when the send_speed() was called.	
 	word	PrevCount;			 // Latest reading
 	word	CurrCount;			 // Latest reading
 	long	SumCurrCounts;		 // for averaging the last n.
 	float	average_CurrCounts;
-	
-	word 	BeginBrakingCount;	 // Trigger for breaking (pid control)
-	bool	DestinationReached;	 // 
+
 	int		MotorStopped;		 // Indicator of which Stop is in: 0 none, 1, 2.
 	float	Duty;				 // 
 	
@@ -105,7 +101,7 @@ public:
 	bool	use_stops;				// if true, then always check limits.
 	struct  sStopInfo stop1;
 	struct  sStopInfo stop2;
-	float	deceleration_rate_cpss;	// Depends on the load.  How to determine?! algorithm to sense?
+
 	float	gravity_angle;			// of the portion more torso direction + CurrAngle = next limb angle wrt gravity!
 
 	word	ZeroOffset;				// in counts.

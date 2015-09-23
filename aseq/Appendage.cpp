@@ -82,17 +82,16 @@ void Appendage::update_submitted_timestamps( struct timeval mts )
 	for (byte a=0; a < actuators.size(); a++)
 		actuators[a].submitted = mts;
 }
-
-bool Appendage::is_done_averaging( )
+int Appendage::is_done_averaging( )
 {
-	bool retval = false;
+	int retval = -1;
 	for (byte a=0; a < actuators.size(); a++)
 	{
-		bool result = ( actuators[a].Reads <= actuators[a].ReadsAllowed );		
-		if (result)
-			return false;		
+		bool result = ( actuators[a].Reads <= actuators[a].ReadsAllowed );
+		if (result) 
+			return a;		
 	}
-	return true;
+	return retval;
 }
 
 void Appendage::start_measurement_averaging( int mNumSamples )
@@ -102,6 +101,7 @@ void Appendage::start_measurement_averaging( int mNumSamples )
 
 	for (byte a=0; a < actuators.size(); a++)
 	{
+		actuators[a].MotorEnable = TRUE;	// enable because, activate Outputs is off, and we'll read all motors positions.
 		actuators[a].SumCurrCounts = 0;
 		actuators[a].Reads = 0;
 		actuators[a].ReadsAllowed = mNumSamples;
@@ -207,8 +207,16 @@ int Appendage::handle_CAN_message( struct sCAN* mMsg )
 	// Special Action to be done when all actuators have received an updated position.	
 	if (is_vector_fully_read())  {
 		Reads++;
-		//printf("VECTOR FULLY READ!!!!\n");
 	}
+}
+void Appendage::print_active_outputs(  )
+{
+	printf("ActiveOutputs:(%d) ",actuators.size() );
+	for (int a=0; a<actuators.size(); a++)
+	{
+		printf("%d, ", actuators[a].ActiveOutputs );
+	}
+	printf("\n");
 }
 
 void Appendage::print_current_angles(  )
@@ -226,7 +234,6 @@ void Appendage::print_current_angles(  )
 void Appendage::print_current_positions(  )
 {
 	if (Enable==false)  return;	
-	//printf("counts: ");
 	for (int a=0; a < actuators.size(); a++)
 	{
 		actuators[a].print_positioning();
@@ -243,18 +250,22 @@ void Appendage::print_averages( )
 	}	
 }
 
-void Appendage::set_new_destinations( struct sVectorSet& mVectors, int mVectorIndex )
+void Appendage::set_new_destinations( struct sVectorSet& mVectors, int mVectorIndex, float mTimeDelta )
 {
 	if (Enable==false)  return ;
-	for (int a=0; a<actuators.size(); a++)
+	for (int a=0; a < actuators.size(); a++)
 	{
 		// GET COUNT & CALC REQUESTED SPEED : 
-		int tmp = mVectors.vectors[mVectorIndex].get_count( a );
-		float speed = mVectors.calc_average_speed_cps( mVectorIndex, a );
-		if (speed>MAX_MOTOR_SPEED)
+		int tmpCount = mVectors.vectors[mVectorIndex].get_count( a );
+		float speed  = (tmpCount - actuators[a].CurrCount) / (mVectors.playback_period_ms/1000.);
+/*		float speed  = mVectors.calc_average_speed_cps( mVectorIndex, a );  
+		Deprecated because the speed should depend on current motor position and not the previous vector.
+ 		especially on first boot, these could be drastically different.
+*/
+		if (speed > MAX_MOTOR_SPEED)
 			speed = MAX_MOTOR_SPEED;
-		//printf("get_count()=%d\n", tmp);
-		actuators[a].set_destination( tmp, speed );
+		printf("Appendage::set_new_destinations():  %d %6.3f\n", tmpCount, speed );
+		actuators[a].set_destination( tmpCount, speed, mTimeDelta );
 	}
 }
 
@@ -270,7 +281,8 @@ void Appendage::send_speed_messages( )
 	{
 		// speeds are in the actuator - "DutyPercent"
 		// This also computes the speed!
-		actuators[a].send_speed_pid();
+		//actuators[a].compute_duty();
+		//actuators[a].send_speed(actuators[a].DutyPercent);
 	}
 }
 
@@ -285,7 +297,7 @@ void Appendage::compute_speeds( )
 	for (int a=0; a<actuators.size(); a++ )
 	{
 		// speeds are in the actuator - ""
-		actuators[a].compute_duty( );
+		//actuators[a].compute_duty( );
 	}
 }
 

@@ -27,6 +27,7 @@ To Fly!
 #include <unistd.h>
 #include <math.h>
 #include <map>
+
 #include "mcp2515.h"
 #include "pican_defines.h"
 #include "bk_system_defs.h"
@@ -73,7 +74,7 @@ char Preferences::load_all_keys( )
 		if (blank==false)  {		
 			char* k_ptr = ( char*)getKey();
 			char* v_ptr = ( char*)getValue();
-			printf("key=%s \t\t\t value=%s\n", key, value );
+			//printf("key=%s \t\t\t value=%s\n", key, value );
 			ptr = new sKeyValuePair( key, value );
 			key_table.push_back( ptr );
 			LineCount++;
@@ -81,6 +82,16 @@ char Preferences::load_all_keys( )
 	}
 	close();	
 	return retval;
+}
+
+void Preferences::print_all_keys( )
+{
+	std::list<sKeyValuePair*>::iterator iter = key_table.begin();
+	while (iter != key_table.end() ) 
+	{
+		printf("key=%s;\t\tvalue=%s\n", (*iter)->key.c_str(), (*iter)->value.c_str() );
+		iter++;
+	}
 }
 
 struct sKeyValuePair* 	Preferences::find_key ( const char* mKey )
@@ -100,17 +111,19 @@ bool Preferences::find_bool( const char* mKey )
 {
 	struct sKeyValuePair* ptr = find_key(mKey);
 	if (ptr==NULL)
-		return NULL;
+		return false; 
+
 	if ((ptr->value.compare("TRUE")==0) ||
 		(ptr->value.compare("ENABLE")==0) ||
 		(ptr->value.compare("ENABLED")==0) ||
 		(ptr->value.compare("YES")==0) ||
+		(ptr->value.compare("1")==0) ||
 		(ptr->value.compare("ON")==0) )
 		return true;
-	else 		
+	else 
 		return false;
 }
-	
+
 const char*  Preferences::find_string ( const char* mKey )
 {
 	struct sKeyValuePair* ptr = find_key(mKey);
@@ -132,7 +145,7 @@ float 	Preferences::find_float( const char* mKey )
 	return tmp;
 }
 
-int 	Preferences::find_int	 ( const char* mKey )
+int 	Preferences::find_int( const char* mKey )
 {
 	struct sKeyValuePair* ptr = find_key(mKey);
 	if (ptr==NULL)	
@@ -141,6 +154,17 @@ int 	Preferences::find_int	 ( const char* mKey )
 	return atoi(ptr->value.c_str());
 }
 
+unsigned int  Preferences::find_hex( const char* mKey )
+{
+	struct sKeyValuePair* ptr = find_key(mKey);
+	if (ptr==NULL)	
+		throw "Not found";
+
+	unsigned int tmp;
+	sscanf(ptr->value.c_str(), "%x", &tmp ); 
+	//printf("find_hex  %s = %d  %x\n", ptr->value.c_str(), tmp, tmp );
+	return tmp;
+}
 
 /* This will read the first non-blank line.	
     ie. it skips blank lines  			
@@ -175,7 +199,7 @@ void Preferences::readln( )
 	while (!feof(fd))
 	{
 		Line[i] = fgetc(fd);
-		if ((Line[i] == '\n') || (Line[i] == '\n')) 
+		if ((Line[i] == '\n') || (Line[i] == '\r')) 
 		{
 			Line[i] = 0;
 			return ;
@@ -219,6 +243,14 @@ int Preferences::getIntValue( )
 {
 	char* delim = strchr(Line, '=');
 	return (atoi(delim+1));
+}
+
+uint16_t Preferences::getHexValue( )
+{
+	getValue();	
+	unsigned short tmp;
+	sscanf(value, "%4x", &tmp );
+	return tmp;
 }
 
 char* Preferences::getString( )

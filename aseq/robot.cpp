@@ -147,7 +147,7 @@ void Robot::print_current_positions(  )
 	{
 		if (limbs[l].Enable)
 		{
-			printf("%d Limb[%d] : \n", seq.Current_Vindex, l );
+			printf("Vector # %d Limb[%d] : \n", seq.Current_Vindex, l );
 			limbs[l].print_current_positions();
 		}
 	}
@@ -186,12 +186,12 @@ void Robot::next_vector( )
 	}
 }
 
-void Robot::set_new_destinations( sRobotVector* mSeq )
+void Robot::set_new_destinations( sRobotVector* mSeq, float mTimeDelta )
 {
 	if (Enable==false)  return ;
 	for (int l=0; l<limbs.size(); l++)
 	{
-		limbs[l].set_new_destinations( mSeq->limbs[l], mSeq->Current_Vindex );
+		limbs[l].set_new_destinations( mSeq->limbs[l], mSeq->Current_Vindex, mTimeDelta );
 	}
 }
 
@@ -291,7 +291,9 @@ bool Robot::done_averaging(  )
 {
 	for (int l=0; l<limbs.size(); l++)
 	{
-		if (limbs[l].is_done_averaging()==false) {
+		int result = limbs[l].is_done_averaging();
+		if (result>=0) {
+			//printf("Actuator %s ,%d is not done!\n", limbs[l].Name, result );
 			//printf("Reads=%d, Allowed=%d\n", limbs[l].Reads, limbs[l].ReadsAllowed );
 			return false;		
 		}
@@ -303,17 +305,7 @@ bool Robot::done_averaging(  )
 	
 */
 void Robot::load_config( char* mFilename )
-{
-/*	ControlSpeedCalculator csc;
-	csc.m_start_value		= 100;
-	csc.m_destination_value = 500;
-	csc.m_time_delta 		= 1.0;
-	csc.m_average_speed 	= 400;
-	csc.m_deceleration		= 500 ;
-	csc.compute_speeds();
-	csc.print_speeds();
-	printf("========================\n"); */
-	
+{	
 	Preferences  prefs(mFilename);
 	prefs.load_all_keys();
 	
@@ -321,16 +313,16 @@ void Robot::load_config( char* mFilename )
 	MotorControl 	mot_control;
 	int 			num_actuators;
 	char* 			ptr;
-
+	char key[80];	
 	FILE* cfd;
+	
 	int number_limbs = prefs.find_int("number_limbs");
-	//int number_limbs = read_int_token( cfd, "number_limbs" );
-	char key[80];
 	
 	for (int l=0; l<number_limbs; l++)
 	{	
 		sprintf(key, "limb_%d_name", l );
-		string str = prefs.find_string(key);		
+		string str = prefs.find_string(key);
+
 		//ptr = read_string_token( cfd, "limb_name" );
 		strcpy( appendage.Name, str.c_str() );
 
@@ -340,17 +332,18 @@ void Robot::load_config( char* mFilename )
 		sprintf(key, "limb_%d_number_actuators", l );
 		num_actuators = prefs.find_int( key );
 
+		appendage.actuators.clear();
 		for (int a=0; a<num_actuators; a++)
 			appendage.actuators.push_back( mot_control );
 
 		limbs.push_back( appendage );
 	}
 
+	int a_count = 0;
 	for (int l=0; l<number_limbs; l++)
 		for (int a=0; a<limbs[l].actuators.size(); a++)
-		{
-			limbs[l].actuators[a].read_config_data( prefs, a );
-		}
+			limbs[l].actuators[a].read_config_data( prefs, a_count++ );
+
 }
 
 /************************************************************************* 

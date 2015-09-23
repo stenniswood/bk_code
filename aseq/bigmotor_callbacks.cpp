@@ -24,9 +24,8 @@
 #include "robot.hpp"
 #include "config_file.h"
 #include "bigmotor_callbacks.hpp"
-
 #include "robot.hpp"
-
+#include "teach_pendant.hpp"
 
 word latest_pot = 0;
 
@@ -35,7 +34,8 @@ extern struct timeval start_ts;
 word latest_pot31;
 word latest_pot32;
 word latest_pot33;
-	
+
+extern TeachPendant 	teach_pendant;
 
 BOOL get_appendage_actuator( int* Aindex, int* actuator_index, byte mInstance )
 {
@@ -83,21 +83,6 @@ BOOL can_position_test_responder( struct sCAN* mMsg )
 	}	
 }
 
-/*BOOL can_position_meas_responder( struct sCAN* mMsg )
-{
-	// Distribute the message to all limbs of the robot:
-	// (the limbs will distribute to each actuator).
-	robot.handle_CAN_message( mMsg );
-	// Is the CAN msg a MOTOR ANGLE? 
-	if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_VALUE, 0)) )
-	{
-		//if (robot.limbs[Aindex].vector_fully_read()) 			// checks elementsFilled
-		{
-			//printf("Measurements:, \n" );			
-			//robot.limbs[0].Reads++;
-		}
-	}	
-}*/
 
 /************************************************************
 INCOMING CAN BIGMOTOR MESSAGE CALLBACK(): 
@@ -108,24 +93,17 @@ INCOMING CAN BIGMOTOR MESSAGE CALLBACK():
 BOOL can_motor_position_responder( struct sCAN* mMsg )
 {
 	// Distribute the message to the robot:
-	robot.handle_CAN_message( mMsg );		// limbs, then actuators, etc.
-
-	/* Is the CAN msg a MOTOR ANGLE? */
-	if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_VALUE, 0)) )
-	{
-		// So that no spurious movements occur before we know our requested destination.
-		if (FirstIssued==false)
-			for (int l=0; l<robot.limbs.size(); l++)
-				robot.limbs[l].set_current_position_as_destination( );
-
-		// When all actuators on a particular limb have been received,
-//		if (robot.limbs[Aindex].vector_fully_read()) 					// checks elementsFilled
-		{
+	BOOL retval = robot.handle_CAN_message( mMsg );		// limbs, then actuators, etc.
+	if ((teach_pendant.m_is_connected) && (retval==0))
+		retval = teach_pendant.handle_CAN_message( mMsg );
+		
+// 	When all actuators on a particular limb have been received,
+//		if (robot.limbs[Aindex].vector_fully_read()) 
+//		{
 //			can_vector_read_complete_responder( Aindex );	// Moves to next vector!
-		}		
-		return TRUE;
-	}
-	return FALSE;
+//		}		
+
+	return retval;
 }
 
 /*********************************************************************
@@ -153,3 +131,29 @@ BOOL can_vector_read_complete_responder( byte mAppendageIndex )
 }
 
 
+/*BOOL can_position_meas_responder( struct sCAN* mMsg )
+{
+	// Distribute the message to all limbs of the robot:
+	// (the limbs will distribute to each actuator).
+	robot.handle_CAN_message( mMsg );
+	// Is the CAN msg a MOTOR ANGLE? 
+	if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_VALUE, 0)) )
+	{
+		//if (robot.limbs[Aindex].vector_fully_read()) 			// checks elementsFilled
+		{
+			//printf("Measurements:, \n" );			
+			//robot.limbs[0].Reads++;
+		}
+	}	
+}*/
+
+	/* Is the CAN msg a MOTOR ANGLE? */
+/*	if ( id_match( mMsg->id, create_CAN_eid	(ID_MOTOR_VALUE, 0)) )
+	{
+		// So that no spurious movements occur before we know our requested destination.
+		//   This is done by ActiveOutputs now.
+
+		if (FirstIssued==false)
+			for (int l=0; l<robot.limbs.size(); l++)
+				robot.limbs[l].set_current_position_as_destination( );
+*/

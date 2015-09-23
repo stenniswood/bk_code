@@ -30,7 +30,7 @@ public:
 	void	update_submitted_timestamps( struct timeval mts );
 
 	BOOL 	is_destination_reached     ( );
-	void	set_new_destinations	   ( sRobotVector* mSeq );
+	void	set_new_destinations	   ( sRobotVector* mSeq, float mTimeDelta );
 
 
 	void 	set_current_position_as_destination( );	// should stop all motors.
@@ -48,7 +48,7 @@ public:
 	void	print_vector		( int mIndex, bool mAngles );
 	void 	set_vectors_limbs	( );
 	void	next_vector			( );
-	sRobotVector	  seq;		// one sequence of moves
+	sRobotVector	  seq;		// one sequence of moves 
 
 	// Semi Constant Variables (change very infrequently)
 	bool 	Enable;		// If FALSE, does not participate in the sequencing

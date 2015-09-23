@@ -30,7 +30,6 @@
 #include "config_file.h"
 
 
-
 float radians(float mDegrees)
 {
 	return (mDegrees * M_PI / 180.0 );	
@@ -65,22 +64,14 @@ void Motor::Initialize()
 	stop1.PotValue  =  10;
 	stop2.Angle 	= 0.0;
 	stop2.PotValue  = 1014;
-
-	StartCount		= 0;		// First reading
-	CurrCount		= 0;		// Latest reading
-	DestinationCount= 0;		// Vector position
-	DestinationReached = false;	
 	
+	CurrCount		= 0;		// Latest reading	
 	CurrAngle		= 0;		// in Degrees 
 	NextAngleDeg	= 0;		// in Degrees * 10 
 	//SpeedTimesTen	= 0.;		// [-100.0 , 100.0] 
 	RequestedSpeed  = 0.;		// Counts per second
 	MeasuredSpeed   = 0.;		// Counts per second
 	DutyPercent		= 0.;
-
- 
- 	// 10 degrees/sec/sec = 34 counts/sec/sec
-	deceleration_rate_cpss = 614;   // counts / second / second	
 	CurrentTimesTen	= 0.;		// fixed point
 
 	ZeroOffset		= 512;		// center	
@@ -132,14 +123,6 @@ float Motor::compute_angle( word mPotValue )
 	return Angle;	
 }
 
-bool Motor::is_destination_greater( )
-{
-	float dist = (DestinationCount - StartCount);
-	if (dist>0)
-		return true;
-	else 
-		return false;
-}
 
 void print_stop_( struct sStopInfo mstop )
 {
@@ -152,10 +135,8 @@ void print_stop_( struct sStopInfo mstop )
 
 void Motor::print_stop( int mStopNum )
 {
-	if (mStopNum==1)
-	{  printf("Stop1: ");	print_stop_( stop1 );	}
-	else if (mStopNum==2)
-	{  printf("Stop2: ");	print_stop_( stop2 );	}
+	printf("Stop1: ");	print_stop_( stop1 );	
+	printf("Stop2: ");	print_stop_( stop2 );	
 }
 
 void Motor::print_state( )	// Position, speed, stops active, torque applied, etc.  1 liner.
@@ -163,18 +144,12 @@ void Motor::print_state( )	// Position, speed, stops active, torque applied, etc
 	if (MotorEnable==FALSE)
 		printf("Motor Disabled!\n");
 	else {
-		printf("Mot#=%3d; Pot=%4d; ZeroO=%4d; Angle=%7.2f degs;\tMeas_Spd=%7.3f Req_Spd=%7.3f degs/sec; Duty=%7.3f  ", 
+		printf("Mot#=%3d; Pot=%4d; ZeroO=%4d; Angle=%7.2f degs;\tMeas_Spd=%8.3f Req_Spd=%8.3f degs/sec; Duty=%7.3f  ", 
 				Instance, CurrCount, ZeroOffset, CurrAngle, MeasuredSpeed, RequestedSpeed, DutyPercent );	
 		if (MotorStopped)
 			printf("Stop %d\n",MotorStopped );
 		else printf("\n"); 
 	}
-}
-void Motor::print_positioning( )
-{
-	if (MotorEnable)
-	printf(" Start=%5d; Curr=%5d; Dest=%5d; \n", 
-			StartCount, CurrCount, DestinationCount );	
 }
 void Motor::print_speeds( )
 {
@@ -268,8 +243,9 @@ void Motor::send_config( byte mindex, byte mValue, byte mMask )
 	//print_message( &msg1 );
 	AddToSendList( &msg1 );	
 }
-
-
+/*
+return 	1 if handled.  0 if skipped.
+*/
 int Motor::handle_CAN_message( struct sCAN* mMsg 	)	// handles incoming ID_MOTOR_VALUE & recomputes duty.
 {
 	if (MotorEnable==FALSE)  return 0;
@@ -280,14 +256,10 @@ int Motor::handle_CAN_message( struct sCAN* mMsg 	)	// handles incoming ID_MOTOR
 		{
 			if (Feedback_index == mMsg->data[0])
 			{
+				//printf("handle_CAN_message %4x\n", Feedback_index );	
 				PrevCount = CurrCount;
 				CurrCount = (mMsg->data[1]<<8) + mMsg->data[2];
 				update_position();
-				if (ActiveOutputs)
-				{
-					printf("ID_ANALOG_MEASUREMENT %4x ", Feedback_index );
-					print_state();
-				}
 				return 1;
 			}
 		}
@@ -321,8 +293,9 @@ int Motor::handle_CAN_message( struct sCAN* mMsg 	)	// handles incoming ID_MOTOR
 
 void Motor::print_average()
 {
-	printf("Mot#%d (%x) : Average Count= %6.3f  N=%d \n", Instance, Feedback_index, 
-													average_CurrCounts, Reads-1);
+	printf("Mot#%d (%x) : Average Count= %6.3f  N=%d  %s\n", Instance, Feedback_index, 
+													average_CurrCounts, Reads-1,
+													Name );
 }
 
 /* 
@@ -331,18 +304,16 @@ void Motor::print_average()
 */
 int Motor::update_position(  )
 {	
-	// Compute Time Lapse since last call here:
+	// TIME LAPSE since last call here:
 	PrevTime = CurrTime;	
-	gettimeofday(&CurrTime, NULL);
-	
+	gettimeofday(&CurrTime, NULL);	
 	struct timeval time_lapse;
 	timersub( &CurrTime, &PrevTime, &time_lapse );
-
 	float time_lapse_secs = time_lapse.tv_sec + ((float)time_lapse.tv_usec/1000000.);
 	if ((MotorEnable) && (ActiveOutputs)) 
 		printf("Time Lapse=%6.4f  ", time_lapse_secs);
-	
-	// AVERAGING MEASUREMENTS:	
+
+	// AVERAGING MEASUREMENTS:
 	if (Reads<ReadsAllowed)
 	{
 		SumCurrCounts += CurrCount;		// Clear the sum when you want to start averaging!
@@ -364,10 +335,10 @@ int Motor::update_position(  )
 	check_stops();
 
 	// Check over current here... (once current reading have been tested/verified)
-			
 }
 	
 #include "config_string_utils.h"
+
 
 bool Motor::read_config_data( Preferences& mprefs, int mIndex )
 {
@@ -378,11 +349,11 @@ bool Motor::read_config_data( Preferences& mprefs, int mIndex )
 	ptr = mprefs.find_string( key );
 	if (ptr==NULL)
 		printf(" ptr=%x \n", ptr );
-	else 
+	else
 		strcpy( Name, ptr );
-	
+
 	sprintf(key, "actuator_%d_instance", mIndex );
-	Instance 	= mprefs.find_int	( key );
+	Instance 	= mprefs.find_int	    ( key );
 
 	sprintf(key, "actuator_%d_feedback_message", mIndex );
 	ptr 	= mprefs.find_string( key );
@@ -399,13 +370,13 @@ bool Motor::read_config_data( Preferences& mprefs, int mIndex )
 	sprintf(key, "actuator_%d_direction", mIndex );	
 	MotorDirection  = mprefs.find_int	( key );
 	sprintf(key, "actuator_%d_enable", mIndex );	
-	MotorEnable 	= mprefs.find_bool ( key );
+	MotorEnable 	= mprefs.find_bool  ( key );		// Active outputs will get set equal to this...	
 	sprintf(key, "actuator_%d_stop_1_angle", mIndex );
 	stop1.Angle  	= mprefs.find_float	( key );
 	sprintf(key, "actuator_%d_stop_1_value", mIndex );	
-	stop1.PotValue  = mprefs.find_int	( key );	
+	stop1.PotValue  = mprefs.find_hex	( key );
 	sprintf(key, "actuator_%d_stop_2_angle", mIndex );	
 	stop2.Angle  	= mprefs.find_float	( key );
 	sprintf(key, "actuator_%d_stop_2_value", mIndex );	
-	stop2.PotValue  = mprefs.find_int	( key );
+	stop2.PotValue  = mprefs.find_hex	( key );
 }

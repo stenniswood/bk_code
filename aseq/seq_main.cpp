@@ -1,6 +1,6 @@
 #include <string.h>
 #include <errno.h>
-#include <stdlib.h>
+#include <stdlib.h> 
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
@@ -26,7 +26,6 @@
 #include "packer_motor.h"
 #include "system_msgs_callback.h"
 #include "board_list.h"
-
 #include "motor.hpp"
 #include "motor_control.hpp"
 #include "motor_vector.h"
@@ -41,6 +40,7 @@
 #include "vector_file.h"
 #include "robot.hpp"
 //#include "config_file.h"
+#include "teach_pendant.hpp"
 
 
 // Wiring PI pin number (gpio pin 15)
@@ -50,6 +50,7 @@
 #define BUTTON3_INT_PIN 6
 
 #define fifty_ms    50000000
+char 	ConfigureFileName2[] = "config_new.ini";
 
 short MsgCounter   = 0;
 byte  MsgIDCounter = 0;
@@ -68,33 +69,32 @@ char cmd[4];
 byte instance;
 byte value;
 bool FirstIssued = false;
+TeachPendant 	teach_pendant;
+struct timeval	start_ts;
 
-struct timeval start_ts;
-
-void Button2r_isr()
-{
-	CAN_init( CANSPEED_250, 0 );
-	printf("Button 2 Pressed - Reset CAN \n");	
-}
 void Button1r_isr()
 {
 	printf("Button 1 Pressed Interrupt - reg_dump()\n");
 	register_dump   ( );
 	tx_register_dump(0);	
-} 
-
-/*void Button3_isr()
+}
+void Button2r_isr()
 {
-	printf("Button 3 Pressed Interrupt\n");
+	CAN_init( CANSPEED_250, 0 );
+	printf("Button 2 Pressed - Reset CAN \n");	
+}
+void Button3r_isr()
+{
+	printf("Pause Sequencer.\n");
 	printf("--------------->>>>>>>\n");
 	char txt[] = {"hello!!!"};
 	pack_lcd_write_text( &msg1, 0, txt);
 	AddToSendList( &msg1 );
 	printf("--------------->>>>>>>\n");
-} */
+}
 
 /////////////////////////////////////////////////////////////////
-// CREATE CAN THREAD: 
+// CREATE CAN THREAD : 
 pthread_t scheduler_thread_id;
 void* scheduler_thread(void* n)
 {
@@ -122,60 +122,95 @@ void create_threads()
 	The speeds/pids will be updated when position messages arrive. */
 struct timeval tv;
 struct timeval starttime;
-bool do_not_send = false;
+	struct sCAN msg;
+	char str[80];	
 
-/* Here we marry a vector in the sequencer with the robot limbs. 
+void setup_teach()
+{
+	teach_pendant.add_dial( 0x16, "Rotate");
+	teach_pendant.add_dial( 0x15, "Hip"  );
+	teach_pendant.add_dial( 0x14, "Knee" );
+	teach_pendant.add_dial( 0x13, "Ankle");
+}
 
+
+void update_lcd()
+{
+	char tmp[20];	
+	int instance = 41;
+	printf("UpdateLCD\n\n");
+	pack_lcd_clear_screen( &msg, instance );
+	AddToSendList( &msg );
+	usleep(2000);
+	
+	pack_lcd_cursor_to( &msg, instance, 0, 1, 0 );
+	AddToSendList( &msg );	
+	usleep(2000);
+	sprintf(str, "Teach Pe");
+	pack_lcd_write_text	( &msg, instance, str );
+	AddToSendList( &msg );
+	usleep(2000);
+	sprintf(str, "ndant:");
+	pack_lcd_write_text	( &msg, instance, str );
+	AddToSendList( &msg );
+	usleep(2000);
+		
+	for (int i=0; i<4; i++)
+	{
+		pack_lcd_cursor_to( &msg, instance, i+2, 2, 0 );
+		AddToSendList( &msg );
+		usleep(2500);
+		
+		sprintf(str, "# %d=%d", i, teach_pendant.m_dials[i].CurrCount );
+		pack_lcd_write_text	( &msg, instance, str );
+		AddToSendList( &msg );
+		usleep(2500);
+	} 
+}
+/* 
+	Here we marry a vector in the sequencer with the robot limbs.
 */
 void next_sequence_handler(int sig, siginfo_t *si, void *uc)
 {
 	if (FirstIssued==false) {
+		FirstIssued = true;		
 		robot.activate_enabled_outputs();
+		robot.limbs[0].print_active_outputs();
+		robot.limbs[1].print_active_outputs();		
 		printf(" FIRST ISSUE:  activate_enabled_outputs\n");		
 	}
 	counter++;
-	//if ((counter%20)==0)  // Every Second, update Thrust Reqested
-	//{
 
-		// Compute time elapsed from start until now:
-		assert( robot.limbs.size() == robot.seq.limbs.size() );
-		gettimeofday(&tv,NULL);
-		float dtime = tv.tv_sec - starttime.tv_sec;
-		dtime  += (tv.tv_usec - starttime.tv_usec)/1000;
-		
-		// PLACE values into Actuators : 	(GREEN LETTERS!)		
-		printf( "\n%sSEQ: New Vector: timestamp=%6.3f  %d/%d%s\n", KGRN, dtime,						
-						robot.seq.Current_Vindex, robot.seq.limbs[0].vectors.size(), KNRM ); 
-		if (do_not_send==false)
-		{
-			// Get TimeStamp : 		
-			gettimeofday(&tv,NULL);
-			robot.update_submitted_timestamps( tv );	// goes into each actuator "submitted" timestamp.
-		}
-		// Sequencer of vectors is stored in "sRobotVector seq" of robot.hpp		
-		robot.set_new_destinations( &(robot.seq) );	  // set DestinatinPotValue to 
-		robot.print_vector( robot.seq.Current_Vindex, false );
-		//robot.seq.limbs[0].vectors[i].print_counts( );
-		robot.print_current_positions();
+	// COMPUTE ELAPSED TIME from start until now:
+	assert( robot.limbs.size() == robot.seq.limbs.size() );
+	gettimeofday(&tv,NULL);
+	float dtime = tv.tv_sec - starttime.tv_sec;
+	dtime  += (tv.tv_usec - starttime.tv_usec)/1000;
+	robot.update_submitted_timestamps( tv );	// goes into each actuator "submitted" timestamp.
+			// SHOW (Green Letters!)		
+	printf( "\n%sSEQ: New Vector: timestamp=%6.3f  %d/%d%s\n", KGRN, dtime,						
+			robot.seq.Current_Vindex, robot.seq.limbs[0].vectors.size(), KNRM );
 
-		robot.next_vector();			
-		FirstIssued = true;
-		
-		// speeds will get updated on next messages received
-		
-		//printf( "\nSEQ: New Vector: done.\n" );		
-		/* Our algorithm will work as follows :
-				Issue the vectors on a periodic basis.  Ie this timer.
-				Compare a timestamp from point of issue, to the destination reached.
-				If reached early, adjust the duty to go slower next time.
-				If reached late (ie. not reached before the timer goes off again),
-					then speed up the weights.			
+	// PLACE values INTO ACTUATORS : 
+	robot.print_vector( robot.seq.Current_Vindex, false );
+	robot.set_new_destinations( &(robot.seq), dtime );	  // set DestinatinPotValue 
+	robot.print_current_positions();
+	robot.next_vector();			// Advance to the next vector
 
-		We will focus first on reaching the destinations under constant load (ie no gravity)
-		(acceleration/decel calculated)
-		And later subtract the effect of gravity.		
-		*/
-	//}
+/*	Note: Sequencer of vectors is stored in "sRobotVector seq" of robot.hpp		
+	      speeds will get updated on next messages received
+	
+	   Our algorithm will work as follows :
+			Issue the vectors on a periodic basis.  Ie this timer.
+			Compare a timestamp from point of issue, to the destination reached.
+			If reached early, adjust the duty to go slower next time.
+			If reached late (ie. not reached before the timer goes off again),
+				then speed up the weights.			
+
+	We will focus first on reaching the destinations under constant load (ie no gravity)
+	(acceleration/decel calculated)
+	And later subtract the effect of gravity.		
+	*/
 }
 
 void init_hardware()
@@ -219,19 +254,13 @@ void init_interrupts()
 	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
 	  exit(1);
 	}
-	if ( wiringPiISR(BUTTON3_INT_PIN, INT_EDGE_FALLING, &Button3_isr) < 0 ) {
+	if ( wiringPiISR(BUTTON3_INT_PIN, INT_EDGE_FALLING, &Button3r_isr) < 0 ) {
 	  fprintf (stderr, "Unable to setup ISR: %s\n", strerror (errno));
 	  exit(1);
 	}
-
-	//printf("\nPiCAN Board present & Responding.\n" );
-	//printf("*****************************************\n");
-
-//	write_register( CANCTRL,  0x10 );	// Abort any transmitting msgs...
-//	write_register( CANCTRL,  0x00 );	// 
 }
 
-char 	ConfigureFileName2[] = "config_new.ini";
+
 
 void init()
 {
@@ -247,8 +276,9 @@ void init()
 	read_register ( CANSTAT );
 	write_register( CANINTE,  0x1F );	// enable 2 TXs & 1 RX	
 	printf("Finished Init!\n");
-}
 
+	setup_teach();
+}
 
 void setup_scheduler()
 {	
@@ -347,7 +377,7 @@ return 			: void
 *************************************************************************/
 void configure_motor_reports( bool mOn )
 {
-	byte mReports = MODE_SEND_POSITION_RAW;
+	byte mReports = MODE_SEND_POSITION_RAW; 
 	byte mRate    = MODE_SEND_UPDATES_20ms; 
 	if (mOn==false) {
 		mReports = 0;
@@ -405,7 +435,7 @@ void jog()
 		{
 			robot.limbs[limb].actuators[actuator].DestinationCount = 
 						robot.limbs[limb].actuators[actuator].ZeroOffset;
-			robot.limbs[limb].actuators[actuator].send_speed_pid();
+			//robot.limbs[limb].actuators[actuator].send_speed_pid();			
 			while(1==1) { };			// Fix!
 		}
 		else {
@@ -463,7 +493,7 @@ int main( int argc, char *argv[] )
 						 	print_message( &msg1 );
 							AddToSendList( &msg1 );	  
 						}
-					}						 	
+					}				 	
 				}
 			}
 		}	// end of "set_stop"	
@@ -509,9 +539,8 @@ int main( int argc, char *argv[] )
 			/* Measure should not move the motors at all.  
 				The normal callback_board_presence move them. */
 			robot.deactivate_outputs();
-
-			robot.start_measurement_averaging( 20 );			
-			set_model_rx_callback ( can_motor_position_responder );
+			robot.start_measurement_averaging( 20 );
+			set_model_rx_callback( can_motor_position_responder );
 
 			/* Here we'll read the Pot values for all motors.  Average 10 samples.
 			   and print the results. */			
@@ -527,7 +556,6 @@ int main( int argc, char *argv[] )
 		
 		if ( strcmp(argv[1], "play") == 0 )
 		{
-			do_not_send = true;
 			printf("Playing sequence ...\n");
 			if (argc > 2)
 				SequenceFileName = argv[2];
@@ -559,6 +587,7 @@ int main( int argc, char *argv[] )
 			if (argc > 3)
 				robot.seq.iterations_requested = atoi(argv[3]);	 // -1 means infinite
 
+			// Deactivate Outputs:
 			robot.deactivate_outputs();
 			robot.clear_reads( 1 );
 			bool result = false;
@@ -569,20 +598,16 @@ int main( int argc, char *argv[] )
 			robot.seq.read_vector_file( SequenceFileName );			
 			robot.set_vectors_limbs   (  );
 
-
 			printf("MotorEnable 0,1,2 =%d,%d,%d \n", 
 					robot.limbs[1].actuators[0].MotorEnable,
 					robot.limbs[1].actuators[1].MotorEnable,
 					robot.limbs[1].actuators[2].MotorEnable );
 
-			printf("ActiveOutputs_0,1,2 =%d,%d,%d \n", 
-					robot.limbs[1].actuators[0].ActiveOutputs,
-					robot.limbs[1].actuators[1].ActiveOutputs,
-					robot.limbs[1].actuators[2].ActiveOutputs );
-
+			robot.limbs[0].print_active_outputs();
+			robot.limbs[1].print_active_outputs();
 
 			setup_scheduler();					// sets a timer for  next_sequence_handler()
-			
+
 			printf("Repeating %d iterations\n", robot.seq.iterations_requested );
 			printf("====================looping===========================\n");
 
@@ -593,10 +618,13 @@ int main( int argc, char *argv[] )
 			     is called periodically 
 			     CAN_isr() callback handles the positions. 
 			    */
+			   // printf("Looping...\n");
+			   teach_pendant.print();
+			    update_lcd();
+			    usleep(500000);
 			}
 			printf("all iterations requested have completed.  Done.\n");		
-		}	
-		
+		}
 	}
 }
 

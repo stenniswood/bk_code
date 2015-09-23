@@ -41,6 +41,7 @@ public:
 
 	char*  getWord		( 	);
 	void   show_file	( char* mFileName 	);
+	void 	print_all_keys( );
 
 	void   	open		( BOOL mReadOnly = FALSE);	
 	void   	close		( 						);
@@ -54,11 +55,13 @@ public:
 	const char* 			find_string	 ( const char* mKey );
 	float 					find_float	 ( const char* mKey );
 	int 					find_int	 ( const char* mKey );
+	unsigned int			find_hex	 ( const char* mKey );
 	bool 					find_bool	 ( const char* mKey );	
 
 	// For compatability legacy:
 	float 	getFloatValue(  );
 	int 	getIntValue	 (  );
+	uint16_t getHexValue( );
 	char* 	getString	 (  );
 	
 	char*	getKey		 (  );
