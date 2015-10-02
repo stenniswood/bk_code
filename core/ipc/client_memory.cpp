@@ -1,11 +1,12 @@
+
 /*********************************************************************
 Product of Beyond Kinetics, Inc
 ------------------------------------------
-|			Atmel						 |
+|	abkInstant |<==>|  bkInstant (wifi)	 |
 ------------------------------------------
-			|SPI|
+			   |SHM|
 ------------------------------------------
-|   atiltcam   |<==>|  bkInstant (wifi)  |
+|   avisual     						 |
 ------------------------------------------
 
 This code handles IPC Shared memory for graphical display:  visual
@@ -15,6 +16,8 @@ WRITES TO SHARED MEMORY:
 	The "abkInstant" establishes the memory segment.
 	and the avisual may connect to it when it's run.
 READS:
+	Lowside Outputs	- this app reserves the right to override the outputs based on the application.
+	Servo Angles
 	
 DATE 	:  8/8/2013
 AUTHOR	:  Stephen Tenniswood
@@ -33,6 +36,7 @@ AUTHOR	:  Stephen Tenniswood
 #include "bk_system_defs.h"
 #include "interrupt.h"
 #include "client_memory.hpp"
+
 
 char* 	client_shared_memory;
 int 	client_segment_id;
@@ -88,8 +92,9 @@ int cli_allocate_memory( )
 	
 	/* Allocate a shared memory segment. */
 	client_segment_id = shmget( IPC_KEY_CLI, shared_segment_size, IPC_CREAT | 0666 );
+	int errsv = errno;
 	if (client_segment_id==-1)
-		printf("cli_allocate_memory - ERROR: %s \n", strerror(errno) );
+		printf("cli_allocate_memory - ERROR: %s \n", strerror(errsv) );
 	else 
 		printf ("Client shm segment_id=%d\n", client_segment_id );
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
@@ -152,13 +157,17 @@ void cli_deallocate_memory(int msegment_id)
 	shmctl (msegment_id, IPC_RMID, 0);
 }
 
+/*********************************************************/
+/* Functions which access the data members:				 */
+/*********************************************************/
+
 /* WRITE IMPLIES TO SHARED MEMORY.  And since we are the abkInstant task,
 	the writes will be transfer to avisual
 FORMAT:
 	INT 		ID
 	char[255] 	Buffer
 */
-void cli_ipc_write_command_text( char* mSentence )
+void cli_ipc_write_sentence( char* mSentence )
 {
 	int length = strlen(mSentence);	
 	int MaxAllowedLength = sizeof(ipc_memory_client->Sentence);	
@@ -166,7 +175,7 @@ void cli_ipc_write_command_text( char* mSentence )
 		length = MaxAllowedLength;
 		mSentence[MaxAllowedLength] = 0;
 	}
-	ipc_memory_client->RequestCount++;
+	ipc_memory_client->UpdateCounter++;
 
 	//printf("%d:Copying %d bytes to shared mem.\n", SentenceCounter, length);
 	strcpy(ipc_memory_client->Sentence, mSentence);
@@ -188,40 +197,12 @@ void cli_ipc_write_connection_status( char* mStatus )
 	printf( "|%s|\n", ipc_memory_client->ConnectionStatus );
 }
 
-void cli_ipc_write_active_page( short NewActivePage )
+/*void cli_ipc_write_active_page( short NewActivePage )
 {
-//	ipc_memory_avis->ScreenNumber = NewActivePage;
-}
+	ipc_memory_avis->ScreenNumber = NewActivePage;
+} */
+
 /* See udp_transponder for update_client_list()		*/
-
-
-/*********************************************************************
-Product of Beyond Kinetics, Inc
-------------------------------------------
-|			Atmel						 |
-------------------------------------------
-			|SPI|
-------------------------------------------
-|   atiltcam   |<==>|  bkInstant (wifi)  |
-------------------------------------------
-
-This code handles IPC Shared memory:  atiltcam
-Intended for the PiCamScan board on RaspberryPi.
-
-WRITES TO SHARED MEMORY:
-	Analog 	
-READS:
-	Lowside Outputs	- this app reserves the right to override the outputs based on the application.
-	Servo Angles
-
-DATE 	:  8/8/2013
-AUTHOR	:  Stephen Tenniswood
-********************************************************************/
-long int	SentenceCounter=0;
-char*		Sentence;
-long int	StatusCounter=0;
-char*		Status;
-
 
  
 #if (PLATFORM==Mac)
@@ -233,7 +214,13 @@ char cli_segment_id_filename[] = "/home/steve/bk_code/client/cli_shared_memseg_i
 #endif
 
 
-/* The allocating should be done by abkInstant. */
+/* The allocating should be done by abkInstant. 
+		Should test for mem segment allocation first.
+		Then if requested allocate.
+Return : 
+	1 => Attached to memory successfully.
+	0 => No connection.
+*/
 int connect_shared_client_memory( char mAllocate )
 {
 	if (mAllocate)
@@ -248,16 +235,18 @@ int connect_shared_client_memory( char mAllocate )
 		cli_save_segment_id( cli_segment_id_filename );		
 		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
 			return 1;
-	} else  {	
-		printf("Reading segment id: %s\n", cli_segment_id_filename);
-		cli_read_segment_id(cli_segment_id_filename);	
+	}
+	 else  
+	{	
+		printf( "Reading segment id: %s\n", cli_segment_id_filename );
+		cli_read_segment_id( cli_segment_id_filename );
 		cli_attach_memory();	
 		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
 			return 1;			
 	}
 	return 0;	
 }
-
+ 
 char* get_connection_status()
 {
 	return (ipc_memory_client->ConnectionStatus);
@@ -273,32 +262,110 @@ int read_status_counter()
 }
 int read_sentence_counter()
 {
-	return ipc_memory_client->RequestCount;
+	return ipc_memory_client->UpdateCounter;
 }
 
-BOOL is_new_connection_status()
+BOOL cli_is_new_connection_status()
 {
 	int latest_count = read_status_counter();
-	if (latest_count > StatusCounter)
+	if (latest_count > ipc_memory_client->StatusAcknowledgedCounter)
 	{
-		printf("Latest_count = %d/%d\n", latest_count, StatusCounter);			
-		StatusCounter = latest_count;
+		printf("Latest_count = %d/%d\n", latest_count, ipc_memory_client->StatusAcknowledgedCounter );
 		return TRUE;
 	}
 	return FALSE;
 }
 
-BOOL is_new_sentence()
+void cli_ack_connection_status()
+{
+	ipc_memory_client->StatusAcknowledgedCounter = ipc_memory_client->StatusCounter;
+}
+
+BOOL cli_is_new_update()
 {
 	int latest_count = read_sentence_counter();
-	if (latest_count > SentenceCounter)
+	if (latest_count > ipc_memory_client->AcknowledgedCounter)
 	{
-		printf("Latest_count = %d/%d\n", latest_count, SentenceCounter);			
-		SentenceCounter = latest_count;
+		printf("Latest_count = %d/%d\n", latest_count, ipc_memory_client->AcknowledgedCounter);			
 		return TRUE;
 	}
 	return FALSE;
 }
+void cli_ack_update_status()
+{
+	ipc_memory_client->AcknowledgedCounter = ipc_memory_client->UpdateCounter;
+}
+
+/*void cli_ipc_add_new_client( struct in_addr mbeacon_ip_list, char* mTextMsg )
+{
+	ipc_memory_client->NumberClients++;
+	std::list<struct in_addr>::iterator iter = mbeacon_ip_list.end();
+	int byte_array_size = 0;
+	struct stClientData* ptr 			= ipc_memory_client->ClientArray;
+	int  i=0;
+
+	// Now add the client as a string followed by a null terminator.  Hence a string array:
+	char* ip_str = inet_ntoa(*iter);
+	int len = strlen(ip_str);
+	
+	// Copy 1 client:
+	memcpy( ptr[i].address,  ip_str, len );
+	memcpy( ptr[i].name,  ip_str, len );
+	memcpy( ptr[i].machine,  ip_str, len );	
+	
+	// Adjust for next client:
+	byte_array_size += (len+1);	// null terminator
+} */
+
+/*
+	Puts a new ip into the shared memory  ipc_memory_client->ClientArray[]
+*/
+/*void cli_ipc_add_new_clients( std::list<struct in_addr> mbeacon_ip_list )
+{
+	ipc_memory_client->NumberClients    = mbeacon_ip_list.size();
+	std::list<struct in_addr>::iterator iter = mbeacon_ip_list.begin();
+	int byte_array_size = 0;
+	char* ptr 			= ipc_memory_client->ClientArray;
+	int  i=0;
+
+	// Now add each client as a string followed by a null terminator.  Hence a string array:
+	while(( iter != mbeacon_ip_list.end()) && (byte_array_size<MAX_CLIENT_ARRAY_SIZE))
+	{
+		char* ip_str = inet_ntoa(*iter);
+		int len = strlen(ip_str);
+		
+		// Copy 1 client:
+		memcpy( ptr[i],  ip_str, len );
+		ptr[len] = 0;
+		
+		// Adjust for next client:
+//		ptr      += (len+1);		// skip null terminator!
+		byte_array_size += (len+1);	// null terminator
+		iter++;
+		i++;
+	}
+	
+	ipc_memory_client->UpdateCounter++;	
+}*/
+
+void cli_print_clients()
+{
+	if (ipc_memory_client==NULL) return ;
+	
+	int size = ipc_memory_client->NumberClients;
+	printf("There are %d available clients.\n", size );
+
+	struct stClientData* ptr = ipc_memory_client->ClientArray;		
+	for (int i=0; i<size; i++)
+	{
+		printf(" %s\t%s\t%s \n", ptr[i].name, ptr[i].address, ptr[i].machine );
+	}
+	return ;
+}
+
+
+
+
 
 /*void cli_ipc_add_new_client 	( char* mClientText )
 {
@@ -314,55 +381,3 @@ BOOL is_new_sentence()
 	strcpy( ptr, mClientText );
 	ipc_memory_client->NumberClients++;
 }*/
-
-/*
-	Puts a new ip into the shared memory  ipc_memory_client->ClientArray[]
-*/
-void cli_ipc_add_new_client( std::list<struct in_addr> mbeacon_ip_list )
-{
-	// Number of clients:
-	ipc_memory_client->NumberClients    = mbeacon_ip_list.size();
-	std::list<struct in_addr>::iterator iter = mbeacon_ip_list.begin();
-	int byte_array_size = 0;
-	char* ptr 			= ipc_memory_client->ClientArray;
-
-	// Now add each client as a string followed by a null terminator.  Hence a string array.
-	while(( iter != mbeacon_ip_list.end()) && (byte_array_size<MAX_CLIENT_ARRAY_SIZE))
-	{
-		char* ip_str = inet_ntoa(*iter);
-		int len = strlen(ip_str);
-		
-		// Copy 1 client:
-		memcpy( ptr,  ip_str, len );
-		ptr[len] = 0;
-		
-		// Adjust for next client:
-		ptr      += (len+1);		// skip null terminator!
-		byte_array_size += (len+1);	// null terminator
-		iter++;
-	}
-}
-
-void print_clients()
-{
-	if (ipc_memory_client==NULL) return ;
-	
-	int size = ipc_memory_client->NumberClients;
-	printf("There are %d available clients.\n", size );
-
-	char* ptr = ipc_memory_client->ClientArray;	
-	char* ptr2 = strchr( ptr, 0 );
-	
-	for (int i=0; i<size; i++)
-	{
-		printf(" %s \n", ptr );
-		ptr2 = strchr( ptr, 0 )+1;
-		if (ptr2)
-			ptr = ptr2;
-	}
-	return ;
-}
-
-
-
-

@@ -10,7 +10,6 @@
 #include <fcntl.h>        // Needed for sockets stuff
 #include <netdb.h>        // Needed for sockets stuff
 #include "udp_transponder.hpp"
-#include "visual_memory.h"
 #include "bk_system_defs.h" 
 #include "client_memory.hpp"
 
@@ -19,15 +18,24 @@
 
 //---------------------- CLIENT LIST --------------------------------------------
 using namespace std;
-list<struct in_addr> beacon_ip_list;
+struct stBK_Header 
+{
+	char ip_address[40];	
+	char hostname[40];
+	char machine_type[40];
+	struct in_addr addr;
+};
+
+list<struct stBK_Header> beacon_ip_list;
+
 
 int already_added( struct in_addr* mIP )
 {
 	struct in_addr tmp;
-	list<struct in_addr>::iterator i = beacon_ip_list.begin();	
+	list<struct stBK_Header>::iterator i = beacon_ip_list.begin();	
 	while ( i != beacon_ip_list.end() )
 	{
-		tmp = *i;
+		tmp = (*i).addr;
 				//printf(" IP=%s  \n",  inet_ntoa(*i) );		
 		if (tmp.s_addr == mIP->s_addr)
 			return 1;
@@ -41,27 +49,60 @@ void print_beacons()
 {
 	printf("============= Beacons =====================\n");
 	int c=0;
-	list<struct in_addr>::iterator i = beacon_ip_list.begin();
+	list<struct stBK_Header>::iterator i = beacon_ip_list.begin();
 	while ( i != beacon_ip_list.end() )
 	{
 		c++;
-		printf("#%d IP=%s  \n", c, inet_ntoa(*i) );		
+//		printf("#%d IP=%s  \n", c, inet_ntoa( (*i).addr) );		
+		printf("#%d IP=%s; %s  %s  \n", c, (*i).ip_address, i->hostname, i->machine_type );				
 		i++;
 	}
 	printf("==========================================\n");
 }
 
+int convert_to_string_array( char* mText )
+{
+	int count = 1;
+	char* ch = strchr( mText, '\n' );
+
+	while (ch != NULL)
+	{
+		*ch = 0;
+		count++;
+		ch = strchr( ch+1, '\n' );
+	}	
+	return count;
+}
+
 void  handle_client_list( struct in_addr* client_ip_addr, char in_buf[] )
 {
+  struct stBK_Header  hdr;
   if ( !already_added( client_ip_addr ) )
   {
-  	 printf("Adding IP...\n");
-	 beacon_ip_list.push_back( *client_ip_addr );
-	 update_client_list();	// put into IPC memory
-	 
+  	 printf("Adding IP...\n");  	 
+	 int num_strings = convert_to_string_array( in_buf );	  
+	 char* ptr = in_buf+strlen(in_buf)+1;		// skip to second string.		 
+
+	  // EXTRACT HOST NAME
+	  char* ptr2 = strchr( ptr, '=');
+	  strcpy ( hdr.hostname, ptr2+1);
+
+	  // EXTRACT MACHINE TYPE:	  
+	  ptr = ptr2+strlen(ptr2)+1;				// skip to 3rd string.
+	  ptr2 = strchr(ptr, '=');
+	  strcpy( hdr.machine_type, ptr2+1 );
+	  
+	  // ADD IP ADDRESS:
+	  char* ip = inet_ntoa(*client_ip_addr);
+	  strcpy ( hdr.ip_address, ip );
+	  hdr.addr = *client_ip_addr;
+	  
+	  
 	  // Print an informational message of IP address and port of the client
 	  // printf("IP address of client = %s  port = %d \n", inet_ntoa(client_ip_addr),
 	  //	 ntohs(client_addr.sin_port));
+	 beacon_ip_list.push_back( hdr );
+	 update_client_list();	// put into IPC memory
 	  print_beacons();
 	  // Output the received message
 	  printf("Msg: %s \n", in_buf);
@@ -70,55 +111,32 @@ void  handle_client_list( struct in_addr* client_ip_addr, char in_buf[] )
 
 /* 
 	Put the list<string> of clients into the ipc_memory.
+//			char* ip_str = inet_ntoa((*iter).addr);	
 */
 void update_client_list()
-{
-	if (ipc_memory_avis)
-	{ 
-		ipc_memory_avis->NumberClients = beacon_ip_list.size();
-		list<struct in_addr>::iterator iter = beacon_ip_list.begin();
-		int byte_array_size = 0;
-		char* ptr = ipc_memory_avis->ClientArray;
-		
-		// Now add each client as a string followed by a null terminator.  Hence a string array.
-		while(( iter != beacon_ip_list.end()) && (byte_array_size<MAX_CLIENT_ARRAY_SIZE))
-		{
-			char* ip_str = inet_ntoa(*iter);
-			int len = strlen(ip_str);
-			
-			// Copy 1 client:
-			memcpy( ptr,  ip_str, len );
-			ptr[len] = 0;
-			
-			// Adjust for next client:
-			ptr      += (len+1);		// skip null terminator!
-			byte_array_size += (len+1);	// null terminator
-			iter++;
-		}
-	}
-	
+{	
 	// Number of clients.
 	if (ipc_memory_client)
 	{	
 		ipc_memory_client->NumberClients    = beacon_ip_list.size();
-		list<struct in_addr>::iterator iter = beacon_ip_list.begin();
+		list<struct stBK_Header>::iterator iter = beacon_ip_list.begin();
 		int byte_array_size = 0;
-		char* ptr = ipc_memory_client->ClientArray;
-
+		struct stClientData* ptr = ipc_memory_client->ClientArray;
+		int i=0;
+		
 		// Now add each client as a string followed by a null terminator.  Hence a string array.
-		while(( iter != beacon_ip_list.end()) && (byte_array_size<MAX_CLIENT_ARRAY_SIZE))
+		while(( iter != beacon_ip_list.end()) && (byte_array_size<MAX_CLIENTS))
 		{
-			char* ip_str = inet_ntoa(*iter);
-			int len      = strlen(ip_str);
 			
 			// Copy 1 client:
-			memcpy( ptr,  ip_str, len );
-			ptr[len] = 0;
+			strcpy( ptr[i].address,  iter->ip_address);			
+			strcpy( ptr[i].name,  	 iter->hostname );
+			strcpy( ptr[i].machine,  iter->machine_type );
+			ptr[i].network = 1;		// TCP_IP
 			
 			// Adjust for next client:
-			ptr      += (len+1);		// skip null terminator!
-			byte_array_size += (len+1);	// null terminator
 			iter++;
+			i++;
 		}
 	}
 }
@@ -134,8 +152,7 @@ void compose_message()
 {
 	// Assign a message to buffer out_buf
 	char   name[255];
-	gethostname(name, 255);
-	
+	gethostname(name, 255);	
 	sprintf(out_buf, "APP_NAME=BK robot server\nHOST_NAME=%s\nMACHINE_TYPE=%s\n", name, MACHINE_TYPE );	
 }
 
@@ -238,14 +255,22 @@ void* udp_receive_function(void* msg)
 		exit(-1);
 	  }
 
+	  
+	  
+	  // Now for each string, parse info:
+	  //for (int i=0; i<num_strings; i++)
+	  {
+	  	
+	  }
+	  	  	  
 	  // Copy the four-byte client IP address into an IP address structure
 	  memcpy(&client_ip_addr, &client_addr.sin_addr.s_addr, 4);
 	  handle_client_list( &client_ip_addr, in_buf );
-	  
+
 	  // Filter out our own broadcast - not interested in it!
 	  char name[255];
 	  gethostname(name, 255);
-	  
+
 	  // Print an informational message of IP address and port of the client
 	  if (Debug) printf("UDP Rx: Client IP = %s\tport = %d) \n", inet_ntoa(client_ip_addr),
 			 ntohs(client_addr.sin_port));

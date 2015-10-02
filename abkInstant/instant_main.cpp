@@ -115,7 +115,6 @@ void establish_ipc()
 		picam_fill_memory	 ();
 	} 
 //	else picam_deallocate_memory(  );	// 98307
-
 	
 	if (USE_AUDIO)
 	{
@@ -137,7 +136,7 @@ void init( )
 {	
 	//fuse_init ( );
 	establish_ipc();
-		
+
 	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
 
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
@@ -319,11 +318,12 @@ void scan_inputs()
 {
 	//printf("%d %d\n", ipc_memory_client->RequestCount, ipc_memory_client->AcknowledgedCount);
 	// CHECK CLIENT MEMORY FOR REQUEST:
-	if (ipc_memory_client->RequestCount > ipc_memory_client->AcknowledgedCount)
+	if (cli_is_new_update())
+	//if (ipc_memory_client->RequestCount > ipc_memory_client->AcknowledgedCount)
 	{
 		printf("calling handle_client_request() \n");
 		handle_client_request();
-		ipc_memory_client->AcknowledgedCount++;
+		cli_ack_update_status();
 	}	
 }
 		

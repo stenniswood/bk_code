@@ -39,6 +39,7 @@ char*		Sentence;
 long int	StatusCounter=0;
 char*		Status;
 
+
 int connect_shared_abkInstant_memory( )
 {
 	printf("connect_shared_abkInstant_memory()  \n");

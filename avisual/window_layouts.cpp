@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
+#include <string>
+#include <vector>
+
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
@@ -17,11 +19,12 @@
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
 #include "display_manager.hpp"
-#include "visual_memory.h"
-#include <vector>
+#include "client_memory.hpp"
+#include "client_list_control.hpp"
 
 
-#define Debug 0
+
+#define Debug 1
 
 
 // Avisual display:
@@ -37,6 +40,8 @@ static TabularListBox  adren_board_list;
 Window		ParentWindow(450, 1050, 500, 100);
 TextView 	SampleText;
 ListBox  	AvailableClients;
+ClientList	AvailClients;
+
 IconView	test_image;
 IconView	test_icon(50,200);
 /*******************************************************/
@@ -168,13 +173,18 @@ void populate_listbox()
 
 void update_available_client_list()
 {
+	cli_print_clients();
 	if (Debug) printf("====== List of Available Clients: ==================\n");
-	char* ptr  = ipc_memory_avis->ClientArray;
+	if (ipc_memory_client==NULL)  {
+		printf(" Error Peer List is not available!\n");
+		return;
+	}
+	struct client_ipc_memory_map* ptr  = ipc_memory_client->ClientArray;
 	AvailableClients.clear_items();
-	for (int i=0; i<ipc_memory_avis->NumberClients; i++)
+	for (int i=0; i<ipc_memory_client->NumberClients; i++)
 	{
-		int length = strlen(ptr);
-		if (Debug) printf("CLient %d:%s\n", i, ptr);
+		int length = strlen(ptr[i].);
+		if (Debug) printf("CLient %d:%s\n", i, ptr );
 		AvailableClients.set_item( (const char*)ptr );
 		ptr += length+1;
 	}
@@ -201,7 +211,8 @@ void init_avisual()
 	CmdText.set_background_color( 0xFF9f9f0f );
 
 	// This should be hidden until asked for via voice.
-	AvailableClients.set_position( 1000, 1200, 400, 100 );
+	AvailableClients.set_position( 10, 10, 400, 100 );
+		
 	update_available_client_list();
 
 	//set_headings();
@@ -221,8 +232,7 @@ void init_avisual()
 	adren_board_list.calc_column_positions_from_widths  (   );
 	//adren_board_list.calc_metrics();
 	if (Debug) adren_board_list.print_positions();
-	
-	
+
 	//printf("CALC_METRICS() - DONE \n");
 	//pack_sample_window();	
 	//test_icon.set_position( 100, 200, 313, 200);
@@ -254,7 +264,7 @@ void init_avisual()
 	MainDisplay.add_object( &l1 		);
 	MainDisplay.add_object( &AvailableClients );
 	MainDisplay.add_object( &test_icon  );
-	MainDisplay.add_object( &adren_board_list );
+//	MainDisplay.add_object( &adren_board_list );
 	MainDisplay.load_resources();
 }
 

@@ -23,13 +23,13 @@ public:
 	Rectangle( float   Width, float   Height );
 	Rectangle( );
 
-	float 	set_left	( float mLeft   )	{ coords[LEFT] =mLeft;    left = mLeft;    		};
-	float 	set_right	( float mRight  )	{ coords[RIGHT]=mRight;   width= mRight-left;   };
-	float 	set_top		( float mTop    )	{ coords[TOP]  =mTop;     height= mTop-bottom;	};
-	float 	set_bottom	( float mBottom )	{ coords[BOTTOM]=mBottom; bottom=mBottom; 		};
+	float 	set_left	( float mLeft   )	{ coords[LEFT] =mLeft;    left = mLeft;    		return mLeft;   };
+	float 	set_right	( float mRight  )	{ coords[RIGHT]=mRight;   width= mRight-left;   return mRight;  };
+	float 	set_top		( float mTop    )	{ coords[TOP]  =mTop;     height= mTop-bottom;	return mTop;    };
+	float 	set_bottom	( float mBottom )	{ coords[BOTTOM]=mBottom; bottom=mBottom; 		return mBottom; };
 	
-	float 	set_width	( float mWidth  )	{ coords[RIGHT]=coords[LEFT]+mWidth;    width = mWidth;  };
-	float 	set_height	( float mHeight )	{ coords[TOP]  =coords[BOTTOM]+mHeight; height= mHeight; };
+	float 	set_width	( float mWidth  )	{ coords[RIGHT]=coords[LEFT]+mWidth;    width = mWidth;  return mWidth; };
+	float 	set_height	( float mHeight )	{ coords[TOP]  =coords[BOTTOM]+mHeight; height= mHeight; return mHeight; };
 
 	inline float 	get_left	( )		{ return coords[LEFT];   };
 	inline float 	get_right	( )		{ return coords[RIGHT];  };
@@ -41,8 +41,8 @@ public:
 	void	print_positions();
 
 	void	draw		();
-	int		hit_test	(float x, float y);	
-	void	move_to		( float left, float bottom );
+	int		hit_test	( float x,     float y);	
+	void	move_to		( float left,  float bottom );
 	void 	set_size	( float width, float height);
 
 private:

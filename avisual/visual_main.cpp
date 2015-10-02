@@ -27,7 +27,6 @@
 #include "window_layouts.hpp"
 #include "callbacks.hpp"
 #include "vector_file.hpp"
-#include "ipc_mem_bkinstant.h"
 #include "mouse.h"
 #include "test_layouts.hpp"
 
@@ -39,9 +38,11 @@
 #include "AUDIO_device.h"
 
 #include "audio_app.hpp"
+#include "client_memory.hpp"
 #include "visual_memory.h"
 #include "audio_memory.h"
 #include "CAN_memory.h"
+
 
 /*
 	What's displayed here is going to be under the control of bkInstant.
@@ -65,8 +66,13 @@ void init_ipc( const char* mVectorFileName )
 {
 	// Ready-to-send, Receive buffer full 
 	create_threads();
-	bkInstant_connected = connect_shared_abkInstant_memory(); 
+	
+	bkInstant_connected = connect_shared_client_memory( FALSE );
+	printf("init_ipc %d \n", bkInstant_connected );
+	
+	//bkInstant_connected = connect_shared_abkInstant_memory(); 
 
+	// AUDIO : 
 	if (aud_allocate_memory() == -1)
 	{
 		printf("Cannot allocate memory.\n");
@@ -75,10 +81,6 @@ void init_ipc( const char* mVectorFileName )
 	aud_attach_memory();
 	
 	can_connect_shared_memory(FALSE);
-/*	can_segment_id = 1234;
-	can_connected  = can_attach_memory();	
-	if (can_connected==-1)	can_connected = 0; */	
-	//	connect_shared_CAN_memory();
 }
 
 void help()
@@ -152,11 +154,11 @@ void gui_interface()
 	//printf("any_invalid_children= %d\n", UpdateDisplaySemaphore );			
 
 	//printf("ipc_memory_avis=%x\n", ipc_memory_avis);
-	if (ipc_memory_avis)
-		if (ipc_memory_avis->NumberClients != Last_Retrieved_Number)
+	if (ipc_memory_client)
+		if (ipc_memory_client->NumberClients != Last_Retrieved_Number)
 		{
 			update_available_client_list();
-			Last_Retrieved_Number = ipc_memory_avis->NumberClients;
+			Last_Retrieved_Number = ipc_memory_client->NumberClients;
 			UpdateDisplaySemaphore = 1;
 		}
 	//printf("ipc_memory_avis past.\n" );				
@@ -186,17 +188,19 @@ void sequencer_interface()
 
 void ethernet_interface()		/* wifi comms */
 {
-	if ( is_new_sentence() )
+	if ( cli_is_new_update() )
 	{	
 		if (Debug) printf("New sentence : %s\n", get_sentence());
 		CmdText.set_text( get_sentence() );		
+		update_available_client_list();
+		
 		UpdateDisplaySemaphore=1;			
 	}
-	if ( is_new_connection_status() )
-	{		
+	if ( cli_is_new_connection_status() )
+	{	
 		if (Debug) printf("New status : %s\n", get_connection_status());	
 		ConnectionStatus.set_text( get_connection_status() );		
-		UpdateDisplaySemaphore=1;			
+		UpdateDisplaySemaphore=1;
 	}
 }
 
@@ -218,8 +222,8 @@ int main( int argc, char *argv[] )
 {
 	printf("======= main() ==============\n");		
 	init_ipc("simple_walk.csv");
-	DisplayNum      = 4; 
-	
+	DisplayNum = 4;
+
 	printf("======= Checking command line arguments ==============\n");	
 	print_args( argc, argv );
 	if (argc>1)
@@ -235,7 +239,8 @@ int main( int argc, char *argv[] )
 			load_test_screen(DisplayNum); 
 		} 
 	} else 
-		init_avisual();
+		init_avisual();		// opening screen!	Located in window_layouts.cpp
+		
 	UpdateDisplaySemaphore=1;
 	MainDisplay.onCreate();
 

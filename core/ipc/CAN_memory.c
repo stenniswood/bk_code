@@ -315,6 +315,13 @@ char segment_id_filename[] = "/home/steve/bk_code/amonitor/acan_shared_memseg_id
 #endif
 
 
+/* The allocating should be done by amon
+		Should test for mem segment allocation first.
+		Then if requested allocate.
+Return : 
+	1 => Attached to memory successfully.
+	0 => No connection.
+*/
 int can_connect_shared_memory(char mAllocate)
 {
 	if (mAllocate) {		

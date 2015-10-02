@@ -1,6 +1,5 @@
 
 
-
 #include <list>
 #include <string>
 using namespace std;
@@ -17,6 +16,6 @@ void 	handle_client_list	( struct in_addr* client_ip_addr, char in_buf[] );
 void	print_beacons		(						 );
 void 	update_client_list	(						 );
 
-extern list<struct in_addr> beacon_ip_list; 
+extern list<struct stBK_Header> beacon_ip_list; 
 
 

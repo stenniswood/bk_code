@@ -1,0 +1,42 @@
+The following Shared memory Segments
+
+Name		Approx Size		Description
+===========================================================
+Audio						Audio buffers to and from Instant
+CAN							CAN buffers to and from Instant
+Client						Connection Status, Sentence, Client List. Info about which peer servers are on the network (beacons)
+PiCamScan					Pan & Tilt PWMs, LED's etc to be driven on the PiCamScan board.
+Sway 						Segway style balancing
+Visual						Connection Status, Sentence, Client List
+								Nearly identical to client.  However change this to anything needed.
+===========================================================
+
+
+
+=== USEAGE ===
+
+
+AVISUAL		init_ipc() in avisual_main.cpp
+
+Name		Used	Allocated By aVisual
+===========================================================
+Audio		Yes		Yes
+CAN			Yes		Possible (preferred amon)
+Client		Yes		No
+PiCamScan	
+Sway 
+Visual
+===========================================================
+
+
+
+abkInstant
+Name		Used	Allocated By	
+===========================================================
+Audio
+CAN
+Client
+PiCamScan
+Sway 
+Visual
+===========================================================
