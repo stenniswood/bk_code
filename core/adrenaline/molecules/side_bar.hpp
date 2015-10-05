@@ -45,7 +45,7 @@ public:
 	virtual void 	load_resources	 ( 	 );
 	float			get_bottom	 	 ( int mIndex   );
 	float			get_short_width	 (   );	// for minimized view (ie. just icons)
-	float			get_expanded_width	 ( );	// for minimized view (ie. just icons)
+	float			get_expanded_width(  );	// for minimized view (ie. just icons)
 	
 	void			unload_controls	 ( );	// does not delete
 	void			load_controls	 ( vector<Control*>* mSidebar_controls );

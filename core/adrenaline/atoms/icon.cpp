@@ -62,7 +62,8 @@ void IconView::set_file( const char* mFileName )
 
 void IconView::Initialize()
 {
-	Visible   		= FALSE;
+	Control::Initialize();
+	
 	style     		= 0;
 	file_loaded 	= false;
 
