@@ -21,27 +21,24 @@
 #include "display_manager.hpp"
 #include "client_memory.hpp"
 #include "client_list_control.hpp"
-
+ 
 
 
 #define Debug 1
 
 
 // Avisual display:
-TextView 	ConnectionStatus( 50, 1230, 750, 700 );
-TextView 	CmdText;
+
+
 
 //TabularListBox  tab_lb(600, 20, 620, 5, -1);
 static TabularListBox  adren_board_list;
 
 /********************* A sample Window ****************/
 // 1900 - 1000 = 900
-//
 Window		ParentWindow(450, 1050, 500, 100);
 TextView 	SampleText;
 ListBox  	AvailableClients;
-ClientList	AvailClients;
-
 IconView	test_image;
 IconView	test_icon(50,200);
 /*******************************************************/
@@ -77,7 +74,8 @@ ProgressBar MyProgress ( 450, 650, 300, 275 );
 CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
 //ButtonArrayMot MyArray( 700, 1070, 350, 100);
 static char ConnectionStatusText[128];
-
+extern TextView 	ConnectionStatus;
+extern TextView 	CmdText;
 
 void set_headings()
 {
@@ -171,25 +169,11 @@ void populate_listbox()
 //	adren_board_list.add_row (data);
 }
 
-void update_available_client_list()
-{
-	cli_print_clients();
-	if (Debug) printf("====== List of Available Clients: ==================\n");
-	if (ipc_memory_client==NULL)  {
-		printf(" Error Peer List is not available!\n");
-		return;
-	}
-	struct client_ipc_memory_map* ptr  = ipc_memory_client->ClientArray;
-	AvailableClients.clear_items();
-	for (int i=0; i<ipc_memory_client->NumberClients; i++)
-	{
-		int length = strlen(ptr[i].);
-		if (Debug) printf("CLient %d:%s\n", i, ptr );
-		AvailableClients.set_item( (const char*)ptr );
-		ptr += length+1;
-	}
-	if (Debug) printf("===================================================\n");
-}
+
+
+
+extern ClientList	AvailClients;
+//static TabularListBox	tabb ( 100, 400, 750, 50  );
 
 void init_avisual()
 {
@@ -211,12 +195,15 @@ void init_avisual()
 	CmdText.set_background_color( 0xFF9f9f0f );
 
 	// This should be hidden until asked for via voice.
-	AvailableClients.set_position( 10, 10, 400, 100 );
-		
-	update_available_client_list();
+//	AvailableClients.set_position( 10, 10, 400, 100 );
+	AvailClients.move_to( 100, 100 );
+	AvailClients.calc_metrics();
+	AvailClients.set_headings();	
+	AvailClients.update_available_client_list();
+	
 
 	//set_headings();
-	if (Debug) printf("SET_HEADINGS() - \n");
+/*	if (Debug) printf("SET_HEADINGS() - \n");
 	populate_listbox();
 	if (Debug) printf("POPULATED LISTBOX () - \n");
 	
@@ -246,7 +233,7 @@ void init_avisual()
 	sb.set_min_value		( 0   );
 	sb.scroll_to    		( 1   );
 	sb.set_amount_visible	( 10  );
-
+ 
 	hsb.copy_position_horiz (&test_image );
 	hsb.set_position_below  ( &test_image );
 	hsb.set_max_value		( 100 );
@@ -256,14 +243,17 @@ void init_avisual()
 	
 	l1.set_position 		( 500, 600, 300, 70 );
 	l1.set_level_percent	( 50.0 );
-
+*/
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
 	MainDisplay.add_object( &ConnectionStatus );
 	MainDisplay.add_object( &CmdText 	);
-	MainDisplay.add_object( &l1 		);
-	MainDisplay.add_object( &AvailableClients );
-	MainDisplay.add_object( &test_icon  );
+//	MainDisplay.add_object( &l1 		);
+	MainDisplay.add_object( &AvailClients );
+//	MainDisplay.add_object( &tabb );	
+//	MainDisplay.add_object( &tabb );	
+	printf("ADDING TABULAR LIST BOX  Avail Clients!!!!\n");
+//	MainDisplay.add_object( &test_icon  );
 //	MainDisplay.add_object( &adren_board_list );
 	MainDisplay.load_resources();
 }
@@ -378,4 +368,6 @@ void init_control_test()
 	
 	if (Debug) printf("init_control_test() done\n");
 }
+
+
 

@@ -33,20 +33,6 @@ VerticalMenu     draw_view_menu(-1,-1);
 
 Drawing2D*  drawing;
 
-void init_drawing_app() 
-{
-	printf("\ninit_drawing_app\n");
-	drawing = new Drawing2D( 1000,600 );
-
-	Rectangle* rect = MainDisplay.get_useable_rect();
-	drawing->move_to      	 ( rect->get_left(), rect->get_bottom() );
-	drawing->set_width_height( rect->get_width(), rect->get_height() );
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( drawing );
-	MainDisplay.set_menu  ( &draw_menu );
-	printf("\ninit_drawing_app done \n");
-}
 
 int draw_file_menu_actions( void* menuPtr, int mMenuIndex )
 {
@@ -126,10 +112,9 @@ void init_main_draw_menu()
 	draw_menu.add_sub_menu  ( "View",     &draw_view_menu );
 }
 
-
 Drawing2D::Drawing2D() 
 :Control()
-{ 
+{
 	Initialize();
 }
 Drawing2D::Drawing2D( Rectangle* mRect ) 

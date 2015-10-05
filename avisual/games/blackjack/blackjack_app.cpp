@@ -34,9 +34,12 @@ void init_blackjack( )
 	if (bj_app==NULL)	
 		bj_app = new BlackJackApp();
 	if (bj_app)
-		bj_app->register_with_display_manager();		
+		MainDisplay.start_app( bj_app );
 }
 
+/*************************************************************/
+
+/*************************************************************/
 BlackJackApp::BlackJackApp ()
 {
 	Initialize(); 
@@ -67,15 +70,14 @@ void 	BlackJackApp::Initialize	(	)
 	m_main_window = new BlackJack( 3 );
 	//printf("BlackJackApp::Initialize()\n");	
 
-	setup_app_menu();
-	setup_menu    ();
+	setup_app_menu ();
+	setup_main_menu();
 	onPlace();	
 }
 
 int		BlackJackApp::onPlace		(	)
 { 
 	Application::onPlace();		// Place the main window.
-	
 	((BlackJack*)m_main_window)->onPlace();
 } 
 
@@ -85,9 +87,9 @@ int		BlackJackApp::onCreate(	)
 	Application::onCreate();
 }
 
-void	BlackJackApp::setup_menu  	( )
+void	BlackJackApp::setup_main_menu  	( )
 { 
-	Application::setup_menu();
+	Application::setup_main_menu();
 //	bj_file_menu.create_std_file_menu();
 //	bj_file_menu.add_callback_all_items( draw_file_menu_actions );
 //	m_hMenu.add_sub_menu( "File", &bj_file_menu  );

@@ -68,7 +68,7 @@ void 	HeartsApp::Initialize	(	)
 	//printf("HeartsApp::Initialize()\n");	
 
 	setup_app_menu();
-	setup_menu    ();
+	setup_main_menu    ();
 	onPlace();	
 }
 
@@ -86,9 +86,9 @@ int		HeartsApp::onCreate(	)
 	
 }
 
-void	HeartsApp::setup_menu  	( )
+void	HeartsApp::setup_main_menu  	( )
 { 
-	Application::setup_menu();
+	Application::setup_main_menu();
 //	bj_file_menu.create_std_file_menu();
 //	bj_file_menu.add_callback_all_items( draw_file_menu_actions );
 //	m_hMenu.add_sub_menu( "File", &bj_file_menu  );	

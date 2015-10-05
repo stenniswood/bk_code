@@ -271,7 +271,8 @@ int Control::draw_border()
 
 Control* Control::ChildrenHitTest( int x, int y )
 {
-	//printf("Control::ChildrenHitTest() .\n");
+	if (Visible==false) return NULL;
+	
 	Control* retval = NULL;
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
@@ -287,24 +288,25 @@ Control* Control::ChildrenHitTest( int x, int y )
 
 Control* Control::HitTest(int x, int y)
 {
+	if (Visible==false) return NULL;
+
 	Control* result = ChildrenHitTest( x, y );
 	if (result) {
-		//printf("Control::HitTest()  Clicked a registered child.\n");
 		return result;
 	}
-	//printf("Control::HitTest()  Not a registered child!\n");
+
 	float right = left+width;
 	float top   = bottom+height;
 	
-	if ((x>left)   && (x<right)  &&
-	    (y>bottom) && (y<top))
+	if ((x>left) && (x<right) && (y>bottom) && (y<top))
+	{
 	   return this;
-	// could add in a border check.  ie. if with 2 pixels of left or right, etc
-	else	
+	   // could add in a border check.  ie. if with 2 pixels of left or right, etc
+	} else	
 		return NULL;
 }
 
-int		Control::onClick(int x, int y, bool mouse_is_down)
+int	Control::onClick(int x, int y, bool mouse_is_down)
 {
 	Control* result = ChildrenHitTest(x,y);
 	if (result)
@@ -316,12 +318,12 @@ int		Control::onClick(int x, int y, bool mouse_is_down)
 	return -1;
 }
 
-int		Control::onDoubleClick()
+int	Control::onDoubleClick()
 {
 	return -1;	
 }
 
-int		Control::onReceiveFocus()
+int	Control::onReceiveFocus()
 {
 	return -1;
 }
@@ -340,6 +342,7 @@ void Control::print_children( )
 		iter++; 
 	};		
 }
+
 void Control::unregister_child	( Control* mNewChild )
 {
 	if (Debug) printf("\t\tControl::unregister_child( %x )\n", mNewChild );

@@ -33,7 +33,7 @@ public:
 	virtual int		background_time_slice(	);
 	
 	virtual void	setup_sidebar	(	);  // derived class adds these here
-	virtual void	setup_menu		(	);  // derived class adds these here
+	virtual void	setup_main_menu	(	);  // derived class adds these here
 	virtual void	setup_app_menu	(	);  // Name of App, About, Preferences, Quit.
 	
 	virtual void 	register_with_display_manager();
@@ -58,8 +58,8 @@ public:
 	virtual int   	draw		 	(	);
 
 
-	HorizontalMenu			m_hMenu;	
-	VerticalMenu			m_app_menu;		// 
+	HorizontalMenu			m_main_menu;	
+	VerticalMenu			m_app_menu;		// About, Preferences, Quit
 	VerticalMenu			m_file_menu;	// standard file menu too.	
 
 	vector<Control*>		m_sidebar_controls;	

@@ -8,7 +8,6 @@
 
 extern HorizontalMenu draw_menu;
 
-void init_drawing_app	();
 void init_main_draw_menu();
 
 #define MENU_STATE_NORMAL 		1
@@ -23,7 +22,7 @@ class Drawing2D : public Control
 public:
 	Drawing2D ();
 	Drawing2D ( Rectangle* mRect );
-	Drawing2D ( int Width, int Height 					 );
+	Drawing2D ( int Width, int Height  );
 	~Drawing2D();
 
 	virtual void 	Initialize(	);

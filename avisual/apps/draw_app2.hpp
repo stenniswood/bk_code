@@ -2,15 +2,14 @@
 #define _DRAW_APP2_LAYOUTS_
 
 
+void init_drawing_app();
+
+
 /**** These function handle the menu commands:   ****/
 void draw_zoom_in			();
 void draw_zoom_out			();
 
-
 /***** END OF MENU COMMAND FUNCTIONS *****/
-
-void configure_wave_views	( int mChannels, short* mDataCh1, short* mDataCh2 );
-
 class DrawApp : public Application
 {
 public:
@@ -21,7 +20,7 @@ public:
 	virtual void 	Initialize		(	);	// create all the objects here.
 	int				onPlace			(	);
 
-	virtual void	setup_menu  	( );
+	virtual void	setup_main_menu ( );
 	virtual void	setup_app_menu  ( );
 	virtual void 	register_with_display_manager();	
 	
@@ -40,10 +39,10 @@ public:
 	void 			zoom_in			();
 	void 			zoom_out		();
 
-
 };
 
 extern DrawApp* draw_app;
+//void configure_wave_views	( int mChannels, short* mDataCh1, short* mDataCh2 );
 
 #endif
 

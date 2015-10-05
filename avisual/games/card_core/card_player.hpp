@@ -19,19 +19,20 @@ public:
 	void	expose_card	( Card* mNewCard, bool mExposed = false );
 	void	expose_all_cards( bool mExposed = false );
 	
-	float	determine_card_spacing();
-	int		get_total_value	( );
+	float	determine_card_spacing	 ( );
+	int		get_total_value			 ( );
 	int		get_best_black_jack_score( );
-	bool	is_ace_in_hand	( );	
-	void	set_winner		( bool mWon )	{ winner = mWon;  };
-	bool	is_winner		( )	{ return winner;  };
+	bool	is_ace_in_hand			 ( );	
+	virtual void	win				 ( )	{ winner = true;   };
+	virtual void	lose			 ( )	{ winner = false;  };
+	bool	is_winner				 ( )	{ return winner;  };
 
-	float	get_one_card_width ();
-	float	get_one_card_height();
+	float	get_one_card_width 		 ( );
+	float	get_one_card_height		 ( );
 	
-	int		arrange_cards		(  float mCardSpacing=-1  );
-	virtual int	draw  	 		( );
-	Card*	get_hit_index		( float x, float y );
+	int		arrange_cards			(  float mCardSpacing=-1  );
+	virtual int	draw  	 			( );
+	Card*	get_hit_index			( float x, float y );
 
 protected:
 	std::list<Card*>	cards;

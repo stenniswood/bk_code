@@ -81,6 +81,11 @@ public:
 
 	//void			enable_scroll_bar	( bool mEnable = true );
 	bool			has_header;
+	float			header_height;			// pixels
+	float			header_text_size;
+	long int		header_text_color;
+	long int		header_border_color;
+	long int		header_background_color;
 
 protected:
 	int				first_visible_line;
@@ -97,6 +102,21 @@ private:
 
 	list<string> 	LineTexts;
 };
+
+/*class HeaderListBox : public ListBox
+{
+public:
+	HeaderListBox();
+
+	bool			has_header;
+	float			header_height;			// pixels
+	float			header_text_size;
+	long int		header_text_color;
+	long int		header_border_color;
+	long int		header_background_color;
+	
+};
+*/
 
 //	void	removeItem( char* mString );
 //	void	FindItemPtr( char* mString );

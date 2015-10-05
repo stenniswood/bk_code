@@ -108,7 +108,7 @@ void 	VideoApp::Initialize		(	)
 	m_application_name = "Video App";
 
 	setup_app_menu();
-	setup_menu    ();
+	setup_main_menu    ();
 	setup_sidebar ();
 	onPlace();	
 
@@ -124,9 +124,9 @@ void	VideoApp::setup_app_menu( )
 	Application::setup_app_menu( );
 }
 
-void	VideoApp::setup_menu  	( ) 
+void	VideoApp::setup_main_menu  	( ) 
 { 
-	Application::setup_menu();
+	Application::setup_main_menu();
 
 	// EDIT MENU:
 	Video_edit_menu.clear_all();	
@@ -154,9 +154,9 @@ void	VideoApp::setup_menu  	( )
 	Video_settings_menu.add_callback_all_items( video_settings_menu_actions );
 		
 	// H MENU:
-	m_hMenu.add_sub_menu  ( "Edit", 	&Video_edit_menu );
-	m_hMenu.add_sub_menu  ( "View", 	&Video_view_menu );
-	m_hMenu.add_sub_menu  ( "Settings", &Video_settings_menu );	
+	m_main_menu.add_sub_menu  ( "Edit", 	&Video_edit_menu );
+	m_main_menu.add_sub_menu  ( "View", 	&Video_view_menu );
+	m_main_menu.add_sub_menu  ( "Settings", &Video_settings_menu );	
 }
 
 void VideoApp::setup_sidebar(	)
@@ -180,7 +180,7 @@ void 	VideoApp::register_with_display_manager()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( m_main_window );
 	MainDisplay.m_status.set_text("Video App");
-	MainDisplay.set_menu  	( &m_hMenu );
+	MainDisplay.set_menu  	( &m_main_menu );
 }	
 
 int				VideoApp::About			(	) 

@@ -56,7 +56,7 @@ public:
 	// This will move it's upper left corner to the horizontal menu:
 	int				attach_at			( float x, float y );
 
-	int   			show	 			( bool mVisible	);	
+	//int  			show	 			( bool mVisible	);	
 	virtual void 	draw_one_row		( int mRow, float mY );	
 	int			   	draw_triangle 		( int mRow, float mY );	// indicator of sub menu.
 	virtual int   	draw		 		(				);
@@ -76,7 +76,7 @@ protected:
 	std::vector<stVertMenuInfo> m_entries;
 	int						m_selection;
 	bool					has_scroller;
-	bool					is_visible;
+
 };
  
 #endif

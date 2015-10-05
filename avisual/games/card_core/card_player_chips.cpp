@@ -6,7 +6,6 @@
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "bcm_host.h"
-
 #include <fontinfo.h>
 #include <shapes.h>
 #include "bk_system_defs.h"
@@ -16,38 +15,49 @@
 #include "card_player.hpp"
 
 
-CardPlayerChips::CardPlayerChips()
-:CardPlayer()
-{
 
+CardPlayerChips::CardPlayerChips ( int MaxCardsInHand )
+:CardPlayer( MaxCardsInHand )
+{
+	in_hand = 0.0;
+	wager   = 0.0;
+}
+void	CardPlayerChips::increase_wager ( float mIncrement = 5.0 )
+{
+	wager += mIncrement;
+	if (wager>1000) wager = 1000;	
+}
+void	CardPlayerChips::decrease_wager ( float mIncrement = 5.0 )
+{
+	wager -= mIncrement;
+	if (wager<0) wager = 0;
 }
 
-/* User has purchased so many of each chips:  */
-void	CardPlayerChips::buy_in( int mNumber_of_1000s, int mNumber_of_100s, int mNumber_of_10s, int mNumber_of_1s )
+void	CardPlayerChips::buy_in		( float mDollarAmount 	)
 {
-	number_of_1000s	= mNumber_of_1000s;
-	number_of_100s  = mNumber_of_100s;
-	number_of_10s   = mNumber_of_10s;
-	number_of_1s    = mNumber_of_1s;
+	in_hand = mDOllarAmount;
+}
+void	CardPlayerChips::lose		( )
+{
+	CardPlayer::lose();
+	in_hand -= wager;
+}
+void	CardPlayerChips::win		( )
+{
+	CardPlayer::win();
+	in_hand += wager;
 }
 
-void	CardPlayerChips::cash_out( int* mNumber_of_1000s, int* mNumber_of_100s, int* mNumber_of_10s, int* mNumber_of_1s )
+int		CardPlayerChips::draw( )
 {
-	mNumber_of_1000s = number_of_1000s;
-	mNumber_of_100s  = number_of_100s;
-	mNumber_of_10s   = number_of_10s;
-	mNumber_of_1s    = number_of_1s;
+	CardPlayer::draw( );
+	
+	// Now Draw  "Cash: $235"
+				
 }
 
-void	CardPlayerChips::bet( int mNumber_of_1000s, int mNumber_of_100s, int mNumber_of_10s, int mNumber_of_1s )
-{
-	number_of_1000s	-= mNumber_of_1000s;
-	number_of_100s  -= mNumber_of_100s;
-	number_of_10s   -= mNumber_of_10s;
-	number_of_1s    -= mNumber_of_1s;
-}
 
-int		CardPlayerChips::draw  	 ( )
-{
 
-}
+/************************************************************************/
+
+/************************************************************************/

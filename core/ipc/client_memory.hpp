@@ -36,7 +36,7 @@ struct client_ipc_memory_map
 	
 	char	 Sentence[128];					// verbal commands (NLP) activate connection requests.	
 	int		 NumberClients;
-	struct stClientData	 ClientArray[MAX_CLIENTS];		// String array (dimension of NumberClients)
+	struct stClientData ClientArray[MAX_CLIENTS];		// String array (dimension of NumberClients)
 	//short	 ScreenNumber;								// Which screen is being displayed.  voice commands can change.  Simplistic for now a single number per page.	
 };
 

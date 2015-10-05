@@ -109,7 +109,7 @@ void 	CANApp::Initialize		(	)
 	*/
 	m_gyro 		  = new GyroView   ();
 	m_analog 	  = new AnalogView ();
-	m_msgs 	      = new CANMessages();  
+	m_msgs 	      = new CANMessages();		// defined in ../core/adrenaline/molecules/can_window.cpp
 	m_msg_view    = NULL; // new CANMessageView  ();		
 	m_board_view  = NULL; // new NetworkView();
 	m_main_window = m_msgs;
@@ -120,7 +120,7 @@ void 	CANApp::Initialize		(	)
 	m_rx_tail_laps = 0;
 
 	setup_app_menu();
-	setup_menu    ();
+	setup_main_menu    ();
 	setup_sidebar ();
 	onPlace();	
 	printf("CANApp::Initialize() done.\n");
@@ -136,9 +136,9 @@ void	CANApp::setup_app_menu( )
 	Application::setup_app_menu( );
 }
 
-void	CANApp::setup_menu  	( ) 
+void	CANApp::setup_main_menu ( ) 
 { 
-	Application::setup_menu();
+	Application::setup_main_menu();
 
 	// EDIT MENU:
 	CAN_edit_menu.clear_all();	
@@ -164,9 +164,9 @@ void	CANApp::setup_menu  	( )
 	CAN_graph_menu.add_callback_all_items( can_graph_menu_actions  );
 	
 	// H MENU:
-	m_hMenu.add_sub_menu  ( "Edit", &CAN_edit_menu );
-	m_hMenu.add_sub_menu  ( "View", &CAN_view_menu );
-	m_hMenu.add_sub_menu  ( "Graph", &CAN_graph_menu );
+	m_main_menu.add_sub_menu  ( "Edit", &CAN_edit_menu );
+	m_main_menu.add_sub_menu  ( "View", &CAN_view_menu );
+	m_main_menu.add_sub_menu  ( "Graph", &CAN_graph_menu );
 }
 
 void CANApp::setup_sidebar(	)
@@ -189,7 +189,7 @@ void 	CANApp::register_with_display_manager()
 	//printf("CANApp::register_with_display_manager() removed\n");	
 	MainDisplay.add_object	( m_main_window );	
 	MainDisplay.m_status.set_text( CAN_App_Status );
-	MainDisplay.set_menu  	( &m_hMenu );
+	MainDisplay.set_menu  	( &m_main_menu );
 	printf("CANApp::register_with_display_manager() done\n");		
 }	
 

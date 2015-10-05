@@ -66,6 +66,7 @@ int	CardPlayer::get_total_value( )
 	return total_value;
 }
 
+
 bool CardPlayer::is_ace_in_hand( )
 {
 	std::list<Card*>::iterator	iter = cards.begin();
@@ -130,7 +131,6 @@ int	CardPlayer::arrange_cards( float mCardSpacing )
 		l += mCardSpacing;
 		iter++;
 	}
-	//printf("\n");
 } 
 
 Card* CardPlayer::get_hit_index( float x, float y )
@@ -142,9 +142,6 @@ int	CardPlayer::draw( )
 {
 	Control::draw();
 
-	//printf("CardPlayer::draw()  %x \n", this );
-	//Control::print_positions();
-	
 	std::list<Card*>::iterator	iter = cards.begin();
 	// FIRST ARRANGE CARDS:
 	while (iter != cards.end())

@@ -1,6 +1,8 @@
 /***********************************************************************
 * DisplayManager
-*
+*		This handles the System bar (at top), side bar, status bar,
+*		and Application window.  In other words all the windowing for 
+*		Adrenaline at the root level.
 * 
 * Steve Tenniswood
 ************************************************************************/
@@ -24,16 +26,16 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug 0
-#define Debug2 0
+#define Debug  1
+#define Debug2 1
 
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
 : IconView(  Left,  Right,  Top,  Bottom, NULL)
 {
 	background_color = 0x800000B0;
 
-	screen_width   = Right-Left;
-	screen_height  = Bottom-Top;
+	//screen_width   = Right-Left;
+	//screen_height  = Bottom-Top;
 	init_screen();
 	Initialize();
 }
@@ -42,9 +44,9 @@ DisplayManager::DisplayManager( int mScreenWidth, int mScreenHeight )
 : IconView( 0,  mScreenWidth,  mScreenHeight,  0, NULL )
 {
 	background_color = 0x800000B0;
-
-	screen_width   = mScreenWidth;
-	screen_height  = mScreenHeight;
+	
+	//screen_width   = mScreenWidth;
+	//screen_height  = mScreenHeight;
 	init_screen();
 	Initialize();
 }
@@ -80,18 +82,29 @@ void DisplayManager::call_on_creates( )
 
 void DisplayManager::Initialize()
 {	
+	IconView::Initialize();
 	// put actual icons on it:
 	init_default_sidebar( &m_side );
 	m_current_running_app = -1;
 }
 
+void DisplayManager::show_keyboard	(   )
+{
+	m_keyboard.show();
+}
+void DisplayManager::hide_keyboard	(   )
+{
+	m_keyboard.hide();
+}
+
+/*  DisplayManager - Places 
+							System Bar, Side Bar, and Status Bar  */
 int	DisplayManager::onPlace( )
 {
 	if (Debug) printf("DisplayManager::onPlace() \n");
-	// System Bar on Top:
-	float system_bar_height = 36.;
-	float status_height = 64.;
 
+	// SYSTEM Bar on Top:
+	float system_bar_height = 36.;
 	m_sb.set_width_height( screen_width, system_bar_height );
 	float b = (screen_height- system_bar_height);
 	m_sb.move_to	    ( 0,  b );
@@ -102,22 +115,27 @@ int	DisplayManager::onPlace( )
 		print_children();
 		m_sb.print_positions( );
 	}
-	
-	// Status Bar on Bottom:
+
+	// STATUS Bar on Bottom:
+	float status_height = 32.;	
 	m_status.move_to		 ( 0, 0 );
 	m_status.set_width_height( screen_width, status_height );
 	if (Debug) m_status.print_positions (  );
 	m_status.onPlace		 (  );
-	
+
 	// RIGHT SideBar
 	int sidebar_width = m_side.get_expanded_width();
-	float h 		  = height - status_height - system_bar_height;
-	// m_sb.get_height() = 36.
-	// m_status.get_height() = 64
+	float h 		  = screen_height - status_height - system_bar_height;
 	m_side.move_to			( screen_width-sidebar_width, status_height );
 	m_side.set_width_height( sidebar_width, h );
 	if (Debug) m_side.print_positions();
 	m_side.onPlace( );
+	
+	// PLACE KEYBOARD:
+	float kb_height = 110*4;
+	m_keyboard.set_position( 0, screen_width, kb_height, 0.0);
+//	m_keyboard.
+	
 }
 
 int	DisplayManager::onCreate(  )
@@ -126,6 +144,9 @@ int	DisplayManager::onCreate(  )
 	onPlace();
 }
 
+/* 
+	Run an app - Setting up it's menu, main_window, and sidebar controls.
+*/
 void DisplayManager::start_app( Application* mApp )
 {
 //	mApp->onCreate();
@@ -134,20 +155,24 @@ void DisplayManager::start_app( Application* mApp )
 	printf("DISPLAY MANAGER:  START APP #%d .......... \n", m_current_running_app );
 
 	// register with DM 
+	Rectangle* rect = get_useable_rect();
+	if (mApp->m_main_window)
+		mApp->m_main_window->set_position( rect );
+	
 	remove_all_objects(	);
-	add_object( mApp->m_main_window 	 );
-	set_menu  ( &(mApp->m_hMenu)  	 	 );
+	add_object( mApp->m_main_window );
+	set_menu  ( &(mApp->m_main_menu)  );
 	m_side.load_controls( &(mApp->m_sidebar_controls) );	
-	m_status.set_text( mApp->m_welcome_status.c_str() );	
-
+	m_status.set_text( mApp->m_welcome_status.c_str() );
 }
 
 void DisplayManager::idle_tasks( )
 {
-	if ((m_current_running_app>=0) && (m_current_running_app<m_running_apps.size())) {
+	if ((m_current_running_app>=0) && (m_current_running_app<m_running_apps.size())) 
+	{
 		//printf("idle task: %d \n", m_current_running_app );
 		m_running_apps[m_current_running_app]->background_time_slice();	
-	}	
+	}
 }
 
 void DisplayManager::close_app( Application* mApp )
@@ -201,6 +226,8 @@ Rectangle*	DisplayManager::get_useable_rect( )
 	// Bottom:
 	if (m_status.is_visible()==true)
 		rect.set_bottom( m_status.get_top() );
+	else if (m_keyboard.is_visible()==true)
+		rect.set_bottom( m_keyboard.get_height() );
 	else
 		rect.set_bottom( 0 );
 	return &rect;
@@ -334,18 +361,22 @@ int   DisplayManager::draw_background( 	)
 
 Control* DisplayManager::HitTest( int x, int y )
 {
-	//print_children();
-	//printf("m_sb=%x\n", &m_sb);
-	//	m_sb.print_children();
-
 	Control* retval = Control::HitTest(x,y);
-	//printf("\tDisplayManager::HitTest() %x \n", retval );
 	if (retval==this)
 		return NULL;	// don't want display manager empty space to do anything.
-	else
+	else {
 		return retval;
+	}
 }
 
+
+
+
+
+//printf("\tDisplayManager::HitTest() %x \n", retval );
+//print_children();
+//printf("m_sb=%x\n", &m_sb);
+//	m_sb.print_children();
 
 /*Control*  DisplayManager::Find_object( Control* NewControl )
 {

@@ -82,6 +82,10 @@ void 	Application::Initialize(	)
 	}
 
 	if (Debug) printf("Application::Initialize() done\n");
+
+/*	setup_app_menu();		// About, Preferences, quit, 
+	setup_main_menu    ();		// 
+	onPlace();	*/
 }
 
 void	Application::setup_sidebar	(	)  // derived class adds these here
@@ -92,15 +96,15 @@ void	Application::setup_sidebar	(	)  // derived class adds these here
 	MainDisplay.m_side.load_controls( &m_sidebar_controls );
 }
 
-void	Application::setup_menu		(	)  // derived class adds these here
+void	Application::setup_main_menu	(	)  // derived class adds these here
 {
-	m_hMenu.m_application = this;
-	m_hMenu.clear_all();
-	m_hMenu.add_sub_menu( m_application_name.c_str(), &m_app_menu  );
+	m_main_menu.m_application = this;
+	m_main_menu.clear_all();
+	m_main_menu.add_sub_menu( m_application_name.c_str(), &m_app_menu  );
 
 	m_file_menu.create_std_file_menu  ( );
 	m_file_menu.add_callback_all_items( app_file_menu_actions );
-	m_hMenu.add_sub_menu( "File", &m_file_menu  );
+	m_main_menu.add_sub_menu( "File", &m_file_menu  );
 }
 
 // Name of App, About, Preferences, Quit
@@ -124,7 +128,7 @@ int		Application::calc_metrics()
 int	Application::onCreate	(  ) 
 {
 	setup_app_menu();
-	setup_menu    ();
+	setup_main_menu();
 	onPlace();
 }
 
@@ -132,7 +136,7 @@ void Application::register_with_display_manager()
 {
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( m_main_window 	 );
-	MainDisplay.set_menu  ( &m_hMenu  	 	 );
+	MainDisplay.set_menu  ( &m_main_menu  	 	 );
 	printf("register_with_display_manager- mid \n");
 	
 	// Establish the sidebar controls:

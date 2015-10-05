@@ -62,11 +62,12 @@ void ListBox::Initialize()
 	border_color 	= 0x20FFFFFF;
 	has_header		= false;
 	
+	text_size = 12;
 	text_color 		= 0xFF000000;
 	selected_item   = 1;
 	selected_color  = 0xFF2C5DCE;		// exact copy of the Mac color selected item active.
 	//selected_color_passive = 0xFFCECECE;	// Mac selected item color window inactive.
-//	calc_metrics();
+	calc_metrics();
 }
 void ListBox::move_to ( float mLeft,   float  mBottom )
 {
@@ -78,19 +79,25 @@ void ListBox::set_width_height   ( int Width, int Height )
 	//printf("ListBox::set_width_height() d=%d\n", d );
 	
 	ScrollControl::set_width_height( Width, Height );		
-	if (has_header)
-		body_height = Height - LineHeight;
-	else
-		body_height = Height;
-	if (vsb) vsb->set_width_height( vsb->get_width(), body_height );
 	calc_metrics();
+	if (vsb) vsb->set_width_height( vsb->get_width(), body_height );
 }
 
 void ListBox::calc_metrics( )
 {
+	if (text_size==0) 
+		text_size = 8;
 	LineHeight           = text_size * 1.5;
-	number_lines_visible = floor( body_height/LineHeight );
 
+	if (has_header) {
+		header_height 	= header_text_size * 1.5;
+		body_height 	= height - header_height; // - LineHeight;
+	} else {
+		header_height 	= 0;		
+		body_height 	= height;
+	}
+	number_lines_visible = floor( body_height/LineHeight );
+	
 	if (vsb) {
 		 vsb->set_amount_visible(number_lines_visible);
 		 //width -= vsb->width;
@@ -159,15 +166,17 @@ void ListBox::draw_one_row( int mRow, float mY )
 
 int ListBox::draw_text()
 {
+	// Number Lines to Draw:
 	int num_lines = min( number_lines_visible, get_total_lines() );
+	
 	//printf("ListBox::draw_text() num_lines=%d  get_total_lines=%d\n", num_lines, get_total_lines() );
 	int i=0;
 	int screen_i=0;	
-	int start = first_visible_line;
+	int start = first_visible_line;					// index
 	int stop  = first_visible_line+num_lines;
 
 	Fill_l( text_color );
-	float y = get_line_bottom( screen_i );
+	float y;
 	for (int i=start; i<stop; i++, screen_i++ )
 	{
 		y = get_line_bottom( screen_i );
@@ -184,7 +193,10 @@ void ListBox::adjust_height_for_num_visible_items( int mNumber_items_shown )
 	calc_metrics();
 }
 
-/*  VisibleIndex means the index which is visible on the screen. 
+/*	This does not count the header!
+	Lines within the box only!
+
+	VisibleIndex means the index which is visible on the screen. 
 	This is different from the item index (lines may not be visible)
 */
 float ListBox::get_line_bottom( int mVisibleIndex )
@@ -193,12 +205,16 @@ float ListBox::get_line_bottom( int mVisibleIndex )
 	if (isTopDown)
 	{
 		y = bottom + body_height - LineHeight * (mVisibleIndex+1);
+//		y = bottom + LineHeight * (number_lines_visible-mVisibleIndex);	// 1 for the header.
+//		printf("get_line_bottom():  y=%6.1, bottom=%6.2f;  lines_visible=%d, mVisibleIndex=%d\n", 
+//										y, bottom, number_lines_visible, mVisibleIndex);		
 		return y;
 	} else {
 		y = bottom + LineHeight * (mVisibleIndex);
 		return y;
 	}
 }
+
 
 int ListBox::draw_line_backgrounds()
 {

@@ -74,25 +74,25 @@ void *eventThread(void *arg)
 				}
 			}
 		} else if (mouse_ev.type == EV_ABS) {
-			printf("Absolute Touch event! Code=%d; \t", mouse_ev.code );
+			//printf("Absolute Touch event! Code=%d; \t", mouse_ev.code );
 			switch(mouse_ev.code)
 			{
-			case 0:	printf(" X=%d\n", mouse_ev.value);			
+			case 0:	//printf(" X=%d\n", mouse_ev.value);			
 					mouse.x = mouse_ev.value;
 					break;
-			case 1: printf(" Y= %d\n", mouse_ev.value);
+			case 1: //printf(" Y= %d\n", mouse_ev.value);
 					mouse.y = mouse.max_y - mouse_ev.value;
 					break;
-			case 24: printf(" Pressure= %d\n", mouse_ev.value);
+			case 24: //printf(" Pressure= %d\n", mouse_ev.value);
 					break;
 			case 53: /*  ABS_MT_POSITION_X  */
-					printf("\n");
+			//		printf("\n");
 					break;
 			case 54: /*  ABS_MT_POSITION_Y  */
-					printf("\n");
+			//		printf("\n");
 					break;	
 			case 57: if (mouse_ev.value>0) {
-						printf(" Finger Down.\n");
+						//printf(" Finger Down.\n");
 						mouse.left = UNHANDLED_EVENT | (0x01);						
 					} else {
 						printf(" Finger Released!\n");	
@@ -100,7 +100,7 @@ void *eventThread(void *arg)
 					}
 					break;			
 			case 47: /* ABS_MT_SLOT */	// multi-touch finger number.
-					printf(" Finger #%d\n", mouse_ev.value);
+					//printf(" Finger #%d\n", mouse_ev.value);
 					break;			
 			default:
 					break;			

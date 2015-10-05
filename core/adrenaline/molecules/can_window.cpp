@@ -23,9 +23,8 @@
 #include "adrenaline_windows.h"
 #include "display.h"
 #include "CAN_base.h"
-
-
 #include "can_window.hpp"
+
 
 /* When the CAN_app is active, change the menu as below */
 
@@ -121,7 +120,6 @@ void 	CANMessages::Initialize(	)
 	Window::Initialize();
 	//init_view_menu();
 	//init_main_CAN_menu();
-
 	//fill_phony_msgs();
 }
 

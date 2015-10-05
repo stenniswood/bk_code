@@ -52,7 +52,7 @@ void 	FileEditorApp::Initialize		(	)
 	m_main_window = new FileEditor( );
 
 	setup_app_menu();
-	setup_menu    ();
+	setup_main_menu    ();
 	onPlace();	
 }	// create all the objects here.
 
@@ -62,9 +62,9 @@ int		FileEditorApp::onPlace			(	)
 	((FileEditorApp*)m_main_window)->onPlace();	
 }
 
-void	FileEditorApp::setup_menu  	( ) 
+void	FileEditorApp::setup_main_menu  	( ) 
 { 
-	Application::setup_menu( );
+	Application::setup_main_menu( );
 }
 void	FileEditorApp::setup_app_menu  ( ) 
 { 

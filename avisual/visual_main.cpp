@@ -42,6 +42,13 @@
 #include "visual_memory.h"
 #include "audio_memory.h"
 #include "CAN_memory.h"
+#include "client_list_control.hpp"
+#include "home_screen.hpp"
+
+
+
+
+
 
 
 /*
@@ -153,21 +160,20 @@ void gui_interface()
 	UpdateDisplaySemaphore = MainDisplay.any_invalid_children();
 	//printf("any_invalid_children= %d\n", UpdateDisplaySemaphore );			
 
-	//printf("ipc_memory_avis=%x\n", ipc_memory_avis);
 	if (ipc_memory_client)
-		if (ipc_memory_client->NumberClients != Last_Retrieved_Number)
+		if (cli_is_new_update())
 		{
-			update_available_client_list();
 			Last_Retrieved_Number = ipc_memory_client->NumberClients;
 			UpdateDisplaySemaphore = 1;
 		}
-	//printf("ipc_memory_avis past.\n" );				
     ////////////////////////////////////////
 	if (UpdateDisplaySemaphore)
 	{
 		UpdateDisplaySemaphore = 0;
 		//update_to_controls();
 		// hide mouse: (mouse has the old image stored in it's buffer)
+		// Only draw the invalidated() items.
+		
 		MainDisplay.draw();		
 		//printf("MainDisplay.draw() Done.\n");
 		MainDisplay.update_invalidated();
@@ -192,8 +198,8 @@ void ethernet_interface()		/* wifi comms */
 	{	
 		if (Debug) printf("New sentence : %s\n", get_sentence());
 		CmdText.set_text( get_sentence() );		
-		update_available_client_list();
-		
+		AvailClients.update_available_client_list();
+		AvailClients.Invalidate();		
 		UpdateDisplaySemaphore=1;			
 	}
 	if ( cli_is_new_connection_status() )
@@ -239,7 +245,7 @@ int main( int argc, char *argv[] )
 			load_test_screen(DisplayNum); 
 		} 
 	} else 
-		init_avisual();		// opening screen!	Located in window_layouts.cpp
+		init_home_screen();		// opening screen!	Located in window_layouts.cpp
 		
 	UpdateDisplaySemaphore=1;
 	MainDisplay.onCreate();

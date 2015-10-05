@@ -1,0 +1,5 @@
+ESSENTIALS FOR CREATING AN APP on Adrenaline Framework
+
+A) Derive a class from Application
+B) 
+C) 

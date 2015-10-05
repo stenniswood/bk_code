@@ -2,10 +2,7 @@
 #define _SYSTEM_BAR_
 
 
-
 #include "horizontal_menu.hpp"
-
-
 
 class SystemBar : public Control 
 {
@@ -30,6 +27,7 @@ public:
 	virtual int			onDoubleClick ( 				);
 
 	HorizontalMenu*		m_Menu;	
+	
 private:
 	float			m_MenuStart_x;
 	float			m_MenuEnd_x;

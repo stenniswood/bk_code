@@ -26,13 +26,20 @@
 #include "CAN_base.h"
 
 
-
-
 //static VerticalMenu     draw_file_menu(-1,-1);
 static VerticalMenu     draw_edit_menu(-1,-1);
 static VerticalMenu     draw_view_menu(-1,-1);
 
 DrawApp*  draw_app = NULL;
+
+void init_drawing_app()
+{
+	//printf("\ninit_drawing_app\n");
+	draw_app = new DrawApp();	
+	MainDisplay.start_app( draw_app );
+	//printf("\ninit_drawing_app done \n");
+}
+
 
 /*static int draw_file_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 {
@@ -79,12 +86,12 @@ void 	DrawApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-
-	m_main_window = new Drawing2D();
-	m_application_name = "Drawing App";
 	
-	setup_app_menu();
-	setup_menu    ();
+	m_main_window      = new Drawing2D();
+	m_application_name = "Drawing App";
+
+	setup_app_menu ();		// About, Preferences, quit, 
+	setup_main_menu();		// 
 	onPlace();	
 
 }	// create all the objects here.
@@ -100,9 +107,9 @@ void	DrawApp::setup_app_menu( )
 	Application::setup_app_menu( );
 }
 
-void	DrawApp::setup_menu  	( ) 
+void	DrawApp::setup_main_menu  	( ) 
 { 
-	Application::setup_menu();
+	Application::setup_main_menu();
 
 	draw_view_menu.clear_all();
 	draw_view_menu.add_simple_command( "Graph "		 );
@@ -110,8 +117,8 @@ void	DrawApp::setup_menu  	( )
 	draw_view_menu.add_simple_command( "Button boards");
 	draw_view_menu.add_callback_all_items( draw_view_menu_actions  );
 
-	m_hMenu.add_entry_text( "Edit" );
-	m_hMenu.add_sub_menu  ( "View",     &draw_view_menu );
+	m_main_menu.add_entry_text( "Edit" );
+	m_main_menu.add_sub_menu  ( "View",     &draw_view_menu );
 }
 
 void 	DrawApp::register_with_display_manager() 
@@ -119,13 +126,13 @@ void 	DrawApp::register_with_display_manager()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( m_main_window );
 	MainDisplay.m_status.set_text("Draw App");
-	MainDisplay.set_menu  	( &m_hMenu );
+	MainDisplay.set_menu  	( &m_main_menu );
 }	
 
-int				DrawApp::About			(	) 
+int		DrawApp::About			(	) 
 { 
 }
-int				DrawApp::Preferences		(	) 
+int		DrawApp::Preferences	(	) 
 { 
 }
 

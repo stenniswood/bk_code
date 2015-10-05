@@ -46,7 +46,7 @@ public:
 	virtual void 	Initialize		(	);	// create all the objects here.
 	int				onPlace			(	);
 
-	virtual void	setup_menu  	( );
+	virtual void	setup_main_menu ( );
 	virtual void	setup_app_menu  ( );
 	virtual void 	register_with_display_manager();	
 	

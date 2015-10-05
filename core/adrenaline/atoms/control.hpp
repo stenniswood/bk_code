@@ -57,10 +57,10 @@ public:
 	void  			print_color_info  	  ( 				 );
 
 	bool  			is_visible			  ( ) 	{ return Visible;  };
-	void  			show				  ( ) 	{ Visible = TRUE;  };
-	void  			hide				  ( ) 	{ Visible = FALSE; };
+	void  			show				  ( bool mShow=true ) 	{ Visible = mShow;  };
+	void  			hide				  ( ) 	{ Visible = false; };
 	void  			show_border 		  ( bool Show=true ) { HasBorder = Show; };
-	
+
 	virtual void 	load_resources		  (	);
 	/*At some point, want to add a param: Canvas canvas to the draw functions.
 		so that we can draw into any memoryDC or the screen.  Switching "on

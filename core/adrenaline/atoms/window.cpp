@@ -53,13 +53,13 @@ void	Window::Initialize		 (   )
 			packer_horizontal_r_position );	*/
 }
 
-int   	Window::draw 			 (	 )
+int   	Window::draw(	 )
 {
 	Control::draw();
-	
+
 	list<Control*>::iterator	iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++ )
-	{
+	{ 
 		if (Debug) printf("\t\t\t Drawing child %d\t", i);
 		if (Debug) (*iter)->print_positions();
 		//if (Debug) (*iter)->print_color_info();

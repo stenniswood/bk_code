@@ -237,7 +237,7 @@ int	HorizontalMenu::onClick( int x, int y, bool mouse_is_down )
 			// hide any other visible menu
 			if ( is_selection_valid() )  {
 				if (m_entries[m_selection].menu)
-					m_entries[m_selection].menu->show(false);
+					m_entries[m_selection].menu->hide(); // show(false);
 			}
 			m_selection = menu_index;
 			m_entries[menu_index].menu->show(true);

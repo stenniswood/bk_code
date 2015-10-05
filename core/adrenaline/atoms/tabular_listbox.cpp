@@ -93,12 +93,6 @@ void TabularListBox::calc_metrics( )
 {
 	ListBox::calc_metrics();
 	
-	header_height 		 = header_text_size * 1.5;
-	//body_height 		 = (height - header_height);
-	//if (text_size==0) 
-	//	text_size = 12;
-	//LineHeight           = text_size * 1.5;
-	//number_lines_visible = floor( body_height/LineHeight );
 	//if (vsb) vsb->set_amount_visible(number_lines_visible);
 	if (Debug) printf("TabularLB: calc_metrics: height=%6.2f; body_height=%6.2f\n", height, body_height );	
 	
@@ -231,7 +225,7 @@ void TabularListBox::draw_one_row( int mRow, float mY )
 	}
 }
 
-float TabularListBox::get_line_bottom( int mVisibleIndex )
+/*float TabularListBox::get_line_bottom( int mVisibleIndex )
 {
 //	if (Debug) 	return ListBox::get_line_bottom( mVisibleIndex );
 	float y;
@@ -243,7 +237,7 @@ float TabularListBox::get_line_bottom( int mVisibleIndex )
 		y = bottom + LineHeight * (mVisibleIndex);
 		return y;
 	}	
-}
+}*/
 	
 int TabularListBox::draw_vertical_lines()
 {	

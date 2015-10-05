@@ -33,6 +33,7 @@
 #include "file_editor_app.hpp"
 #include "video_app.hpp"
 #include "window_layouts.hpp"
+#include "robot_app.hpp"
 
 
 HorizontalMenu hm		(-1,-1);
@@ -120,7 +121,6 @@ void init_molecule_menu()
 }
 
 
-
 int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	Application* tmp_app=NULL;
@@ -143,6 +143,7 @@ int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 	case 6: init_file_editor_app	();		break;
 	case 7: init_pot_objs			();		break;	
 	case 8: init_Video_app			();		break;
+	case 9: init_robot_app();		printf(" --- init_robot_panel --- \n");  break;
 	default: 	break;
 	}
 	printf("handle_apps_screens() done\n");
@@ -159,6 +160,7 @@ void init_apps_menu()
 	apps.add_simple_command( "File Editor" 	);
 	apps.add_simple_command( "Potentiometer");	// simple app showing Big Motor board potentiometer/encoder results.
 	apps.add_simple_command( "Camera" 		);
+	apps.add_simple_command( "Robot" 		);
 	apps.add_callback_all_items( handle_apps_screens );
 }
 

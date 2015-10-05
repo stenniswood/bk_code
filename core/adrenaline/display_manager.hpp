@@ -5,6 +5,8 @@
 #include "rectangle.hpp"
 #include "task_bar.hpp"
 #include "application.hpp"
+#include "keyboard.hpp"
+
 
 #include <vector>
 #include <list>
@@ -58,14 +60,18 @@ public:
 
 	void 	call_on_creates	( 	);  // maybe not needed
 
+	void	show_keyboard	(   );
+	void	hide_keyboard	(   );
+	
 	vector<Application*>	m_running_apps;
 	int					m_current_running_app;
 	
 	// Linked List of objects.
 	SystemBar		m_sb;			// Top
 	TaskBar			m_task_bar;		// Left side
-	SideBar			m_side;	// Right side
+	SideBar			m_side;			// Right side
 	SystemStatusBar	m_status;		// Bottom
+	Keyboard		m_keyboard;
 
 protected:	
 	int		screen_width;

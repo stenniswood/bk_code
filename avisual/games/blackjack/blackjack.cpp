@@ -19,6 +19,7 @@
 #include "display_manager.hpp"
 #include "blackjack.hpp"
 
+
 #define MAX_PLAYERS 10
 
 using namespace std;
@@ -70,9 +71,11 @@ BlackJack::BlackJack( int mNumber_of_m_players )
 	play_again.set_text("Play Again");
 	play_again.hide();
 
+	// SETUP THE HOUSE : 
 	house		   = new CardPlayer(4);
 	house->set_width_height( 4*CARD_WIDTH, 100 );
 
+	// SETUP THE PLAYERS : 
 	CardPlayer* cp;
 	for (int i=0; i<mNumber_of_m_players; i++)
 	{
@@ -81,7 +84,7 @@ BlackJack::BlackJack( int mNumber_of_m_players )
 		m_players.push_back( cp );
 	} 
 
-	// Add 3 decks:
+	// SETUP THE DECKS : 
 	Deck* tmp = new Deck();
 	deck.push_back(tmp);
 	// If multiple decks are desired, add here.
@@ -154,6 +157,7 @@ void BlackJack::setup_game(	)
 	
 	float card_spacing = CARD_WIDTH + 10;	
 	house->arrange_cards( card_spacing );	
+
 	// Arrange each m_players cards:
 	vector<CardPlayer*>::iterator	iter = m_players.begin();
 	for ( ; iter!=m_players.end(); iter++ )
@@ -215,12 +219,13 @@ void BlackJack::onPlace( )
 {
 	// This window has already been place by the Application object.	
 	set_graphic_center();
+	//float radius = ;
 	place_m_players	( 100. );
 	place_buttons	( -1   );
 	
 }
 
-void BlackJack::place_m_players( float radius )		// place places around the game's center point.
+void BlackJack::place_m_players( float radius )		// place players around the game's center point.
 {
 	if (Debug) {
 		printf("place_m_players()  %d  ", number_of_m_players );
@@ -228,7 +233,8 @@ void BlackJack::place_m_players( float radius )		// place places around the game
 	}
 
 	float title_bottom = bottom + height - 1.5*TITLE_HEIGHT;
-	
+	float angle_between_players = 360.0 / (number_of_m_players+1);
+		
 	// PLACE THE HOUSE:
 	float house_x = m_cx - house->get_width()/2.;
 	float house_y = (title_bottom - m_cy - house->get_height() )/2. + m_cy;
@@ -252,7 +258,8 @@ void BlackJack::place_m_players( float radius )		// place places around the game
 	{
 		iter++;
 		w = (*iter)->get_width();
-		(*iter)->move_to( m_cx-3*radius-w, m_cy-(*iter)->get_height()/2. );		// goes left
+		// was:  m_cx-3*radius-w
+		(*iter)->move_to( 10, m_cy-(*iter)->get_height()/2. );		// goes left
 		printf("Just placed Player #2 :\t");
 		(*iter)->print_positions();
 
@@ -260,21 +267,22 @@ void BlackJack::place_m_players( float radius )		// place places around the game
 	// PLACE 3RD PLAYER:
 	if (number_of_m_players>2) {
 		iter++;		
-		(*iter)->move_to( m_cx+3*radius, m_cy-(*iter)->get_height()/2 );			// goes right
+		// was m_cx+3*radius
+		w = (*iter)->get_width();
+		(*iter)->move_to( width-w-10, m_cy-(*iter)->get_height()/2 );			// goes right
 		printf("Just placed Player #3 :\t");
 		(*iter)->print_positions();
 	}
 	// anything else is circle configuration.
 	//if (number_of_m_players>3)  // circle configuration.
 	//	return;		// Not implemented yet.
-	
 }
 
 void BlackJack::place_buttons( int mPlayerIndex )	
 {
 	float sx;
 	float sy;
-	const float below = 75;
+	const float below = 50;
 	int index = mPlayerIndex;
 	if (mPlayerIndex == -1)
 		index = whos_turn_is_it;
@@ -304,9 +312,9 @@ void	BlackJack::evaluate_winners()
 	{
 		scores[pi] = (*iter)->get_best_black_jack_score();
 		if (scores[pi] > house_score)
-			(*iter)->set_winner(true);		
+			(*iter)->win();		
 		else 
-			(*iter)->set_winner(false);
+			(*iter)->lose();
 	}
 }
 
@@ -345,16 +353,16 @@ int	BlackJack::draw_score_text( CardPlayer* mcp )
 	TextMid ( sx, sy, score_text, SerifTypeface, 16 );	
 }
 
-int		BlackJack::draw()
+int BlackJack::draw()
 {
 	if (Debug) printf("\tBlackjack draw.\n");
 	print_positions();
 	Control::draw();
-	
+
 	// Draw title
 	Stroke_l(0xFFFFFFFF);
 	Fill_l(0xFFFFFF00);
-	float centerx = width/8. + left;
+	float centerx = width/4. + left;
 	float centery = height + bottom- 1.5*TITLE_HEIGHT;
 	TextMid(centerx, centery, "Black Jack", SerifTypeface, TITLE_HEIGHT );
 
@@ -371,7 +379,6 @@ int		BlackJack::draw()
 		(*iter)->draw( );
 		iter++;
 	}
-	
 	// Draw Wagers 
 
 	// Draw Scores:	

@@ -73,7 +73,7 @@ void	SystemBar::onPlace		(	)
 
 	m_wifi.move_to  ( m_MenuEnd_x, 		  bottom );
 	m_volume.move_to( m_wifi.get_right(), bottom );	
-		
+
 	m_show_taskbar.set_width_height( 25, height );
 	m_show_sidebar.set_width_height( 25, height );
 	
@@ -114,7 +114,9 @@ Control*	SystemBar::HitTest		  ( int x, int y 	)
 	//Control* result = m_Menu.HitTest( x,y );
 	//if (result)
 	//	return result;
-	return Control::HitTest(x,y); 
+	Control* retval = Control::HitTest(x,y); 
+	//printf("SystemBar::HitTest()= %x\n", retval );
+	return retval;
 }
 
 int			SystemBar::onHover		  ( int x, int y ) 
@@ -130,7 +132,7 @@ int		SystemBar::onClick(int x, int y, bool mouse_is_down)
 	return Control::onClick(x,y,mouse_is_down); 		
 }
 
-int			SystemBar::onDoubleClick  ( 				)
+int	SystemBar::onDoubleClick( 		)
 { 
 }
 

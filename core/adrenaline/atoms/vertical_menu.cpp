@@ -44,13 +44,14 @@ VerticalMenu::~VerticalMenu()
 
 void 	VerticalMenu::Initialize(	)
 {
+	ListBox::Initialize();
+	
 	set_odd_color ( 0xEFFFFFFF );
 	set_even_color( 0xEFFFFFFF );
 
 	m_horiz_parent	   = NULL;
 	callback_all_items = NULL;
 	has_scroller	= false;
-	is_visible		= true;
 	isTopDown  		= true;
 	text_color 		= 0xFF000000;
 }
@@ -217,10 +218,5 @@ int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 		if (m_entries[result].callback)
 			m_entries[result].callback( NULL, result );
 	}
-}
-
-int   VerticalMenu::show( bool mVisible )
-{
-	is_visible = mVisible;
 }
 

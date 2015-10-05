@@ -204,21 +204,21 @@ void	AudioApp::setup_app_menu(	)
 	Application::setup_app_menu();
 }
 
-void	AudioApp::setup_menu  	( )
+void	AudioApp::setup_main_menu  	( )
 {
-	Application::setup_menu();
+	Application::setup_main_menu();
 
 	try {
-		printf("AudioApp::setup_menu() \n");
-		init_audio_menu( &m_hMenu );
+		printf("AudioApp::setup_main_menu() \n");
+		init_audio_menu( &m_main_menu );
 
-		//m_hMenu.m_entries.clear();
+		//m_main_menu.m_entries.clear();
 		//audio_menu->add_sub_menu( "Audio Master", &audio_master );
-		//m_hMenu.add_sub_menu( "File",     &audio_file 		);
-		m_hMenu.add_sub_menu( "View",     &audio_view 		);
-		m_hMenu.add_sub_menu( "Play",     &audio_play_menu 	);
-		m_hMenu.add_sub_menu( "Effects",  &audio_effects 	);
-		printf("AudioApp::setup_menu() init audio menu done\n");		
+		//m_main_menu.add_sub_menu( "File",     &audio_file 		);
+		m_main_menu.add_sub_menu( "View",     &audio_view 		);
+		m_main_menu.add_sub_menu( "Play",     &audio_play_menu 	);
+		m_main_menu.add_sub_menu( "Effects",  &audio_effects 	);
+		printf("AudioApp::setup_main_menu() init audio menu done\n");		
 
 	} catch (std::bad_alloc& ba)
 	{
@@ -289,7 +289,7 @@ void 	AudioApp::Initialize		(	)
 	printf("AudioApp::Initialize 3\n");
 	
 	setup_app_menu();
-	setup_menu    ();
+	setup_main_menu();
 	onPlace();	
 
 	// CREATE Audio Visual Thread : 
@@ -311,7 +311,7 @@ void AudioApp::register_with_display_manager()
 	MainDisplay.add_object( &wave_view_left  );
 	MainDisplay.add_object( &wave_view_right );
 	MainDisplay.add_object( &freq_view 	 	 );
-	MainDisplay.set_menu  ( &m_hMenu  	 	 );
+	MainDisplay.set_menu  ( &m_main_menu  	 	 );
 	//MainDisplay.m_status.set_text( m_welcome_status.c_str() );	
 }
 
