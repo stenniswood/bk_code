@@ -91,10 +91,14 @@ void DisplayManager::Initialize()
 void DisplayManager::show_keyboard	(   )
 {
 	m_keyboard.show();
+	m_keyboard.Invalidate();
 }
 void DisplayManager::hide_keyboard	(   )
 {
 	m_keyboard.hide();
+	m_keyboard.Invalidate();
+	draw();		
+	update_invalidated();
 }
 
 /*  DisplayManager - Places 
@@ -130,12 +134,13 @@ int	DisplayManager::onPlace( )
 	m_side.set_width_height( sidebar_width, h );
 	if (Debug) m_side.print_positions();
 	m_side.onPlace( );
-	
+	m_side.hide();
+		
 	// PLACE KEYBOARD:
 	float kb_height = 110*4;
-	m_keyboard.set_position( 0, screen_width, kb_height, 0.0);
-//	m_keyboard.
-	
+	m_keyboard.set_position( 0, screen_width, screen_height, 0.0);
+	m_keyboard.adjust_height();
+	m_keyboard.hide();	
 }
 
 int	DisplayManager::onCreate(  )
@@ -204,6 +209,12 @@ void DisplayManager::set_menu( HorizontalMenu* mHMenu )
 		m_sb.Invalidate();		
 	}
 }
+
+float DisplayManager::get_aspect_ratio()
+{
+	float ratio = screen_width / screen_height;
+	return ratio;
+}	
 
 Rectangle*	DisplayManager::get_useable_rect( )
 {
@@ -280,6 +291,7 @@ void  DisplayManager::remove_all_objects(  )
 	register_child( &m_status );	
 	register_child( &m_sb   );
 	register_child( &m_side );
+	register_child( &m_keyboard );
 }
 
 int   DisplayManager::draw(	)
@@ -302,6 +314,17 @@ int DisplayManager::any_invalid_children()
 	}	
 	return FALSE;
 }
+int	DisplayManager::draw_invalid_children( )
+{
+	vector<Control*>::iterator	iter = m_child_controls.begin();
+	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
+	{
+		if 	((*iter)->is_invalid())
+			(*iter)->draw();
+	}	
+	return FALSE;
+}
+
 /* Mark all objects as valid, since we just redrew */
 int	DisplayManager::update_invalidated(  )
 {

@@ -92,7 +92,7 @@ int   	Button::draw_raised (	)
 *********************************************************************/
 int Button::draw()
 {	
-	//Control::draw(); 
+	//Control::draw();
 	Stroke_l   ( border_color );		// box color
 	StrokeWidth(2);
 

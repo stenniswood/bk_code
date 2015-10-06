@@ -136,7 +136,7 @@ void gui_interface()
 			{
 				//printf("clicked an object %x!\n", object_clicked);
 				int num = object_clicked->onClick( x, y );
-				UpdateDisplaySemaphore=1;
+				//UpdateDisplaySemaphore=1;
 				//printf("clicked an object - called onClick() DONE\n");				
 			}  
 			left_mouse_button_prev = result;
@@ -157,8 +157,14 @@ void gui_interface()
 	}
 
 	// Scan for objects which have been invalidated and need redrawing.
-	UpdateDisplaySemaphore = MainDisplay.any_invalid_children();
-	//printf("any_invalid_children= %d\n", UpdateDisplaySemaphore );			
+	BOOL invalid = MainDisplay.any_invalid_children();
+	// if the invalid child is now hiden, or moved, redraw everything underneath it!
+	if (invalid)
+		UpdateDisplaySemaphore = 1; 
+	
+	//if (printf("any_invalid_children= %d\n", UpdateDisplaySemaphore );			
+	MainDisplay.draw_invalid_children();
+	MainDisplay.update_invalidated();	
 
 	if (ipc_memory_client)
 		if (cli_is_new_update())

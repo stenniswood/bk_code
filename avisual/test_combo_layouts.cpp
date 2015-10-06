@@ -25,10 +25,8 @@ AUTHOR	: Steve Tenniswood
 #include "display.h"
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
-
 #include "display_manager.hpp"
 #include "frame_window.hpp"
-
 #include "test_layouts.hpp"
 #include "visual_memory.h"
 #include "audio_memory.h"
@@ -38,16 +36,12 @@ AUTHOR	: Steve Tenniswood
 
 static TextView 		ConnectionStatus( 50, 1230, 750, 700 );
 static TextView 		LongText		( 50, 1230, 750, 500 );
-//static TabularListBox	tab_lb			( 600, 900, 750, 50  );
-
 /********************* A sample Window ***********************************/
-static FrameWindow	ParentWindowFrame(450, 1050, 500, 100);
-static Window		ParentWindowF(450, 1050, 500, 100);
+static Window		ParentWindowF(100, 600, 400, 50);
 static Window		ViewWindow	 (0, 1080, 760, 0);
 static TextView 	SampleText;
-static ListBox  	AvailableClients;
 static IconView		test_image;
-static IconView		test_icon ( 50,200 );
+static IconView		test_icon    ( 50,200 );
 /*************************************************************************/
 
 static ScrollBar   vsb;
@@ -86,11 +80,11 @@ static char 		ConnectionStatusText[255];
 
 void print_test_combo_list()
 {
-	printf("10 : init_sidebar_test\n"	 );
-	printf("11 : init_directory_lb_test\n"	 );
-	printf("12 : init_file_browser\n"	 );
-	printf("13 : init_image_gallery\n"		 );	
-	printf("14 : init_okay_cancel_dlg\n" );	
+	printf("10 : init_sidebar_test\n"	 	);
+	printf("11 : init_directory_lb_test\n"	);
+	printf("12 : init_file_browser\n"	 	);
+	printf("13 : init_image_gallery\n"		);	
+	printf("14 : init_okay_cancel_dlg\n" 	);	
 }
 
 void load_test_combo_screen(int number)
@@ -178,11 +172,12 @@ void init_image_gallery()
 
 void init_okay_cancel_dlg()
 {	
-	MyRadio1.set_text("AM Radio");
-	MyRadio2.set_text("FM Radio");
-	MyRadio3.set_text("XM Radio");
-	MyRadio4.set_text("Internet Radio");
-
+	MyRadio1.set_text("AM Radio", true);
+	MyRadio2.set_text("FM Radio", true);
+	MyRadio3.set_text("XM Radio", true);
+	MyRadio4.set_text("Internet Radio", true);
+	MyRadio4.wrap_content();
+	
 /*	MyRadio2.set_position_below ( &MyRadio1 );
 	MyRadio3.set_position_below ( &MyRadio2 );
 	MyRadio4.set_position_below ( &MyRadio3 ); */
@@ -191,7 +186,6 @@ void init_okay_cancel_dlg()
 	MyRadio1.join_group( &MyRadio3 );
 	MyRadio1.join_group( &MyRadio4 );
 	MyRadio1.expand_group_widths();		
-	MyRadio3.select();
 	MyRadio2.select();
 
 	audio_source1.set_text("V6 Engine");

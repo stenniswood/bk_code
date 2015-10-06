@@ -13,6 +13,7 @@ CAN_OBJS =  CAN_Interface.o can_instance.o can_eid.o can_rxbuff.o can_txbuff.o  
 	        bk_system_defs.o can_id_list.o system_msgs_callback.o 
 MISC_OBJS = buttons.o leds.o vector_math.o timer.o preferences.o 
 MSG_OBJS  = packer_lcd.o packer_motor.o packer.o 
+IPC_OBJS  = sequencer_memory.o
 CPPOBJ 	  = 
 
 %.o: %.cpp $(DEPS)
@@ -22,11 +23,13 @@ CPPOBJ 	  =
 
 #libcan_eid.so: ./core/can_eid.o 
 #	gcc -shared -o libcan_eid.so ./core/can_eid.o
+LD_FLAGS = -lpthread
 
 seq: $(OBJ) $(addprefix ../core/can/, $(CAN_OBJS)) \
 			$(addprefix ../core/msg/, $(MSG_OBJS)) \
+			$(addprefix ../core/ipc/, $(IPC_OBJS)) \
 			$(addprefix ../core/misc/,$(MISC_OBJS)) 
-	$(cc) -o  $@ $^ $(CFLAGS)
+	$(cc) -o  $@ $^ $(CFLAGS) $(LD_FLAGS)
 
 clean:
 	rm -rf *.o $(PRG).elf 

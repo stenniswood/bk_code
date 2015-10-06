@@ -14,11 +14,9 @@ public:
 	virtual void 	Initialize(	);
 	int				calc_metrics();
 	int				place_views();
-
-//	void			file_new();	 
 	virtual int		onCreate	  (  );	// chance to load resources, call functions which use fonts
 	
-	int				get_hit_index		( int Mousex, int Mousey );
+//	void			file_new();	 
 //	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	virtual int   	draw		 		(				);
 

@@ -13,21 +13,22 @@
 #include "control.hpp"
 #include "card.hpp"
 #include "card_player.hpp"
+#include "card_player_chips.hpp"
 
 
 
 CardPlayerChips::CardPlayerChips ( int MaxCardsInHand )
 :CardPlayer( MaxCardsInHand )
 {
-	in_hand = 0.0;
-	wager   = 0.0;
+	in_hand = 100.0;
+	wager   = 5.0;
 }
-void	CardPlayerChips::increase_wager ( float mIncrement = 5.0 )
+void	CardPlayerChips::increase_wager ( float mIncrement )
 {
 	wager += mIncrement;
 	if (wager>1000) wager = 1000;	
 }
-void	CardPlayerChips::decrease_wager ( float mIncrement = 5.0 )
+void	CardPlayerChips::decrease_wager ( float mIncrement )
 {
 	wager -= mIncrement;
 	if (wager<0) wager = 0;
@@ -35,7 +36,7 @@ void	CardPlayerChips::decrease_wager ( float mIncrement = 5.0 )
 
 void	CardPlayerChips::buy_in		( float mDollarAmount 	)
 {
-	in_hand = mDOllarAmount;
+	in_hand = mDollarAmount;
 }
 void	CardPlayerChips::lose		( )
 {
@@ -53,7 +54,21 @@ int		CardPlayerChips::draw( )
 	CardPlayer::draw( );
 	
 	// Now Draw  "Cash: $235"
-				
+	const int TEXT_HEIGHT=24;
+	float sx = get_width()  + get_left();
+	float sy = get_bottom() - TEXT_HEIGHT;
+
+	char  cash_text[40];	
+	
+	Stroke_l(0xFF00FF00);
+	Fill_l  (0xFF7FFF00);
+	sprintf(cash_text, "$%6.0f", in_hand );	
+	TextEnd ( sx, sy, cash_text, SerifTypeface, 16 );	
+
+	Stroke_l(0xFFFFFF00);
+	Fill_l  (0xFFFFFF00);
+	sprintf(cash_text, "Bet $%6.0f", wager );	
+	TextEnd ( sx, sy-TEXT_HEIGHT, cash_text, SerifTypeface, 16 );	
 }
 
 

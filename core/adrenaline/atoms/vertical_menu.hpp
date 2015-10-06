@@ -2,7 +2,6 @@
 #define _VERTICAL_MENU_H_
 
 #include <string>
-//#include <string.h>
 #include <vector>
 #include "control.hpp"
 using namespace std;
@@ -35,7 +34,7 @@ class VerticalMenu : public ListBox
 public:
 	VerticalMenu ( );
 	VerticalMenu ( int Left, int Right, int Top, int Bottom );
-	VerticalMenu ( int Width, int Height 				   );
+	VerticalMenu ( int Width, int Height 				    );
 	~VerticalMenu( );
 
 	virtual void 	Initialize			(	);
@@ -48,7 +47,6 @@ public:
 	int				add_callback_all_items( int (*callback)(void*, int, Application*) );	
 	int				add_entry			( stVertMenuInfo mEntry 	 );
 
-//	int				get_id				( )	{ return selected_item; };
 	int				set_state			( int mState, int mIndex );
 	int				set_h_parent		( HorizontalMenu* mMenu  );
 	Application*	get_application		(   );
@@ -56,11 +54,10 @@ public:
 	// This will move it's upper left corner to the horizontal menu:
 	int				attach_at			( float x, float y );
 
-	//int  			show	 			( bool mVisible	);	
+//	int				get_id				( )	{ return selected_item; };
 	virtual void 	draw_one_row		( int mRow, float mY );	
 	int			   	draw_triangle 		( int mRow, float mY );	// indicator of sub menu.
 	virtual int   	draw		 		(				);
-
 
 	int				get_hit_index		( int Mousex, int Mousey );
 	virtual int		onHover				( int x, int y, bool mouse_is_down=true );

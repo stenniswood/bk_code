@@ -41,6 +41,7 @@ public:
 	void	close_app			( Application* mApp	  );
 	void	idle_tasks			();
 
+	float	get_aspect_ratio	();			// width / height  ratio 1080 = 16/9	
 	float	get_width			(	)		{  return screen_width;	 };
 	float 	get_height			(	)		{  return screen_height; };
 	Rectangle*	get_useable_rect( );	// max client coordinates to avoid the sidebars, status and system bars.
@@ -53,6 +54,7 @@ public:
 	Control* HitTest		( int x, int y );
 
 	//void  start_draw		(	);
+	int	  draw_invalid_children( );
 	int   draw				(	);	
 	int   draw_children		( 	);
 	int   draw_background	( 	);
@@ -73,7 +75,6 @@ public:
 	SystemStatusBar	m_status;		// Bottom
 	Keyboard		m_keyboard;
 
-protected:	
 	int		screen_width;
 	int 	screen_height;
 };

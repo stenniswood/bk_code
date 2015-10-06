@@ -36,6 +36,14 @@ bool CardPlayer::receive_card( Card* mNewCard, bool mExposed )
 		arrange_cards( card_spacing );
 	}
 }
+void CardPlayer::discard_all_cards( )
+{
+	printf("CardPlayer::discard_all_cards( )\n");
+	cards.clear();
+	number_cards_in_hand = 0;
+	number_exposed_cards = 0;
+	winner = false;
+}
 
 float	CardPlayer::get_one_card_width ()
 {	return 62.;	}

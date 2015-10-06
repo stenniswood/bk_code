@@ -16,9 +16,19 @@
 #include "adrenaline_windows.h"
 #include "display.h"
 #include "system_status.hpp"
-
+#include "keyboard.hpp"
 
 #define Debug 0
+
+
+
+
+void show_soft_keyboard( void* mSystemStatusBar )
+{
+	MainDisplay.m_keyboard.show();
+	printf("show_soft_keyboard :: SHOW KEYBOARD\n");
+	MainDisplay.m_keyboard.Invalidate();
+}
 
 
 SystemStatusBar::SystemStatusBar ( ) 
@@ -44,6 +54,7 @@ void SystemStatusBar::Initialize	 (   )
 	m_power_button = new Button(-1,-1);
 	m_calendar     = new Button(-1,-1);
 	 
+	m_power_button->set_on_click_listener( show_soft_keyboard, this);
 	Control::Initialize();
 	if (Debug) printf(" SystemStatusBar::Initialize done\n");
 }
@@ -63,7 +74,7 @@ void SystemStatusBar::calc_metrics	 (   )
 
 int	SystemStatusBar::onCreate(  )
 {
-	onPlace();	
+	onPlace();
 }
 
 void	SystemStatusBar::onPlace		(   )

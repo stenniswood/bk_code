@@ -46,7 +46,7 @@ APPS_OBJS =  draw_app.o draw_app2.o file_editor_app.o \
 			  video_app.o video.o 
 CAN_APP_OBJS = can_app.o gyro_window.o analog_board_app.o
 AUDIO_APP_OBJS = audio_app.o audio_app_menu.o 
-ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o 
+ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot_performance.o
 
 #ipc_can_rxbuff.o 
 IPC_OBJS   = CAN_memory.o client_memory.o visual_memory.o audio_memory.o 
@@ -55,7 +55,7 @@ ILCLIENT_OBJS = ilclient.o ilcore.o
 REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o
 HEARTS_GAME_OBJS 	= hearts_game.o hearts_app.o trick.o 
 BLACKJACK_GAME_OBJS = blackjack.o blackjack_app.o 
-CARDCORE_GAME_OBJS  = card.o card_player.o deck.o basic_card_game.o
+CARDCORE_GAME_OBJS  = card.o card_player.o card_player_chips.o deck.o basic_card_game.o
 
 #  button_array_gui.o Container.o 
 ADRENALINE_OBJS = display.o display_manager.o mouse.o resource_manager.o task_bar.o \

@@ -5,7 +5,7 @@
 #include "control.hpp"
 #include "button.hpp"
 #include "deck.hpp"
-#include "card_player.hpp"
+#include "card_player_chips.hpp"
 #include "display_manager.hpp"
 
 
@@ -19,14 +19,16 @@ public:
 	int			get_score		( int mPlayerIndex );
 	void 		onPlace			(   );
 
-	CardPlayer*	get_player		( int mPlayerIndex=-1 );
-	CardPlayer*	next_player		( 	);
+	CardPlayerChips*	get_player		( int mPlayerIndex=-1 );
+	CardPlayerChips*	next_player		( 	);
 
 	void		setup_game		(	);		
 	void		evaluate_winners(	);	
 	void		pay_out			(	);
 	int			dealer_hits		(	);
 	int			dealer_play		(	);
+	void		start_new_round (   );
+	void		collect_cards	(	);
 
 	void 		set_graphic_center( );	
 	void 		place_buttons	( int mPlayerIndex =-1	);
@@ -36,15 +38,15 @@ public:
 	void		load_resources	(	) { deck[0]->load_resources();  };	
 	Card*		draw_one		(	);		
 
-	int				draw_score_text	( CardPlayer* mcp );
+	int				draw_score_text	( CardPlayerChips* mcp );
 	virtual int		draw  	 		(	);
 	virtual int		onCreate  		(	);
 	int 			onClick( int x, int y, bool mouse_is_down );
 
 private:
 	std::vector<Deck*>			deck;
-	std::vector<CardPlayer*>	m_players;
-	CardPlayer*					house;
+	std::vector<CardPlayerChips*>	m_players;
+	CardPlayerChips*			house;
 	Button hit ;
 	Button stay;
 	Button play_again;

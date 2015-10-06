@@ -19,11 +19,11 @@
 #include "display_manager.hpp"
 #include "blackjack.hpp"
 
+#include "card_player_chips.hpp"
 
 #define MAX_PLAYERS 10
 
-using namespace std;
-
+//using namespace std;
 const int TITLE_HEIGHT = 32;
 const int CARD_WIDTH = 62;
 
@@ -52,11 +52,14 @@ void stay_cb( void* mBlackJack )
 	((BlackJack*)mBlackJack)->next_player();
 }
 
-void play_again( void* mBlackJack )
+void play_again_cb( void* mBlackJack )
 {
 	if (Debug) printf("Play Again button pushed\n");
-	((BlackJack*)mBlackJack)->setup_game();
+	((BlackJack*)mBlackJack)->start_new_round();	
+
 }
+
+
 
 BlackJack::BlackJack( int mNumber_of_m_players )
 : Control(), hit(-1,-1), stay(-1,-1), play_again(-1,-1)
@@ -68,18 +71,22 @@ BlackJack::BlackJack( int mNumber_of_m_players )
 	
 	hit.set_on_click_listener( hit_cb, this );
 	stay.set_on_click_listener( stay_cb, this );
+
+	play_again.set_on_click_listener( play_again_cb, this );
+	play_again.set_width_height( 100, 30 );
+	play_again.move_to( 400, 240 );
 	play_again.set_text("Play Again");
 	play_again.hide();
 
 	// SETUP THE HOUSE : 
-	house		   = new CardPlayer(4);
+	house  = new CardPlayerChips(4);
 	house->set_width_height( 4*CARD_WIDTH, 100 );
 
 	// SETUP THE PLAYERS : 
-	CardPlayer* cp;
+	CardPlayerChips* cp;
 	for (int i=0; i<mNumber_of_m_players; i++)
 	{
-		cp = new CardPlayer(4);
+		cp = new CardPlayerChips(4);
 		cp->set_width_height( 4*CARD_WIDTH, 100 );
 		m_players.push_back( cp );
 	} 
@@ -91,13 +98,21 @@ BlackJack::BlackJack( int mNumber_of_m_players )
 	whos_turn_is_it = 0;
 }
 	
-CardPlayer*	BlackJack::next_player( )	
+CardPlayerChips*	BlackJack::next_player( )	
 {
 	whos_turn_is_it++;
+	printf("NEXT PLAYER:  %d\n", whos_turn_is_it );
 	if (whos_turn_is_it == number_of_m_players) 	// dealers turn	
-		dealer_play();
-	place_buttons();
-	Invalidate();
+	{
+		dealer_play();  
+		evaluate_winners();
+		play_again.show();
+		whos_turn_is_it = 0;
+		Invalidate();
+	} else {
+		place_buttons();
+		Invalidate();
+	}
 	return m_players[whos_turn_is_it];
 }
 
@@ -115,8 +130,8 @@ int	BlackJack::dealer_play(	)
 	house->expose_all_cards( true );	
 	hit.hide();
 	stay.hide();
-	play_again.show();
 	Invalidate();
+	printf("Dealer play done!\n"); 
 }
 /*
 return	0 - stay
@@ -127,7 +142,7 @@ int	BlackJack::dealer_hits( )
 	int score = house->get_best_black_jack_score();
 	if (score<17)
 		return 1;
-		
+	
 	// Some casinos hit on soft 17
 	if (score==17)
 	{
@@ -138,7 +153,7 @@ int	BlackJack::dealer_hits( )
 	return 0;	
 }
 	
-CardPlayer*	BlackJack::get_player( int mPlayerIndex )
+CardPlayerChips*	BlackJack::get_player( int mPlayerIndex )
 {
 	int index = mPlayerIndex;
 	if (index == -1)
@@ -148,18 +163,35 @@ CardPlayer*	BlackJack::get_player( int mPlayerIndex )
 	return m_players[index];
 }
 
+void BlackJack::start_new_round (   )
+{
+	collect_cards();
+	setup_game();
+	play_again.hide();
+	hit.show();
+	stay.show();
+	Invalidate();	
+}
+void BlackJack::collect_cards(	)
+{
+	vector<CardPlayerChips*>::iterator	iter = m_players.begin();
+	for ( ; iter != m_players.end(); iter++ )
+		(*iter)->discard_all_cards();
+	house->discard_all_cards();
+}
 void BlackJack::setup_game(	)
 {
-	play_again.hide();
+//	play_again.hide();
 	// PLACE PLAYERS AND DEAL:
 	place_m_players( 100. );	
-	deal();	
+
+	deal();
 	
 	float card_spacing = CARD_WIDTH + 10;	
 	house->arrange_cards( card_spacing );	
 
 	// Arrange each m_players cards:
-	vector<CardPlayer*>::iterator	iter = m_players.begin();
+	vector<CardPlayerChips*>::iterator iter = m_players.begin();
 	for ( ; iter!=m_players.end(); iter++ )
 	{
 		(*iter)->arrange_cards( card_spacing );
@@ -175,6 +207,7 @@ int	BlackJack::onCreate(  )
 	set_graphic_center();
 	float sx = m_cx - play_again.get_width() /2.;
 	float sy = m_cy - play_again.get_height()/2.;
+	printf("PLAY_AGAIN MOVE_TO: %6.1f, %6.1f \n", sx, sy);
 	play_again.move_to( sx, sy );
 
 	if (Debug) printf("BlackJack::onCreate - deck\n");
@@ -187,7 +220,7 @@ int	BlackJack::onCreate(  )
 void	BlackJack::deal()
 {
 	Card* card;
-	vector<CardPlayer*>::iterator	iter;
+	vector<CardPlayerChips*>::iterator	iter;
 	bool face_up = false;
 
 	for (int i=0; i<2; i++)
@@ -219,7 +252,6 @@ void BlackJack::onPlace( )
 {
 	// This window has already been place by the Application object.	
 	set_graphic_center();
-	//float radius = ;
 	place_m_players	( 100. );
 	place_buttons	( -1   );
 	
@@ -243,7 +275,7 @@ void BlackJack::place_m_players( float radius )		// place players around the gam
 
 	// PLACE 1ST PLAYER:
 	float w,yp;
-	std::vector<CardPlayer*>::iterator  iter = m_players.begin();
+	std::vector<CardPlayerChips*>::iterator  iter = m_players.begin();
 	if (number_of_m_players > 0)
 	{	
 		w = (*iter)->get_width()/2.;
@@ -289,9 +321,10 @@ void BlackJack::place_buttons( int mPlayerIndex )
 
 	hit.set_width_height ( 75, 30 );
 	stay.set_width_height( 75, 30 );
+	//play_again.show();
 
 	// BUTTONS ARE RELATIVE TO THE CARD PLAYERS POSITIONING:
-	CardPlayer* cp = get_player(index);
+	CardPlayerChips* cp = get_player(index);
 	sx = cp->get_left();
 	sy = cp->get_bottom() - below;
 	if (Debug) printf("place_buttons:  sx,sy = %d,%d\n", sx, sy );
@@ -301,27 +334,44 @@ void BlackJack::place_buttons( int mPlayerIndex )
 
 void	BlackJack::evaluate_winners()
 {
+	printf("EVALUATE WINNERS!!!\n");
+	
 	int scores[MAX_PLAYERS];
 	int pi = 0;
 	int house_score = 0;
 	house_score = house->get_best_black_jack_score();
-		
-	// Add them all up.
-	vector<CardPlayer*>::iterator  iter = m_players.begin();
+	bool house_bust = (house_score > 21);
+
+	// PAY OUT EACH PLAYER:
+	float house_winnings = 0.0;
+	vector<CardPlayerChips*>::iterator  iter = m_players.begin();
 	for ( ; iter!=m_players.end(); iter++, pi++ )
 	{
 		scores[pi] = (*iter)->get_best_black_jack_score();
-		if (scores[pi] > house_score)
+		bool player_bust = (scores[pi] > 21);
+		bool win = house_bust && (player_bust==false);
+		if (win==false)
+			win = (scores[pi] > house_score) && (player_bust==false);
+		
+		if (win)
+		{
+			printf("Player #%d won.\n", pi);
 			(*iter)->win();		
-		else 
+			house_winnings -= (*iter)->wager;
+		} else {
+			printf("Player #%d won.\n", pi);		
 			(*iter)->lose();
+			house_winnings += (*iter)->wager;
+		}
 	}
+	house->in_hand += house_winnings;
 }
 
 // closest to 21 without going over.	
 // add them all up.
 void	BlackJack::pay_out()
 {
+
 }
 
 Card*	BlackJack::draw_one()
@@ -330,13 +380,13 @@ Card*	BlackJack::draw_one()
 }
 
 
-int	BlackJack::draw_score_text( CardPlayer* mcp )
+int	BlackJack::draw_score_text( CardPlayerChips* mcp )
 {
 	const int TEXT_HEIGHT=24;
 
 	char  score_text[40];
 	int   score = mcp->get_best_black_jack_score();
-	float sx = mcp->get_width()/2.  + mcp->get_left();
+	float sx = mcp->get_left();
 	float sy = mcp->get_bottom() - TEXT_HEIGHT;
 
 	if (score > 21)
@@ -350,7 +400,7 @@ int	BlackJack::draw_score_text( CardPlayer* mcp )
 		Fill_l  (0xFFFFFFFF);
 		sprintf(score_text, "Score: %d", score );
 	}
-	TextMid ( sx, sy, score_text, SerifTypeface, 16 );	
+	Text( sx, sy, score_text, SerifTypeface, 16 );	
 }
 
 int BlackJack::draw()
@@ -373,7 +423,7 @@ int BlackJack::draw()
 	
 	int i=0;
 	// Display Players : 
-	vector<CardPlayer*>::iterator	iter = m_players.begin();
+	vector<CardPlayerChips*>::iterator	iter = m_players.begin();
 	while (  iter != m_players.end()  )
 	{
 		(*iter)->draw( );
@@ -392,6 +442,7 @@ int BlackJack::draw()
 	// Draw Hit/stay buttons:
 	hit.draw();
 	stay.draw();	
+	play_again.draw();
 	return TRUE;
 }
 

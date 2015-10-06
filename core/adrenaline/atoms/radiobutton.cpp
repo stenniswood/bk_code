@@ -114,7 +114,8 @@ float RadioButton::get_longest_width(  )
 	return max_width;
 }
 
-void RadioButton::expand_group_widths()		// make all radiobuttons in this group the width of the longest.
+// make all radiobuttons in this group the width of the longest.
+void RadioButton::expand_group_widths()		
 {
 	float new_width = get_longest_width();
 	set_width_height( new_width, height );

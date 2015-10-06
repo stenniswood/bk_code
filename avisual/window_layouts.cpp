@@ -149,24 +149,6 @@ void populate_listbox()
 	data->push_back("192.168.1.140");
 	data->push_back("Macbook Pro");
 	adren_board_list.add_row (data);
-
-	data = new vector<string>;	
-	data->push_back("sjShadows computer");
-	data->push_back("192.168.1.666");
-	data->push_back("Cat attack");
-	adren_board_list.add_row (data);
-
-	data = new vector<string>;	
-	data->push_back("merici drops");
-	data->push_back("192.168.1.777");
-	data->push_back("Windows PC");
-//	adren_board_list.add_row (data);
-	
-	data = new vector<string>;	
-	data->push_back("tv");
-	data->push_back("192.168.1.144");
-	data->push_back("Mac");
-//	adren_board_list.add_row (data);
 }
 
 

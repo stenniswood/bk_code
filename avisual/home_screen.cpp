@@ -23,10 +23,11 @@
 #include "client_list_control.hpp"
  
 
-TextView 	ConnectionStatus( 50, 1230, 750, 700 );
+TextView 	ConnectionStatus( 50, 700, 500, 50 );
 ClientList	AvailClients (20, 650, 160, 50);
-TextView 	CmdText;
+TextView 	CmdText( 50, 700, 350, 200 );
 static char ConnectionStatusText[128];
+static char CommandText[128];
 
 void init_home_screen()
 {
@@ -41,12 +42,13 @@ void init_home_screen()
 	ConnectionStatus.center_vertical		( TRUE		 );
 	ConnectionStatus.center_horizontal		( TRUE		 );	
 
-	CmdText.set_position  		( 50, 1230, 690, 500 );
-	CmdText.set_text	  		( str  		 );
-	CmdText.set_text_size 		( 25.0 		 );
-	CmdText.set_text_color		( 0xFFFFFFFF );
-	CmdText.set_background_color( 0xFF9f9f0f );
-
+	strcpy(CommandText, "Robot, show me the accuracy of your positioning. Show me a histogram for right leg positions.\
+	 Lift your left leg.  Raise both arms.  Go to the bedroom and get my shoes." );	
+	CmdText.set_text			( CommandText );
+	CmdText.set_text_size 		( 16.0 		 );
+	CmdText.set_text_color		( 0x9FFF0000 );
+	CmdText.set_background_color( 0x7FFfFf00 );
+	
 	// This should be hidden until asked for via voice.
 	AvailClients.move_to( 20, 75 );
 	AvailClients.calc_metrics();
@@ -74,7 +76,7 @@ void init_home_screen()
 */
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
-	MainDisplay.add_object( &ConnectionStatus );
+//	MainDisplay.add_object( &ConnectionStatus );
 	MainDisplay.add_object( &CmdText 	);
 	MainDisplay.add_object( &AvailClients );
 //	MainDisplay.add_object( &adren_board_list );

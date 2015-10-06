@@ -26,10 +26,17 @@
 #include "CAN_base.h"
 #include "robot_app.hpp"
 #include "robot_control_panel.hpp"
+#include "robot_diagnostics.hpp"
+#include "robot_performance.hpp"
 
 
 RobotApp* robot_app=NULL;
 
+
+RobotPanel* 			robot_panel;
+RobotDiagnosticsPanel* 	robot_diagnostics;
+RobotPerformancePanel*	robot_performance;
+//robot_vision_summary
 
 void init_robot_app() 
 {
@@ -55,13 +62,17 @@ void RobotApp::Initialize		(	)
 	
 	Application::Initialize();
 
-	RobotPanel* tmp = new RobotPanel();
-	m_main_window = (Control*) tmp;
-
+	robot_panel 	  = new RobotPanel();
+	robot_diagnostics = new RobotDiagnosticsPanel();	
+	robot_performance = new RobotPerformancePanel();
+	
+	m_main_window = (Control*) robot_panel;
+	
+	
 	m_application_name = "Robot";
 	
 	setup_app_menu();		// About, Preferences, quit, 
-	setup_main_menu    ();		// 
+	setup_main_menu();		// 
 	onPlace();	
 }	// create all the objects here.
 
@@ -71,6 +82,30 @@ int	RobotApp::onPlace			(	)
 }
 
 VerticalMenu view_menu;
+int robot_view_menu_callback(void* menuPtr, int mMenuIndex, Application* mApp )
+{
+	printf("menu_callback( %4x, %d )\n", menuPtr, mMenuIndex );
+	switch( mMenuIndex )
+	{
+	case 0:	
+			break;
+	case 1:	// show 
+				mApp->m_main_window = (Control*) robot_panel;
+			break;	
+	case 2:
+			break;
+	case 3:		mApp->m_main_window = (Control*) robot_diagnostics;
+			break;
+	case 4:		mApp->m_main_window = (Control*) robot_performance;
+			break;
+	case 5:	//	mApp->m_main_window = (Control*) robot_vision_summary;
+			break;
+			
+	default:
+			break;
+	}
+}
+
 void RobotApp::setup_main_menu  ( )
 { 
 	Application::setup_main_menu();
@@ -81,7 +116,8 @@ void RobotApp::setup_main_menu  ( )
 	view_menu.add_simple_command( "Performance"   );
 	view_menu.add_simple_command( "History" 	  );
 	view_menu.add_simple_command( "Vision History" );					
-	m_main_menu.add_sub_menu    ( "View", &view_menu );
+	view_menu.add_callback_all_items( robot_view_menu_callback  );	
+	m_main_menu.add_sub_menu    ( "View", &view_menu );	
 }
 void RobotApp::register_with_display_manager()
 { 

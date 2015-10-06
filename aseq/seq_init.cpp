@@ -40,9 +40,8 @@
 #include "vector_file.h"
 #include "robot.hpp"
 
+#include "sequencer_memory.hpp"
 #include "seq_init.hpp"
-
-
 
 
 
@@ -76,9 +75,6 @@ void Button3r_isr()
 /* Set Callback rate at 20Hz 
 	Use this to dispatch the vectors only.
 	The speeds/pids will be updated when position messages arrive. */
-
-
-
 
 
 void setup_teach()
@@ -154,6 +150,8 @@ void init()
 	printf("Finished Init!\n");
 
 	setup_teach();
+	
+	int result = seq_connect_shared_sequencer_memory(TRUE);
 }
 
 

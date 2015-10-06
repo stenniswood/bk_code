@@ -53,7 +53,9 @@ void 	VerticalMenu::Initialize(	)
 	callback_all_items = NULL;
 	has_scroller	= false;
 	isTopDown  		= true;
+	text_size 		= 15;
 	text_color 		= 0xFF000000;
+	
 }
 
 int  VerticalMenu::calc_metrics()
@@ -62,7 +64,6 @@ int  VerticalMenu::calc_metrics()
 	LineHeight           = text_size * 1.5;
 	number_lines_visible = m_entries.size();
 	float tmp_width  	 = get_longest_line();	
-	//printf  ( "get_longest_line \n" );		
 	float tmp_height = (number_lines_visible*LineHeight);
 	set_width_height( tmp_width, tmp_height );
 }

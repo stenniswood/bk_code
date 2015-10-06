@@ -47,7 +47,7 @@ AUTHOR	: Steve Tenniswood
 #define Debug 0
 
 
-static TextView 		LongText		( 50, 1230, 750, 500 );
+static TextView 		LongText		( 50, 700, 500, 50 );
 static TabularListBox	tab_lb			( 600, 900, 750, 50  );
 
 /********************* A sample Window ***********************************/

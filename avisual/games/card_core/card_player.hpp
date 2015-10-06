@@ -18,6 +18,7 @@ public:
 	void	flip_card	( Card* mNewCard 						);
 	void	expose_card	( Card* mNewCard, bool mExposed = false );
 	void	expose_all_cards( bool mExposed = false );
+	void	discard_all_cards( );
 	
 	float	determine_card_spacing	 ( );
 	int		get_total_value			 ( );
@@ -33,6 +34,7 @@ public:
 	int		arrange_cards			(  float mCardSpacing=-1  );
 	virtual int	draw  	 			( );
 	Card*	get_hit_index			( float x, float y );
+
 
 protected:
 	std::list<Card*>	cards;

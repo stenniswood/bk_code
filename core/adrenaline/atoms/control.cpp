@@ -125,7 +125,7 @@ void Control::wrap_content( )
 }
 
 // Allocates and copies!
-void Control::set_text( const char* NewText )
+void Control::set_text( const char* NewText, bool mWrapContent )
 {
 // Sometimes we can't do a free()  ie for Static string constants!
 // The 2nd call to this function causes a glibc error!
@@ -134,6 +134,8 @@ void Control::set_text( const char* NewText )
 	int len = strlen(NewText)+1;
 	text = new char[len];		
 	strcpy(text, NewText);	
+	if (mWrapContent)
+		wrap_content();
 }
 
 void Control::set_text_size( float mTextSize )

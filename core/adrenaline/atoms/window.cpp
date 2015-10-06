@@ -47,16 +47,16 @@ void	Window::Initialize		 (   )
 	packer_vertical_position = bottom+height;
 	packer_horizontal_l_position = left;		// Moves Left to Right.
 	packer_horizontal_r_position = left+width;
-	/*printf("Window::Initialize:  vp=%6.2f; lp=%6.2f; rp=%6.2f\n", 
+	printf("Window::Initialize:  vp=%6.2f; lp=%6.2f; rp=%6.2f width=%6.1f\n", 
 			packer_vertical_position,
 			packer_horizontal_l_position, 
-			packer_horizontal_r_position );	*/
+			packer_horizontal_r_position, width );	
 }
 
 int   	Window::draw(	 )
 {
+	if (Visible==false)	 return 0;
 	Control::draw();
-
 	list<Control*>::iterator	iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++ )
 	{ 
@@ -141,6 +141,8 @@ void Window::set_horizontal_position( Control* mNewControl, byte mHorizontalPack
 	}
 	if ( mHorizontalPacking & PACK_RIGHT )
 	{
+		printf("Window::set_horizontal_position( PACK_RIGHT  r_pos=%6.1f  width=%6.1f\n", 
+		packer_horizontal_r_position, mNewControl->width );
 		new_left  = packer_horizontal_r_position - mNewControl->width - DEFAULT_PADDING_HORIZ;
 		packer_horizontal_r_position = new_left-1; 	// left of control is right of the next control!
 	}
@@ -288,3 +290,4 @@ int Window::onClick(int x, int y, bool mouse_is_down)
 	}
 	return FALSE;
 }
+
