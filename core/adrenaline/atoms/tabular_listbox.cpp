@@ -351,7 +351,7 @@ void TabularListBox::move_to( float Left, float Bottom )
 void TabularListBox::set_headings( vector<struct HeaderItemInfo> *mHeaderTexts )
 {
 	has_header = true;
-	Headings = *mHeaderTexts;
+	Headings   = *mHeaderTexts;
 	calc_widths_from_text();
 	calc_column_positions_from_widths();		
 }

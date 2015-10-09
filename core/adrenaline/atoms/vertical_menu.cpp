@@ -16,7 +16,7 @@
 #include "display.h"
 #include "vertical_menu.hpp"
 
-  
+
 #define Debug 0
 
 
@@ -54,18 +54,22 @@ void 	VerticalMenu::Initialize(	)
 	has_scroller	= false;
 	isTopDown  		= true;
 	text_size 		= 15;
-	text_color 		= 0xFF000000;
-	
+	text_color 		= 0xFF000000;	
 }
 
 int  VerticalMenu::calc_metrics()
 {
-	//ListBox::calc_metrics();
-	LineHeight           = text_size * 1.5;
+	has_header = false;
 	number_lines_visible = m_entries.size();
+	//ListBox::adjust_height_for_num_visible_items(number_lines_visible);
+
 	float tmp_width  	 = get_longest_line();	
-	float tmp_height = (number_lines_visible*LineHeight);
+	LineHeight           = 1.5 * text_size;
+	float tmp_height 	 = (number_lines_visible*LineHeight)+5;
 	set_width_height( tmp_width, tmp_height );
+
+	ListBox::calc_metrics();
+
 }
 
 // New sjt - add to header!

@@ -15,9 +15,9 @@ using namespace std;
 #define DEFAULT_SCROLL_WIDTH 10
 
 struct stColor_set {
-	long even;
-	long odd;
-	long selected;
+	unsigned long even;
+	unsigned long odd;
+	unsigned long selected;
 };
 
 const struct stColor_set color_set[] = {

@@ -1,6 +1,8 @@
 #ifndef _GRAPHBASE_
 #define _GRAPHBASE_
 
+#include <vector>
+#include "bk_system_defs.h"
 #include "dataset.hpp"
 #include "control.hpp"
 

@@ -74,7 +74,7 @@ void	Keyboard::initialize_keys()
 
 	// ROW #3 : 
 	char array3[] = { '^', 'Z','X','C','V','B','N','M', ',', '.' };	
-	printf("===SHIFT_KEY should be %d !!\n", m_keys.size() );
+	//printf("===SHIFT_KEY should be %d !!\n", m_keys.size() );
 	key.x  = 5+KEY_SPACING_COL/2+KEY_WIDTH/2;
 	key.y += (KEY_SPACING_ROW);
 	for (int col=0; col<10; col++)
@@ -270,7 +270,9 @@ int Keyboard::draw()
 
 Control* Keyboard::HitTest( int x, int y )
 {
-	return Window::HitTest(x,y);
+	Control* retval = Window::HitTest(x,y);
+	printf("Keyboard::HitTest()  %x\n", retval); 
+	return retval;
 }
 
 void Keyboard::append_character	(char mChar)
@@ -338,9 +340,10 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 		key = m_alt_keys[key_index].text[0];
 	} else {
 		key_index = KeyHitTest   ( x,y );
-		if (m_shift_down)			
+		if (m_shift_down)	{		
+			m_shift_down = false;		// just 1 key!
 			key = toupper( m_keys[key_index].text[0] );
-		else
+		} else
 			key = tolower( m_keys[key_index].text[0] );		
 	}
 
@@ -363,18 +366,3 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 }
 
 
-//printf(" Keyboard::xy=%d,%d: %d,%d  %c\n", x,y, m_keys[i].x, m_keys[i].y,   m_keys[i].text[0] );
-/*#define KEY_WIDTH  50
-#define KEY_HEIGHT 75
-#define KEY_SPACING_COL 64
-#define KEY_SPACING_ROW 110 
-
-float Keyboard::compute_height_scale( float aspect_ratio )
-{
-
-	m_aspect_ratio = aspect_ratio;
-	// 2:1 ratio ==> pixel_height = height * 
-	// We really need to go by the DPI.  Because even though the screen resolution is 780:400
-	// the width of the screen is almost 2x the height.  So, 
-}
-*/

@@ -69,7 +69,7 @@ int show_atom_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 	case 14: init_spinner_menu		();		break;
 	case 15: init_listbox			();		break;	
 	case 16: init_tab_listbox		();		break;			
-	case 17: init_CAN_msg_view		();		break;
+	case 17: /*init_CAN_msg_view	();*/		break;
 	default: break;
 	}
 }

@@ -239,7 +239,6 @@ int	FrameWindow::HitTestArea(int x, int y)
 	} else {
 		// check child controls.
 		return CLIENT_AREA_HIT;
-
 		return 0;		// miss!
 	}
 }
@@ -255,12 +254,6 @@ int FrameWindow::onClick(int x, int y, bool mouse_is_down)
 			save_pixels( /*screen_width, screen_height */ );		
 	}		
 	// Disperse to affected child:
-	list<Control*>::iterator  iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++ )
-	{
-		Control* result = (*iter)->HitTest( x, y );
-		if (result)
-			(*iter)->onClick( x, y );
-	}	
+	Control::onClick(x,y, mouse_is_down);	
 }
 

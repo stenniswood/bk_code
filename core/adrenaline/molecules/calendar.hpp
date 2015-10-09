@@ -1,13 +1,9 @@
-#ifndef _BUTTON_
-#define _BUTTON_
+#ifndef _CALENDAR_HPP_
+#define _CALENDAR_HPP_
 
+#include <time.h>
 #include "control.hpp"
 
-string Months[] = { 
-		"January",  "February",  "March",  
-		"April", 	"May",  	"June",  
-		"July",  	"August", 	"September,
-		"October",  "November", "December" };
 		
 
 class Calendar : public Control 
@@ -25,9 +21,10 @@ public:
 	virtual int   	onCreate	(	);	
 	virtual int   	draw 		(	);	
 	int   			draw_simple_view(	);	
-	int   			draw_1month_view(	);		
+	int   			draw_1month_view(	);	
 	int   			draw_1week_view (	);			
-	
+	int				draw_1month_view_small(	);
+		
 	int				set_on_click_listener( void (*callback)(void*), void* mOn_click_context );
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 

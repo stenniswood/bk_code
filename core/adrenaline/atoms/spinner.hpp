@@ -26,13 +26,13 @@ public:
 	virtual void 	Initialize(	);
 	int				calc_metrics();
 	
-	int				set_value		( int mValue )	{ m_value = mValue; };
+	void			set_value		( int mValue )	{ m_value = mValue; };
 	int				get_value		( )				{ return m_value;   };
-	int				increment		( )				{ m_value++; };
-	int				decrement		( )				{ m_value--; };
+	void			increment		( )				{ m_value++; };
+	void			decrement		( )				{ m_value--; };
 
-	int				set_max			( int mMax ) { m_max_value=mMax; };
-	int				set_min			( int mMin ) { m_min_value=mMin; };	
+	void			set_max			( int mMax ) { m_max_value=mMax; };
+	void			set_min			( int mMin ) { m_min_value=mMin; };	
 
 	virtual void 	set_width_height( int Width, int Height 		 );
 	virtual void  	move_to	  		( float Left,   float  Bottom	 );

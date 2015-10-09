@@ -65,6 +65,7 @@ void 	SpinnerControl::Initialize(	)
 
 int		SpinnerControl::calc_metrics()
 { 
+	return 1;
 }
 
 int		SpinnerControl::onCreate()
@@ -75,6 +76,7 @@ int		SpinnerControl::onCreate()
 	m_down.set_width_height( BUTTON_WIDTH, height/2. );
 	m_up.set_on_click_listener  ( on_up_click, this   );
 	m_down.set_on_click_listener( on_down_click, this );
+	return Control::onCreate();
 }
 void 	SpinnerControl::set_width_height( int Width, int Height 		 )  
 { 
@@ -123,11 +125,12 @@ int   	SpinnerControl::draw 				(	)
 	}
 	m_up.draw  ();
 	m_down.draw();
+	return 1;
 }
 
 int		SpinnerControl::get_hit_index		( int Mousex, int Mousey )
 { 
-
+	return 0;
 }
 
 int		SpinnerControl::onClick				( int x, int y, bool mouse_is_down=true )
@@ -139,4 +142,5 @@ int		SpinnerControl::onClick				( int x, int y, bool mouse_is_down=true )
 	Control* down_result = m_down.HitTest( x, y );
 	if (down_result)
 		down_result->onClick( x,y,mouse_is_down );
+	return 0;
 }

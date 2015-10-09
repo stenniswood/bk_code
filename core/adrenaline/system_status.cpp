@@ -21,13 +21,25 @@
 #define Debug 0
 
 
-
-
 void show_soft_keyboard( void* mSystemStatusBar )
 {
-	MainDisplay.m_keyboard.show();
-	printf("show_soft_keyboard :: SHOW KEYBOARD\n");
-	MainDisplay.m_keyboard.Invalidate();
+	MainDisplay.show_keyboard();
+	//((SystemStatusBar*)mSystemStatusBar)->Revalidate();	
+
+	//m_keyboard.show();
+	//MainDisplay.m_keyboard.draw();	
+	//MainDisplay.update_invalidated();
+	printf("show_soft_keyboard :: SHOW KEYBOARD  %x  %x \n", mSystemStatusBar,((SystemStatusBar*)mSystemStatusBar)->m_power_button );
+//	if (((SystemStatusBar*)mSystemStatusBar)->invalidated)
+//		printf("INVALID!\n");
+		
+	//MainDisplay.m_keyboard.Invalidate();
+}
+
+void show_calendar( void* mSystemStatusBar )
+{
+	printf("show_calendar :: SHOW CALENDAR\n");
+	
 }
 
 
@@ -54,7 +66,11 @@ void SystemStatusBar::Initialize	 (   )
 	m_power_button = new Button(-1,-1);
 	m_calendar     = new Button(-1,-1);
 	 
+	m_power_button->hot_touch = true;
+	m_calendar->hot_touch 	  = true;
 	m_power_button->set_on_click_listener( show_soft_keyboard, this);
+	m_calendar->set_on_click_listener( show_calendar, this);
+	
 	Control::Initialize();
 	if (Debug) printf(" SystemStatusBar::Initialize done\n");
 }

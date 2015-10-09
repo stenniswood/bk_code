@@ -27,7 +27,6 @@
 //static VerticalMenu     bj_file_menu(-1,-1);
 BlackJackApp* 	bj_app = NULL;
 
-
 void init_blackjack( )
 {
 	printf("init_blackjack()\n");
@@ -67,12 +66,13 @@ void 	BlackJackApp::Initialize	(	)
 	*/
 
 	m_application_name = "Black Jack";
-	m_main_window = new BlackJack( 3 );
-	//printf("BlackJackApp::Initialize()\n");	
+	m_main_window      = new BlackJack( 3 );
+	//printf("BlackJackApp::Initialize() \n");	
 
 	setup_app_menu ();
 	setup_main_menu();
 	onPlace();	
+
 }
 
 int		BlackJackApp::onPlace		(	)

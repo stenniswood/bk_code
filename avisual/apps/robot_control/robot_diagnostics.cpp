@@ -24,8 +24,8 @@
 
 #define Debug 1
 
-TabularListBox	FaultList( 50, 800, 400, 200  );
-Button   		Clear   ( 20, 200, 400, 300 );
+TabularListBox	FaultList( 50, 780, 400, 100  );
+Button   		Clear    ( 20, 100,  80,  40  );
 Button   		ClearAll;
 
 RobotDiagnosticsPanel::RobotDiagnosticsPanel()
@@ -35,12 +35,12 @@ RobotDiagnosticsPanel::RobotDiagnosticsPanel()
 
 void RobotDiagnosticsPanel::Initialize(	)
 {
- 	setup_headings(); 	
+	Window::Initialize();
 }
 
 void RobotDiagnosticsPanel::setup_headings()
 {
-	struct HeaderItemInfo hdr_info;
+	static struct HeaderItemInfo hdr_info;
 	if (FaultList.is_created()==false)
 	{
 		hdr_info.start_x  = 10.;
@@ -70,28 +70,37 @@ void RobotDiagnosticsPanel::setup_headings()
 		hdr_info.width	  = -1;
 		hdr_info.alignment= HEADER_ALIGN_LEFT;	// left,center,right
 		FaultList.add_column( &hdr_info );		
-	}	
+	}
 }
 
 int	RobotDiagnosticsPanel::calc_metrics()
-{ 
+{
+ 	Window::calc_metrics();
 }
+
 int	RobotDiagnosticsPanel::place_views()
 { 
+	printf("RobotDiagnosticsPanel::place_views (  )");
+	Clear.set_text("Clear Fault",true);
+	ClearAll.set_text("Clear All",true);
+	ClearAll.set_position_right_of( &Clear );
+
+	add_control_local_coords( &Clear 	);
+	add_control_local_coords( &ClearAll  );
+	register_child( &FaultList );
 }
+
 int	RobotDiagnosticsPanel::onCreate	  (  )
 { 
-	add_control( &Clear );
-	add_control( &ClearAll );
-	add_control( &FaultList );
-}	// chance to load resources, call functions which use fonts
+ 	setup_headings(); 	
+ 	place_views();
 
-/*int		RobotDiagnosticsPanel::get_hit_index		( int Mousex, int Mousey )
-{ 
-	Window::
-}*/
+	printf("RobotDiagnosticsPanel::onCreate	  (  )");
+	return Control::onCreate();
+	
+}	// chance to load resources, call functions which use fonts
 
 int RobotDiagnosticsPanel::draw		 		(				)
 { 
-	Window::draw();
+	return Window::draw();
 }

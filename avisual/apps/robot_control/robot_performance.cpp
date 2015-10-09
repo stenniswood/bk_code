@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>

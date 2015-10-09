@@ -76,7 +76,7 @@ void RobotPanel::Initialize(	)
 }
 int	RobotPanel::calc_metrics()
 {
-	
+ 	Window::calc_metrics();	
 }
 int	RobotPanel::place_views()
 {	
@@ -92,11 +92,10 @@ int	RobotPanel::place_views()
 	Add.set_text("Add ->");
 	Add.set_on_click_listener( add_cb, this );
 
-
 	Left_hip.set_text("L Hip",true);		
 	Left_knee.set_text("L Knee",true);		
 	Left_ankle.set_text("L Ankle",true);	
-	Left_hip.set_position_below    ( &Go );
+	Left_hip.set_position_below    ( &Go, true, 15.0 );
 	Left_knee.set_position_below   ( &Left_hip  );
 	Left_ankle.set_position_below  ( &Left_knee ); 
 		
@@ -105,9 +104,7 @@ int	RobotPanel::place_views()
 	Right_ankle.set_text("R Ankle",true);	
 	Right_hip.set_position_right_of ( &Left_hip  );
 	Right_knee.set_position_below   ( &Right_hip ); 
-	Right_ankle.set_position_below  ( &Right_knee ); 
-
-
+	Right_ankle.set_position_below  ( &Right_knee );
 
 	SequenceSource.add_item( "left hip swing"  );	
 	SequenceSource.add_item( "right hip swing" );
@@ -135,18 +132,18 @@ int	RobotPanel::place_views()
 	add_control( &Right_hip 	 );
 	add_control( &Right_knee 	 );
 	add_control( &Right_ankle 	 );
-	
 
+	print_children();
 	printf("====== Robot CONTROL POSITIONS AFTER ===\n");
-	Stop.print_positions();
+/*	Stop.print_positions();
 	Go.print_positions ();
-	Add.print_positions();
+	Add.print_positions(); */
 }
 //	void			file_new();	 
 int	RobotPanel::onCreate	  (  )	// chance to load resources, call functions which use fonts
 {
-	Window::onCreate();
 	place_views();
+	Window::onCreate();
 }
 
 int RobotPanel::draw(	)
@@ -154,10 +151,6 @@ int RobotPanel::draw(	)
 	return Window::draw();	
 }
 
-/*int	RobotPanel::get_hit_index( int Mousex, int Mousey )
-{
-
-}*/
 
 
 

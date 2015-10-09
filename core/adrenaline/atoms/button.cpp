@@ -44,6 +44,7 @@ Button::~Button()
 
 void Button::Initialize()
 {
+	hot_touch = false;
 	text_size = 14.0;
 	sunken    = false;
 
@@ -123,7 +124,8 @@ int	Button::onClick(int x, int y, bool mouse_is_down)
 	if (sunken)
 	{
 	}
-	Invalidate();
+	if (hot_touch==false)
+		Invalidate();
 	return -1;
 }
 

@@ -18,7 +18,7 @@ public:
 	void			setup_headings();
 	
 	virtual int		onCreate	  (  );	// chance to load resources, call functions which use fonts
-	virtual int   	draw		 		(				);
+	virtual int   	draw		 (	);
 
 };
 

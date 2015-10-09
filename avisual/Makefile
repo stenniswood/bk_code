@@ -1,12 +1,12 @@
 CC		   = g++
-OPTIONS	   = -fpermissive -Wwrite-strings 
-
+OPTIONS	   =  -Wwrite-strings -fpermissive
+# 
 # INCLUDE PATHS:
 CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 	 		 ../core/misc/ ../core/msg/    ../core/wifi/     ../core/ipc/    	\
 	 		 ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
 			 ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/
-APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control
+APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 INC		= $(CORE_INC) $(APPS_INC) $(GAMES_INC) ./voice/ ./kinetic/ ./
 SELF_INC   = ../../avisual/ ./ ../ 
@@ -17,6 +17,7 @@ VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 # LIBRARY FLAGS :
 LIBFLAGS   = -L../core/libs/ilclient/ -L/opt/vc/lib -L../core/libs/vgfont/  \
 			-ljpeg -lshapes -lwiringPi -lm 
+CFLAGS = -g -Wall
 #CFLAGS +=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX \
 #		-D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
 #		-U_FORTIFY_SOURCE -Wall -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -ftree-vectorize \
@@ -42,8 +43,8 @@ AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   test_layouts.o test_combo_layouts.o client_list_control.o \
 			  test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
 			  power.o home_screen.o 
-APPS_OBJS =  draw_app.o draw_app2.o file_editor_app.o \
-			  video_app.o video.o 
+APPS_OBJS =  file_editor_app.o video_app.o video.o 
+DRAW_APP_OBJS = draw_app.o draw_canvas.o 
 CAN_APP_OBJS = can_app.o gyro_window.o analog_board_app.o
 AUDIO_APP_OBJS = audio_app.o audio_app_menu.o 
 ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot_performance.o
@@ -59,7 +60,7 @@ CARDCORE_GAME_OBJS  = card.o card_player.o card_player_chips.o deck.o basic_card
 
 #  button_array_gui.o Container.o 
 ADRENALINE_OBJS = display.o display_manager.o mouse.o resource_manager.o task_bar.o \
-			system_status.o keyboard.o
+			system_status.o keyboard.o 
 ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			directory_listbox.o frame_window.o groupbox.o icon.o       \
 			leveler.o line_grouper.o listbox.o marquee.o power_level.o \
@@ -69,8 +70,8 @@ ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			horizontal_menu.o vertical_menu.o spinner.o can_msg_view.o wave.o 
 ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
-			stereo_power.o stick_figure.o system_bar.o can_window.o 	  \
-			application.o file_editor.o
+			stereo_power.o stick_figure.o system_bar.o can_window.o   \
+			application.o file_editor.o calendar.o 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o
 KINETIC_OBJS = 
@@ -104,11 +105,12 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ./apps/,				$(APPS_OBJS))			\
 		$(addprefix ./apps/audio/,			$(AUDIO_APP_OBJS))		\
 		$(addprefix ./apps/CAN/,			$(CAN_APP_OBJS))		\
-		$(addprefix ./apps/robot_control/,	$(ROBOT_CONTROL_OBJS))		
+		$(addprefix ./apps/draw/,			$(DRAW_APP_OBJS))		\
+		$(addprefix ./apps/robot_control/,	$(ROBOT_CONTROL_OBJS))
 	g++ -o $@ $^  $(LIBFLAGS)  $(LDFLAGS)
 
 clean:
-	rm -rf *.o $(PRG).elf *.eps *.png *.pdf *.bak 
+	rm -rf *.o $(PRG).elf *.eps *.bak 
 	rm -rf ../core/can/*.o 
 	rm -rf ../core/msg/*.o 
 	rm -rf ../core/misc/*.o 
@@ -121,7 +123,7 @@ clean:
 	rm -rf ./apps/*.o
 	rm -rf ./wifi/*.o 		
 	rm -rf ./voice/*.o 	
-	rm -rf ./apps/*.o ./apps/CAN/*.o ./apps/audio/*.o ./apps/robot_control/*.o 	
+	rm -rf ./apps/*.o ./apps/CAN/*.o ./apps/draw/*.o ./apps/audio/*.o ./apps/robot_control/*.o 	
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 
 clean_core:

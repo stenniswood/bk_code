@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <string>
 #include <ctype.h>
+#include <string>
+#include <vector>
+
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <jpeglib.h>
@@ -17,6 +19,7 @@
 #include "adrenaline_windows.h"
 #include "application.hpp"
 
+using namespace std;
 
 #define Debug 1
 
@@ -143,6 +146,7 @@ void Application::register_with_display_manager()
 	// Create Sidebar items:
 //	MainDisplay.m_side.load_controls( &m_sidebar_controls );	
 	MainDisplay.m_status.set_text( m_welcome_status.c_str() );	
+	onPlace();
 	printf("register_with_display_manager- done \n");	
 }
 
@@ -152,7 +156,7 @@ int		Application::onPlace( )
 	
 	// Put the MainWindow in the requested client area.
 	Rectangle* client_rect = MainDisplay.get_useable_rect();
-	if (Debug) printf("MainDisplay.get_useable_rect() %x %x done\n", m_main_window, client_rect );	
+	if (Debug) printf("\n\nMainDisplay.get_useable_rect() %x %x done\n", m_main_window, client_rect );	
 	client_rect->print_positions();		
 	if ( (m_main_window) && (client_rect) )
 	{

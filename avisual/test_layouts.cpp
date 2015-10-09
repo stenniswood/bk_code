@@ -48,7 +48,7 @@ AUTHOR	: Steve Tenniswood
 
 
 static TextView 		LongText		( 50, 700, 500, 50 );
-static TabularListBox	tab_lb			( 600, 900, 750, 50  );
+static TabularListBox	tab_lb			( 600, 900, 400, 50  );
 
 /********************* A sample Window ***********************************/
 static FrameWindow	ParentWindowFrame(450, 1050, 500, 100);
@@ -100,7 +100,7 @@ void print_test_list()
 	printf("15 : init_listbox_menu\n"	 );
 	printf("16 : init_tab_listbox_menu\n");	
 	printf("17 : init_scrollbar()\n"	 );	
-	printf("18 : init_CAN_msg_view\n"	 );
+	printf("18 : empty\n"	 );
 
 	// test_combo_layouts.hpp
 	printf("21 : init_image_gallery\n"	 );
@@ -152,7 +152,7 @@ void load_test_screen(int number)
 	case 16: init_tab_listbox		();		break;
 	case 17: init_scrollbar			();		break;
 				
-	case 18: init_CAN_msg_view		();		break;
+	case 18: /*init_CAN_msg_view		();*/		break;
 
 	case 21: init_image_gallery		();		break;		
 	case 22: init_okay_cancel_dlg	();		break;
@@ -626,13 +626,13 @@ void init_tab_listbox()
 	
 		printf("\ninit_tab_listbox : added first column \n");
 		hdr_info.text 	 = "Advisor";
-		tab_lb.add_column( &hdr_info );
+		//tab_lb.add_column( &hdr_info );
 	
 		hdr_info.text 	 = "Expected Time";	
 		tab_lb.add_column( &hdr_info );
 		printf("\ninit_tab_listbox : added 3 columns \n");
 	}
-	tab_lb.move_to( 100, 100 );
+	tab_lb.move_to( 100, 50 );
 	printf("\ninit_tab_listbox : moved_to \n");	
 	
 	MainDisplay.remove_all_objects(	);
@@ -645,7 +645,7 @@ void init_dropdown_menu()
 }
 
 
-CANMessageView 			 msg_view;
+/*CANMessageView 			 msg_view;
 void fill_data( byte* mdata, byte last)
 {
 	mdata[0] = 0x12;
@@ -681,21 +681,8 @@ void init_CAN_msg_view( )
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &msg_view );
-}
+}*/
 
-/*CANApp can_app;
-void init_CAN_app( )
-{
-	float wide = MainDisplay.get_width();
-	float high = MainDisplay.get_height();
-
-	can_app.set_width_height( wide*(1-0.125), 3.*high/4. );
-	can_app.move_to			( 0.0625*wide, high*(1./8.)  );
-	can_app.set_text_color	( 0xFFFF0000 );
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &can_app );
-} */
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

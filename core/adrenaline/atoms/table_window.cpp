@@ -39,11 +39,7 @@ void TableWindow::Initialize(   )
 
 int   	TableWindow::draw 			 (	 )
 {
-	list<Control*>::iterator	iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++ )
-	{
-		(*iter)->draw();
-	}
+	Window::draw();
 }
 
 void	TableWindow::calc_metrics	 (   )
@@ -57,15 +53,14 @@ int	TableWindow::add_control_local_coords( Control* mControl, int mRow, int mCol
 	int dLeft   = left;
 	int dBottom = bottom;
 	mControl->move_by( -left, -bottom );
-	controls.push_back( mControl );
+	//controls.push_back( mControl );
+	Window::add_control_local_coords( mControl );
 }
 
 int	TableWindow::add_control_absolute_coords( Control* mControl, int mRow, int mCol )
 {
-	controls.push_back( mControl );
+	Window::add_control( mControl );
 }
-
-
 
 void TableWindow::set_column_width( int mWidth  )	
 {
@@ -82,16 +77,7 @@ void TableWindow::set_row_height	( int mHeight )
 
 Control*	TableWindow::HitTest	( int x, int y )
 {
-	Control* result = Control::HitTest(x,y);
-	if (result)
-	{
-		// Disperse to affected child:
-		list<Control*>::iterator	iter = controls.begin();
-		for (int i=0; iter!=controls.end(); i++ )
-		{
-			return (*iter)->HitTest( x, y );
-		}
-	}
+	return Window::HitTest(x,y);
 }
 
 

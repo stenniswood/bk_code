@@ -11,43 +11,51 @@
 #include <unistd.h>
 #include <string.h>
 #include <string> 
+#include <vector>
+#include <list>
+
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-#include "Graphbase.hpp"
-#include "bk_system_defs.h"
+//#include "Graphbase.hpp"
 #include "mouse.h"
-#include "adrenaline_windows.h"
 #include "rectangle.hpp"
+
+#include "calendar.hpp"
 #include "display_manager.hpp"
 #include "avisual_menu.hpp"		// Specific system menu.  not part of adrenaline_windows
+
+
 
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
 #define Debug  1
 #define Debug2 1
+Keyboard		m_keyboard;
+Control			mctrl;
+Calendar		m_calendar;
+
 
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
 : IconView(  Left,  Right,  Top,  Bottom, NULL)
 {
+	openvg_initialized = false;
 	background_color = 0x800000B0;
-
-	//screen_width   = Right-Left;
-	//screen_height  = Bottom-Top;
 	init_screen();
 	Initialize();
-}
+} 
 
 DisplayManager::DisplayManager( int mScreenWidth, int mScreenHeight )
 : IconView( 0,  mScreenWidth,  mScreenHeight,  0, NULL )
 {
+	openvg_initialized = false;
 	background_color = 0x800000B0;
 	
-	//screen_width   = mScreenWidth;
-	//screen_height  = mScreenHeight;
-	init_screen();
+	screen_width   = mScreenWidth;
+	screen_height  = mScreenHeight;
+	init_screen();		// will override above!
 	Initialize();
 }
 
@@ -55,6 +63,7 @@ DisplayManager::DisplayManager( int mScreenWidth, int mScreenHeight )
 void  DisplayManager::init_screen()
 {
 	init(&screen_width, &screen_height);	// Graphics initialization
+	openvg_initialized = true;
 	printf("\nDisplayManager::\tscreen_width=%d;\tscreen_height=%d\n", screen_width, screen_height );
 	mouse_init( screen_width, screen_height );
 	load_resources();
@@ -90,15 +99,20 @@ void DisplayManager::Initialize()
 
 void DisplayManager::show_keyboard	(   )
 {
+	printf("DisplayManager::show_keyboard	(   )\n");
 	m_keyboard.show();
-	m_keyboard.Invalidate();
+	m_keyboard.draw();
+	m_keyboard.z_order = ++m_z_order_counter;
+	printf("DisplayManager::show_keyboard  %d	\n", m_z_order_counter);
+	sort_z_order();
 }
+
 void DisplayManager::hide_keyboard	(   )
 {
+	printf("DisplayManager::hide_keyboard	(   )\n");
 	m_keyboard.hide();
-	m_keyboard.Invalidate();
-	draw();		
-	update_invalidated();
+	//m_keyboard.Invalidate();
+	draw();
 }
 
 /*  DisplayManager - Places 
@@ -135,18 +149,33 @@ int	DisplayManager::onPlace( )
 	if (Debug) m_side.print_positions();
 	m_side.onPlace( );
 	m_side.hide();
-		
+	
 	// PLACE KEYBOARD:
-	float kb_height = 110*4;
 	m_keyboard.set_position( 0, screen_width, screen_height, 0.0);
 	m_keyboard.adjust_height();
-	m_keyboard.hide();	
+	m_keyboard.hide();
+	bool vis =  m_keyboard.is_visible();
+	if (vis==true)
+		printf("KB Visible!\n");
+
+	mctrl.hide();
+	bool vis2 = mctrl.is_visible();
+	if (vis2==true)
+		printf("mCTRL VIsible!\n"); 
+		
+	m_keyboard.invalidated = false;
+	printf("DisplayManager::onPlace() keyboard.hide(   )\n");
+
+	// PLACE CALENDAR:
+	m_calendar.set_position( screen_width-m_calendar.get_width(), screen_width, m_calendar.get_height(), 0.0);
+	return 1;
 }
 
 int	DisplayManager::onCreate(  )
 {	
-	Control::onCreate();
+	int retval = Control::onCreate();
 	onPlace();
+	return retval;
 }
 
 /* 
@@ -176,7 +205,7 @@ void DisplayManager::idle_tasks( )
 	if ((m_current_running_app>=0) && (m_current_running_app<m_running_apps.size())) 
 	{
 		//printf("idle task: %d \n", m_current_running_app );
-		m_running_apps[m_current_running_app]->background_time_slice();	
+		//m_running_apps[m_current_running_app]->background_time_slice();	
 	}
 }
 
@@ -219,17 +248,25 @@ float DisplayManager::get_aspect_ratio()
 Rectangle*	DisplayManager::get_useable_rect( )
 {
 	static Rectangle rect;
-	// TOP:
-	rect.set_top( m_sb.get_bottom() );
-
-	// Right Side:
 	if (Debug) printf("DisplayManager::get_useable_rect( )\n");
-	
-	if (m_side.is_visible()==true)
-		rect.set_right( m_side.get_left()-1 );
-	else
+
+	// TOP : 
+	float top2 = m_sb.get_bottom();
+	printf("get_bottom() = %6.1f\n", top2 );
+	float top2_ = m_sb.get_bottom_();
+	printf("get_bottom() = %6.1f\n", top2_ );	
+
+	m_sb.print_positions();	
+	rect.set_top( top2 );
+
+	// Right Side:	
+	if (m_side.is_visible()==true) {
+		float l2 = m_side.get_left_()-1; 
+		printf("right side = %6.1f\n", l2 );
+		rect.set_right( l2 );
+	} else
 		rect.set_right( screen_width );
-	//printf("right = %6.1f\n", rect.get_right() );
+	printf("right = %6.1f\n", rect.get_right() );
 	
 	// no task bar yet!
 	rect.set_left( 0 );
@@ -292,16 +329,25 @@ void  DisplayManager::remove_all_objects(  )
 	register_child( &m_sb   );
 	register_child( &m_side );
 	register_child( &m_keyboard );
+	//register_child( &m_calendar );
 }
 
 int   DisplayManager::draw(	)
 {
 	if (Debug2) printf("\n======display manager draw===========\tStart:\n" );
 	start_screen();
+	printf("SystemBar: %x\n", &m_sb );
+	printf("StatusBar: %x\n", &m_status );
+	printf("Keyboard: %x\t" , &m_keyboard );
+	if (m_keyboard.is_visible())
+		printf("KB Visible!");
+	printf("\n");
+	printf("Side  Bar: %x\n", &m_side );	
 	draw_background();
 	draw_children();
 	end_draw();				// end is needed to see display!
 	if (Debug2) printf("======display manager draw===========\tDone!\n\n" );
+	return 1;
 }
 
 int DisplayManager::any_invalid_children()
@@ -310,7 +356,10 @@ int DisplayManager::any_invalid_children()
 	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
 		if 	((*iter)->is_invalid())
+		{
+			printf("invalid child:  %x\n", (*iter) );
 			return TRUE;	
+		}
 	}	
 	return FALSE;
 }
@@ -333,6 +382,7 @@ int	DisplayManager::update_invalidated(  )
 	{
 		(*iter)->Revalidate();
 	}	
+	return 1;
 }
 void  DisplayManager::end_draw(	)
 {
@@ -348,12 +398,16 @@ int   DisplayManager::draw_children( )
 	if (Debug) { printf("\t\tside bar	\t");	m_side.print_positions();	}
 	if (Debug) { printf("\t\tstatus bar	\t");	m_status.print_positions();	}
 
+	sort_z_order();	
 	vector<Control*>::iterator	iter = m_child_controls.begin();
 	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
-		if (Debug2) printf("draw child %d\n", i);
+		if (Debug2) printf("draw child %d %x\n", i, *iter );
 		(*iter)->draw();		
 	}
+
+//	if (m_keyboard.is_visible())		// DRAW LAST!
+//		m_keyboard.draw();
 	return -1;	
 }
 
@@ -385,6 +439,8 @@ int   DisplayManager::draw_background( 	)
 Control* DisplayManager::HitTest( int x, int y )
 {
 	Control* retval = Control::HitTest(x,y);
+	printf("DisplayManager::HitTest()   %x \n", retval );
+	
 	if (retval==this)
 		return NULL;	// don't want display manager empty space to do anything.
 	else {
@@ -393,13 +449,13 @@ Control* DisplayManager::HitTest( int x, int y )
 }
 
 
+bool DisplayManager::relay_mouse(   )
+{
+	if (mouse_capture_control==NULL) return false;
+	mouse_capture_control->HitTest(mouse.x, mouse.y);
+	return true;	
+}
 
-
-
-//printf("\tDisplayManager::HitTest() %x \n", retval );
-//print_children();
-//printf("m_sb=%x\n", &m_sb);
-//	m_sb.print_children();
 
 /*Control*  DisplayManager::Find_object( Control* NewControl )
 {

@@ -99,14 +99,20 @@ void ListBox::calc_metrics( )
 	number_lines_visible = floor( body_height/LineHeight );
 	
 	if (vsb) {
+
 		 vsb->set_amount_visible(number_lines_visible);
 		 //width -= vsb->width;
 	}
 	// The change in height, could change number_lines_visible, which would require scroll bar:
 	if (LineTexts.size() > number_lines_visible) {
+		printf("****** ENABLING VERTICAL SCROLLBAR ******\n");
 		enable_v_scroll_bar(true);
 		if (vsb) vsb->set_width_height( vsb->width, body_height );
 		set_v_scroll_values( LineTexts.size(), 0, first_visible_line, number_lines_visible );
+	} else 
+	{
+		printf("****** ENABLING VERTICAL SCROLLBAR ******\n");	
+		enable_v_scroll_bar(false);
 	}
 	//printf("number_lines_visible=%d; LineHeight=%5.3f\n", number_lines_visible, LineHeight );
 }

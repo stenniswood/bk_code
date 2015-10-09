@@ -44,9 +44,10 @@ public:
 	int 			onClick( int x, int y, bool mouse_is_down );
 
 private:
-	std::vector<Deck*>			deck;
+	std::vector<Deck*>				deck;
 	std::vector<CardPlayerChips*>	m_players;
-	CardPlayerChips*			house;
+	CardPlayerChips*				house;
+	
 	Button hit ;
 	Button stay;
 	Button play_again;

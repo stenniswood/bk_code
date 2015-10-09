@@ -81,7 +81,9 @@ public:
 	virtual int		 onClick( int x, int y, bool mouse_is_down=true );
 	
 protected:
-	list<Control*>	controls;
+	/* Best to get rid of this list!  After all how is it any better than what's in 
+	   the control class m_child_controls? */
+//	list<Control*>	controls;
 	float			packer_vertical_position;		// Moves Top to bottom.
 
 	float			packer_horizontal_l_position;		// Moves Left to Right.

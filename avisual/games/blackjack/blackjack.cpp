@@ -327,7 +327,7 @@ void BlackJack::place_buttons( int mPlayerIndex )
 	CardPlayerChips* cp = get_player(index);
 	sx = cp->get_left();
 	sy = cp->get_bottom() - below;
-	if (Debug) printf("place_buttons:  sx,sy = %d,%d\n", sx, sy );
+	if (Debug) printf("place_buttons: sx,sy = %d,%d\n", sx, sy );
 	hit.move_to( sx, sy );
 	stay.set_position_right_of( &hit, true, 10 );	
 }

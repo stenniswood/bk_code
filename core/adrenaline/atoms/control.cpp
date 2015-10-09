@@ -4,14 +4,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <algorithm>
+
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
+//#include "../core/can/bk_system_defs.h"
 #include "Graphbase.hpp"
 #include "rectangle.hpp"
 #include "control.hpp"
 #include "display.h"
+
 
 #define margin_percent 0.07
 #define Debug 0
@@ -48,12 +52,12 @@ void Control::Initialize()
 	Visible   	= true;
 	text_size 	= 14.0;
 	border_roundness_x = 15.0;
-	border_roundness_y = 15.0;	
+	border_roundness_y = 15.0;
 	background_color = 0xCF202020;
 	border_color	 = 0xFFFFFFFF;
 	text_color		 = 0xFFFFFFFF;
 	invalidated 	 = true;		// force a draw on init.
-	
+	z_order          = 0;
 	//printf("Ctrl: border_color=%8x; background_color=%8x\n", border_color, background_color );
 }
 
@@ -81,9 +85,34 @@ bool Control::is_invalid( )
 	return false;
 }
 
+bool  Control::is_visible( )
+{
+	return Visible;  
+}
+void Control::hide ( ) 					
+{
+	Visible = false; 
+}
+
+void Control::show( bool mShow ) 	
+{
+	 Visible = mShow; 
+};
+
+
+float Control::get_left_( 		)	
+{ 
+	return left;   
+}
+float Control::get_bottom( 	)
+{
+ return bottom; 
+}
+
 void Control::print_positions( )
 {
-	printf("Left=%6.1f; Bottom=%6.1f;  width=%6.1f; height=%6.1f;  \n", left, bottom, width, height );
+	printf("Left=%6.1f; Bottom=%6.1f;  width=%6.1f; height=%6.1f;  \n", 
+					left, bottom, width, height );
 }
 
 void Control::print_color_info( )
@@ -97,12 +126,13 @@ void Control::print_color_info( )
 int	Control::onCreate(  )
 {	
 	created = true;
-	wrap_content();
-	//if (Debug) printf("	Control::onCreate() Child Create:\n"); 
-	// Create All Children:
+	//wrap_content();
+
+	// Create All Children : 
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
 	{ 	
+		if (Debug) printf("Control::onCreate() Child Create: %x\n", *iter );
 		(*iter)->onCreate();
 		iter++; 
 	}	
@@ -111,16 +141,17 @@ int	Control::onCreate(  )
 
 void Control::wrap_content( ) 
 { 	
-	if (created==false)  return;	//if fonts are not yet loaded...
+	//if (created==false)  return;	//if fonts are not yet loaded...
 	VGfloat text_width;
-	if (((width==-1.) || (height==-1.)) && (text))
+	//if (((width==-1.) || (height==-1.)) && (text))
+	if (text)
 	{
 		text_width = TextWidth( (char*)text, SerifTypeface, (int)text_size );
-		if (width == -1.)
+		//if (width == -1.)
 			width  = text_width*1.2;
-		if (height== -1.)
+		//if (height== -1.)
 			height = text_size*1.5;
-		//printf("\t\tControl::wrap_content() Got Called! w=%6.1f h=%6.1f\n", width, height);			
+		printf("\t\tControl::wrap_content() Got Called! w=%6.1f h=%6.1f\n", width, height);			
 	}
 }
 
@@ -219,7 +250,7 @@ void  Control::move_left_to  	 ( float  mNewLeft	)
 // virtual function (for classes such as scroll view which 
 // have to update the scroll bar as well)
 void  Control::move_to( float Left, float Bottom )
-{
+{ 
 	float deltaX = left   - Left;
 	float deltaY = bottom - Bottom;
 	
@@ -239,6 +270,12 @@ void Control::load_resources( )
 {
 }
 
+bool Z_compare (Control* i,Control* j) { printf("%d %d ", i, i->z_order); return (i->z_order < j->z_order); }
+
+void Control::sort_z_order() 
+{
+	std::sort( m_child_controls.begin(), m_child_controls.end(), Z_compare );
+}
 
 int Control::draw() 
 {
@@ -274,18 +311,39 @@ int Control::draw_border()
 Control* Control::ChildrenHitTest( int x, int y )
 {
 	if (Visible==false) return NULL;
-	
+
+	std::vector<Control*> hit_objects;
 	Control* retval = NULL;
+	
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
 	{
-		//(*iter)->print_positions();
-		retval = (*iter)->HitTest( x,y );
-		if (retval)
-			return retval;
+		retval = (*iter)->HitTest( x,y );		
+		if (retval) {
+			printf("Hit: %s\t", retval);
+			(*iter)->print_positions();
+			hit_objects.push_back( retval );
+		}
 		iter++;
-	}
-	return retval;
+	}	
+	return FindHighestZOrder( hit_objects );
+}
+
+Control* Control::FindHighestZOrder( std::vector<Control*> &mObjects )
+{
+	Control* highest_control = NULL;
+	long int highest = -1;
+	for (int i=0; i<mObjects.size(); i++)
+		if (mObjects[i]->z_order > highest)
+		{
+			highest = mObjects[i]->z_order;
+			highest_control = mObjects[i];
+		}
+	if (highest_control)
+		printf("overlapping objects=%d, highest Z order: %x \n", mObjects.size(), highest_control );
+	else 
+		printf(" Null, ");
+	return highest_control;
 }
 
 Control* Control::HitTest(int x, int y)
@@ -340,7 +398,8 @@ void Control::print_children( )
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )  
 	{ 
-		printf(" Children:  %x \n", *iter ); 
+		printf(" Children:  %x \t", *iter ); 
+		(*iter)->print_positions();
 		iter++; 
 	};		
 }

@@ -53,10 +53,9 @@ void CheckBox::wrap_content( )
 	printf("\t\tCheckBox::wrap_content() Got Called! w=%6.1f h=%6.1f\n", width, height);
 	float text_width  = TextWidth( text, SerifTypeface, text_size ) * 1.2;
 	float total_width = text_width + 2.0*check_box_side_length + 2.0*BOX_PADDING;
-	if (width==-1)
-		width = total_width;
-	if (height==-1)
-		height = text_size*2.0;	
+
+	width = total_width;
+	height = text_size*1.5;	
 }
 
 int CheckBox::draw_check_mark()

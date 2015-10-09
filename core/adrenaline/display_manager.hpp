@@ -1,23 +1,26 @@
 #ifndef _DISPLAY_MANAGER_H_
 #define _DISPLAY_MANAGER_H_
 
-#include "adrenaline_windows.h"
+
+//#include "adrenaline_windows.h"
+#include "bk_system_defs.h"
+#include "control.hpp"
+#include "system_bar.hpp"
+#include "side_bar.hpp"
+#include "system_status.hpp"
+#include "icon.hpp"
+
 #include "rectangle.hpp"
 #include "task_bar.hpp"
 #include "application.hpp"
 #include "keyboard.hpp"
-
-
-#include <vector>
-#include <list>
-#include <string>
-using namespace std;
+//using namespace std;
 
 
 /* Packages Objects for display */
 class DisplayManager : public IconView
 {
-	friend class Control;
+	//friend class Control;
 	
 public:
 	DisplayManager( int Left, int Right, int Top, int Bottom );
@@ -39,9 +42,9 @@ public:
 	void	set_menu	    	( HorizontalMenu* mHMenu = NULL );
 	void	start_app			( Application* mApp	  );
 	void	close_app			( Application* mApp	  );
-	void	idle_tasks			();
+	void	idle_tasks			(   );
 
-	float	get_aspect_ratio	();			// width / height  ratio 1080 = 16/9	
+	float	get_aspect_ratio	(   );		// width / height  ratio 1080 = 16/9	
 	float	get_width			(	)		{  return screen_width;	 };
 	float 	get_height			(	)		{  return screen_height; };
 	Rectangle*	get_useable_rect( );	// max client coordinates to avoid the sidebars, status and system bars.
@@ -65,18 +68,25 @@ public:
 	void	show_keyboard	(   );
 	void	hide_keyboard	(   );
 	
-	vector<Application*>	m_running_apps;
-	int					m_current_running_app;
+	bool	relay_mouse		(   );
+	
+	std::vector<Application*>	m_running_apps;
+	unsigned int				m_current_running_app;
 	
 	// Linked List of objects.
 	SystemBar		m_sb;			// Top
 	TaskBar			m_task_bar;		// Left side
 	SideBar			m_side;			// Right side
 	SystemStatusBar	m_status;		// Bottom
-	Keyboard		m_keyboard;
 
+
+	long int	m_z_order_counter;	// highest Z_order
 	int		screen_width;
 	int 	screen_height;
+	
+	bool	mouse_capturing;
+	Control* mouse_capture_control;
+	bool	 openvg_initialized;
 };
 
 extern DisplayManager MainDisplay;

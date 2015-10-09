@@ -1,13 +1,13 @@
 #ifndef _APPLICATION_
 #define _APPLICATION_
 
+#include <string>
+#include <vector>
+
 #include "control.hpp"
 #include "rectangle.hpp"
-
 #include "horizontal_menu.hpp"
 #include "vertical_menu.hpp"
-
-
 
 #define MENU_STATE_NORMAL 		1
 #define MENU_STATE_GRAYED 		2
@@ -20,6 +20,7 @@
 	
 	This onCreate then sets the menus, sidebars, and status, etc.
 */
+
 class Application 
 {
 public:
@@ -62,9 +63,9 @@ public:
 	VerticalMenu			m_app_menu;		// About, Preferences, Quit
 	VerticalMenu			m_file_menu;	// standard file menu too.	
 
-	vector<Control*>		m_sidebar_controls;	
-	string					m_welcome_status;
-	string					m_application_name;
+	std::vector<Control*>		m_sidebar_controls;	
+	std::string					m_welcome_status;
+	std::string					m_application_name;
 	Control*				m_main_window;
 	
 };

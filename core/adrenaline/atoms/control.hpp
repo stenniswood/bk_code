@@ -2,18 +2,15 @@
 #define _CONTROL_H_
   
 #include <vector>
-#include "../core/can/bk_system_defs.h"
 #include "rectangle.hpp"
 
 #define DefaultPadding 15
-class Window;
+
 
 /* Abstract Base Class for all graphs */
 class Control
 {
-	friend class Window;
 public:
-	//Control( Rectangle* mRect );
 	Control( int Left,  int Right, int Top, int Bottom );
 	Control( int Width, int Height 					   );
 	Control();
@@ -37,8 +34,10 @@ public:
 	float			get_width			  (			)	{return width; 	 };
 	float			get_height			  (			)	{return height;  };
 	float 			get_left	  		  ( 		)	{ return left;   };
+	float 			get_left_	  		  ( 		);
 	float 			get_right	  		  ( 		)	{ return left+width;   };	
-	float 			get_bottom	  		  ( 		)	{ return bottom; };
+	float 			get_bottom	  		  ( 		);//	{ return bottom; };
+	float 			get_bottom_ 	  	  ( 		)	{ return bottom; };	
 	float 			get_top		  		  ( 		)	{ return bottom+height; };	
 	inline bool		is_created			  ( 		)   { return created; };
 	
@@ -55,11 +54,12 @@ public:
 
 	void  			print_positions	  	  ( 				 );
 	void  			print_color_info  	  ( 				 );
-
-	bool  			is_visible			  ( ) 	{ return Visible;  };
-	void  			show				  ( bool mShow=true ) 	{ Visible = mShow;  };
-	void  			hide				  ( ) 	{ Visible = false; };
-	void  			show_border 		  ( bool Show=true ) { HasBorder = Show; };
+	void          	print_children		  (  				 );
+	
+	bool  			is_visible			  ( );// 					{ return Visible;  };
+	void  			show				  ( bool mShow=true );// 	{ Visible = mShow; };
+	void  			hide				  ( );// { Visible = false; };
+	void  			show_border 		  ( bool Show=true ) 	{ HasBorder = Show; };
 
 	virtual void 	load_resources		  (	);
 	/*At some point, want to add a param: Canvas canvas to the draw functions.
@@ -81,7 +81,8 @@ public:
 	if the mouse click is on this control (ie. if the function below returns true), 
 	then the display manager will call OnClick() subsequently.  
 	*/
-			Control*	ChildrenHitTest( int x, int y 	);
+	Control*	ChildrenHitTest  ( int x, int y 			  );
+	Control* 	FindHighestZOrder( std::vector<Control*> &mObjects );
 
 	virtual Control*	HitTest		  ( int x, int y 	);
 	virtual int			onHover		  ( int x, int y	) { return 0; };
@@ -90,8 +91,10 @@ public:
 	virtual int			onReceiveFocus( 				);
 	int					isTabStop	  (					)	{ return 0; };
 	virtual int			onCreate	  (  );	// chance to load resources, call functions which use fonts (already loaded before this call) etc.
-	void          		print_children();
 
+	void				sort_z_order();
+	
+	long int			z_order;
 	bool				invalidated;		// forces a redraw in display manager.  not implemented yet.	
 protected:
 	std::vector<Control*>	m_child_controls;

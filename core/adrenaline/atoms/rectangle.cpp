@@ -6,7 +6,7 @@
 #include <shapes.h>
 #include "rectangle.hpp"
 
-	
+
 Rectangle::Rectangle(float Left, float Bottom, float Width, float Height)
 {
 	set_left  ( Left 			);

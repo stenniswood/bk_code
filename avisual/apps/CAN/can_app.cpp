@@ -184,6 +184,8 @@ char CAN_App_Status[] = "CAN App";
 
 void 	CANApp::register_with_display_manager() 
 { 
+	//Application::register_with_display_manager() ;		//This should replace all of the below
+	
 	printf("CANApp::register_with_display_manager()\n");
 	MainDisplay.remove_all_objects(	);
 	//printf("CANApp::register_with_display_manager() removed\n");	
@@ -191,7 +193,7 @@ void 	CANApp::register_with_display_manager()
 	MainDisplay.m_status.set_text( CAN_App_Status );
 	MainDisplay.set_menu  	( &m_main_menu );
 	printf("CANApp::register_with_display_manager() done\n");		
-}	
+}
 
 int				CANApp::About			(	) 
 { 

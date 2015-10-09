@@ -114,6 +114,8 @@ void print_args(int argc, char *argv[])
 int icount=0;
 int Last_Retrieved_Number=0;
 
+
+
 void gui_interface()
 {
 	static int left_mouse_button_prev  = 0;
@@ -121,15 +123,19 @@ void gui_interface()
 
 	// HANDLE MOUSE EVENTS :
 	int result = mouse_timeslice();
-	MainDisplay.end_screen();			// 
+	MainDisplay.end_screen(); 
 
 	Control* object_clicked = NULL;
 	int x = round(mouse.x);
 	int y = round(mouse.y);
-	if (result == LEFT_BUTTON_DOWN)
+	if (MainDisplay.mouse_capturing==true)
+	{
+		MainDisplay.relay_mouse();
+	}
+	else if (result == LEFT_BUTTON_DOWN)
 	{
 		//if (left_mouse_button_prev == 0)
-		{	
+		{
 			//printf(" Left button clicked!  mousex=(%d,%d)\n", x,y);
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
@@ -147,7 +153,7 @@ void gui_interface()
 	}
 	else
 	{
-		object_clicked = MainDisplay.HitTest( x, y );
+		//object_clicked = MainDisplay.HitTest( x, y );
 		//if (object_clicked)
 		{
 			//object_clicked->onHover( x, y );
@@ -160,8 +166,10 @@ void gui_interface()
 	BOOL invalid = MainDisplay.any_invalid_children();
 	// if the invalid child is now hiden, or moved, redraw everything underneath it!
 	if (invalid)
-		UpdateDisplaySemaphore = 1; 
-	
+	{	UpdateDisplaySemaphore = 1; 
+
+		printf("Testing for invalid children.  Found! \n");	
+	}
 	//if (printf("any_invalid_children= %d\n", UpdateDisplaySemaphore );			
 	MainDisplay.draw_invalid_children();
 	MainDisplay.update_invalidated();	
@@ -181,7 +189,7 @@ void gui_interface()
 		// Only draw the invalidated() items.
 		
 		MainDisplay.draw();		
-		//printf("MainDisplay.draw() Done.\n");
+		printf("MainDisplay.draw() Done.\n");
 		MainDisplay.update_invalidated();
 		//printf("MainDisplay.update_invalidated() Done.\n");
 				
@@ -192,8 +200,6 @@ void gui_interface()
 }
 
 // Where does it evalutate Menu's and call their callbacks?
-
-
 
 void sequencer_interface()
 {	/* select script, play, loop, link, etc */ }

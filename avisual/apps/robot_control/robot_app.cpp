@@ -64,16 +64,14 @@ void RobotApp::Initialize		(	)
 
 	robot_panel 	  = new RobotPanel();
 	robot_diagnostics = new RobotDiagnosticsPanel();	
-	robot_performance = new RobotPerformancePanel();
-	
+	robot_performance = new RobotPerformancePanel();	
 	m_main_window = (Control*) robot_panel;
-	
 	
 	m_application_name = "Robot";
 	
 	setup_app_menu();		// About, Preferences, quit, 
 	setup_main_menu();		// 
-	onPlace();	
+	//onPlace();	
 }	// create all the objects here.
 
 int	RobotApp::onPlace			(	)
@@ -91,12 +89,15 @@ int robot_view_menu_callback(void* menuPtr, int mMenuIndex, Application* mApp )
 			break;
 	case 1:	// show 
 				mApp->m_main_window = (Control*) robot_panel;
+				mApp->register_with_display_manager();	
 			break;	
-	case 2:
+	case 2: 
 			break;
 	case 3:		mApp->m_main_window = (Control*) robot_diagnostics;
+				mApp->register_with_display_manager();	
 			break;
 	case 4:		mApp->m_main_window = (Control*) robot_performance;
+				mApp->register_with_display_manager();	
 			break;
 	case 5:	//	mApp->m_main_window = (Control*) robot_vision_summary;
 			break;
@@ -104,6 +105,7 @@ int robot_view_menu_callback(void* menuPtr, int mMenuIndex, Application* mApp )
 	default:
 			break;
 	}
+	
 }
 
 void RobotApp::setup_main_menu  ( )
@@ -121,6 +123,7 @@ void RobotApp::setup_main_menu  ( )
 }
 void RobotApp::register_with_display_manager()
 { 
+	Application::register_with_display_manager();
 }	
 	
 int	RobotApp::About			(	)

@@ -1,8 +1,9 @@
 #ifndef _SYSTEM_BAR_
 #define _SYSTEM_BAR_
 
-
+#include "button.hpp"
 #include "horizontal_menu.hpp"
+
 
 class SystemBar : public Control 
 {

@@ -47,24 +47,16 @@ void	Window::Initialize		 (   )
 	packer_vertical_position = bottom+height;
 	packer_horizontal_l_position = left;		// Moves Left to Right.
 	packer_horizontal_r_position = left+width;
-	printf("Window::Initialize:  vp=%6.2f; lp=%6.2f; rp=%6.2f width=%6.1f\n", 
+/*	printf("Window::Initialize:  vp=%6.2f; lp=%6.2f; rp=%6.2f width=%6.1f\n", 
 			packer_vertical_position,
 			packer_horizontal_l_position, 
-			packer_horizontal_r_position, width );	
+			packer_horizontal_r_position, width );	*/
 }
 
 int   	Window::draw(	 )
 {
 	if (Visible==false)	 return 0;
 	Control::draw();
-	list<Control*>::iterator	iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++, iter++ )
-	{ 
-		if (Debug) printf("\t\t\t Drawing child %d\t", i);
-		if (Debug) (*iter)->print_positions();
-		//if (Debug) (*iter)->print_color_info();
-		(*iter)->draw();
-	}
 }
 
 void	Window::calc_metrics	 (   )
@@ -80,8 +72,7 @@ void Window::pack_control( Control* mNewControl, byte mHorizontalPacking, byte m
 
 	set_vertical_position  ( mNewControl, mVerticalPacking   );
 	set_horizontal_position( mNewControl, mHorizontalPacking );	
-	controls.push_back	   ( mNewControl );
-	//register_child( mNewControl );
+	register_child( mNewControl );
 }
 
 void Window::set_vertical_position( Control* mNewControl, byte mVerticalPacking )
@@ -91,19 +82,19 @@ void Window::set_vertical_position( Control* mNewControl, byte mVerticalPacking 
 	{ 
 		// expand up & downward
 		int H = (packer_vertical_position-bottom);
-		mNewControl->set_width_height( mNewControl->width, H );
+		mNewControl->set_width_height( mNewControl->get_width(), H );
 		ctrl_bottom = bottom;
 	} 
 	else if (mVerticalPacking & PACKER_ALIGN_TOP)	
 	{
 		// default
-		ctrl_bottom = packer_vertical_position-mNewControl->height;
+		ctrl_bottom = packer_vertical_position-mNewControl->get_height();
 		packer_vertical_position = ctrl_bottom - DefaultPadding;
 	}
 	else if (mVerticalPacking & PACKER_ALIGN_CENTER)	
 	{
 		float remaining = packer_vertical_position-bottom;		
-		ctrl_bottom = (remaining - mNewControl->height)/2.0 + bottom;		
+		ctrl_bottom = (remaining - mNewControl->get_height())/2.0 + bottom;		
 	}
 	else if (mVerticalPacking & PACKER_ALIGN_BOTTOM)	
 	{
@@ -126,24 +117,24 @@ void Window::set_horizontal_position( Control* mNewControl, byte mHorizontalPack
 		new_left = packer_horizontal_l_position;
 		int W = packer_horizontal_r_position - packer_horizontal_l_position;
 		//packer_vertical_position -= mNewControl->height;
-		mNewControl->set_width_height( W, mNewControl->height );
+		mNewControl->set_width_height( W, mNewControl->get_height() );
 	}
 	if ( mHorizontalPacking & PACK_LEFT )
 	{
 		new_left = (packer_horizontal_l_position+DEFAULT_PADDING_HORIZ);
-		packer_horizontal_l_position += (DEFAULT_PADDING_HORIZ+mNewControl->width);
+		packer_horizontal_l_position += (DEFAULT_PADDING_HORIZ+mNewControl->get_width());
 	}
 	if ( mHorizontalPacking & PACK_CENTER )
 	{
 		new_left = ((packer_horizontal_r_position-packer_horizontal_l_position) 
-					- mNewControl->width) / 2.0 + packer_horizontal_l_position;	
-		packer_horizontal_l_position = new_left+mNewControl->width;
+					- mNewControl->get_width()) / 2.0 + packer_horizontal_l_position;	
+		packer_horizontal_l_position = new_left+mNewControl->get_width();
 	}
 	if ( mHorizontalPacking & PACK_RIGHT )
 	{
 		printf("Window::set_horizontal_position( PACK_RIGHT  r_pos=%6.1f  width=%6.1f\n", 
-		packer_horizontal_r_position, mNewControl->width );
-		new_left  = packer_horizontal_r_position - mNewControl->width - DEFAULT_PADDING_HORIZ;
+		packer_horizontal_r_position, mNewControl->get_width() );
+		new_left  = packer_horizontal_r_position - mNewControl->get_width() - DEFAULT_PADDING_HORIZ;
 		packer_horizontal_r_position = new_left-1; 	// left of control is right of the next control!
 	}
 	mNewControl->move_left_to( new_left );
@@ -155,12 +146,13 @@ void Window::pack_below  (Control* mNewControl, Control* mReferenceControl, byte
 
 	if (mHorizontalPacking & PACK_COPY_HORIZ)
 	{
-		mNewControl->left  = mReferenceControl->left;
-		mNewControl->width = mReferenceControl->width;
+		mNewControl->move_to( mReferenceControl->get_left(),  mNewControl->get_bottom() );
+		mNewControl->set_width_height( mReferenceControl->get_width(), mNewControl->get_height() );
+		
 	} else 
 		set_horizontal_position( mNewControl, mHorizontalPacking );
 
-	controls.push_back( mNewControl );
+	register_child( mNewControl );
 }
 
 void Window::pack_above ( Control* mNewControl, Control* mReferenceControl, byte mHorizontalPacking )
@@ -168,22 +160,25 @@ void Window::pack_above ( Control* mNewControl, Control* mReferenceControl, byte
 	mNewControl->set_position_above(mReferenceControl);
 	if (mHorizontalPacking & PACK_FILL_PARENT )
 	{
-		mNewControl->left = left;
-		mNewControl->width = width;
+		mNewControl->move_to( left, mNewControl->get_bottom() );
+		mNewControl->set_width_height( width, mNewControl->get_height() );		
 	}
 	if (mHorizontalPacking & PACK_LEFT )
 	{
-		mNewControl->left = left;
+		//mNewControl->get_left() = left;
+		mNewControl->move_to( left, mNewControl->get_bottom() );
 	}
 	if (mHorizontalPacking & PACK_CENTER )
 	{
-		mNewControl->left = (width - mNewControl->width) / 2.0;		
+		//mNewControl->get_left() = (width - mNewControl->width) / 2.0;		
+		mNewControl->move_to( left, mNewControl->get_bottom() );		
 	}
 	if (mHorizontalPacking & PACK_RIGHT )
 	{
-		mNewControl->left  = left+width - mNewControl->width;
+		//mNewControl->get_left()  = left+width - mNewControl->get_width();
+		mNewControl->move_to( left+width - mNewControl->get_width(), mNewControl->get_bottom() );				
 	}		
-	controls.push_back( mNewControl );
+	register_child( mNewControl );
 }
 
 /* This takes a control which has absolute positioning.  and puts it in reference of the 
@@ -195,12 +190,12 @@ int	Window::add_control_local_coords( Control* mControl )
 	int dLeft   = left;
 	int dBottom = bottom;
 	mControl->move_by( -left, -bottom );
-	controls.push_back( mControl );
+	register_child( mControl );	
 }
 
 int		Window::add_control		 ( Control* mControl )
 {
-	controls.push_back( mControl );
+	register_child( mControl );	
 }
 
 void	Window::move_by			( int dX, int dY )
@@ -218,28 +213,6 @@ void	Window::move_to			( float NewX, float NewY )
 	packer_horizontal_r_position += deltaX;
 	packer_vertical_position     += deltaY;
 	
-	float tmpLeft;
-	float tmpBottom;
-
-	// Adjust all children (stored in absolute):	
-	list<Control*>::iterator	iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++, iter++ )
-	{
-		(*iter)->get_xy ( &tmpLeft, &tmpBottom 			   );
-		(*iter)->move_to( tmpLeft+deltaX, tmpBottom+deltaY );
-	}	
-}
-
-void Window::print_window_positions( )
-{
-	Control::print_positions();
-
-	// Adjust all children (stored in absolute):	
-	list<Control*>::iterator	iter = controls.begin();
-	for (int i=0; iter!=controls.end(); i++, iter++ )
-	{
-		(*iter)->print_positions();
-	}
 }
 
 void	Window::set_width_height( int NewWidth, int NewHeight )
@@ -248,7 +221,7 @@ void	Window::set_width_height( int NewWidth, int NewHeight )
 	height = NewHeight;
 
 	// For a new window, first time geting width height, need to do this.
-	if (controls.size()==0)
+	if (m_child_controls.size()==0)
 	{	
 		// but not if there are controls already packed!
 		packer_vertical_position     = bottom+height;
@@ -259,16 +232,10 @@ void	Window::set_width_height( int NewWidth, int NewHeight )
 
 Control*	Window::HitTest	( int x, int y )
 {
-	Control* result;
-	if (Control::HitTest(x,y))		// within the bounds of this window.
+	Control* result = Control::HitTest(x,y);
+	if (result)		// within the bounds of this window.
 	{
 		// Disperse to affected child:  (do this in onClick() )
-		/*list<Control*>::iterator  iter = controls.begin();
-		for (int i=0; iter!=controls.end(); i++ )
-		{
-			result = (*iter)->HitTest( x, y );
-			if (result)  return result;
-		}*/
 		// Not hitting any child objects...
 		return this;		//Window::click( int x, int y);
 	}
@@ -279,7 +246,9 @@ Control*	Window::HitTest	( int x, int y )
 int Window::onClick(int x, int y, bool mouse_is_down)
 {
 	// Disperse to affected child:
-	list<Control*>::iterator  iter = controls.begin();
+	Control::onClick(x,y,mouse_is_down);
+	
+/*	list<Control*>::iterator  iter = controls.begin();
 	for (int i=0; iter!=controls.end(); i++, iter++)
 	{
 		Control* result = (*iter)->HitTest( x, y );
@@ -287,7 +256,7 @@ int Window::onClick(int x, int y, bool mouse_is_down)
 			(*iter)->onClick( x, y );
 			return TRUE;
 		}				
-	}
+	}*/
 	return FALSE;
 }
 

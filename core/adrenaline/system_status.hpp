@@ -1,13 +1,16 @@
 #ifndef _SYSTEM_STATUS_
 #define _SYSTEM_STATUS_
 
-#include "control.hpp"
-#include "window.hpp"
 
 
 #include <list>
 #include <string>
 using namespace std;
+
+#include "control.hpp"
+#include "window.hpp"
+#include "text_view.hpp"
+
 
 #define DEFAULT_VSCROLL_WIDTH  10
 #define DEFAULT_HSCROLL_HEIGHT 10 
@@ -46,10 +49,10 @@ public:
 
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
-protected:
+
 	Button*			m_power_button;		// center of display
 	Button*			m_calendar;			// center of display	
-	
+protected:	
 	TextView		m_text_view;		// center of display
 	string			m_text;	
 
