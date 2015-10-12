@@ -29,7 +29,8 @@ public:
 	int			dealer_play		(	);
 	void		start_new_round (   );
 	void		collect_cards	(	);
-
+	void		arrange_players_cards(	);
+	
 	void 		set_graphic_center( );	
 	void 		place_buttons	( int mPlayerIndex =-1	);
 	void		place_m_players	( float radius 		);	// place places around the game's center point.

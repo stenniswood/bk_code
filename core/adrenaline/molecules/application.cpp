@@ -34,8 +34,9 @@ static int app_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 			case 0: mApp->About();			break;
 			case 1: mApp->Preferences();	break;
 			case 2: mApp->Quit();			break;
-			default: break;
+			default: return 0; break;
 		} 
+	return 1;
 }
 
 static int app_file_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
@@ -48,8 +49,9 @@ static int app_file_menu_actions( void* menuPtr, int mMenuIndex, Application* mA
 	case 2: mApp->file_open_recent();	break;
 	case 3: mApp->file_save	 	();		break;
 	case 4: mApp->file_save_as	();		break;
-	default: break;
+	default: return 0; 	break;
 	} 
+	return 1;
 }
  
 
@@ -83,12 +85,6 @@ void 	Application::Initialize(	)
 		m_welcome_status   = "Generic Application";
 		m_application_name = "Generic Application";
 	}
-
-	if (Debug) printf("Application::Initialize() done\n");
-
-/*	setup_app_menu();		// About, Preferences, quit, 
-	setup_main_menu    ();		// 
-	onPlace();	*/
 }
 
 void	Application::setup_sidebar	(	)  // derived class adds these here
@@ -124,6 +120,7 @@ void	Application::setup_app_menu(	)
 
 int		Application::calc_metrics() 
 { 
+	return 0;
 }
 
 // First Time application is run - load resources etc.
@@ -133,18 +130,19 @@ int	Application::onCreate	(  )
 	setup_app_menu();
 	setup_main_menu();
 	onPlace();
+	return 1;
 }
 
 void Application::register_with_display_manager()
 {
 	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( m_main_window 	 );
+	MainDisplay.add_object( m_main_window 	 	 );
 	MainDisplay.set_menu  ( &m_main_menu  	 	 );
 	printf("register_with_display_manager- mid \n");
 	
 	// Establish the sidebar controls:
 	// Create Sidebar items:
-//	MainDisplay.m_side.load_controls( &m_sidebar_controls );	
+	MainDisplay.m_side.load_controls( &m_sidebar_controls );
 	MainDisplay.m_status.set_text( m_welcome_status.c_str() );	
 	onPlace();
 	printf("register_with_display_manager- done \n");	
@@ -167,6 +165,7 @@ int		Application::onPlace( )
 		//m_main_window->set_width_height( client_rect->get_width(), client_rect->get_height() );
 		//m_main_window->move_to			( client_rect->get_left(), client_rect->get_bottom() );		
 	}	
+	return 1;
 }
 
 /* Return:  1=> all done.
@@ -178,6 +177,7 @@ int	Application::background_time_slice(	)
 
 int		Application::onActivate	() 
 { 
+	return 1;
 }		// Future reactivation - set menus, sidebars, status, etc.
 
 // Standard Menu Handlers:	
@@ -201,9 +201,11 @@ int		Application::About			(	)
 {
 	TextView* about = new TextView();
 	MainDisplay.add_object( about );
+	return 1;	
 }
 int		Application::Preferences(	)
 {
+	return 1;
 }
 
 int	Application::Quit	() 
@@ -214,11 +216,15 @@ int	Application::Quit	()
 	MainDisplay.m_side.unload_controls( );
 	MainDisplay.m_status.set_text( "Closed app" );	
 	if (Debug) printf("Application::Quit() done \n");
+	return 1;	
 }
 
 int		Application::onClick(int x, int y, bool mouse_is_down) 
 { 
+	return 1;
 }
 int   	Application::draw		 	(	) 
 { 
+	return 1;
 }
+

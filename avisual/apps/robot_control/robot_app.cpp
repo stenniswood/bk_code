@@ -25,18 +25,10 @@
 #include "draw_app2.hpp"
 #include "CAN_base.h"
 #include "robot_app.hpp"
-#include "robot_control_panel.hpp"
-#include "robot_diagnostics.hpp"
-#include "robot_performance.hpp"
 
 
 RobotApp* robot_app=NULL;
 
-
-RobotPanel* 			robot_panel;
-RobotDiagnosticsPanel* 	robot_diagnostics;
-RobotPerformancePanel*	robot_performance;
-//robot_vision_summary
 
 void init_robot_app() 
 {
@@ -59,65 +51,77 @@ RobotApp::~RobotApp()
 void RobotApp::Initialize		(	)
 { 
 	printf("RobotApp:: Initialize() \n");
-	
+	m_application_name = "Robot";
+	m_welcome_status   = "Robot Control Panel";	
 	Application::Initialize();
 
 	robot_panel 	  = new RobotPanel();
 	robot_diagnostics = new RobotDiagnosticsPanel();	
-	robot_performance = new RobotPerformancePanel();	
-	m_main_window = (Control*) robot_panel;
+	robot_performance = new RobotPerformancePanel();
+	joint_positions   = new AnalogView ();	
+	robot_vision 	  = new RobotVisionPanel();	
+	m_main_window 	  = (Control*) robot_panel;
 	
-	m_application_name = "Robot";
-	
-	setup_app_menu();		// About, Preferences, quit, 
-	setup_main_menu();		// 
-	//onPlace();	
 }	// create all the objects here.
 
 int	RobotApp::onPlace			(	)
 { 
-	Application::onPlace();
+	return Application::onPlace();
 }
 
 VerticalMenu view_menu;
-int robot_view_menu_callback(void* menuPtr, int mMenuIndex, Application* mApp )
+
+int robot_view_menu_callback(void* menuPtr, int mMenuIndex, RobotApp* mApp )
 {
 	printf("menu_callback( %4x, %d )\n", menuPtr, mMenuIndex );
 	switch( mMenuIndex )
 	{
-	case 0:	
+	case 0:	// Dwelling
 			break;
-	case 1:	// show 
-				mApp->m_main_window = (Control*) robot_panel;
+	case 1:	// Control Panel 
+				mApp->m_main_window = (Control*) mApp->robot_panel;
 				mApp->register_with_display_manager();	
 			break;	
-	case 2: 
+	case 2: // Robot 
+				MainDisplay.set_main_window( (Control*) mApp->joint_positions );
+				//mApp->m_main_window = ;
+				//mApp->m_main_window->Invalidate();
+				//mApp->joint_positions->onCreate();
+				//mApp->register_with_display_manager();		
 			break;
-	case 3:		mApp->m_main_window = (Control*) robot_diagnostics;
+	case 3:	// Diagnostics
+				mApp->m_main_window = (Control*) mApp->robot_diagnostics;
 				mApp->register_with_display_manager();	
 			break;
-	case 4:		mApp->m_main_window = (Control*) robot_performance;
+	case 4:	// Performance
+				mApp->m_main_window = (Control*) mApp->robot_performance;
 				mApp->register_with_display_manager();	
 			break;
-	case 5:	//	mApp->m_main_window = (Control*) robot_vision_summary;
+	case 5:	// History
+			//	mApp->m_main_window = (Control*) robot_vision_summary;
+			break;
+	case 6:	// Vision
+				mApp->m_main_window = (Control*) mApp->robot_vision;
+				mApp->register_with_display_manager();				
 			break;
 			
-	default:
+	default:	return 0;
 			break;
 	}
-	
+	return 1;
 }
 
 void RobotApp::setup_main_menu  ( )
 { 
 	Application::setup_main_menu();
+	view_menu.clear_all();
 	view_menu.add_simple_command( "Dwelling" 	  );
 	view_menu.add_simple_command( "Control Panel" );	
 	view_menu.add_simple_command( "Robot" 		  );
 	view_menu.add_simple_command( "Diagnostics"   );
 	view_menu.add_simple_command( "Performance"   );
 	view_menu.add_simple_command( "History" 	  );
-	view_menu.add_simple_command( "Vision History" );					
+	view_menu.add_simple_command( "Vision Analyzer" );					
 	view_menu.add_callback_all_items( robot_view_menu_callback  );	
 	m_main_menu.add_sub_menu    ( "View", &view_menu );	
 }
@@ -128,13 +132,14 @@ void RobotApp::register_with_display_manager()
 	
 int	RobotApp::About			(	)
 { 
+	return 0;
 }
 int	RobotApp::Preferences		(	)
-{ 
+{ 	return 0; 
 }
 int RobotApp::Quit			(	)
 { 
-
+	return 1;
 }	
 
 void RobotApp::file_new		( )

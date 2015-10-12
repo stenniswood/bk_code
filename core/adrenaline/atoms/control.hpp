@@ -64,15 +64,14 @@ public:
 	virtual void 	load_resources		  (	);
 	/*At some point, want to add a param: Canvas canvas to the draw functions.
 		so that we can draw into any memoryDC or the screen.  Switching "on
-		the fly".
-	*/
+		the fly".	*/
 	virtual int   	draw				(	);
 	int   			draw_border			(   );
 
 	void			Revalidate			( );
 	void			Invalidate			( )			{ invalidated = true; };
 	bool			is_invalid			( );
-	
+
 	// Once registered, will be tested in the HitTest & OnClick()
 	void			register_child		( Control* mNewChild );
 	void			unregister_child	( Control* mNewChild );	
@@ -81,8 +80,8 @@ public:
 	if the mouse click is on this control (ie. if the function below returns true), 
 	then the display manager will call OnClick() subsequently.  
 	*/
-	Control*	ChildrenHitTest  ( int x, int y 			  );
-	Control* 	FindHighestZOrder( std::vector<Control*> &mObjects );
+	Control*			ChildrenHitTest  ( int x, int y 			  );
+	Control* 			FindHighestZOrder( std::vector<Control*> &mObjects );
 
 	virtual Control*	HitTest		  ( int x, int y 	);
 	virtual int			onHover		  ( int x, int y	) { return 0; };

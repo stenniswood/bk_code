@@ -68,7 +68,7 @@ int		CardPlayerChips::draw( )
 	Stroke_l(0xFFFFFF00);
 	Fill_l  (0xFFFFFF00);
 	sprintf(cash_text, "Bet $%6.0f", wager );	
-	TextEnd ( sx, sy-TEXT_HEIGHT, cash_text, SerifTypeface, 16 );	
+	TextEnd ( sx, sy-TEXT_HEIGHT, cash_text, SerifTypeface, 14 );	
 }
 
 

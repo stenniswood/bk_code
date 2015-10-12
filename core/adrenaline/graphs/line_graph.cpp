@@ -21,8 +21,6 @@ LineGraph::LineGraph()
 {	
 	stroke_width = 5.0;
 	//ShowVerticalLines=false;
-	DataHead=NULL;
-	DataTail=NULL;
 	auto_scale = false;
 	min =0;
 	max =0;
@@ -34,8 +32,6 @@ LineGraph::LineGraph( int Left, int Right, int Top, int Bottom )
 {
 	stroke_width = 5.0;
 	//ShowVerticalLines=false;
-	DataHead=NULL;
-	DataTail=NULL;
 	auto_scale = false;
 	min =0;
 	max =0;
@@ -69,12 +65,11 @@ void LineGraph::line_plot( DataSet* data, long int Color )
 
 void LineGraph::draw_data_series( )
 {
-	DataSet* ptr = DataHead;
+
 	int i=0;
-	while (ptr)
+	for (int s=0; s<data_series.size(); s++)
 	{
-		line_plot( ptr, ColorSequence[i] );
-		ptr = ptr->getNext();
+		line_plot( &data_series[s], ColorSequence[i] );
 		i++;
 	}	
 }
@@ -82,18 +77,17 @@ void LineGraph::draw_data_series( )
 float LineGraph::calc_auto_scale( )
 {
 	// get max of all data series:
-	DataSet* ptr = DataHead;
 	float tmp_max,tmp_min;
 	
-	while (ptr)
+	for (int s=0; s<data_series.size(); s++)
 	{
-		tmp_max = ptr->get_max();
-		tmp_min = ptr->get_min();
+		tmp_max = data_series[s].get_max();
+		tmp_min = data_series[s].get_min();
 		if (tmp_max > max)	max = tmp_max;
-		if (tmp_min > min)	min = tmp_min;			
-		ptr = ptr->getNext();
+		if (tmp_min > min)	min = tmp_min;
 	}	
 	// round max and min 
+	return 1.0;
 }
 
 void LineGraph::calc_scale( )
@@ -121,5 +115,6 @@ int LineGraph::draw_body()
 	
 	//calc_scale( );
 	draw_data_series( );
+	return 1;
 }
 

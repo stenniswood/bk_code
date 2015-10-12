@@ -42,7 +42,7 @@ public:
 
 	// This links the Datasets together!
 	void  add_data_series	  	( DataSet* NewData );
-	void  remove_data_series	( DataSet* OldData );
+	void  remove_data_series	( int index /*DataSet* OldData*/ );
 
 	void  set_horizontal_lines	( int NumberLines ) { NumberHorizontalLines=NumberLines; };	
 	void  set_vertical_lines 	( int NumberLines ) { NumberVerticalLines=NumberLines; };
@@ -66,8 +66,8 @@ public:
 	int		count_data_series();	// how many data series are there?
 
 protected:
-	DataSet* DataHead;
-	DataSet* DataTail;	
+	std::vector<DataSet>	data_series;
+	
 
 	byte		draw_options;		// bit field 
 	long int	title_color;

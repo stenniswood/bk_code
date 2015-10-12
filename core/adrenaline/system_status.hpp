@@ -1,8 +1,6 @@
 #ifndef _SYSTEM_STATUS_
 #define _SYSTEM_STATUS_
 
-
-
 #include <list>
 #include <string>
 using namespace std;
@@ -41,20 +39,17 @@ public:
 	void			onPlace			 (   );
 	virtual int		onCreate  		 (   );	// chance to load resources, 	
 	
-	void			set_text		 ( const char* mText ) { m_text_view.set_text( mText ); };
-	int				add_control		 ( Control* mControl, char* mText=NULL );
-	void			hide			 ( bool mHide = true);
+	void			set_text		 ( const char* mText );// { m_text_view.set_text( mText ); };
+	//int				add_control		 ( Control* mControl, char* mText=NULL );
 	void			auto_hide		 ( bool mAutoHide = true);
 	void			set_alignment	 ( byte mAlignment = SYSTEM_ALIGN_CENTER );
 
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
-
-	Button*			m_power_button;		// center of display
-	Button*			m_calendar;			// center of display	
+	Button*			m_power_button;		
+	Button*			m_calendar;			
 protected:	
 	TextView		m_text_view;		// center of display
-	string			m_text;	
 
 	int				num_tabs;
 	list<Control*>	controls;

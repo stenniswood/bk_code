@@ -52,7 +52,6 @@ public:
 	void			load_controls	 ( std::vector<Control*>* mSidebar_controls );
 
 	int				add_control		 ( Control* mControl, char* mText=NULL );
-	void			hide			 ( bool mHide = true);
 	void			auto_hide		 ( bool mAutoHide = true);
 	void			set_alignment	 ( byte mAlignment = SIDEBAR_ALIGN_CENTER );
 
@@ -66,7 +65,7 @@ protected:
 	float			m_bottom_margin;	
 	
 	byte			Alignment;
-	bool			isHidden;
+
 	bool			AutoHideEnabled;
 	
 };

@@ -197,7 +197,7 @@ void Control::set_position_right_of(Control* Sibling, bool mCopyVert, float mPad
 
 void Control::set_position_above( Control* Sibling, bool mCopyHoriz, float mPadding )
 {
-	float Bottom  = Sibling->bottom + Sibling->height + DefaultPadding;
+	float Bottom  = Sibling->bottom + Sibling->height + mPadding;
 	move_to( left, Bottom );
 	if (mCopyHoriz)
 		copy_position_horiz(Sibling);
@@ -207,7 +207,7 @@ void Control::set_position_above( Control* Sibling, bool mCopyHoriz, float mPadd
 // mleft, mwidth are optional.
 void Control::set_position_below( Control* Sibling, bool mCopyHoriz, float mPadding )
 { 
-	float Bottom  = Sibling->bottom - DefaultPadding - height;
+	float Bottom  = Sibling->bottom - mPadding - height;
 	move_to( left, Bottom );
 	if (mCopyHoriz) 
 		copy_position_horiz(Sibling);
@@ -341,8 +341,6 @@ Control* Control::FindHighestZOrder( std::vector<Control*> &mObjects )
 		}
 	if (highest_control)
 		printf("overlapping objects=%d, highest Z order: %x \n", mObjects.size(), highest_control );
-	else 
-		printf(" Null, ");
 	return highest_control;
 }
 

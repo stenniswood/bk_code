@@ -64,8 +64,10 @@ void 	BlackJackApp::Initialize	(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-
+	m_welcome_status   = "Get as close to 21 without going over.";
 	m_application_name = "Black Jack";
+	Application::Initialize();
+	
 	m_main_window      = new BlackJack( 3 );
 	//printf("BlackJackApp::Initialize() \n");	
 

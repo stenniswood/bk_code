@@ -86,6 +86,7 @@ int		HorizontalMenu::add_entry_text( const char* mMenuText )
 	
 	m_entries.push_back( hmi );
 	calc_metrics();
+	return 1;
 }
 void		HorizontalMenu::clear_all()
 {
@@ -102,17 +103,20 @@ int		HorizontalMenu::add_sub_menu( const char* mMenuText, VerticalMenu* vm )
 	
 	m_entries.push_back( hmi );
 	calc_metrics();
+	return 1;
 }
 
 int 	HorizontalMenu::add_entry( struct stHorizMenuInfo* mEntry )
 {
 	m_entries.push_back( *mEntry );
 	calc_metrics();
+	return 1;
 }
 
 int 	HorizontalMenu::select 	( int mSelected 	) 
 {
 	m_selection    = mSelected;
+	return 1;
 }
 
 int HorizontalMenu::draw(	)
@@ -171,6 +175,7 @@ int HorizontalMenu::draw(	)
 			m_entries[m_selection].menu->draw();
 		}
 	}
+	return 1;	
 }
 
 int	HorizontalMenu::get_id(   )
@@ -179,6 +184,7 @@ int	HorizontalMenu::get_id(   )
 	if (m_selection > m_entries.size()) return -1;
 	int result = (m_selection*1000);
 	//m_entries[m_selection]->menu->get_id();
+	return 1;
 }
 
 int 	HorizontalMenu::get_hit_index( int Mousex, int Mousey ) 
@@ -245,8 +251,10 @@ int	HorizontalMenu::onClick( int x, int y, bool mouse_is_down )
 			m_entries[menu_index].menu->show(true);
 			m_entries[menu_index].menu->draw();
 			//m_entries[menu_index]->menu->draw();
-			//Invalidate();
+			//Invalidate();			
 		}
+		return 1;		
 	}	
+	return 0;	
 }
 

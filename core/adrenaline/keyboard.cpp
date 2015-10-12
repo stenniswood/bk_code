@@ -127,10 +127,10 @@ void	Keyboard::initialize_alt_keys()
 
 
 	// ROW #4 :  
-	char array4[] = { '\\', '|', '-', '=', '_', '+',  ',', '.' };	
+	char array4[] = { '\\', '|', '-', '=', '_', '+',  ',', '.', '?' };	
 	key.x  = 5+KEY_SPACING_COL/2+KEY_WIDTH/2;
 	key.y  = 10;
-	for (int col=0; col<7; col++)
+	for (int col=0; col<9; col++)
 	{
 		key.x += KEY_SPACING_COL;
 		key.text[0] = array4[col];
@@ -140,9 +140,9 @@ void	Keyboard::initialize_alt_keys()
 
 	// ROW #3 : 
 	char array3[] = { '<', '>',';',':','\'','\"','[',']', '{', '}' };	
-	key.x  = 5+KEY_SPACING_COL/2+KEY_WIDTH/2;
+	key.x  = 5;
 	key.y += (KEY_SPACING_ROW);
-	for (int col=0; col<9; col++)
+	for (int col=0; col<10; col++)
 	{
 		key.x += KEY_SPACING_COL;
 		key.text[0] = array3[col];

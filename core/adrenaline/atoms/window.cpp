@@ -183,13 +183,15 @@ void Window::pack_above ( Control* mNewControl, Control* mReferenceControl, byte
 
 /* This takes a control which has absolute positioning.  and puts it in reference of the 
    window's <left,bottom>
-   */
-// This will add the window offsets before adding:
+
+   This will add the window offsets before registering the control.   
+   This means the Control's left, bottom are offsets from the Window's!
+*/
 int	Window::add_control_local_coords( Control* mControl )
 {
 	int dLeft   = left;
 	int dBottom = bottom;
-	mControl->move_by( -left, -bottom );
+	mControl->move_by( left, bottom );
 	register_child( mControl );	
 }
 

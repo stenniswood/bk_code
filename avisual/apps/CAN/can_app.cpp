@@ -107,6 +107,10 @@ void 	CANApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
+	m_welcome_status   = "Get as close to 21 without going over.";
+	m_application_name = "CAN App";
+	Application::Initialize();
+			
 	m_gyro 		  = new GyroView   ();
 	m_analog 	  = new AnalogView ();
 	m_msgs 	      = new CANMessages();		// defined in ../core/adrenaline/molecules/can_window.cpp
@@ -115,14 +119,13 @@ void 	CANApp::Initialize		(	)
 	m_main_window = m_msgs;
 	printf("CANApp::Initialize()\n");
 
-	m_application_name = "CAN App";
 	m_rx_tail 	   = 0;
 	m_rx_tail_laps = 0;
 
-	setup_app_menu();
-	setup_main_menu    ();
+/*	setup_app_menu();		done in onCreate()
+	setup_main_menu();
+	onPlace();		*/
 	setup_sidebar ();
-	onPlace();	
 	printf("CANApp::Initialize() done.\n");
 }	// create all the objects here.
 

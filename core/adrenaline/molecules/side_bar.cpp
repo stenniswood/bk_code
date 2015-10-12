@@ -41,7 +41,6 @@ void SideBar::Initialize()
 
 	m_state=0;
 	Alignment 		=SIDEBAR_ALIGN_CENTER;
-	isHidden		=false;
 	AutoHideEnabled	=false;
 }
 
@@ -121,11 +120,6 @@ int		SideBar::add_control( Control* mControl, char* mText )
 	return 1;
 }
 
-void	SideBar::hide			 ( bool mHide )
-{	
-	isHidden = mHide;
-	Invalidate();
-}
 void	SideBar::auto_hide		 ( bool mAutoHide )
 {	
 	AutoHideEnabled = mAutoHide;
@@ -140,8 +134,6 @@ void SideBar::set_alignment( byte mAlignment  )
 int SideBar::draw()
 {
 	//printf("\n\nSideBar::draw()\n");
-	if (isHidden)	return 0; 
-
 	Control::draw();
 	return 1;
 }

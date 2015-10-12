@@ -122,16 +122,18 @@ void CardPlayer::expose_card	( Card* mNewCard, bool mExposed )
 
 int	CardPlayer::arrange_cards( float mCardSpacing )
 {
-
 	const float CARD_HEIGHT = 81;
-	
+
+	// COMPUTE AREA:	
 	int   l = left+Margin; 
 	float b = (height-CARD_HEIGHT)/2 + bottom;
 
+	// DETERMINE SPACING:
 	//printf("CardPlayer::arrange_cards() \n" ); 
 	if (mCardSpacing==-1)
 		mCardSpacing = determine_card_spacing();
 	
+	// ADJUST EACH CARD:
 	std::list<Card*>::iterator	iter = cards.begin();
 	while (iter != cards.end())
 	{
@@ -150,11 +152,11 @@ int	CardPlayer::draw( )
 {
 	Control::draw();
 
-	std::list<Card*>::iterator	iter = cards.begin();
 	// FIRST ARRANGE CARDS:
+	std::list<Card*>::iterator	iter = cards.begin();
 	while (iter != cards.end())
 	{		
-		printf("drawing %d %c\n", (*iter)->get_value(), (*iter)->get_suit() );
+		//printf("drawing %d %c\n", (*iter)->get_value(), (*iter)->get_suit() );
 		//(*iter)->print_positions();
 		(*iter)->draw();
 		iter++;

@@ -1,4 +1,4 @@
-CC		   = g++
+CC		   = g++-4.9
 OPTIONS	   =  -Wwrite-strings -fpermissive
 # 
 # INCLUDE PATHS:
@@ -47,7 +47,8 @@ APPS_OBJS =  file_editor_app.o video_app.o video.o
 DRAW_APP_OBJS = draw_app.o draw_canvas.o 
 CAN_APP_OBJS = can_app.o gyro_window.o analog_board_app.o
 AUDIO_APP_OBJS = audio_app.o audio_app_menu.o 
-ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot_performance.o
+ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot_performance.o \
+			robot_vision.o
 
 #ipc_can_rxbuff.o 
 IPC_OBJS   = CAN_memory.o client_memory.o visual_memory.o audio_memory.o 

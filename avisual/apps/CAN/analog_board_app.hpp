@@ -50,6 +50,11 @@ protected:
 	int						m_group_start_index[4];
 	int						m_group_end_index[4];
 	
+	int						m_col_start;
+	int						m_row_start;
+	int						m_col_increment;
+	int						m_row_increment;
+	
 	CheckBox* 				m_chip_enable1;
 	CheckBox* 				m_chip_enable2;
 	CheckBox* 				m_chip_enable3;

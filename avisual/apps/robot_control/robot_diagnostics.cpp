@@ -35,7 +35,7 @@ RobotDiagnosticsPanel::RobotDiagnosticsPanel()
 
 void RobotDiagnosticsPanel::Initialize(	)
 {
-	Window::Initialize();
+	Window::Initialize();	
 }
 
 void RobotDiagnosticsPanel::setup_headings()
@@ -73,7 +73,7 @@ void RobotDiagnosticsPanel::setup_headings()
 	}
 }
 
-int	RobotDiagnosticsPanel::calc_metrics()
+void	RobotDiagnosticsPanel::calc_metrics()
 {
  	Window::calc_metrics();
 }
@@ -88,6 +88,7 @@ int	RobotDiagnosticsPanel::place_views()
 	add_control_local_coords( &Clear 	);
 	add_control_local_coords( &ClearAll  );
 	register_child( &FaultList );
+	return 1;
 }
 
 int	RobotDiagnosticsPanel::onCreate	  (  )

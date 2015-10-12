@@ -47,10 +47,6 @@
 
 
 
-
-
-
-
 /*
 	What's displayed here is going to be under the control of bkInstant.
 	We'll start by showing the incoming text.

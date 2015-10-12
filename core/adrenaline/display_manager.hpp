@@ -41,6 +41,8 @@ public:
 	void	load_resources  	(					  );
 	void	set_menu	    	( HorizontalMenu* mHMenu = NULL );
 	void	start_app			( Application* mApp	  );
+	void	set_main_window		( Control* mNewWindow );
+	
 	void	close_app			( Application* mApp	  );
 	void	idle_tasks			(   );
 

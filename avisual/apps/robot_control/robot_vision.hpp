@@ -1,15 +1,15 @@
-#ifndef _ROBOT_DIAGNOSTICS_PANEL_
-#define _ROBOT_DIAGNOSTICS_PANEL_
+#ifndef _ROBOT_VISION_PANEL_
+#define _ROBOT_VISION_PANEL_
+/* Show live analysis of vision system. */
 
 
-//#include "adrenaline_windows.h"
 #include "window.hpp"
 
 
-class RobotDiagnosticsPanel : public Window
+class RobotVisionPanel : public Window
 {
 public:
-	RobotDiagnosticsPanel();
+	RobotVisionPanel();
 
 	virtual void 	Initialize(	);
 	void			calc_metrics();
@@ -18,8 +18,9 @@ public:
 	void			setup_headings();
 	
 	virtual int		onCreate	  (  );	// chance to load resources, call functions which use fonts
-	virtual int   	draw		 (	);
+	virtual int   	draw		 		(				);
 
+	
 };
 
 

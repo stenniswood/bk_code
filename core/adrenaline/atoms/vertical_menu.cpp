@@ -69,7 +69,7 @@ int  VerticalMenu::calc_metrics()
 	set_width_height( tmp_width, tmp_height );
 
 	ListBox::calc_metrics();
-
+	return 1;
 }
 
 // New sjt - add to header!
@@ -81,6 +81,7 @@ int  VerticalMenu::create_std_file_menu()
 	add_simple_command( "Open Recent"	);	
 	add_simple_command( "Save"  		);
 	add_simple_command( "Save As" 		);
+	return 1;	
 }
 
 int  VerticalMenu::add_simple_command( const char* mText, char* mShortcut )
@@ -103,27 +104,30 @@ int  VerticalMenu::add_simple_command( const char* mText, char* mShortcut )
 	//printf  ( "add_simple_command:: 4 \n" );
 	
 	calc_metrics();
+	return 1;	
 	//printf  ( "add_simple_command:: 4 \n" );			
 }
 
 int	VerticalMenu::add_callback( int mIndex, int (*mcallback)(void*, int) )
 {
 	m_entries[mIndex].callback = mcallback;	
+	return 1;	
 }
 
 int	VerticalMenu::add_callback_all_items( int (*callback)(void*, int, Application*) )
 {
 	callback_all_items = callback;
+	return 1;	
 }
 
 int 	VerticalMenu::add_sub_menu		( char* mText, VerticalMenu* mSubMenu )
 {
-	
+	return 1;	
 }
 
 int 	VerticalMenu::add_entry 		( stVertMenuInfo mEntry )
 {
-
+	return 1;
 }
 
 int		VerticalMenu::attach_at			( float x, float y )
@@ -131,11 +135,13 @@ int		VerticalMenu::attach_at			( float x, float y )
 //	left   =  x;
 //	bottom = (y - height);
 	move_to(x, y-height);
+	return 1;	
 }
 	
 int 	VerticalMenu::set_state ( int mState, int mIndex )
 {
 	m_entries[mIndex].state = mState;
+	return 1;	
 }
 
 void 	VerticalMenu::draw_one_row( int mRow, float mY )
@@ -166,6 +172,7 @@ int	VerticalMenu::draw_triangle( int mRow, float mY )
 	Line( x, b, x, t);
 	Line( x, t, x+10, c);
 	Line( x+10, c, x, b);
+	return 1;	
 }
 
 int   	VerticalMenu::draw		 		( 	)
@@ -173,17 +180,20 @@ int   	VerticalMenu::draw		 		( 	)
 	//printf("VerticalMenu::draw	\n");
 	//print_positions();
 	ListBox::draw();
+	return 1;	
 }
 
 int 	VerticalMenu::get_hit_index		( int Mousex, int Mousey )
 {
 	//printf("VerticalMenu::get_hit_index()\n");
 	return ListBox::get_hit_index( Mousex, Mousey );
+	
 }
 
 int	VerticalMenu::set_h_parent			( HorizontalMenu* mMenu )
 {
 	m_horiz_parent = mMenu;
+	return 1;
 }
 
 /* We need to establish a capture mouse mechanism.  Maybe not for this though.
@@ -223,5 +233,6 @@ int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 		if (m_entries[result].callback)
 			m_entries[result].callback( NULL, result );
 	}
+	return 1;	
 }
 

@@ -11,16 +11,16 @@ public:
 	Histogram();
 	Histogram( int Left, int Right, int Top, int Bottom );
 	
-	float 	set_bins		( int NumberOfBins ) { bins = NumberOfBins; };
+	void 	set_bins		( int NumberOfBins );
 	int   	get_bin_count ( int binNumber );
 
-	float 	get_highest_sample_count	();
+	float 	get_highest_sample_count	( int mSeriesIndex=0);
 	float 	evaluate_gaussian			(float avg, float stddev, float x);
 	int   	draw_bell_curve			();
 
 	float 	calc_scale	(  );
 	void  	histo_plot	(  );
-	int   	draw_body		(  );
+	int   	draw_body	(  );
 	void  	draw_stats	(  );
 	
 private:

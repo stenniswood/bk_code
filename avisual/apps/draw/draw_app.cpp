@@ -85,13 +85,15 @@ void 	DrawApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
+	m_welcome_status   = "Get as close to 21 without going over.";	
+	m_application_name = "Drawing App";
+	Application::Initialize();
 	
 	m_main_window      = new Drawing2D();
-	m_application_name = "Drawing App";
-
-	setup_app_menu ();		// About, Preferences, quit, 
+	
+/*	setup_app_menu ();		// About, Preferences, quit, 
 	setup_main_menu();		// 
-	onPlace();	
+	onPlace();	*/
 
 }	// create all the objects here.
 

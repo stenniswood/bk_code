@@ -168,19 +168,18 @@ int Graphbase::draw_title()
 
 void Graphbase::add_data_series( DataSet* NewSeries )
 {
-	NewSeries->setPrev( DataTail ); 
-	NewSeries->setNext( NULL );
-	if (DataHead == NULL)
-		DataHead = NewSeries;
-	if (DataTail)
-		DataTail->setNext( NewSeries );
-	DataTail = NewSeries;
+	data_series.push_back( *NewSeries );
 	//printf("New Series!\n");
 }
 
-void Graphbase::remove_data_series( DataSet* OldSeries )
+void Graphbase::remove_data_series( int mIndex )
+//DataSet* OldSeries )
 {
-	DataSet* Pptr = OldSeries->getPrev( );
+//*OldSeries
+//	std::vector<DataSet>::iterator iter = ;
+//	data_series.erase( data_series.begin() + index );
+	
+	/*DataSet* Pptr = OldSeries->getPrev( );
 	DataSet* Nptr = OldSeries->getNext( );
 
 	Nptr->setPrev( Pptr );
@@ -192,7 +191,7 @@ void Graphbase::remove_data_series( DataSet* OldSeries )
 	if (DataHead == OldSeries)
 		DataHead = Nptr;
 	if (DataTail == OldSeries)
-		DataTail = NULL;
+		DataTail = NULL; */
 	//printf("Old Series!\n");		
 }
 
@@ -231,45 +230,31 @@ int Graphbase::draw()
 /* Calculates max for all data series */
 void Graphbase::find_max()
 {
-	DataSet* ptr  = DataHead;
-	float tmp_max = 0.;
-	while (ptr)
+	float tmp_max = -10000000.;
+	for(int s=0; s<data_series.size(); s++)
 	{
-		// 
-		tmp_max = ptr->get_max();
+		tmp_max = data_series[s].get_max();
 		if (tmp_max > max)
 			max = tmp_max;			
-		ptr = ptr->getNext();
 	}
 }
 
 /* Calculates min for all data series */
 void Graphbase::find_min()
 {
-	DataSet* ptr = DataHead;
 	float tmp_min = 0.;	
-	while (ptr)
+	for(int s=0; s<data_series.size(); s++)
 	{
-		// 
-		tmp_min = ptr->get_min();
+		tmp_min = data_series[s].get_min();
 		if (tmp_min > min)
 			min = tmp_min;			
-		ptr = ptr->getNext();
 	}
 }
 
 // how many data series are there?
 int Graphbase::count_data_series()
 {
-	DataSet* ptr = DataHead;
-	int count = 0;
-	
-	while (ptr)
-	{
-		count++;
-		ptr = ptr->getNext();
-	}	
-	return count;
+	return data_series.size();
 }
 
 int Graphbase::draw_x_scale() 

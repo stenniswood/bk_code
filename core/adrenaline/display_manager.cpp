@@ -183,7 +183,6 @@ int	DisplayManager::onCreate(  )
 */
 void DisplayManager::start_app( Application* mApp )
 {
-//	mApp->onCreate();
 	m_running_apps.push_back( mApp );
 	m_current_running_app = m_running_apps.size()-1;
 	printf("DISPLAY MANAGER:  START APP #%d .......... \n", m_current_running_app );
@@ -192,12 +191,21 @@ void DisplayManager::start_app( Application* mApp )
 	Rectangle* rect = get_useable_rect();
 	if (mApp->m_main_window)
 		mApp->m_main_window->set_position( rect );
-	
-	remove_all_objects(	);
-	add_object( mApp->m_main_window );
-	set_menu  ( &(mApp->m_main_menu)  );
-	m_side.load_controls( &(mApp->m_sidebar_controls) );	
-	m_status.set_text( mApp->m_welcome_status.c_str() );
+		
+	mApp->onCreate();
+	mApp->register_with_display_manager();
+}
+
+void DisplayManager::set_main_window( Control* mNewWindow )
+{
+	Rectangle* rect = get_useable_rect();
+	if (mNewWindow)
+		mNewWindow->set_position( rect );
+	mNewWindow->onCreate();
+	m_running_apps[m_current_running_app]->m_main_window = mNewWindow;
+	m_running_apps[m_current_running_app]->register_with_display_manager();
+	//mApp->m_main_window = mNewWindow;
+	//mApp->register_with_display_manager();
 }
 
 void DisplayManager::idle_tasks( )
@@ -326,8 +334,8 @@ void  DisplayManager::remove_all_objects(  )
 
 	// Put back in the bare essentials!		
 	register_child( &m_status );	
-	register_child( &m_sb   );
-	register_child( &m_side );
+	register_child( &m_sb     );
+	register_child( &m_side   );
 	register_child( &m_keyboard );
 	//register_child( &m_calendar );
 }
@@ -337,12 +345,12 @@ int   DisplayManager::draw(	)
 	if (Debug2) printf("\n======display manager draw===========\tStart:\n" );
 	start_screen();
 	printf("SystemBar: %x\n", &m_sb );
+	printf("Side  Bar: %x\n", &m_side );
 	printf("StatusBar: %x\n", &m_status );
 	printf("Keyboard: %x\t" , &m_keyboard );
-	if (m_keyboard.is_visible())
-		printf("KB Visible!");
+	if (m_keyboard.is_visible()) printf("KB Visible!");
 	printf("\n");
-	printf("Side  Bar: %x\n", &m_side );	
+
 	draw_background();
 	draw_children();
 	end_draw();				// end is needed to see display!
@@ -390,11 +398,7 @@ void  DisplayManager::end_draw(	)
 }
 
 int   DisplayManager::draw_children( )
-{
-/*	m_sb.draw();
-	m_side.draw();
-	m_status.draw(); */	
-	
+{	
 	if (Debug) { printf("\t\tside bar	\t");	m_side.print_positions();	}
 	if (Debug) { printf("\t\tstatus bar	\t");	m_status.print_positions();	}
 
@@ -406,8 +410,6 @@ int   DisplayManager::draw_children( )
 		(*iter)->draw();		
 	}
 
-//	if (m_keyboard.is_visible())		// DRAW LAST!
-//		m_keyboard.draw();
 	return -1;	
 }
 

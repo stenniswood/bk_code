@@ -164,13 +164,13 @@ const char red_back[] = "./games/card_images/card_back_red.jpg";
 
 int	Card::onCreate(  )
 {
-	printf("Card::oncreate  \n");
+	//printf("Card::oncreate  \n");
 	if (Card::CardBackFilename==NULL)
 	{
 		int len = strlen(red_back);
 		Card::CardBackFilename = new char[len];
 		strcpy( Card::CardBackFilename, red_back );
-		printf("%s\n", Card::CardBackFilename ); 
+		//printf("%s\n", Card::CardBackFilename ); 
 		back_image = createImageFromJpeg( Card::CardBackFilename, &Card::back_ImageInfo );		
 	}
 	load_resources();

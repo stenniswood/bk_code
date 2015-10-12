@@ -161,9 +161,12 @@ void init_image_gallery()
 {
 	Rectangle* rect = MainDisplay.get_useable_rect();
 	ig.set_position(rect->get_left(), rect->get_width(), rect->get_top(), rect->get_bottom() );
-	ig.onCreate    ();
+
 	ig.set_directory( "/home/pi/bk_code/abkInstant/media/" );
-	//ig.set_directory( "/media/My Book/tv/PhonePics/" ); 
+	ig.onCreate      ();
+	//ig.create_load_thread();	
+	ig.load_resources();
+	//ig.set_directory( "/media/My Book/tv/PhonePics/" );
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &ig );
@@ -194,7 +197,7 @@ void init_okay_cancel_dlg()
 	//check1.set_position_above( &check2 );
 	//check2.set_position_below( &check1 );
 	//check1.copy_position_horiz( &check2 );
-
+ 
 	Okay.set_text("Okay");
 	Cancel.set_text("Cancel");
 	

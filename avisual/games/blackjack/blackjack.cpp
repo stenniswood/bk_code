@@ -56,10 +56,9 @@ void play_again_cb( void* mBlackJack )
 {
 	if (Debug) printf("Play Again button pushed\n");
 	((BlackJack*)mBlackJack)->start_new_round();	
-
 }
 
-
+/***********************************************************/
 
 BlackJack::BlackJack( int mNumber_of_m_players )
 : Control(), hit(-1,-1), stay(-1,-1), play_again(-1,-1)
@@ -179,14 +178,9 @@ void BlackJack::collect_cards(	)
 		(*iter)->discard_all_cards();
 	house->discard_all_cards();
 }
-void BlackJack::setup_game(	)
-{
-//	play_again.hide();
-	// PLACE PLAYERS AND DEAL:
-	place_m_players( 100. );	
 
-	deal();
-	
+void BlackJack::arrange_players_cards(	)
+{
 	float card_spacing = CARD_WIDTH + 10;	
 	house->arrange_cards( card_spacing );	
 
@@ -196,7 +190,17 @@ void BlackJack::setup_game(	)
 	{
 		(*iter)->arrange_cards( card_spacing );
 	}
+}
+
+void BlackJack::setup_game(	)
+{
+	// play_again.hide();
+	// PLACE PLAYERS AND DEAL:
+	place_m_players( 100. );	
+
+	deal();
 	
+	arrange_players_cards();
 	whos_turn_is_it = 0;
 	place_buttons( whos_turn_is_it );
 }
@@ -238,9 +242,10 @@ void	BlackJack::deal()
 			card = draw_one();
 			(*iter)->receive_card( card, true );
 		}
-	}
+	}	
 }
 
+	
 void BlackJack::set_graphic_center( )
 {
 	m_cx = width /2. + left;
@@ -406,16 +411,18 @@ int	BlackJack::draw_score_text( CardPlayerChips* mcp )
 int BlackJack::draw()
 {
 	if (Debug) printf("\tBlackjack draw.\n");
-	print_positions();
+	//print_positions();
 	Control::draw();
 
 	// Draw title
 	Stroke_l(0xFFFFFFFF);
 	Fill_l(0xFFFFFF00);
-	float centerx = width/4. + left;
+	float leftx = left + 15;
 	float centery = height + bottom- 1.5*TITLE_HEIGHT;
-	TextMid(centerx, centery, "Black Jack", SerifTypeface, TITLE_HEIGHT );
-
+	Text(leftx, centery, "Black", SerifTypeface, TITLE_HEIGHT );	
+	leftx = left + width-15;
+	TextEnd(leftx, centery, "Jack", SerifTypeface, TITLE_HEIGHT );
+	
 	// Draw house + m_players
 	house->draw(  );
 	if (whos_turn_is_it>=number_of_m_players)
