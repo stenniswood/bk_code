@@ -19,8 +19,8 @@ public:
 	void			open_file	( string mFilename );
 	void			close_file	(  );
 
-	virtual int   	draw 		(	);	
-	virtual int		onClick(int x, int y, bool mouse_is_down=true);
+	//virtual int   	draw 		(	);	
+	//virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
 protected:
 	TabularListBox*			m_open_documents;	//

@@ -30,6 +30,45 @@
 
 #include "can_id_list.h"
 
+#define Debug 1
+
+
+void show_group_1_cb( void* mAnalogView )
+{
+	static bool visible=false;
+	AnalogView* av = mAnalogView;
+	av->show_group( 1, visible );
+	av->Invalidate();	
+	if (Debug) printf("show_group_1_cb\n");
+	visible = !visible;
+}
+void show_group_2_cb( void* mAnalogView )
+{
+	static bool visible=false;
+	AnalogView* av = mAnalogView;
+	av->show_group( 1, visible );
+	av->Invalidate();	
+	if (Debug) printf("show_group_2_cb\n");
+	visible = !visible;
+}
+void show_group_3_cb( void* mAnalogView )
+{
+	static bool visible=false;
+	AnalogView* av = mAnalogView;
+	av->show_group( 1, visible );
+	av->Invalidate();
+	if (Debug) printf("show_group_3_cb\n");
+	visible = !visible;
+}
+void show_group_4_cb( void* mAnalogView )
+{
+	static bool visible=false;
+	AnalogView* av = mAnalogView;
+	av->show_group( 1, visible );
+	av->Invalidate();
+	if (Debug) printf("show_group_4_cb\n");	
+	visible = !visible;	
+}
 
 AnalogView::AnalogView()
 {
@@ -68,7 +107,12 @@ void AnalogView::Initialize(	)
 	m_chip_enable1->set_check();
 	m_chip_enable2->set_check();	
 	m_chip_enable3->set_check();
-	m_chip_enable4->set_check();	
+	m_chip_enable4->set_check();
+	
+	m_chip_enable1->set_on_click_listener( show_group_1_cb, this );
+	m_chip_enable2->set_on_click_listener( show_group_2_cb, this );
+	m_chip_enable3->set_on_click_listener( show_group_3_cb, this );
+	m_chip_enable4->set_on_click_listener( show_group_4_cb, this );
 	printf("AnalogView::textd()\n");	
 
 	add_control( m_chip_enable1 );
@@ -103,7 +147,7 @@ void AnalogView::configure_screen()
 	}
 }
 
-void	AnalogView::show_group( int mChip, int mNumberVisible )
+void	AnalogView::create_group( int mChip, int mNumberVisible )
 {
 	Leveler* l;
 	char title[20];
@@ -117,7 +161,7 @@ void	AnalogView::show_group( int mChip, int mNumberVisible )
 				sprintf ( title, "Chip %d, A%d", mChip, i );
 			else
 				sprintf ( title, "A%d", i );		
-			printf("--- show_group:    %s;  w=%d; h=%d\n", title, m_col_increment, m_row_increment );	
+			printf("--- create_group:    %s;  w=%d; h=%d\n", title, m_col_increment, m_row_increment );	
 			l->set_text(title);			// NAME
 			m_indicators.push_back( l );	
 		}
@@ -150,27 +194,27 @@ int		AnalogView::place_views()
 	float b = bottom + m_row_start;
 	int last_used_index = 0;
 	if (m_chip_enable1->is_checked()) {
-		show_group( 0, 8 );	
+		create_group( 0, 8 );	
 		place_group( last_used_index, last_used_index+8, b );
 		last_used_index += 8;
 		b+= m_row_increment;		
 	}
 	if (m_chip_enable2->is_checked()) {
-		show_group( 1, 8 );
+		create_group( 1, 8 );
 		place_group( last_used_index, last_used_index+8, b );
 		last_used_index += 8;		
 		b+= m_row_increment;		
 	}
 
 	if (m_chip_enable3->is_checked())	{
-		show_group( 2, 8 );
+		create_group( 2, 8 );
 		place_group( last_used_index, last_used_index+8, b );
 		last_used_index += 8;		
 		b+= m_row_increment;		
 	}
 
 	if (m_chip_enable4->is_checked())	{
-		show_group( 3, 8 );
+		create_group( 3, 8 );
 		place_group( last_used_index, last_used_index+8, b );
 		last_used_index += 8;		
 		b+= m_row_increment;
@@ -182,12 +226,20 @@ int		AnalogView::place_views()
 	return 1;
 }
 
-int		AnalogView::calc_metrics()
+void AnalogView::show_group( int mGroup, bool mVisible )
+{
+	int start = m_group_start_index[mGroup];
+	for (int i=start; i<start+8; i++)
+		m_indicators[i]->show( mVisible );
+	Invalidate();
+}
+
+int	AnalogView::calc_metrics()
 {
 	m_col_start = m_chip_enable1->get_right() + 10;
 	
 	m_row_start = 10;
-	m_col_increment = (int)(width / 9.);
+	m_col_increment = (int)(width  / 9.);
 	m_row_increment = (int)(height / 5.)*1.1;
 
 	printf("\tAnalogView::calc_metrics()  width,height=%6.2f,%6.2f  :  w,h= %d %d\n", width, height, m_col_increment, m_row_increment );

@@ -5,7 +5,6 @@
 #include <string>
 #include <ctype.h>
 #include <jpeglib.h>
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "EGL/egl.h"
@@ -13,7 +12,6 @@
 #include "bcm_host.h"
 #include <fontinfo.h>
 #include <shapes.h>
-
 #include "adrenaline_windows.h"
 #include "file_editor_app.hpp"
 #include "file_editor.hpp"
@@ -25,15 +23,16 @@ void init_file_editor_app()
 {
 	if (file_app==NULL)	
 		file_app = new FileEditorApp();
-	if (file_app)
-		file_app->register_with_display_manager();
+	MainDisplay.start_app( file_app );
 }
 
 FileEditorApp::FileEditorApp () 
 { 
+	Initialize();
 }
 FileEditorApp::FileEditorApp ( Rectangle* mRect ) 
-{ 
+{
+	Initialize(); 
 }
 FileEditorApp::~FileEditorApp() 
 { 
@@ -48,18 +47,18 @@ void 	FileEditorApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
+	Application::Initialize();	
+	
+	m_welcome_status   = "Simple File Editor";
 	m_application_name = "File Editor";
-	m_main_window = new FileEditor( );
 
-	setup_app_menu();
-	setup_main_menu    ();
-	onPlace();	
-}	// create all the objects here.
+	m_main_window = new FileEditor( );
+}	
 
 int		FileEditorApp::onPlace			(	) 
 { 
 	Application::onPlace();
-	((FileEditorApp*)m_main_window)->onPlace();	
+//	((FileEditorApp*)m_main_window)->onPlace();	
 }
 
 void	FileEditorApp::setup_main_menu  	( ) 
@@ -77,11 +76,11 @@ void 	FileEditorApp::register_with_display_manager()
 
 int		FileEditorApp::About			(	) 
 { 
-	Application::About			(	);
+	return Application::About			(	);
 }
 int		FileEditorApp::Preferences		(	) 
 { 
-	Application::Preferences		(	); 
+	return Application::Preferences		(	); 
 }
 
 void	FileEditorApp::file_new		( ) 

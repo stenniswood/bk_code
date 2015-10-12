@@ -95,7 +95,7 @@ VideoApp::~VideoApp()
 }
 
 void 	VideoApp::Initialize		(	) 
-{ 
+{
 	/*  Base class is initialized in the base class constructor.
 		ie. The Application::Initialize is invoked there (not this one)
 		Even though the function is virtual, for the base class,
@@ -103,18 +103,17 @@ void 	VideoApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-
-	m_main_window = new Control();
+	m_main_window 	   = new Control();
+	m_welcome_status   = "Video & Camera";
 	m_application_name = "Video App";
 
-	setup_app_menu();
-	setup_main_menu    ();
-	setup_sidebar ();
-	onPlace();	
-
+	setup_app_menu ();
+	setup_main_menu();
+	setup_sidebar  ();
+	onPlace		   ();
 }	// create all the objects here.
 
-int		VideoApp::onPlace		(	) 
+int		VideoApp::onPlace(	)
 { 
 	Application::onPlace( );
 }
@@ -173,8 +172,8 @@ void VideoApp::setup_sidebar(	)
 	
 	tmp->load_resources( );
 	MainDisplay.m_side.add_control( tmp, "Refresh" );
-	
 }
+
 void 	VideoApp::register_with_display_manager() 
 { 
 	MainDisplay.remove_all_objects(	);
@@ -183,14 +182,12 @@ void 	VideoApp::register_with_display_manager()
 	MainDisplay.set_menu  	( &m_main_menu );
 }	
 
-int				VideoApp::About			(	) 
+int		VideoApp::About			(	) 
 { 
 }
-int				VideoApp::Preferences		(	) 
+int		VideoApp::Preferences	(	)
 { 
 }
-
-
 
 void	VideoApp::cut				()
  { }

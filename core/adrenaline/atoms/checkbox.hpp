@@ -26,10 +26,14 @@ public:
 	int				set_height_to_text();
 	int				set_check(bool CheckOn=true);
 	bool			is_checked()	{ return checked;  };
-	
+	int				set_on_click_listener( void (*callback)(void*), void* mOn_click_context );
+		
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
 protected:
+	void 	 (*on_click_callback)(void*);
+	void* 	 on_click_context;				// often this pointer to a Control*
+	
 	float	 box_rectangle[4];
 	long int box_border_color;
 	long int box_background_color;

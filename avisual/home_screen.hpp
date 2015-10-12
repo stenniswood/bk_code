@@ -3,10 +3,6 @@
 
 
 extern ClientList	AvailClients;
-
-void init_home_screen();
-
-
-
+void 				init_home_screen();
 
 #endif

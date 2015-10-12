@@ -70,6 +70,9 @@ public:
 	void	show_keyboard	(   );
 	void	hide_keyboard	(   );
 	
+	void	show_calendar	(   );
+	void	hide_calendar	(   );
+	
 	bool	relay_mouse		(   );
 	
 	std::vector<Application*>	m_running_apps;

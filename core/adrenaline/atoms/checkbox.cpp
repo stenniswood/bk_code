@@ -46,6 +46,9 @@ void CheckBox::Initialize()
 	check_box_side_length=10;
 
 	check_box_side_length = text_size;
+	
+	on_click_callback = NULL;
+	on_click_context  = NULL;	
 }
 
 void CheckBox::wrap_content( )
@@ -56,6 +59,12 @@ void CheckBox::wrap_content( )
 
 	width = total_width;
 	height = text_size*1.5;	
+}
+
+int	CheckBox::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
+{
+	on_click_context  = mOn_click_context;
+	on_click_callback = callback;
 }
 
 int CheckBox::draw_check_mark()
@@ -108,6 +117,9 @@ int	CheckBox::set_check(bool CheckOn)
 
 int	CheckBox::onClick(int x, int y, bool mouse_is_down)
 {
+	if (on_click_callback)
+		on_click_callback( on_click_context );
+
 	checked = !checked;
 	draw();
 	return -1;

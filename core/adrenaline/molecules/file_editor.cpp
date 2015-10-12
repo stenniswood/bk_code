@@ -26,17 +26,20 @@
 FileEditor::FileEditor() 
 : Control()
 { 
+	Initialize();
 }
 
 FileEditor::FileEditor( Rectangle* mRect ) 
 : Control()
 { 
 	Control::set_position(mRect);
+	Initialize();	
 }
 
 FileEditor::FileEditor( int Width, int Height ) 
 : Control( Width,  Height)
 { 
+	Initialize();
 }
 
 FileEditor::~FileEditor() 
@@ -92,10 +95,11 @@ void	FileEditor::close_file	(  )
 { 
 }
 
-int   	FileEditor::draw 		(	) 
+/*int   	FileEditor::draw 		(	) 
 { 
 }	
 
 int		FileEditor::onClick(int x, int y, bool mouse_is_down) 
 { 
 }
+*/

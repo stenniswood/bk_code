@@ -130,12 +130,11 @@ int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 	case 0: init_image_gallery		();		break;		
 	case 1: if (audio_app==NULL)
 				audio_app = new AudioApp();
-			if (audio_app)
-				audio_app->register_with_display_manager();
+			MainDisplay.start_app( audio_app );
 			break;
 	case 2: init_file_browser		();		break;
-	case 3: //init_CAN_app();
-			can_app = new CANApp();
+	case 3: if (can_app==NULL)
+				can_app = new CANApp();
 			MainDisplay.start_app( can_app );		
 			break;
 	case 4: init_drawing_app		();		break;	

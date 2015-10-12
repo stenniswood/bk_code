@@ -32,8 +32,14 @@ void show_soft_keyboard( void* mSystemStatusBar )
 
 void show_calendar( void* mSystemStatusBar )
 {
-	printf("show_calendar :: SHOW CALENDAR\n");
+	static bool is_visible = false;
+	if (is_visible==false)
+		MainDisplay.show_calendar();
+	else 
+		MainDisplay.hide_calendar();	
+	printf("show_calendar :: SHOW CALENDAR\n");	
 }
+
 
 SystemStatusBar::SystemStatusBar ( ) 
 :Control( )

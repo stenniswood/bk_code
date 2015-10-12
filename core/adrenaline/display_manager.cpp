@@ -31,8 +31,9 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug  1
-#define Debug2 1
+#define Debug  0
+#define Debug2 0
+
 Keyboard		m_keyboard;
 Control			mctrl;
 Calendar		m_calendar;
@@ -99,19 +100,35 @@ void DisplayManager::Initialize()
 
 void DisplayManager::show_keyboard	(   )
 {
-	printf("DisplayManager::show_keyboard	(   )\n");
+	if (Debug)  printf("DisplayManager::show_keyboard	(   )\n");
 	m_keyboard.show();
 	m_keyboard.draw();
 	m_keyboard.z_order = ++m_z_order_counter;
-	printf("DisplayManager::show_keyboard  %d	\n", m_z_order_counter);
+	if (Debug)  printf("DisplayManager::show_keyboard  %d	\n", m_z_order_counter);
 	sort_z_order();
 }
 
 void DisplayManager::hide_keyboard	(   )
 {
-	printf("DisplayManager::hide_keyboard	(   )\n");
+	if (Debug)  printf("DisplayManager::hide_keyboard	(   )\n");
 	m_keyboard.hide();
 	//m_keyboard.Invalidate();
+	draw();
+}
+void DisplayManager::show_calendar	(   )
+{
+	printf("DisplayManager::show_calendar	(   )\n");
+	m_calendar.show();
+	m_calendar.draw();
+	m_keyboard.z_order = ++m_z_order_counter;
+	printf("DisplayManager::show_calendar  %d	\n", m_z_order_counter);
+	sort_z_order();
+}
+void DisplayManager::hide_calendar	(   )
+{
+	printf("DisplayManager::hide_calendar	(   )\n");
+	m_calendar.hide();
+	//m_calendar.Invalidate();
 	draw();
 }
 
@@ -129,7 +146,7 @@ int	DisplayManager::onPlace( )
 	m_sb.onPlace		( );
 	if (Debug) 
 	{
-		printf("DisplayManager::onPlace()  %d,%d, %5.1f\n", screen_width, screen_height, b );
+		if (Debug)  printf("DisplayManager::onPlace()  %d,%d, %5.1f\n", screen_width, screen_height, b );
 		print_children();
 		m_sb.print_positions( );
 	}
@@ -183,15 +200,22 @@ int	DisplayManager::onCreate(  )
 */
 void DisplayManager::start_app( Application* mApp )
 {
+	if (mApp==NULL) 
+	{
+		printf("ERROR:  Application could not be started because it is NULL!\n");
+		return;
+	}
+
 	m_running_apps.push_back( mApp );
 	m_current_running_app = m_running_apps.size()-1;
 	printf("DISPLAY MANAGER:  START APP #%d .......... \n", m_current_running_app );
 
 	// register with DM 
 	Rectangle* rect = get_useable_rect();
-	if (mApp->m_main_window)
-		mApp->m_main_window->set_position( rect );
-		
+	if (mApp->m_main_window) {
+		//mApp->m_main_window->onCreate();		// this is done inside Application::onCreate() !
+		mApp->m_main_window->set_position( rect );		
+	}
 	mApp->onCreate();
 	mApp->register_with_display_manager();
 }
@@ -260,9 +284,9 @@ Rectangle*	DisplayManager::get_useable_rect( )
 
 	// TOP : 
 	float top2 = m_sb.get_bottom();
-	printf("get_bottom() = %6.1f\n", top2 );
+	if (Debug)  printf("get_bottom() = %6.1f\n", top2 );
 	float top2_ = m_sb.get_bottom_();
-	printf("get_bottom() = %6.1f\n", top2_ );	
+	if (Debug)  printf("get_bottom() = %6.1f\n", top2_ );	
 
 	m_sb.print_positions();	
 	rect.set_top( top2 );
@@ -270,11 +294,11 @@ Rectangle*	DisplayManager::get_useable_rect( )
 	// Right Side:	
 	if (m_side.is_visible()==true) {
 		float l2 = m_side.get_left_()-1; 
-		printf("right side = %6.1f\n", l2 );
+		if (Debug)  printf("right side = %6.1f\n", l2 );
 		rect.set_right( l2 );
 	} else
 		rect.set_right( screen_width );
-	printf("right = %6.1f\n", rect.get_right() );
+	if (Debug)  printf("right = %6.1f\n", rect.get_right() );
 	
 	// no task bar yet!
 	rect.set_left( 0 );
@@ -344,12 +368,12 @@ int   DisplayManager::draw(	)
 {
 	if (Debug2) printf("\n======display manager draw===========\tStart:\n" );
 	start_screen();
-	printf("SystemBar: %x\n", &m_sb );
-	printf("Side  Bar: %x\n", &m_side );
-	printf("StatusBar: %x\n", &m_status );
-	printf("Keyboard: %x\t" , &m_keyboard );
+	if (Debug)  printf("SystemBar: %x\n", &m_sb );
+	if (Debug)  printf("Side  Bar: %x\n", &m_side );
+	if (Debug)  printf("StatusBar: %x\n", &m_status );
+	if (Debug)  printf("Keyboard: %x\t" , &m_keyboard );
 	if (m_keyboard.is_visible()) printf("KB Visible!");
-	printf("\n");
+	if (Debug)  printf("\n");
 
 	draw_background();
 	draw_children();
@@ -441,7 +465,7 @@ int   DisplayManager::draw_background( 	)
 Control* DisplayManager::HitTest( int x, int y )
 {
 	Control* retval = Control::HitTest(x,y);
-	printf("DisplayManager::HitTest()   %x \n", retval );
+	if (Debug)  printf("DisplayManager::HitTest()   %x \n", retval );
 	
 	if (retval==this)
 		return NULL;	// don't want display manager empty space to do anything.
@@ -457,22 +481,3 @@ bool DisplayManager::relay_mouse(   )
 	mouse_capture_control->HitTest(mouse.x, mouse.y);
 	return true;	
 }
-
-
-/*Control*  DisplayManager::Find_object( Control* NewControl )
-{
-	Control* ctrl = Head;
-	while (ctrl)
-	{
-		if (ctrl->id==NewControl->id)
-			return ctrl;
-		ctrl = ctrl->getNext();
-	}
-	return NULL;
-}*/
-
-/*void  DisplayManager::onClick( int x, int y, bool mouse_is_down=true )
-{
-	Control* obj = HitTest(x,y);
-	obj->onClick();
-}*/

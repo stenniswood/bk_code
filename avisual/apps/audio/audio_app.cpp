@@ -246,9 +246,9 @@ void 	AudioApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-	m_application_name = "Audio Master";
+	m_application_name = "AudMaster";
 	m_welcome_status   = m_application_name;
-	
+
 	VolumeSlider.set_level_percent( 50.0    );	
 	VolumeSlider.set_max		  ( 100.0   );
 	VolumeSlider.set_width_height ( 70,200  );

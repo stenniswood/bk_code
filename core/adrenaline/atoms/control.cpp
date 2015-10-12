@@ -320,7 +320,7 @@ Control* Control::ChildrenHitTest( int x, int y )
 	{
 		retval = (*iter)->HitTest( x,y );		
 		if (retval) {
-			printf("Hit: %s\t", retval);
+			//printf("Hit: %s\t", retval);
 			(*iter)->print_positions();
 			hit_objects.push_back( retval );
 		}

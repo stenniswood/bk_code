@@ -29,8 +29,9 @@ public:
 	int				place_views();
 
 	void			configure_screen();	// based on which checkboxes enabled.
-	void			show_group ( int mChip, int mNumberVisible );
-	void			place_group( int mStartIndex, int mEndIndex, float mBottom );
+	void			create_group ( int mChip, int mNumberVisible 	);
+	void			show_group 	 ( int mGroup, bool mVisible=true  	);
+	void			place_group	 ( int mStartIndex, int mEndIndex, float mBottom );
 
 
 	int				handle_incoming_msg	( struct sCAN* msg );

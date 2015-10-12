@@ -127,6 +127,8 @@ int		Application::calc_metrics()
 // chance to load resources, call functions which use fonts
 int	Application::onCreate	(  ) 
 {
+	if (m_main_window)
+		m_main_window->onCreate();
 	setup_app_menu();
 	setup_main_menu();
 	onPlace();

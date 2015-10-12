@@ -25,6 +25,8 @@
 #include "draw_app2.hpp"
 #include "CAN_base.h"
 #include "robot_app.hpp"
+#include "robot_vision.hpp"
+
 
 
 RobotApp* robot_app=NULL;
@@ -61,8 +63,8 @@ void RobotApp::Initialize		(	)
 	joint_positions   = new AnalogView ();	
 	robot_vision 	  = new RobotVisionPanel();	
 	m_main_window 	  = (Control*) robot_panel;
-	
-}	// create all the objects here.
+
+}	// create all the objects here
 
 int	RobotApp::onPlace			(	)
 { 
@@ -77,32 +79,24 @@ int robot_view_menu_callback(void* menuPtr, int mMenuIndex, RobotApp* mApp )
 	switch( mMenuIndex )
 	{
 	case 0:	// Dwelling
-			break;
+			break; 
 	case 1:	// Control Panel 
-				mApp->m_main_window = (Control*) mApp->robot_panel;
-				mApp->register_with_display_manager();	
+			MainDisplay.set_main_window( (Control*) mApp->robot_panel );
 			break;	
 	case 2: // Robot 
-				MainDisplay.set_main_window( (Control*) mApp->joint_positions );
-				//mApp->m_main_window = ;
-				//mApp->m_main_window->Invalidate();
-				//mApp->joint_positions->onCreate();
-				//mApp->register_with_display_manager();		
+			MainDisplay.set_main_window( (Control*) mApp->joint_positions );
 			break;
 	case 3:	// Diagnostics
-				mApp->m_main_window = (Control*) mApp->robot_diagnostics;
-				mApp->register_with_display_manager();	
+			MainDisplay.set_main_window( (Control*) mApp->robot_diagnostics );
 			break;
 	case 4:	// Performance
-				mApp->m_main_window = (Control*) mApp->robot_performance;
-				mApp->register_with_display_manager();	
+			MainDisplay.set_main_window( (Control*) mApp->robot_performance );
 			break;
 	case 5:	// History
-			//	mApp->m_main_window = (Control*) robot_vision_summary;
+			MainDisplay.set_main_window( (Control*) mApp->robot_vision );
 			break;
 	case 6:	// Vision
-				mApp->m_main_window = (Control*) mApp->robot_vision;
-				mApp->register_with_display_manager();				
+			MainDisplay.set_main_window( (Control*) mApp->robot_vision );
 			break;
 			
 	default:	return 0;
@@ -125,6 +119,7 @@ void RobotApp::setup_main_menu  ( )
 	view_menu.add_callback_all_items( robot_view_menu_callback  );	
 	m_main_menu.add_sub_menu    ( "View", &view_menu );	
 }
+
 void RobotApp::register_with_display_manager()
 { 
 	Application::register_with_display_manager();
@@ -157,12 +152,11 @@ void RobotApp::file_save		( )
 void RobotApp::file_save_as	( )
 { 
 }
-
-void RobotApp::show_grid		( )
+void RobotApp::show_grid	( )
 { 
 }
 
-void RobotApp::zoom_in			()
+void RobotApp::zoom_in		()
 { 
 }
 void RobotApp::zoom_out		()
