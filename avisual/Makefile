@@ -1,5 +1,5 @@
 CC		   = g++-4.9
-OPTIONS	   =  -Wwrite-strings -fpermissive
+OPTIONS	   =  -Wwrite-strings -fpermissive -Wreturn-type
 # 
 # INCLUDE PATHS:
 CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\

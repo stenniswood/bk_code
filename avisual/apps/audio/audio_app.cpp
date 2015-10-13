@@ -287,10 +287,6 @@ void 	AudioApp::Initialize		(	)
 	freq_view.set_data( sample_waveform(), 200 );
 	//freq_view.set_data( freqs, 64 );
 	printf("AudioApp::Initialize 3\n");
-	
-	setup_app_menu();
-	setup_main_menu();
-	onPlace();	
 
 	// CREATE Audio Visual Thread : 
 	int iret1 = pthread_create( &audio_view_thread_id, NULL, process_audio, NULL);
@@ -321,7 +317,7 @@ void AudioApp::configure_wave_views(int mChannels, short* mDataCh1, short* mData
 	wave_view_left.m_wave = &dWave;	
 	wave_view_left.set_width_height( 1400, 200 );
 	wave_view_left.move_to		   (  220, 100 );
-	wave_view_left.set_data		   ( mDataCh1 );
+	wave_view_left.set_data		   ( mDataCh1  );
 
 	// Left Audio Channel Display:
 	if (mChannels>1)

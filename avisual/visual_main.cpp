@@ -82,7 +82,6 @@ void init_ipc( const char* mVectorFileName )
 		return;
 	}
 	aud_attach_memory();
-	
 	can_connect_shared_memory(FALSE);
 }
 

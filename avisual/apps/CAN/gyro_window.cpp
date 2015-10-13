@@ -28,11 +28,12 @@
 
 GyroView::GyroView()
 {
-	set_width_height( 1500., 900 );	
+	//set_width_height( 1500., 900 );	
 	move_to		    ( 0, 100   );
 	Initialize();
 }
 GyroView::GyroView( int Left, int Right, int Top, int Bottom )
+: Window (Left,Right,Top,Bottom)
 {
 	set_position( Left, Right, Top, Bottom );
 	Initialize();

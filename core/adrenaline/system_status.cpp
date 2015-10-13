@@ -36,7 +36,7 @@ void show_calendar( void* mSystemStatusBar )
 	if (is_visible==false)
 		MainDisplay.show_calendar();
 	else 
-		MainDisplay.hide_calendar();	
+		MainDisplay.hide_calendar();
 	printf("show_calendar :: SHOW CALENDAR\n");	
 }
 

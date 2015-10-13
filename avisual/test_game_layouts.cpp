@@ -52,60 +52,69 @@ CardPlayer player2(4);
 */
 void init_cards_only( )
 {
-	const int PADDING = 20;
-	int l = 100+PADDING; 
+	const int PADDING = 20;	
 	MainDisplay.remove_all_objects(	);
-			
+	Rectangle* rect = MainDisplay.get_useable_rect();
+	
+	int start_l = rect->get_left()   + rect->get_width() * 0.05; 
+	int b = rect->get_bottom() + rect->get_height() * 0.05;
+
+	
 	//  HEARTS.   h c d s 
+	int l = start_l;
 	Card* cardsH[13];				// first suit.
 	for (int i=0; i<13; i++)
 	{
 		cardsH[i] = new Card(i);
 		cardsH[i]->load_resources();
 		cardsH[i]->match_image_size();
-		cardsH[i]->move_to( l, 200 );
+		cardsH[i]->move_to( l, b );
 		cardsH[i]->print_positions();		
 		l += cardsH[i]->get_width() + PADDING;
 		MainDisplay.add_object	( cardsH[i] );
 	}
+	int b_inc = (int)((float)(cardsH[0]->get_height()) * 1.07);
+	b += b_inc;
 	
 	//  HEARTS.   h c d s 
+	l = start_l;
 	Card* cardsC[13];				// first suit.
-	l = 100+PADDING;
 	for (int i=0; i<13; i++)
 	{
 		cardsC[i] = new Card(i+13);
 		cardsC[i]->load_resources();
 		cardsC[i]->match_image_size();
-		cardsC[i]->move_to( l, 300 );
+		cardsC[i]->move_to( l, b );
 		cardsC[i]->print_positions();		
 		l += cardsC[i]->get_width() + PADDING;
 		MainDisplay.add_object	( cardsC[i] );
 	}
-
+	b += b_inc;
+	
 	//  HEARTS.   h c d s 
+	l = start_l;
 	Card* cardsD[13];				// first suit.
-	l = 100+PADDING;
 	for (int i=0; i<13; i++)
 	{
 		cardsD[i] = new Card(i+26);
 		cardsD[i]->load_resources();
 		cardsD[i]->match_image_size();
-		cardsD[i]->move_to( l, 400 );
+		cardsD[i]->move_to( l, b );
 		cardsD[i]->print_positions();		
 		l += cardsD[i]->get_width() + PADDING;
 		MainDisplay.add_object	( cardsD[i] );
 	}
-
+	b += b_inc;
+	
 	//  HEARTS.   h c d s 
+	l = start_l;
 	Card* cardsS[13];				// first suit.
-	l = 100+PADDING;
 	for (int i=0; i<13; i++)
 	{
 		cardsS[i] = new Card(i+39);
 		cardsS[i]->load_resources();
 		cardsS[i]->match_image_size();
-		cardsS[i]->move_to( l, 500 );
+		cardsS[i]->move_to( l, b );
 		cardsS[i]->print_positions();		
 		l += cardsS[i]->get_width() + PADDING;
 		MainDisplay.add_object	( cardsS[i] );

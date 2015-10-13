@@ -33,8 +33,7 @@ void init_hearts( )
 	printf("init_hearts()\n");
 	if (hearts_app==NULL)	
 		hearts_app = new HeartsApp();
-	if (hearts_app)
-		hearts_app->register_with_display_manager();		
+	MainDisplay.start_app( hearts_app );
 }
 
 HeartsApp::HeartsApp ()
@@ -82,7 +81,7 @@ int		HeartsApp::onPlace		(	)
 // First Time application is run - load resources etc.
 int		HeartsApp::onCreate(	)	
 {
-	Application::onCreate();
+	return Application::onCreate();
 	
 }
 
@@ -108,17 +107,17 @@ void 	HeartsApp::register_with_display_manager()
 
 int		HeartsApp::About			(	)
 { 
-	Application::About();
+	return Application::About();
 } 
 
 int		HeartsApp::Preferences	(	)
 {
-	Application::Preferences(); 
+	return Application::Preferences(); 
 } 
 
 int		HeartsApp::Quit			(	)
 { 
-	Application::Quit();
+	return Application::Quit();
 } 	
 
 void	HeartsApp::file_new		( )

@@ -103,7 +103,7 @@ void DisplayManager::show_keyboard	(   )
 	if (Debug)  printf("DisplayManager::show_keyboard	(   )\n");
 	m_keyboard.show();
 	m_keyboard.draw();
-	m_keyboard.z_order = ++m_z_order_counter;
+	m_keyboard.z_order = ++m_z_order_counter;	// for the hittest 
 	if (Debug)  printf("DisplayManager::show_keyboard  %d	\n", m_z_order_counter);
 	sort_z_order();
 }
@@ -118,9 +118,10 @@ void DisplayManager::hide_keyboard	(   )
 void DisplayManager::show_calendar	(   )
 {
 	printf("DisplayManager::show_calendar	(   )\n");
+
 	m_calendar.show();
 	m_calendar.draw();
-	m_keyboard.z_order = ++m_z_order_counter;
+	m_calendar.z_order = ++m_z_order_counter;
 	printf("DisplayManager::show_calendar  %d	\n", m_z_order_counter);
 	sort_z_order();
 }
@@ -155,36 +156,38 @@ int	DisplayManager::onPlace( )
 	float status_height = 32.;	
 	m_status.move_to		 ( 0, 0 );
 	m_status.set_width_height( screen_width, status_height );
-	if (Debug) m_status.print_positions (  );
+	if (Debug) m_status.print_positions(  );
 	m_status.onPlace		 (  );
 
 	// RIGHT SideBar
 	int sidebar_width = m_side.get_expanded_width();
 	float h 		  = screen_height - status_height - system_bar_height;
-	m_side.move_to			( screen_width-sidebar_width, status_height );
+	m_side.move_to		   ( screen_width-sidebar_width, status_height );
 	m_side.set_width_height( sidebar_width, h );
 	if (Debug) m_side.print_positions();
 	m_side.onPlace( );
-	m_side.hide();
-	
-	// PLACE KEYBOARD:
-	m_keyboard.set_position( 0, screen_width, screen_height, 0.0);
-	m_keyboard.adjust_height();
-	m_keyboard.hide();
-	bool vis =  m_keyboard.is_visible();
+	m_side.hide   ( );
+
+	// PLACE KEYBOARD : 
+	m_keyboard.set_position ( 0, screen_width, screen_height, 0.0 );
+	m_keyboard.adjust_height(  );
+	m_keyboard.hide			(  );
+	bool vis = m_keyboard.is_visible( );
 	if (vis==true)
 		printf("KB Visible!\n");
 
 	mctrl.hide();
 	bool vis2 = mctrl.is_visible();
 	if (vis2==true)
-		printf("mCTRL VIsible!\n"); 
-		
-	m_keyboard.invalidated = false;
-	printf("DisplayManager::onPlace() keyboard.hide(   )\n");
+		printf("mCTRL VIsible!\n");
 
-	// PLACE CALENDAR:
-	m_calendar.set_position( screen_width-m_calendar.get_width(), screen_width, m_calendar.get_height(), 0.0);
+	m_keyboard.invalidated = false;
+	printf("DisplayManager::onPlace() keyboard.hide() \n");
+
+	// PLACE CALENDAR : 
+	m_calendar.set_position( screen_width-m_calendar.get_width(), screen_width, m_calendar.get_height(), 0.0 );
+	m_calendar.onCreate    ( );
+	m_calendar.hide		   ( );
 	return 1;
 }
 
@@ -361,7 +364,7 @@ void  DisplayManager::remove_all_objects(  )
 	register_child( &m_sb     );
 	register_child( &m_side   );
 	register_child( &m_keyboard );
-	//register_child( &m_calendar );
+	register_child( &m_calendar );
 }
 
 int   DisplayManager::draw(	)
