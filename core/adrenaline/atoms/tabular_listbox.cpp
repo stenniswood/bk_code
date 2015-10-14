@@ -89,6 +89,17 @@ void TabularListBox::print_tab_info(   )
 	}
 }
 
+void TabularListBox::clear_items( )  
+{
+	ListBox::clear_items();
+	for(int row=0; row<LineData.size(); row++)
+	{
+		LineData[row].clear();
+	}
+	LineData.clear();	
+	Invalidate();
+}
+
 void TabularListBox::calc_metrics( )
 {
 	ListBox::calc_metrics();
@@ -286,6 +297,9 @@ void TabularListBox::calc_widths_from_text( int mNotToExceed )
 	for (int col=0; col<num_columns; col++)
 	{
 		max_chars = 0;
+
+		if (Headings[col].width > 0)	// only do it if requested.
+			continue;
 
 		// Each column has the same font.  So the most characters is the most pixels.
 		// But bad assumption.  The font may be proportional, so some letters smaller/longer.		

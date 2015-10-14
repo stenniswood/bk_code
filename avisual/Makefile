@@ -1,4 +1,23 @@
-CC		   = g++-4.9
+RPI = 1
+linux_desktop = 2
+Mac = 3
+
+PLATFORM  = $(RPI)
+#PLATFORM = $(linux_desktop)
+#PLATFORM  = $(Mac)
+
+ifeq ($(PLATFORM), $(RPI))
+HOME_PATH = /home/pi/     
+endif
+ifeq ($(PLATFORM), $(linux_desktop))
+HOME_PATH = ~/                
+endif
+ifeq ($(PLATFORM), $(Mac))
+HOME_PATH = /Users/stephentenniswood/
+endif
+
+
+CC		   = g++
 OPTIONS	   =  -Wwrite-strings -fpermissive -Wreturn-type
 # 
 # INCLUDE PATHS:
@@ -17,7 +36,7 @@ VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 # LIBRARY FLAGS :
 LIBFLAGS   = -L../core/libs/ilclient/ -L/opt/vc/lib -L../core/libs/vgfont/  \
 			-ljpeg -lshapes -lwiringPi -lm 
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -DPLATFORM=$(PLATFORM) -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
 #CFLAGS +=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX \
 #		-D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
 #		-U_FORTIFY_SOURCE -Wall -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -ftree-vectorize \

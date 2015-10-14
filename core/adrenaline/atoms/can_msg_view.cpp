@@ -125,57 +125,74 @@ int		CANMessageView::add_message ( struct sCAN* msg )
 	add_row( &row ); 
 }
 
+#define DATA_COL_WIDTH 35
+
 int	CANMessageView::setup_headers()
 {
 	static struct HeaderItemInfo mNewHeading;	// = new struct HeaderItemInfo();
 	//mNewHeading.width	  = -1;
-	mNewHeading.text 		= "ID";
-	mNewHeading.alignment  = HEADER_ALIGN_LEFT;
+	mNewHeading.text 		= "ID ";
+	mNewHeading.alignment  = HEADER_ALIGN_CENTER;
+	mNewHeading.width               = DATA_COL_WIDTH*2.5;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "Name";
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;
+	mNewHeading.width		= 30*8;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "Instance";
 	mNewHeading.alignment  = HEADER_ALIGN_CENTER;	
+	mNewHeading.width		= -1;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "DLC";
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.width               = 40;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "[0]";		// for now all 8 bytes at once.
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.width		= DATA_COL_WIDTH;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "[1]";		// for now all 8 bytes at once.
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.width		= DATA_COL_WIDTH;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "[2]";		// for now all 8 bytes at once.
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.width		= DATA_COL_WIDTH;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "[3]";		// for now all 8 bytes at once.
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.width		= DATA_COL_WIDTH;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "[4]";		// for now all 8 bytes at once.
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.width		= DATA_COL_WIDTH;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "[5]";		// for now all 8 bytes at once.
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.width		= DATA_COL_WIDTH;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "[6]";		// for now all 8 bytes at once.
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.width		= DATA_COL_WIDTH;
 	add_column( &mNewHeading );
 
 	mNewHeading.text 		= "[7]";		// for now all 8 bytes at once.
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;	
+	mNewHeading.width		= DATA_COL_WIDTH;
 	add_column( &mNewHeading );
+	
+	calc_column_positions_from_widths();
+
 }
 
 int 	CANMessageView::order_by_time		() 

@@ -33,15 +33,15 @@ void *eventThread(void *arg)
 {
 	// Open mouse driver
 //	if ((mouse_fd = open("/dev/input/mouse0", O_RDONLY)) < 0) {	
-	if ((mouse_fd = open("/dev/input/event0", O_RDONLY)) < 0) {	
+	if ((mouse_fd = open("/dev/input/event2", O_RDONLY)) < 0) {	
 		if ((mouse_fd = open("/dev/input/event1", O_RDONLY)) < 0) {	
-			if ((mouse_fd = open("/dev/input/event2", O_RDONLY)) < 0) {
+			if ((mouse_fd = open("/dev/input/event0", O_RDONLY)) < 0) {
 				fprintf(stderr, "Error opening Mouse!\n");
 				quitState = 1;
 				return &quitState;
-			}
-		}
-	}	
+			} else printf("Opened /dev/input/event0\n");
+		} else printf("Opened /dev/input/event1\n");
+	} else printf("Opened /dev/input/event2\n");
 
 	mouse.x = mouse.max_x / 2;			   //Reset mouse
 	mouse.y = mouse.max_y / 2;

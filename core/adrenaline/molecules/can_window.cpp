@@ -133,6 +133,19 @@ int		CANMessages::onCreate(  )
 	place_views();
 	//fill_phony_msgs();
 	Window::onCreate();
+	m_msg_view.calc_column_positions_from_widths();
+}
+
+void rescan_cb( void* mCANMessages )
+{
+	CANMessages* cm = (CANMessages*) mCANMessages;
+	cm->reset_boards_present();
+	cm->Invalidate();	
+}
+void  CANMessages::reset_boards_present()
+{
+	m_board_view.reset();
+	m_board_view.Invalidate(); 
 }
 
 int		CANMessages::place_views()
@@ -144,14 +157,16 @@ int		CANMessages::place_views()
 	m_board_view.move_to		 ( left, bottom+100   );
 	//m_board_view.print_positions ( );
 
-	m_rescan.set_text			  ( "Rescan" );
+	m_rescan.set_text		  ( "Rescan" );
 	m_rescan.set_width_height	  ( 75, 50   );
 	m_rescan.set_position_below	  ( &m_board_view, false, 0 ); 
 	m_rescan.move_to 			  ( left, m_rescan.get_bottom() );
+	m_rescan.set_on_click_listener	( rescan_cb, this );
 
-	m_msg_view.move_to  		 ( left+width/2., bottom  );
-	m_msg_view.set_width_height	 ( width/2, height   );
-	m_msg_view.set_text_color	 ( 0xFFFF0000 );
+
+	m_msg_view.move_to  		 ( left+width/2.-10, bottom  );
+	m_msg_view.set_width_height	 ( width/2-10   , height   );
+	m_msg_view.set_text_color	 ( 0xFF100000 );
 	//m_msg_view.print_positions();
 	
 	register_child( &m_rescan     );
@@ -159,14 +174,17 @@ int		CANMessages::place_views()
 	register_child( &m_msg_view   );
 }
 
-int		CANMessages::handle_incoming_msg	( struct sCAN* msg ) 
+int	CANMessages::handle_incoming_msg	( struct sCAN* msg ) 
 {
+	if (msg==NULL) return 0;
+
 	//struct sCAN* result = m_filter_view.filter_incoming_msg( msg );
 	//if (result)		
 
 		m_msg_view.handle_incoming_msg( msg );	
-		//m_board_view.handle_incoming_msg(msg);
+		m_board_view.handle_incoming_msg(msg);
 
+	return 1;
 	// test if it's a trigger for another message.
 	//     then send response	
 }

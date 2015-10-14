@@ -61,6 +61,7 @@ public:
 
 	struct stBoardInfoText* convert_to_text( struct stBoardInfo2* mInfo );
 
+	void		reset();
 	int		populate_with_boards(	);	
 	
 	

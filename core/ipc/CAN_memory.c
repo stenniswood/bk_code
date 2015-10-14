@@ -337,13 +337,13 @@ int can_connect_shared_memory(char mAllocate)
 		can_attach_memory();
 		can_fill_memory	 ();
 		CAN_save_segment_id(segment_id_filename);			
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(can_ipc_memory_map*)-1))
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 			return 1;
 
 	} else  {
 		CAN_read_segment_id(segment_id_filename);	
 		can_attach_memory();		
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(can_ipc_memory_map*)-1))
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 			return 1;
 	}
 	return 0;

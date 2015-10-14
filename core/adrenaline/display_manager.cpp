@@ -255,7 +255,7 @@ void DisplayManager::idle_tasks( )
 	if ((m_current_running_app>=0) && (m_current_running_app<m_running_apps.size())) 
 	{
 		//printf("idle task: %d \n", m_current_running_app );
-		//m_running_apps[m_current_running_app]->background_time_slice();	
+		m_running_apps[m_current_running_app]->background_time_slice();	
 	}
 }
 

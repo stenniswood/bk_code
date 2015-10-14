@@ -29,6 +29,7 @@ public:
 	int				setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms );
 	int				setup_triggered_response_msg( struct sCAN* mTriggerMsg, struct sCAN* mResponse );	
 
+	void			reset_boards_present();
 	void			fill_phony_msgs();
 
 	virtual int		onCreate	  (  );	// chance to load resources, call functions which use fonts

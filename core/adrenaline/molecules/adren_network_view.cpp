@@ -83,11 +83,19 @@ int	NetworkView::setup_headers()
 
 	mNewHeading.text 		= "Description";		// Revision
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;
+	mNewHeading.width      = 300;
 	add_column( &mNewHeading );
 
 /*	mNewHeading.text 		= "Manufacturer";		// Revision
 	mNewHeading.alignment  = HEADER_ALIGN_LEFT;
 	add_column( &mNewHeading ); */
+}
+
+void NetworkView::reset()
+{
+	m_board_info.clear();
+	m_board_info_text.clear();
+	clear_items();
 }
 
 struct stBoardInfoText* NetworkView::convert_to_text( struct stBoardInfo2* mInfo )
@@ -127,11 +135,22 @@ int	NetworkView::add_board( struct stBoardInfo2* mBInfo )
 	formulate_line( Txt );
 }
 
+void can_parse_board_presence_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
+{
+    mOut->model    = mMsg->data[0];
+    mOut->instance = mMsg->data[1];
+    mOut->status   = mMsg->data[2];
+   // mOut->block    = mMsg->data[3];
+}
+
 int	NetworkView::handle_incoming_msg( struct sCAN* msg )
 {
+	static struct stBoardInfo2 bi;
 	switch(msg->id.group.id)
 	{
-	case ID_BOARD_PRESENCE_BROADCAST: 
+	case ID_BOARD_PRESENCE_BROADCAST:
+		can_parse_board_presence_msg( msg, &bi );
+		add_board( &bi );		 
 		break;
 	case ID_BOARD_REVISION:
 		break;
@@ -147,32 +166,32 @@ void 	NetworkView::Initialize  (	)
 { 
 	TabularListBox::Initialize();
 	setup_headers();	
-	struct stBoardInfo2 bi;
-	bi.model = 21;
-	bi.instance = 31;
-	bi.status = 0;
-	bi.Software_Major = 3;
-	bi.Software_Minor = 5;
-	bi.Hardware_Revision = 'C';
-	bi.Manufacturer = 1;
-	bi.BKSerialNumber = 0x00001001;
-	strcpy (bi.Description, "BigMotor Board");		
-	add_board ( &bi );
-	bi.instance = 32;
-	add_board ( &bi );
-	bi.instance = 33;
-	add_board ( &bi );
-	bi.instance = 41;	
-	add_board 		( &bi );	
-	bi.instance = 42;	
-	add_board 		( &bi );	
-	bi.instance = 43;
-	add_board 		( &bi );
+	populate_with_boards();
 }
 
-int		NetworkView::populate_with_boards(	)
+int	NetworkView::populate_with_boards(	)
 {
-
+        struct stBoardInfo2 bi;
+        bi.model = 21;
+        bi.instance = 31;
+        bi.status = 0;
+        bi.Software_Major = 3;
+        bi.Software_Minor = 5;
+        bi.Hardware_Revision = 'C';
+        bi.Manufacturer = 1;
+        bi.BKSerialNumber = 0x00001001;
+        strcpy (bi.Description, "BigMotor Board");              
+        add_board ( &bi );
+        bi.instance = 32;
+        add_board ( &bi );
+        bi.instance = 33;
+        add_board ( &bi );
+        bi.instance = 41;       
+        add_board               ( &bi );        
+        bi.instance = 42;       
+        add_board               ( &bi );        
+        bi.instance = 43;
+        add_board               ( &bi );
 }
 
 int		NetworkView::calc_metrics(	) 
@@ -194,15 +213,6 @@ int	NetworkView::draw_board_info( )
 int	NetworkView::draw  	( )
 {
 	TabularListBox::draw();
-}
-
-
-void can_parse_board_presence_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
-{
-    mOut->model    = mMsg->data[0];
-    mOut->instance = mMsg->data[1];
-    mOut->status   = mMsg->data[2];
-   // mOut->block    = mMsg->data[3];
 }
 
 void can_parse_board_revision_msg( sCAN* mMsg, struct stBoardInfo2* mOut )

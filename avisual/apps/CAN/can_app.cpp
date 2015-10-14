@@ -28,9 +28,9 @@
 #include "gyro_window.h"
 #include "analog_board_app.hpp"
 #include "CAN_memory.h"
+#include "display_manager.hpp"
 
 
-//static VerticalMenu     draw_file_menu(-1,-1);
 static VerticalMenu     CAN_edit_menu(-1,-1);
 static VerticalMenu     CAN_view_menu(-1,-1);
 static VerticalMenu     CAN_graph_menu(-1,-1);
@@ -107,14 +107,15 @@ void 	CANApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-	m_welcome_status   = "Get as close to 21 without going over.";
+	m_welcome_status   = "Monitor and generate CAN traffic. For vehicle or Adrenaline.";
 	m_application_name = "CAN App";
 	Application::Initialize();
 			
-	m_gyro 		  = new GyroView   ();
-	m_analog 	  = new AnalogView ();
-	m_msgs 	      = new CANMessages();		// defined in ../core/adrenaline/molecules/can_window.cpp
-	m_msg_view    = NULL; // new CANMessageView  ();		
+	m_gyro 	  = new GyroView   ();
+	m_analog  = new AnalogView ();
+	m_msgs 	  = new CANMessages();	// defined in ../core/adrenaline/molecules/can_window.cpp
+					//  contains a CANMessageView & NetworkView
+	m_msg_view    = NULL; // new CANMessageView();		
 	m_board_view  = NULL; // new NetworkView();
 	m_main_window = m_msgs;
 	printf("CANApp::Initialize()\n");
@@ -122,9 +123,6 @@ void 	CANApp::Initialize		(	)
 	m_rx_tail 	   = 0;
 	m_rx_tail_laps = 0;
 
-/*	setup_app_menu();		done in onCreate()
-	setup_main_menu();
-	onPlace();		*/
 	setup_sidebar ();
 	printf("CANApp::Initialize() done.\n");
 }	// create all the objects here.
@@ -187,14 +185,7 @@ char CAN_App_Status[] = "CAN App";
 
 void 	CANApp::register_with_display_manager() 
 { 
-	//Application::register_with_display_manager() ;		//This should replace all of the below
-	
-	printf("CANApp::register_with_display_manager()\n");
-	MainDisplay.remove_all_objects(	);
-	//printf("CANApp::register_with_display_manager() removed\n");	
-	MainDisplay.add_object	( m_main_window );	
-	MainDisplay.m_status.set_text( CAN_App_Status );
-	MainDisplay.set_menu  	( &m_main_menu );
+	Application::register_with_display_manager();			
 	printf("CANApp::register_with_display_manager() done\n");		
 }
 
@@ -208,32 +199,32 @@ int				CANApp::Preferences		(	)
 void 	CANApp::show_messages	( )	// CAN Messages view.
 {
 	m_main_window = m_msgs; //_view;
-	//m_main_window = m_msg_view;	
 		// This will be better as a tab control page probably.
-	register_with_display_manager();			
+	MainDisplay.set_main_window( m_main_window );
 }
 
 void 	CANApp::show_network	( )	// Adrenaline Network.
 {
 	m_main_window = m_board_view;
-		// This will be better as a tab control page probably.
-	register_with_display_manager();
+	// This will be better as a tab control page probably.
+	MainDisplay.set_main_window( m_main_window );
 }
 
 void 	CANApp::show_sequencer	( )	// Robot sequencer
 {
+	//MainDisplay.MainDisplay.set_main_window( m_main_window );
 }
 void 	CANApp::show_gyro	( )		// Robot sequencer
 {
 	printf("CANApp::show_gyro() called\n");
 	m_main_window = m_gyro;
-	register_with_display_manager();			
+	MainDisplay.set_main_window( m_main_window );
 }
 void 	CANApp::show_analogs ( )	// Robot sequencer
 {
 	printf("CANApp::show_ANALOG() called \n" );
 	m_main_window  = m_analog;
-	register_with_display_manager();		
+	MainDisplay.set_main_window( m_main_window );
 }
 
 void 	CANApp::add_watch		(	) 
@@ -265,10 +256,10 @@ int		CANApp::background_time_slice(	)
 				m_gyro->handle_incoming_msg  ( ptr ); 
 			if (m_msgs)
 				m_msgs->handle_incoming_msg( ptr ); 
+                        if (m_board_view)
+                                m_board_view->handle_incoming_msg( ptr );
 /*			if (m_msg_view)
-				m_msg_view->handle_incoming_msg( ptr );
-			if (m_board_view)
-				m_board_view->handle_incoming_msg( ptr ); */			
+				m_msg_view->handle_incoming_msg( ptr ); */
 		}
 	};	
 	return 0;
