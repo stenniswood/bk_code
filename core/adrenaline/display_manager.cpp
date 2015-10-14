@@ -23,9 +23,9 @@
 #include "rectangle.hpp"
 
 #include "calendar.hpp"
+#include "calendar_summary.hpp"
 #include "display_manager.hpp"
 #include "avisual_menu.hpp"		// Specific system menu.  not part of adrenaline_windows
-
 
 
 
@@ -37,6 +37,7 @@ DisplayManager MainDisplay(1920, 1080);
 Keyboard		m_keyboard;
 Control			mctrl;
 Calendar		m_calendar;
+CalendarSummary m_calendar_summary;
 
 
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
@@ -118,6 +119,9 @@ void DisplayManager::hide_keyboard	(   )
 void DisplayManager::show_calendar	(   )
 {
 	printf("DisplayManager::show_calendar	(   )\n");
+	m_calendar_summary.show();
+	m_calendar_summary.draw();
+	m_calendar_summary.z_order = ++m_z_order_counter;
 
 	m_calendar.show();
 	m_calendar.draw();
@@ -127,8 +131,9 @@ void DisplayManager::show_calendar	(   )
 }
 void DisplayManager::hide_calendar	(   )
 {
-	printf("DisplayManager::hide_calendar	(   )\n");
+	printf("DisplayManager::hide_calendar(   )\n");
 	m_calendar.hide();
+	m_calendar_summary.hide();
 	//m_calendar.Invalidate();
 	draw();
 }
@@ -185,9 +190,19 @@ int	DisplayManager::onPlace( )
 	printf("DisplayManager::onPlace() keyboard.hide() \n");
 
 	// PLACE CALENDAR : 
-	m_calendar.set_position( screen_width-m_calendar.get_width(), screen_width, m_calendar.get_height(), 0.0 );
+	m_calendar.set_position( screen_width-m_calendar.get_width(), screen_width, 
+						     m_calendar.get_height(), 0.0 );
 	m_calendar.onCreate    ( );
 	m_calendar.hide		   ( );
+	
+	float summary_w = 250;
+	//float summary_h = m_calendar.get_height();
+	m_calendar_summary.set_position( m_calendar.get_left()-summary_w, m_calendar.get_right(), 
+									 m_calendar.get_height(), 0.0 );
+	m_calendar_summary.onCreate( );
+	m_calendar_summary.hide    ( );	
+	printf("=== CALENDAR_SUMMARY :  ");
+	m_calendar_summary.print_positions();
 	return 1;
 }
 
@@ -365,6 +380,7 @@ void  DisplayManager::remove_all_objects(  )
 	register_child( &m_side   );
 	register_child( &m_keyboard );
 	register_child( &m_calendar );
+	register_child( &m_calendar_summary );
 }
 
 int   DisplayManager::draw(	)

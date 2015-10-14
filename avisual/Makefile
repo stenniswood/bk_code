@@ -5,7 +5,7 @@ OPTIONS	   =  -Wwrite-strings -fpermissive -Wreturn-type
 CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 	 		 ../core/misc/ ../core/msg/    ../core/wifi/     ../core/ipc/    	\
 	 		 ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
-			 ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/
+			 ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ ../core/adrenaline/molecules/calendar/
 APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 INC		= $(CORE_INC) $(APPS_INC) $(GAMES_INC) ./voice/ ./kinetic/ ./
@@ -72,7 +72,9 @@ ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
 			stereo_power.o stick_figure.o system_bar.o can_window.o   \
-			application.o file_editor.o calendar.o 
+			application.o file_editor.o
+ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o
+
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o
 KINETIC_OBJS = 
@@ -99,6 +101,7 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) 	\
 		$(addprefix ../core/adrenaline/atoms/,	   $(ADRENALINE_ATOMS_OBJS)) 	 \
 		$(addprefix ../core/adrenaline/molecules/, $(ADRENALINE_MOLECULES_OBJS)) \
+		$(addprefix ../core/adrenaline/molecules/calendar/, $(ADRENALINE_SYSTEM_UI_OBJS)) \
 		$(addprefix ../core/adrenaline/graphs/,	   $(ADRENALINE_GRAPH_OBJS))	 \
 		$(addprefix ../core/msg/,			$(MSG_OBJS))  			\
 		$(addprefix ../core/can/,			$(CAN_OBJS))			\

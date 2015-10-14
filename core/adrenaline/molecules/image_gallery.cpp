@@ -136,8 +136,6 @@ int  ImageGallery::draw( )
 	return Window::draw();
 }
 
-
-
 pthread_t 	load_thread_id;
 
  VGImage image;
@@ -253,7 +251,6 @@ int	 ImageGallery::onClick(int x, int y, bool mouse_is_down)
 			sprintf(str, "loading %d ...", last_loaded_index );
 			MainDisplay.m_status.set_text(str);			
 		} else {
-
 			sprintf(str, "%d / %d : %s", current_image_index, Filelist.size(), Filelist[current_image_index].c_str() );
 			MainDisplay.m_status.set_text(str);
 
