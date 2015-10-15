@@ -60,6 +60,8 @@ void ScrollBar::print_scroll_info( )
 {
 	printf("ScrollInfo: max=%d; min=%d; lines_visible=%d; m_position=%d\n", 
 			m_MaxValue, m_MinValue, m_AmountVisibleValue, m_position);
+	printf("Scrollbar Pixel:  m_start_pixel=%d;   m_bar_pixel_length=%d \n",
+			m_start_pixel, m_bar_pixel_length );	
 }
 
 
@@ -89,7 +91,7 @@ void ScrollBar::calc_vertical_bar_pixels( )
 	//float fraction = (float)m_position / max_start_value ;
 	//float max_m_start_pixel = height - m_bar_pixel_length)
 	
-	int top_pixel = (bottom+height) - ((float)m_position / value_range) * (float)height;
+	int top_pixel = (bottom+height) - ((float)(m_position-m_MinValue) / value_range) * (float)height;
 	//printf("top_pix=%d; range=%4.1f; height=%d\n", top_pixel, range, height);
 
 	m_start_pixel = (top_pixel - m_bar_pixel_length);
@@ -170,6 +172,7 @@ void ScrollBar::set_amount_visible	( long int  mValue )
 
 int	ScrollBar::HitTestArea(int x, int y)
 {
+	printf("ScrollBar::HitTestArea()   x=%d;  y=%d\n", x, y ); 
 	if (m_is_dragging)
 		return HIT_BAR;		// even if it moves sideways outside the rectangle!
 		
@@ -206,6 +209,7 @@ long int ScrollBar::interpolate(float bar_top)
 // need to put mouse_is_down into Control:: and all derived classes!
 int	ScrollBar::onClick	 (int x, int y, bool mouse_is_down)
 {
+	m_is_dragging = false;
 	if ((m_is_dragging) )		// release
 	{
 		// Want to place the same portion of the bar as when we picked it up; in the
@@ -223,6 +227,7 @@ int	ScrollBar::onClick	 (int x, int y, bool mouse_is_down)
 	{
 		if (mouse_is_down)	
 		{
+			print_scroll_info();
 			// store the number of pixels to top of the bar.
 			m_top_to_y_delta = (m_start_pixel+m_bar_pixel_length)-y;
 			m_is_dragging = true;			
@@ -250,10 +255,11 @@ int	ScrollBar::onClick	 (int x, int y, bool mouse_is_down)
 void ScrollBar::page_down(  )	
 {
 	m_position += m_AmountVisibleValue/2.; 
-
+	
 	float highest_value = m_MaxValue-m_AmountVisibleValue;	
 	if (m_position > highest_value)
 		m_position = highest_value;
+	Invalidate();
 }
 
 void ScrollBar::page_up	 (  )	
@@ -261,5 +267,6 @@ void ScrollBar::page_up	 (  )
 	m_position -= m_AmountVisibleValue/2.;
 	if (m_position < m_MinValue)
 		m_position = m_MinValue;
+	Invalidate();
 }
 

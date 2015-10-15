@@ -366,26 +366,27 @@ Control* ListBox::HitTest(int x, int y)
 int	ListBox::onClick(int Mousex, int Mousey, bool mouse_is_down)
 {	
 	// Call ScrollControl::onClick() first.  If click is a scrollbar, then handle it.
+	
 	int retval = ScrollControl::onClick( Mousex, Mousey, mouse_is_down );
 	if (retval>0)
 		return retval;
-	
+
+	// IGNORE
 	if ((Mousex<left) || (Mousex>(left+width)))
 		return 0;
 
-	int   start=first_visible_line;
-	int   end  =first_visible_line+number_lines_visible;
-	float y;
-
+	// DEBUG
 	if (Debug) {
-		printf("ListBox:: on Click()  : start=%d, end=%d\n",  first_visible_line, end);
+		printf("ListBox:: on Click()  : start=%d, end=%d\n",  first_visible_line, first_visible_line+number_lines_visible);
 		printf("ListBox:: on Click()  : mousex,mousey\n");
 		print_positions();
 	}
-	
+
+	// FIND & SELECT ENTRY:
 	int index = get_hit_index( Mousex, Mousey );
 	select( index );
 
+	// REDRAW
 	Invalidate();
 	return selected_item;
 }

@@ -70,10 +70,10 @@ int	CANMessageView::handle_incoming_msg	( struct sCAN* msg )
 	
 	if (in_filter)
 	{	
-		if (count++ < 50)
+		if (count++ < 100)
 		{	
-			if (msg->header.DLC > 8)
-				printf("DLC=%d\n", msg->header.DLC );
+			//if (msg->header.DLC > 8)
+			//	printf("DLC=%d\n", msg->header.DLC );
 				
 			msg->header.DLC 		  = 8;
 			
