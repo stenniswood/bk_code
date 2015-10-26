@@ -47,6 +47,7 @@ public:
 
 private:
 	float	coords[4];
+	
 	float 	left;
 	float 	bottom;
 	float 	width;

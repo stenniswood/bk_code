@@ -48,8 +48,8 @@ extern struct   client_ipc_memory_map* ipc_memory_client;
 /*********************************************************/
 
 void cli_dump_ipc			( );
-void cli_save_segment_id	(char* mFilename);
-int  cli_read_segment_id	(char* mFilename);
+void cli_save_segment_id	( char* mFilename );
+int  cli_read_segment_id	( char* mFilename );
 
 int  cli_allocate_memory	( );
 void cli_deallocate_memory	( int msegment_id );

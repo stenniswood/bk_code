@@ -7,6 +7,12 @@
 	This is a tabular list view of the CAN messages.
 */
 
+const int CAN_MESSAGE_BUFFER_SIZE = 5000 * 60 * 30;		// approximately 30 minutes worth.
+
+
+const int CAN_MSG_MODE_HISTORY  = 1;
+const int CAN_MSG_MODE_MESSAGES = 2;
+
 class CANMessageView : public TabularListBox
 {
 public:
@@ -15,19 +21,21 @@ public:
 	CANMessageView ( int Width, int Height 					  );
 	~CANMessageView();
 
-	virtual void 	Initialize  (	);
-	int				calc_metrics(	);
+	virtual void 	Initialize  		(	);
+	int				calc_metrics		(	);
  
- 	int				setup_headers		( );
-	int				add_message 		( struct sCAN* msg );
+ 	void			setup_headers		( );
+	void			add_message 		( struct sCAN* msg );
 	int				handle_incoming_msg	( struct sCAN* msg );
 
-	int 			order_by_time		( );
-	int 			order_by_msg_id		( );
+	void 			order_by_time		( );
+	void 			order_by_msg_id		( );
 
-	int   			draw_entry 			( int mState	);	
+	void   			draw_entry 			( int mState	);	
 	virtual int   	draw		 		(				);
+	vector<string>* convert_to_string	( struct sCAN* msg );
 
+	void			save				( string mFilename );		// Save all messages!
 	int				get_hit_index		( int Mousex, int Mousey );
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 
@@ -35,6 +43,7 @@ protected:
 	std::vector<struct sCAN*>	m_msgs;
 	int				m_width;
 	bool			has_scroller;	
+	int				m_mode;
 };
 
  

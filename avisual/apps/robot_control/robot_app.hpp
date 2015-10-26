@@ -29,11 +29,13 @@ public:
 	virtual void 	Initialize		(	);	// create all the objects here.
 	int				onPlace			(	);
 
+	void			StartSequence(	);
+	
 	virtual void	setup_main_menu ( );
 	virtual void 	register_with_display_manager();	
 
-	int				About			(	);
-	int				Preferences		(	);
+	void			About			(	);
+	void			Preferences		(	);
 	int				Quit			(	);	
 
 	virtual void	file_new		( );

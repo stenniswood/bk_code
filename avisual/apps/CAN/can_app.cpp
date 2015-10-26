@@ -30,7 +30,7 @@
 #include "CAN_memory.h"
 #include "display_manager.hpp"
 
-
+ 
 static VerticalMenu     CAN_edit_menu(-1,-1);
 static VerticalMenu     CAN_view_menu(-1,-1);
 static VerticalMenu     CAN_graph_menu(-1,-1);
@@ -107,7 +107,10 @@ void 	CANApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-	m_welcome_status   = "Monitor and generate CAN traffic. For vehicle or Adrenaline.";
+	if (ipc_memory_can<=0)
+		m_welcome_status   = "No CAN connection. Connect PiCAN board & run \'amon\'. ";
+	else
+		m_welcome_status   = "Monitor and generate CAN traffic. For vehicle or Adrenaline.";
 	m_application_name = "CAN App";
 	Application::Initialize();
 			
@@ -189,10 +192,10 @@ void 	CANApp::register_with_display_manager()
 	printf("CANApp::register_with_display_manager() done\n");		
 }
 
-int				CANApp::About			(	) 
+void	CANApp::About			(	) 
 { 
 }
-int				CANApp::Preferences		(	) 
+void	CANApp::Preferences		(	) 
 { 
 }
 
@@ -258,7 +261,7 @@ int		CANApp::background_time_slice(	)
 				m_msgs->handle_incoming_msg( ptr ); 
                         if (m_board_view)
                                 m_board_view->handle_incoming_msg( ptr );
-/*			if (m_msg_view)
+/*			if (m_msg_view) 
 				m_msg_view->handle_incoming_msg( ptr ); */
 		}
 	};	

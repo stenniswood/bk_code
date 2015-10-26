@@ -79,6 +79,8 @@ public:
 
 	virtual Control* HitTest( int x, int y );
 	virtual int		 onClick( int x, int y, bool mouse_is_down=true );
+	virtual int		 onCreate	  (  );
+	virtual int		 place_views ( ) { return 1; };	
 	
 protected:
 	/* Best to get rid of this list!  After all how is it any better than what's in 

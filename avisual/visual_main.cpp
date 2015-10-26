@@ -16,18 +16,20 @@
 #include "packer.h"
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
-
+ 
 #include "can_id_list.h"
 #include "cmd_process.h"
 #include "leds.h"
 #include "vector_math.h"
 #include "parser_tilt.h"
 #include "catagorization.h"
-
 #include "window_layouts.hpp"
 #include "callbacks.hpp"
 #include "vector_file.hpp"
-#include "mouse.h"
+
+#include "mouse_oop.hpp"
+#include "touch_gesture.hpp"
+#include "keyboard_dev.hpp"
 #include "test_layouts.hpp"
 
 #include <assert.h>
@@ -72,7 +74,6 @@ void init_ipc( const char* mVectorFileName )
 	
 	bkInstant_connected = connect_shared_client_memory( FALSE );
 	printf("init_ipc %d \n", bkInstant_connected );
-	
 	//bkInstant_connected = connect_shared_abkInstant_memory(); 
 
 	// AUDIO : 
@@ -83,6 +84,7 @@ void init_ipc( const char* mVectorFileName )
 	}
 	aud_attach_memory();
 	can_connect_shared_memory(FALSE);
+	printf("============== IPC DONE ==============\n");
 }
 
 void help()
@@ -109,7 +111,7 @@ void print_args(int argc, char *argv[])
 int icount=0;
 int Last_Retrieved_Number=0;
 
-
+DraggerGesture mouse; 
 
 void gui_interface()
 {
@@ -117,10 +119,13 @@ void gui_interface()
 	static int right_mouse_button_prev = 0;
 
 	// HANDLE MOUSE EVENTS :
-	int result = mouse_timeslice();
+	//int result=0;
+	int result = mouse.time_slice();	//int result = mouse_timeslice(); 	
+	//printf(" mouse.time_slice()  result =%d\n", result );
+	
 	MainDisplay.end_screen(); 
 
-	Control* object_clicked = NULL;
+	Control* object_clicked = NULL; 
 	int x = round(mouse.x);
 	int y = round(mouse.y);
 	if (MainDisplay.mouse_capturing==true)
@@ -131,7 +136,7 @@ void gui_interface()
 	{
 		//if (left_mouse_button_prev == 0)
 		{
-			//printf(" Left button clicked!  mousex=(%d,%d)\n", x,y);
+			printf(" Left button clicked!  mousexy=(%d,%d)\n", x,y );
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
 			{
@@ -161,13 +166,14 @@ void gui_interface()
 	BOOL invalid = MainDisplay.any_invalid_children();
 	// if the invalid child is now hiden, or moved, redraw everything underneath it!
 	if (invalid)
-	{	UpdateDisplaySemaphore = 1; 
-
-		printf("Testing for invalid children.  Found! \n");	
+	{	
+		UpdateDisplaySemaphore = 1;
+		printf("Test for invalid children.  Found! \n");	
 	}
-	//if (printf("any_invalid_children= %d\n", UpdateDisplaySemaphore );			
+
 	MainDisplay.draw_invalid_children();
 	MainDisplay.update_invalidated();	
+	//printf("MainDisplay.update_invalidated. \n");
 
 	if (ipc_memory_client)
 		if (cli_is_new_update())
@@ -184,13 +190,13 @@ void gui_interface()
 		// Only draw the invalidated() items.
 		
 		MainDisplay.draw();		
-		printf("MainDisplay.draw() Done.\n");
+		//printf("MainDisplay.draw() Done.\n");
 		MainDisplay.update_invalidated();
 		//printf("MainDisplay.update_invalidated() Done.\n");
 				
 		// so now just resave the buffer with new contents:
-		save_mouse();		
-		//printf("done with save_mouse()\n");		
+//		mouse.save_mouse();
+		//printf("done with save_mouse()\n");
 	}
 }
 
@@ -232,7 +238,7 @@ extern Wave dWave;
 	Seems like functionality doesn't work without interrupts.  ie. flags 
 	are only set when the Enable is.  maybe.		*/
 int main( int argc, char *argv[] )
-{
+{ 
 	printf("======= main() ==============\n");		
 	init_ipc("simple_walk.csv");
 	DisplayNum = 4;
@@ -253,10 +259,12 @@ int main( int argc, char *argv[] )
 		} 
 	} else 
 		init_home_screen();		// opening screen!	Located in window_layouts.cpp
-		
+
+	printf("================= init_home_screen() ==========================\n");	
 	UpdateDisplaySemaphore=1;
 	MainDisplay.onCreate();
-
+	dev_keyboard_init();
+	
 	//audio_file_open();
 	//play_waveform( &dWave, 1 );
 	//audio_play();
@@ -268,7 +276,7 @@ int main( int argc, char *argv[] )
 		//if (bkInstant_connected)
 		//	ethernet_interface();
 
-		MainDisplay.idle_tasks();		
+		MainDisplay.idle_tasks();	
 		//printf("done with MainDisplay.idle_tasks()\n");
 		
 		// Want to be able to open the screen leaving everything as is.

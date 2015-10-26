@@ -46,6 +46,7 @@ protected:
 	//CANMessageList		m_msg_list;			// All messages in database.
 
 	Button					m_rescan;
+	Button					m_filter;
 	Button					m_view_graph;		// toggle between outline (msg flow) & graphing of data.
 
 	int						m_width;

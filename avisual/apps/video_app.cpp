@@ -182,11 +182,11 @@ void 	VideoApp::register_with_display_manager()
 	MainDisplay.set_menu  	( &m_main_menu );
 }	
 
-int		VideoApp::About			(	) 
-{ 
+void		VideoApp::About			(	) 
+{ Application::About();
 }
-int		VideoApp::Preferences	(	)
-{ 
+void		VideoApp::Preferences	(	)
+{ Application::Preferences();
 }
 
 void	VideoApp::cut				()

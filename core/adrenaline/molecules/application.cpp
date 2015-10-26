@@ -199,13 +199,13 @@ void	Application::file_save_as	()
 { 
 }
 
-int		Application::About			(	)
+void	Application::About			(	)
 {
 	TextView* about = new TextView();
 	MainDisplay.add_object( about );
 	return 1;	
 }
-int		Application::Preferences(	)
+void	Application::Preferences(	)
 {
 	return 1;
 }

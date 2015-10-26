@@ -227,13 +227,13 @@ void	AudioApp::setup_main_menu  	( )
 	printf("AudioApp::Initialize menu done\n");
 }
 
-int	AudioApp::About			(	)
+void	AudioApp::About			(	)
 {
-
+	Application::About();
 }
-int	AudioApp::Preferences		(	)
+void	AudioApp::Preferences		(	)
 {
-
+	Application::Preferences();
 }
 
 // create all the objects here.

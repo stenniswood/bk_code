@@ -24,6 +24,29 @@
 #include "display.h"
 #include "CAN_base.h"
 #include "can_window.hpp"
+#include "filter_select.hpp"
+
+
+void rescan_cb( void* mCANMessages )
+{
+	CANMessages* cm = (CANMessages*) mCANMessages;
+	cm->reset_boards_present();
+	cm->Invalidate();	
+}
+
+FilterSelector* fs = NULL;
+
+void adjust_filter_cb( void* mCANMessages )
+{
+	CANMessages* cm = (CANMessages*) mCANMessages;
+	fs = new FilterSelector();	
+	fs->set_width_height( 300, 200 );
+	fs->move_to		    ( 200, 100 );
+	fs->onCreate();	
+//	fs->m_update.set_on_click_listener( update_value_cb, mObj );
+	fs->draw();		
+//	cm->Invalidate();	
+}
 
 
 /* When the CAN_app is active, change the menu as below */
@@ -136,12 +159,7 @@ int		CANMessages::onCreate(  )
 	m_msg_view.calc_column_positions_from_widths();
 }
 
-void rescan_cb( void* mCANMessages )
-{
-	CANMessages* cm = (CANMessages*) mCANMessages;
-	cm->reset_boards_present();
-	cm->Invalidate();	
-}
+
 void  CANMessages::reset_boards_present()
 {
 	m_board_view.reset();
@@ -163,6 +181,10 @@ int		CANMessages::place_views()
 	m_rescan.move_to 			  ( left, m_rescan.get_bottom() );
 	m_rescan.set_on_click_listener	( rescan_cb, this );
 
+	m_filter.set_text		  	  ( "Filter", true );
+	m_filter.set_position_right_of( &m_rescan );
+	m_filter.set_on_click_listener	( adjust_filter_cb, this );
+
 
 	m_msg_view.move_to  		 ( left+width/2.-10, bottom  );
 	m_msg_view.set_width_height	 ( width/2-10   , height   );
@@ -170,6 +192,7 @@ int		CANMessages::place_views()
 	//m_msg_view.print_positions();
 	
 	register_child( &m_rescan     );
+	register_child( &m_filter     );
 	register_child( &m_board_view );
 	register_child( &m_msg_view   );
 }

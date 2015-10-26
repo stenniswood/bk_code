@@ -178,13 +178,15 @@ void SystemBar::set_menu( HorizontalMenu* mMenu )
 int	SystemBar::onCreate(  )
 {
 	// Inflate the menu's:
+	printf("\tSystemBar::onCreate()\n" );	
+	
 	static bool first_time = true;
 	if (first_time)
 	{	
 		init_system_hmenu(  );	
 		first_time = false; 	
 	};	
-	//printf("\tSystem Menu:  sysmenu:%x  draw_menu:%x \n", &system_hmenu, &draw_menu );
+	printf("\tSystem Menu:  sysmenu:%x  draw_menu: \n", &system_hmenu );
 	m_Menu = &system_hmenu;	
 
 	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_side) );
@@ -192,11 +194,12 @@ int	SystemBar::onCreate(  )
 	//m_wifi.set_on_click_listener  ( show_wifi,   (void*)&(MainDisplay.m_wifi  ) );
 	//m_volume.set_on_click_listener( show_volume, (void*)&(MainDisplay.m_volume) );
 
-	m_child_controls.clear();
+	//m_child_controls.clear();
 	register_child( m_Menu );
 	register_child( &m_show_sidebar );
 	register_child( &m_show_taskbar );
 	register_child( &m_wifi 		);
 	register_child( &m_volume 		);
+	Control::onCreate();
 }
 

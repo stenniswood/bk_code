@@ -145,11 +145,14 @@ void init_directory_lb_test()
 
 FileBrowser  browser(1000,600);
 //Control		browse(1000,600);
+
 void init_file_browser()
 {
 	printf("\n\ninit_file_browser\n\n");
+	Rectangle* rect = MainDisplay.get_useable_rect();
+	browser.set_position( rect );
+	printf("useableRect:\t"); rect->print_positions();	
 	browser.set_base_path( "/home/pi/" );
-	browser.move_to      ( 100, 100 );
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &browser );

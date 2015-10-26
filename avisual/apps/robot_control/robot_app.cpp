@@ -26,6 +26,7 @@
 #include "CAN_base.h"
 #include "robot_app.hpp"
 #include "robot_vision.hpp"
+#include "client_memory.hpp"
 
 
 
@@ -50,6 +51,20 @@ RobotApp::~RobotApp()
 { 
 }
 
+void RobotApp::StartSequence(	)
+{
+	
+	// SEND ENABLES : 
+	//int result = Req_CAN( mBuffer, mPin, mHigh );		
+	//SendTelegram(mBuffer, mSize );
+
+	// SEND ALL POSES : 
+	//for ( )
+	{
+		//int result = pack_Pose( BYTE* mBuffer, struct stBodyPosition bp, boolean mHigh );		
+		//SendTelegram( BYTE* mBuffer, int mSize );
+	}
+}
 void RobotApp::Initialize		(	)
 { 
 	printf("RobotApp:: Initialize() \n");
@@ -64,7 +79,26 @@ void RobotApp::Initialize		(	)
 	robot_vision 	  = new RobotVisionPanel();	
 	m_main_window 	  = (Control*) robot_panel;
 
-}	// create all the objects here
+	// CONNECT TO  SEQUENCING RPI : 
+	char working_buffer[127];
+	strcpy( working_buffer, "connect " );
+	strcat( working_buffer, "192.168.1.121" );
+		printf("\n\nConnect command:  %s\n", working_buffer );			
+	cli_ipc_write_sentence( working_buffer );		// This is working!
+	
+	// REQUEST CAN : 
+	strcpy( working_buffer, "send can " );
+	printf("\n\nSend command:  %s\n", working_buffer );
+	cli_ipc_write_sentence( working_buffer );		
+
+	// STOP CAN : 
+	strcpy( working_buffer, "stop can " );
+	printf("\n\nSend command:  %s\n", working_buffer );
+	//cli_ipc_write_sentence( working_buffer );		
+
+	// Connect to the Vision RPI:	
+	
+}	
 
 int	RobotApp::onPlace			(	)
 { 
@@ -125,12 +159,13 @@ void RobotApp::register_with_display_manager()
 	Application::register_with_display_manager();
 }	
 	
-int	RobotApp::About			(	)
+void	RobotApp::About			(	)
 { 
-	return 0;
+	Application::About();
 }
-int	RobotApp::Preferences		(	)
-{ 	return 0; 
+void	RobotApp::Preferences		(	)
+{
+	Application::Preferences();
 }
 int RobotApp::Quit			(	)
 { 

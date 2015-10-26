@@ -19,7 +19,7 @@
 #include "test_layouts.hpp"
 #include "file_browser.hpp"
 
-#define Debug 0
+#define Debug 1
 
 
 FileBrowser::FileBrowser()
@@ -44,7 +44,7 @@ FileBrowser::~FileBrowser()
 void FileBrowser::Initialize( )
 {
 	if (Debug) printf("\n\tFileBrowser::Initialize()::\n");
-	Control::Initialize();
+	//Control::Initialize();
 	path_descriptor   = NULL;
 	show_hidden_files = false;
 	if (Debug) printf("\tFileBrowser::Initialize()::done!\n");
@@ -60,13 +60,48 @@ void FileBrowser::show_hidden( bool mShow )
 	show_hidden_files = mShow;
 }
 
+// width in pixels needed to show all directory list boxes
+float FileBrowser::compute_width_all_dirs(  )		
+{
+	float total_width = 0;
+	vector<DirectoryListBox*>::iterator iter = levels.begin();
+	while (iter != levels.end())
+	{
+		total_width += (*iter)->get_width();		
+		iter++;	
+	}
+	return total_width;
+}
+
+int FileBrowser::onPlace	(  )	// chance to place children.
+{
+	// if views take more room than available:
+	float total_width = compute_width_all_dirs();
+	if (total_width > width)
+	{
+		// Start packing from the Right.
+		float last_right = (*levels.begin())->get_width() + left;		// Save room for the first (root) directory
+		float left_edge = (left+width);
+		vector<DirectoryListBox*>::iterator iter = levels.end();
+		while ((iter != levels.begin()))
+		{
+			left_edge -= (*iter)->get_width();
+			// Until no more room (leaving favorites)
+			if (left_edge > last_right)
+				(*iter)->move_to( left_edge, bottom);
+			else
+				(*iter)->hide();		// don't show those early ones that don't fit on the window.
+			iter--;	
+		}
+	}
+}
 
 int	FileBrowser::onCreate(  )
 {
 	if (Debug) printf("FileBrowser::onCreate(  )\n");
 	create_file_browser( );
 	Control::onCreate();
-	if (Debug) printf("FileBrowser::onCreate(  ) done\n");	
+	//if (Debug) printf("FileBrowser::onCreate(  ) done\n");	
 }
 
 /* Start with just 1 level */
@@ -77,14 +112,13 @@ void FileBrowser::create_file_browser( )
 	path_descriptor = new TextView	( width, 32 );
 	path_descriptor->set_text		( base_path.c_str() );
 	path_descriptor->set_text_size  ( 14 );
-	//path_descriptor->onCreate		();
-	float h = bottom+height-path_descriptor->get_height();
+	path_descriptor->onCreate		();
+	
+	float h = bottom+height - path_descriptor->get_height();
 	if (Debug) printf(" %s \n", base_path.c_str() );	
-	if (Debug) printf(" %d \n", h );
 	path_descriptor->move_to		(left, h );
-	if (Debug) printf(" move_to (%6.1f, %6.1f) \n", left, h );
 	path_descriptor->print_positions();
-	//register_child( path_descriptor );
+	register_child( path_descriptor );
 
 	// Create the first file List :
 	add_level( base_path );
@@ -97,21 +131,18 @@ void FileBrowser::add_level( string mAppendPath )
 {
 	if (Debug) printf( "add_level : %s \n", mAppendPath.c_str() );
 	DirectoryListBox*  tmp_dir  = new DirectoryListBox();
-	float ht = height - path_descriptor->get_height();
-
 	tmp_dir->set_odd_color   ( 0xFF9FFFFF 	);
-	tmp_dir->set_width_height( 200, ht 	);		// height will get overwritten
 	tmp_dir->populate_directories( mAppendPath.c_str(), 1 );
+	
+	float ht = height - path_descriptor->get_height();	
+	tmp_dir->set_width_height( 200, ht 	);		// height will get overwritten
 	//tmp_dir->populate_files  ( mAppendPath, 1 );
-	//printf( "add_level : populated directories. \n" );
-
-	int size = levels.size();	
-	vector<DirectoryListBox*>::iterator iter;
+	
+	int size = levels.size();
 	if (size==0) {
-		if (Debug) printf("First level::  put at left\n");
 		tmp_dir->move_to(left, bottom);
-	}
-	else {
+	} else {
+		vector<DirectoryListBox*>::iterator iter;
 		if (Debug) printf("previous level: \n" );
 		iter = levels.end();	iter--;
 		if (Debug) (*iter)->print_positions();
@@ -120,6 +151,8 @@ void FileBrowser::add_level( string mAppendPath )
 	}
 	register_child  (tmp_dir);
 	levels.push_back(tmp_dir);
+	
+	tmp_dir->z_order = -1;
 }
 
 void FileBrowser::extract_complete_path()		// from the sequence of listboxes.
@@ -163,23 +196,24 @@ void FileBrowser::collapse_to_level( int mLevelIndex )
 
 int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 {
-	if (Debug) printf(" Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		
+	//if (Debug) 
+	printf("FileBrowser::onClick() Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		
 	bool start_closing = false;
 	int  size = levels.size();
 
 	// WHICH LEVEL:
 	int level_index = which_level_clicked( Mousex, Mousey );
 
+	// COLLAPSE  open lists deeper than this:
+	collapse_to_level( level_index );
+
 	// WHICH ITEM:   (find the item within that level)
 	int item_index = levels[level_index]->get_hit_index( Mousex, Mousey );
-
 	if (Debug) printf("You clicked FileBrowser level:%d; item:%d\n", level_index, item_index );
 
 	// SELECT ITEM:
 	levels[level_index]->select( item_index );
 
-	// COLLAPSE  open lists deeper than this:
-	//collapse_to_level( level_index );
 
 	// Now, if the selected item was a directory...
 	// add 1 new listbox showing it's contents.

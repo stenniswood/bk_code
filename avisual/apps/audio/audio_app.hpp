@@ -50,8 +50,8 @@ public:
 	virtual void	setup_app_menu  ( );
 	virtual void 	register_with_display_manager();	
 	
-	int				About			(	);
-	int				Preferences		(	);
+	void			About			(	);
+	void			Preferences		(	);
 			
 	virtual void	file_new		( );
 	virtual void	file_open		( );	

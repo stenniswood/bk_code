@@ -21,17 +21,15 @@
 #include "tabular_listbox.hpp"
 #include "directory_listbox.hpp"
 
+static 	struct image_info	ImageInfo;
+static	VGImage 			folder_image=0;
 
-static 	struct image_info ImageInfo;
-static	VGImage folder_image=0; //= createImageFromJpeg( "./resources/folder.jpg", &ImageInfo );
-
+#define Debug 0
 
 DirectoryListBox::DirectoryListBox()
 :TabularListBox()
 {
-	printf("DirectoryListBox::ctor()\n");
 	Initialize();
-	printf("DirectoryListBox::initialized\n");
 }
 
 DirectoryListBox::DirectoryListBox( int Left, int Bottom, int mWidth, int mNumber_items_shown, int mItem_height )
@@ -62,7 +60,7 @@ void DirectoryListBox::Initialize()
 
 	// Load Directory Folder icon:
 	if (folder_image==0) {
-		printf("DirectoryListBox::Initialize()\n");
+		if (Debug)  printf("DirectoryListBox::Initialize()\n");
 		folder_image = createImageFromJpeg( "./resources/folder.jpg", &ImageInfo );
 	}
 	printf("DirectoryListBox::Initialize() done\n");

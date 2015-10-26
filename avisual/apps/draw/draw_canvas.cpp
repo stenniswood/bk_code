@@ -241,6 +241,11 @@ bool Drawing2D::append_new_captured	( )
 		
 }
 
+Control* Drawing2D::HitTest ( int x, int y 	)
+{
+	Capture(x,y,1);
+}
+
 Control* Drawing2D::Capture ( int x, int y, int finger 	)
 {
 //	mouse.

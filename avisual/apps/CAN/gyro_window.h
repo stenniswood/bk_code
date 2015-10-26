@@ -18,6 +18,13 @@
 #define MENU_STATE_CIRCLED 		4
 #define MENU_STATE_EMPHASIZED 	5
 
+struct stValueInfo {
+	int	 instance;
+	int  id;
+	int  start_byte;
+	int	 num_bytes;
+};
+
 class GyroView : public Window
 {
 public:
@@ -28,8 +35,9 @@ public:
 
 	virtual void 	Initialize  ( );
 	int				calc_metrics( );
-	int				place_views ( );
+	virtual int		place_views ( );
 
+	int				handle_generic_msg ( struct sCAN* msg );
 	int				handle_incoming_msg	( struct sCAN* msg );
 	int				setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms );
 	int				setup_triggered_response_msg( struct sCAN* mTriggerMsg, struct sCAN* mResponse );	
@@ -39,12 +47,14 @@ public:
 
 	virtual int		onCreate	  (  );	// chance to load resources, call functions which use fonts
 	
-	int				get_hit_index		( int Mousex, int Mousey );
+	//int				get_hit_index		( int Mousex, int Mousey );
 	virtual int		onClick				( int x, int y, bool mouse_is_down=true);
 	virtual int   	draw		 		(				);
 
+	struct stValueInfo		m_match_data[3];
+	
 protected:
-
+	
 	DataSet* 	accel [3];
 	DataSet* 	gyro  [3];
 	DataSet* 	magnet[3];
@@ -54,9 +64,11 @@ protected:
 	LineGraph* 	y_axis;
 	LineGraph* 	z_axis;
 	
-	Button					m_rescan;
-	Button					m_view_graph;		// toggle between outline (msg flow) & graphing of data.
-
+	Button					m_restart;
+	Button					m_value1;
+	Button					m_value2;
+	Button					m_value3;
+	
 	int						m_width;
 	bool					has_scroller;
 };

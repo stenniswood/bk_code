@@ -24,20 +24,19 @@
 
 
 FileEditor::FileEditor() 
-: Control()
 { 
 	Initialize();
 }
 
 FileEditor::FileEditor( Rectangle* mRect ) 
-: Control()
+: TextView()
 { 
 	Control::set_position(mRect);
 	Initialize();	
 }
 
 FileEditor::FileEditor( int Width, int Height ) 
-: Control( Width,  Height)
+: TextView( Width,  Height)
 { 
 	Initialize();
 }

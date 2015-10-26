@@ -97,16 +97,16 @@ void establish_ipc()
 		vis_allocate_memory();
 		vis_attach_memory  ();
 		vis_fill_memory	   ();
-	} 
+	}
 	//else vis_deallocate_memory( 98307 );
 
 	if (USE_SWAY)
 	{
 		sway_allocate_memory();
-		sway_attach_memory  (); 
+		sway_attach_memory  ();
 		sway_fill_memory	();
-	} 
-	//	else sway_deallocate_memory();	
+	}
+	//	else sway_deallocate_memory();
 
 	if (USE_PICAMSCAN) 
 	{

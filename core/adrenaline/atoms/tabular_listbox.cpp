@@ -118,9 +118,9 @@ void TabularListBox::set_width_height( int Width, int Height )
 {
 	int Ht = Height-(header_text_size*4);
 	if (Debug) printf("\tTabularListBox::set_width_height( %d, %d ) lb:Ht %d\n", Width, Height, Ht );
-	ListBox::set_width_height( Width, Ht );
+	ListBox::set_width_height( Width, Height );		// Was Ht!!
 	calc_metrics();
-	if (vsb)  vsb->set_width_height( vsb->width, Ht );
+	if (vsb)   vsb->set_width_height( vsb->width, Height );
 	if (Debug) print_positions();
 	if (Debug) ListBox::print_positions(); 
 }

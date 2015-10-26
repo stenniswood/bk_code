@@ -52,6 +52,7 @@ public:
 	virtual int   	draw		 		(				);
 	
 	bool			append_new_captured	( );
+	virtual Control*	HitTest		  ( int x, int y 	);
 	Control*		Capture 			( int x, int y, int finger 	);
 	
 protected:

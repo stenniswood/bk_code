@@ -21,11 +21,14 @@
 #include "display_manager.hpp"
 #include "client_memory.hpp"
 #include "client_list_control.hpp"
+#include "edit_box.hpp"
  
 
-TextView 	ConnectionStatus( 50, 700, 500, 50 );
-ClientList	AvailClients (20, 650, 160, 50);
-TextView 	CmdText( 50, 700, 350, 200 );
+TextView 	ConnectionStatus( 50, 700, 500, 50 	);
+ClientList	AvailClients 	( 20, 650, 160, 50	);
+TextView 	CmdText		 	( 50, 700, 350, 200 );
+EditBox 	SampleEdit	 	( 50, 700, 450, 355 );
+
 static char ConnectionStatusText[128];
 static char CommandText[128];
 
@@ -55,6 +58,11 @@ void init_home_screen()
 	AvailClients.set_headings();	
 	AvailClients.update_available_client_list();
 	
+
+	SampleEdit.set_text_size 		( 16.0 		 );
+//	SampleEdit.set_text_color		( 0x9FFF0000 );
+//	SampleEdit.set_background_color ( 0x7FFfFf00 );
+
 /*	if (Debug) printf("SET_HEADINGS() - \n");
 	populate_listbox();
 	if (Debug) printf("POPULATED LISTBOX () - \n");
@@ -77,8 +85,10 @@ void init_home_screen()
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
 //	MainDisplay.add_object( &ConnectionStatus );
+	MainDisplay.add_object( &SampleEdit );
 	MainDisplay.add_object( &CmdText 	);
 	MainDisplay.add_object( &AvailClients );
 //	MainDisplay.add_object( &adren_board_list );
 	MainDisplay.load_resources();
+	printf("====== 	MainDisplay.load_resources() COMPLETED ========\n");
 }

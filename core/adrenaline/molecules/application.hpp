@@ -51,8 +51,8 @@ public:
 	virtual void	file_save		( );
 	virtual void	file_save_as	( );
 
-	int				About			(	);
-	int				Preferences		(	);
+	void				About			(	);
+	void				Preferences		(	);
 	int				Quit			(	);	
 			
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);

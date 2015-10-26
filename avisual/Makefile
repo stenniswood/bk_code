@@ -24,7 +24,8 @@ OPTIONS	   =  -Wwrite-strings -fpermissive -Wreturn-type
 CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 	 		 ../core/misc/ ../core/msg/    ../core/wifi/     ../core/ipc/    	\
 	 		 ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
-			 ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ ../core/adrenaline/molecules/calendar/
+			 ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \
+			 ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
 APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 INC		= $(CORE_INC) $(APPS_INC) $(GAMES_INC) ./voice/ ./kinetic/ ./
@@ -64,7 +65,7 @@ AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			  power.o home_screen.o 
 APPS_OBJS =  file_editor_app.o video_app.o video.o 
 DRAW_APP_OBJS = draw_app.o draw_canvas.o 
-CAN_APP_OBJS = can_app.o gyro_window.o analog_board_app.o
+CAN_APP_OBJS = can_app.o gyro_window.o analog_board_app.o filter_select.o msg_value_composer.o
 AUDIO_APP_OBJS = audio_app.o audio_app_menu.o 
 ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot_performance.o \
 			robot_vision.o
@@ -79,24 +80,26 @@ BLACKJACK_GAME_OBJS = blackjack.o blackjack_app.o
 CARDCORE_GAME_OBJS  = card.o card_player.o card_player_chips.o deck.o basic_card_game.o
 
 #  button_array_gui.o Container.o 
-ADRENALINE_OBJS = display.o display_manager.o mouse.o resource_manager.o task_bar.o \
-			system_status.o keyboard.o 
+ADRENALINE_OBJS   = display.o task_bar.o
+ADRENALINE_SYSTEM_OBJS = system_status.o keyboard.o touch_gesture.o keyboard_dev.o \
+			display_manager.o mouse_oop.o resource_manager.o
 ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			directory_listbox.o frame_window.o groupbox.o icon.o       \
 			leveler.o line_grouper.o listbox.o marquee.o power_level.o \
 			progressbar.o radiobutton.o rectangle.o scroll_bar.o scroll_control.o \
 			stick_leg.o tab_control.o table_window.o tabular_listbox.o \
 			TextFile.o text_view.o tk_colors.o wave_view.o window.o    \
-			horizontal_menu.o vertical_menu.o spinner.o can_msg_view.o wave.o 
+			horizontal_menu.o vertical_menu.o spinner.o can_msg_view.o wave.o \
+			edit_box.o drop_down_box.o listbox_icon.o
 ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
 			stereo_power.o stick_figure.o system_bar.o can_window.o   \
-			application.o file_editor.o
+			application.o file_editor.o label_edit_box.o
 ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o
 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
-			 bar_graph.o bar_graph_stacked.o scatter_plot.o
-KINETIC_OBJS = 
+			 bar_graph.o bar_graph_stacked.o scatter_plot.o 
+#KINETIC_OBJS = 
 
 # APP CODE
 VOICE_OBJS 	= 
@@ -118,6 +121,7 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix /home/pi/openvg/,		$(VG_OBJS))  			\
 		$(addprefix ../core/hardware/,		$(HARDWARE_OBJS))		\
 		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) 	\
+		$(addprefix ../core/adrenaline/system/,	   $(ADRENALINE_SYSTEM_OBJS)) 	 \
 		$(addprefix ../core/adrenaline/atoms/,	   $(ADRENALINE_ATOMS_OBJS)) 	 \
 		$(addprefix ../core/adrenaline/molecules/, $(ADRENALINE_MOLECULES_OBJS)) \
 		$(addprefix ../core/adrenaline/molecules/calendar/, $(ADRENALINE_SYSTEM_UI_OBJS)) \
@@ -134,19 +138,13 @@ avisual: $(AVISUAL_OBJS) 					\
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.bak 
-	rm -rf ../core/can/*.o 
-	rm -rf ../core/msg/*.o 
-	rm -rf ../core/misc/*.o 
-	rm -rf ../core/fusion/*.o 	
-	rm -rf ../core/adrenaline/*.o 
-	rm -rf ../core/adrenaline/atoms/*.o 	
-	rm -rf ../core/adrenaline/molecules/*.o
-	rm -rf ../core/adrenaline/graphs/*.o 
+	rm -rf ../core/*/*.o 
+	rm -rf ../core/adrenaline/*/*.o ../core/adrenaline/*/*/*.o
 	rm -rf ./hardware/*.o
 	rm -rf ./apps/*.o
 	rm -rf ./wifi/*.o 		
 	rm -rf ./voice/*.o 	
-	rm -rf ./apps/*.o ./apps/CAN/*.o ./apps/draw/*.o ./apps/audio/*.o ./apps/robot_control/*.o 	
+	rm -rf ./apps/*/*.o
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 
 clean_core:

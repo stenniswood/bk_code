@@ -130,11 +130,13 @@ void 	DrawApp::register_with_display_manager()
 	MainDisplay.set_menu  	( &m_main_menu );
 }	
 
-int		DrawApp::About			(	) 
+void	DrawApp::About			(	) 
 { 
+	Application::About();
 }
-int		DrawApp::Preferences	(	) 
-{ 
+void	DrawApp::Preferences	(	) 
+{
+	Application::Preferences(); 
 }
 
 void	DrawApp::file_new		( )

@@ -2,16 +2,18 @@
 #define _FILE_EDITOR_
 
 #include "control.hpp"
+#include "text_view.hpp"
+
 #include <vector>
 using namespace std;
 
-class FileEditor : public Control 
+class FileEditor : public TextView 
 {
 public:
-	FileEditor();
-	FileEditor( Rectangle* mRect );
-	FileEditor( int Width, int Height );
-	~FileEditor();
+	FileEditor ( );
+	FileEditor ( Rectangle* mRect );
+	FileEditor ( int Width, int Height );
+	~FileEditor( );
 	
 	virtual void 	Initialize(	);
 

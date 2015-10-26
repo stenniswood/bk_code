@@ -28,7 +28,7 @@ public:
 
 	void			set_position	  	  ( Rectangle* mRect );
 	void		 	set_position	  	  ( int Left, int Right, int Top, int Bottom );
-	virtual void 	set_width_height  	  ( int Width, int Height 		 )  { width = Width; height=Height; };
+	virtual void 	set_width_height  	  ( int Width, int Height 		 );//  { width = Width; height=Height; };
 	virtual void  	move_to	  		  	  ( float Left,   float  Bottom	 );
 	void  			get_xy	  		  	  ( float* mLeft, float* mBottom )  { *mLeft=left; *mBottom=bottom; };
 	float			get_width			  (			)	{return width; 	 };
@@ -43,7 +43,7 @@ public:
 	
 	void 		 	move_bottom_to  	  ( float  mNewBottom	);
 	void 		 	move_left_to  	 	  ( float  mNewLeft		);
-	virtual void  	move_by	  		  	  ( int DeltaX, int  DeltaY	) { left+=DeltaX; bottom+=DeltaY; };
+	virtual void  	move_by	  		  	  ( int DeltaX, int  DeltaY	); // { left+=DeltaX; bottom+=DeltaY; };
 
 	void  			set_position_left_of  ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding );
 	void  			set_position_right_of ( Control* Sibling, bool mCopyVert=true, float mPadding=DefaultPadding );
@@ -84,16 +84,21 @@ public:
 	Control* 			FindHighestZOrder( std::vector<Control*> &mObjects );
 
 	virtual Control*	HitTest		  ( int x, int y 	);
-	virtual int			onHover		  ( int x, int y	) { return 0; };
+	virtual int			onHover		  ( int x, int y	);
 	virtual int			onClick		  ( int x, int y, bool mouse_is_down=true );
+	virtual int			onRelease	  ( int x, int y 	);
 	virtual int			onDoubleClick ( 				);
 	virtual int			onReceiveFocus( 				);
+	virtual int			onKey	  	  ( char mKey 		);
+	
 	int					isTabStop	  (					)	{ return 0; };
 	virtual int			onCreate	  (  );	// chance to load resources, call functions which use fonts (already loaded before this call) etc.
 
+
 	void				sort_z_order();
-	
+	void				set_z_order( long int& mZorder );
 	long int			z_order;
+
 	bool				invalidated;		// forces a redraw in display manager.  not implemented yet.	
 protected:
 	std::vector<Control*>	m_child_controls;

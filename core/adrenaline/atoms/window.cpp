@@ -195,6 +195,12 @@ int	Window::add_control_local_coords( Control* mControl )
 	register_child( mControl );	
 }
 
+int	Window::onCreate(  )
+{
+	Control::onCreate();
+	place_views();
+}
+
 int		Window::add_control		 ( Control* mControl )
 {
 	register_child( mControl );	

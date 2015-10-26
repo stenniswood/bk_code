@@ -126,17 +126,18 @@ void Control::print_color_info( )
 int	Control::onCreate(  )
 {	
 	created = true;
-	//wrap_content();
+	// wrap_content();
+	int count=0;
 
 	// Create All Children : 
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
-	{ 	
-		if (Debug) printf("Control::onCreate() Child Create: %x\n", *iter );
+	{
+		if (Debug) printf("Control::onCreate() Child Create: %d %x\n", count++, *iter );
 		(*iter)->onCreate();
 		iter++; 
 	}	
-	return 1;
+	return 1;  
 }
 
 void Control::wrap_content( ) 
@@ -151,7 +152,7 @@ void Control::wrap_content( )
 			width  = text_width*1.2;
 		//if (height== -1.)
 			height = text_size*1.5;
-		printf("\t\tControl::wrap_content() Got Called! w=%6.1f h=%6.1f\n", width, height);			
+		//printf("\t\tControl::wrap_content() Got Called! w=%6.1f h=%6.1f\n", width, height);			
 	}
 }
 
@@ -247,6 +248,12 @@ void  Control::move_left_to  	 ( float  mNewLeft	)
 	move_to ( mNewLeft, bottom );
 }
 
+void Control::set_width_height ( int Width, int Height )
+{
+	width = Width; 
+	height=Height; 
+}
+
 // virtual function (for classes such as scroll view which 
 // have to update the scroll bar as well)
 void  Control::move_to( float Left, float Bottom )
@@ -266,11 +273,35 @@ void  Control::move_to( float Left, float Bottom )
 	}
 }
 
+void Control::move_by( int DeltaX, int  DeltaY	) 
+{
+	left+=DeltaX; bottom+=DeltaY; 
+}
+
 void Control::load_resources( )
 {
 }
 
-bool Z_compare (Control* i,Control* j) { printf("%d %d ", i, i->z_order); return (i->z_order < j->z_order); }
+bool Z_compare (Control* i,Control* j) 
+{
+ 	if (Debug)  printf("%d %d ", i, i->z_order); 
+	return (i->z_order < j->z_order); 
+}
+
+void Control::set_z_order( long int& mZorder )
+{
+	z_order = mZorder;
+	
+	// How should we do this?  child controls go in front always?  
+	// in the file browser, we wanted them at lower level so that the clicks came to 
+	// the parent FileBrowser objects.
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while ( iter != m_child_controls.end() )
+	{
+		(*iter)->set_z_order( mZorder );
+		iter++;
+	}
+}
 
 void Control::sort_z_order() 
 {
@@ -279,7 +310,6 @@ void Control::sort_z_order()
 
 int Control::draw() 
 {
-	//printf("Control::draw() \n");
 	if (Visible==false)	 return 0;
 
 	StrokeWidth(2);
@@ -295,7 +325,6 @@ int Control::draw()
 		(*iter)->draw();
 		iter++; 
 	};
-
 	return TRUE;
 }
 
@@ -340,7 +369,7 @@ Control* Control::FindHighestZOrder( std::vector<Control*> &mObjects )
 			highest_control = mObjects[i];
 		}
 	if (highest_control)
-		printf("overlapping objects=%d, highest Z order: %x \n", mObjects.size(), highest_control );
+		if (Debug) printf("overlapping objects=%d, highest Z order: %x \n", mObjects.size(), highest_control );
 	return highest_control;
 }
 
@@ -363,6 +392,10 @@ Control* Control::HitTest(int x, int y)
 	} else	
 		return NULL;
 }
+int	Control::onHover ( int x, int y	) 
+{
+	return 0;
+};
 
 int	Control::onClick(int x, int y, bool mouse_is_down)
 {
@@ -374,6 +407,15 @@ int	Control::onClick(int x, int y, bool mouse_is_down)
 		return 1;
 	}
 	return -1;
+}
+int	Control::onRelease( int x, int y ) 
+{
+	return 0; 
+}
+
+int	Control::onKey( char mKey )
+{
+	return 0; 
 }
 
 int	Control::onDoubleClick()
@@ -396,7 +438,7 @@ void Control::print_children( )
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )  
 	{ 
-		printf(" Children:  %x \t", *iter ); 
+		if (Debug) printf(" Children:  %x \t", *iter ); 
 		(*iter)->print_positions();
 		iter++; 
 	};		
@@ -404,10 +446,12 @@ void Control::print_children( )
 
 void Control::unregister_child	( Control* mNewChild )
 {
-	if (Debug) printf("\t\tControl::unregister_child( %x )\n", mNewChild );
-	
+	if (Debug) printf("\t\tControl::unregister_child( %x )\n", mNewChild );	
+
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
-	while ( *iter != mNewChild )  { iter++; };		
+	while (( *iter != mNewChild ) && (iter != m_child_controls.end()))
+	{ iter++; };
+
 	if (Debug) printf("Unregistering_child( %x )\n", *iter );
 	m_child_controls.erase( iter );
 }

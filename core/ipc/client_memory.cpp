@@ -105,14 +105,14 @@ int cli_attach_memory()
 {
 	/* Attach the shared memory segment. */
 	int error=0;
-	client_shared_memory = (char*) shmat (client_segment_id, 0, 0);
+	client_shared_memory = (char*)shmat(client_segment_id, 0, 0);
 	if (client_shared_memory==(char*)-1) {
 		printf("cli_attach_memory - ERROR: %s \n", strerror(errno) );
 		return 0;
 	} else 
 		printf ("Client shm attached at address %p\n", client_shared_memory); 	
 	
-	ipc_memory_client		 = (struct client_ipc_memory_map*)client_shared_memory;
+	ipc_memory_client = (struct client_ipc_memory_map*)client_shared_memory;
 	return 1;
 }
 

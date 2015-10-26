@@ -74,28 +74,34 @@ void 	FileEditorApp::register_with_display_manager()
 	Application::register_with_display_manager();
 }	
 
-int		FileEditorApp::About			(	) 
+void	FileEditorApp::About	(	) 
 { 
-	return Application::About			(	);
+	Application::About(	);
 }
-int		FileEditorApp::Preferences		(	) 
+void	FileEditorApp::Preferences (	) 
 { 
-	return Application::Preferences		(	); 
+	Application::Preferences(	); 
 }
 
-void	FileEditorApp::file_new		( ) 
+void	FileEditorApp::file_new	( ) 
 { 
 }
-void	FileEditorApp::file_open		( ) 
+void	FileEditorApp::file_open( ) 
 { 
+	
 }	
 void	FileEditorApp::file_open_recent( ) 
 { 
+	FileEditor* fe = (FileEditor*) m_main_window;
+	string fn = "/home/pi/test.cpp";
+	
+	fe->load_file( fn.c_str() );	
+	fe->Invalidate();
 }	
-void	FileEditorApp::file_save		( ) 
+void	FileEditorApp::file_save( )
 { 
 }
-void	FileEditorApp::file_save_as	( ) 
+void	FileEditorApp::file_save_as( ) 
 { 
 }
 
