@@ -213,6 +213,12 @@ int	VerticalMenu::onHover( int x, int y, bool mouse_is_down )
 	return result;
 }
 
+void VerticalMenu::close_menu( )
+{
+	//set_visible( false );
+	hide();
+}	
+
 Application*	VerticalMenu::get_application(   )
 {
 	if (m_horiz_parent==NULL) return NULL;
@@ -232,6 +238,7 @@ int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 		}	
 		if (m_entries[result].callback)
 			m_entries[result].callback( NULL, result );
+		close_menu();
 	}
 	return 1;	
 }

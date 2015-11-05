@@ -63,7 +63,7 @@ void DirectoryListBox::Initialize()
 		if (Debug)  printf("DirectoryListBox::Initialize()\n");
 		folder_image = createImageFromJpeg( "./resources/folder.jpg", &ImageInfo );
 	}
-	printf("DirectoryListBox::Initialize() done\n");
+	if (Debug) printf("DirectoryListBox::Initialize() done\n");
 }
 
 void DirectoryListBox::show_mode( int mMode	)
@@ -80,7 +80,7 @@ void DirectoryListBox::setup_headings( )
 }
 void DirectoryListBox::setup_heading_simple( )
 {
-	printf("DirectoryListBox::setup_heading_simple( )\n");
+	if (Debug) printf("DirectoryListBox::setup_heading_simple( )\n");
 	struct HeaderItemInfo hi;
 	hi.text      = "Filename";
 	hi.alignment = HEADER_ALIGN_LEFT;
@@ -124,7 +124,7 @@ void DirectoryListBox::draw_one_cell( int mRow, int mCol, float mY )
 	int   x;
 
 	// Determine the X start pixel:
-	if 		(Headings[mCol].alignment == HEADER_ALIGN_LEFT)
+	if 	(Headings[mCol].alignment == HEADER_ALIGN_LEFT)
 	{
 		x = Headings[mCol].start_x + ImageInfo.width;
 		Text( x, mY+above_line_offset, (char*)LineData[mRow][mCol].c_str(), SerifTypeface, text_size );	
@@ -150,11 +150,10 @@ char*	DirectoryListBox::get_item_text ( int mIndex )
 	return LineData[mIndex][0].c_str();
 }
 int	DirectoryListBox::get_item_id	( int mIndex )
-{		// file type
+{	// file type
 	if (mIndex==-1)	mIndex = selected_item;
 	return icon_id[mIndex];
 }
-
 
 void DirectoryListBox::compose_detail_line( char* path, char* d_name )
 {
@@ -173,11 +172,10 @@ void DirectoryListBox::compose_detail_line( char* path, char* d_name )
 		last modified time:						buf.st_mtime
 		size:						 off_t    	st_size	
 		owner:						 uid_t 		st_uid
-	*/		
-	//time_t    st_mtime;
+	*/
 	
 	int FileSize = buf.st_size;
-	printf("load_file: result=%d/%d;  fizesize=%d\n", result, errsv, FileSize);
+	if (Debug) printf("load_file: result=%d/%d;  fizesize=%d\n", result, errsv, FileSize);
 }
 
 void DirectoryListBox::populate_files( char* mPath, int Column )

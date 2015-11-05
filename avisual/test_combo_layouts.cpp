@@ -143,20 +143,23 @@ void init_directory_lb_test()
 	MainDisplay.add_object( &ParentWindowF );	
 }
 
-FileBrowser  browser(1000,600);
-//Control		browse(1000,600);
+#include "complete_file_browser.hpp"
+CompleteFileBrowser browser(1000,600);
+  //FileBrowser  browser(1000,600);
 
 void init_file_browser()
 {
 	printf("\n\ninit_file_browser\n\n");
 	Rectangle* rect = MainDisplay.get_useable_rect();
 	browser.set_position( rect );
-	printf("useableRect:\t"); rect->print_positions();	
-	browser.set_base_path( "/home/pi/" );
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &browser );
 	printf("\n\ninit_file_browser done \n\n");
+	printf("useableRect:\t"); rect->print_positions();	printf("\n");
+	browser.set_base_path( "/home/pi/" );
+	printf("set_base_path() done\n");
+
 }
 
 ImageGallery ig;

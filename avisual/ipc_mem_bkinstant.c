@@ -78,7 +78,7 @@ BOOL is_new_connection_status()
 	int latest_count = read_status_counter();
 	if (latest_count > StatusCounter)
 	{
-		printf("Latest_count = %d/%d\n", latest_count, StatusCounter);			
+		//printf("Latest_count = %d/%d\n", latest_count, StatusCounter);			
 		StatusCounter = latest_count;
 		return TRUE;
 	}
@@ -90,7 +90,7 @@ BOOL is_new_sentence()
 	int latest_count = read_sentence_counter();
 	if (latest_count > SentenceCounter)
 	{
-		printf("Latest_count = %d/%d\n", latest_count, SentenceCounter);			
+		//printf("Latest_count = %d/%d\n", latest_count, SentenceCounter);			
 		SentenceCounter = latest_count;
 		return TRUE;
 	}

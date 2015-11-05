@@ -47,6 +47,7 @@ public:
 	int				add_callback_all_items( int (*callback)(void*, int, Application*) );	
 	int				add_entry			( stVertMenuInfo mEntry 	 );
 
+	void			close_menu			();
 	int				set_state			( int mState, int mIndex );
 	int				set_h_parent		( HorizontalMenu* mMenu  );
 	Application*	get_application		(   );

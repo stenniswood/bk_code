@@ -23,6 +23,7 @@
 #include "robot_control_panel.hpp"
 
 
+#define BUFFER_SIZE 6
 #define Debug 1
 
 /* Are the coordinates relative to the Window we are adding them to,
@@ -31,9 +32,11 @@
 */
 Button   	Stop   ( 20, 200, 400, 300 );
 Button   	Go	   ( 20, 110, 250, 200 );
-ListBox  	SequenceSource( 250, 450, 400, 220  );
+ListBox  	SequenceSource( 250, 450, 400, 220 );
 ListBox  	SequenceList  ( 500, 700, 400, 60  );
 Button   	Add	   		  ( 400, 480, 200, 150 );
+
+CheckBox	can_send	  ( 350, 465, 150, 100 );
 
 CheckBox	Left_hip_rotate;
 CheckBox	Left_hip;
@@ -46,6 +49,9 @@ CheckBox	Right_knee;
 CheckBox	Right_ankle;
 
 
+/* ======================================================= */
+
+/* ======================================================= */
 void stop_cb( void* mRobotControl )
 {
 	if (Debug) printf("Stop button pushed\n");
@@ -53,13 +59,28 @@ void stop_cb( void* mRobotControl )
 
 void go_cb( void* mRobotControl )
 {
-	if (Debug) printf("Go button pushed\n");
+	RobotPanel* rp = (RobotPanel*) mRobotControl;	
+	
+	// package up the enables;
+	static char data[BUFFER_SIZE];
+	int length = rp->pack_enables(data);
+	
+	if (Debug) printf("Go button pushed\nEnable Buffer: ");
+	for (int i=0; i<BUFFER_SIZE; i++)
+		printf("%x ", data[i] );
+	printf("\n");
 	
 }
 
 void add_cb( void* mRobotControl )
 {
 	if (Debug) printf("Add button pushed\n");
+		
+}
+
+void send_can_messages( void* mRobotControl )
+{
+	if (Debug) printf("Send CAN toggled\n");
 		
 }
 
@@ -88,20 +109,24 @@ int	RobotPanel::place_views()
 	Go.set_text	( "Go!" );		
 	Go.set_background_color( 0xFF20DF20 );
 	Go.set_on_click_listener( go_cb, this );
-	
+
+	can_send.set_text			  ( "Send CAN", true );
+	//can_send.set_background_color ( 0xFF20DF20  	 );
+	can_send.set_on_click_listener( send_can_messages, this );
+
 	Add.set_text("Add ->");
 	Add.set_on_click_listener( add_cb, this );
 
-	Left_hip.set_text("L Hip",true);		
-	Left_knee.set_text("L Knee",true);		
-	Left_ankle.set_text("L Ankle",true);	
+	Left_hip.set_text				("L Hip",true);		
+	Left_knee.set_text				("L Knee",true);		
+	Left_ankle.set_text				("L Ankle",true);	
 	Left_hip.set_position_below    ( &Go, true, 15.0 );
 	Left_knee.set_position_below   ( &Left_hip  );
 	Left_ankle.set_position_below  ( &Left_knee ); 
-		
-	Right_hip.set_text("R Hip",true);		
-	Right_knee.set_text("R Knee",true);		
-	Right_ankle.set_text("R Ankle",true);	
+
+	Right_hip.set_text				("R Hip",true);		
+	Right_knee.set_text				("R Knee",true);		
+	Right_ankle.set_text			("R Ankle",true);	
 	Right_hip.set_position_right_of ( &Left_hip  );
 	Right_knee.set_position_below   ( &Right_hip ); 
 	Right_ankle.set_position_below  ( &Right_knee );
@@ -125,6 +150,7 @@ int	RobotPanel::place_views()
 	add_control( &Add     		 );
 	add_control( &SequenceSource );	
 	add_control( &SequenceList   ); 
+	add_control( &can_send 		 );
 
 	add_control( &Left_hip 		 );
 	add_control( &Left_knee 	 );
@@ -135,15 +161,31 @@ int	RobotPanel::place_views()
 
 	print_children();
 	printf("====== Robot CONTROL POSITIONS AFTER ===\n");
-/*	Stop.print_positions();
-	Go.print_positions ();
-	Add.print_positions(); */
 }
-//	void			file_new();	 
+
 int	RobotPanel::onCreate	  (  )	// chance to load resources, call functions which use fonts
 {
 	place_views();
 	Window::onCreate();
+}
+
+
+// return is length
+int	RobotPanel::pack_enables(char* mDataBuffer)
+{
+	//static char data[BUFFER_SIZE];
+	for (int i=0; i<BUFFER_SIZE; i++)
+		mDataBuffer[i] = 0;
+		
+	if (Left_hip.get_check())		mDataBuffer[0] = 1;
+	if (Left_knee.get_check())		mDataBuffer[1] = 1;
+	if (Left_ankle.get_check())		mDataBuffer[2] = 1;
+
+	if (Right_hip.get_check())		mDataBuffer[3] = 1;
+	if (Right_knee.get_check())		mDataBuffer[4] = 1;
+	if (Right_ankle.get_check())	mDataBuffer[5] = 1;
+	
+	return BUFFER_SIZE;
 }
 
 int RobotPanel::draw(	)

@@ -18,6 +18,7 @@ extern "C" {
 #define POSITION_VECTORS_ANGLE	0x01 
 #define POSITION_VECTORS_COUNT	0x02 
 #define SPEED_VECTORS 	 		0x03 
+#define DUTY_VECTORS 	 		0x04 
 #define OTHER_VECTORS	 		0x08
 
 class sOneVector	// CORRESPONDS TO 1 LIMB!
@@ -32,6 +33,7 @@ public:
 	
 	vector<float> Data;	
 	byte 		data_type;		// int,float, Angle, PotValue	
+//	byte		vector_type;
 
 	Appendage*	limb;			// use to convert angles, etc.		
 };

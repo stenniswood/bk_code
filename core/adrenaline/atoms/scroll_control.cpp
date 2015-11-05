@@ -47,7 +47,7 @@ ScrollControl::~ScrollControl()
 
 void ScrollControl::Initialize()
 {
-	Control::Initialize();
+	//Control::Initialize();
 	vsb = NULL;
 	hsb = NULL;
 	h_first_visible_value = 0;
@@ -71,16 +71,16 @@ void ScrollControl::set_width_height( int Width, int Height )
 		hsb->set_width_height( Width, hsb->height);
 }
 
-void ScrollControl::move_to( float mLeft,   float  mBottom )
+void ScrollControl::move_to( float mLeft, float  mBottom )
 {
 	Control::move_to(mLeft, mBottom);
-	//printf("ScrollControl::move_to():  moving to %d,%d\n", mLeft, mBottom);
+	//printf("ScrollControl::move_to(): moving to %d,%d\n", mLeft, mBottom);
 	if (vsb)
 		vsb->move_to( (mLeft+width)-(vsb->width), bottom);
 	if (hsb)
 		hsb->move_to( mLeft, mBottom);
 }
-	
+
 void ScrollControl::set_v_scroll_values( int max, int min, int first_visible, 
 										 int amount_visible )
 {

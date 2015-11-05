@@ -18,10 +18,8 @@
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-
 #include "touch_gesture.hpp"
 #include "rectangle.hpp"
-
 #include "calendar.hpp"
 #include "calendar_summary.hpp"
 #include "display_manager.hpp"

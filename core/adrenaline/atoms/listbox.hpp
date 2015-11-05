@@ -8,6 +8,7 @@
 #include "control.hpp"
 #include "scroll_bar.hpp"
 #include "scroll_control.hpp"
+#include "touch_gesture.hpp"
 
 using namespace std;
 
@@ -67,6 +68,7 @@ public:
 	string*			get_item   			( int index =-1     );
 	virtual float	get_line_bottom		( int mVisibleIndex );
 	virtual int		get_total_lines		( )	{ /*printf("listbox::gettotal_lines %d\n", LineTexts.size() );*/ return LineTexts.size();  };
+	int				get_selection		( );
 	
 	void			set_first_visible	( int mValue 	 );
 	virtual void  	set_text_size		( float TextSize );
@@ -78,6 +80,7 @@ public:
 	virtual int			onClick			( int x, int y, bool mouse_is_down=true);
 	virtual int			onHover		  	( int x, int y	) { return 0; };
 	virtual int			onCreate	  	(  );
+	virtual int			onGesture	  	( DraggerGesture* mGesture );
 
 	//void			enable_scroll_bar	( bool mEnable = true );
 	bool			has_header;

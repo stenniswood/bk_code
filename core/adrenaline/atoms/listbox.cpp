@@ -16,6 +16,7 @@
 #include "display.h"
 
 
+
 #define margin_percent 0.07
 #define Debug 0
 
@@ -73,12 +74,11 @@ void ListBox::move_to ( float mLeft,   float  mBottom )
 {
 	ScrollControl::move_to( mLeft, mBottom );	
 }
-void ListBox::set_width_height   ( int Width, int Height )
-{
-	//int d = (height - body_height);
-	//printf("ListBox::set_width_height() d=%d\n", d );
+void ListBox::set_width_height( int Width, int Height )
+{	
+	ScrollControl::set_width_height( Width, Height );
+	printf("num_child_controls=%d; vsb=%x\n", m_child_controls.size(), vsb );
 	
-	ScrollControl::set_width_height( Width, Height );		
 	calc_metrics();
 	if (vsb) vsb->set_width_height( vsb->get_width(), body_height );
 }
@@ -99,20 +99,19 @@ void ListBox::calc_metrics( )
 	number_lines_visible = floor( body_height/LineHeight );
 	
 	if (vsb) {
-
 		 vsb->set_amount_visible(number_lines_visible);
 		 //width -= vsb->width;
 	}
 	// The change in height, could change number_lines_visible, which would require scroll bar:
 	if (LineTexts.size() > number_lines_visible) {
-		if (Debug) printf("****** ENABLING VERTICAL SCROLLBAR ******\n");
+		if (Debug) printf("****** ENABLING VERTICAL SCROLLBAR ****** nlines_visible=%d\n", number_lines_visible);
 		enable_v_scroll_bar(true);
 		if (vsb) vsb->set_width_height( vsb->width, body_height );
 		set_v_scroll_values( LineTexts.size(), 0, first_visible_line, number_lines_visible );
 	} else 
 	{
-		if (Debug) printf("****** ENABLING VERTICAL SCROLLBAR ******\n");	
-		enable_v_scroll_bar(false);
+		if (Debug) printf("****** DISABLING VERTICAL SCROLLBAR ******\n");	
+		enable_v_scroll_bar(false); 
 	}
 	//printf("number_lines_visible=%d; LineHeight=%5.3f\n", number_lines_visible, LineHeight );
 }
@@ -358,9 +357,30 @@ int ListBox::get_hit_index(int mx, int my)
 	return retval; 
 }
 
+int	ListBox::get_selection( ) 
+{
+	if ( selected_item > LineTexts.size() )
+		return -1;	
+	return selected_item;
+}
+
 Control* ListBox::HitTest(int x, int y)
 {
 	ScrollControl::HitTest(x,y);
+}
+
+// "Special Mouse events"  Used for scrolling.
+int ListBox::onGesture( DraggerGesture* mGesture )
+{
+	if (mGesture->m_last_gesture_recognized == FLINGER_ONE_DRAG) 
+	{
+		//scroll to
+	}
+	
+	if (mGesture->m_last_gesture_recognized == FLINGER_ONE_FLING) 
+	{
+	
+	}	
 }
 
 int	ListBox::onClick(int Mousex, int Mousey, bool mouse_is_down)

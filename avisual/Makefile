@@ -94,7 +94,7 @@ ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
 			stereo_power.o stick_figure.o system_bar.o can_window.o   \
-			application.o file_editor.o label_edit_box.o
+			application.o file_editor.o label_edit_box.o complete_file_browser.o icon_bar.o
 ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o
 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
@@ -109,6 +109,7 @@ VOICE_OBJS 	=
 %.o: %.c $(DEPS) 
 	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
 
+
 avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ./voice/, 				$(VOICE_OBJS)) 			\
 		$(addprefix ./kinetic/, 			$(KINETIC_OBJS)) 		\
@@ -120,12 +121,6 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ../core/misc/,			$(MISC_OBJS))  			\
 		$(addprefix /home/pi/openvg/,		$(VG_OBJS))  			\
 		$(addprefix ../core/hardware/,		$(HARDWARE_OBJS))		\
-		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) 	\
-		$(addprefix ../core/adrenaline/system/,	   $(ADRENALINE_SYSTEM_OBJS)) 	 \
-		$(addprefix ../core/adrenaline/atoms/,	   $(ADRENALINE_ATOMS_OBJS)) 	 \
-		$(addprefix ../core/adrenaline/molecules/, $(ADRENALINE_MOLECULES_OBJS)) \
-		$(addprefix ../core/adrenaline/molecules/calendar/, $(ADRENALINE_SYSTEM_UI_OBJS)) \
-		$(addprefix ../core/adrenaline/graphs/,	   $(ADRENALINE_GRAPH_OBJS))	 \
 		$(addprefix ../core/msg/,			$(MSG_OBJS))  			\
 		$(addprefix ../core/can/,			$(CAN_OBJS))			\
 		$(addprefix ../core/ipc/,			$(IPC_OBJS))			\
@@ -133,8 +128,30 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ./apps/audio/,			$(AUDIO_APP_OBJS))		\
 		$(addprefix ./apps/CAN/,			$(CAN_APP_OBJS))		\
 		$(addprefix ./apps/draw/,			$(DRAW_APP_OBJS))		\
-		$(addprefix ./apps/robot_control/,	$(ROBOT_CONTROL_OBJS))
+		$(addprefix ./apps/robot_control/,	$(ROBOT_CONTROL_OBJS)) \
+		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) \
+		$(addprefix ../core/adrenaline/atoms/, $(ADRENALINE_ATOMS_OBJS)) \
+		$(addprefix ../core/adrenaline/molecules/, $(ADRENALINE_MOLECULES_OBJS)) \
+		$(addprefix ../core/adrenaline/molecules/calendar/, $(ADRENALINE_SYSTEM_UI_OBJS)) \
+		$(addprefix ../core/adrenaline/graphs/,	   $(ADRENALINE_GRAPH_OBJS))	 \
+		$(addprefix ../core/adrenaline/system/,	   $(ADRENALINE_SYSTEM_OBJS))
 	g++ -o $@ $^  $(LIBFLAGS)  $(LDFLAGS)
+
+libadrenaline.a: \
+		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) \
+		$(addprefix ../core/adrenaline/atoms/, $(ADRENALINE_ATOMS_OBJS)) \
+		$(addprefix ../core/adrenaline/molecules/, $(ADRENALINE_MOLECULES_OBJS)) \
+		$(addprefix ../core/adrenaline/molecules/calendar/, $(ADRENALINE_SYSTEM_UI_OBJS)) \
+		$(addprefix ../core/adrenaline/graphs/,	   $(ADRENALINE_GRAPH_OBJS))	 \
+		$(addprefix ../core/adrenaline/system/,	   $(ADRENALINE_SYSTEM_OBJS))
+	ar -cvq libadrenaline.a $@ $^
+
+#		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) 	\
+#		$(addprefix ../core/adrenaline/system/,	   $(ADRENALINE_SYSTEM_OBJS)) 	 \
+#		$(addprefix ../core/adrenaline/atoms/,	   $(ADRENALINE_ATOMS_OBJS)) 	 \
+#		$(addprefix ../core/adrenaline/molecules/, $(ADRENALINE_MOLECULES_OBJS)) \
+#		$(addprefix ../core/adrenaline/molecules/calendar/, $(ADRENALINE_SYSTEM_UI_OBJS)) \
+#		$(addprefix ../core/adrenaline/graphs/,	   $(ADRENALINE_GRAPH_OBJS))	 \
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.bak 

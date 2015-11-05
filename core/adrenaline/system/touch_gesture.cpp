@@ -327,61 +327,153 @@ bool DraggerGesture::recognize_three_move_together( )
 	return false;
 }	
 
-/* Allowed directions are : Up, down, left, right.
-	No diagonals.  
-*/
-const int RIGHT_DIR = 1;
-const int LEFT_DIR  = 1;
-const int DOWN_DIR  = 1;
-const int UP_DIR    = 1;
+int pick_direction( float dx, float dy )
+{
+	int Direction = 0;
+	if ((dx>dy) && (dx>0))	Direction = DIRECTION_RIGHT;
+	if ((dx>dy) && (dx<0))	Direction = DIRECTION_LEFT;
+	if ((dy>dx) && (dy>0))	Direction = DIRECTION_DOWN;
+	if ((dy>dx) && (dy<0))	Direction = DIRECTION_UP;
+	return Direction;
+}
+const int FLING_GAP_THRESHOLD = 20;	 //	pixels
+
+float subtract_time_stamps( struct timeval time1, struct timeval time2)
+{
+	return 0.1;
+}
+
+/* Subtract the ‘struct timeval’ values X and Y,
+   storing the result in RESULT.
+   Return 1 if the difference is negative, otherwise 0. */
+   
+int  timeval_subtract( struct timeval *result, struct timeval *x, struct timeval *y )
+{
+  /* Perform the carry for the later subtraction by updating y. */
+  if (x->tv_usec < y->tv_usec) {
+    int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
+    y->tv_usec -= 1000000 * nsec;
+    y->tv_sec += nsec;
+  }
+  if (x->tv_usec - y->tv_usec > 1000000) {
+    int nsec = (x->tv_usec - y->tv_usec) / 1000000;
+    y->tv_usec += 1000000 * nsec;
+    y->tv_sec -= nsec;
+  }
+
+  /* Compute the time remaining to wait.
+     tv_usec is certainly positive. */
+  result->tv_sec = x->tv_sec - y->tv_sec;
+  result->tv_usec = x->tv_usec - y->tv_usec;
+
+  /* Return 1 if result is negative. */
+  return x->tv_sec < y->tv_sec;
+}
 
 bool DraggerGesture::flinger_one_finger( )
 { 
 	float dx = 0;
 	float dy = 0;
 	float sum = 0;
+	static int DirectionCount = 0;	// number of times in current direction Latches in that dir.
 	static int Direction=0;
 	static int state = 1;
+	int last  = m_finger_history[0].size()-1;
+	if (last>=1) {
+		dx = m_finger_history[0][last].x - m_finger_history[0][last-1].x;
+		dy = m_finger_history[0][last].y - m_finger_history[0][last-1].y;
+	}
+	Direction = pick_direction (dx, dy);
+	float max_change = max( fabs(dx),fabs(dy) );
+	
 	switch(state)
 	{
 		case 1: 
 			if (m_num_fingers_down==1)
 			{
-				if (m_finger_history[0].size()>1) 
+				if (last >= 1) 	//= b/c last is an index (not size)
 				{
-					dx = m_finger_history[0][1].x - m_finger_history[0][0].x;
-					dy = m_finger_history[0][1].y - m_finger_history[0][0].y;
+					m_direction = Direction;
+					DirectionCount = 1;
 					if ((dx > MAX_MOVE_THRESHOLD) || (dy > MAX_MOVE_THRESHOLD))
 						state = 2;
 				}
 				// we dont know yet if it's going to be 2 finger slide or an enlarge.
-			} 
+			} else {
+				m_last_gesture_recognized &= ~FLINGER_ONE_DRAG;
+				m_last_gesture_recognized &= ~FLINGER_ONE_FLING;
+			}
+			//stay here.
 			break;
-		case 2:	// still 2 fingers down - moves change ratio:
+		case 2:	// still 1 finger down - "DRAG MODE" slow/small changes.
+			// Determine direction (north, south, east, west)
+			//					   (up, down, left, right)
+			if (m_num_fingers_down==1)
+			{	
+				m_drag_amount_dy = dy;
+				m_drag_amount_dx = dx;
+				if (max_change > FLING_GAP_THRESHOLD)
+					state = 3;
+				
+				if ((mouse_ev.code == 57) && (mouse_ev.value == -1))
+				{
+					state = 1;
+				}
+				if (Direction == m_direction)	
+					DirectionCount++;
+				else
+					DirectionCount--;
+				if (DirectionCount < 0)
+				{
+					m_direction = Direction;
+					DirectionCount = 0;
+					//state = 1;
+				}	
+				if (m_last_gesture_recognized & FLINGER_ONE_DRAG)
+				{
+				}
+				else
+				{
+					m_last_gesture_recognized |= FLINGER_ONE_DRAG;
+					printf("SCROLL DRAG EVENT RECEIVED:  d<x,y>=<%6.2f,%6.2f>\n", 
+								m_drag_amount_dx, m_drag_amount_dy );
+					return true;
+				}
+			}
+			else {
+				//state = 1;
+			}
+			break;
+		case 3:	// still 1 finger down - "FLING MODE" fast/large changes.
 			if (m_num_fingers_down==1)
 			{
-				int last  = m_finger_history[0].size()-1;
-				dx = m_finger_history[0][1].x - m_finger_history[0][0].x;
-				dy = m_finger_history[0][1].y - m_finger_history[0][0].y;
-				if ((dx>dy) && (dx>0))	Direction = RIGHT_DIR;
-				if ((dx>dy) && (dx<0))	Direction = LEFT_DIR;
-				if ((dy>dx) && (dy>0))	Direction = DOWN_DIR;
-				if ((dy>dx) && (dy<0))	Direction = UP_DIR;
-		
-				if (m_last_gesture_recognized & FLINGER_ONE)
-				{
-					//printf("recognize_rotation:  initial=%6.2f;  final=%6.2f   Change=%6.2f\n", m_initial_angle, angle2, m_rotate_angle_relative );
-				}   
+				m_drag_amount_dy = dy;
+				m_drag_amount_dx = dx;
+				printf("SCROLL DRAG EVENT RECEIVED:  d<x,y>=<%6.2f,%6.2f>\n", 
+								m_drag_amount_dx, m_drag_amount_dy );
+
+				// The speed will be taken from the very last two coordinates received!
+				// Released?				
+				if (m_last_gesture_recognized & FLINGER_ONE_FLING)
+				{ }
 				else 
 				{
-					m_last_gesture_recognized |= FLINGER_ONE;
-					printf("ROTATE EVENT RECEIVED:  Angle=%6.2f\n", m_rotate_angle_relative);
+					//m_last_gesture_recognized |= FLINGER_ONE_FLING;
 					return true;
 				}
 			} 
-			else {
-				m_last_gesture_recognized &= ~FLINGER_ONE;
-				state = 1;
+			if ((mouse_ev.code == 57) && (mouse_ev.value == -1))
+			{
+				state = 1;		
+				struct timeval time_delta;
+				int reverse_time = timeval_subtract( &time_delta, &(mouse_ev.time), 
+														&m_prev_ev_time );
+				float time_delta_f = time_delta.tv_sec + (time_delta.tv_usec / 1000000.);
+				m_fling_speed = (max_change / time_delta_f);		
+									// pixels / second 
+				m_last_gesture_recognized |= FLINGER_ONE_FLING;
+				printf("SCROLL FLING RECEIVED: max=%6.3f deltaTime=%6.3f Speed=%6.2f\n", 
+							max_change, time_delta_f, m_fling_speed);
 			}
 			break;
 		default:
@@ -402,7 +494,6 @@ void DraggerGesture::handle_recognize( )
 		m_last_gesture_recognized &= ~TOUCH_GESTURE_TAP;
 		printf("DraggerGesture::handle_recognize( )  left = %x\n", left );
 	}
-	
 }
 
 void DraggerGesture::recognize_gesture( )
@@ -411,7 +502,7 @@ void DraggerGesture::recognize_gesture( )
 	recognize_tap    ();
 	recognize_enlarge();
 	recognize_rotation();
-	//flinger_one_finger();
+	flinger_one_finger();
 	
 	handle_recognize();
 
@@ -438,3 +529,10 @@ int	DraggerGesture::time_slice()
 }
 
 
+/* Allowed directions are : Up, down, left, right.
+	No diagonals.  
+const int RIGHT_DIR = 1;
+const int LEFT_DIR  = 1;
+const int DOWN_DIR  = 1;
+const int UP_DIR    = 1;
+*/

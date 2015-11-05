@@ -25,6 +25,8 @@ public:
 	// override set_position to update box_rectangle.
 	int				set_height_to_text();
 	int				set_check(bool CheckOn=true);
+
+	bool			get_check()		{ return checked;  };
 	bool			is_checked()	{ return checked;  };
 	int				set_on_click_listener( void (*callback)(void*), void* mOn_click_context );
 		

@@ -270,7 +270,7 @@ BOOL cli_is_new_connection_status()
 	int latest_count = read_status_counter();
 	if (latest_count > ipc_memory_client->StatusAcknowledgedCounter)
 	{
-		printf("Latest_count = %d/%d\n", latest_count, ipc_memory_client->StatusAcknowledgedCounter );
+		//printf("Latest_count = %d/%d\n", latest_count, ipc_memory_client->StatusAcknowledgedCounter );
 		return TRUE;
 	}
 	return FALSE;
@@ -286,7 +286,7 @@ BOOL cli_is_new_update()
 	int latest_count = read_sentence_counter();
 	if (latest_count > ipc_memory_client->AcknowledgedCounter)
 	{
-		printf("Latest_count = %d/%d\n", latest_count, ipc_memory_client->AcknowledgedCounter);			
+		//printf("Latest_count = %d/%d\n", latest_count, ipc_memory_client->AcknowledgedCounter);			
 		return TRUE;
 	}
 	return FALSE;

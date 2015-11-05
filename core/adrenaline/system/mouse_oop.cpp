@@ -43,6 +43,7 @@ static void* eventThread(void *arg)
 	M->y = M->max_y / 2;
 	
 	while (1) {
+		M->m_prev_ev_time = M->mouse_ev.time;
 		read(mouse_fd, &(M->mouse_ev), sizeof(struct input_event));
 		M->print_event_info();		
 		M->handle_event();

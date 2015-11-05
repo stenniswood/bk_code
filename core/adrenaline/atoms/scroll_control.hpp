@@ -16,6 +16,9 @@ This is an abstract class which has a scroll bar
 built in.  Used in classes such as TextView,
 ListBox, etc.  Which often need scroll capability.
 This offers is readily builtin.
+All it does is add the scrollbar objects and enables/disables based
+on variables for amount visible and amount available in each direction.
+
 ***************************************/
 
 class ScrollControl : public Control 

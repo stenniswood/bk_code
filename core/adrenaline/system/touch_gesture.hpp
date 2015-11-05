@@ -17,9 +17,13 @@ const int THREE_NEXT_SCREEN = 0x020;
 const int THREE_TWO_MOVE 	= 0x040;		
 const int THREE_THREE_MOVE 	= 0x080;		
 const int TOUCH_GESTURE_TAP	= 0x100;		
-const int FLINGER_ONE		= 0x200;
+const int FLINGER_ONE_DRAG	= 0x201;
+const int FLINGER_ONE_FLING	= 0x202;
 
-
+const int DIRECTION_UP    = 0X01;
+const int DIRECTION_DOWN  = 0X02;
+const int DIRECTION_LEFT  = 0X03;
+const int DIRECTION_RIGHT = 0X04;
 
 const float MAX_MOVE_THRESHOLD = 10.0;
 
@@ -48,9 +52,17 @@ public:
 	
 	void	add_event			 ( );
 
-
+	// Enlarge/Rotate : 
 	float	m_enlarge_ratio;	
 	float	m_rotate_angle_relative;		// relative
+
+	// "flinger_one_finger" : 
+	int		m_direction;		// Algo selects one of 4.  Most dominant DIRECTION_UP, etc.
+	float	m_drag_amount_dx;
+	float	m_drag_amount_dy;	
+	float	m_fling_speed;		// pixels / second
+
+
 
 	int		m_last_gesture_recognized;	
 	int		m_test_results_bitfield;	

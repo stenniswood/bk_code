@@ -186,6 +186,15 @@ void Robot::next_vector( )
 	}
 }
 
+void Robot::set_duty( sRobotVector* mSeq, float mTimeDelta )
+{
+	if (Enable==false)  return ;
+	for (int l=0; l<limbs.size(); l++)
+	{
+		limbs[l].set_new_destinations( mSeq->limbs[l], mSeq->Current_Vindex, mTimeDelta );
+	}
+}
+
 void Robot::set_new_destinations( sRobotVector* mSeq, float mTimeDelta )
 {
 	if (Enable==false)  return ;

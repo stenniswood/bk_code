@@ -14,7 +14,7 @@ public:
 	TextView( int Width, int Height );
 
 	virtual void 	Initialize			  	(				 );
-	void 			calc_margins			( float fraction );
+	void 			calc_margins			( float fraction = -1.0 );
 	void 			calc_metrics			( 				 );
 	void			print_info				(	);
 	void 			set_font				( Fontinfo* f	 );
@@ -48,6 +48,7 @@ private:
 	Fontinfo*	font;
 	float		m_left_margin;
 	float		m_right_margin;
+	float		m_fraction;
 	
 };
 

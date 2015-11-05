@@ -11,11 +11,13 @@ class RobotPanel : public Window
 public:
 	RobotPanel();
 
-	virtual void 	Initialize(	);
-	int				calc_metrics();
-	int				place_views();
-	virtual int		onCreate	  (  );	// chance to load resources, call functions which use fonts
+	virtual void 	Initialize	( );
+	int				calc_metrics( );
+	int				place_views	( );
+	virtual int		onCreate	( );	// chance to load resources, call functions which use fonts
 	
+	int				pack_enables(char* mData);		// return is length
+		
 //	void			file_new();	 
 //	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	virtual int   	draw		 		(				);

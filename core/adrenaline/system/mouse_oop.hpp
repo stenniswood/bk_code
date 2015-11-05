@@ -64,7 +64,8 @@ public:
 	int						m_finger;
 	int						m_num_fingers_down;	
 	std::vector<struct finger_info>	m_finger_history[10];	
-	struct input_event 		mouse_ev;		// info read from driver.
+	struct input_event 		mouse_ev;			// info read from driver.
+	struct timeval			m_prev_ev_time;		// of previous mouse_ev
 	
 	// get these values from display manager.	
 	VGImage CursorBuffer;

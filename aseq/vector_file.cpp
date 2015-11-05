@@ -254,6 +254,9 @@ void sRobotVector::read_header(FILE* f)
 		data_type = POSITION_VECTORS_ANGLE;
 	else if (strcmp(data,"speeds")==0)	
 		data_type = SPEED_VECTORS;
+	else if (strcmp(data,"duty")==0)	
+		data_type = DUTY_VECTORS;
+		
 	printf ("data type = %s:%d\n", data, data_type);
 	
 }

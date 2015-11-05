@@ -252,7 +252,10 @@ void Appendage::print_averages( )
 		actuators[a].print_average();
 	}	
 }
-
+void Appendage::set_duty( struct sVectorSet& mVectors, int mVectorIndex, float mTimeDelta )
+{
+	
+}
 void Appendage::set_new_destinations( struct sVectorSet& mVectors, int mVectorIndex, float mTimeDelta )
 {
 	if (Enable==false)  return ;

@@ -234,12 +234,15 @@ Control* HorizontalMenu::HitTest( int x, int y )
 int	HorizontalMenu::onClick( int x, int y, bool mouse_is_down )
 {
 	int menu_index = get_hit_index( x,y );
-	printf( "Mouse Click  Horiz Menu Item # %d\n", menu_index );
 	if (menu_index >= 0)
 	{
+		printf( "Mouse Click  Horiz Menu Item # %d\n", menu_index );	
 		if (m_entries[menu_index].menu)
 		{
 			printf("Is a SubMenu. \n");
+			m_entries[menu_index].menu->set_z_order( ++MainDisplay.m_z_order_counter );
+			m_entries[menu_index].menu->show();
+
 			// hide any other visible menu
 			if ( is_selection_valid() )  {
 				if (m_entries[m_selection].menu) {

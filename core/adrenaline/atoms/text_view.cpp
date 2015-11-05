@@ -56,7 +56,8 @@ void TextView::Initialize(	)
 	text_color		= 0xFF001f00;
 	border_color 	= 0xFFffffff;
 	background_color= 0xFFE2E2CC;
-	calc_margins(0.1);
+	m_fraction = 0.05;
+	calc_margins();
 	calc_metrics();
 	//if (Debug) printf("TextView::Initialize() done\n");
 }
@@ -70,7 +71,10 @@ void TextView::set_position ( int Left, int Right, int Top, int Bottom )
 // need to be recalculated everytime:  set_width_height()
 void TextView::calc_margins( float fraction )
 {
-	float TheMargin = (width*fraction)/2.;	
+	if (fraction != -1.0)	m_fraction = fraction;
+	printf("TextView::calc_margins(%6.2f)  %6.2f %6.2f \n", m_fraction, m_left_margin, m_right_margin);
+	
+	float TheMargin = (width*m_fraction)/2.;
 	m_left_margin  = left       +TheMargin;
 	m_right_margin = left+width -TheMargin;
 }
@@ -113,7 +117,7 @@ void TextView::set_font( Fontinfo* f )
 /* Return the number of characters that will fit in the pixel width 
 	The string should not contain any \n characters.
 */
-int TextView::get_num_chars_fit( char* mString, int mWidth )
+int TextView::get_num_chars_fit( char* mString, int mWidthPixels )
 {
 	int length = strlen(mString);
 	VGfloat font_width=0.;
@@ -130,10 +134,10 @@ int TextView::get_num_chars_fit( char* mString, int mWidth )
 
 		mString[i] = 0;		
 		font_width = TextWidth( mString, *font, text_size );		
-		//printf("get_num_chars_fit: font_width=%d; width=%d  %s\n", font_width, mWidth, mString );
 		mString[i] = tmp;		// Restore
+		//printf("get_num_chars_fit: font_width=%d; width=%d  %s\n", font_width, mWidth, mString );
 
-		if (font_width > mWidth)
+		if (font_width > mWidthPixels)
 		{ return i;	}	// would like to force a return
 	}
 	return length;	// entire string will fit
@@ -163,12 +167,15 @@ char* TextView::get_end_of_line	( char* mText )	// for eol
 {
 	int   strLength   	   = strlen(mText);
 	char* pos 			   = strchr(mText, (int)'\n' );
+	if (pos==NULL)	   pos = strchr(mText, (int)'\r' );
+	
 	int   available_pixels = (m_right_margin-m_left_margin);
 	if (pos==mText) 
 		return pos;
-		
+	
 	int length 			   = get_num_chars_fit( mText, available_pixels );	
-	//printf("TextView::get_end_of_line: newline:%d;  fit:%d / %d  availablePixels=%d\n", pos, length, strLength, available_pixels);
+	//if (Debug)   printf("TextView::get_end_of_line: newline at %d;  %d/%d chars fit  availablePixels=%d\n", 
+	//					pos, length, strLength, available_pixels );
 
 	// If the line does not reach the margin (ie last line) don't find the word break.
 	char tmp = mText[length];
@@ -180,12 +187,15 @@ char* TextView::get_end_of_line	( char* mText )	// for eol
 	if (t_width < (available_pixels-2))		// does not reach right margin
 		return &( mText[length] );
 
+	//printf("TextView::Calling Word Break() %s %d\n", mText, length );
 	char* eol 		= get_word_break( mText, length );
 	length 			= (eol-mText);
 
 	// if \n comes first, then readjust for it.
-	if ( (pos>0) && ((pos-mText)<length) )
+	if ((pos>0) && ((pos-mText)<length))
 		length = (pos-mText);
+	//printf("TextView:: %d \n", length);
+	
 	return &(mText[length]);
 }
 
@@ -255,7 +265,7 @@ int TextView::draw()
 	// 
 	Fill_l(text_color);					// 
 	line_height 	= 1.25*text_size;
-	if (Debug)  printf("TextView::draw text_size %X \n", text_size);
+	//if (Debug)  printf("TextView::draw text_size %X \n", text_size);
 	
 	int vertical    = height-line_height;
 	char* ptr       = text-1;
@@ -318,17 +328,15 @@ void TextView::load_file( char* mFullFilename )
 void TextView::set_width_height( int Width, int Height )
 {
 	Control::set_width_height(Width,Height);
-	calc_margins(0.1);
+	calc_margins();
 }
 void TextView::move_to( float Left,   float  Bottom )
 {
 	Control::move_to(Left,Bottom);
-	calc_margins(0.1);
+	calc_margins();
 }
 
 int	TextView::onClick(int x, int y, bool mouse_is_down)
 {
 	return -1;
 }
-
-
