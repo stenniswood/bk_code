@@ -117,7 +117,8 @@ float sOneVector::get_angle(byte index)
 	if (data_type==POSITION_VECTORS_ANGLE)
 		retval = Data[index];
 	else if (data_type==POSITION_VECTORS_COUNT)
-		retval = limb->actuators[index].compute_angle(Data[index]);
+		retval = limb->actuators[index]->compute_angle(Data[index]);
+	else return 0.0; 		// should throw an error if it's a duty!	
 	return retval;
 }
 
@@ -128,9 +129,10 @@ int sOneVector::get_count(byte index)
 {
 	int retval = -1;
 	if (data_type==POSITION_VECTORS_ANGLE)
-		retval = limb->actuators[index].compute_position( Data[index] );
+		retval = limb->actuators[index]->compute_position( Data[index] );
 	else if (data_type==POSITION_VECTORS_COUNT)
 		retval = (word)(Data[index]);
+	else return 0.0;
 	return retval;
 }
 
@@ -320,7 +322,7 @@ void sRobotVector::print_vector( int mIndex, bool mAngles )
 void sRobotVector::set_limbs( Robot& mrobot )
 {
 	for (int l=0; l<limbs.size(); l++)
-		limbs[l].set_limb( &(mrobot.limbs[l]) );
+		limbs[l].set_limb( (mrobot.limbs[l]) );
 }
 	
 void sRobotVector::init_limbs(  )
@@ -349,7 +351,7 @@ void sRobotVector::read_vector_file( char* mFilename )
 	{
 		result = read_line( f, data_type );
 	}
-	printf("data_type= %d\n", data_type );
+	printf("data_type= %d\n",   data_type );
 	printf("Read %d vectors\n", limbs[0].vectors.size() );
 	// POSITION_VECTORS_ANGLE, POSITION_VECTORS_COUNT
 	set_data_type_all_lists( data_type );

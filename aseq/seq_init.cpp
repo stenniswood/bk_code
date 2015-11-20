@@ -76,7 +76,6 @@ void Button3r_isr()
 	Use this to dispatch the vectors only.
 	The speeds/pids will be updated when position messages arrive. */
 
-
 void setup_teach()
 {
 	teach_pendant.add_dial( 0x16, "Rotate");
@@ -84,7 +83,6 @@ void setup_teach()
 	teach_pendant.add_dial( 0x14, "Knee" );
 	teach_pendant.add_dial( 0x13, "Ankle");
 }
-
 
 void init_hardware()
 {
@@ -111,7 +109,7 @@ void init_hardware()
 */
 void init_interrupts()
 {
-	set_system_rx_callback( callback_board_presence 	 );
+	set_system_rx_callback( callback_board_presence  );
 
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
 	// and attach myInterrupt() to the interrupt
@@ -151,6 +149,7 @@ void init()
 
 	setup_teach();
 	
+	// SHARED MEM (for receiving commands via Instant) :
 	int result = seq_connect_shared_sequencer_memory(TRUE);
 }
 
@@ -290,16 +289,16 @@ void jog()
 		
 		if (dir==0)		// Seek Home!
 		{
-			robot.limbs[limb].actuators[actuator].DestinationCount = 
-						robot.limbs[limb].actuators[actuator].ZeroOffset;
+			robot.limbs[limb]->actuators[actuator]->DestinationCount = 
+						robot.limbs[limb]->actuators[actuator]->ZeroOffset;
 			//robot.limbs[limb].actuators[actuator].send_speed_pid();			
 			while(1==1) { };			// Fix!
 		}
 		else {
 			// Now pulse it for a short time:
-			robot.limbs[limb].actuators[actuator].send_speed( duty );
+			robot.limbs[limb]->actuators[actuator]->send_speed( duty );
 			delay(1000);
-			robot.limbs[limb].actuators[actuator].send_speed( 0.   );
+			robot.limbs[limb]->actuators[actuator]->send_speed( 0.   );
 		}
 		c = getchar(); 	 
 	};		// wait till pot reaches max/min.

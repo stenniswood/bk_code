@@ -31,7 +31,7 @@ public:
 
 	BOOL 	is_destination_reached     ( );
 	void	set_new_destinations	   ( sRobotVector* mSeq, float mTimeDelta );
-
+	void	set_duty				   ( sRobotVector* mSeq, int mIndex, float mTimeDelta );
 
 	void 	set_current_position_as_destination( );	// should stop all motors.
 	void 	compute_speeds			   ( );
@@ -43,8 +43,8 @@ public:
 	word 	Reads;				// number of CAN positioning reads done since duty was last updated
 	word 	ReadsAllowed;		// number of CAN positioning reads before duty will be updated
 
-	vector<Appendage> limbs;
-	
+	vector<Appendage*> limbs;
+
 	void	print_vector		( int mIndex, bool mAngles );
 	void 	set_vectors_limbs	( );
 	void	next_vector			( );

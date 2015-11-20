@@ -1,3 +1,7 @@
+/*  WARNING: This serverthread.c is Very different from the one in abkInstant
+	The one in ../core/wifi/serverthread.c is Token based
+	This one is simple NLP words based and is the current choice.
+*/
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -29,10 +33,12 @@
 #include "bk_system_defs.h"
 #include "client_memory.hpp"
 
-
+ 
 #define MAX_SENTENCE_LENGTH 1024
 char	 		header[MAX_SENTENCE_LENGTH];
 
+
+char 			broadcast_addr[16];		// 
 static char 	ip_addr[16]; 			// for user feedback
 struct   		sockaddr_in s_in;
 struct   		sockaddr_in p_in;	// To be stored in UserList for each user.
@@ -60,17 +66,23 @@ static void init_server()
     for (ifa = ifAddrStruct; ifa != NULL;  ifa=ifa->ifa_next)
     {
         if (ifa->ifa_addr->sa_family==AF_INET) 	// check it is IP4
-        { 	
+        {
             // is a valid IP4 Address
             tmpAddrPtr = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
             char addressBuffer[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
 
-            int result = strcmp(ifa->ifa_name, "en1");
             printf("%s IP Address %s \n", ifa->ifa_name, addressBuffer );
-            if (result==0)
+            int result = strcmp(ifa->ifa_name, "en1");
+            if (result==0) 
+            {
+        		struct sockaddr * sa2 = ifa->ifa_broadaddr;
             	strcpy ( ip_addr, addressBuffer );
-            	
+            	            	
+            	printf(" Broadcast Address = %s\n", ifa->ifa_broadaddr->sa_data );            	      	
+            	// inet_ntop(AF_INET, tmpAddrPtr, broadcast_addr, INET_ADDRSTRLEN);
+            	// strcpy ( broadcast_addr, addressBuffer );            	
+            }
         } else if (ifa->ifa_addr->sa_family==AF_INET6) 	// check it is IP6
         { 
             // is a valid IP6 Address

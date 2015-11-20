@@ -3,15 +3,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/types.h>    // Needed for sockets stuff
 #include <netinet/in.h>   // Needed for sockets stuff
 #include <sys/socket.h>   // Needed for sockets stuff
 #include <arpa/inet.h>    // Needed for sockets stuff
 #include <fcntl.h>        // Needed for sockets stuff
 #include <netdb.h>        // Needed for sockets stuff
+#include "pican_defines.h"
+
 #include "udp_transponder.hpp"
 #include "bk_system_defs.h" 
 #include "client_memory.hpp"
+
+
 
 #define Debug 0
 
@@ -156,6 +161,9 @@ void compose_message()
 	sprintf(out_buf, "APP_NAME=BK robot server\nHOST_NAME=%s\nMACHINE_TYPE=%s\n", name, MACHINE_TYPE );	
 }
 
+
+#include "serverthread.h"
+
 void* udp_transponder_function(void* msg)
 { 
   int                  client_s;        // Client socket descriptor
@@ -178,23 +186,27 @@ void* udp_transponder_function(void* msg)
   // Fill-in server socket's address information
   server_addr.sin_family = AF_INET;                 // Address family to use
   server_addr.sin_port   = htons(PORT_NUM);           // Port num to use
-  server_addr.sin_addr.s_addr = inet_addr("255.255.255.255"); // Need this for Broadcast
-
+//server_addr.sin_addr.s_addr = inet_addr("255.255.255.255"); // Need this for Broadcast
+  server_addr.sin_addr.s_addr = inet_addr("192.168.2.255"); // Need this for Broadcast
+  printf ("Broadcast Address=%s\n", broadcast_addr );
+  
   // Set socket to use MAC-level broadcast
   iOptVal = 1;
   iOptLen = sizeof(int);
   setsockopt(client_s, SOL_SOCKET, SO_BROADCAST, (char*)&iOptVal, iOptLen);
-  if (Debug) printf("UDP Tx: Local IP=%s\tport=%d\n", inet_ntoa(server_addr.sin_addr), 
-  									  ntohs(server_addr.sin_port) );
+  if (Debug) printf("UDP Tx: Local IP=%s\tport=%d\n", 
+  									inet_ntoa(server_addr.sin_addr), 
+  									ntohs(server_addr.sin_port) );
   compose_message();
   while (1)
   {
 	  // Now send the message to server:
 	  retcode = sendto(client_s, out_buf, (strlen(out_buf) + 1), 0,
 					   (struct sockaddr *)&server_addr, sizeof(server_addr));
+	  int error = errno;
 	  if (retcode < 0)
 	  {
-		printf("*** ERROR - sendto() failed \n");
+		printf("*** ERROR - sendto() failed %s \n", strerror(error));
 		exit(-1);
 	  }
 	  sleep(1);
@@ -255,12 +267,9 @@ void* udp_receive_function(void* msg)
 		exit(-1);
 	  }
 
-	  
-	  
 	  // Now for each string, parse info:
 	  //for (int i=0; i<num_strings; i++)
-	  {
-	  	
+	  {	  	
 	  }
 	  	  	  
 	  // Copy the four-byte client IP address into an IP address structure

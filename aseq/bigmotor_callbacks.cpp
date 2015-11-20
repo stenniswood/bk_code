@@ -42,7 +42,7 @@ BOOL get_appendage_actuator( int* Aindex, int* actuator_index, byte mInstance )
 	*Aindex = 0;
 	for (int a=0; a<robot.limbs.size(); a++)
 	{
-		*actuator_index = robot.limbs[*Aindex].find_actuator_instance( mInstance );
+		*actuator_index = robot.limbs[*Aindex]->find_actuator_instance( mInstance );
 		if (*actuator_index != -1)
 			return TRUE;
 	}	
@@ -77,9 +77,8 @@ BOOL can_position_test_responder( struct sCAN* mMsg )
 			latest_pot33 = tmp.PotValue;
 			printf("Enc/Pot:, %5d, %5d, %5d, %4.6f\n", latest_pot31, latest_pot32, 
 								latest_pot33, mtime );
-			robot.limbs[0].Reads++;
+			robot.limbs[0]->Reads++;
 		}
-
 	}	
 }
 
@@ -93,16 +92,15 @@ INCOMING CAN BIGMOTOR MESSAGE CALLBACK():
 BOOL can_motor_position_responder( struct sCAN* mMsg )
 {
 	// Distribute the message to the robot:
-	BOOL retval = robot.handle_CAN_message( mMsg );		// limbs, then actuators, etc.
-	if ((teach_pendant.m_is_connected) && (retval==0))
+	BOOL retval = robot.handle_CAN_message( mMsg );		// limbs, then actuators, etc.	
+	if (retval==FALSE)
 		retval = teach_pendant.handle_CAN_message( mMsg );
-		
+
 // 	When all actuators on a particular limb have been received,
 //		if (robot.limbs[Aindex].vector_fully_read()) 
 //		{
 //			can_vector_read_complete_responder( Aindex );	// Moves to next vector!
-//		}		
-
+//		}
 	return retval;
 }
 
@@ -113,10 +111,10 @@ BOOL can_motor_position_responder( struct sCAN* mMsg )
  *********************************************************************/
 BOOL can_vector_read_complete_responder( byte mAppendageIndex )
 {		
-	robot.limbs[mAppendageIndex].ElementsFilled = 0;
-	robot.limbs[mAppendageIndex].Reads++;	
+	robot.limbs[mAppendageIndex]->ElementsFilled = 0;
+	robot.limbs[mAppendageIndex]->Reads++;	
 	
-	BOOL reached = robot.limbs[mAppendageIndex].is_destination_reached( );
+	BOOL reached = robot.limbs[mAppendageIndex]->is_destination_reached( );
 	if (reached)
 	{
 			//print_current_positions( mAppendageIndex );

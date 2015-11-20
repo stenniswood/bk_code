@@ -57,7 +57,7 @@ public:
 	int  	update_position			( 						);	// computes time delta, angle, angular speed, check stops 
 	virtual int  	handle_CAN_message( struct sCAN* mMsg 	);	// handles incoming msg
 
-	void  	send_speed				( float mDuty 			);
+	void  	send_speed				( float mDutyPercent	);
 	void  	send_stop				( 						);
 	void  	send_moveto_angle		( float mAngle=9999. 	);
 	void  	send_config				( byte mindex, byte mValue, byte mMask=0xFF );
@@ -105,8 +105,8 @@ public:
 	float	gravity_angle;			// of the portion more torso direction + CurrAngle = next limb angle wrt gravity!
 
 	word	ZeroOffset;				// in counts.
-	BOOL	ActiveOutputs;			// Similar to MotorEnable, if false does not send the duty to the motor.
-	BOOL 	MotorEnable;			// If FALSE, does not participate in the sequencing (
+	int		ActiveOutputs;			// Similar to MotorEnable, if false does not send the duty to the motor.
+	int 	MotorEnable;			// If FALSE, does not participate in the sequencing (
 	// If MotorEnable==TRUE but ActiveOutputs==FALSE, the incoming messages will be updated, but no drive to motors.
 	short 	MotorDirection;			// 1 => increasing counts is positive direction;  0=> decreasing counts is positive angle.
 

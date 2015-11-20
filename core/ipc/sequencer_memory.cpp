@@ -42,7 +42,7 @@ char* 	sequencer_shared_memory;
 int 	sequencer_segment_id;
 struct  sequencer_ipc_memory_map* ipc_memory_sequencer =NULL;
 
- 
+
 void seq_dump_ipc()
 {
 	int length = sizeof(struct sequencer_ipc_memory_map);
@@ -56,9 +56,9 @@ void seq_dump_ipc()
 
 void seq_save_segment_id(char* mFilename)
 {
-	FILE* fd = fopen(mFilename, "w");
+	FILE* fd = fopen(mFilename, "w+");
 	if (fd==NULL) {
-		printf("Cannot open file %s. %s \n", mFilename, strerror(errno) );		
+		printf("Cannot write to file %s. %s \n", mFilename, strerror(errno) );		
 	}
 	
 	//FILE* fd = fopen("client_shared_memseg_id.cfg", "w");
@@ -69,6 +69,7 @@ void seq_save_segment_id(char* mFilename)
 	fwrite ( line, strlen(line), 1, fd  );
 	fclose( fd );
 }
+
 int seq_read_segment_id(char* mFilename)
 {
 	char tline[40];

@@ -6,6 +6,7 @@ extern "C" {
 #define UINT unsigned int
 #define WORD unsigned short
 #define BYTE unsigned char
+//#define BOOL unsigned char
 
 
 //void init_server();
@@ -18,8 +19,10 @@ void* server_thread(void*);
 
 extern BOOL 	nlp_reply_formulated;
 extern char		NLP_Response[255];
-
+extern char 	broadcast_addr[16];	
 
 #ifdef  __cplusplus
 }
 #endif
+
+

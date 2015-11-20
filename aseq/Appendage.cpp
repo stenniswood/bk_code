@@ -70,7 +70,7 @@ int Appendage::find_actuator_instance( byte mInstance )
 	if (Enable==false)  return -1;
 	for (byte a=0; a < actuators.size(); a++)
 	{
-		if ( actuators[a].Instance == mInstance )
+		if ( actuators[a]->Instance == mInstance )
 			return a;
 	}
 	return -1;	
@@ -80,14 +80,14 @@ void Appendage::update_submitted_timestamps( struct timeval mts )
 {
 	if (Enable==false)  return;
 	for (byte a=0; a < actuators.size(); a++)
-		actuators[a].submitted = mts;
+		actuators[a]->submitted = mts;
 }
 int Appendage::is_done_averaging( )
 {
 	int retval = -1;
 	for (byte a=0; a < actuators.size(); a++)
 	{
-		bool result = ( actuators[a].Reads <= actuators[a].ReadsAllowed );
+		bool result = ( actuators[a]->Reads <= actuators[a]->ReadsAllowed );
 		if (result) 
 			return a;		
 	}
@@ -101,10 +101,10 @@ void Appendage::start_measurement_averaging( int mNumSamples )
 
 	for (byte a=0; a < actuators.size(); a++)
 	{
-		actuators[a].MotorEnable = TRUE;	// enable because, activate Outputs is off, and we'll read all motors positions.
-		actuators[a].SumCurrCounts = 0;
-		actuators[a].Reads = 0;
-		actuators[a].ReadsAllowed = mNumSamples;
+		actuators[a]->MotorEnable = TRUE;	// enable because, activate Outputs is off, and we'll read all motors positions.
+		actuators[a]->SumCurrCounts = 0;
+		actuators[a]->Reads = 0;
+		actuators[a]->ReadsAllowed = mNumSamples;
 	}
 }
 
@@ -122,17 +122,17 @@ mTorso_io_Angle - should be measured from horizon (=0.0 deg)
 void Appendage::propogate_gravity_angle_down( float mTorso_fa_Angle, float mTorso_io_Angle )	
 {
 	// Almost always propogate down the legs, b/c we have the gyros in the torso.
-	actuators[HIP_FA_SWING_INDEX].gravity_angle = mTorso_fa_Angle;
+	actuators[HIP_FA_SWING_INDEX]->gravity_angle = mTorso_fa_Angle;
 	
 	/* Note: For now we don't have any Hip Rotate motor.  This angle means we would have
 			to use the _io_ angle also!  Add this later after we know the algorithm works
 			without side to side tipping.			 
 	*/
-	float angle = actuators[HIP_FA_SWING_INDEX].gravity_angle + actuators[HIP_FA_SWING_INDEX].CurrAngle;
+	float angle = actuators[HIP_FA_SWING_INDEX]->gravity_angle + actuators[HIP_FA_SWING_INDEX]->CurrAngle;
 
-	actuators[KNEE_SWING_INDEX].gravity_angle  = angle;
-	angle = actuators[KNEE_SWING_INDEX].gravity_angle + actuators[KNEE_SWING_INDEX].CurrAngle;	
-	actuators[ANKLE_SWING_INDEX].gravity_angle = angle;	
+	actuators[KNEE_SWING_INDEX]->gravity_angle  = angle;
+	angle = actuators[KNEE_SWING_INDEX]->gravity_angle + actuators[KNEE_SWING_INDEX]->CurrAngle;	
+	actuators[ANKLE_SWING_INDEX]->gravity_angle = angle;	
 }
 	
 /*********************************************************************
@@ -147,7 +147,7 @@ BOOL Appendage::is_destination_reached( )
 	// For all actuators : 
 	for (int a=0; a<actuators.size(); a++)
 	{
-		bool reached = actuators[a].destination_reached( 20. );
+		bool reached = actuators[a]->destination_reached( 20. );
 		if (reached==false)
 			result = FALSE;
 	}	
@@ -159,8 +159,8 @@ void Appendage::clear_reads( int mNumExpected )
 	Reads = 0;	
 	ReadsAllowed = mNumExpected;
 	for (int a=0; a<actuators.size(); a++)  {
-		actuators[a].Reads = 0;
-		actuators[a].ReadsAllowed = mNumExpected;
+		actuators[a]->Reads = 0;
+		actuators[a]->ReadsAllowed = mNumExpected;
 	}
 }
 
@@ -170,8 +170,8 @@ bool Appendage::is_vector_fully_read( )
 	if (Enable==false)  return true;
 
 	for (int a=0; a<actuators.size(); a++)
-		if (actuators[a].MotorEnable)
-			if (actuators[a].Reads < actuators[a].ReadsAllowed)
+		if (actuators[a]->MotorEnable)
+			if (actuators[a]->Reads < actuators[a]->ReadsAllowed)
 			{
 				printf("Actuator %d is not received. %s \n", a, Name );
 				return false;
@@ -183,17 +183,19 @@ bool Appendage::is_vector_fully_read( )
 void Appendage::deactivate_outputs( )
 {
 	for (int a=0; a<actuators.size(); a++)
-		actuators[a].ActiveOutputs = FALSE;
+		actuators[a]->ActiveOutputs = FALSE;
 }
 void Appendage::activate_outputs( )
 {
 	for (int a=0; a<actuators.size(); a++)
-		actuators[a].ActiveOutputs = TRUE;
+		actuators[a]->ActiveOutputs = TRUE;
 }
 void Appendage::activate_enabled_outputs( )
 {
-	for (int a=0; a<actuators.size(); a++)
-		actuators[a].ActiveOutputs = actuators[a].MotorEnable;
+	for (int a=0; a < actuators.size(); a++) {
+		actuators[a]->ActiveOutputs = actuators[a]->MotorEnable;
+		//if (Debug) printf("%d-%x: Enable=%d\n", a, actuators[a], actuators[a]->MotorEnable );
+	}
 }
 	
 // handles incoming msg
@@ -204,7 +206,7 @@ int Appendage::handle_CAN_message( struct sCAN* mMsg )
 	int handled = 0;
 	for (int a=0; a<actuators.size(); a++)
 	{
-		handled = actuators[a].handle_CAN_message( mMsg );
+		handled = actuators[a]->handle_CAN_message( mMsg );
 	}	
 
 	// Special Action to be done when all actuators have received an updated position.	
@@ -217,7 +219,7 @@ void Appendage::print_active_outputs(  )
 	printf("ActiveOutputs:(%d) ",actuators.size() );
 	for (int a=0; a<actuators.size(); a++)
 	{
-		printf("%d, ", actuators[a].ActiveOutputs );
+		printf("%d, ", actuators[a]->ActiveOutputs );
 	}
 	printf("\n");
 }
@@ -229,7 +231,7 @@ void Appendage::print_current_angles(  )
 	printf("angles: ");
 	for (int a=0; a<actuators.size(); a++)
 	{
-		printf(" %6.2f ", actuators[a].CurrAngle );
+		printf(" %6.2f ", actuators[a]->CurrAngle );
 	}
 	printf("\n");	
 }
@@ -239,7 +241,7 @@ void Appendage::print_current_positions(  )
 	if (Enable==false)  return;	
 	for (int a=0; a < actuators.size(); a++)
 	{
-		actuators[a].print_positioning();
+		actuators[a]->print_positioning();
 	}
 	printf("\n");	
 }
@@ -249,13 +251,20 @@ void Appendage::print_averages( )
 	printf("Limb: %s\n", Name );
 	for (int a=0; a < actuators.size(); a++)
 	{
-		actuators[a].print_average();
+		actuators[a]->print_average();
 	}	
 }
-void Appendage::set_duty( struct sVectorSet& mVectors, int mVectorIndex, float mTimeDelta )
+
+void Appendage::set_duty( sOneVector& mVector )
 {
-	
+	for (int a=0; a<actuators.size(); a++)
+	{
+		printf("%d- %6.2f  ", a, mVector.Data[a] );
+		actuators[a]->send_speed( mVector.Data[a] );
+	}
+	printf("\n");
 }
+
 void Appendage::set_new_destinations( struct sVectorSet& mVectors, int mVectorIndex, float mTimeDelta )
 {
 	if (Enable==false)  return ;
@@ -263,7 +272,7 @@ void Appendage::set_new_destinations( struct sVectorSet& mVectors, int mVectorIn
 	{
 		// GET COUNT & CALC REQUESTED SPEED : 
 		int tmpCount = mVectors.vectors[mVectorIndex].get_count( a );
-		float speed  = (tmpCount - actuators[a].CurrCount) / (mVectors.playback_period_ms/1000.);
+		float speed  = (tmpCount - actuators[a]->CurrCount) / (mVectors.playback_period_ms/1000.);
 /*		float speed  = mVectors.calc_average_speed_cps( mVectorIndex, a );  
 		Deprecated because the speed should depend on current motor position and not the previous vector.
  		especially on first boot, these could be drastically different.
@@ -271,7 +280,7 @@ void Appendage::set_new_destinations( struct sVectorSet& mVectors, int mVectorIn
 		if (speed > MAX_MOTOR_SPEED)
 			speed = MAX_MOTOR_SPEED;
 		printf("Appendage::set_new_destinations():  %d %6.3f\n", tmpCount, speed );
-		actuators[a].set_destination( tmpCount, speed, mTimeDelta );
+		actuators[a]->set_destination( tmpCount, speed, mTimeDelta );
 	}
 }
 
@@ -287,8 +296,8 @@ void Appendage::send_speed_messages( )
 	{
 		// speeds are in the actuator - "DutyPercent"
 		// This also computes the speed!
-		//actuators[a].compute_duty();
-		//actuators[a].send_speed(actuators[a].DutyPercent);
+		//actuators[a]->compute_duty();
+		//actuators[a]->send_speed(actuators[a]->DutyPercent);
 	}
 }
 
@@ -303,7 +312,7 @@ void Appendage::compute_speeds( )
 	for (int a=0; a<actuators.size(); a++ )
 	{
 		// speeds are in the actuator - ""
-		//actuators[a].compute_duty( );
+		//actuators[a]->compute_duty( );
 	}
 }
 
@@ -322,10 +331,10 @@ void Appendage::send_moveto_angle_messages(  )
 	for (int a=0; a < actuators.size(); a++ )
 	{
 		printf("Instances=%x; NextAngle=%x RequestedSpeed=%3.1f\n", 
-			actuators[a].Instance, 
-			actuators[a].NextAngleDeg,
-			actuators[a].RequestedSpeed  );
-		actuators[a].send_moveto_angle( actuators[a].NextAngleDeg );		
+			actuators[a]->Instance, 
+			actuators[a]->NextAngleDeg,
+			actuators[a]->RequestedSpeed  );
+		actuators[a]->send_moveto_angle( actuators[a]->NextAngleDeg );		
 	}
 }
 
@@ -335,8 +344,8 @@ void Appendage::set_current_position_as_destination( )
 	if (Enable==false)  return ;
 	for (int a=0; a<actuators.size(); a++)
 	{
-		actuators[a].StartCount = actuators[a].CurrCount;
-		actuators[a].DestinationCount = actuators[a].CurrCount;
+		actuators[a]->StartCount = actuators[a]->CurrCount;
+		actuators[a]->DestinationCount = actuators[a]->CurrCount;
 	}
 }
 
@@ -358,7 +367,7 @@ void Appendage::configure_motor_reports( byte mRate, byte mReports )
 	if (Enable==false)  return ;
 	for (int a=0; a<actuators.size(); a++)
 	{
-		configure_motor_set_update_rate( &Msg, actuators[a].Instance, 
+		configure_motor_set_update_rate( &Msg, actuators[a]->Instance, 
 										 mRate, mReports );
 		print_message( &Msg );
 		AddToSendList( &Msg );

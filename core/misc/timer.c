@@ -6,6 +6,7 @@
 #include "bk_system_defs.h"
 #include "timer.h"
 
+
 timer_t 	timerid;
 struct		sigevent  sev;
 struct		sigaction sa;
@@ -46,10 +47,11 @@ void start_timer(struct itimerspec* mits,
 				 timer_t  mtimerid )
 {
    /* Start the timer */
-   mits->it_value.tv_sec     = mfreq_nanosecs / 1000000000;
-   mits->it_value.tv_nsec    = mfreq_nanosecs % 1000000000;
+   mits->it_value.tv_sec     = mfreq_nanosecs / 1000000000.;	// billion
+   mits->it_value.tv_nsec    = mfreq_nanosecs % 1000000000;		// billion
    mits->it_interval.tv_sec  = mits->it_value.tv_sec;
    mits->it_interval.tv_nsec = mits->it_value.tv_nsec;
+   printf("start_timer:  interval=%d . %d\n", mits->it_interval.tv_sec, mits->it_interval.tv_nsec );
    if (timer_settime(mtimerid, 0, mits, NULL) == -1)
 		errExit("timer_settime");
 }

@@ -21,6 +21,7 @@ extern "C" {
 #define DUTY_VECTORS 	 		0x04 
 #define OTHER_VECTORS	 		0x08
 
+
 class sOneVector	// CORRESPONDS TO 1 LIMB!
 {
 public:
@@ -42,19 +43,23 @@ class sVectorSet				// A sequence of vectors
 {
 public:
 	sVectorSet();
-	vector<class sOneVector> vectors;
-	int 		playback_period_ms;
-	void		set_data_type			( byte mDataType 	);		// updates all vectors too.
+	
+	void		set_data_type			( byte mDataType 	);				// updates all vectors too.
 	void		set_limb     			( Appendage* mlimb	);
 	float		calc_average_speed_cps	( int mStartIndex, int mActuator );	// speed between 2 consequetive vectors
-
-	byte 		data_type;
+	void 		print_vectors			( );
+		
 	
-	void print_vectors( );
+	int 		playback_period_ms;
+	vector<class sOneVector> vectors;
+	byte 		data_type;
 };
+
 
 class Robot;
 
+
+// RobotPose much better name.
 class sRobotVector		// All vectors for entire robot.
 {
 public:
@@ -67,7 +72,7 @@ public:
 	int 		iterations_completed;	
 
 	void		print_vector( int mIndex=-1, bool mAngles=true );
-	void		init_limbs( );
+	void		init_limbs  ( );
 	
 	// FILE ACCESS : 
 	void 				read_header			( FILE* f );
@@ -83,8 +88,6 @@ public:
 	void 				set_data_type_all_lists		 ( byte mType );
 	void 				set_limbs					 ( Robot& mrobot );
 };
-
-
 
 
 #ifdef  __cplusplus

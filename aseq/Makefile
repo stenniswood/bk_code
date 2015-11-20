@@ -1,8 +1,26 @@
+RPI = 1
+linux_desktop = 2
+Mac = 3
+
+PLATFORM  = $(RPI)
+#PLATFORM = $(linux_desktop)
+#PLATFORM  = $(Mac)
+ifeq ($(PLATFORM), $(RPI))
+HOME_PATH = /home/pi/     
+endif
+ifeq ($(PLATFORM), $(linux_desktop))
+HOME_PATH = ~/                
+endif
+ifeq ($(PLATFORM), $(Mac))
+HOME_PATH = /Users/stephentenniswood/
+endif
+MACROS = -DPLATFORM=$(PLATFORM) -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
+
 cc		 = g++
 OPTIONS	 =  -lm
 INC		 = ../core/can ../core/msg ../core/misc ../core/ipc
 SELF_INC = ./
-CFLAGS 	= -lwiringPi -lm -lrt
+CFLAGS 	= -lwiringPi -lm -lrt $(MACROS)
 DEPS   	= 
 OBJ     = seq_main.o board_list.o motor_vector.o cmd_process.o leds.o  config_file.o \
 	      string_util.o vector_file.o motor.o motor_control.o Appendage.o robot.o \
@@ -36,5 +54,6 @@ clean:
 	rm -rf ../core/can/*.o 
 	rm -rf ../core/msg/*.o 
 	rm -rf ../core/misc/*.o 
+	rm -rf ../core/ipc/*.o 	
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 

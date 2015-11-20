@@ -28,8 +28,6 @@
 #include "teach_pendant.hpp"
 
 
-
-
 TeachPendant::TeachPendant()
 {
 	Initialize();
@@ -38,7 +36,7 @@ TeachPendant::TeachPendant()
 void TeachPendant::Initialize( )
 {
 	m_Instance = -1;
-	m_is_connected = true;
+	m_is_connected = true;	
 	m_CAN_msg_id = ID_ANALOG_MEASUREMENT;
 	m_Instance = 7;
 }
@@ -58,15 +56,19 @@ int TeachPendant::matches_any_dial( int mIndex )
 
 int TeachPendant::handle_CAN_message( struct sCAN* mMsg )	// handles incoming msg
 {
+	if (teach_pendant.m_is_connected == false) 	return 0;
 	if (mMsg->id.group.instance != m_Instance)	return 0;
-				
+
+	printf("Checking TeachPendant Msg\n");
 	if (mMsg->id.group.id == m_CAN_msg_id)
 	{
 		if (m_CAN_msg_id == ID_ANALOG_MEASUREMENT)
 		{
-			int dial_index = matches_any_dial(mMsg->data[0]);
-			if (dial_index>=0)
+			
+			int dial_index = matches_any_dial( mMsg->data[0] );
+			if (dial_index >= 0)
 			{
+				printf("Received TeachPendant Msg Dial=%d\n", dial_index );
 				m_dials[dial_index].PrevCount = m_dials[dial_index].CurrCount;
 				m_dials[dial_index].CurrCount = (mMsg->data[1]<<8) + mMsg->data[2];
 				return 1;
@@ -74,7 +76,12 @@ int TeachPendant::handle_CAN_message( struct sCAN* mMsg )	// handles incoming ms
 		}
 		else if (m_CAN_msg_id == ID_MOTOR_VALUE)
 		{
-/*			int dial_index = matches_any_dial(mMsg->data[0]);
+/*	Teach Pendant can be plugged into the same Harness that connects to the leg	
+	Pots.  So this might need to be added sometime.  But the main intent is 
+	to compare leg Pots to the teach pendant, therefore not likely use case.
+	I.e. Want Leg Pots and Teach pendant simultaneously.
+	
+			int dial_index = matches_any_dial(mMsg->data[0]);
 				struct stMotorStateInfo tmp;
 				can_parse_motor_value( mMsg, &(tmp.PotValue), 
 											 &(tmp.CurrentTimesTen), 

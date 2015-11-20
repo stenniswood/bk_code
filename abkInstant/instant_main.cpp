@@ -360,7 +360,7 @@ int main( int argc, char *argv[] )
 	}
 	init();
 	printf("===============================================\n");
-	
+
 	CAN_SendingOn   = FALSE;
 	CAN_ListeningOn = FALSE;
 	if (argc>1)

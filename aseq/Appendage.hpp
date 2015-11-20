@@ -2,6 +2,7 @@
 #define _APPENDAGE_HPP_
 
 #include <vector>
+#include "vector_file.h"
 #include "motor_control.hpp"
 
 using namespace std;
@@ -31,7 +32,8 @@ public:
 	BOOL 	is_destination_reached     ( );
 	bool	is_vector_fully_read	   ( );		// at least 1 update on all enabled motors.
 	void	set_new_destinations	   ( struct sVectorSet& mVectors, int mVectorIndex, float mTimeDelta );
-
+	void	set_duty					( sOneVector& mVector );
+	
 	void	activate_outputs		   ( );
 	void	activate_enabled_outputs   ( );	
 	void	deactivate_outputs		   ( );
@@ -48,7 +50,7 @@ public:
 	word 	ReadsAllowed;		// number of CAN positioning reads before duty will be updated
 	byte  	ElementsFilled;		// Bitmap. Use this each time a CAN ID_MOTOR_ANGLE msg comes in to indicate we have a new reading of the element.  Up to 8 elements
 
-	vector<MotorControl> actuators;
+	vector<MotorControl*> actuators;
 
 	// Semi Constant Variables (change very infrequently)
 	bool 	Enable;	// If FALSE, does not participate in the sequencing

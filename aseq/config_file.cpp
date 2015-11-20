@@ -50,7 +50,6 @@ Comments Should not appear in the file.
 #include "motor_control.hpp"
 #include "Appendage.hpp"
 #include "vector_file.h"
-
 #include "robot.hpp"
 #include "config_file.h" 
 
@@ -110,11 +109,12 @@ void read_instance_line( FILE* f, Robot& mRobot )
 		exit(0);
 	}
 
-	MotorControl ni;
+	MotorControl* ni = NULL;
 	for (int i=2; i<num_params; i++)
-	{		
-		ni.Instance = numbers[i];
-		mRobot.limbs[limb_index].actuators.push_back( ni );
+	{
+		ni = new MotorControl();
+		ni->Instance = numbers[i];
+		mRobot.limbs[limb_index]->actuators.push_back( ni );
 		printf("%d, ", numbers[i]);
 	}
 	printf("\n");
@@ -140,7 +140,7 @@ void read_direction_line( FILE* f, Robot& mRobot )
 			exit(0);
 		}
 
-		mRobot.limbs[limb_index].actuators[i-2].MotorDirection = numbers[i];
+		mRobot.limbs[limb_index]->actuators[i-2]->MotorDirection = numbers[i];
 		printf("[%d]=%d, ", i-2, numbers[i]);
 	}
 	printf("\n");
@@ -165,7 +165,7 @@ void read_feedback_msg_ids( FILE* f, Robot& mRobot )
 		char* s = params[i];
 		while (*s == ' ') s++;
 		int id = getID( s );
-		mRobot.limbs[limb_index].actuators[i-1].Feedback_Msg_id = id;
+		mRobot.limbs[limb_index]->actuators[i-1]->Feedback_Msg_id = id;
 		printf("Limb[%d][%d] Feedback Msg ID=|%s|%d\n", limb_index, i-1, s, id );
 	}
 }
@@ -192,9 +192,8 @@ void read_feedback_indices( FILE* f, Robot& mRobot )
 			exit(0);
 		}
 		printf("Limb[%d][%d] feedback index=%d\n", limb_index, i-1, numbers[i] );
-		mRobot.limbs[limb_index].actuators[i-1].Feedback_index = numbers[i];
+		mRobot.limbs[limb_index]->actuators[i-1]->Feedback_index = numbers[i];
 	}
-
 }
 
 
@@ -218,8 +217,8 @@ void read_enable_line( FILE* f, Robot& mRobot )
 			exit(0);
 		}
 		if (numbers[i])	numbers[i] = TRUE;		// 2,3,4,etc ==> 1		
-		mRobot.limbs[limb_index].actuators[i-2].MotorEnable = numbers[i];
-		mRobot.limbs[limb_index].actuators[i-2].ActiveOutputs = numbers[i];
+		mRobot.limbs[limb_index]->actuators[i-2]->MotorEnable = numbers[i];
+		mRobot.limbs[limb_index]->actuators[i-2]->ActiveOutputs = numbers[i];
 		printf("[%d]=%d, ", i-2, numbers[i] );
 	}
 	printf("\n");
@@ -244,7 +243,7 @@ void read_zero_offsets( FILE* f, Robot& mRobot )
 			printf("Error reading config : Supplied vector index is more than the robot has!\n");
 			exit(0);
 		}
-		mRobot.limbs[limb_index].actuators[i-2].ZeroOffset = numbers[i];
+		mRobot.limbs[limb_index]->actuators[i-2]->ZeroOffset = numbers[i];
 		printf("[%d]=%d, ", i-2, numbers[i] );
 	}
 	printf("\n");
@@ -275,7 +274,7 @@ void read_stop_line(FILE* f, Robot& mRobot)
 		printf("Error reading config : Supplied vector index is more than the robot has!\n");
 		exit(0);
 	}
-	if ( actuator_index > (mRobot.limbs[limb_index].actuators.size() ) )
+	if ( actuator_index > (mRobot.limbs[limb_index]->actuators.size() ) )
 	{
 		printf("Error reading config : Supplied actuator index is more than the limb has!\n");
 		exit(0);
@@ -286,13 +285,13 @@ void read_stop_line(FILE* f, Robot& mRobot)
 
 	if (stop_index == 1)
 	{
-		mRobot.limbs[limb_index].actuators[actuator_index].stop1.Enabled  = TRUE;	
-		mRobot.limbs[limb_index].actuators[actuator_index].stop1.Angle    = angle;
-		mRobot.limbs[limb_index].actuators[actuator_index].stop1.PotValue = value;
+		mRobot.limbs[limb_index]->actuators[actuator_index]->stop1.Enabled  = TRUE;	
+		mRobot.limbs[limb_index]->actuators[actuator_index]->stop1.Angle    = angle;
+		mRobot.limbs[limb_index]->actuators[actuator_index]->stop1.PotValue = value;
 	} else {
-		mRobot.limbs[limb_index].actuators[actuator_index].stop1.Enabled  = TRUE;	
-		mRobot.limbs[limb_index].actuators[actuator_index].stop2.Angle    = angle;
-		mRobot.limbs[limb_index].actuators[actuator_index].stop2.PotValue = value;	
+		mRobot.limbs[limb_index]->actuators[actuator_index]->stop1.Enabled  = TRUE;	
+		mRobot.limbs[limb_index]->actuators[actuator_index]->stop2.Angle    = angle;
+		mRobot.limbs[limb_index]->actuators[actuator_index]->stop2.PotValue = value;	
 	}
 	printf("Angle=%6.2f;  PotValue=%d\n", angle, value );			
 	//printf("Done\n");
@@ -306,19 +305,21 @@ void read_config( char* mFilename, Robot& mRobot )
 	FILE* f = fopen(mFilename, "r");
 
 	// READ Number of Limbs:
-	Appendage ai;
+	Appendage* ai;
 	getLine( f, line );			// First Line has number of appendages.
 	int Number_of_appendages = atoi( line );
-	for (int i=0; i<Number_of_appendages; i++)
+	for (int i=0; i<Number_of_appendages; i++) {
+		ai = new Appendage();
 		mRobot.limbs.push_back( ai );
+	}
 	printf("Number of Robot Limbs = %d\n", mRobot.limbs.size() );
 
 	// READ NAMES : 
 	for (int i=0; i<Number_of_appendages; i++)
 	{
 		getLine( f, line );
-		strcpy ( mRobot.limbs[i].Name, line );
-		printf("%s\n", mRobot.limbs[i].Name );
+		strcpy ( mRobot.limbs[i]->Name, line );
+		printf("%s\n", mRobot.limbs[i]->Name );
 	}
 	// READ LIMB ENABLES : 	
 	for (int i=0; i<Number_of_appendages; i++)
@@ -326,10 +327,10 @@ void read_config( char* mFilename, Robot& mRobot )
 		getLine( f, line );
 		if (strcmp(line, "ENABLED")==0) {
 			printf("limb[%d] : Enabled\n", i );
-			mRobot.limbs[i].Enable = true;
+			mRobot.limbs[i]->Enable = true;
 		} else {
 			printf("limb[%d] : Disabled\n", i );
-			mRobot.limbs[i].Enable = false;
+			mRobot.limbs[i]->Enable = false;
 		}		
 	}
 
@@ -363,7 +364,7 @@ void read_config( char* mFilename, Robot& mRobot )
 	// For each Actuator : 
 	for (int i=0; i<Number_of_appendages; i++)
 	{
-		for (int j=0; j<mRobot.limbs[i].actuators.size(); j++)
+		for (int j=0; j<mRobot.limbs[i]->actuators.size(); j++)
 		{
 			read_stop_line( f, mRobot );	
 			read_stop_line( f, mRobot );				

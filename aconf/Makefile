@@ -15,6 +15,8 @@ MSG_OBJS  = packer_motor.o packer_lcd.o packer.o parser_tilt.o
 MISC_OBJS = buttons.o leds.o vector_math.o 
 CPPOBJ    = 
 
+LDFLAGS = -lpthread -lrt
+
 %.o: %.cpp $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) -c -o $@ $< $(CFLAGS)
 %.o: %.c $(DEPS)
@@ -23,7 +25,7 @@ CPPOBJ    =
 #	gcc -shared -o libcan_eid.so ./core/can_eid.o
 	
 aconf: $(OBJ) $(addprefix ../core/can/, $(CORE_OBJS)) $(addprefix ../core/misc/, $(MISC_OBJS)) $(addprefix ../core/msg/, $(MSG_OBJS)) 
-	gcc -o  $@ $^ $(CFLAGS)
+	gcc -o  $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.png *.pdf *.bak 

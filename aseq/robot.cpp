@@ -63,8 +63,8 @@ int Robot::handle_CAN_message( struct sCAN* mMsg )
 {
 	for (byte l=0; l < limbs.size(); l++)
 	{
-		limbs[l].handle_CAN_message( mMsg );
-	}	
+		limbs[l]->handle_CAN_message( mMsg );
+	}
 }
 
 /*********************************************************************
@@ -80,7 +80,7 @@ int Robot::find_actuator_by_instance( byte mInstance, int* Aindex, int* actuator
 	if (Enable==false)  return -1;
 	for (*Aindex=0; *Aindex < limbs.size(); (*Aindex)++)
 	{
-		*actuator_index = limbs[*Aindex].find_actuator_instance( mInstance );
+		*actuator_index = limbs[*Aindex]->find_actuator_instance( mInstance );
 		if (*actuator_index != -1)
 			return TRUE;
 	}
@@ -92,25 +92,25 @@ void Robot::update_submitted_timestamps( struct timeval mts )
 	if (Enable==false)  return;
 	for (byte l=0; l < limbs.size(); l++)
 	{
-		limbs[l].update_submitted_timestamps( mts );
+		limbs[l]->update_submitted_timestamps( mts );
 	}		
 }
 
 void Robot::deactivate_outputs( )
 {
 	for (byte l=0; l < limbs.size(); l++)
-		limbs[l].deactivate_outputs( );
+		limbs[l]->deactivate_outputs( );
 }	
 void Robot::activate_outputs( )
 {
 	for (byte l=0; l < limbs.size(); l++)
-		limbs[l].activate_outputs( );
+		limbs[l]->activate_outputs( );
 }
 /* Because there are Activate outputs and motor enables.   */
 void Robot::activate_enabled_outputs( )
 {
 	for (byte l=0; l < limbs.size(); l++)
-		limbs[l].activate_enabled_outputs( );
+		limbs[l]->activate_enabled_outputs( );
 	printf("activate_enabled_outputs() ACTIVATED!\n");
 }	
 
@@ -126,7 +126,7 @@ BOOL Robot::is_destination_reached( )
 	// For all actuators : 
 	for (int l=0; l<limbs.size(); l++)
 	{
-		bool reached = limbs[l].is_destination_reached( );
+		bool reached = limbs[l]->is_destination_reached( );
 		if (reached==false)
 			result = FALSE;
 	}	
@@ -145,10 +145,10 @@ void Robot::print_current_positions(  )
 	printf("Robot positions : \n");
 	for (int l=0; l < limbs.size(); l++)
 	{
-		if (limbs[l].Enable)
+		if (limbs[l]->Enable)
 		{
 			printf("Vector # %d Limb[%d] : \n", seq.Current_Vindex, l );
-			limbs[l].print_current_positions();
+			limbs[l]->print_current_positions();
 		}
 	}
 	printf("\n");
@@ -161,14 +161,14 @@ void Robot::print_vector( int mIndex, bool mAngles )
 	printf("Vector[%d] \n", mIndex );
 	if (mAngles)
 		for (int l=0; l<limbs.size(); l++)		
-		{	if (limbs[l].Enable) {
+		{	if (limbs[l]->Enable) {
 				printf("Limb[%d] ", l);
 				seq.limbs[l].vectors[mIndex].print_vector( );
 			}
 		}
 	else
 		for (int l=0; l<limbs.size(); l++)
-		{	if (limbs[l].Enable) {
+		{	if (limbs[l]->Enable) {
 				printf("Limb[%d] \n", l);
 				seq.limbs[l].vectors[mIndex].print_counts( );	
 			}
@@ -186,12 +186,12 @@ void Robot::next_vector( )
 	}
 }
 
-void Robot::set_duty( sRobotVector* mSeq, float mTimeDelta )
+void Robot::set_duty( sRobotVector* mSeq, int mIndex, float mTimeDelta )
 {
-	if (Enable==false)  return ;
+	if (Enable==false)  return;
 	for (int l=0; l<limbs.size(); l++)
 	{
-		limbs[l].set_new_destinations( mSeq->limbs[l], mSeq->Current_Vindex, mTimeDelta );
+		limbs[l]->set_duty( mSeq->limbs[l].vectors[mIndex] );
 	}
 }
 
@@ -200,7 +200,7 @@ void Robot::set_new_destinations( sRobotVector* mSeq, float mTimeDelta )
 	if (Enable==false)  return ;
 	for (int l=0; l<limbs.size(); l++)
 	{
-		limbs[l].set_new_destinations( mSeq->limbs[l], mSeq->Current_Vindex, mTimeDelta );
+		limbs[l]->set_new_destinations( mSeq->limbs[l], mSeq->Current_Vindex, mTimeDelta );
 	}
 }
 
@@ -216,7 +216,7 @@ void Robot::send_speed_messages( )
 	{
 		// speeds are in the actuator - "SpeedTimesTen"
 		// This also computes the speed!
-		limbs[l].send_speed_messages();
+		limbs[l]->send_speed_messages();
 	}
 }
 
@@ -231,7 +231,7 @@ void Robot::compute_speeds( )
 	for (int l=0; l<limbs.size(); l++ )
 	{
 		// speeds are in the actuator - "SpeedTimesTen"
-		limbs[l].compute_speeds( );
+		limbs[l]->compute_speeds( );
 	}
 }
 
@@ -249,7 +249,7 @@ void Robot::send_moveto_angle_messages(  )
 	if (Enable==false)  return ;
 	for (int l=0; l < limbs.size(); l++ )
 	{
-		limbs[l].send_moveto_angle_messages( );		
+		limbs[l]->send_moveto_angle_messages( );		
 	}
 }
 
@@ -259,36 +259,36 @@ void Robot::set_current_position_as_destination( )
 	if (Enable==false)  return ;
 	for (int l=0; l<limbs.size(); l++)
 	{
-		limbs[l].set_current_position_as_destination( );
+		limbs[l]->set_current_position_as_destination( );
 	}
 }
 
 void Robot::start_measurement_averaging( int mNumSamples )
 {
 	for (byte l=0; l < limbs.size(); l++)
-		limbs[l].start_measurement_averaging( mNumSamples );
+		limbs[l]->start_measurement_averaging( mNumSamples );
 }
 
 void Robot::print_averages( )
 {
 	for (int l=0; l<limbs.size(); l++) {
-		limbs[l].print_averages( );		
+		limbs[l]->print_averages( );		
 	}
 }
 
 void Robot::clear_reads( int mNumExpected )
 {
 	for (int l=0; l<limbs.size(); l++) {
-		limbs[l].clear_reads(mNumExpected);
+		limbs[l]->clear_reads(mNumExpected);
 		Reads = 0;	
-		limbs[l].ReadsAllowed = mNumExpected;
+		limbs[l]->ReadsAllowed = mNumExpected;
 
 	}
 }
 bool Robot::are_reads_completed (  )
 {
 	for (int l=0; l<limbs.size(); l++)  { 
-		if (limbs[l].is_vector_fully_read()==false ) {
+		if (limbs[l]->is_vector_fully_read()==false ) {
 			//printf("Limb #%d - not completed\n", l );
 			return false;
 		}
@@ -300,59 +300,72 @@ bool Robot::done_averaging(  )
 {
 	for (int l=0; l<limbs.size(); l++)
 	{
-		int result = limbs[l].is_done_averaging();
+		int result = limbs[l]->is_done_averaging();
 		if (result>=0) {
-			//printf("Actuator %s ,%d is not done!\n", limbs[l].Name, result );
-			//printf("Reads=%d, Allowed=%d\n", limbs[l].Reads, limbs[l].ReadsAllowed );
+			//printf("Actuator %s ,%d is not done!\n", limbs[l]->Name, result );
+			//printf("Reads=%d, Allowed=%d\n", limbs[l]->Reads, limbs[l]->ReadsAllowed );
 			return false;		
 		}
 	}
 	return true;
 }
 
-/* Load the config file.
-	
+/* 
+	Load the config file.
+		
 */
 void Robot::load_config( char* mFilename )
 {	
-	Preferences  prefs(mFilename);
-	prefs.load_all_keys();
+	printf("Reading %s Robot Configuration file.\n", mFilename );
 	
-	Appendage 		appendage;
-	MotorControl 	mot_control;
+	Preferences		prefs(mFilename);
+	Appendage* 		appendage=NULL;
+	MotorControl* 	mot_control;
 	int 			num_actuators;
 	char* 			ptr;
 	char key[80];	
 	FILE* cfd;
-	
+
+	// ALL TOKENS READ IN : 
+	prefs.load_all_keys();
 	int number_limbs = prefs.find_int("number_limbs");
-	
+	printf("number_limgs=%d\n", number_limbs);
+
+	// FOR EACH LIMB:
 	for (int l=0; l<number_limbs; l++)
 	{	
+		appendage = new Appendage();
+		
+		// LIMB INFO - NAME : 
 		sprintf(key, "limb_%d_name", l );
 		string str = prefs.find_string(key);
+		strcpy( appendage->Name, str.c_str() );
 
-		//ptr = read_string_token( cfd, "limb_name" );
-		strcpy( appendage.Name, str.c_str() );
-
+		// LIMB INFO - ENABLE :
 		sprintf(key, "limb_%d_enabled", l );
-		appendage.Enable = prefs.find_bool( key );
+		appendage->Enable = prefs.find_bool( key );
 
+		// NUMBER OF ACTUATORS:
 		sprintf(key, "limb_%d_number_actuators", l );
 		num_actuators = prefs.find_int( key );
 
-		appendage.actuators.clear();
+		// CREATE (empty) ACTUATORS :
+		//appendage->actuators.clear();
 		for (int a=0; a<num_actuators; a++)
-			appendage.actuators.push_back( mot_control );
-
+		{
+			mot_control = new MotorControl();
+			printf("Created new MotorControl %x\n", mot_control );
+			appendage->actuators.push_back( mot_control );
+		}
 		limbs.push_back( appendage );
 	}
 
+	// NOW READ EACH ACTUATOR : 
 	int a_count = 0;
 	for (int l=0; l<number_limbs; l++)
-		for (int a=0; a<limbs[l].actuators.size(); a++)
-			limbs[l].actuators[a].read_config_data( prefs, a_count++ );
-
+		for (int a=0; a<limbs[l]->actuators.size(); a++)
+			limbs[l]->actuators[a]->read_config_data( prefs, a_count++ );
+			
 }
 
 /************************************************************************* 
@@ -368,7 +381,6 @@ void Robot::configure_motor_reports( byte mRate, byte mReports )
 	
 	for (int l=0; l<limbs.size(); l++)
 	{
-		limbs[l].configure_motor_reports( mRate, mReports );
+		limbs[l]->configure_motor_reports( mRate, mReports );
 	}	
 }
-

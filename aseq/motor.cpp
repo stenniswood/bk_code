@@ -157,18 +157,21 @@ void Motor::print_speeds( )
 					 RequestedSpeed, MeasuredSpeed, DutyPercent );	
 }
 
-void  Motor::send_speed( float mDuty )
+/* PARAMS:
+	mDuty - as a Percent
+*/
+void  Motor::send_speed( float mDutyPercent )
 {
 	bool proceed = true;
 	if (MotorStopped) {
-		proceed = correct_direction_out_of_stop( mDuty );
+		proceed = correct_direction_out_of_stop( mDutyPercent );
 	}
 
 	if ((MotorEnable) && (proceed))
 	{
 		// takes [-100.0 , 100.0]
-		pack_move_speed( &msg1, Instance, mDuty );
-		short Speed    = mDuty * 100;	// *100 = 10,000 
+		pack_move_speed( &msg1, Instance, mDutyPercent );
+		//short Speed    = mDuty * 100;	// *100 = 10,000 
 		//printf("Spd= %4x \n", Speed);
 		//print_message( &msg1 ); 
 		AddToSendList( &msg1 );
@@ -256,9 +259,9 @@ int Motor::handle_CAN_message( struct sCAN* mMsg 	)	// handles incoming ID_MOTOR
 		{
 			if (Feedback_index == mMsg->data[0])
 			{
-				//printf("handle_CAN_message %4x\n", Feedback_index );	
 				PrevCount = CurrCount;
 				CurrCount = (mMsg->data[1]<<8) + mMsg->data[2];
+				printf("===Motor::handle_CAN_message %4x:  Count=%d\n", Feedback_index, CurrCount );
 				update_position();
 				return 1;
 			}

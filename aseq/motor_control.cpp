@@ -213,8 +213,8 @@ int MotorControl::handle_CAN_message( struct sCAN* mMsg )	// handles incoming ms
 {
 	if (MotorEnable==FALSE) return 0;
 	int retval = Motor::handle_CAN_message( mMsg );
-	if (retval)
-		run_algorithm();
+//	if (retval)
+//		run_algorithm();
 	return retval;
 }
 

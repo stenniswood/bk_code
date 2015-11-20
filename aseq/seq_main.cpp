@@ -1,3 +1,9 @@
+/****************************************************
+Sequencer Main : 
+
+Analog Board Configuration should be:
+	0x05  0x11  0x05 0x42
+****************************************************/
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h> 
@@ -45,52 +51,102 @@
 
 #define fifty_ms    50000000
 
-int counter = 0;
-//char user_input[255];
-//char cmd[4];
-//byte instance;
-//byte value;
+volatile int seq_counter = 0;
+volatile int seq_counter_handled = 0;
+
 bool FirstIssued = false;
 struct timeval	start_ts;
 struct timeval tv;
 struct timeval starttime;
 
 
+void print_sig_info( siginfo_t *si )
+{
+	printf("siginfo_t si= %x\n", si );
+	printf("si_signo=%d\n",  si->si_signo );
+	printf("si_errno=%d\n",  si->si_errno );
+	printf("si_code=%d\n",   si->si_code );
+	//printf("si_trapno=%d\n", si->si_trapno );
+	
+	printf("si_pid=%d\n", 	 si->si_pid );
+	printf("si_uid=%d\n", 	 si->si_uid );
+	printf("si_status=%d\n", si->si_status );
+							
+/*	printf("si_status=%d\n", si->si_status );
+	clock_t  si_utime;     * User time consumed *
+	clock_t  si_stime;     * System time consumed *
+	sigval_t si_value;     * Signal value *
+	int      si_int;       * POSIX.1b signal *
+	void    *si_ptr;       * POSIX.1b signal *
+	int      si_overrun;   * Timer overrun count;
+							 POSIX.1b timers *
+	int      si_timerid;   * Timer ID; POSIX.1b timers *
+	void    *si_addr;      * Memory location which caused fault *
+	long     si_band;      * Band event (was int in
+							 glibc 2.3.2 and earlier) *
+	int      si_fd;        * File descriptor *
+	short    si_addr_lsb;  * Least significant bit of address
+							 (since Linux 2.6.32) *
+	void    *si_call_addr; * Address of system call instruction
+							 (since Linux 3.5) *
+	int      si_syscall;   * Number of attempted system call
+							 (since Linux 3.5) *
+	unsigned int si_arch;  * Architecture of attempted system call
+									 (since Linux 3.5) */
+}
+struct		sigaction sa_sequencer;
+struct		sigevent  sev_sequencer;
 
+float compute_elapsed_time()
+{
+	// COMPUTE ELAPSED TIME from start until now:
+	assert      ( robot.limbs.size() == robot.seq.limbs.size() );
+	gettimeofday( &tv, NULL );
+	float dtime = (tv.tv_sec - starttime.tv_sec);
+//	dtime       += ((float)(tv.tv_usec) - (float)(starttime.tv_usec))/1000000.;
+
+	// SHOW (Green Letters!)
+	printf( "\n%sSEQ: New Vector: timestamp=%6.3f  %d/%d%s\n", KGRN, dtime,						
+			robot.seq.Current_Vindex, robot.seq.limbs[0].vectors.size(), KNRM );
+	printf("\n %s SEQ: New Vector: %d/%d%s\n", KGRN, robot.seq.Current_Vindex, robot.seq.limbs[0].vectors.size(), KNRM );
+	return dtime;
+}
+
+void activate_vector( float dtime )
+{
+	// ACTIVATE:	
+	if (robot.seq.data_type == DUTY_VECTORS )
+		robot.set_duty( &(robot.seq), robot.seq.Current_Vindex, dtime );
+	else {
+		robot.set_new_destinations( &(robot.seq), dtime );	  // set DestinatinPotValue 
+		robot.print_current_positions();
+	}
+}
 
 /* 
 	Here we marry a vector in the sequencer with the robot limbs.
 */
 void next_sequence_handler(int sig, siginfo_t *si, void *uc)
 {
+	printf("next_sequence_handler(%d, %x)\n", sig,  uc );
+	print_sig_info( si );
+	
 	if (FirstIssued==false) {
 		FirstIssued = true;		
-		robot.activate_enabled_outputs();
-		robot.limbs[0].print_active_outputs();
-		robot.limbs[1].print_active_outputs();		
-		printf(" FIRST ISSUE:  activate_enabled_outputs\n");		
+		//robot.activate_enabled_outputs();
+		//robot.limbs[0]->print_active_outputs();
+		//robot.limbs[1]->print_active_outputs();		
+		//robot.update_submitted_timestamps( tv );	// goes into each actuator "submitted" timestamp.
+		// PLACE values INTO ACTUATORS : 
+		//	robot.print_vector( robot.seq.Current_Vindex, false );
+		//printf(" FIRST ISSUE:  activate_enabled_outputs\n");		
 	}
-	counter++;
+	seq_counter++;
 
-	// COMPUTE ELAPSED TIME from start until now:
-	assert( robot.limbs.size() == robot.seq.limbs.size() );
-	gettimeofday(&tv,NULL);
-	float dtime = tv.tv_sec - starttime.tv_sec;
-	dtime  += (tv.tv_usec - starttime.tv_usec)/1000;
-	robot.update_submitted_timestamps( tv );	// goes into each actuator "submitted" timestamp.
-			// SHOW (Green Letters!)		
-	printf( "\n%sSEQ: New Vector: timestamp=%6.3f  %d/%d%s\n", KGRN, dtime,						
-			robot.seq.Current_Vindex, robot.seq.limbs[0].vectors.size(), KNRM );
-
-	// PLACE values INTO ACTUATORS : 
-	robot.print_vector( robot.seq.Current_Vindex, false );
-	printf("next_sequence_handler() print_vector Done \n");	
-	robot.set_new_destinations( &(robot.seq), dtime );	  // set DestinatinPotValue 
-	printf("next_sequence_handler() set_new_destinations Done \n");	
-	robot.print_current_positions();
-	printf("next_sequence_handler() print_current_positions Done \n");	
-	robot.next_vector();			// Advance to the next vector
-	printf("next_sequence_handler() next_vector Done \n");
+	//printf("next_sequence_handler() next_vector Done \n");
+	//signal (sig, next_sequence_handler);
+	//sigaction(SIG, msa, NULL);
+	//set_handler ( &sa_sequencer,  next_sequence_handler );
 	
 /*	Note: Sequencer of vectors is stored in "sRobotVector seq" of robot.hpp		
 	      speeds will get updated on next messages received
@@ -108,20 +164,29 @@ void next_sequence_handler(int sig, siginfo_t *si, void *uc)
 	*/
 }
 
+void multiply_now( )
+{	
+	long int  ppm        = 5000;
+	float     fperiod_ns = (float)ppm * 1000000.;
+	long long period_ns  = ((long long)ppm * 1000000);
+	printf("===== playback_period_ms = %lu ", ppm        );
+	printf("===== %lld  %6.2f \n", period_ns, fperiod_ns );
+}
+
 void setup_scheduler()
 {	
-	long period_ns = robot.seq.limbs[0].playback_period_ms * 1000000;	
-	printf("===== playback_period_ms = %lu \n", robot.seq.limbs[0].playback_period_ms );	
-	//long period_ns = 1000000;
+	long int ppm = robot.seq.limbs[0].playback_period_ms;
+	long long period_ns = ((long long)ppm * 1000000);
+	printf("===== playback_period_ms = %lu ", ppm  );
+	printf("===== %lld \n", period_ns );
 	
 	gettimeofday( &starttime, NULL );
 
 	// SETUP OS timer:
-	set_handler ( &sa,  next_sequence_handler );
-	create_timer( &sev, &timerid 			  );
-	start_timer ( &its, period_ns, timerid     );
+	set_handler ( &sa_sequencer,  next_sequence_handler );
+	create_timer( &sev_sequencer, &timerid 	);
+	start_timer ( &its, period_ns, timerid  );
 }
-
 
 // void help() is in "seq_init.cpp"
 
@@ -145,6 +210,21 @@ void configure_motor_reports( bool mOn )
 	robot.configure_motor_reports( mRate, mReports );			
 }
 
+void activate_outputs()
+{
+		printf("%x\n", robot.limbs[0]->actuators[0] );
+		printf("%x\n", robot.limbs[0]->actuators[1] );
+		printf("%x\n", robot.limbs[0]->actuators[2] );
+		
+		robot.limbs[0]->actuators[0]->ActiveOutputs = 1; //actuators[a].MotorEnable;
+		robot.limbs[0]->actuators[1]->ActiveOutputs = 1; //actuators[a].MotorEnable;
+		robot.limbs[0]->actuators[2]->ActiveOutputs = 1; //actuators[a].MotorEnable;
+
+		robot.limbs[1]->actuators[0]->ActiveOutputs = 0; //actuators[a].MotorEnable;
+		robot.limbs[1]->actuators[1]->ActiveOutputs = 1; //actuators[a].MotorEnable;
+		robot.limbs[1]->actuators[2]->ActiveOutputs = 1; //actuators[a].MotorEnable;
+
+}
 
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
@@ -153,7 +233,6 @@ void configure_motor_reports( bool mOn )
 int main( int argc, char *argv[] )
 {
 	char* SequenceFileName = "vectors_raw.ini";		// was "vectors_raw.ini"
-	
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg
 	int value    	= 0;
@@ -252,6 +331,7 @@ int main( int argc, char *argv[] )
 		
 		if ( strcmp(argv[1], "play") == 0 )
 		{
+			// INTENDED TO RUN THRU VECTORS WITHOUT ACTUATING! (to verify calculations, etc)
 			printf("Playing sequence ...\n");
 			if (argc > 2)
 				SequenceFileName = argv[2];
@@ -271,7 +351,32 @@ int main( int argc, char *argv[] )
 			}
 			printf("===All iterations requested have completed.  Done.===\n");
 		}
+		if ( strcmp(argv[1], "stop") == 0 )
+		{		
+			// 
+			sRobotVector zero;
+			sVectorSet   zset;
+			sOneVector	 zvec;
+			
+			zvec.Data.push_back( 0.0 );
+			zvec.Data.push_back( 0.0 );
+			zvec.Data.push_back( 0.0 );
+			
+			zero.data_type = 4;
+			zset.data_type = 4;
+			zvec.data_type = 4;			
+			zset.vectors.push_back(zvec);
+			zset.vectors.push_back(zvec);
+			zero.limbs.push_back  (zset);
+			zero.limbs.push_back  (zset);
+			
+			zero.set_limbs( robot );
+			robot.activate_enabled_outputs();
+			robot.set_duty( &zero, 0, 1.0 );			
+			usleep(1000000);
+		}
 		
+		//if (1==1)
 		if ( strcmp(argv[1], "run") == 0 )
 		{
 			set_model_rx_callback ( can_motor_position_responder );
@@ -286,35 +391,55 @@ int main( int argc, char *argv[] )
 			// Deactivate Outputs:
 			robot.deactivate_outputs();
 			robot.clear_reads( 1 );
-			bool result = false;
+/*			bool result = false;
 			while (result==false) {
 				result = robot.are_reads_completed();
-			};
-			
-			robot.seq.read_vector_file( SequenceFileName );			
+			}; */
+
+			robot.seq.read_vector_file( /*"vectors_swing.ini"*/ SequenceFileName );
 			robot.set_vectors_limbs   (  );
 
 			printf("MotorEnable 0,1,2 =%d,%d,%d \n", 
-					robot.limbs[1].actuators[0].MotorEnable,
-					robot.limbs[1].actuators[1].MotorEnable,
-					robot.limbs[1].actuators[2].MotorEnable );
+					robot.limbs[1]->actuators[0]->MotorEnable,
+					robot.limbs[1]->actuators[1]->MotorEnable,
+					robot.limbs[1]->actuators[2]->MotorEnable );
 
-			robot.limbs[0].print_active_outputs();
-			robot.limbs[1].print_active_outputs();
+			robot.limbs[0]->print_active_outputs();
+			robot.limbs[1]->print_active_outputs();
 
-			setup_scheduler();					// sets a timer for  next_sequence_handler()
+//			setup_scheduler();					// sets a timer for  next_sequence_handler()
 
 			printf("Repeating %d iterations\n", robot.seq.iterations_requested );
 			printf("====================looping===========================\n");
 
-			while ((robot.seq.iterations_requested==-1) || 
-					(robot.seq.iterations_completed < robot.seq.iterations_requested))
+			long int  ppm = robot.seq.limbs[0].playback_period_ms;
+			long long period_us = ((long long)ppm * 1000);
+
+						robot.activate_enabled_outputs();
+			while (1)						
+//			while ((robot.seq.iterations_requested==-1) || 
+//					(robot.seq.iterations_completed < robot.seq.iterations_requested))
 			{
+			    printf("Looping...\n");
+//				if (seq_counter > seq_counter_handled)
+				{
+//					if (seq_counter == 1)  {
+//					}
+					float dtime = compute_elapsed_time();
+					robot.print_vector( robot.seq.Current_Vindex, false );
+					activate_vector(dtime);	
+					robot.next_vector();			// Advance to the next vector
+					//seq_counter_handled = seq_counter;
+
+					printf("next_sequence_handler() next_vector Done \n");
+					
+					usleep(period_us);
+				}
 			  /* timer based - next_sequence_handler(); 
 			     is called periodically 
 			     CAN_isr() callback handles the positions. 
 			    */
-			   // printf("Looping...\n");
+
 			   //teach_pendant.print();
 			   // update_lcd();
 			   // usleep(500000);
