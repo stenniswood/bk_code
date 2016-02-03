@@ -79,26 +79,9 @@ void RobotApp::Initialize		(	)
 	robot_vision 	  = new RobotVisionPanel();	
 	m_main_window 	  = (Control*) robot_panel;
 
-	// CONNECT TO  SEQUENCING RPI : 
-	char working_buffer[127];
-	strcpy( working_buffer, "connect " );
-	strcat( working_buffer, "192.168.1.121" );
-		printf("\n\nConnect command:  %s\n", working_buffer );			
-	cli_ipc_write_sentence( working_buffer );		// This is working!
-	
-	// REQUEST CAN : 
-	strcpy( working_buffer, "send can " );
-	printf("\n\nSend command:  %s\n", working_buffer );
-	cli_ipc_write_sentence( working_buffer );		
-
-	// STOP CAN : 
-	strcpy( working_buffer, "stop can " );
-	printf("\n\nSend command:  %s\n", working_buffer );
-	//cli_ipc_write_sentence( working_buffer );		
-
 	// Connect to the Vision RPI:	
 	
-}	
+}
 
 int	RobotApp::onPlace			(	)
 { 

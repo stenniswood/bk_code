@@ -67,6 +67,8 @@ public:
 		the fly".	*/
 	virtual int   	draw				(	);
 	int   			draw_border			(   );
+	int 			erase				(   );
+	
 
 	void			Revalidate			( );
 	void			Invalidate			( )			{ invalidated = true; };
@@ -93,7 +95,6 @@ public:
 	
 	int					isTabStop	  (					)	{ return 0; };
 	virtual int			onCreate	  (  );	// chance to load resources, call functions which use fonts (already loaded before this call) etc.
-
 
 	void				sort_z_order();
 	void				set_z_order( long int& mZorder );

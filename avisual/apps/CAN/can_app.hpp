@@ -1,3 +1,16 @@
+/********************************************************
+	Though this app is for all CAN traffic.
+
+	Here are details for the Analog board specifically.
+	Chip Layout:
+		1	3
+		4	2			
+	The robot wiring harness has "teach pendant" potentiometers
+	wired to the upper 4 bits of the chip.  
+	Cable left is plugged into chip 1
+	Cable right is plugged into chip 3
+				
+********************************************************/
 #ifndef _CAN_APP2_
 #define _CAN_APP2_
 
@@ -57,11 +70,12 @@ public:
 	int				m_rx_tail;
 	int				m_rx_tail_laps;
 	
-	NetworkView*			m_board_view;		// List of all boards present
-	CANMessageView*			m_msg_view;
-	CANMessages*			m_msgs;		
-	GyroView*				m_gyro;
-	AnalogView*				m_analog;
+	// List of all boards present
+	NetworkView*			m_board_view;		// in ../core/adrenaline/molecules/adren_network_view.cpp
+	CANMessageView*			m_msg_view;			// in ../core/adrenaline/atoms/
+	CANMessages*			m_msgs;				// in ../core/adrenaline/molecules/can_window.cpp
+	GyroView*				m_gyro;				// in apps/CAN/gyro_window.h
+	AnalogView*				m_analog;			// in apps/CAN/analog_board_app.cpp
 };
 
 extern CANApp* can_app;

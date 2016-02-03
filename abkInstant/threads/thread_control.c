@@ -26,12 +26,9 @@
 //#include "can_tx_thread.h"
 //#include "hmi_tx_thread.h"
 #include "file_tx_thread.h"
-
 #include "thread_control.h"
 
 
-
- 
 char 	 ip_addr[16]; 			// for user feedback
 
 void 	exit1() {	while (1==1) {  }; }
@@ -363,13 +360,13 @@ void create_CAN_tx_thread	  	( BOOL mPlay, BOOL mSave, int Port )
 	int total_length = 6;
 	
 	char* message = new char[total_length];
-	printf("can_thread.message=%s\n", message);
+	printf("can_thread.message=|%s|\n", message);
 
 	// CREATE THREAD : 
-	//int iret1 = pthread_create( &can_tx_thread_id, NULL, can_transmit_thread, (void*) message);
-	//if (iret1)
+	int iret1 = pthread_create( &can_tx_thread_id, NULL, can_transmit_thread, (void*) message);
+	if (iret1)
 	{
-		//fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
+		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
 		exit(EXIT_FAILURE);
 	}
 }

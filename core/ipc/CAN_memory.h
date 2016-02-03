@@ -19,21 +19,23 @@ extern char* 	can_shared_memory;
 extern int 		can_segment_id;
 extern struct   can_ipc_memory_map* ipc_memory_can; 
 
-#define MAX_CAN_RX_MESSAGES 300
-#define MAX_CAN_TX_MESSAGES 300
+#define MAX_CAN_RX_MESSAGES 5000
+#define MAX_CAN_TX_MESSAGES 5000
 
 /******************** CAN IPC MEMORY MAP *****************/
 struct can_ipc_memory_map
 {
 	long int 	StatusCounter;
 	char	 	ConnectionStatus[64];	// such as "board not present", or "CAN hardware operational",
-										// or "CAN over tcp/ip"
+
+	char		isReceiving;			// data coming in over tcp/ip.
 	int 		RxHeadLap;				// counts each roll over.
 	int 	 	RxHead;
 	//byte 	 	RxTail;		 each user should keep his own copy.
 	struct sCAN Received[MAX_CAN_RX_MESSAGES];
 	byte		RxOverFlow;		// indicator if not receiving quickly enough.
-
+ 
+	char		isTransmitting;			// is being sent over tcp/ip (not local can card)
 	int 	 	TxHead;
 	int 	 	TxTail;
 	struct sCAN Transmit[MAX_CAN_TX_MESSAGES];
@@ -46,6 +48,7 @@ struct can_ipc_memory_map
 //void dump_ipc				();	// formated as CAN messages & string.
 
 // The SERVER calls these to setup the memory.  (ie. abkInstant or amon )
+BOOL is_CAN_IPC_memory_available();
 int  can_allocate_memory	();
 void can_deallocate_memory	();
 
@@ -62,14 +65,23 @@ int  can_connect_shared_memory(char mAllocate);
 void ipc_write_can_connection_status( char* mStatus   );
 void ipc_write_can_message( struct sCAN* mMsg );
 
-uint8_t sprint_message(char* mBuffer, struct sCAN* msg);
+void sprint_message(char* mBuffer, struct sCAN* msg);
 
 void ipc_add_can_rx_message( struct sCAN* mMsg );
 /***** Rx Buffer Functions (replaces former "can_rxbuff.cpp"):	******/
 void 		 copy_can_msg ( struct sCAN* mDest, struct sCAN* mSrc );
 void 		 AddToRxList  ( struct sCAN* mMsg );
 BOOL   		 shm_isRxMessageAvailable( int* mTail, int* mTailLaps  );
-struct sCAN* shm_GetNextRxMsg		 ( int* mTail, int* mTailLaps );
+struct sCAN* shm_GetNextRxMsg		 ( int* mTail, int* mTailLaps );	// pointer to 1 allocation. overwritten on next call!
+void 		 print_rx_position();
+
+void		set_tcp_receiving_flag  ();
+void		clear_tcp_receiving_flag();
+BOOL		is_tcp_receiving_flag   ();
+
+void		set_tcp_transmitting_flag  ();
+void		clear_tcp_transmitting_flag();
+BOOL		is_tcp_transmitting_flag   ();
 
 
 void CAN_save_segment_id(char* mFilename);

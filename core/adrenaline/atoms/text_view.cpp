@@ -72,7 +72,7 @@ void TextView::set_position ( int Left, int Right, int Top, int Bottom )
 void TextView::calc_margins( float fraction )
 {
 	if (fraction != -1.0)	m_fraction = fraction;
-	printf("TextView::calc_margins(%6.2f)  %6.2f %6.2f \n", m_fraction, m_left_margin, m_right_margin);
+	//printf("TextView::calc_margins(%6.2f)  %6.2f %6.2f \n", m_fraction, m_left_margin, m_right_margin);
 	
 	float TheMargin = (width*m_fraction)/2.;
 	m_left_margin  = left       +TheMargin;

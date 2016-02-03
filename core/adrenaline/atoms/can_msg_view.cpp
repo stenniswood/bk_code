@@ -79,7 +79,7 @@ int	CANMessageView::handle_incoming_msg	( struct sCAN* msg )
 		{	
 			msg->header.DLC = 8;			
 			add_message( msg );
-			//printf("CANMessageView:: %d\n", count );			
+			printf("CANMessageView:: %d\n", count );			
 			Invalidate();
 		}
 	}		

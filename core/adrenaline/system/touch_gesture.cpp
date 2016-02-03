@@ -19,6 +19,7 @@
 #include "text_view.hpp"
 #include "touch_gesture.hpp"
 
+
 float degrees( float mRad )
 {
 	return mRad * (360. / M_PI);
@@ -94,7 +95,7 @@ bool DraggerGesture::recognize_tap ( )			// 1 finger distance between
 						return false;		// start over!
 					}
 					else {
-						printf("TAP EVENT RECEIVED!\n");
+						printf("TAP EVENT RECEIVED! %d \n", m_last_gesture_recognized);
 						m_last_gesture_recognized = TOUCH_GESTURE_TAP;
 						return true;
 					}
@@ -251,7 +252,7 @@ bool DraggerGesture::recognize_z_enlarge( )			// 3 fingers distance between thum
 		init_dist_1_2 = dist_1_2;
 		init_dist_2_0 = dist_2_0;	
 	}
-	m_last_gesture_recognized = THREE_ENLARGE;
+	//m_last_gesture_recognized = THREE_ENLARGE;
 	return true;	
 }
 
@@ -480,31 +481,32 @@ bool DraggerGesture::flinger_one_finger( )
 			break;
 	}
 	
-	m_last_gesture_recognized = THREE_THREE_MOVE;
+	//m_last_gesture_recognized = THREE_THREE_MOVE;
 	return false;
 }	
 
 void DraggerGesture::handle_recognize( )
-{
+{	
 	if (m_last_gesture_recognized & TOUCH_GESTURE_TAP)
 	{
-		x = m_finger_history[0][0].x;
-		y = max_y - m_finger_history[0][0].y;
+		x    = m_finger_history[0][0].x;
+		y    = max_y - m_finger_history[0][0].y;
 		left = UNHANDLED_EVENT | (0x01);
 		m_last_gesture_recognized &= ~TOUCH_GESTURE_TAP;
 		printf("DraggerGesture::handle_recognize( )  left = %x\n", left );
-	}
+	}  
+//	else printf("DraggerGesture::handle_recognize()  %d %d \n", m_last_gesture_recognized,TOUCH_GESTURE_TAP );	
 }
 
 void DraggerGesture::recognize_gesture( )
 {	
 	// Run the gauntlet of tests:
-	recognize_tap    ();
-	recognize_enlarge();
+	recognize_tap     ();
+	recognize_enlarge ();
 	recognize_rotation();
 	flinger_one_finger();
-	
-	handle_recognize();
+
+	handle_recognize  ();
 
 /*	recognize_z_enlarge();
 	recognize_three_up_down();
@@ -517,11 +519,10 @@ void DraggerGesture::add_event()
 
 }
 
-
 int	DraggerGesture::time_slice()
 {
 	m_test_results_bitfield = 0;
-	//recognize_gesture();
+	recognize_gesture();
 
 //	if (m_last_gesture_recognized & TOUCH_GESTURE_TAP)
 //		m_last_gesture_recognized &= ~TOUCH_GESTURE_TAP;

@@ -29,63 +29,77 @@
 #include "analog_board_app.hpp"
 #include "CAN_memory.h"
 #include "display_manager.hpp"
-
+#include "client_memory.hpp"
  
 static VerticalMenu     CAN_edit_menu(-1,-1);
 static VerticalMenu     CAN_view_menu(-1,-1);
 static VerticalMenu     CAN_graph_menu(-1,-1);
 
 
-CANApp*  can_app = NULL;
 
+CANApp*  can_app = NULL;
+char CAN_App_Status[] = "CAN App";
+
+
+/***** Handler for Menu's *****/
 static int can_edit_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 
 	{
-	case 0: can_app->show_messages();		break;
-	case 1: can_app->show_network();		break;
-	case 2: can_app->show_sequencer();		break;		
+	case 0: can_app->show_messages();		return 1;	break;
+	case 1: can_app->show_network();		return 1;	break;
+	case 2: can_app->show_sequencer();		return 1;	break;		
 	default: break;
 	} 
+	return 0;	
 }
 
 static int can_view_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 
 	{
-	case 0: can_app->show_messages();		break;
-	case 1: can_app->show_network();		break;
-	case 2: can_app->show_sequencer();		break;		
-	case 3: can_app->show_gyro();			break;			
-	case 4: can_app->show_analogs();		break;	
+	case 0: can_app->show_messages();		return 1;	break;
+	case 1: can_app->show_network();		return 1;	break;
+	case 2: can_app->show_sequencer();		return 1;	break;		
+	case 3: can_app->show_gyro();			return 1;	break;			
+	case 4: can_app->show_analogs();		return 1;	break;	
 	default: break;
 	} 
+	return 0;	
 }
 
 static int can_graph_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 
 	{
-	case 0: can_app->add_watch();		break;
-	case 1: can_app->line_graph();		break;
-	case 2: can_app->histogram();		break;		
-	case 3: can_app->timing();			break;
+	case 0: can_app->add_watch();		return 1;	break;
+	case 1: can_app->line_graph();		return 1;	break;
+	case 2: can_app->histogram();		return 1;	break;		
+	case 3: can_app->timing();			return 1;	break;
 	default: break;
 	} 
+	return 0;	
 }
+/***** END OF Handler for Menu's *****/
+
 
 void init_CAN_app( )
 {
 	printf("init_CAN_app()\n");
-	if (can_app==NULL)	
+	if (can_app==NULL)
 		can_app = new CANApp();
-	if (can_app)
-		can_app->register_with_display_manager();
+	MainDisplay.start_app( can_app );
 }
 
+void start_can()
+{
+	char working_buffer[127];
+	strcpy( working_buffer, "receive can" );	
+	cli_ipc_write_sentence( working_buffer );
+	cli_wait_for_ack_update();	
+}
 
 /************************************************************************/
-
 CANApp::CANApp () 
 {
 	Initialize(); 
@@ -107,24 +121,33 @@ void 	CANApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-	if (ipc_memory_can<=0)
+
+	// ESTABLISH CAN IPC :
+	int  okay = can_connect_shared_memory(TRUE);		
+	if (!okay)
 		m_welcome_status   = "No CAN connection. Connect PiCAN board & run \'amon\'. ";
-	else
+	else {
+		m_rx_tail 	   = 0;
+		m_rx_tail_laps = 0;
+
+		if (ipc_memory_can->isReceiving==FALSE)
+		{	
+			printf("no remote CAN data, requesting...\n");  
+			start_can();
+		}
 		m_welcome_status   = "Monitor and generate CAN traffic. For vehicle or Adrenaline.";
-	m_application_name = "CAN App";
+	}
+	// BEGIN APP INIT:	
+	m_application_name = "CAN App";	
 	Application::Initialize();
 			
-	m_gyro 	  = new GyroView   ();
-	m_analog  = new AnalogView ();
-	m_msgs 	  = new CANMessages();	// defined in ../core/adrenaline/molecules/can_window.cpp
-					//  contains a CANMessageView & NetworkView
-	m_msg_view    = NULL; // new CANMessageView();		
-	m_board_view  = NULL; // new NetworkView();
-	m_main_window = m_msgs;
+	m_gyro 	  		= new GyroView   ();
+	m_analog  		= new AnalogView ();
+	m_msgs 	  		= new CANMessages();	// defined in ../core/adrenaline/molecules/can_window.cpp
+	m_msg_view    	= new CANMessageView();		
+	m_board_view  	= NULL; // new NetworkView();
+	m_main_window 	= m_msgs;
 	printf("CANApp::Initialize()\n");
-
-	m_rx_tail 	   = 0;
-	m_rx_tail_laps = 0;
 
 	setup_sidebar ();
 	printf("CANApp::Initialize() done.\n");
@@ -132,7 +155,7 @@ void 	CANApp::Initialize		(	)
 
 int		CANApp::onPlace		(	) 
 { 
-	Application::onPlace( );
+	return Application::onPlace( );
 }
 
 void	CANApp::setup_app_menu( )
@@ -184,7 +207,7 @@ void CANApp::setup_sidebar(	)
 	tmp->load_resources( );
 	MainDisplay.m_side.add_control( tmp, "Refresh" );
 }
-char CAN_App_Status[] = "CAN App";
+
 
 void 	CANApp::register_with_display_manager() 
 { 
@@ -199,7 +222,7 @@ void	CANApp::Preferences		(	)
 { 
 }
 
-void 	CANApp::show_messages	( )	// CAN Messages view.
+void 	CANApp::show_messages	( )		// CAN Messages view.
 {
 	m_main_window = m_msgs; //_view;
 		// This will be better as a tab control page probably.
@@ -225,7 +248,7 @@ void 	CANApp::show_gyro	( )		// Robot sequencer
 }
 void 	CANApp::show_analogs ( )	// Robot sequencer
 {
-	printf("CANApp::show_ANALOG() called \n" );
+	printf("CANApp::show_ANALOG()  \n" );
 	m_main_window  = m_analog;
 	MainDisplay.set_main_window( m_main_window );
 }
@@ -246,23 +269,26 @@ int		CANApp::background_time_slice(	)
 {	
 	struct sCAN* ptr=NULL;
 
-	// CHECK CAN : 
+	// CHECK CAN : 	
 	while (shm_isRxMessageAvailable( &m_rx_tail, &m_rx_tail_laps) )
 	{	
+		//printf("CANApp rx_tail=%d;  rx_tail_laps=%d\n", m_rx_tail, m_rx_tail_laps );
 		ptr = shm_GetNextRxMsg (&m_rx_tail, &m_rx_tail_laps);
 		if (ptr) 
 		{
+			//printf("got new message\n");
 			// Distribute to All Views :
 			if (m_analog)
 				m_analog->handle_incoming_msg( ptr );
 			if (m_gyro)
-				m_gyro->handle_incoming_msg  ( ptr ); 
-			if (m_msgs)
-				m_msgs->handle_incoming_msg( ptr ); 
-                        if (m_board_view)
-                                m_board_view->handle_incoming_msg( ptr );
-/*			if (m_msg_view) 
-				m_msg_view->handle_incoming_msg( ptr ); */
+				m_gyro->handle_incoming_msg  ( ptr );  
+//			if (m_msgs)
+//				m_msgs->handle_incoming_msg( ptr ); 
+
+            if (m_board_view)
+                m_board_view->handle_incoming_msg( ptr );        
+			if (m_msg_view) 
+				m_msg_view->handle_incoming_msg( ptr ); 
 		}
 	};	
 	return 0;

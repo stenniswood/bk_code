@@ -25,13 +25,17 @@ public:
 	~AnalogView();
 
 	virtual void 	Initialize(	);
+	int				count_rows_showing();
 	int				calc_metrics();
 	int				place_views();
+	
 
 	void			configure_screen();	// based on which checkboxes enabled.
-	void			create_group ( int mChip, int mNumberVisible 	);
+	void			create_group ( int mChip 	);
+	void			create_groups( );
+	
 	void			show_group 	 ( int mGroup, bool mVisible=true  	);
-	void			place_group	 ( int mStartIndex, int mEndIndex, float mBottom );
+	void			place_group	 ( int mGroup, float mBottom );
 
 
 	int				handle_incoming_msg	( struct sCAN* msg );

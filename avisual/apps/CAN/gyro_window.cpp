@@ -31,6 +31,8 @@
 MsgValueComposer* mvc = NULL;
 int graph_index = 0;
 	
+	
+	
 void update_value_cb ( void* mObj )
 {
 	GyroView* gv = (GyroView*)mObj;
@@ -38,10 +40,8 @@ void update_value_cb ( void* mObj )
 	gv->m_match_data[graph_index].id = mvc->m_id;	
 	gv->m_match_data[graph_index].start_byte = mvc->m_id;	
 	gv->m_match_data[graph_index].num_bytes  = mvc->m_start_byte_index;
-
 }
 
- 
 void change_value_cb ( void* mObj )
 {
 	printf("=== change_value_cb === \n");	
@@ -62,7 +62,9 @@ void change_value_cb ( void* mObj )
 	printf("=== change_value_cb === add_object done\n");		
 }
 
-
+/****************************************************************
+		GyroView Class Implementation
+****************************************************************/
 GyroView::GyroView()
 {
 	Initialize();
@@ -91,9 +93,9 @@ const char z_title[] = "Z Axis Accel/Gyro";
 void GyroView::Initialize(	)
 {
 	Window::Initialize();
-	printf("GyroView::Initialize()\n");
+	printf("---GyroView::Initialize()\n");
 
-	accel[0]  = new DataSet();
+/*	accel[0]  = new DataSet();
 	gyro [0]  = new DataSet();
 	magnet[0] = new DataSet();
 
@@ -147,21 +149,20 @@ void GyroView::Initialize(	)
 	z_axis->calc_scale			( 			);
 	z_axis->set_horizontal_lines( 5 		);
 	z_axis->set_vertical_lines	( 5 		);
-
+*/
 	// put one over each graph!
-	m_value1.set_text( "Value", true);
-	m_value2.set_text( "Value", true);
-	m_value3.set_text( "Value", true);
+	m_value1.set_text( "Value 1", true);
+	m_value2.set_text( "Value 2", true);
+	m_value3.set_text( "Value 3", true);
 	m_value1.set_on_click_listener( change_value_cb, this);
 	m_value2.set_on_click_listener( change_value_cb, this);
 	m_value3.set_on_click_listener( change_value_cb, this);
 			
 	//m_view_graph.set_position ( , bottom+height-10, bottom+height-60);
-
 	
-	add_control( x_axis );
+/*	add_control( x_axis );
 	add_control( y_axis );
-	add_control( z_axis );
+	add_control( z_axis );  */
 	add_control( &m_value1 );
 	add_control( &m_value2 );
 	add_control( &m_value3 );		
@@ -183,19 +184,24 @@ int GyroView::place_views()
 	float graph_h_margin = (height)*0.1;	
 	printf("GyroView::place_views() \n");
 
-	x_axis->set_width_height ( graph_width, graph_height );
+	m_value1.move_to( graph_margin, 150 );
+	m_value2.move_to( graph_margin+150, 150 );
+	m_value3.move_to( graph_margin+300, 150 );
+	
+	
+/*	x_axis->set_width_height ( graph_width, graph_height );
 	x_axis->move_to		 	 ( graph_margin, bottom+graph_h_margin  );
 	
 	y_axis->set_width_height ( graph_width, graph_height );
 	y_axis->set_position_right_of( x_axis, true, 2*graph_margin );
 
 	z_axis->set_width_height ( graph_width, graph_height );
-	z_axis->set_position_right_of( y_axis, true, 2*graph_margin );	
+	z_axis->set_position_right_of( y_axis, true, 2*graph_margin );	 
 		
 	m_value1.move_to( graph_margin, x_axis->get_top() );
 	m_value2.move_to( graph_margin+graph_x_spacing, x_axis->get_top() );
 	m_value3.move_to( graph_margin+graph_x_spacing*2, x_axis->get_top() );
-
+*/
 	return 1;
 }
 
@@ -209,6 +215,8 @@ int	GyroView::handle_generic_msg ( struct sCAN* msg )
 	int datum;
 	long int value;
 
+	return 0;
+	
 	// GRAPH #1:
 	if ((msg->id.group.id == m_match_data[0].id) && 
 		(msg->id.group.instance == m_match_data[0].instance))
@@ -261,6 +269,8 @@ int	GyroView::handle_incoming_msg	( struct sCAN* msg )
 	int channel;
 	int value;
 
+	return 0;
+	
 	// GRAPH #1:
 	if (msg->id.group.id == ID_ACCEL_XYZ)
 	{	
@@ -318,6 +328,8 @@ void GyroView::fill_phony_msgs()
 }
 int	GyroView::onCreate(  )	// chance to load resources, call functions which use fonts
 {
+	if (created)	return 0;
+	// add code here!
 	int retval = Window::onCreate();
 	return retval;
 }

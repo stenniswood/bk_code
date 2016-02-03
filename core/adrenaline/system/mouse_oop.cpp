@@ -25,19 +25,24 @@ static int 		quitState  = 0;
 static void* eventThread(void *arg) 
 {
 	if (DEBUG) printf("STarting eventThread...\n");
+	char counter=0;
+	char dev_name[40];
 	
 	Mouse* M = (Mouse*) arg;	
 	// Open mouse driver
 //	if ((mouse_fd = open("/dev/input/mouse0", O_RDONLY)) < 0) {	
-	if ((mouse_fd = open("/dev/input/event0", O_RDONLY)) < 0) {	
-		if ((mouse_fd = open("/dev/input/event1", O_RDONLY)) < 0) {	
-			if ((mouse_fd = open("/dev/input/event2", O_RDONLY)) < 0) {
-				fprintf(stderr, "Error opening Mouse!\n");
-				quitState = 1;
-				return &quitState;
-			} else printf("Opened /dev/input/event2\n");
-		} else printf("Opened /dev/input/event1\n");
-	} else printf("Opened /dev/input/event0\n");
+	for (counter=0; counter<9; counter++)
+	{
+		sprintf( dev_name, "/dev/input/event%d", counter );		
+		mouse_fd = open( dev_name, O_RDONLY );
+		if (mouse_fd >= 0)
+			break;
+		if (counter==9) {
+			fprintf(stderr, "Error opening Mouse!\n");
+			quitState = 1;
+			return &quitState;
+		}
+	}
 
 	M->x = M->max_x / 2;			   // Reset mouse
 	M->y = M->max_y / 2;
@@ -268,7 +273,7 @@ void Mouse::init_fingers( )
 }
 
 int	Mouse::time_slice()
-{ 
+{
 	if (x != cursorx || y != cursory) 	// if the mouse moved...
 	{
 		restore_pixels(CursorBuffer);

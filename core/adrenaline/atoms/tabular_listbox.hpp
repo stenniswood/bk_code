@@ -73,6 +73,7 @@ public:
 	void			set_headings			( vector<struct HeaderItemInfo> *mHeaderTexts );
 	void			set_column_width		( int mColumn, int mWidth );	
 	void 			change_header_titles	( string mHeaderTexts, int column );
+	void			set_row_col_text		( string mNewText, int row, int col );
 
 	// Does not copy the structure !!
 	void			add_column 				( struct HeaderItemInfo* mNewHeading );		// row data will be increased and blanked!

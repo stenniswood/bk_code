@@ -6,7 +6,6 @@
 #include "CAN_base.h"
 #include "package_commands.h"
 
-
 #define CAN_AVAILABLE 
 #ifdef CAN_AVAILABLE
 
@@ -136,6 +135,13 @@ int Req_GPIO_cmd( BYTE* mBuffer, BYTE mPin, boolean mHigh)
 	package_int( mBuffer, 4,  1 );			// DataLength
 	*(mBuffer+4) = mPin; 
 	return 9;	
+}
+
+int Req_CAN_Listen( BYTE* mBuffer )
+{
+	strcpy( mBuffer, 0, REQ_CAN_LISTEN );	// Token
+	package_int( mBuffer, 4, 0 );				// Length
+	return 8;
 }
 
 int Req_CAN_Listen( BYTE* mBuffer )

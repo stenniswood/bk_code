@@ -53,9 +53,8 @@ void	CalendarSummary::next_month()
 }
 int   	CalendarSummary::onCreate			(	)
 { 
-	printf("CalendarSummary::onCreate\n");
+	//printf("CalendarSummary::onCreate()\n");
 	int retval = Control::onCreate();
-	printf("CalendarSummary::onCreate\n");	
 	return retval;
 }	
 int   	CalendarSummary::draw 				(	)

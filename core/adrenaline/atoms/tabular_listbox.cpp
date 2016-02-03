@@ -125,6 +125,14 @@ void TabularListBox::set_width_height( int Width, int Height )
 	if (Debug) ListBox::print_positions(); 
 }
 
+void TabularListBox::set_row_col_text( string mNewText, int row, int col )
+{
+	LineData[row][col] = mNewText;
+	
+	// want to add only if visible...
+	Invalidate();
+}	
+
 void TabularListBox::adjust_height_for_num_visible_items ( int mNumber_items_shown )
 {
 	float NewHeight = (mNumber_items_shown*LineHeight)+2;

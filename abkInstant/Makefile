@@ -22,14 +22,12 @@ INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/ 
 			  ./nlp_protocol/ ../nlp_protocol/  ./nlp_adrenaline/ ./voice/ \
 			  ./threads/ /home/pi/bk_code/abkInstant/  ./hardware/ ../core/libs/ilclient/ \
 			  /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/ 	\
-			  $(HARDWARE_PATH)
+			  $(HARDWARE_PATH) 
 #			  /opt/vc/include/interface/vcos/pthreads/ 
 SELF_INC   = ../../abkInstant/ ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 			 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
 LIBFLAGS   =   -lpthread  -lm
-			
-
 
 DEPS   	   = 
 #CFLAGS    = -fpermissive -Wwrite-strings 
@@ -63,8 +61,7 @@ WIFI_OBJS     = udp_transponder.o client.o
 NLP_PROTOCOL_OBJS = GENERAL_protocol.o	CAN_protocol.o	GPIO_protocol.o	\
 	AUDIO_protocol.o	CAN_util.o			CAMERA_protocol.o \
 	AUDIO_util.o		FILE_protocol.o		IMAGE_protocol.o	CAMERA_util.o	  \
-	package_commands.o		IMAGE_util.o		HMI_protocol.o	  \
-			
+	package_commands.o	IMAGE_util.o		HMI_protocol.o
 
 NLP_ADRENALINE_OBJS  =	 Adrenaline_nlp.o     	Adren_bigmotor_talk.o  		\
 	Adren_lcd_talk.o     Adren_pwm_talk.o	 	Adren_analog_talk.o  		\

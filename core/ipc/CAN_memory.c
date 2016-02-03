@@ -39,9 +39,13 @@ int 	can_segment_id;
 char* 	can_shared_memory;							// unstructured
 struct  can_ipc_memory_map* ipc_memory_can=NULL;	// structured memory.
 
+
+
+
+
 #define Debug 1
 
-static uint8_t print_message(struct sCAN* msg)
+static void print_message(struct sCAN* msg)
 {	
 	printf(" ID=%2X:%4X:%d; ", msg->id.group.block, 
 			 msg->id.group.id, msg->id.group.instance );
@@ -62,7 +66,7 @@ static uint8_t print_message(struct sCAN* msg)
 		printf("\tDF\n");
 }
  
-uint8_t sprint_message(char* mBuffer, struct sCAN* msg)
+void sprint_message(char* mBuffer, struct sCAN* msg)
 {	
 	char buffer[80];
 	sprintf(mBuffer, " ID=%2X:%4X:%d; ", msg->id.group.block, 
@@ -87,7 +91,7 @@ uint8_t sprint_message(char* mBuffer, struct sCAN* msg)
 }
 
 
-static void dump_ipc()
+void dump_CAN_ipc()
 {
 	printf("StatusCounter=%d\n", 	  	ipc_memory_can->StatusCounter);
 	printf("Connection Status: %s\n", 	ipc_memory_can->ConnectionStatus );
@@ -102,7 +106,7 @@ static void dump_ipc()
 		print_message( &ipc_memory_can->Transmit[i] );	
 }
 
-static void dump_raw_ipc()
+void dump_CAN_raw_ipc()
 {
 	int length = sizeof(struct can_ipc_memory_map);
 	for (int i=0; i<length; i++)
@@ -112,22 +116,49 @@ static void dump_raw_ipc()
 		printf("%2x ", can_shared_memory[i] );
 	}	
 }
-  
+
+void init_can_memory()
+{
+	if (ipc_memory_can==NULL)	return;
+	
+	ipc_memory_can->StatusCounter=0;
+	strcpy (ipc_memory_can->ConnectionStatus, "no connection");	
+	// such as "board not present", or "CAN hardware operational",
+										// or "CAN over tcp/ip"
+	ipc_memory_can->RxHeadLap=0;				// counts each roll over.
+	ipc_memory_can->RxHead   =0;
+	//byte 	 	RxTail=0;		 each user should keep his own copy.
+	ipc_memory_can->RxOverFlow=FALSE;		// indicator if not receiving quickly enough.
+
+	ipc_memory_can->TxHead=0;
+	ipc_memory_can->TxTail=0;
+	ipc_memory_can->TxOverFlow=FALSE;		// indicator if trying to send too quickly.
+	
+//	struct sCAN Received[MAX_CAN_RX_MESSAGES];
+//	struct sCAN Transmit[MAX_CAN_TX_MESSAGES];
+}
+
+/* return:  0=> error;  greater than 0 segment_ic */
 int can_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct can_ipc_memory_map);
-
+	printf ("CAN shm seg size=%d\n", shared_segment_size );
+	
 	/* Allocate a shared memory segment. */
 	can_segment_id = shmget( IPC_KEY_CAN, shared_segment_size, IPC_CREAT | 0666 );
+	int errsv = errno;
 	if (can_segment_id==-1) {
-		printf("CAN_read_segment_id - ERROR: %s \n", strerror(errno) );
+		printf("can_allocate_memory - shmget ERROR: %s \n", strerror(errsv) );
 		return 0;
-	} else 
+	} else {
 		printf ("CAN Allocated %d bytes shm segment_id=%d\n", shared_segment_size, can_segment_id );
+		init_can_memory();
+	}
 		// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
 	return can_segment_id;	
 }
 
+/* return:  1 => success */
 int can_attach_memory()
 {
 	/* Attach the shared memory segment. */
@@ -149,9 +180,9 @@ void can_reattach_memory()
 		printf("can_attach_memory - ERROR: %s \n", strerror(errno) );
 	} else 
 		printf ("CAN shm reattached at address %p\n", can_shared_memory); 	
-	ipc_memory_can	  = (struct can_ipc_memory_map*)can_shared_memory;	
+	ipc_memory_can = (struct can_ipc_memory_map*)can_shared_memory;	
 }
- 
+
 void can_detach_memory()
 {
 	/* Detach the shared memory segment. */
@@ -216,7 +247,7 @@ void copy_can_msg( struct sCAN* mDest, struct sCAN* mSrc )
 }
 
 void ipc_add_can_rx_message( struct sCAN* mMsg )
-{		
+{	
 	copy_can_msg( &(ipc_memory_can->Received[ipc_memory_can->RxHead++]), mMsg );
 	
 	if (ipc_memory_can->RxHead > MAX_CAN_RX_MESSAGES) {
@@ -229,24 +260,34 @@ void AddToRxList( struct sCAN* mMsg )
 {
 	ipc_add_can_rx_message( mMsg );
 }
+void print_rx_position()
+{
+	if (ipc_memory_can)
+		printf("Added to CAN IPC memory: %d, lap=%d\n", ipc_memory_can->RxHead, ipc_memory_can->RxHeadLap );
+}
 
 BOOL  shm_isRxMessageAvailable( int* mTail, int* mTailLaps )
 {
-	BOOL Overrun = FALSE;
 	if ((ipc_memory_can==NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 		return FALSE;
 
-	int tail_count = *mTailLaps 			   * MAX_CAN_RX_MESSAGES + *mTail;	
-	int head_count = ipc_memory_can->RxHeadLap * MAX_CAN_RX_MESSAGES + ipc_memory_can->RxHead;	
-	int msgs_qued = head_count - tail_count;	
-	if (msgs_qued >= MAX_CAN_RX_MESSAGES)		// overrun
-	{											// scoot tail up keeping as many msgs as possible.
-		Overrun    = TRUE;
+	long int tail_count = 				 *mTailLaps * MAX_CAN_RX_MESSAGES + *mTail;	
+	long int head_count = ipc_memory_can->RxHeadLap * MAX_CAN_RX_MESSAGES + ipc_memory_can->RxHead;	
+	long int msgs_qued  = head_count - tail_count;
+	
+	
+	if (msgs_qued >= MAX_CAN_RX_MESSAGES)		// overrun 
+	{					
+		//printf("RxHeadLap=%d; RxHead=%d\n", ipc_memory_can->RxHeadLap, ipc_memory_can->RxHead);	
+							// scoot tail up keeping as many msgs as possible.
+		//printf("head_count=%d;  tail_count=%d; msgs=%d\n", head_count, tail_count, msgs_qued);
+		ipc_memory_can->RxOverFlow  = TRUE;
 		*mTailLaps = ipc_memory_can->RxHeadLap - 1;
 		tail_count = head_count - (MAX_CAN_RX_MESSAGES-10);	// allow room for 10 more, since the Tail is slower than the head.
 		*mTail = (tail_count - *mTailLaps * MAX_CAN_RX_MESSAGES);		
+		printf("OverFlow; mTail=%d;  mTailLaps=%d; \n", *mTail, *mTailLaps );
 	}
-	
+
 //	if (head_count < tail_count)
 //		printf("h/t: %d/%d \n", head_count, tail_count );
 	/* Not new way.
@@ -281,7 +322,7 @@ void CAN_save_segment_id(char* mFilename)
 {
 	char line[40];
 	//FILE* fd = fopen(mFilename, "w");
-	FILE* fd = fopen("acan_shared_memseg_id.cfg", "w");
+	FILE* fd = fopen(mFilename, "w");
 	printf("Saved Segment_id=%d\n", can_segment_id );
 	sprintf( line, "%d", can_segment_id );
 	fwrite( line, strlen(line), 1, fd );
@@ -293,16 +334,16 @@ int CAN_read_segment_id(char* mFilename)
 	char tline[40];
 	FILE* fd = fopen( mFilename, "r" );
 	if (fd==NULL)  {
-		printf("CAN_read_segment_id - ERROR: %s %s\n", strerror(errno), mFilename );	
+		printf("CAN_read_segment_id - File ERROR: %s %s\n", strerror(errno), mFilename );	
 		return -1;
 	}
 
 	int result = fread( tline, 1, 20, fd);		//	fscanf( fd, "%d", &can_segment_id );
 	tline[result] = 0;
-	can_segment_id = atol( tline );
+	int tmp_can_segment_id = atol( tline );
 	fclose( fd );
-	printf("can_segment_id= %d \n", can_segment_id );	
-	return can_segment_id;
+	printf("can_segment_id= %d \n", tmp_can_segment_id );	
+	return tmp_can_segment_id;
 }
 
 
@@ -315,6 +356,28 @@ char segment_id_filename[] = "/home/steve/bk_code/amonitor/acan_shared_memseg_id
 #endif
 
 
+BOOL is_CAN_IPC_memory_available()
+{
+	struct shmid_ds buf;			// shm data descriptor.
+
+	printf("Checking for CAN IPC memory... ");
+	// First see if the memory is already allocated:
+	can_segment_id = CAN_read_segment_id( segment_id_filename );
+	int retval = shmctl(can_segment_id, IPC_STAT, &buf);
+	if (retval==-1) {
+		printf("Error: %s\n", strerror(errno) );
+		return FALSE;
+	}
+	printf( " Found segment, size=%d and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+	
+	if ((buf.shm_segsz > 0)			// segment size > 0
+	    && (buf.shm_nattch >= 1))	// number of attachments.
+		return TRUE;
+	
+	//shmctl(can_segment_id, IPC_RMID, NULL);
+	return FALSE;
+}
+
 /* The allocating should be done by amon
 		Should test for mem segment allocation first.
 		Then if requested allocate.
@@ -324,28 +387,67 @@ Return :
 */
 int can_connect_shared_memory(char mAllocate)
 {
-	if (mAllocate) {		
+	BOOL available = is_CAN_IPC_memory_available();
+	if ((!available) && (mAllocate))  {
+		printf("can_connect_shared_memory() allocating.\n");
 		// First see if the memory is already allocated:
-		//CAN_read_segment_id("/home/pi/bk_code/amonitor/acan_shared_memseg_id.cfg");
 	    //shmctl(can_segment_id, IPC_RMID, NULL);
-		//printf("can_connect_shared_memory() attempting to allocate.\n");
 		// Now Re-allocate : 
 		int result = can_allocate_memory();
-		if (result) 
-			printf("ERROR: can_connect_shared_memory() cannot allocate.\n");
-		
+		if (!result) 
+		{	printf("ERROR: can_connect_shared_memory() cannot allocate.\n");
+			return 0;
+		}
 		can_attach_memory();
 		can_fill_memory	 ();
-		CAN_save_segment_id(segment_id_filename);			
+		CAN_save_segment_id(segment_id_filename);
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return 1;
-
+			return 0;
 	} else  {
-		CAN_read_segment_id(segment_id_filename);	
 		can_attach_memory();		
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return 1;
+			return 0;
 	}
-	return 0;
+	return 1;
+}
+
+//// RECEIVING OVER TCP/IP:
+void		set_tcp_receiving_flag()
+{
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+			return 0;
+	ipc_memory_can->isReceiving = TRUE;
+}
+void		clear_tcp_receiving_flag()
+{
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+			return 0;
+	ipc_memory_can->isReceiving = FALSE;
+}
+BOOL		is_tcp_receiving_flag   ()
+{
+	if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+			return FALSE;
+	return ipc_memory_can->isReceiving;
+}
+
+//// TRANSMITTING OVER TCP/IP:
+void		set_tcp_transmitting_flag()
+{
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+			return 0;
+	ipc_memory_can->isTransmitting = TRUE;
+}
+void		clear_tcp_transmitting_flag()
+{
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+			return 0;
+	ipc_memory_can->isTransmitting = FALSE;
+}
+BOOL		is_tcp_transmitting_flag   ()
+{
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+			return FALSE;
+	return ipc_memory_can->isTransmitting;	
 }
 

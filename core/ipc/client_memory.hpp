@@ -66,6 +66,11 @@ void cli_ipc_write_sentence	 	    ( char* mSentence );
 void cli_ipc_add_new_client	   ( struct in_addr mbeacon_ip_list );
 void cli_ipc_add_new_clients   ( std::list<struct in_addr> mbeacon_ip_list );
 void cli_print_clients		   ( );
+
+// new:
+int cli_find_name(char*);
+void cli_wait_for_ack_update();
+
 /************************************************************/
 
 /************************************************************/

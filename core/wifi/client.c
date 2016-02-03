@@ -140,9 +140,10 @@ int Cmd_client_CAN_listen( )
 {
 	CAN_ListeningOn = TRUE;
 	printf("Cmd_client_CAN_listen:  Rx CAN msg stream...\n");
-	int length = Req_CAN_Listen( coBuff );
-	DumpBuffer( coBuff, length );
-	bytes      = write(sockfd, coBuff, length);
+	
+	strcpy( (char*)coBuff, "send CAN" );	// what we tell the other end.
+	int length = strlen( (char*)coBuff );
+	bytes   = write(sockfd, coBuff, length);
 	printf("Cmd_client_CAN_listen:  %d bytes written\n", bytes );
 	return bytes;
 }

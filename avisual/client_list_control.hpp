@@ -3,6 +3,7 @@
 
 #include "tabular_listbox.hpp"
 #include "window.hpp"
+#include "button.hpp"
 
 
 class ClientList : public TabularListBox
@@ -26,12 +27,16 @@ public:
 	ClientListPanel( int Left, int Right, int Top, int Bottom  );	
 	~ClientListPanel();
 	
-	void		update_available_client_list();
-	void		set_headings				();
-	void		set_row( struct stClientData* mDatum );
+	virtual int		 onCreate   ( );
+	virtual int		 place_views( );
 	
-};
+	virtual Control* HitTest( int x, int y );
+	virtual int		 onClick( int x, int y, bool mouse_is_down=true );
 
+	
+	ClientList* 	m_clients;	
+	Button			m_connect;		
+};
 
 
 #endif
