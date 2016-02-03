@@ -123,21 +123,21 @@ void init_can_memory()
 	
 	ipc_memory_can->StatusCounter=0;
 	strcpy (ipc_memory_can->ConnectionStatus, "no connection");	
+
 	ipc_memory_can->isReceiving=FALSE;		// data coming in over tcp/ip.
 		
 	// such as "board not present", or "CAN hardware operational",
 											// or "CAN over tcp/ip"
 	ipc_memory_can->RxHeadLap=0;			// counts each roll over.
-	ipc_memory_can->RxHead   =0;
 	//byte 	 	RxTail=0;		 each user should keep his own copy.
 	ipc_memory_can->RxOverFlow=FALSE;		// indicator if not receiving quickly enough.
+
 
 	ipc_memory_can->isTransmitting=FALSE;	// is being sent over tcp/ip (not local can card)
 	ipc_memory_can->TxHead=0;
 	ipc_memory_can->TxTail=0;
 	ipc_memory_can->TxOverFlow=FALSE;		// indicator if trying to send too quickly.	
-}
-
+	
 /* return:  0=> error;  greater than 0 segment_ic */
 int can_allocate_memory( )
 {

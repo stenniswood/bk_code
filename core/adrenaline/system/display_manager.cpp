@@ -29,7 +29,7 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug  0
+#define Debug  0 
 #define Debug2 0
 
 Keyboard		m_keyboard;
@@ -146,7 +146,7 @@ void DisplayManager::grab_focus( Control* mControl )
 	m_focus = mControl;
 }
 
-void DisplayManager::relay_key( char mKey )
+bool DisplayManager::relay_key( char mKey )
 {
 	if (Debug) printf("DisplayManager::relay_key %d %c; focus=%x \n", mKey, mKey, m_focus);	
 	if (m_focus==NULL)	return false;
@@ -246,12 +246,6 @@ void DisplayManager::start_app( Application* mApp )
 	m_current_running_app = m_running_apps.size()-1;
 	if (Debug) printf("DISPLAY MANAGER:  START APP #%d .......... \n", m_current_running_app );
 
-	// register with DM 
-	Rectangle* rect = get_useable_rect();
-	if (mApp->m_main_window) {
-		//mApp->m_main_window->onCreate();		// this is done inside Application::onCreate() !
-		mApp->m_main_window->set_position( rect );		
-	}
 	mApp->onCreate();
 	mApp->register_with_display_manager();
 }
@@ -396,8 +390,8 @@ void  DisplayManager::set_background( char* mFileName )
 
 void  DisplayManager::add_object( Control* NewControl )
 {
-	NewControl->onCreate();
-	register_child( NewControl );	
+	NewControl->onCreate ( );
+	register_child( NewControl );
 }
 
 // This removes the object from the list.  Does not delete or free memory.
@@ -531,7 +525,7 @@ int   DisplayManager::draw_background( 	)
 Control* DisplayManager::HitTest( int x, int y )
 {
 	Control* retval = Control::HitTest(x,y);
-	if (Debug)  printf("DisplayManager::HitTest()   %x \n", retval );
+	if (Debug)  printf("DisplayManager::HitTest()  %x \n", retval );
 	
 	if (retval==this)
 		return NULL;	// don't want display manager empty space to do anything.

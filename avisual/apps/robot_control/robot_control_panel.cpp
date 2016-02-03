@@ -31,12 +31,14 @@
 	The fact that I have to ask this is not too good.	
 */
 Button   	Stop   ( 20, 200, 400, 300 );
-Button   	Go	   ( 20, 110, 250, 200 );
-ListBox  	SequenceSource( 250, 450, 400, 220 );
-ListBox  	SequenceList  ( 500, 700, 400, 60  );
-Button   	Add	   		  ( 400, 480, 200, 150 );
 
-CheckBox	can_send	  ( 350, 465, 150, 100 );
+ListBox  	SequenceSource( 350, 550, 400, 220 );
+ListBox  	SequenceList  ( 600, 800, 400, 60  );
+Button   	Add	   		  ( 450, 580, 200, 150 );
+Button   	ClearList	  ( 450, 580, 140, 90  );
+Button   	Go	   		  ( 325, 440, 140, 90  );
+
+CheckBox	can_send	  ( 20, 110, 250, 200 );
 
 CheckBox	Left_hip_rotate;
 CheckBox	Left_hip;
@@ -50,7 +52,7 @@ CheckBox	Right_ankle;
 
 
 /* ======================================================= */
-
+//	Push Button Callbacks:
 /* ======================================================= */
 void stop_cb( void* mRobotControl )
 {
@@ -75,17 +77,46 @@ void go_cb( void* mRobotControl )
 void add_cb( void* mRobotControl )
 {
 	if (Debug) printf("Add button pushed\n");
-		
+	// get entry from source.
+	int selected = 	SequenceSource.get_selection();
+	string* move = SequenceSource.get_item( selected );
+
+	// add entry to 
+	SequenceList.add_item( move->c_str() );
 }
 
-void send_can_messages( void* mRobotControl )
+void clear_cb( void* mRobotControl )
+{
+	if (Debug) printf("Clear button pushed\n");
+	SequenceList.clear_items();
+	
+}
+
+/* Callback for Send CAN check box! */
+void send_can_messages( void* mCheckBox )
 {
 	if (Debug) printf("Send CAN toggled\n");
+
+	bool clicked = ((CheckBox*)mCheckBox)->is_checked();
+	char working_buffer[127];
 		
+	// toggle occurs after this callback, so !
+	if (!clicked) {	
+		// REQUEST CAN : 
+		strcpy( working_buffer, "receive can" );
+	} else {
+		// STOP CAN : 
+		strcpy( working_buffer, "stop can " );
+	}
+
+
+	printf("\n\nSend command: %s\n", working_buffer );
+	cli_ipc_write_sentence( working_buffer );
+	cli_wait_for_ack_update();	
 }
 
 /* ======================================================= */
-
+//	Class Definition
 /* ======================================================= */
 RobotPanel::RobotPanel()
 {
@@ -97,7 +128,8 @@ void RobotPanel::Initialize(	)
 }
 int	RobotPanel::calc_metrics()
 {
- 	Window::calc_metrics();	
+ 	Window::calc_metrics();
+ 	return 1;
 }
 int	RobotPanel::place_views()
 {	
@@ -112,15 +144,18 @@ int	RobotPanel::place_views()
 
 	can_send.set_text			  ( "Send CAN", true );
 	//can_send.set_background_color ( 0xFF20DF20  	 );
-	can_send.set_on_click_listener( send_can_messages, this );
+	can_send.set_on_click_listener( send_can_messages, &can_send );
 
 	Add.set_text("Add ->");
 	Add.set_on_click_listener( add_cb, this );
 
+	ClearList.set_text				("Clear!");
+	ClearList.set_on_click_listener ( clear_cb, this );
+	
 	Left_hip.set_text				("L Hip",true);		
 	Left_knee.set_text				("L Knee",true);		
 	Left_ankle.set_text				("L Ankle",true);	
-	Left_hip.set_position_below    ( &Go, true, 15.0 );
+	Left_hip.set_position_below    ( &can_send, true, 15.0 );
 	Left_knee.set_position_below   ( &Left_hip  );
 	Left_ankle.set_position_below  ( &Left_knee ); 
 
@@ -151,7 +186,8 @@ int	RobotPanel::place_views()
 	add_control( &SequenceSource );	
 	add_control( &SequenceList   ); 
 	add_control( &can_send 		 );
-
+	add_control( &ClearList		 );
+	
 	add_control( &Left_hip 		 );
 	add_control( &Left_knee 	 );
 	add_control( &Left_ankle 	 );	
@@ -161,12 +197,13 @@ int	RobotPanel::place_views()
 
 	print_children();
 	printf("====== Robot CONTROL POSITIONS AFTER ===\n");
+	return 1;
 }
 
 int	RobotPanel::onCreate	  (  )	// chance to load resources, call functions which use fonts
 {
 	place_views();
-	Window::onCreate();
+	return Window::onCreate();
 }
 
 

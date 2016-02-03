@@ -127,8 +127,8 @@ int		Application::calc_metrics()
 // chance to load resources, call functions which use fonts
 int	Application::onCreate	(  ) 
 {
-	if (m_main_window)
-		m_main_window->onCreate();
+	// What about creating all the App's windows?  These are done on set_main_window()
+	
 	setup_app_menu();
 	setup_main_menu();
 	onPlace();
@@ -137,17 +137,17 @@ int	Application::onCreate	(  )
 
 void Application::register_with_display_manager()
 {
+	printf("Application::register_with_display_manager()\n");
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( m_main_window 	 	 );
 	MainDisplay.set_menu  ( &m_main_menu  	 	 );
-	printf("register_with_display_manager- mid \n");
 	
 	// Establish the sidebar controls:
 	// Create Sidebar items:
 	MainDisplay.m_side.load_controls( &m_sidebar_controls );
 	MainDisplay.m_status.set_text( m_welcome_status.c_str() );	
 	onPlace();
-	printf("register_with_display_manager- done \n");	
+	printf("Application::register_with_display_manager() - done \n");	
 }
 
 int		Application::onPlace( ) 
@@ -156,13 +156,17 @@ int		Application::onPlace( )
 	
 	// Put the MainWindow in the requested client area.
 	Rectangle* client_rect = MainDisplay.get_useable_rect();
-	if (Debug) printf("\n\nMainDisplay.get_useable_rect() %x %x done\n", m_main_window, client_rect );	
-	client_rect->print_positions();		
+	if (Debug) {
+		//printf("\n\nMainDisplay.get_useable_rect() %x done\n", m_main_window, client_rect );	
+		//client_rect->print_positions();		
+	}
 	if ( (m_main_window) && (client_rect) )
 	{
 		m_main_window->set_position( client_rect );
-		if (Debug) printf("MainWindow. set position done\n");
-		m_main_window->print_positions();
+		if (Debug) {
+			//printf("MainWindow. set position done\n");
+			//m_main_window->print_positions();
+		}
 
 		//m_main_window->set_width_height( client_rect->get_width(), client_rect->get_height() );
 		//m_main_window->move_to			( client_rect->get_left(), client_rect->get_bottom() );		
@@ -207,7 +211,7 @@ void	Application::About			(	)
 }
 void	Application::Preferences(	)
 {
-	return 1;
+	return ;
 }
 
 int	Application::Quit	() 

@@ -24,10 +24,10 @@
 #include "edit_box.hpp"
  
 
-TextView 	ConnectionStatus( 50, 700, 500, 50 	);
-ClientList	AvailClients 	( 20, 650, 160, 50	);
-TextView 	CmdText		 	( 50, 700, 350, 200 );
-EditBox 	SampleEdit	 	( 50, 700, 450, 355 );
+TextView 		ConnectionStatus( 50, 700, 500, 50 	);
+ClientListPanel	AvailClients 	( 20, 700, 160, 50	);
+TextView 		CmdText		 	( 50, 700, 350, 200 );
+EditBox 		SampleEdit	 	( 50, 700, 450, 355 );
 
 static char ConnectionStatusText[128];
 static char CommandText[128];
@@ -53,11 +53,7 @@ void init_home_screen()
 	CmdText.set_background_color( 0x7FFfFf00 );
 	
 	// This should be hidden until asked for via voice.
-	AvailClients.move_to( 20, 75 );
-	AvailClients.calc_metrics();
-	AvailClients.set_headings();	
-	AvailClients.update_available_client_list();
-	
+	//AvailClients.move_to( 20, 75 );
 
 	SampleEdit.set_text_size 		( 16.0 		 );
 //	SampleEdit.set_text_color		( 0x9FFF0000 );
@@ -82,13 +78,13 @@ void init_home_screen()
 
 	//pack_sample_window();	
 */
-	// Add to display manager:
-	MainDisplay.remove_all_objects(		);
 //	MainDisplay.add_object( &ConnectionStatus );
-	MainDisplay.add_object( &SampleEdit );
-	MainDisplay.add_object( &CmdText 	);
-	MainDisplay.add_object( &AvailClients );
 //	MainDisplay.add_object( &adren_board_list );
+
+	// Add to display manager:
+	MainDisplay.remove_all_objects(		  );
+	MainDisplay.add_object( &SampleEdit   );
+	MainDisplay.add_object( &CmdText 	  );
+	MainDisplay.add_object( &AvailClients );
 	MainDisplay.load_resources();
-	printf("====== 	MainDisplay.load_resources() COMPLETED ========\n");
 }

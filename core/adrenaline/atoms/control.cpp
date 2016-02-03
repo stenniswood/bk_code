@@ -123,10 +123,13 @@ void Control::print_color_info( )
 
 // Chance to load resources, call functions which use fonts
 //  (already loaded before this call) etc.
+// Return:		1 => Action was performed
+//				0 => already created
 int	Control::onCreate(  )
 {	
+	if (created)	return 0;
+	
 	created = true;
-	// wrap_content();
 	int count=0;
 
 	// Create All Children : 
@@ -311,7 +314,9 @@ void Control::sort_z_order()
 int Control::draw() 
 {
 	if (Visible==false)	 return 0;
-
+	if (invalidated)
+		erase();
+	
 	StrokeWidth(2);
 	if (HasBorder) 
 		draw_border();
@@ -326,6 +331,14 @@ int Control::draw()
 		iter++; 
 	};
 	return TRUE;
+}
+
+int Control::erase()
+{
+	/* Erase background of the control */
+	Stroke_l ( 0x00000000 );
+	Fill_l   ( 0x00000000 );
+	Rect( left, bottom, width, height);
 }
 
 int Control::draw_border()

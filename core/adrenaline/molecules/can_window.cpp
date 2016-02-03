@@ -153,8 +153,11 @@ int		CANMessages::calc_metrics()
 // chance to load resources, call functions which use fonts
 int		CANMessages::onCreate(  )
 {
+	if (created)	return 0;
+		
 	place_views();
 	//fill_phony_msgs();
+	
 	Window::onCreate();
 	m_msg_view.calc_column_positions_from_widths();
 }

@@ -1,6 +1,5 @@
-#ifndef _DISPLAY_MANAGER_H_
+#ifndef _DISPLAY_MANAGER_H_ 
 #define _DISPLAY_MANAGER_H_
-
 
 //#include "adrenaline_windows.h"
 #include "bk_system_defs.h"
@@ -76,7 +75,7 @@ public:
 	void	hide_calendar	(   );
 	
 	bool	relay_mouse		(   );
-	void	relay_key		( char mKey );
+	bool	relay_key		( char mKey );
 	void	grab_focus		( Control* mKey );
 		
 	std::vector<Application*>	m_running_apps;

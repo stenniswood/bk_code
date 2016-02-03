@@ -28,7 +28,6 @@
 #include "file_tx_thread.h"
 #include "thread_control.h"
 
- 
 char 	 ip_addr[16]; 			// for user feedback
 
 void 	exit1() {	while (1==1) {  }; }
@@ -326,7 +325,6 @@ void terminate_video_tx_thread(  )
 {	
 	video_terminate_requested = TRUE;
 }
-
 
 void create_HMI_tx_thread( BOOL mPlay, BOOL mSave, int Port )
 {	

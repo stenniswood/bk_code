@@ -45,9 +45,8 @@ pthread_t 	server_thread_id;
 
 void create_threads()
 {
-	/* These threads are located in :   
-	*/
-	
+	/* These threads are located in :   	*/
+
 	// CREATE UDP - Transponder : 
 	const char *message1 = "every second";
 	int iret1 = pthread_create( &udp_tx_thread_id, NULL, udp_transponder_function, (void*) message1);
@@ -205,12 +204,22 @@ int start_amon()
         case 0:
             execvp(amon_command, NULL);
             printf("returned from ececvp\n");
-        default:
+        default: printf("unknown start_amon pid!\n");
             return 0;
     }
     return 1;
 }
 
+void trim_trail_space( char* str )
+{
+	int   len = strlen(str)-1;
+	char* ptr = &(str[len]);
+	while(( len>0 ) && (*ptr==' '))
+	{
+		*ptr = 0;
+		ptr--;  len--;
+	}
+}
 /* Note the client can do any of these:
 	establish a connection
 	audio  						(send and/or receive)
@@ -222,6 +231,7 @@ int start_amon()
 void handle_client_request()
 {
 	if (ipc_memory_client==NULL)	return;
+	trim_trail_space( ipc_memory_client->Sentence );
 
  	printf ("Sentence:%s|\n", ipc_memory_client->Sentence );
 	int result = strcmp(ipc_memory_client->Sentence, "whoami");
@@ -248,6 +258,7 @@ void handle_client_request()
 		REQUEST_client_connect_to_robot = TRUE;		// signal to serverthread.c
 		REQUESTED_client_ip = space;				// ip address
 	}
+
 	result = strcmp(ipc_memory_client->Sentence, "receive");
 	if (result==0)
 	{
@@ -278,11 +289,11 @@ void handle_client_request()
 	result = strcmp(ipc_memory_client->Sentence, "send");	
 	if (result==0)
 	{
-		printf("sending..\n");
 		result = strcmp(space, "can");			
 		if (result==0)
 		{
-			start_amon();
+			/* "send can" spoken to this local client - means:		*/
+			start_amon();  
 			printf("sending..CAN\n");
 			// this is the "token" to indicate can messages are coming.
 			Cmd_client_CAN_Start();		// in core/wifi/client.c
@@ -348,6 +359,7 @@ void handle_client_request()
 	}
 }
 
+/* Client request shared memory.  */
 void scan_inputs()
 {
 	// CHECK CLIENT MEMORY FOR REQUEST:
@@ -388,7 +400,8 @@ int main( int argc, char *argv[] )
 			return 0;
 		}
 	}
-	init();
+	init();	// <-- Serverthread is established
+	
 	printf("===============================================\n");
 	if (argc>1)
 	{

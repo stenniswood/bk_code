@@ -180,6 +180,8 @@ void Leveler::draw_marker(  )
 
 int Leveler::draw() 
 {	
+	if (!Visible) return 0;
+	
 	Stroke		(255, 128, 128, 0.5);
 	StrokeWidth (2); 
  
@@ -190,5 +192,6 @@ int Leveler::draw()
 	draw_y_label	 	(  );
 
 	draw_marker			(  );
+	return 1;	
 }
 

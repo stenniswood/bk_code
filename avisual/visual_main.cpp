@@ -119,7 +119,6 @@ void gui_interface()
 	static int right_mouse_button_prev = 0;
 
 	// HANDLE MOUSE EVENTS :
-	//int result=0;
 	int result = mouse.time_slice();	//int result = mouse_timeslice(); 	
 	//printf(" mouse.time_slice()  result =%d\n", result );
 	
@@ -139,8 +138,8 @@ void gui_interface()
 			printf(" Left button clicked!  mousexy=(%d,%d)\n", x,y );
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
-			{
-				//printf("clicked an object %x!\n", object_clicked);
+			{ 
+				printf("clicked an object %x!\n", object_clicked);
 				int num = object_clicked->onClick( x, y );
 				//UpdateDisplaySemaphore=1;
 				//printf("clicked an object - called onClick() DONE\n");				

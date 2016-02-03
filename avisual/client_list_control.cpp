@@ -11,7 +11,6 @@
 #include <shapes.h>
 #include <fontinfo.h>
 #include "CAN_Interface.h"
-
 #include "dataset.hpp"
 #include "display.h"
 #include "adrenaline_windows.h"
@@ -24,23 +23,16 @@
 #define Debug 1
 
 
-
 ClientList::ClientList()
 {
-
 }
-
 ClientList::ClientList( int Left, int Right, int Top, int Bottom  )
 : TabularListBox( Left, Right, Top, Bottom)
 {
-
 }
-
 ClientList::~ClientList()
 {
-
 }
-
 
 void ClientList::set_headings()
 {
@@ -71,6 +63,12 @@ void ClientList::set_headings()
 	hdr_info.width = -1;
 	hdr_info.alignment = HEADER_ALIGN_LEFT;			
 	add_column( &hdr_info );	
+
+	hdr_info.text  = "Status        ";
+	hdr_info.width = -1;
+	hdr_info.alignment = HEADER_ALIGN_LEFT;
+	add_column( &hdr_info );
+
 }
 
 void ClientList::set_row( struct stClientData* mDatum )
@@ -82,6 +80,7 @@ void ClientList::set_row( struct stClientData* mDatum )
 	data->push_back("TCP/IP");
 	data->push_back(mDatum->machine);
 	data->push_back(mDatum->address);
+	data->push_back(mDatum->status );
 	add_row (data);
 }
 
@@ -99,5 +98,75 @@ void ClientList::update_available_client_list()
 	if (Debug) printf("===================================================\n");
 }
 
+// =======================================================
+ClientListPanel::ClientListPanel()
+{
+	
+}
+ClientListPanel::ClientListPanel( int Left, int Right, int Top, int Bottom  )
+:Window( Left, Right, Top, Bottom )
+{
 
+}
+
+ClientListPanel::~ClientListPanel()
+{
+
+}	
+
+/* CALLBACK :   */
+void connect_button_cb( void* mControl )
+{
+	ClientListPanel* panel = (ClientListPanel*) mControl;
+	
+	// CONNECT TO  SEQUENCING RPI : 
+	char working_buffer[127];
+	int index = cli_find_name( "sequencer" );
+	if ((index==-1) || (index>MAX_CLIENTS)) return;
+
+	strcpy( working_buffer, "connect " );
+	strcat( working_buffer, ipc_memory_client->ClientArray[index].address );
+
+	// Where do we get the real IP Address? 
+	printf("\n\nConnect command:  %s\n", working_buffer );
+	cli_ipc_write_sentence( working_buffer );		// This is working!
+
+	// Need to wait for acknowledgement here.
+	cli_wait_for_ack_update();
+	printf("back from cli_wait_for_ack_update\n" );
+	
+	const int STATUS_COL =4;
+	panel->m_clients->set_row_col_text( "connected", index, STATUS_COL );
+	
+}
+
+int	ClientListPanel::onCreate(  )
+{
+	m_clients = new ClientList(left, left+width-50, bottom+height, bottom );
+	m_clients->calc_metrics();
+	m_clients->set_headings();
+	m_clients->update_available_client_list();
+
+	m_connect.set_on_click_listener( connect_button_cb, this );
+	add_control( m_clients );
+	add_control( &m_connect );
+		
+	Window::onCreate();
+}
+
+int ClientListPanel::place_views( )
+{
+	m_connect.set_text( "connect", true );
+	m_connect.set_position_right_of( m_clients );	
+}
+
+Control* ClientListPanel::HitTest( int x, int y )
+{
+	return Window::HitTest(x,y);
+}
+
+int		 ClientListPanel::onClick( int x, int y, bool mouse_is_down=true )
+{
+	return Window::onClick(x,y, mouse_is_down);
+}
 

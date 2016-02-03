@@ -120,7 +120,10 @@ void init_molecule_menu()
 	molecules.add_callback_all_items( show_molecule_screens );
 }
 
-
+/*
+	All apps are currently invoked by a pull down menu called "Apps".  
+	This begins each app when selected.
+*/
 int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	Application* tmp_app=NULL;
@@ -133,9 +136,8 @@ int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 			MainDisplay.start_app( audio_app );
 			break;
 	case 2: init_file_browser		();		break;
-	case 3: if (can_app==NULL)
-				can_app = new CANApp();
-			MainDisplay.start_app( can_app );		
+	case 3: init_CAN_app();
+			MainDisplay.start_app( can_app );	
 			break;
 	case 4: init_drawing_app		();		break;	
 	case 5: init_drawing_app		();		break;

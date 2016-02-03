@@ -70,7 +70,7 @@ int	CheckBox::set_on_click_listener( void (*callback)(void*), void* mOn_click_co
 int CheckBox::draw_check_mark()
 {
 	StrokeWidth(2.0);
-	Stroke_l( box_border_color );
+	Stroke_l( box_border_color   );
 	Fill_l( box_background_color );	
 	Line(box_rectangle[0], box_rectangle[1], box_rectangle[2], box_rectangle[3] );
 	Line(box_rectangle[0], box_rectangle[3], box_rectangle[2], box_rectangle[1] );
@@ -117,10 +117,13 @@ int	CheckBox::set_check(bool CheckOn)
 
 int	CheckBox::onClick(int x, int y, bool mouse_is_down)
 {
+	checked = !checked;		// some listeners want the check to change before
+							// so that they know the new state.
+							// what if others want the old state?
+
 	if (on_click_callback)
 		on_click_callback( on_click_context );
 
-	checked = !checked;
 	draw();
 	return -1;
 }
