@@ -22,7 +22,6 @@ Tenniswood - 2014
 #include <pthread.h>
 #include <semaphore.h>
 #include "bk_system_defs.h"
-//#include "devices.h"
 #include "thread_control.h"
 #include "audio_thread.h"
 #include "utilities.h"
@@ -44,11 +43,7 @@ static BOOL 	send_requested = FALSE;
 BOOL			audio_terminate_requested = FALSE;
 static int   	port	= 6000;
 
-static struct   sockaddr_in s_in;
-static struct   sockaddr_in p_in;	// To be stored in UserList for each user.
-static fd_set	socks;
 static int 	 	listenfd = 0, connfd = 0;
-
 
 byte		 	audio_socket_buffer[AUDIO_OUTPUT_BUFFER_SIZE+100];
 BOOL 			start_new_file = TRUE;

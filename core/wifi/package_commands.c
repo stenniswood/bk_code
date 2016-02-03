@@ -138,6 +138,8 @@ int Req_GPIO_cmd( BYTE* mBuffer, BYTE mPin, boolean mHigh)
 	return 9;	
 }
 
+/* THIS IS OLD TOKEN BASED CODE!! */
+
 int Req_CAN_Listen( BYTE* mBuffer )
 {
 	package_int( mBuffer, 0, REQ_CAN_LISTEN );	// Token

@@ -18,6 +18,13 @@
 #include <pthread.h>
 #include <string>
 #include <list>
+#include <sys/ioctl.h>
+#include "bk_system_defs.h"
+#include "CAN_base.h"
+#include "CAN_memory.h"
+#include "CAN_util.h"
+
+
 #include "protocol.h"
 //#include "devices.h"
 
@@ -34,15 +41,13 @@
 #include "client_memory.hpp"
 
  
-#define MAX_SENTENCE_LENGTH 1024
-char	 		header[MAX_SENTENCE_LENGTH];
+/* Ah, this may even hold frames of 1080i video, so... let's make it big: 5MB  */
+#define MAX_SENTENCE_LENGTH 5*1024*1024
+char	 		buffer[MAX_SENTENCE_LENGTH];
 
 
 char 			broadcast_addr[16];		// 
 static char 	ip_addr[16]; 			// for user feedback
-struct   		sockaddr_in s_in;
-struct   		sockaddr_in p_in;	// To be stored in UserList for each user.
-fd_set	 		socks;
 int 	 		listenfd = 0, connfd = 0;    
 
 #define OUTPUT_BUFFER_SIZE 65535
@@ -50,6 +55,16 @@ static BYTE 	general_socket_buff[OUTPUT_BUFFER_SIZE];
 static void 	exit1() {	while (1==1) {  }; }
 
 int 			bytes_txd;
+
+byte  REQUEST_client_connect_to_robot = FALSE;
+char* REQUESTED_client_ip    = NULL;
+int   connection_established = FALSE;
+
+// USED IN SERVER THREAD:
+struct sockaddr_in serv_addr;   
+struct sockaddr_in client_addr;		// will receive the clients IP on accept()
+
+
 
 /********************************************************************
 Init - Initialize all submodules
@@ -99,8 +114,8 @@ static void init_server()
 
 void SendTelegram( BYTE* mBuffer, int mSize)
 {
-	printf("Sending: ");
-	short Token = *((UINT*)mBuffer);
+	//printf("Sending: ");
+	//short Token = *((UINT*)mBuffer);
 	//Print_Msg_Acknowledgement( Token );  printf("\n");
 	write(connfd, mBuffer, mSize ); 
 }
@@ -112,6 +127,13 @@ void update_ipc_status( struct sockaddr_in* sa )
 	strcpy(client_ip, inet_ntoa( sa->sin_addr ) );
 	strcpy(msg, "Connected to : ");
 	strcat(msg, client_ip);		
+	cli_ipc_write_connection_status( msg );
+}		
+
+void update_ipc_status_no_connection( )
+{
+	static char msg[80];
+	strcpy(msg, "Error: Not Connected!");
 	cli_ipc_write_connection_status( msg );
 }		
 
@@ -162,6 +184,91 @@ void Init_NLP_word_lists()
 }
 
 
+/* Return 1 => Error
+		  0 => Okay */
+int connect_to_robot(char *ip_address )
+{
+	printf("====Connect_to_robot...ip=%s\n", ip_address);    
+    if((connfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        printf("\n Error : Could not create socket \n");
+        return 1;
+    }
+
+    memset(&client_addr, '0', sizeof(client_addr)); 
+    client_addr.sin_family = AF_INET;
+    client_addr.sin_port   = htons(BK_MEDIA_PORT);
+
+    if(inet_pton(AF_INET, ip_address, &client_addr.sin_addr)<=0)
+    {
+        printf("\n inet_aton error occured\n");
+        return 1;
+    } 
+
+	printf("ROBOT CLIENT Connecting to : %s:%d\n", ip_address, BK_MEDIA_PORT );
+    if( connect(connfd, (struct sockaddr *)&client_addr, sizeof(client_addr)) < 0)
+    {
+       printf("\n Error : Connect Failed \n");
+       return 1;
+    } 
+	printf("ROBOT CLIENT Connected\n");
+	
+   return 0;
+}
+
+void establish_connection()
+{
+	/****************************
+	   loop on select() or poll().  These will inform when a connection is pending,
+	   then we call accept().  Since select()/Poll() are nonblocking, we can
+	   also check for connect_to_robot() client initiated request.
+	*/
+	printf("establish_connection()\n");	
+    socklen_t size = (socklen_t)sizeof(client_addr);	
+    memset(&client_addr, '0', sizeof(client_addr) );
+	
+	struct timeval tv;
+	tv.tv_sec = 10;		// want immediate return
+	tv.tv_usec = 0;
+
+	int connection_pending = 0;
+	fd_set rfds;
+	int max_fds = max( listenfd, connfd )+1;
+
+	while (!connection_established)
+	{
+		FD_ZERO(&rfds);
+		FD_SET(listenfd, &rfds);
+	//	FD_SET(connfd,   &rfds);
+
+		tv.tv_sec = 0;		// want immediate return
+		tv.tv_usec = 0;
+
+		// CHECK FOR AN INCOMING CONNECTION TO ACCEPT:
+		int number_active = select( max_fds, &rfds, NULL, NULL, &tv );
+		if (number_active==-1)
+			printf("%s \n", strerror(errno));
+
+		connection_pending = FD_ISSET(listenfd, &rfds);
+		if (number_active>0)
+			printf("select() = %d; pending=%d\n", number_active, connection_pending);
+
+		if (connection_pending) {
+			connfd = accept(listenfd, (struct sockaddr*)&client_addr, &size ); 
+			printf("connection accepted!\n");
+			connection_established = TRUE;
+		}
+		else 
+			// ALTERNATELY:  Client memory requested we be the client, initiate connection : 
+			if (REQUEST_client_connect_to_robot)
+			{
+				connection_established = !(connect_to_robot( REQUESTED_client_ip ));				
+				REQUEST_client_connect_to_robot = FALSE;				
+			}
+	}
+	printf("Connection established \n");
+}
+
 /******************************************************
 * Could rename as nlp_server_thread() 
 * return true 	- The telegram was handled.
@@ -169,20 +276,12 @@ void Init_NLP_word_lists()
 ******************************************************/
 void* server_thread(void*)
 {
-    int 			   readsocks = 0;			/* number of updated sockets */
-    struct sockaddr_in serv_addr;   
-    struct sockaddr_in client_addr;		// will receive the clients IP on accept()
-
-    char 	sendBuff[1025];
     time_t 	ticks; 
-
-	init_server    ( );			// Get "ip_addr" of this machine.
+	init_server        ( );		// Get "ip_addr" of this machine.
 	Init_NLP_word_lists( );		// parser
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     memset(&serv_addr, '0', sizeof(serv_addr));
-    memset(sendBuff,   '0', sizeof(sendBuff) );
-
     serv_addr.sin_family 		= AF_INET;
     serv_addr.sin_addr.s_addr 	= htonl(INADDR_ANY);
     serv_addr.sin_port 			= htons(BK_MEDIA_PORT);
@@ -195,49 +294,64 @@ void* server_thread(void*)
 
 	/* wait for a client to talk to us */
     BOOL done = FALSE;
+    int  bytes_available 		 = 0;
+ 	long int telegram_end_marker = 0;	// a position within the buffer[] 
+
     while(1)
     {
     	// WAIT FOR A NEW SESSION:
-    	socklen_t size = (socklen_t)sizeof(client_addr);
-        connfd = accept(listenfd, (struct sockaddr*)&client_addr, &size ); 
+		update_ipc_status_no_connection();
+    	establish_connection();			// either incoming connection or signal client to robot request.
 		printf("=== Socket opened ===\n");
 		update_ipc_status( &client_addr ); 
 		
 		// REPEAT UNTIL REQ_SHUT_DOWN is encountered:
 		while (!done)
 		{
-			/* Get HEADER from the client */
-			int bytes_rxd = read(connfd, header, MAX_SENTENCE_LENGTH);
+			ioctl(connfd, FIONREAD, &bytes_available);
+			if (bytes_available==0) {
+				transmit_queued_entities();	// any and all outgoing data!
+				continue;		 // top of loop.
+			}
+			//printf("bytes_available=%d\n", bytes_available);
+			
+			/* Get data from the client. For streaming data, remember multiple 'telegrams'
+				may come in a single read.  
+			 */
+			int bytes_rxd = read(connfd, buffer, bytes_available);
 			int errsv = errno;
-
 			if (bytes_rxd == 0)
-			{ 
+			{
 				printf("Server thread Received Close (0 bytes) \n");
 				done = TRUE;
 			}
 			else if (bytes_rxd == -1) 
 			{
-				printf("NLP Server thread error: Received -1 bytes; errno=%d\n", errno);
-				errno = errsv;
-				perror("NLP socket");
+				//printf("NLP Server thread error: Received -1 bytes; errno=%d:%s\n", errno, strerror(errno) );
+				perror("NLP Server thread error: Received -1 bytes;");
 				exit1();
 			}
 			else 	// DATA ARRIVED, HANDLE:
 			{
-				header[bytes_rxd] = 0;
-				UINT  DataLength = strlen(header);
+				buffer[bytes_rxd]       = 0;
+				char* next_telegram_ptr = buffer;								
 
-				Parse_Statement(header);
-				printf("Done parsing.\n");
-				
-				if (nlp_reply_formulated)				
-					Send_Reply();
-				printf("Reply sent.\n");	
+				while ( (next_telegram_ptr-buffer) < bytes_rxd )
+				{
+					//printf("Start parsing. buff_index=%d of bytes_rxd=%d; \n", telegram_end_marker, bytes_rxd);
+					next_telegram_ptr   = Parse_Statement( next_telegram_ptr );					
+					// next the problem of split packages - which will occur!							
+				}
+				//printf("Done parsing. %d\n", connfd);
 
-				ipc_write_command_text( header );
-				//done = Parse_done(header);
+				if (nlp_reply_formulated)
+				{	Send_Reply();
+					printf("Reply sent.\n");	
+				}
+				//ipc_write_command_text( buffer );
+				//done = Parse_done(buffer);
 			}
-		}
+		}  // end while()		
 		done = FALSE;
 
 		// SEND Timestamp:	
@@ -251,7 +365,31 @@ void* server_thread(void*)
      }	// WAIT FOR ANOTHER CONNECT     
 }
 
+void audio_interface()
+{
 
+}
+void video_interface()
+{
+
+}
+void sequence_interface()
+{
+
+}
+
+
+// Any and all outgoing data!
+void transmit_queued_entities()
+{
+	can_interface();				// Send CAN data if waiting...
+	audio_interface();				// Send audio if enabled and data avail
+	video_interface();				// Send audio if enabled and data avail
+	sequence_interface();			// Send audio if enabled and data avail
+	
+}
+
+			
 
 /*	int i=0;
 	short size=0;

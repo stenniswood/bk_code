@@ -1,7 +1,26 @@
+RPI = 1
+linux_desktop = 2
+Mac = 3
+
+PLATFORM  = $(RPI)
+#PLATFORM = $(linux_desktop)
+#PLATFORM  = $(Mac)
+
+ifeq ($(PLATFORM), $(RPI))
+HARDWARE_PATH = ./hardware/rpi/
+endif
+ifeq ($(PLATFORM), $(linux_desktop))
+HARDWARE_PATH = ./hardware/linux_desktop/
+endif
+ifeq ($(PLATFORM), $(Mac))
+HARDWARE_PATH = ./hardware/mac/
+endif
+
 cc      =g++
 OPTIONS	= -std=c99
 INC		= ./ ../core/can/ ../core/misc/ ../core/msg/ ../core/ipc/
-CFLAGS 	= -lwiringPi -lrt
+CFLAGS 	= -lwiringPi -lrt -DPLATFORM=$(PLATFORM) \
+		-DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
 DEPS   	= 
 OBJ     =   amon_main.o gpio.o  OS_Dispatch.o
 

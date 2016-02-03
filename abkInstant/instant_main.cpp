@@ -29,7 +29,6 @@
 #include "udp_transponder.hpp"
 #include "thread_control.h"
 
-#include "CAN_protocol.h"
 
 // Right now this is user settable.  Need to detect:
 BOOL	PiCAN_Present=FALSE;
@@ -70,12 +69,28 @@ void create_threads()
 	iret2 = pthread_create( &server_thread_id, NULL, server_thread, (void*) message1);
 	if (iret2)
 	{
-		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
+		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
 		exit(EXIT_FAILURE);
 	}
 	// CLIENT PROTOCOL... thread needed?  No.
 }
 
+
+// SET THIS IN serverThread Parse whatever.
+int create_client_thread_requested = 0;		// from a serverthread which received a request to connect to another RPI.
+
+void create_another_client_thread()		// really serverthread which initiates connection (ie. client thread)
+{
+	// TBD!!!	
+	const char *message1 = "client blah";
+	// ETHERNET SERVER PROTOCOL:
+	int iret2 = pthread_create( &server_thread_id, NULL, server_thread, (void*) message1);
+	if (iret2)
+	{
+		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
+		exit(EXIT_FAILURE);
+	}
+}
 
 #define USE_AVISUAL 0
 #define USE_CAN		1
@@ -91,9 +106,9 @@ void establish_ipc()
 	// Allocate a shared memory so we can accept user commands (ie. connect, send audio, etc)
 	int result = connect_shared_client_memory(TRUE);
 
-	printf("************************* avisual SHARED MEMORY *****************************\n");
 	if (USE_AVISUAL)
 	{
+		printf("************************* AVISUAL SHARED MEMORY *****************************\n");
 		vis_allocate_memory();
 		vis_attach_memory  ();
 		vis_fill_memory	   ();
@@ -102,6 +117,7 @@ void establish_ipc()
 
 	if (USE_SWAY)
 	{
+		printf("************************* SWAY SHARED MEMORY *****************************\n");	
 		sway_allocate_memory();
 		sway_attach_memory  ();
 		sway_fill_memory	();
@@ -110,6 +126,7 @@ void establish_ipc()
 
 	if (USE_PICAMSCAN) 
 	{
+		printf("************************* PICAMSCAN SHARED MEMORY *****************************\n");	
 		picam_allocate_memory();
 		picam_attach_memory  ();
 		picam_fill_memory	 ();
@@ -118,6 +135,7 @@ void establish_ipc()
 	
 	if (USE_AUDIO)
 	{
+		printf("************************* AUDIO SHARED MEMORY *****************************\n");	
 		aud_allocate_memory();
 		aud_attach_memory  (); 
 		aud_fill_memory	   ();
@@ -127,6 +145,7 @@ void establish_ipc()
 
 	if (USE_CAN)
 	{
+		printf("************************* CAN SHARED MEMORY *****************************\n");	
 	    result =  can_connect_shared_memory(FALSE);
 	} 
 	printf("****************** END SHARED MEMORY SETUP *******************");	
@@ -144,7 +163,6 @@ void init( )
 	create_threads();
 
 	printf("done with board request()!\n");
-
 }
   
 void help()
@@ -168,23 +186,6 @@ void print_args(int argc, char *argv[])
 	printf("\n");
 }
 
-/* 	Interface between Command Central and CAN
-	Process and Transmit CAN messages 
-*/
-void can_interface()
-{
-	// PUMP TRANSMIT MESSAGE QUEUE:
-/*	if (ReadyToSendAnother)
-	{
-		SendNext();		// Transmit next can message
-	}
-	// HANDLE ANY RX MESSAGES:
-	while (RxMessageAvailable())
-	{
-		struct sCAN* tmp = GetNext();
-		//callback_main( tmp );
-	}		*/
-}
 
 #if (PLATFORM==Mac)
 char amon_command[] = "~/bk_code/amonitor/amon";
@@ -193,7 +194,6 @@ char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon";
 #elif (PLATFORM==linux_desktop)
 char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
 #endif
-
 
 int start_amon() 
 {
@@ -222,7 +222,7 @@ int start_amon()
 void handle_client_request()
 {
 	if (ipc_memory_client==NULL)	return;
- 
+
  	printf ("Sentence:%s|\n", ipc_memory_client->Sentence );
 	int result = strcmp(ipc_memory_client->Sentence, "whoami");
 	if (result==0)
@@ -245,10 +245,37 @@ void handle_client_request()
 	result = strcmp(ipc_memory_client->Sentence, "connect");
 	if (result==0) {
 		printf("connecting..\n");
-		result = connect_to_robot( space );
+		REQUEST_client_connect_to_robot = TRUE;		// signal to serverthread.c
+		REQUESTED_client_ip = space;				// ip address
 	}
-
-	result = strcmp(ipc_memory_client->Sentence, "send");			
+	result = strcmp(ipc_memory_client->Sentence, "receive");
+	if (result==0)
+	{
+		if (!connection_established)
+		{
+			// The request comes thru IPC Client memory.  So the response will be
+			// placed there as well.
+			printf("No Connection!!\n\n");
+			return;
+		} 
+		else 
+		{
+			// No amon at this end.
+			int attached = can_connect_shared_memory(TRUE);	// allocate if not already.
+			CAN_ListeningOn   = TRUE;
+			set_tcp_receiving_flag();
+			
+			printf("Requesting data...");
+			result = strcmp(space, "can");                  
+			if (result==0)
+			{  
+					printf(" (ie. 'send can')\n");
+					Cmd_client_CAN_listen();  // request for other end to send CAN.  in core/wifi$
+			}
+		}
+	}
+	
+	result = strcmp(ipc_memory_client->Sentence, "send");	
 	if (result==0)
 	{
 		printf("sending..\n");
@@ -257,6 +284,7 @@ void handle_client_request()
 		{
 			start_amon();
 			printf("sending..CAN\n");
+			// this is the "token" to indicate can messages are coming.
 			Cmd_client_CAN_Start();		// in core/wifi/client.c
 		}
 		result = strcmp(space, "audio");
@@ -290,6 +318,12 @@ void handle_client_request()
 		result = strcmp(space, "can");			
 		if (result==0)
 		{
+			char coBuff[127];
+			strcpy ((char*)coBuff, "stop CAN");
+			int length = strlen( (char*)coBuff );
+			SendTelegram( coBuff, length);
+			CAN_SendingOn = FALSE;
+			clear_tcp_transmitting_flag();
 		}
 		result = strcmp(space, "audio");
 		if (result==0)
@@ -316,14 +350,13 @@ void handle_client_request()
 
 void scan_inputs()
 {
-	//printf("%d %d\n", ipc_memory_client->RequestCount, ipc_memory_client->AcknowledgedCount);
 	// CHECK CLIENT MEMORY FOR REQUEST:
 	if (cli_is_new_update())
-	//if (ipc_memory_client->RequestCount > ipc_memory_client->AcknowledgedCount)
 	{
 		printf("calling handle_client_request() \n");
 		handle_client_request();
 		cli_ack_update_status();
+		printf(" handled_client_request acknowledged to client memory. \n");		
 	}	
 }
 		
@@ -335,9 +368,6 @@ void update_outputs()
 		cli_ipc_add_new_client( mClientText );		
 */	
 }
-
-void ethernet_interface()	{	/* wifi comms 	 */ }
-void voice_interface()		{	/* NLP/Synthesis */ }
 
 char filespath[64];
 char filename [64];
@@ -360,9 +390,6 @@ int main( int argc, char *argv[] )
 	}
 	init();
 	printf("===============================================\n");
-
-	CAN_SendingOn   = FALSE;
-	CAN_ListeningOn = FALSE;
 	if (argc>1)
 	{
 		// FORCE CLIENT CONNECTION :
@@ -382,19 +409,12 @@ int main( int argc, char *argv[] )
 
 	printf("================= Main Loop ==========================\n");
 	int count = 0;
-	//Init_CAN_Protocol();
 	sleep(1);
-	//Parse_CAN_Statement( "incoming CAN");
-	//create_CAN_thread( FALSE,  TRUE );
 	while (1) 
 	{
-		//printf("Loop %d\n", count++);
-		can_interface();			// empty
-		ethernet_interface();		// empty
-		voice_interface();			// empty
+		//voice_interface();		// empty
 		scan_inputs();
-		update_outputs();
-		usleep(100000);
+		usleep(50000);
 	}
 }
 

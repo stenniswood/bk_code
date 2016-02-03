@@ -168,7 +168,7 @@ void gui_interface()
 	if (invalid)
 	{	
 		UpdateDisplaySemaphore = 1;
-		printf("Test for invalid children.  Found! \n");	
+		//printf("Test for invalid children.  Found! \n");	
 	}
 
 	MainDisplay.draw_invalid_children();

@@ -26,10 +26,7 @@
 //#include "can_tx_thread.h"
 //#include "hmi_tx_thread.h"
 #include "file_tx_thread.h"
-
 #include "thread_control.h"
-
-
 
  
 char 	 ip_addr[16]; 			// for user feedback
@@ -38,7 +35,7 @@ void 	exit1() {	while (1==1) {  }; }
 
 std::list<int> AudioPortsInUse;
 std::list<int> VideoPortsInUse;
-std::list<int> CANPortsInUse;
+//std::list<int> CANPortsInUse;
 std::list<int> HMIPortsInUse;
 std::list<int> FilePortsInUse;
 
@@ -58,7 +55,6 @@ extern int DisplayNum;
 
 pthread_t audio_thread_id;
 pthread_t video_thread_id;
-pthread_t can_thread_id;
 pthread_t hmi_thread_id;
 pthread_t file_thread_id;
 
@@ -167,31 +163,6 @@ The message can be:
 "receive&play&save"
 *******************************/
 char message_params[40];
-void create_CAN_thread( BOOL mPlay, BOOL mSave, int Port )
-{	
-	// FORM THE PARAMETER LIST:
-	memset( message_params, ' ', 40);
-	if (mPlay)
-		memcpy (message_params, "play", 4);		// play on piCAN
-	if (mSave)
-		memcpy (message_params+5, "send", 4);
-	sprintf(message_params+10, "%d", Port);
-	message_params[4]=':';
-	message_params[9]=':';
-
-	printf("sending msg=%s\n", message_params);
-	int iret1 = pthread_create( &can_thread_id, NULL, CAN_server_thread, (void*) message_params);
-	if (iret1)
-	{
-		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
-		exit(EXIT_FAILURE);
-	}
-}
-
-void terminate_CAN_thread(  )
-{	
-	can_terminate_requested = TRUE;
-}
 
 void create_HMI_thread( BOOL mPlay, BOOL mSave, int Port  )
 {	
@@ -253,7 +224,7 @@ void terminate_file_thread( )
 
 pthread_t file_tx_thread_id;
 pthread_t audio_tx_thread_id;
-pthread_t can_tx_thread_id;
+
 
 
 /*****************************
@@ -354,28 +325,6 @@ void create_video_tx_thread		( BOOL mPlay, BOOL mSave, int Port )
 void terminate_video_tx_thread(  )
 {	
 	video_terminate_requested = TRUE;
-}
-
-void create_CAN_tx_thread	  	( BOOL mPlay, BOOL mSave, int Port )
-{	
-	// FORM THE PARAMETER LIST:
-	int port_length = 6;	
-	int total_length = 6;
-	
-	char* message = new char[total_length];
-	printf("can_thread.message=%s\n", message);
-
-	// CREATE THREAD : 
-	//int iret1 = pthread_create( &can_tx_thread_id, NULL, can_transmit_thread, (void*) message);
-	//if (iret1)
-	{
-		//fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
-		exit(EXIT_FAILURE);
-	}
-}
-void terminate_CAN_tx_thread( 	)
-{	
-	can_terminate_requested = TRUE;
 }
 
 

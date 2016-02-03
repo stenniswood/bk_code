@@ -282,42 +282,57 @@ void diagram_sentence(	std::string* subject,
 		printf("object=%s\n", 	 object->c_str() );		
 }
 
+extern int connfd;
+
 /*****************************************************************
 Do the work of the Telegram :
+PARAMS : 
+	mSentence 		- pointer to a buffer which begins with text (data may follow end of string).
+	mbegin_index	- index within the mSentence buffer (up to 5MB)
+
 return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
 *****************************************************************/
-void Parse_Statement(char*  mSentence)
+char* Parse_Statement(char*  mSentence)
 {	
 	/*sObject* subject  = extract_subject( mSentence );	
 	std::string* verb = extract_verb   ( mSentence );
 	sObject* object   = extract_object ( mSentence );	// direct object of sentence.
 	int prepos_index  = get_preposition_index( mSentence ); */
- 
-	if (mSentence==NULL) return;
-		printf("Sentence:|%s|\n", mSentence);
+ 	
+ 	char* end_of_telegram = mSentence + strlen(mSentence);
+ 	
+	if (mSentence==NULL) return; 
+	printf( "Sentence:|%s|\n", mSentence );
 
-	BOOL result = Parse_Audio_Statement( mSentence );
+	if (strcmp(mSentence, "I don't understand. Ignoring.")==0)
+		return;
+	
+	int result = Parse_Audio_Statement( mSentence );
 	
 	if (result==FALSE)
 		result = Parse_Camera_Statement( mSentence );
 
 	if (result==FALSE)
-		result = Parse_File_Statement( mSentence );
+		result = Parse_File_Statement  ( mSentence );
 		/* ie. File transfer, directory, backup, etc. */		
 		
 	if (result==FALSE)
 		result = Parse_HMI_Statement   ( mSentence ); 
 		/* ie mouse, keyboard, PS3 controller, etc. */
-
-	if (result==FALSE)
-		result = Parse_CAN_Statement   ( mSentence );
 	
+	if (result==FALSE)
+	{	
+		char* new_end_of_telegram = Parse_CAN_Statement( mSentence );
+		result = (new_end_of_telegram > mSentence);
+		end_of_telegram = new_end_of_telegram;
+	}
 	if (result==FALSE)
 	{	
 		nlp_reply_formulated = TRUE;
 		strcpy (NLP_Response, "I don't understand. Ignoring.");		
 	}
+	return end_of_telegram;
 }
 
 /*****************************************************************

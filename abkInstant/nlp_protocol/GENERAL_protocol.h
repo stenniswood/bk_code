@@ -31,7 +31,7 @@ std::string*    extract_verb		( char*  mCommand );
 int 			get_preposition_index(char*  mSentence);
 struct sObject* extract_object		( char*  mSentence);
 
-void 	Parse_Statement				( char*  mCommand );
+char* 	Parse_Statement				( char*  mCommand );
 BOOL 	Perform_VIDEO_actions		( char* mAction, 
 									  char* mAdjectives, 
 									  char* mObjects );

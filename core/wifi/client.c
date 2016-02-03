@@ -21,6 +21,7 @@ incoming file for you from 192.168.1.144:
 #include "client.h"
 #include "CAN_memory.h"
 #include "protocol.h"  // for dumpbuffer()
+#include "serverthread.h"
 
 
 //#define BK_MEDIA_PORT 8080
@@ -64,50 +65,6 @@ int are_importing_CAN()
 int  	sockfd=0;
 char 	recvBuff[1024];
 
-/* Return 1 => Error
-		  0 => Okay */
-int connect_to_robot(char *ip_address )
-{
-	printf("====Connect_to_robot...ip=%s\n", ip_address);
-    struct sockaddr_in	serv_addr; 
-	struct in_addr      addr;
-    
-    if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        printf("\n Error : Could not create socket \n");
-        return 1;
-    }
-
-    memset(&serv_addr, '0', sizeof(serv_addr)); 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port   = htons(BK_MEDIA_PORT);
-
-    if(inet_pton(AF_INET, ip_address, &serv_addr.sin_addr)<=0)
-//    if(inet_aton(ip_address, &addr)<=0)
-    {
-        printf("\n inet_aton error occured\n");
-        return 1;
-    } 
-
-	printf("ROBOT CLIENT Connecting to : %s:%d\n", ip_address, BK_MEDIA_PORT );
-    if( connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-//    if( connect(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-    {
-       printf("\n Error : Connect Failed \n");
-       return 1;
-    } 
-	printf("ROBOT CLIENT Connected\n");
-	
-	// Set All LEDs
-	/*for (i=0; i<10; i++)
-	{
-		int length = Cmd_GPIO( coBuff, i, 0 );
-		printf("Token (%x %x) DLC=(%x %x) Pin %x-%x \n", coBuff[1], coBuff[0], coBuff[3], coBuff[2], coBuff[4], coBuff[5] );
-		bytes = write(sockfd, coBuff, length );	
-		sleep(1);
-	}*/
-    return 0;
-}
 
 int send_file_transmit_request()
 {
@@ -131,7 +88,8 @@ int Cmd_client_CAN_Start( )
 	
 	strcpy( (char*)coBuff, "incoming CAN" );
 	int length = strlen( (char*)coBuff );
-	bytes = write(sockfd, coBuff, length );
+//	bytes = write(sockfd, coBuff, length );
+	SendTelegram( coBuff, length);
 	printf("Cmd_client_CAN_Start:  %d bytes written\n", bytes );
 	return bytes;
 }
@@ -139,12 +97,14 @@ int Cmd_client_CAN_Start( )
 int Cmd_client_CAN_listen( )
 {
 	CAN_ListeningOn = TRUE;
-	printf("Cmd_client_CAN_listen:  Rx CAN msg stream...\n");
-	int length = Req_CAN_Listen( coBuff );
-	DumpBuffer( coBuff, length );
-	bytes      = write(sockfd, coBuff, length);
-	printf("Cmd_client_CAN_listen:  %d bytes written\n", bytes );
-	return bytes;
+	//printf("Cmd_client_CAN_listen:  Rx CAN msg stream...\n");
+
+	strcpy (coBuff, "send CAN");
+	int length = strlen(coBuff);
+	//DumpBuffer  ( coBuff, length );
+	SendTelegram( coBuff, length);
+	printf("Cmd_client_CAN_listen:  %d bytes written\n", length );
+	return length;
 }
 
 int Cmd_client_send_CAN( struct sCAN* Msg )
@@ -153,9 +113,10 @@ int Cmd_client_send_CAN( struct sCAN* Msg )
 	//int length = Cmd_CAN( coBuff, Msg );
 	//DumpBuffer( coBuff, length );
 
-	uint8_t test = sprint_message( (char*)coBuff, Msg ); 
+	sprint_message( (char*)coBuff, Msg ); 
 	int length   = strlen((char*)coBuff);
-	bytes = write(sockfd, coBuff, length );
+//	bytes = write(sockfd, coBuff, length );
+	SendTelegram( coBuff, length);
 	printf("Cmd_client_send_CAN:  %d bytes written\n", bytes);	
 	return bytes;
 }
@@ -167,7 +128,8 @@ int Cmd_client_CAN_Stop( )
 	//DumpBuffer( coBuff, length );
 	strcpy ((char*)coBuff, "stop CAN");
 	int length = strlen( (char*)coBuff );
-	bytes = write(sockfd, coBuff, length );
+//	bytes = write(sockfd, coBuff, length );
+	SendTelegram( coBuff, length);
 	printf("Cmd_client_CAN_Stop:  %d bytes written\n", bytes );
 	return bytes;
 }

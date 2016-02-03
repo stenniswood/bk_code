@@ -40,9 +40,9 @@ AUTHOR	:  Stephen Tenniswood
 
 char* 	client_shared_memory;
 int 	client_segment_id;
-struct  client_ipc_memory_map* ipc_memory_client =NULL;
+struct  client_ipc_memory_map* ipc_memory_client = NULL;
 
- 
+
 void cli_dump_ipc()
 {
 	int length = sizeof(struct client_ipc_memory_map);
@@ -51,7 +51,7 @@ void cli_dump_ipc()
 		if ((i%32)==0)
 			printf("\n");
 		printf("%2x ", client_shared_memory[i] );
-	}	
+	}
 }
 
 void cli_save_segment_id(char* mFilename)
@@ -296,6 +296,13 @@ void cli_ack_update_status()
 	ipc_memory_client->AcknowledgedCounter = ipc_memory_client->UpdateCounter;
 }
 
+void cli_wait_for_ack_update()
+{
+	while (ipc_memory_client->AcknowledgedCounter < ipc_memory_client->UpdateCounter)
+	{
+	}
+	
+}
 /*void cli_ipc_add_new_client( struct in_addr mbeacon_ip_list, char* mTextMsg )
 {
 	ipc_memory_client->NumberClients++;
@@ -364,6 +371,21 @@ void cli_print_clients()
 }
 
 
+int cli_find_name(char* mName)
+{
+	if (ipc_memory_client==NULL) return -1;
+	
+	int size = ipc_memory_client->NumberClients;
+
+	struct stClientData* ptr = ipc_memory_client->ClientArray;		
+	for (int i=0; i<size; i++)
+	{
+		if (strcmp(ptr[i].name, mName)==0 )
+			return i;
+		//printf(" %s\t%s\t%s \n", ptr[i].name, ptr[i].address, ptr[i].machine );
+	}
+	return ;	
+}
 
 
 

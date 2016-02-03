@@ -77,7 +77,7 @@ void ListBox::move_to ( float mLeft,   float  mBottom )
 void ListBox::set_width_height( int Width, int Height )
 {	
 	ScrollControl::set_width_height( Width, Height );
-	printf("num_child_controls=%d; vsb=%x\n", m_child_controls.size(), vsb );
+	//printf("num_child_controls=%d; vsb=%x\n", m_child_controls.size(), vsb );
 	
 	calc_metrics();
 	if (vsb) vsb->set_width_height( vsb->get_width(), body_height );

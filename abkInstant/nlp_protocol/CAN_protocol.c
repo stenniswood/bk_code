@@ -12,8 +12,8 @@
 #include <list>
 #include "protocol.h"
 #include "devices.h"
-
-
+#include "CAN_memory.h"
+#include "CAN_util.h"
 #include "GENERAL_protocol.h"
 #include "CAMERA_device.h"
 #include "thread_control.h"
@@ -32,13 +32,15 @@ static std::list<std::string> 	preposition_list;
 static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
+//#define NLP_DEBUG 1
+
 
 static void init_subject_list()
 {
+	subject_list.push_back( "CAN_message" 	);
 	subject_list.push_back( "CAN"	 		);
 	subject_list.push_back( "CAN data"		);
 	subject_list.push_back( "CAN traffic" 	);
-	subject_list.push_back( "CAN message" 	);
 	
 	subject_list.push_back( "capabilities" 	);
 }
@@ -125,25 +127,66 @@ void Init_CAN_Protocol()
 	init_word_lists();
 }
 
+//extern int start_amon();	// extern from instant_main.cpp
+#if (PLATFORM==Mac)
+static char amon_command[] = "~/bk_code/amonitor/amon";
+#elif (PLATFORM==RPI)
+static char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon";
+#elif (PLATFORM==linux_desktop)
+static char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
+#endif
+
+int start_amon() 
+{
+    int pid;
+    switch (pid=fork()) {
+        case -1:
+			printf("fork() = -1 %s\n", strerror(errno) );
+            return 0;
+        case 0:
+            execvp(amon_command, NULL);
+            printf("returned from ececvp\n");
+        default:
+            return 0;
+    }
+    return 1;
+}
+
+BOOL compare_subject( std::string* subject, const char* mstr )
+{
+	BOOL retval = (strcmp( subject->c_str(), mstr)==0);
+	return retval;	
+}
+
+//extern void dump_buffer(BYTE* buffer, int bufSize);
+
 /*****************************************************************
 Do the work of the Telegram :
 return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
+		
+return:	pointer to the next telegram (ie. after all our header and data bytes)
+		this will be null if end of the received buffer (terminator added in serverthread.c
+		by the number of bytes read).
 *****************************************************************/
-BOOL Parse_CAN_Statement( char* mSentence )
+char* Parse_CAN_Statement( char* mSentence )
 {
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);
 	if (subject==NULL) return FALSE;  // subject matter must pertain.
-	printf("Parse_CAN_Statement\n");
-			
+
+
+	char* retval = mSentence + strlen(mSentence)+ 1/*nullterminator*/;
+
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
 	std::string* object 	= extract_word( mSentence, &object_list  	);
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-	//int prepos_index      	= get_preposition_index( mSentence );
+	//int prepos_index      = get_preposition_index( mSentence );
 
+#ifdef NLP_DEBUG
+	printf("Parse_CAN_Statement - ");
 	diagram_sentence(subject, verb, adjective, object );
+#endif
 
-	BOOL retval = FALSE;
 	if ( (strcmp( subject->c_str(), "CAN")==0) ||
 		 (strcmp( subject->c_str(), "CAN traffic")==0) ||
 		 (strcmp( subject->c_str(), "CAN data")==0) )
@@ -154,8 +197,9 @@ BOOL Parse_CAN_Statement( char* mSentence )
 			// Maybe want to verify the source IP address for security purposes
 			// later on.  Not necessary now!
 			printf( "Listening for incoming CAN data...\n");
-			create_CAN_thread( TRUE,  FALSE );
-			retval = TRUE;
+			//create_CAN_thread( TRUE,  FALSE );
+			CAN_ListeningOn = FALSE;
+			//retval = TRUE;
 		}
 		if ( (strcmp(verb->c_str(), "send") ==0) ||
 			 (strcmp(verb->c_str(), "route") ==0)  )
@@ -163,17 +207,60 @@ BOOL Parse_CAN_Statement( char* mSentence )
 			// Maybe want to verify the source IP address for security purposes
 			// later on.  Not necessary now!
 			printf( "Connecting to send CAN data...\n");
-			create_CAN_tx_thread( TRUE,  FALSE );
-			retval = TRUE;
+			int action;
+			BOOL available = is_CAN_IPC_memory_available();
+			if (!available)
+			{
+				printf("Starting fork for amon(itor)\n");
+				//action = start_amon();
+				//if (action)
+				//	printf("No action for request to start amon!\n");
+			} 
+			int attached = can_connect_shared_memory(FALSE);
+			CAN_SendingOn   = TRUE;
+			set_tcp_transmitting_flag();
+			
+			/* the messages will be pulled off of the Received buffer.
+			   and stored in Recieved buffer at the other instant end.  */
+			
+			/* rather than creating a new thread, we are going to set a variable to
+				send on the main server thread.
+				Can we do that?  bidirectional - okay.  the receive would have to poll
+				for bytes available and if none, then do any sending.  Yes.								
+			*/
+			//retval = TRUE;
+		}
+		if ( (strcmp(verb->c_str(), "stop") ==0) ||
+			 (strcmp(verb->c_str(), "stopping") ==0)  )
+		{
+			CAN_SendingOn   = FALSE;
+			clear_tcp_transmitting_flag();			
+			// Leave connection to IPC and amon running.
+			//retval = TRUE;
 		}
 
 		if (strcmp(verb->c_str(), "how much") ==0)
 		{
+			//retval = TRUE;
 		}
 	}
-	else if (strcmp( subject->c_str(), "CAN message")==0)
+	else if (strcmp( subject->c_str(), "CAN_message")==0)
 	{
-		if (strcmp(verb->c_str(), "send") ==0)
+		static struct sCAN msg;
+		//dump_buffer(mSentence, 25); 
+		byte* ptr = ((byte*)mSentence + strlen("CAN_message")+1);		
+		int bytes_extracted = extract_CAN_msg( &msg, ptr );
+		//printf("extract_CAN_msg() %d bytes\n", bytes_extracted );
+		if (bytes_extracted) {
+			AddToRxList( &msg );	// goes into the received buffer.
+			print_rx_position();
+		}
+
+		retval += bytes_extracted;		
+	}
+	else if (strcmp( subject->c_str(), "CANlkjh")==0)
+	{
+/*		if (strcmp(verb->c_str(), "send") ==0)
 		{
 			//float result = atof(mObject->c_str());			
 		}
@@ -193,7 +280,7 @@ BOOL Parse_CAN_Statement( char* mSentence )
 		if (strcmp(verb->c_str(), "record")==0)
 		{
 			// "value"
-		}
+		} */
 	}
 	return retval;
 }

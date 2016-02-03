@@ -26,6 +26,7 @@ AUTHOR	:  Stephen Tenniswood
 #include <sys/shm.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
 #include "bk_system_defs.h"
 #include "interrupt.h"
 #include "visual_memory.h"
@@ -65,12 +66,16 @@ int read_segment_id(char* mFilename)
 int vis_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct avisual_ipc_memory_map);
-
+	printf ("Visual shm seg size=%d\n", shared_segment_size );
+	
 	/* Allocate a shared memory segment. */
 	visual_segment_id = shmget( IPC_KEY_VIS, shared_segment_size, IPC_CREAT | 0666 );
-
+	int errsv = errno;
+	if (visual_segment_id==-1)
+		printf("vis_allocate_memory() - shmget ERROR: %s \n", strerror(errsv) );
+	else 
+		printf ("Visual shm segment_id=%d\n", visual_segment_id );
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	printf ("Visual shm segment_id=%d\n", visual_segment_id );
 	return visual_segment_id;	
 }
 
@@ -157,6 +162,27 @@ void ipc_write_active_page( short NewActivePage )
 }
 /* See udp_transponder for update_client_list()		*/
 
+
+BOOL is_avisual_IPC_memory_available()
+{
+	struct shmid_ds buf;			// shm data descriptor.
+
+	printf("Checking for avisual IPC memory... ");
+	// First see if the memory is already allocated:
+//	visual_segment_id = CAN_read_segment_id( segment_id_filename );
+	int retval = shmctl(visual_segment_id, IPC_STAT, &buf);
+	if (retval==-1) {
+		printf("Error: %s\n", strerror(errno) );
+		return FALSE;
+	}
+	printf( " Found segment, size=%d and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+	
+	if ((buf.shm_segsz > 0)			// segment size > 0
+	    && (buf.shm_nattch >= 1))	// number of attachments.
+		return TRUE;
+	
+	return FALSE;
+}
 
 
 

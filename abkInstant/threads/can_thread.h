@@ -1,4 +1,12 @@
 
+
+/**************************************************************
+
+		FILE IS DEPRECATED!!  ALL DONE IN SERVERTHREAD.C NOW.
+		SINGLE THREAD MULTI-DATA.  SINGLE SOCKET, MULTI DATA.
+
+***************************************************************/
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -8,8 +16,6 @@ extern "C" {
 #define BYTE unsigned char
 
 extern BOOL	can_terminate_requested;
-
-
 
 void Print_General_Msg_Acknowledgement(UINT mToken);
 void Print_Msg_Acknowledgement(UINT mToken);

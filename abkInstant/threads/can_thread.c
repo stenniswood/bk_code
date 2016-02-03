@@ -5,7 +5,11 @@
  Listens on Port:  
 
 Tenniswood - 2014
-**********************************************************/
+
+	**********************************************************
+		FILE IS DEPRECATED!!  ALL DONE IN SERVERTHREAD.C NOW.
+		SINGLE THREAD MULTI-DATA.  SINGLE SOCKET, MULTI DATA.
+***************************************************************/
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
