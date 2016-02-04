@@ -137,7 +137,8 @@ void init_can_memory()
 	ipc_memory_can->TxHead=0;
 	ipc_memory_can->TxTail=0;
 	ipc_memory_can->TxOverFlow=FALSE;		// indicator if trying to send too quickly.	
-	
+}
+
 /* return:  0=> error;  greater than 0 segment_ic */
 int can_allocate_memory( )
 {

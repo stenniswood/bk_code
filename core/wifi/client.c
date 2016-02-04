@@ -106,6 +106,7 @@ int Cmd_client_CAN_listen( )
 	SendTelegram( coBuff, length);
 	printf("Cmd_client_CAN_listen:  %d bytes written\n", length );
 	return length;
+}
 
 int Cmd_client_send_CAN( struct sCAN* Msg )
 {

@@ -20,6 +20,7 @@ struct stClientData {
 	int		network;		// ie. CAN, TCP/IP, private
 	char	address[80];	// ip address
 	char	machine[40];	// connected
+	char	status[80];	// ip address	
 };
 
 /******************** CLIENT MEMORY MAP *****************/
