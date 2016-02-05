@@ -51,35 +51,36 @@ int  can_allocate_memory	();
 void can_deallocate_memory	();
 
 // CLIENT uses these to connect:
-int  can_attach_memory		();
-void can_reattach_memory	();
-void can_detach_memory		();
-
-int  can_get_segment_size	();
+int    can_connect_shared_memory(char mAllocate);
+void init_can_memory		();
 void can_fill_memory		();
+int    can_attach_memory	();
+void can_reattach_memory	();
+void can_detach_memory	();
+int    can_get_segment_size	();
 
+void can_ipc_write_can_connection_status( char* mStatus   );
+void can_ipc_write_can_message( struct sCAN* mMsg );
 
-int  can_connect_shared_memory(char mAllocate);
-void ipc_write_can_connection_status( char* mStatus   );
-void ipc_write_can_message( struct sCAN* mMsg );
-
-void sprint_message(char* mBuffer, struct sCAN* msg);
-
-void ipc_add_can_rx_message( struct sCAN* mMsg );
 /***** Rx Buffer Functions (replaces former "can_rxbuff.cpp"):	******/
+void 		 sprint_message(char* mBuffer, struct sCAN* msg);
 void 		 copy_can_msg ( struct sCAN* mDest, struct sCAN* mSrc );
+void 		 ipc_add_can_rx_message( struct sCAN* mMsg );
 void 		 AddToRxList  ( struct sCAN* mMsg );
+
 BOOL   		 shm_isRxMessageAvailable( int* mTail, int* mTailLaps  );
-struct sCAN* shm_GetNextRxMsg		 ( int* mTail, int* mTailLaps );	// pointer to 1 allocation. overwritten on next call!
+struct sCAN* 	 shm_GetNextRxMsg		 ( int* mTail, int* mTailLaps );	// pointer to 1 allocation. overwritten on next call!
 void 		 print_rx_position();
 
-void		set_tcp_receiving_flag  ();
-void		clear_tcp_receiving_flag();
-BOOL		is_tcp_receiving_flag   ();
 
-void		set_tcp_transmitting_flag  ();
-void		clear_tcp_transmitting_flag();
-BOOL		is_tcp_transmitting_flag   ();
+// MACROS FOR SETTING IPC FLAGS:
+void		set_tcp_receiving_flag_ipc_can  ();
+void		clear_tcp_receiving_flag_ipc_can();
+BOOL		is_tcp_receiving_flag_ipc_can();
+
+void		set_tcp_transmitting_flag_ipc_can   ();
+void		clear_tcp_transmitting_flag_ipc_can();
+BOOL		is_tcp_transmitting_flag_ipc_can();
 
 
 void CAN_save_segment_id(char* mFilename);

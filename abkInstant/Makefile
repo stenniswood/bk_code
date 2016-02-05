@@ -56,6 +56,8 @@ THREAD_OBJS 	= video_thread.o can_thread.o file_thread.o \
 HARDWARE_OBJS = GPIO_device.o AUDIO_device.o IMAGE_device.o CAMERA_device.o 
 ILCLIENT_OBJS = ilclient.o ilcore.o
 WIFI_OBJS     = udp_transponder.o client.o
+UTIL_OBJS 	= client_to_socket.o
+
 
 # APP CODE
 NLP_PROTOCOL_OBJS = GENERAL_protocol.o	CAN_protocol.o	GPIO_protocol.o	\
@@ -91,6 +93,7 @@ instant: $(APP_CPP_OBJS) 										\
 		$(addprefix ./nlp_adrenaline/, 	$(NLP_ADRENALINE_OBJS)) \
 		$(addprefix ./nlp_protocol/, 	$(NLP_PROTOCOL_OBJS)) 	\
 		$(addprefix ./threads/, 		$(THREAD_OBJS)) 		\
+		$(addprefix ./util/, 			$(UTIL_OBJS)) 		\
 		$(addprefix $(HARDWARE_PATH), 	$(HARDWARE_OBJS)) 	\
 		$(addprefix ../core/ipc/, 	$(IPC_OBJS)) 			\
 		$(addprefix ../core/can/, 	$(CAN_OBJS)) 			\

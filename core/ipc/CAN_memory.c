@@ -217,7 +217,7 @@ FORMAT:
 	INT 		ID
 	char[255] 	Buffer
 */
-void ipc_write_can_connection_status( char* mStatus )
+void can_ipc_write_can_connection_status( char* mStatus )
 {
 	int length = strlen(mStatus);	
 	int MaxAllowedLength = sizeof(ipc_memory_can->ConnectionStatus);
@@ -231,7 +231,7 @@ void ipc_write_can_connection_status( char* mStatus )
 	if (Debug) printf( "|%s|\n", ipc_memory_can->ConnectionStatus );
 }
 
-void ipc_write_can_message( struct sCAN* mMsg )
+void can_ipc_write_can_message( struct sCAN* mMsg )
 {		
 	copy_can_msg( &(ipc_memory_can->Transmit[ipc_memory_can->TxTail]), mMsg );
 

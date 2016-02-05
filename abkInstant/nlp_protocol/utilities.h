@@ -1,5 +1,11 @@
 /* This header is a conglomeration of the *_util.c files functions */
 
+#include "AUDIO_file_util.h"
+#include "VIDEO_file_util.h"
+#include "IMAGE_file_util.h"
+
+
+
 // from audio_util.c : 
 char* GetNewAudioFileName	( BOOL mOutgoing	);
 BOOL  OpenAudioFile			( char* mFilename	);

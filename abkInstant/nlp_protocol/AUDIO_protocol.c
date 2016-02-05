@@ -301,7 +301,8 @@ BOOL Parse_Audio_Statement( char* mSentence )
 	    //printf("Processing audio telegram. verb=%s\n", verb->c_str());
 	    // implied subject (party being spoken to) is the other end (ie. sequencer from lcd rpi):
 		if ((strcmp(verb->c_str(), "upload"   ) ==0)  ||
-		    (strcmp(verb->c_str(), "eavesdrop") ==0)  ||  (strcmp(verb->c_str(), "receive")==0) ||
+		    (strcmp(verb->c_str(), "eavesdrop") ==0)  ||
+		    (strcmp(verb->c_str(), "receive")==0) 		||
 		    (strcmp(verb->c_str(), "incoming" ) ==0) )
 		{
 			audio_listen();

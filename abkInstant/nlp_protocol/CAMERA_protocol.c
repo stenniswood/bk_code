@@ -36,6 +36,15 @@ What was the topic of it?  How long was it?  A smart robot could even
 use the info to answer questions.  On Sept 20th, you said you wanted to
 ignore all upgrade notices.
 ***********************************************************************/
+/* VIDEO refers to a video file.  Where as CAMERA refers to live cam. */
+
+BOOL  CAMERA_tcpip_ListeningOn 	= FALSE;		
+BOOL  CAMERA_tcpip_SendingOn  	= FALSE;
+BOOL  CAMERA_tcpip_SendingMuted  	= FALSE;		// we send zerod out CAMERA
+BOOL  CAMERA_save_requested 		= FALSE;			// incoming or outgoing? 
+
+FILE* sending_camera_playback_file_fd = NULL;		// prerecorded cam (robot's history)
+
 
 static std::list<std::string>  	subject_list;
 static std::list<std::string> 	verb_list;
@@ -46,17 +55,16 @@ static std::list<std::string>  	object_list;
 
 static void init_subject_list()
 {
-	subject_list.push_back( "audio"	 		);
-	subject_list.push_back( "connection"	);	
-	subject_list.push_back( "microphone" 	);
-	subject_list.push_back( "recording" 	);
-	subject_list.push_back( "music" 		);
-	subject_list.push_back( "capabilities" 	);
+	subject_list.push_back( "camera" 		);
+	subject_list.push_back( "web cam"	);	
+	subject_list.push_back( "eyes" 	);
+	subject_list.push_back( "camera capabilities" 	);
 }
 
 static void init_verb_list()
 {
-	verb_list.push_back( "open" );	
+	verb_list.push_back( "open" );
+	verb_list.push_back( "receive" );		
 	verb_list.push_back( "route" );
 	verb_list.push_back( "incoming" );
 	verb_list.push_back( "send" );
@@ -67,11 +75,10 @@ static void init_verb_list()
 	verb_list.push_back( "terminate" );
 	verb_list.push_back( "kill" 	 );			
 	
-	verb_list.push_back( "hear" 	 );			
-	verb_list.push_back( "listen" 	 );
-	verb_list.push_back( "eavesdrop" );
+	verb_list.push_back( "watch" 	 );			
+	verb_list.push_back( "show" 	 );
+	verb_list.push_back( "spy" );
 	
-	verb_list.push_back( "synthesize" );
 	verb_list.push_back( "are" );	
 	verb_list.push_back( "have" );
 	verb_list.push_back( "get" );	
@@ -99,9 +106,11 @@ static void init_adjective_list()
 	adjective_list.push_back( "your" 	);
 	adjective_list.push_back( "low" 	);
 	adjective_list.push_back( "lowest"	);
-	adjective_list.push_back( "best" 	);
+	adjective_list.push_back( "VGA"	);
+	adjective_list.push_back( "QVGA"	);	
+	adjective_list.push_back( "hdmi" 	);
 	adjective_list.push_back( "quality" );
-	adjective_list.push_back( "stereo"  );
+	adjective_list.push_back( "hi-res"  );
 }
 
 static void init_object_list()
@@ -110,11 +119,9 @@ static void init_object_list()
 	// prepositions to look for :
 	//		to by as 
 	object_list.push_back( "tv" 	  	);		
-	object_list.push_back( "hdmi"	  	);
-	object_list.push_back( "speaker"	);
-	object_list.push_back( "headphones" );
+	object_list.push_back( "hdmi"	);
 	object_list.push_back( "you" 		);	
-	object_list.push_back( "me"			);
+	object_list.push_back( "me"		);
 }
 
 static void init_word_lists()
@@ -127,8 +134,88 @@ static void init_word_lists()
 
 void Init_Camera_Protocol()
 {
-	init_word_lists();
+    CAMERA_tcpip_ListeningOn 		= FALSE;		
+    CAMERA_tcpip_SendingOn  		= FALSE;
+    CAMERA_tcpip_SendingMuted  		= FALSE;		// we send zerod out CAMERA
+    CAMERA_tcpip_ListeningSilenced  	= FALSE;		// we do not play any incoming CAMERA.
+    CAMERA_save_requested 			= FALSE;		// incoming or outgoing? 
+    
+    init_word_lists();
 }
+
+
+/**** ACTION INITIATORS:    (4 possible actions) *****/
+void send_camera_file ( char* mFilename )
+{	
+    sending_camera_file_fd  = fopen( mFilename, "r" );
+    if (sending_camera_file_fd == NULL)
+    {
+	nlp_reply_formulated=TRUE;
+	sprintf ( NLP_Response, "Sorry, the camera file %s does not exist!", mFilename );
+	printf( NLP_Response );
+	return;
+    }
+    
+	printf( "Sending camera file over tcpip...\n");	
+	CAMERA_tcpip_SendingOn = TRUE;
+
+	nlp_reply_formulated=TRUE;
+	sprintf ( NLP_Response, "Okay, I'm sending the camera file %s.", mFilename );
+	printf( NLP_Response );
+}
+
+void send_camera()
+{
+	// Maybe want to verify the source IP address for security purposes
+	// later on.  Not necessary now!
+	printf( "Sending my camera over tcpip...\n");
+
+	// Fill in later...!  WaveHeader struct
+	char* header=NULL;
+	CAMERA_tcpip_SendingOn = TRUE;
+
+	nlp_reply_formulated=TRUE;
+	strcpy(NLP_Response, "Okay, I am attempting to send you my camera.");
+	printf("%s\n", NLP_Response);
+}
+
+void camera_watch(BOOL Save=FALSE)
+{	
+	// Maybe want to verify the source IP address for security purposes
+	// later on.  Not necessary now!
+	printf( "Watching for incoming tcpip camera...\n");
+	CAMERA_tcpip_ListeningOn = TRUE;
+
+	nlp_reply_formulated=TRUE;
+	strcpy(NLP_Response, "Okay, I'm watching for your camera");
+}
+
+void camera_two_way()
+{
+	printf( "Opening 2 way camera...\n");
+
+	// Fill in with WaveHeader struct !
+	char* header=NULL;
+	CAMERA_tcpip_SendingOn  = TRUE;
+	CAMERA_tcpip_ListeningOn = TRUE;
+	
+	nlp_reply_formulated=TRUE;
+	strcpy(NLP_Response, "Okay, we'll both see each other now.");
+	printf("%s\n", NLP_Response);
+}
+
+void camera_cancel()
+{
+	printf( "Cancelling camera connection.\n");
+	CAMERA_tcpip_SendingOn = FALSE;
+	CAMERA_tcpip_ListeningOn = FALSE;
+	
+	nlp_reply_formulated      = TRUE;
+	strcpy(NLP_Response, "Okay, I am terminating our camera connection.");
+	printf("%s\n", NLP_Response);
+}
+
+
 /*****************************************************************
 Do the work of the Telegram :
 return  TRUE = Telegram was Handled by this routine
@@ -140,9 +227,9 @@ BOOL Parse_Camera_Statement( char* mSentence )
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);
 	if (subject==NULL) return FALSE;  // subject matter must pertain.
 	printf("Parse_Camera_Statement\n");
-		
+
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
-	std::string* object 	= extract_word( mSentence, &object_list  	);
+	std::string* object 		= extract_word( mSentence, &object_list  	);
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
 	int prepos_index      	= get_preposition_index( mSentence );
 
@@ -196,14 +283,54 @@ BOOL Parse_Camera_Statement( char* mSentence )
 			get_camera_pan( result );
 		}
 	}
-	else if (strcmp( subject->c_str(), "camera")==0)
+	else if ((strcmp( subject->c_str(), "camera")==0)  ||
+		    (strcmp( subject->c_str(), "web cam")==0)  ||
+		    (strcmp( subject->c_str(), "eyes")==0) )
 	{
 		/* It might be nice to redirect these statements to a subject of:
 			camera tilt/pan.  This would get our subject more and more exacting.
 			The preprocessor would know that Lowering a camera has to do with the tilt,
-				and not any video properties.
-							
+				and not any video properties.							
 		*/
+		if (strcmp(verb->c_str(), "receive") ==0)
+		{
+		    watch_video();
+		    retval = TRUE;	
+		    // Here we are the receiving end point.  So no message to relay.
+		}
+		if (strcmp(verb->c_str(), "send") ==0)
+		{
+		    send_video();
+		    retval = TRUE;
+		    // Here we are the receiving end point.  So no message to relay.		    
+		}
+		if (strcmp( adjective->c_str(), "two way")==0 )
+		{
+		    camera_two_way();
+		    retval = TRUE;
+		};
+		
+		if ((strcmp(verb->c_str(), "mute") ==0) )
+		{
+		    CAMERA_tcpip_SendingMuted = TRUE;	// Blocked, other side wont be able to see
+		    retval = TRUE;		    
+		}
+		if ((strcmp(verb->c_str(), "unmute") ==0) )
+		{
+		    CAMERA_tcpip_SendingMuted = FALSE;	// Blocked, other side wont be able to see
+		    retval = TRUE;
+		}
+
+		if ((strcmp(verb->c_str(), "close") ==0) ||
+		    (strcmp(verb->c_str(), "stop" ) ==0)  ||
+		    (strcmp(verb->c_str(), "end"  ) ==0)  ||		    
+		    (strcmp(verb->c_str(), "terminate") ==0)  ||		    		    
+		    (strcmp(verb->c_str(), "kill" ) ==0))
+		{
+		    camera_cancel();
+		    retval = TRUE;
+		};
+		
 		if (strcmp(verb->c_str(), "lower") ==0)
 		{
 			float result = atof(object->c_str());
@@ -257,6 +384,7 @@ BOOL Parse_Camera_Statement( char* mSentence )
 			}
 		}		
 	}
+	printf( "Parse_Camera_Statement done\n" );
 	return retval;
 }
 

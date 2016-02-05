@@ -28,6 +28,7 @@
 #include "CAN_memory.h"
 #include "udp_transponder.hpp"
 #include "thread_control.h"
+#include "client_to_socket.h"
 
 
 // Right now this is user settable.  Need to detect:
@@ -35,12 +36,15 @@ BOOL	PiCAN_Present=FALSE;
 
 struct sCAN MMsg;
 byte 		count = 0;
-int  		fd;
+int  			fd;
 long  		SerialNumber_ = 0x56789CD;
 #define 	Debug 0
 pthread_t 	udp_tx_thread_id;
 pthread_t 	udp_rx_thread_id;
 pthread_t 	server_thread_id;
+
+// SET THIS IN serverThread Parse whatever.
+int create_client_thread_requested = 0;		// from a serverthread which received a request to connect to another RPI.
 
 
 void create_threads()
@@ -75,8 +79,6 @@ void create_threads()
 }
 
 
-// SET THIS IN serverThread Parse whatever.
-int create_client_thread_requested = 0;		// from a serverthread which received a request to connect to another RPI.
 
 void create_another_client_thread()		// really serverthread which initiates connection (ie. client thread)
 {
@@ -91,6 +93,7 @@ void create_another_client_thread()		// really serverthread which initiates conn
 	}
 }
 
+// WHICH IPC MEMORY TO SETUP ON STARTUP?
 #define USE_AVISUAL 0
 #define USE_CAN		1
 #define USE_SWAY	0
@@ -185,7 +188,7 @@ void print_args(int argc, char *argv[])
 #if (PLATFORM==Mac)
 char amon_command[] = "~/bk_code/amonitor/amon";
 #elif (PLATFORM==RPI)
-char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon";
+char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon > /dev/null";
 #elif (PLATFORM==linux_desktop)
 char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
 #endif
@@ -216,155 +219,16 @@ void trim_trail_space( char* str )
 		ptr--;  len--;
 	}
 }
-/* Note the client can do any of these:
-	establish a connection
-	audio  						(send and/or receive)
-	file transfer				
-	image transfer				
-	HMI							
-	CAN							
-*/
-void handle_client_request()
-{
-	if (ipc_memory_client==NULL)	return;
-	trim_trail_space( ipc_memory_client->Sentence );
-
- 	printf ("Sentence:%s|\n", ipc_memory_client->Sentence );
-	int result = strcmp(ipc_memory_client->Sentence, "whoami");
-	if (result==0)
-		printf("whoami\n");
-
-	result = strcmp(ipc_memory_client->Sentence, "list");
-	if (result==0)
-		printf("list\n");
-
-	result = strcmp(ipc_memory_client->Sentence, "disconnect");
-	if (result==0)
-		result = disconnect_from_robot( );
-
-	// AFTER THIS BEGIN 2+ WORD COMMANDS:
-	char* space = strchr(ipc_memory_client->Sentence, ' ');
-	if (space==NULL)  {  return;	};
-	*space = 0;
-	space++;
-	
-	result = strcmp(ipc_memory_client->Sentence, "connect");
-	if (result==0) {
-		printf("connecting..\n");
-		REQUEST_client_connect_to_robot = TRUE;		// signal to serverthread.c
-		REQUESTED_client_ip = space;				// ip address
-	}
-
-	result = strcmp(ipc_memory_client->Sentence, "receive");
-	if (result==0)
-	{
-		if (!connection_established)
-		{
-			// The request comes thru IPC Client memory.  So the response will be
-			// placed there as well.
-			printf("No Connection!!\n\n");
-			return;
-		} 
-		else 
-		{
-			// No amon at this end.
-			int attached = can_connect_shared_memory(TRUE);	// allocate if not already.
-			CAN_ListeningOn   = TRUE;
-			set_tcp_receiving_flag();
-			
-			printf("Requesting data...");
-			result = strcmp(space, "can");                  
-			if (result==0)
-			{  
-					printf(" (ie. 'send can')\n");
-					Cmd_client_CAN_listen();  // request for other end to send CAN.  in core/wifi$
-			}
-		}
-	}
-	
-	result = strcmp(ipc_memory_client->Sentence, "send");	
-	if (result==0)
-	{
-		result = strcmp(space, "can");			
-		if (result==0)
-		{
-			/* "send can" spoken to this local client - means:		*/
-			start_amon();  
-			printf("sending..CAN\n");
-			// this is the "token" to indicate can messages are coming.
-			Cmd_client_CAN_Start();		// in core/wifi/client.c
-		}
-		result = strcmp(space, "audio");
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "video");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "file");			
-		if (result==0)
-		{
-			send_file_transmit_request();
-		}
-		result = strcmp(space, "mouse");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "keyboard");
-		if (result==0)
-		{
-		}
-		
-	}
-
-	result = strcmp(ipc_memory_client->Sentence, "stop");
-	if (result==0)
-	{
-		printf("stoping..\n");
-		result = strcmp(space, "can");			
-		if (result==0)
-		{
-			char coBuff[127];
-			strcpy ((char*)coBuff, "stop CAN");
-			int length = strlen( (char*)coBuff );
-			SendTelegram( coBuff, length);
-			CAN_SendingOn = FALSE;
-			clear_tcp_transmitting_flag();
-		}
-		result = strcmp(space, "audio");
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "video");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "file");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "mouse");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "keyboard");
-		if (result==0)
-		{
-		}	
-	}
-}
 
 /* Client request shared memory.  */
-void scan_inputs()
+void scan_client()
 {
 	// CHECK CLIENT MEMORY FOR REQUEST:
 	if (cli_is_new_update())
 	{
-		printf("calling handle_client_request() \n");
 		handle_client_request();
 		cli_ack_update_status();
-		printf(" handled_client_request acknowledged to client memory. \n");		
+		printf(" acknowledged to client memory. \n");
 	}	
 }
 		
@@ -377,8 +241,6 @@ void update_outputs()
 */	
 }
 
-char filespath[64];
-char filename [64];
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
 	are only set when the Enable is.  maybe.		*/
@@ -401,18 +263,15 @@ int main( int argc, char *argv[] )
 	printf("===============================================\n");
 	if (argc>1)
 	{
-		// FORCE CLIENT CONNECTION :
-		/*int error = connect_to_robot(argv[1]);
-		if (error==0)	// Success,
-		{
+		// TEST CLIENT CONNECTION :
+		/*
 			WifiConnected = TRUE;
 			TransportCAN  = TRUE;
 			send_file_transmit_request( );
 			strcpy(filespath, "/home/pi/abkInstant/media/");
 			strcpy(filename, "test" );
 			create_file_tx_thread( argv[1], filespath, filename, BASE_FILE_PORT );
-			//Cmd_client_CAN_Start( );
-		}*/
+		*/
 	}
 	printf("================= Checking command line arguments ========================\n");	
 
@@ -422,7 +281,7 @@ int main( int argc, char *argv[] )
 	while (1) 
 	{
 		//voice_interface();		// empty
-		scan_inputs();
+		scan_client();
 		usleep(50000);
 	}
 }
