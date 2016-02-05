@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "bk_system_defs.h"
 #include "protocol.h"
 #include "devices.h"
+
 
 /***********************************************************************
 All Incoming Audio will also be saved to the hard-drive on those 
@@ -88,6 +90,57 @@ BOOL OpenAudioFile( char* mFilename )
 	//printf("OpenAudioFile: end. \n");
 	TotalAudioDataLengthBytes = 0;
 	return TRUE;
+}
+
+/************************************************
+Create and Open Audio File for Reading
+*************************************************/
+BOOL OpenAudioFileRead( char* mFilename )
+{
+	// DATA DEFS:
+	char riff[] = "RIFF";	
+	char qs[]   = "????";
+	char wave[] = "WAVE";
+	char fmt[]  = "fmt ";
+	char data[] = "data";
+	int  file_length     = 0x21212121;
+	int  fmt_chunk_size  = 16;
+
+	//	FILE* wave_file;
+	//strcpy( AudioFilename, mFilename );
+	//wave_file = fopen(mFilename, "r");
+	if (sending_audio_file_fd==NULL) {
+		printf(" %s \n", mFilename );
+		printf("Error opening file, make sure you are running as root 'sudo ./server' \n");
+		return FALSE;
+	}
+	printf("Opened file: %s \n", mFilename );
+
+	// WRITES:
+	fread( (void*)riff, 		1, 4, sending_audio_file_fd );
+	fread( (void*)qs,		1, 4, sending_audio_file_fd );
+	fread( (void*)wave, 		1, 4, sending_audio_file_fd );
+	
+	// FORMAT SUB CHUNK :
+	fread( (void*)fmt,  			1, 4, sending_audio_file_fd );
+	fread( (void*)&fmt_chunk_size, 1, 4, sending_audio_file_fd );
+	fread( (void*)&audio_hdr,  	2, 8, sending_audio_file_fd );
+				
+	// DATA SUB CHUNK (written in AppendAudioData() only)
+	fread( (void*)data,  		1, 4, sending_audio_file_fd );		// ID
+	fread( (void*)qs,  		1, 4, sending_audio_file_fd );		// Size unknown at this time.
+
+	// Need to know the Total File size!  When streaming, we don't know at the start.
+	// So keep an accumulated byte count and seek to the top of the file and update this
+	// later on.	
+	//printf("OpenAudioFile: end. \n");
+	TotalAudioDataLengthBytes = 0;
+	return TRUE;
+}
+void  read_chunk( short* mBuffer, int mSize )
+{
+	fread( (void*)mBuffer,  1, mSize, sending_audio_file_fd );
+	
 }
 
 /************************************************

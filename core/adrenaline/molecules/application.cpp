@@ -85,18 +85,23 @@ void 	Application::Initialize(	)
 		m_welcome_status   = "Generic Application";
 		m_application_name = "Generic Application";
 	}
+	m_sidebar_controls = new std::vector<Control*>();
+	printf("m_sidebar_control size=%d\n", m_sidebar_controls->size() );
+	if (Debug) printf("Application::Initialize() DONE!\n");	
 }
 
 void	Application::setup_sidebar	(	)  // derived class adds these here
 {
 	// SideBar 
 	Control* tmp = new IconView();
-	m_sidebar_controls.push_back( tmp );	
-	MainDisplay.m_side.load_controls( &m_sidebar_controls );
+	m_sidebar_controls->push_back( tmp );
+	MainDisplay.m_side.load_controls( m_sidebar_controls );
+	if (Debug) printf("Application::setup_sidebar() done\n");	
 }
 
-void	Application::setup_main_menu	(	)  // derived class adds these here
+void	Application::setup_main_menu(	)  // derived class adds these here
 {
+	if (Debug) printf("Application::setup_main_menu()\n");
 	m_main_menu.m_application = this;
 	m_main_menu.clear_all();
 	m_main_menu.add_sub_menu( m_application_name.c_str(), &m_app_menu  );
@@ -104,6 +109,7 @@ void	Application::setup_main_menu	(	)  // derived class adds these here
 	m_file_menu.create_std_file_menu  ( );
 	m_file_menu.add_callback_all_items( app_file_menu_actions );
 	m_main_menu.add_sub_menu( "File", &m_file_menu  );
+	if (Debug) printf("Application::setup_main_menu() done\n");	
 }
 
 // Name of App, About, Preferences, Quit
@@ -127,11 +133,12 @@ int		Application::calc_metrics()
 // chance to load resources, call functions which use fonts
 int	Application::onCreate	(  ) 
 {
-	// What about creating all the App's windows?  These are done on set_main_window()
-	
+	// What about creating all the App's various windows?  
+	// These are done on set_main_window()	
+	printf("Application::onCreate()\n");	
 	setup_app_menu();
 	setup_main_menu();
-	onPlace();
+	setup_sidebar  ();
 	return 1;
 }
 
@@ -139,40 +146,21 @@ void Application::register_with_display_manager()
 {
 	printf("Application::register_with_display_manager()\n");
 	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( m_main_window 	 	 );
-	MainDisplay.set_menu  ( &m_main_menu  	 	 );
-	
+	MainDisplay.set_main_window( m_main_window );
+	MainDisplay.set_menu  	   ( &m_main_menu  );
+		
 	// Establish the sidebar controls:
 	// Create Sidebar items:
-	MainDisplay.m_side.load_controls( &m_sidebar_controls );
+	MainDisplay.m_side.load_controls( m_sidebar_controls );
 	MainDisplay.m_status.set_text( m_welcome_status.c_str() );	
-	onPlace();
 	printf("Application::register_with_display_manager() - done \n");	
 }
 
-int		Application::onPlace( ) 
-{
-	if (Debug) printf("\tApplication::onPlace( ) \n");
-	
-	// Put the MainWindow in the requested client area.
-	Rectangle* client_rect = MainDisplay.get_useable_rect();
-	if (Debug) {
-		//printf("\n\nMainDisplay.get_useable_rect() %x done\n", m_main_window, client_rect );	
-		//client_rect->print_positions();		
-	}
-	if ( (m_main_window) && (client_rect) )
-	{
-		m_main_window->set_position( client_rect );
-		if (Debug) {
-			//printf("MainWindow. set position done\n");
-			//m_main_window->print_positions();
-		}
-
-		//m_main_window->set_width_height( client_rect->get_width(), client_rect->get_height() );
-		//m_main_window->move_to			( client_rect->get_left(), client_rect->get_bottom() );		
-	}	
-	return 1;
-}
+/* Note: Application does not have a "place".  It represents the executable,
+ 		and not any windowing positions.  So the old function Application::onPlace
+ 		which was here is deprecated and removed.  The main window may have
+ 		a onPlace for setting it's child controls, but even the get_usable_rect() from
+ 		the display manager will be done on set_main_widow().    */
 
 /* Return:  1=> all done.
 			0=> need more time. */
@@ -206,8 +194,9 @@ void	Application::file_save_as	()
 void	Application::About			(	)
 {
 	TextView* about = new TextView();
+	about->set_text("Sample Generic Application");	
 	MainDisplay.add_object( about );
-	return 1;	
+	return ;	
 }
 void	Application::Preferences(	)
 {

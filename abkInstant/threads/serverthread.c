@@ -23,6 +23,7 @@
 #include "CAN_base.h"
 #include "CAN_memory.h"
 #include "CAN_util.h"
+#include "AUDIO_interface.h"
 
 
 #include "protocol.h"
@@ -133,7 +134,7 @@ void update_ipc_status( struct sockaddr_in* sa )
 void update_ipc_status_no_connection( )
 {
 	static char msg[80];
-	strcpy(msg, "Error: Not Connected!");
+	strcpy(msg, " Not Connected!");
 	cli_ipc_write_connection_status( msg );
 }		
 
@@ -365,10 +366,6 @@ void* server_thread(void*)
      }	// WAIT FOR ANOTHER CONNECT     
 }
 
-void audio_interface()
-{
-
-}
 void video_interface()
 {
 

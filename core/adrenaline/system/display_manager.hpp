@@ -78,7 +78,7 @@ public:
 	bool	relay_key		( char mKey );
 	void	grab_focus		( Control* mKey );
 		
-	std::vector<Application*>	m_running_apps;
+	std::vector<Application*>*	m_running_apps;
 	unsigned int				m_current_running_app;
 	
 	// Linked List of objects.

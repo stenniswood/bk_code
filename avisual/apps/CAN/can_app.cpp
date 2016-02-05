@@ -153,10 +153,6 @@ void 	CANApp::Initialize		(	)
 	printf("CANApp::Initialize() done.\n");
 }	// create all the objects here.
 
-int		CANApp::onPlace		(	) 
-{ 
-	return Application::onPlace( );
-}
 
 void	CANApp::setup_app_menu( )
 {

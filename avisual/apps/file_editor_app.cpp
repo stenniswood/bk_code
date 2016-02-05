@@ -55,11 +55,8 @@ void 	FileEditorApp::Initialize		(	)
 	m_main_window = new FileEditor( );
 }	
 
-int		FileEditorApp::onPlace			(	) 
-{ 
-	Application::onPlace();
-//	((FileEditorApp*)m_main_window)->onPlace();	
-}
+
+
 
 void	FileEditorApp::setup_main_menu  	( ) 
 { 

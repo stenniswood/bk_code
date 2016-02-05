@@ -27,7 +27,6 @@ public:
 	~RobotApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
-	int				onPlace			(	);
 
 	void			StartSequence(	);
 	

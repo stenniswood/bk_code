@@ -17,15 +17,14 @@ public:
 	~BlackJackApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
-	int				onPlace			(	);
 	virtual int		onCreate	  	(	);	// First Time application is run - load resources etc.
 
 	virtual void	setup_main_menu ( );
 	virtual void	setup_app_menu  ( );
 	virtual void 	register_with_display_manager();	
 	
-	int				About			(	);
-	int				Preferences		(	);
+	void			About			(	);
+	void			Preferences		(	);
 	int				Quit			(	);	
 
 	virtual void	file_new		( );

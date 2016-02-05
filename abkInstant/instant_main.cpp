@@ -135,12 +135,8 @@ void establish_ipc()
 	if (USE_AUDIO)
 	{
 		printf("************************* AUDIO SHARED MEMORY *****************************\n");	
-		aud_allocate_memory();
-		aud_attach_memory  (); 
-		aud_fill_memory	   ();
+	    result =  audio_connect_shared_memory(FALSE);
 	}  
-	//else aud_deallocate_memory();
-
 
 	if (USE_CAN)
 	{

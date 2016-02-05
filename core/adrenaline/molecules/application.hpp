@@ -30,7 +30,6 @@ public:
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 	int				calc_metrics	(	);
-	int				onPlace			(	);
 	virtual int		background_time_slice(	);
 	
 	virtual void	setup_sidebar	(	);  // derived class adds these here
@@ -51,8 +50,8 @@ public:
 	virtual void	file_save		( );
 	virtual void	file_save_as	( );
 
-	void				About			(	);
-	void				Preferences		(	);
+	void			About			(	);
+	void			Preferences		(	);
 	int				Quit			(	);	
 			
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
@@ -63,10 +62,10 @@ public:
 	VerticalMenu			m_app_menu;		// About, Preferences, Quit
 	VerticalMenu			m_file_menu;	// standard file menu too.	
 
-	std::vector<Control*>		m_sidebar_controls;	
+	std::vector<Control*>*		m_sidebar_controls;	
 	std::string					m_welcome_status;
 	std::string					m_application_name;
-	Control*				m_main_window;
+	Control*					m_main_window;
 	
 };
 

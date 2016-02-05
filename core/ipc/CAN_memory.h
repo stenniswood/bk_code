@@ -44,8 +44,6 @@ struct can_ipc_memory_map
 /******************** CAN IPC MEMORY MAP *****************/
 /*********************************************************/
 //void copy_can_msg( struct sCAN* mDest, struct sCAN* mSrc );
-//void dump_raw_ipc			();
-//void dump_ipc				();	// formated as CAN messages & string.
 
 // The SERVER calls these to setup the memory.  (ie. abkInstant or amon )
 BOOL is_CAN_IPC_memory_available();

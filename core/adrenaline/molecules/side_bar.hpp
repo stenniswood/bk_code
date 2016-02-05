@@ -2,11 +2,9 @@
 #define _SIDE_BAR_CONTROL_
 
 
-
 #include <list>
 #include <string>
 #include "control.hpp"
-//#include "window.hpp"
 
 //using namespace std;
 
@@ -55,9 +53,8 @@ public:
 	void			auto_hide		 ( bool mAutoHide = true);
 	void			set_alignment	 ( byte mAlignment = SIDEBAR_ALIGN_CENTER );
 
-	virtual int		onCreate	  		(  ) { return 1; };
-	virtual int		onClick(int x, int y, bool mouse_is_down=true);
-
+	virtual int		onCreate	  	  (  ) { return 1; };
+	virtual int		onClick			  (int x, int y, bool mouse_is_down=true);
 	
 protected:
 	int				m_state;
@@ -65,9 +62,7 @@ protected:
 	float			m_bottom_margin;	
 	
 	byte			Alignment;
-
 	bool			AutoHideEnabled;
-	
 };
 
  

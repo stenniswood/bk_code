@@ -17,7 +17,6 @@ public:
 	~VideoApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
-	int				onPlace			(	);
 
 	virtual void	setup_sidebar	(	);  // derived class adds these here
 	virtual void	setup_main_menu ( );

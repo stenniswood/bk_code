@@ -25,7 +25,6 @@
 #include "video.h"
 
 
-
 static VerticalMenu     Video_edit_menu(-1,-1);
 static VerticalMenu     Video_view_menu(-1,-1);
 static VerticalMenu     Video_settings_menu(-1,-1);
@@ -107,16 +106,9 @@ void 	VideoApp::Initialize		(	)
 	m_welcome_status   = "Video & Camera";
 	m_application_name = "Video App";
 
-	setup_app_menu ();
-	setup_main_menu();
-	setup_sidebar  ();
-	onPlace		   ();
+
 }	// create all the objects here.
 
-int		VideoApp::onPlace(	)
-{ 
-	Application::onPlace( );
-}
 
 void	VideoApp::setup_app_menu( )
 {

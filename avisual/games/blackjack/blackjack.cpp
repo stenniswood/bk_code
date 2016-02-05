@@ -60,6 +60,7 @@ void play_again_cb( void* mBlackJack )
 
 /***********************************************************/
 
+/***********************************************************/
 BlackJack::BlackJack( int mNumber_of_m_players )
 : Control(), hit(-1,-1), stay(-1,-1), play_again(-1,-1)
 {
@@ -207,6 +208,7 @@ void BlackJack::setup_game(	)
 
 int	BlackJack::onCreate(  )
 {
+	printf("\nBJ\n");
 	if (Debug) printf("BlackJack::onCreate\n");
 	set_graphic_center();
 	float sx = m_cx - play_again.get_width() /2.;

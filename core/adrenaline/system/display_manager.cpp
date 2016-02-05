@@ -29,7 +29,7 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug  0 
+#define Debug  1
 #define Debug2 0
 
 Keyboard		m_keyboard;
@@ -96,6 +96,8 @@ void DisplayManager::call_on_creates( )
 void DisplayManager::Initialize()
 {	
 	IconView::Initialize();
+	m_running_apps = new std::vector<Application*>();
+	
 	// put actual icons on it:
 	init_default_sidebar( &m_side );
 	m_current_running_app = -1;
@@ -242,8 +244,8 @@ void DisplayManager::start_app( Application* mApp )
 		return;
 	}
 
-	m_running_apps.push_back( mApp );
-	m_current_running_app = m_running_apps.size()-1;
+	m_running_apps->push_back( mApp );
+	m_current_running_app = m_running_apps->size()-1;
 	if (Debug) printf("DISPLAY MANAGER:  START APP #%d .......... \n", m_current_running_app );
 
 	mApp->onCreate();
@@ -255,29 +257,33 @@ void DisplayManager::set_main_window( Control* mNewWindow )
 	Rectangle* rect = get_useable_rect();
 	if (mNewWindow)
 		mNewWindow->set_position( rect );
-	mNewWindow->onCreate();
-	m_running_apps[m_current_running_app]->m_main_window = mNewWindow;
-	m_running_apps[m_current_running_app]->register_with_display_manager();
-	//mApp->m_main_window = mNewWindow;
-	//mApp->register_with_display_manager();
+	mNewWindow->onCreate();	// what if it's already created? the control.cpp class will return 0
+
+	// Remove old main window, and add in the new! 
+	if ((*m_running_apps)[m_current_running_app]->m_main_window)
+		remove_object( (*m_running_apps)[m_current_running_app]->m_main_window );
+	add_object ( mNewWindow );
+	(*m_running_apps)[m_current_running_app]->m_main_window = mNewWindow;
 }
 
 void DisplayManager::idle_tasks( )
 {
-	if ((m_current_running_app>=0) && (m_current_running_app<m_running_apps.size())) 
+	if ((m_current_running_app>=0) && (m_current_running_app< m_running_apps->size())) 
 	{
 		//printf("idle task: %d \n", m_current_running_app );
-		m_running_apps[m_current_running_app]->background_time_slice();	
+		(*m_running_apps)[m_current_running_app]->background_time_slice();
 	}
 }
 
 void DisplayManager::close_app( Application* mApp )
 {
-	for (int i=0; i<m_running_apps.size(); i++)
+	// Note these are Apps, not m_child_controls.  Other than that same logic as the
+	// remove_object()
+	for (int i=0; i<m_running_apps->size(); i++)
 	{
-		if (m_running_apps[i] == mApp)
-			m_running_apps.erase( m_running_apps.begin()+i );
-	}
+		if ((*m_running_apps)[i] == mApp)
+			m_running_apps->erase( m_running_apps->begin()+i );
+	} 
 	delete mApp;
 }
 
@@ -398,7 +404,13 @@ void  DisplayManager::add_object( Control* NewControl )
 // because some may be static.  Leave that to the caller.
 void  DisplayManager::remove_object( Control* NewControl )
 {
-
+	std::vector<Control*>::iterator iter = m_child_controls.begin();
+	while (iter != m_child_controls.end())
+	{
+		if (*iter == NewControl)
+			m_child_controls.erase( iter );
+		iter++;
+	}
 }
 
 void  DisplayManager::remove_all_objects(  )

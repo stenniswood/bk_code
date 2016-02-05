@@ -83,11 +83,6 @@ void RobotApp::Initialize		(	)
 	
 }
 
-int	RobotApp::onPlace			(	)
-{ 
-	return Application::onPlace();
-}
-
 VerticalMenu view_menu;
 
 int robot_view_menu_callback(void* menuPtr, int mMenuIndex, RobotApp* mApp )

@@ -18,7 +18,6 @@ public:
 	~DrawApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
-	int				onPlace			(	);
 
 	virtual void	setup_main_menu ( );
 	virtual void	setup_app_menu  ( );

@@ -98,7 +98,9 @@ void ClientList::update_available_client_list()
 	if (Debug) printf("===================================================\n");
 }
 
-// =======================================================
+/************************************************************************
+	Client List Panel - has button for connecting, etc.
+ ************************************************************************/
 ClientListPanel::ClientListPanel()
 {
 	
@@ -145,6 +147,7 @@ int	ClientListPanel::onCreate(  )
 	m_clients = new ClientList(left, left+width-50, bottom+height, bottom );
 	m_clients->calc_metrics();
 	m_clients->set_headings();
+	m_clients->onCreate();
 	m_clients->update_available_client_list();
 
 	m_connect.set_on_click_listener( connect_button_cb, this );

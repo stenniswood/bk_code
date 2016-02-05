@@ -2,13 +2,21 @@
 extern "C" {
 #endif
 
-void Init_Audio_Protocol();
 
-BOOL Parse_Audio_Statement( char* mSentence );
 
-char* audio_inform_client();
-char* audio_inform_user  ();
+extern BOOL  AUDIO_tcpip_ListeningOn;
+extern BOOL  AUDIO_tcpip_SendingOn;
+extern BOOL  AUDIO_tcpip_SendingMuted;			// we send zerod out audio
+extern BOOL  AUDIO_tcpip_ListeningSilenced;		// we do not play any incoming audio.
+extern BOOL  AUDIO_save_requested;
 
+extern FILE* sending_audio_file_fd;
+
+
+
+void 	DumpBuffer( BYTE* mbuff, int mlength);
+void 	Init_Audio_Protocol();
+BOOL 	Parse_Audio_Statement( char* mSentence );
 
 
 

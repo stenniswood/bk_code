@@ -32,6 +32,8 @@ void init_blackjack( )
 	printf("init_blackjack()\n");
 	if (bj_app==NULL)	
 		bj_app = new BlackJackApp();
+	printf("bj_app=%x\n", bj_app);		
+	
 	if (bj_app)
 		MainDisplay.start_app( bj_app );
 }
@@ -69,24 +71,15 @@ void 	BlackJackApp::Initialize	(	)
 	Application::Initialize();
 	
 	m_main_window      = new BlackJack( 3 );
-	//printf("BlackJackApp::Initialize() \n");	
-
-	setup_app_menu ();
-	setup_main_menu();
-	onPlace();	
-
+	
 }
-
-int		BlackJackApp::onPlace		(	)
-{ 
-	Application::onPlace();		// Place the main window.
-	((BlackJack*)m_main_window)->onPlace();
-} 
 
 // First Time application is run - load resources etc.
 int		BlackJackApp::onCreate(	)	
 {
-	Application::onCreate();
+	int retval = Application::onCreate();
+    ((BlackJack*)m_main_window)->onPlace();
+    return retval;
 }
 
 void	BlackJackApp::setup_main_menu  	( )
@@ -108,12 +101,12 @@ void 	BlackJackApp::register_with_display_manager()
 	
 } 	
 
-int		BlackJackApp::About			(	)
+void	BlackJackApp::About			(	)
 { 
 	Application::About();
 } 
 
-int		BlackJackApp::Preferences	(	)
+void	BlackJackApp::Preferences	(	)
 {
 	Application::Preferences(); 
 } 

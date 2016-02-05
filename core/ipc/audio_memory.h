@@ -43,8 +43,8 @@ struct audio_ipc_memory_map
 {
 	long int 		StatusCounter;			//
 	char	 		ConnectionStatus[64];	// idle, receiving, connecting.
-	long int 		update_counter;			// 
-	long int 		acknowledge_counter;	// 
+	long int 		UpdateCounter;			// for each buffer
+	long int 		AcknowledgedCounter;	// for each buffer
 	long int 		update_samples;			// Number of samples last added.
 	char			name[512];				// 
 	char			description[512];		//
@@ -54,25 +54,31 @@ struct audio_ipc_memory_map
 
 /*********************************************************/
 //void dump_ipc				();
-void aud_save_segment_id	(char* mFilename);
-int  read_segment_id		(char* mFilename);
+void audio_save_segment_id	(char* mFilename);
+int  audio_read_segment_id	(char* mFilename);
 
-int  aud_allocate_memory	();
-void aud_deallocate_memory	();
+int  audio_allocate_memory	();
+void audio_deallocate_memory();
 
-int  aud_attach_memory		();
-void aud_reattach_memory	();
-void aud_detach_memory		();
+int  audio_attach_memory	();
+void audio_reattach_memory	();
+void audio_detach_memory	();
 
-int  aud_get_segment_size	();
-void aud_fill_memory		();
+int  audio_get_segment_size	();
+void audio_fill_memory		();
 
-void ipc_write_header( struct wav_header mAudio_header  );
-void ipc_write_buffer( short* mBuffer, long int mLength );
+void audio_ipc_write_header( struct wav_header mAudio_header  );
+void audio_ipc_write_buffer( short* mBuffer, long int mLength );
 
-void ipc_write_audio_connection_status( char* mStatus );
-void ipc_write_command_text 		  ( char* mSentence );
+void audio_ipc_write_audio_connection_status( char* mStatus );
+void audio_ipc_write_command_text 		  ( char* mSentence );
 
+BOOL audio_is_new_rxbuffer();
+void audio_ack_new_rxbuffer();
+void audio_wait_for_ack_new_rxbuffer();
+
+BOOL is_audio_ipc_memory_available();
+int audio_connect_shared_memory(char mAllocate);
 
 #ifdef  __cplusplus
 }

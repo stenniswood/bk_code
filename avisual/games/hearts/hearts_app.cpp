@@ -66,23 +66,14 @@ void 	HeartsApp::Initialize	(	)
 	m_main_window = new HeartsGame( 3 );
 	//printf("HeartsApp::Initialize()\n");	
 
-	setup_app_menu();
-	setup_main_menu    ();
-	onPlace();	
 }
-
-int		HeartsApp::onPlace		(	)
-{ 
-	Application::onPlace();		// Place the main window.
-	
-	((HeartsGame*)m_main_window)->onPlace();
-} 
 
 // First Time application is run - load resources etc.
 int		HeartsApp::onCreate(	)	
 {
-	return Application::onCreate();
-	
+	int retval = Application::onCreate();
+	((HeartsGame*)m_main_window)->onPlace();	
+	return retval;
 }
 
 void	HeartsApp::setup_main_menu  	( )
@@ -99,20 +90,14 @@ void	HeartsApp::setup_app_menu( )
 	Application::setup_app_menu();
 } 
 
-void 	HeartsApp::register_with_display_manager()
+void		HeartsApp::About			(	)
 { 
-	Application::register_with_display_manager();
-	
-} 	
-
-int		HeartsApp::About			(	)
-{ 
-	return Application::About();
+	 Application::About();
 } 
 
-int		HeartsApp::Preferences	(	)
+void		HeartsApp::Preferences	(	)
 {
-	return Application::Preferences(); 
+	 Application::Preferences(); 
 } 
 
 int		HeartsApp::Quit			(	)

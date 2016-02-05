@@ -91,17 +91,7 @@ void 	DrawApp::Initialize		(	)
 	
 	m_main_window      = new Drawing2D();
 	
-/*	setup_app_menu ();		// About, Preferences, quit, 
-	setup_main_menu();		// 
-	onPlace();	*/
-
 }	// create all the objects here.
-
-int		DrawApp::onPlace		(	) 
-{ 
-	Application::onPlace( );
-
-}
 
 void	DrawApp::setup_app_menu( )
 {

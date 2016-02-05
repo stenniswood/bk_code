@@ -51,7 +51,7 @@ FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 APP_CPP_OBJS	= instant_main.o string_util.o
 IPC_OBJS    	= picamscan_memory.o sway_memory.o visual_memory.o audio_memory.o \
 				CAN_memory.o client_memory.o CAN_memory.o
-THREAD_OBJS 	= audio_thread.o video_thread.o can_thread.o file_thread.o \
+THREAD_OBJS 	= video_thread.o can_thread.o file_thread.o \
 			    file_tx_thread.o hmi_thread.o thread_control.o serverthread.o 
 HARDWARE_OBJS = GPIO_device.o AUDIO_device.o IMAGE_device.o CAMERA_device.o 
 ILCLIENT_OBJS = ilclient.o ilcore.o
@@ -60,8 +60,9 @@ WIFI_OBJS     = udp_transponder.o client.o
 # APP CODE
 NLP_PROTOCOL_OBJS = GENERAL_protocol.o	CAN_protocol.o	GPIO_protocol.o	\
 	AUDIO_protocol.o	CAN_util.o			CAMERA_protocol.o \
-	AUDIO_util.o		FILE_protocol.o		IMAGE_protocol.o	CAMERA_util.o	  \
-	package_commands.o	IMAGE_util.o		HMI_protocol.o
+	AUDIO_file_util.o	FILE_protocol.o		IMAGE_protocol.o	CAMERA_util.o	  \
+	package_commands.o	IMAGE_util.o		HMI_protocol.o	\
+	AUDIO_interface.o 
 
 NLP_ADRENALINE_OBJS  =	 Adrenaline_nlp.o     	Adren_bigmotor_talk.o  		\
 	Adren_lcd_talk.o     Adren_pwm_talk.o	 	Adren_analog_talk.o  		\

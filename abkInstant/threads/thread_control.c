@@ -15,7 +15,7 @@
 #include "pican_defines.h"
 
 //#include "ipc_mem_bkinstant.h"
-#include "audio_thread.h"
+//#include "audio_thread.h"
 #include "video_thread.h"
 #include "can_thread.h"
 #include "hmi_thread.h"
@@ -52,7 +52,7 @@ extern int DisplayNum;
 #define Debug 0
 
 
-pthread_t audio_thread_id;
+//pthread_t audio_thread_id;
 pthread_t video_thread_id;
 pthread_t hmi_thread_id;
 pthread_t file_thread_id;
@@ -96,7 +96,7 @@ The message can be:
 "receive&save"
 "receive&play&save"
 *******************************/
-void create_audio_thread( BOOL mPlay, BOOL mSave, int Port )
+/*void create_audio_thread( BOOL mPlay, BOOL mSave, int Port )
 {	
 	static int first_time = TRUE;
 	if (first_time)
@@ -123,7 +123,7 @@ void create_audio_thread( BOOL mPlay, BOOL mSave, int Port )
 void terminate_audio_thread( )
 {	
 	audio_terminate_requested = TRUE;
-}
+}*/
 
 /*****************************
 The message can be:
@@ -222,7 +222,7 @@ void terminate_file_thread( )
 ***********************************************************************/
 
 pthread_t file_tx_thread_id;
-pthread_t audio_tx_thread_id;
+//pthread_t audio_tx_thread_id;
 
 
 
@@ -282,27 +282,12 @@ The message can be:
 "receive&save"
 "receive&play&save"
 *******************************/
-void create_audio_tx_thread( char* mHeader, int Port )
+/*void create_audio_tx_thread( char* mHeader, int Port )
 {	
-	// FORM THE PARAMETER LIST:
-	int port_length = 6;	
-	int total_length = 6;
-	
-	char* message = new char[total_length];
-	printf("audio_thread.message=%s\n", message);
-
-	// CREATE THREAD:
-	//int iret1 = pthread_create( &audio_tx_thread_id, NULL, audio_transmit_thread, (void*) message);
-	//if (iret1)
-	{
-	//	fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
-		exit(EXIT_FAILURE);
-	}
 }
 void terminate_audio_tx_thread( )
 {	
-	audio_terminate_requested = TRUE;
-}
+}*/
 
 void create_video_tx_thread		( BOOL mPlay, BOOL mSave, int Port )
 {	
