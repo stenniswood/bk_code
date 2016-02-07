@@ -3,12 +3,12 @@ extern "C" {
 #endif
 
 
-BOOL  CAMERA_tcpip_ListeningOn;		
-BOOL  CAMERA_tcpip_SendingOn;
-BOOL  CAMERA_tcpip_SendingMuted;		// we send zerod out CAMERA
-BOOL  CAMERA_tcpip_ListeningSilenced;		// we do not play any incoming CAMERA.
-BOOL  CAMERA_save_requested;			// incoming or outgoing? 
-FILE* sending_camera_playback_file_fd;		// prerecorded cam (robot's history)
+extern BOOL  CAMERA_tcpip_ListeningOn;		
+extern BOOL  CAMERA_tcpip_SendingOn;
+extern BOOL  CAMERA_tcpip_SendingMuted;		// we send zerod out CAMERA
+extern BOOL  CAMERA_tcpip_ListeningSilenced;		// we do not play any incoming CAMERA.
+extern BOOL  CAMERA_save_requested;			// incoming or outgoing? 
+extern FILE* sending_camera_playback_file_fd;		// prerecorded cam (robot's history)
 
 
 void Init_Camera_Protocol();

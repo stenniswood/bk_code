@@ -186,11 +186,12 @@ int find_subject( char* mSubject )
 		}
 	}
 }
+
 /*******************************************
  *  Find the direct object of the sentence
  *  Return :	index into the subject_list 
  ********************************************/
-struct sObject* extract_subject( char* mSentence  ) 
+struct sObject* extract_subject( char* mSentence )
 {
 	std::string  Sentence(mSentence);
 	std::list<sObject*>::iterator iter = subject_list.begin();
@@ -208,7 +209,7 @@ struct sObject* extract_subject( char* mSentence  )
 }
 
 /*****************************************************************
-
+	extract_word()
 *****************************************************************/
 std::string* extract_word(char* mSentence, std::list<std::string> *m_word_list )
 {

@@ -31,9 +31,12 @@
 #include "client_memory.hpp"
 #include "CAN_memory.h"
 #include "udp_transponder.hpp"
-#include "thread_control.h"
+#include "GENERAL_protocol.h"
 #include "client_to_socket.h"
 
+#include "CAN_protocol.h"
+#include "AUDIO_protocol.h"
+#include "CAMERA_protocol.h"
 
 //#define NLP_DEBUG 1
 
@@ -136,6 +139,17 @@ std::string* verb = NULL;
 std::string* object = NULL;
 std::string* adjective=NULL;
 
+void trim_trail_space( char* str )
+{
+	int   len = strlen(str)-1;
+	char* ptr = &(str[len]);
+	while(( len>0 ) && (*ptr==' '))
+	{
+		*ptr = 0;
+		ptr--;  len--;
+	}
+}
+
 BOOL extract_nlp_words()
 {
     if (ipc_memory_client==NULL)  return;
@@ -146,15 +160,15 @@ BOOL extract_nlp_words()
     subject = extract_word( mSentence, &subject_list );
     if (subject==NULL)   // subject matter must pertain.
     {
-	printf("Reply:  What do you want me to do with %s\n", subject->c_str());
-	return FALSE;
+		printf("Reply:  What do you want me to do with %s\n", subject->c_str());
+		return FALSE;
     }
 
-    verb 	= extract_word( mSentence, &verb_list 	 );
+    verb 	= extract_word( mSentence, &verb_list );
     if (verb==NULL)
     {
-	printf("Reply:  What do you want me to do with %s\n", subject->c_str());
-	return FALSE;
+		printf("Reply:  What do you want me to do with %s\n", subject->c_str());
+		return FALSE;
     }
 
     object    = extract_word( mSentence, &object_list  );
@@ -162,6 +176,7 @@ BOOL extract_nlp_words()
     diagram_sentence(subject, verb, adjective, object );
     return TRUE;    
 }
+
 
 /* Note the client can do any of these:
 	establish a connection
@@ -180,10 +195,10 @@ void handle_client_request()
 	printf("handle_client_request()\n");
 	
  	printf ("Sentence:%s|\n", ipc_memory_client->Sentence );    
-	BOOL result = extract_nlp_words();
+	int result = extract_nlp_words();
 	if (result==FALSE) return;
 
-	int result = strcmp(subject->c_str(), "whoami");
+	result = strcmp(subject->c_str(), "whoami");
 	if (result==0)
 		printf("whoami\n");
 
@@ -212,19 +227,19 @@ void handle_client_request()
 
 	if ( (strcmp( subject->c_str(), "sequencer")==0) )
 	{
-			// Pass the request to the other end:
-			strcpy (relay_buffer, ipc_memory_client->Sentence );
-			length = strlen(relay_buffer);
-			SendTelegram( relay_buffer, length);
+		// Pass the request to the other end:
+		strcpy (relay_buffer, ipc_memory_client->Sentence );
+		length = strlen(relay_buffer);
+		SendTelegram( relay_buffer, length);
 	}
-	
+
 	result = strcmp(verb->c_str(), "connect");
 	if (result==0) {
 		printf("connecting..\n");
 		REQUEST_client_connect_to_robot = TRUE;		// signal to serverthread.c
 		REQUESTED_client_ip = space;				// ip address
 	}
-	result = strcmp(verb->c_str(),, "receive");
+	result = strcmp(verb->c_str(), "receive");
 	if (result==0)
 	{
 		if (!connection_established)
@@ -294,7 +309,7 @@ void handle_client_request()
 		if (result==0)
 		{
 			/* "send can" spoken to this local client - means:		*/
-			start_amon();  
+			start_amon();
 			printf("sending..CAN\n");
 			// this is the "token" to indicate can messages are coming.
 			Cmd_client_CAN_Start();		// in core/wifi/client.c

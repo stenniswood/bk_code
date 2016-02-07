@@ -10,18 +10,17 @@
 #include <string.h>
 #include <string>
 #include <list>
+
 #include "protocol.h"
 #include "devices.h"
 #include "CAN_memory.h"
 #include "CAN_util.h"
 #include "GENERAL_protocol.h"
 #include "CAMERA_device.h"
-#include "thread_control.h"
+//#include "thread_control.h"
+#include "CAN_protocol.h"
 
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 BOOL CAN_ListeningOn;	// if true we will be receiving CAN Traffic.
 BOOL CAN_SendingOn;		// if true we will be sending CAN Traffic.
@@ -136,7 +135,7 @@ static char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon";
 static char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
 #endif
 
-int start_amon() 
+int start_amon()
 {
     int pid;
     switch (pid=fork()) {
@@ -216,9 +215,9 @@ char* Parse_CAN_Statement( char* mSentence )
 				//if (action)
 				//	printf("No action for request to start amon!\n");
 			} 
-			int attached = can_connect_shared_memory(FALSE);
-			CAN_SendingOn   = TRUE;
-			set_tcp_transmitting_flag();
+			int attached  = can_connect_shared_memory(FALSE);
+			CAN_SendingOn = TRUE;
+			set_tcp_transmitting_flag_ipc_can();			
 			
 			/* the messages will be pulled off of the Received buffer.
 			   and stored in Recieved buffer at the other instant end.  */
@@ -234,7 +233,7 @@ char* Parse_CAN_Statement( char* mSentence )
 			 (strcmp(verb->c_str(), "stopping") ==0)  )
 		{
 			CAN_SendingOn   = FALSE;
-			clear_tcp_transmitting_flag();			
+			clear_tcp_transmitting_flag_ipc_can();
 			// Leave connection to IPC and amon running.
 			//retval = TRUE;
 		}
@@ -286,6 +285,3 @@ char* Parse_CAN_Statement( char* mSentence )
 }
 
 
-#ifdef  __cplusplus
-}
-#endif

@@ -12,12 +12,17 @@
 #include <sys/types.h>
 #include <time.h> 
 #include <string>
+
 #include "protocol.h"
 #include "devices.h"
 #include "GENERAL_protocol.h"
 #include "CAMERA_protocol.h"
 #include "CAMERA_device.h"
-#include "thread_control.h"
+#include "CAMERA_util.h"
+
+
+
+
 
 /* Suggested statements:
 	Show camera on [TV,robot,kitchen tv, phone, etc]
@@ -41,8 +46,7 @@ ignore all upgrade notices.
 BOOL  CAMERA_tcpip_ListeningOn 	= FALSE;		
 BOOL  CAMERA_tcpip_SendingOn  	= FALSE;
 BOOL  CAMERA_tcpip_SendingMuted  	= FALSE;		// we send zerod out CAMERA
-BOOL  CAMERA_save_requested 		= FALSE;			// incoming or outgoing? 
-
+BOOL  CAMERA_save_requested 		= FALSE;		// incoming or outgoing? 
 FILE* sending_camera_playback_file_fd = NULL;		// prerecorded cam (robot's history)
 
 
@@ -137,7 +141,6 @@ void Init_Camera_Protocol()
     CAMERA_tcpip_ListeningOn 		= FALSE;		
     CAMERA_tcpip_SendingOn  		= FALSE;
     CAMERA_tcpip_SendingMuted  		= FALSE;		// we send zerod out CAMERA
-    CAMERA_tcpip_ListeningSilenced  	= FALSE;		// we do not play any incoming CAMERA.
     CAMERA_save_requested 			= FALSE;		// incoming or outgoing? 
     
     init_word_lists();
@@ -147,8 +150,8 @@ void Init_Camera_Protocol()
 /**** ACTION INITIATORS:    (4 possible actions) *****/
 void send_camera_file ( char* mFilename )
 {	
-    sending_camera_file_fd  = fopen( mFilename, "r" );
-    if (sending_camera_file_fd == NULL)
+    sending_camera_playback_file_fd  = fopen( mFilename, "r" );
+    if (sending_camera_playback_file_fd == NULL)
     {
 	nlp_reply_formulated=TRUE;
 	sprintf ( NLP_Response, "Sorry, the camera file %s does not exist!", mFilename );
@@ -293,14 +296,14 @@ BOOL Parse_Camera_Statement( char* mSentence )
 				and not any video properties.							
 		*/
 		if (strcmp(verb->c_str(), "receive") ==0)
-		{
-		    watch_video();
+		{		
+		    camera_watch();
 		    retval = TRUE;	
 		    // Here we are the receiving end point.  So no message to relay.
 		}
 		if (strcmp(verb->c_str(), "send") ==0)
 		{
-		    send_video();
+		    send_camera();
 		    retval = TRUE;
 		    // Here we are the receiving end point.  So no message to relay.		    
 		}

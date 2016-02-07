@@ -5,11 +5,11 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
+
 #include "CAN_Interface.h"
 #include "dataset.hpp"
 #include "display.h"
@@ -18,6 +18,15 @@
 #include "display_manager.hpp"
 #include "client_memory.hpp"
 #include "client_list_control.hpp"
+
+#include "protocol.h"
+#include "devices.h"
+#include "CAN_memory.h"
+#include "CAN_util.h"
+#include "GENERAL_protocol.h"
+#include "CAMERA_device.h"
+//#include "thread_control.h"
+
 
 
 #define Debug 1

@@ -34,7 +34,7 @@ AUTHOR	:  Stephen Tenniswood
 
 #include "CAN_memory.h"
 
-
+ 
 int 	can_segment_id;
 char* 	can_shared_memory;							// unstructured
 struct  can_ipc_memory_map* ipc_memory_can=NULL;	// structured memory.
@@ -413,19 +413,19 @@ int can_connect_shared_memory(char mAllocate)
 }
 
 //// RECEIVING OVER TCP/IP:
-void		set_tcp_receiving_flag()
+void		set_tcp_receiving_flag_ipc_can()
 {
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 			return 0;
 	ipc_memory_can->isReceiving = TRUE;
 }
-void		clear_tcp_receiving_flag()
+void		clear_tcp_receiving_flag_ipc_can()
 {
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 			return 0;
 	ipc_memory_can->isReceiving = FALSE;
 }
-BOOL		is_tcp_receiving_flag   ()
+BOOL		is_tcp_receiving_flag_ipc_can   ()
 {
 	if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 			return FALSE;
@@ -433,19 +433,19 @@ BOOL		is_tcp_receiving_flag   ()
 }
 
 //// TRANSMITTING OVER TCP/IP:
-void		set_tcp_transmitting_flag()
+void		set_tcp_transmitting_flag_ipc_can()
 {
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 			return 0;
 	ipc_memory_can->isTransmitting = TRUE;
 }
-void		clear_tcp_transmitting_flag()
+void		clear_tcp_transmitting_flag_ipc_can()
 {
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 			return 0;
 	ipc_memory_can->isTransmitting = FALSE;
 }
-BOOL		is_tcp_transmitting_flag   ()
+BOOL		is_tcp_transmitting_flag_ipc_can   ()
 {
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 			return FALSE;

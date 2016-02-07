@@ -193,7 +193,7 @@ char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon > /dev/null";
 char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
 #endif
 
-int start_amon() 
+/*int start_amon() 
 {
     int pid;
     switch (pid=fork()) {
@@ -207,18 +207,8 @@ int start_amon()
             return 0;
     }
     return 1;
-}
+}*/
 
-void trim_trail_space( char* str )
-{
-	int   len = strlen(str)-1;
-	char* ptr = &(str[len]);
-	while(( len>0 ) && (*ptr==' '))
-	{
-		*ptr = 0;
-		ptr--;  len--;
-	}
-}
 
 /* Client request shared memory.  */
 void scan_client()
