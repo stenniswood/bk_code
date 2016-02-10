@@ -123,25 +123,23 @@ void update_client_list()
 	// Number of clients.
 	if (ipc_memory_client)
 	{	
-		ipc_memory_client->NumberClients    = beacon_ip_list.size();
+		cli_reset_client_list();
 		list<struct stBK_Header>::iterator iter = beacon_ip_list.begin();
 		int byte_array_size = 0;
-		struct stClientData* ptr = ipc_memory_client->ClientArray;
-		int i=0;
+		struct stClientData tmp;
 		
 		// Now add each client as a string followed by a null terminator.  Hence a string array.
 		while(( iter != beacon_ip_list.end()) && (byte_array_size<MAX_CLIENTS))
-		{
-			
+		{			
 			// Copy 1 client:
-			strcpy( ptr[i].address,  iter->ip_address);			
-			strcpy( ptr[i].name,  	 iter->hostname );
-			strcpy( ptr[i].machine,  iter->machine_type );
-			ptr[i].network = 1;		// TCP_IP
+			strcpy( tmp.address,  iter->ip_address);
+			strcpy( tmp.name,  	  iter->hostname  );
+			strcpy( tmp.machine,  iter->machine_type );
+			tmp.network = 1;		// TCP_IP
+			cli_ipc_add_new_client( &tmp );
 			
 			// Adjust for next client:
 			iter++;
-			i++;
 		}
 	}
 }

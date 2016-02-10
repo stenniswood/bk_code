@@ -82,7 +82,7 @@ int client_send_buffer()
 int Cmd_client_CAN_Start( )
 {
 	CAN_SendingOn = TRUE;
-	printf("Cmd_client_CAN_Start:  CAN message stream enabled...\n");
+/*	printf("Cmd_client_CAN_Start:  CAN message stream enabled...\n");
 	//int length = Cmd_CAN_Start( coBuff ); 
 	//DumpBuffer( coBuff, length );
 	
@@ -90,27 +90,29 @@ int Cmd_client_CAN_Start( )
 	int length = strlen( (char*)coBuff );
 //	bytes = write(sockfd, coBuff, length );
 	SendTelegram( coBuff, length);
-	printf("Cmd_client_CAN_Start:  %d bytes written\n", bytes );
-	return bytes;
+	printf("Cmd_client_CAN_Start:  %d bytes written\n", bytes );  */
+	return 0; //bytes;
 }
 
 int Cmd_client_CAN_listen( )
 {
-	CAN_ListeningOn = TRUE;
 
-	//printf("Cmd_client_CAN_listen:  Rx CAN msg stream...\n");
-
+	printf("Cmd_client_CAN_listen() - DEPRECATED FUNCTION DOES NOTHING!\n");
+/*	CAN_ListeningOn = TRUE;
 	strcpy (coBuff, "send CAN");
 	int length = strlen(coBuff);
 	//DumpBuffer  ( coBuff, length );
 	SendTelegram( coBuff, length);
 	printf("Cmd_client_CAN_listen:  %d bytes written\n", length );
-	return length;
+*/
+	return 0;//length;
 }
 
 int Cmd_client_send_CAN( struct sCAN* Msg )
 {
-	printf("Cmd_client_send_CAN:  Transporting CAN message...\n");	
+
+	printf("Cmd_client_CAN_listen() - DEPRECATED FUNCTION DOES NOTHING!\n");
+/*	printf("Cmd_client_send_CAN:  Transporting CAN message...\n");	
 	//int length = Cmd_CAN( coBuff, Msg );
 	//DumpBuffer( coBuff, length );
 
@@ -118,8 +120,8 @@ int Cmd_client_send_CAN( struct sCAN* Msg )
 	int length   = strlen((char*)coBuff);
 //	bytes = write(sockfd, coBuff, length );
 	SendTelegram( coBuff, length);
-	printf("Cmd_client_send_CAN:  %d bytes written\n", bytes);	
-	return bytes;
+	printf("Cmd_client_send_CAN:  %d bytes written\n", bytes);	*/
+	return 0;//bytes;
 }
 
 int Cmd_client_CAN_Stop( )
@@ -127,12 +129,12 @@ int Cmd_client_CAN_Stop( )
 	printf("Cmd_client_CAN_Stop:  Transporting CAN message...\n");
 	//int length = Cmd_CAN_Start( coBuff );		// see ../core/wifi/package_commands.c
 	//DumpBuffer( coBuff, length );
-	strcpy ((char*)coBuff, "stop CAN");
+/*	strcpy ((char*)coBuff, "stop CAN");
 	int length = strlen( (char*)coBuff );
 //	bytes = write(sockfd, coBuff, length );
 	SendTelegram( coBuff, length);
-	printf("Cmd_client_CAN_Stop:  %d bytes written\n", bytes );
-	return bytes;
+	printf("Cmd_client_CAN_Stop:  %d bytes written\n", bytes ); */
+	return 0; //bytes;
 }
 
 int wait_for_ack()

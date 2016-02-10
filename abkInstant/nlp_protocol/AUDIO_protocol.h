@@ -14,17 +14,16 @@ extern FILE* sending_audio_file_fd;
 
 
 /* Action Initiators */
-void send_audio_file 	( char* mFilename );
-void send_audio		();
-void audio_listen		(BOOL Play=TRUE, BOOL Save=FALSE);
-void audio_two_way	();
-void audio_cancel		();
+void send_audio_file( char* mFilename );
+void send_audio		( );
+void audio_listen	(BOOL Save=FALSE);
+void audio_two_way	( );
+void audio_cancel	( );
 
 
 void 	DumpBuffer( BYTE* mbuff, int mlength);
 void 	Init_Audio_Protocol();
 BOOL 	Parse_Audio_Statement( char* mSentence );
-
 
 
 

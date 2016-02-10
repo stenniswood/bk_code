@@ -1,4 +1,5 @@
 /* BK Instant main file.  */
+#include "AUDIO_device.h"
 #include <sys/time.h>
 #include <string.h>
 #include <errno.h>
@@ -9,6 +10,8 @@
 #include <string>
 #include <vector>
 #include <pthread.h>
+
+
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
 #include "can_txbuff.h"
@@ -28,7 +31,9 @@
 #include "CAN_memory.h"
 #include "udp_transponder.hpp"
 #include "thread_control.h"
-#include "client_to_socket.h"
+#include "client_to_socket.hpp"
+
+#include "AUDIO_device.h"
 
 
 // Right now this is user settable.  Need to detect:
@@ -105,7 +110,7 @@ void create_another_client_thread()		// really serverthread which initiates conn
 void establish_ipc()
 {
 	printf("************************* SHARED MEMORY *****************************\n");
-	// Allocate a shared memory so we can accept user commands (ie. connect, send audio, etc)
+	// Always have a Client connection, so we can accept user commands (ie. connect, send audio, etc)
 	int result = connect_shared_client_memory(TRUE);
 
 	if (USE_AVISUAL)
@@ -160,7 +165,8 @@ void init( )
 	// and attach myInterrupt() to the interrupt
 	create_threads();
 
-	printf("done with board request()!\n");
+	init_client_request();	
+	printf("done with init()!\n");
 }
   
 void help()
@@ -185,29 +191,14 @@ void print_args(int argc, char *argv[])
 }
 
 
-#if (PLATFORM==Mac)
+/*#if (PLATFORM==Mac)
 char amon_command[] = "~/bk_code/amonitor/amon";
 #elif (PLATFORM==RPI)
 char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon > /dev/null";
 #elif (PLATFORM==linux_desktop)
 char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
-#endif
+#endif */
 
-/*int start_amon() 
-{
-    int pid;
-    switch (pid=fork()) {
-        case -1:
-			printf("fork() = -1\n");
-            return 0;
-        case 0:
-            execvp(amon_command, NULL);
-            printf("returned from ececvp\n");
-        default: printf("unknown start_amon pid!\n");
-            return 0;
-    }
-    return 1;
-}*/
 
 
 /* Client request shared memory.  */
@@ -216,20 +207,15 @@ void scan_client()
 	// CHECK CLIENT MEMORY FOR REQUEST:
 	if (cli_is_new_update())
 	{
+		//printf("is new update.\n");
 		handle_client_request();
-		cli_ack_update_status();
-		printf(" acknowledged to client memory. \n");
+		// Now wait until our response is taken.  Don't want to reprocess it on 
+		// next pass thru here!
+		//cli_wait_for_ack_update();		// should be a timeout on this though.
+		//printf("client response was sent.\n");
 	}	
 }
 		
-void update_outputs()
-{
-	// Update Client List:
-/*	int size = ipc_memory_client->NumberClients;
-	for (int i=0; i<size; i++)
-		cli_ipc_add_new_client( mClientText );		
-*/	
-}
 
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
@@ -239,7 +225,6 @@ int main( int argc, char *argv[] )
 {
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg 
-	int value    	= 0;
 	if (argc>1)
 	{
 		if ((strcmp(argv[first_param], "help") == 0))
@@ -263,11 +248,24 @@ int main( int argc, char *argv[] )
 			create_file_tx_thread( argv[1], filespath, filename, BASE_FILE_PORT );
 		*/
 	}
-	printf("================= Checking command line arguments ========================\n");	
+	printf("================= Checking command line arguments ========================\n");		
 
-	printf("================= Main Loop ==========================\n");
-	int count = 0;
-	sleep(1);
+		short Sinewave_2[N_WAVE];
+		float freq = (2.*3.1415 / (float)N_WAVE);
+		create_sinewave(Sinewave,  N_WAVE, freq, 0.);
+		freq = 5.*(2.*3.1415 / (float)N_WAVE);
+		create_sinewave(Sinewave_2, N_WAVE, freq, 0.);
+
+//		play_api_test(22050, 16, 1, 0);
+
+		int32_t result = audio_setup( 0, 22050, 1, 16 );
+		while (1)
+		{
+			uint8_t* result = audio_add_play_buffer( Sinewave, N_WAVE, 22050 );
+			result = audio_add_play_buffer( Sinewave_2, N_WAVE, 22050 );
+		}			
+	
+	printf("================= Main Loop ==========================\n");	
 	while (1) 
 	{
 		//voice_interface();		// empty
@@ -276,3 +274,15 @@ int main( int argc, char *argv[] )
 	}
 }
 
+
+
+
+
+void update_outputs()
+{
+	// Update Client List:
+/*	int size = ipc_memory_client->NumberClients;
+	for (int i=0; i<size; i++)
+		cli_ipc_add_new_client( mClientText );		
+*/	
+}

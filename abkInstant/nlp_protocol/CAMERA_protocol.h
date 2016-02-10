@@ -3,7 +3,7 @@ extern "C" {
 #endif
 
 
-extern BOOL  CAMERA_tcpip_ListeningOn;		
+extern BOOL  CAMERA_tcpip_WatchingOn;		
 extern BOOL  CAMERA_tcpip_SendingOn;
 extern BOOL  CAMERA_tcpip_SendingMuted;		// we send zerod out CAMERA
 extern BOOL  CAMERA_tcpip_ListeningSilenced;		// we do not play any incoming CAMERA.

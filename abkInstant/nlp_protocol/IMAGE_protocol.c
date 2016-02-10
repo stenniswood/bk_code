@@ -15,6 +15,7 @@
 
 #include "protocol.h"
 #include "devices.h"
+#include "nlp_extraction.hpp"
 
 
 /***********************************************************************

@@ -18,6 +18,7 @@
 #include "GENERAL_protocol.h"
 #include "FILE_protocol.h"
 #include "thread_control.h"
+#include "nlp_extraction.hpp"
 
 
 

@@ -19,7 +19,7 @@
 #include "HMI_protocol.h"
 #include "thread_control.h"
 #include "hmi_thread.h"
-
+#include "nlp_extraction.hpp"
 
 /* Sample Sentences:
 	receive my [mouse/touch/[and]keyboard] input

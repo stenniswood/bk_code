@@ -59,13 +59,13 @@ pthread_t server_thread_id;
 */
 void establish_ipc()
 {
-	int result = connect_shared_client_memory(FALSE);
+	int result = connect_shared_client_memory( FALSE );
 	if (result<=0) {
-		printf("Error:  Cannot attach to abkInstant.  No shared memory established.\n");
-		printf("    You must start the Instant server first!\n");
+		//printf("\n\nError:  Cannot attach to abkInstant.  No shared memory established.\n");
+		printf("\n    You must start the Instant server first!\n\n");
 		exit(1);
-	}
-	print_clients();
+	}	 
+	cli_print_clients();
 }
   
 void help()
@@ -86,10 +86,10 @@ void help()
 
 void print_args(int argc, char *argv[])
 {
-	printf("ARGS: %d", argc);
+	printf("ARGS: %d\n", argc);
 	for (int i=0; i< argc; i++)
 	{
-		printf(" %s ", argv[i] );
+		printf("%d: %s \n", i, argv[i] );
 	}
 	printf("\n");
 }
@@ -97,39 +97,14 @@ void print_args(int argc, char *argv[])
 /* A connection to another client must exist already.  Doesn't matter how the connection
 	was established.  If Instant received it or initiaited it based on this client.
 */
-void parse_send_cmds( char** mArgv, int mArgc, int mStartIndex )
+void parse_send_cmds( char* mArgv[], int mArgc )
 {
 	// CAN,AUDIO,VIDEO,file,Mouse/keyboard:
-	cli_ipc_write_command_text( mArgv[mStartIndex] );
-
-/* NOTE:  This parsing has to be done in abkInstant!  
-		Here just put the string in .
-	
-	Only have to parse here if further parameters to be sent also.
-*/	
-/*	if (strcmp(argv[1], "can")==0)
-	{
-		cli_ipc_write_command_text( );
-			//TransportCAN = FALSE;		
-	}
-	else if (strcmp(argv[1], "audio")==0)
-	{	
-	}
-	else if (strcmp(argv[1], "video")==0)
-	{
-	}
-	else if (strcmp(argv[1], "file")==0)
-	{
-	}
-	else if (strcmp(argv[1], "mouse")==0)
-	{
-	}
-	else if (strcmp(argv[1], "keyboard")==0)
-	{
-	} */
+	cli_ipc_write_sentence( mArgv[1] );
 }
 
 char working_buffer[127];
+
 
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
@@ -138,7 +113,7 @@ int main( int argc, char *argv[] )
 {
 	print_args( argc, argv );
 	printf("=======================Beyond Kinetics ========================\n");		
-	int first_param = 1;		// sudo ./pican cfg 
+	int first_param = 1;
 	int value    	= 0;
 	if (argc>1)
 	{
@@ -148,43 +123,49 @@ int main( int argc, char *argv[] )
 			return 0;
 		}
 	}
-	establish_ipc();		
-	int index = 0;
-	char* str_ptr = NULL;
+	establish_ipc();
 
 	// PARSE ARGUMENTS : 
 	if (argc>1)
 	{
-		// FORCE CLIENT CONNECTION:
-		if (strcmp(argv[1], "whoami")==0)
+		cli_ipc_write_sentence( argv[1] );		
+		cli_wait_for_ack_update();
+		cli_wait_for_response();		
+		cli_ack_response();		
+		printf("RESPONSE:  %s\n", get_sentence() );
+	}
+	printf("================= DONE ========================\n");
+}
+
+
+/*			Done in Instant.
+			int error = connect_to_robot(argv[2]);
+			if (error==0)
+			{ } */
+
+/*		if (strcmp(argv[1], "whoami")==0)
 		{
 			printf("\n\nYour beacon name is %s.\n", ipc_memory_client->OurBeaconName );
 			printf("Your IP address is %s.\n", ipc_memory_client->ipAddress );
 		} 
 		else if (strcmp(argv[1], "list")==0)
 		{
-			printf("\n\n%d Instant clients available.\n",  ipc_memory_client->NumberClients );
-			str_ptr = ipc_memory_client->ClientArray;
-			for (int i=0; i<ipc_memory_client->NumberClients; i++)
-			{
-				printf("%s\n",  str_ptr );
-				index += (strlen(str_ptr)+1);
-				str_ptr = (str_ptr+index);
-			}
+			printf("\n\n%d Instant clients available.\n", ipc_memory_client->NumberClients );
+			cli_print_clients();
 		}
 		else if (strcmp(argv[1], "connect")==0)
 		{
 			strcpy( working_buffer, "connect " );
 			strcat( working_buffer, argv[2]   );
 			printf("\n\nConnect command:  %s\n", working_buffer );			
-			cli_ipc_write_command_text( working_buffer );			
+			cli_ipc_write_sentence( working_buffer );			
 		}
 		else if (strcmp(argv[1], "send")==0)
 		{
 			strcpy( working_buffer, "send " );
 			strcat( working_buffer, argv[2] );
 			printf("\n\nConnect command:  %s\n", working_buffer );			
-			cli_ipc_write_command_text( working_buffer );			
+			cli_ipc_write_sentence( working_buffer );			
 
 			//CAN,AUDIO,VIDEO,file,Mouse/keyboard
 			//parse_send_cmds(argv, argc, 2);						
@@ -194,18 +175,8 @@ int main( int argc, char *argv[] )
 			strcpy( working_buffer, "stop " );
 			strcat( working_buffer, argv[2] );
 			printf("\n\nConnect command:  %s\n", working_buffer );			
-			cli_ipc_write_command_text( working_buffer );			
+			cli_ipc_write_sentence( working_buffer );			
 
 			//CAN,AUDIO,VIDEO,file,Mouse/keyboard
 			//parse_send_cmds(argv, argc, 2);						
- 		}
-
-	}
-	printf("================= DONE ========================\n");	
-}
-
-
-/*			Done in Instant.
-			int error = connect_to_robot(argv[2]);
-			if (error==0)
-			{ } */
+ 		}  */

@@ -13,9 +13,10 @@ extern "C" {
 #include "bcm_host.h"
 #include "ilclient.h"
 
-
-#define BUFFER_SIZE_SAMPLES 1024
-
+#define N_WAVE          1024*8    /* dimension of Sinewave[] */
+#define BUFFER_SIZE_SAMPLES N_WAVE
+extern short Sinewave[N_WAVE];
+ 
 typedef int int32_t;
 
 typedef struct {
@@ -49,15 +50,16 @@ uint32_t audioplay_get_latency(AUDIOPLAY_STATE_T *st);
 #define CTTW_SLEEP_TIME 10
 #define MIN_LATENCY_TIME 20
 
-//static const char *audio_dest[] = {"local", "hdmi"};
-
-void test_function(int id);
 //void play_waveform( Wave* mWave, int dest );
-//void play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
 
+void create_sinewave(short* mBuffer, int mSize, float freq, float phase=0.); 
+
+
+// dest=0--> local;  =1-->hdmi;
+void play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
 
 // BK:
-int32_t audio_setup_and_play ( int dest, int samplerate, int channels, int bitdepth );
+int32_t  audio_setup 		  ( int dest, int samplerate, int channels, int bitdepth );
 uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate );
 void	 audio_close		  ( );
 

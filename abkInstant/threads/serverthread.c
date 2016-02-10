@@ -166,12 +166,16 @@ BOOL Parse_done( char* mSentence )
 // Send nlp response:
 void Send_Reply()
 {
-	printf("RESPONSE:|%s|\n", NLP_Response);
-
-	int length = strlen(NLP_Response);
+	char buffer[255];
+	strcpy (buffer, "VR:");
+	strcat (buffer, NLP_Response);	
+	printf("RESPONSE:|%s|\t", buffer);
+	
+	int length = strlen(buffer);
 	if (length > MAX_SENTENCE_LENGTH)
 		length = MAX_SENTENCE_LENGTH;
-	bytes_txd = write(connfd, NLP_Response, length );
+	bytes_txd = write(connfd, buffer, length );
+	printf("Reply sent.\n");	
 }
 
 void Init_NLP_word_lists()
@@ -258,13 +262,19 @@ void establish_connection()
 			connfd = accept(listenfd, (struct sockaddr*)&client_addr, &size ); 
 			printf("connection accepted!\n");
 			connection_established = TRUE;
+
+				// For Client Status purpose, let them know we are connected.
+				//strcpy (NLP_Response, "Connected, welcome.");
+				//printf("RESPONSE: %s\n", NLP_Response );
+				//Send_Reply();
 		}
 		else 
 			// ALTERNATELY:  Client memory requested we be the client, initiate connection : 
 			if (REQUEST_client_connect_to_robot)
 			{
-				connection_established = !(connect_to_robot( REQUESTED_client_ip ));				
-				REQUEST_client_connect_to_robot = FALSE;				
+				connection_established = !(connect_to_robot( REQUESTED_client_ip ));
+				REQUEST_client_connect_to_robot = FALSE;
+				
 			}
 	}
 	printf("Connection established \n");
@@ -346,8 +356,9 @@ void* server_thread(void*)
 				//printf("Done parsing. %d\n", connfd);
 
 				if (nlp_reply_formulated)
-				{	Send_Reply();
-					printf("Reply sent.\n");	
+				{	
+					Send_Reply();
+					nlp_reply_formulated = false;
 				}
 				//ipc_write_command_text( buffer );
 				//done = Parse_done(buffer);

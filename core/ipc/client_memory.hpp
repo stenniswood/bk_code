@@ -35,7 +35,10 @@ struct client_ipc_memory_map
 	long int UpdateCounter;					// Incremented on change to any of below:
 	long int AcknowledgedCounter; 
 	
-	char	 Sentence[128];					// verbal commands (NLP) activate connection requests.	
+	long int ResponseCounter;					// Incremented on change to any of below:
+	long int ResponseAcknowledgedCounter;					// Incremented on change to any of below:
+			
+	char	 Sentence[255];					// verbal commands (NLP) activate connection requests.	
 	int		 NumberClients;
 	struct stClientData ClientArray[MAX_CLIENTS];		// String array (dimension of NumberClients)
 	//short	 ScreenNumber;								// Which screen is being displayed.  voice commands can change.  Simplistic for now a single number per page.	
@@ -52,6 +55,8 @@ void cli_dump_ipc			( );
 void cli_save_segment_id	( char* mFilename );
 int  cli_read_segment_id	( char* mFilename );
 
+BOOL is_client_ipc_memory_available();
+int  connect_shared_client_memory( char mAllocate=FALSE );
 int  cli_allocate_memory	( );
 void cli_deallocate_memory	( int msegment_id );
 int  cli_attach_memory		( );
@@ -63,19 +68,24 @@ void cli_fill_memory		( );
 void cli_ipc_write_connection_status( char* mStatus   );
 void cli_ipc_write_sentence	 	    ( char* mSentence );
 
+void cli_ipc_write_response	 	    ( char* mSentence );
+void cli_wait_for_response();
+void cli_ack_response	  ();
+
 // for instant to fill in the shared mem buffer:
-void cli_ipc_add_new_client	   ( struct in_addr mbeacon_ip_list );
+//void cli_ipc_add_new_client  ( struct in_addr mbeacon_ip_list );
+void cli_reset_client_list	   (  );
+void cli_ipc_add_new_client	   ( struct stClientData* mEntry );
 void cli_ipc_add_new_clients   ( std::list<struct in_addr> mbeacon_ip_list );
 void cli_print_clients		   ( );
 
 // new:
-int cli_find_name(char*);
+int  cli_find_name(char*);
 void cli_wait_for_ack_update();
-
 /************************************************************/
 
 /************************************************************/
-int connect_shared_client_memory( char mAllocate=FALSE );
+
 char* get_connection_status		();
 char* get_sentence				();
 int   read_status_counter		();
@@ -85,6 +95,7 @@ BOOL  cli_is_new_update				();
 
 void cli_ack_connection_status	();
 void cli_ack_update_status		();
+
 /************************************************************/
 
 

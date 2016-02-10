@@ -117,10 +117,10 @@ BOOL handle_audio_data( )
 		int audio_dest = 0;
 		if ((header_received) && (play_started==FALSE))		
 		{
-			audio_setup_and_play(   audio_dest, 
-									wave_header.sample_rate, 
-									wave_header.num_channels, 
-									wave_header.bits_per_sample );
+			audio_setup(   audio_dest, 
+							wave_header.sample_rate, 
+							wave_header.num_channels, 
+							wave_header.bits_per_sample );
 			printf("Audio Setup completed\n");
 			play_started = TRUE;
 		}
@@ -173,7 +173,7 @@ void audio_interface()
 	
 	if (AUDIO_tcpip_SendingOn)
 	{
-	    printf("Audio_SendingOn is ON!\n");	    
+	    //printf("Audio_SendingOn is ON!\n");	    
 	    if (sending_audio_file_fd)
 	    {
 			// file position will be maintained automatically as long as the file descriptor is
@@ -185,19 +185,23 @@ void audio_interface()
 	    }
 	    else
 	    {
-			// PUMP AUDIO RECORDING QUEUE:
-			BOOL available = audio_is_new_rxbuffer();
-				/* the messages will be pulled off of the Received buffer.
-				   and stored in Recieved buffer at the other instant end.  */
-			if ((available) && (ipc_memory_aud))
+			/* the messages will be pulled off of the Received buffer.
+			   and stored in Recieved buffer at the other instant end.  */
+			if (ipc_memory_aud)
 			{				
-				memcpy( audio_socket_buffer, ipc_memory_aud->audio_data, ipc_memory_aud->update_samples*sizeof(sample) );
-				if (AUDIO_tcpip_SendingMuted)
-					MuteBuffer( (byte*)audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE/2 );
-				else if ((AUDIO_tcpip_ListeningOn) && (use_fir))
-					audio_subtract( (short*)audio_socket_buffer, (short*)buffer, AUDIO_OUTPUT_BUFFER_SIZE/2 ,
-									FIR, FIR_length);	
-				SendTelegram( audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE );
+				// PUMP AUDIO RECORDING QUEUE:
+				BOOL available = audio_is_new_rxbuffer();
+				if (available)
+				{
+					printf("new buffer is availble, sending...\n");	    
+					memcpy( audio_socket_buffer, ipc_memory_aud->audio_data, ipc_memory_aud->update_samples*sizeof(sample) );
+					if (AUDIO_tcpip_SendingMuted)
+						MuteBuffer( (byte*)audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE/2 );
+					else if ((AUDIO_tcpip_ListeningOn) && (use_fir))
+						audio_subtract( (short*)audio_socket_buffer, (short*)buffer, AUDIO_OUTPUT_BUFFER_SIZE/2 ,
+										FIR, FIR_length);	
+					SendTelegram( audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE );
+				}
 			}
 		}
 	}
