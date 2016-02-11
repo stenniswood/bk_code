@@ -166,11 +166,12 @@ return:	pointer to the next telegram (ie. after all our header and data bytes)
 		this will be null if end of the received buffer (terminator added in serverthread.c
 		by the number of bytes read).
 *****************************************************************/
-char* Parse_CAN_Statement( char* mSentence )
+int Parse_CAN_Statement( char* mSentence )
 {
 	printf("Parse_CAN_Statement - \n");
-	char* retval = mSentence + strlen(mSentence)+ 1/*nullterminator*/;
-
+	//char* retval = mSentence + strlen(mSentence)+ 1/*nullterminator*/;
+	int retval = -1;
+	
 	//extract_nlp_words( mSentence, &subject_list, &verb_list, &object_list, &adjective_list );
 
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);
@@ -192,7 +193,7 @@ char* Parse_CAN_Statement( char* mSentence )
 		{
 			printf( "Listening for incoming CAN data...\n");
 			CAN_ListeningOn = FALSE;
-			//retval = TRUE;
+			retval=0;
 		}
 		if ( (compare_word( verb, "send") ==0) ||
 			 (compare_word( verb, "route") ==0)  )
@@ -209,6 +210,7 @@ char* Parse_CAN_Statement( char* mSentence )
 					printf("No action for request to start amon!\n");
 					nlp_reply_formulated = TRUE;
 					strcpy (NLP_Response, "Sorry, CAN is not available.");
+					retval=0;					
 					return retval;
 				}						
 			}
@@ -220,7 +222,7 @@ char* Parse_CAN_Statement( char* mSentence )
 			
 			nlp_reply_formulated = TRUE;
 			strcpy (NLP_Response, "Okay, I will be sending you my CAN traffic.");
-			
+			retval=0;
 			/* the messages will be pulled off of the Received buffer.
 			   and stored in Recieved buffer at the other instant end.  */
 		}
@@ -232,11 +234,11 @@ char* Parse_CAN_Statement( char* mSentence )
 			// Leave connection to IPC and amon running.
 			nlp_reply_formulated = TRUE;
 			strcpy (NLP_Response, "Okay, No more CAN traffic will be transmitted over tcpip.");
+			retval=0;			
 		}
 
 		if (compare_word( verb, "how much") ==0)
 		{
-			//retval = TRUE;
 		}
 	}
 	else if (compare_word( subject, "can_message")==0)
@@ -250,8 +252,7 @@ char* Parse_CAN_Statement( char* mSentence )
 			AddToRxList( &msg );	// goes into the received buffer.
 			print_rx_position();
 		}
-
-		retval += bytes_extracted;		
+		retval = bytes_extracted;		
 	}
 	else if (compare_word( subject, "can_lkjh")==0)
 	{

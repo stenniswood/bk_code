@@ -250,20 +250,36 @@ int main( int argc, char *argv[] )
 	}
 	printf("================= Checking command line arguments ========================\n");		
 
-		short Sinewave_2[N_WAVE];
-		float freq = (2.*3.1415 / (float)N_WAVE);
+//		play_api_test(22050, 16, 1, 0);
+
+#define N_WAVES          1024*32    /* dimension of Sinewave[] */
+	static short Sinewaves[N_WAVES*2];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
+
+	float freq = 1*(2.*3.1415 / (float)N_WAVES);
+	create_sinewave(Sinewaves,  N_WAVES, freq, 0.);
+	freq = 10.*(2.*3.1415 / (float)N_WAVES);
+	create_sinewave( &(Sinewaves[N_WAVES]), N_WAVES, freq, 0. );
+
+	int32_t result = audio_setup( 0, 22050, 1, N_WAVES*2 );
+	for (int j=0; j<4; j++)
+	{
+		uint8_t* result = audio_add_play_buffer( Sinewaves, N_WAVES*2, 22050 );
+//		result = audio_add_play_buffer( Sinewave_2, N_WAVE, 22050 );
+	}
+
+/*		short Sinewave_2[N_WAVE];
+		float freq = 3*(2.*3.1415 / (float)N_WAVE);
 		create_sinewave(Sinewave,  N_WAVE, freq, 0.);
 		freq = 5.*(2.*3.1415 / (float)N_WAVE);
 		create_sinewave(Sinewave_2, N_WAVE, freq, 0.);
 
-//		play_api_test(22050, 16, 1, 0);
-
-		int32_t result = audio_setup( 0, 22050, 1, 16 );
-		while (1)
+		int32_t result = audio_setup( 1, 22050, 1, N_WAVE );
+		for (int j=0; j<4; j++)
 		{
 			uint8_t* result = audio_add_play_buffer( Sinewave, N_WAVE, 22050 );
 			result = audio_add_play_buffer( Sinewave_2, N_WAVE, 22050 );
-		}			
+		}	
+*/
 	
 	printf("================= Main Loop ==========================\n");	
 	while (1) 

@@ -131,18 +131,17 @@ Do the work of the Telegram :
 return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
 *****************************************************************/
-BOOL Parse_HMI_Statement(char* mSentence)
+int Parse_HMI_Statement(char* mSentence)
 {
-	std::string* subject  	= extract_word( mSentence, &subject_list );
-	if (subject==NULL) return FALSE;  // subject matter must pertain.
 	printf("Parse_HMI_Statement\n");
-			
+	int retval = -1;	
+	
+	std::string* subject  	= extract_word( mSentence, &subject_list );
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 );
 	std::string* object 	= extract_word( mSentence, &object_list  );
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
 	int prepos_index      	= get_preposition_index( mSentence );
 
-	int retval = FALSE;
 	if ((strcmp( subject->c_str(), "mouse")==0) ||
 		(strcmp( subject->c_str(), "touch")==0) ||
 		(strcmp( subject->c_str(), "keyboard")==0) ||
@@ -159,16 +158,16 @@ BOOL Parse_HMI_Statement(char* mSentence)
 			// Maybe want to verify the source IP address for security purposes
 			// later on.  Not necessary now!
 			printf( "Listening for incoming HMI...\n");
-			create_HMI_thread( FALSE,  TRUE );
-			retval = TRUE;
+			
+			retval = 0;
 		}
 
 		if ( (strcmp(verb->c_str(), "send") ==0) && // preposition "to"
 			 (strcmp(object->c_str(), "you") ==0) )
 		{
 			printf( "Listening for HMI...\n");
-			create_HMI_thread( FALSE,  TRUE );
-			retval = TRUE;			
+			
+			retval = 0;			
 		}	
 
 		if ((strcmp(verb->c_str(), "close") ==0) ||
@@ -178,6 +177,7 @@ BOOL Parse_HMI_Statement(char* mSentence)
 		    (strcmp(verb->c_str(), "kill" ) ==0))
 			{
 				 hmi_terminate_requested = TRUE;
+				 retval=0;				 
 			}
 	}
 	return retval;

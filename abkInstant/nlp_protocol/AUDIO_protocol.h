@@ -2,7 +2,11 @@
 extern "C" {
 #endif
 
-
+/* Note - Sometimes the Raspberry Pi doesn't play over HDMI anyway.
+		  and doing "raspi-config" doesn't help.
+		  Answer is to uncomment the line in "/boot/config.txt" which says
+		  hdmi_drive=2.  Then reboot.  This solved it.
+*/
 
 extern BOOL  AUDIO_tcpip_ListeningOn;
 extern BOOL  AUDIO_tcpip_SendingOn;
@@ -23,7 +27,7 @@ void audio_cancel	( );
 
 void 	DumpBuffer( BYTE* mbuff, int mlength);
 void 	Init_Audio_Protocol();
-BOOL 	Parse_Audio_Statement( char* mSentence );
+int 	Parse_Audio_Statement( char* mSentence );
 
 
 

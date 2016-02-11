@@ -21,8 +21,8 @@
 #include "AUDIO_file_util.h"
 #include "AUDIO_interface.h"
 #include "AUDIO_device.h"
-
-//#include "thread_control.h"
+#include "audio_memory.h"
+#include "serverthread.h"
 #include "nlp_extraction.hpp"
 
 /* Suggested Statements:
@@ -88,7 +88,7 @@ static void init_subject_list()
 	subject_list.push_back( "recording" 	);
 	subject_list.push_back( "music" 		);
 	subject_list.push_back( "capabilities" 	);
-	subject_list.push_back( "buffer"	 	);	
+	subject_list.push_back( "audio_buffer"	);	
 }
 
 static void init_verb_list()
@@ -129,8 +129,6 @@ static void init_preposition_list()
 	// WordGroup prepositions ;
 	// prepositions.add_word( "to" );
 	// prepositions.add_word( "from" );
-	
-	
 	
 	preposition_list.push_back( "to" );
 	preposition_list.push_back( "from" );	
@@ -204,12 +202,17 @@ void Init_Audio_Protocol()
 	AUDIO_tcpip_ListeningOn = FALSE;		
 	AUDIO_tcpip_SendingOn   = FALSE;
 	init_word_lists();
+
+	// Setup the AUDIO IPC memory - for output mostly :
+	// abkInstant will play over the sound card, however,
+	// for avisual display and other 3rd party analyzing...
+	int result = audio_connect_shared_memory( TRUE );
 }
 
 
 /**** ACTION INITIATORS:    (4 possible actions) *****/
 void send_audio_file ( char* mFilename )
-{	
+{
     sending_audio_file_fd  = fopen( mFilename, "r" );
     if (sending_audio_file_fd == NULL)
     {
@@ -227,11 +230,14 @@ void send_audio_file ( char* mFilename )
 	//printf( NLP_Response );
 }
 
+const int AUDIO_SAMPLE_SIZE = 16*1024;	/* see autio_interface */ 
+
 void send_audio()
 {
 	// Maybe want to verify the source IP address for security purposes
 	// later on.  Not necessary now!
 	//printf( "Sending my incoming audio over tcpip...\n");
+	int32_t result = audio_setup( 1, 22050, 1, AUDIO_SAMPLE_SIZE );		// for record
 
 	// Fill in later...!  WaveHeader struct
 	char* header=NULL;
@@ -245,10 +251,8 @@ void audio_listen(BOOL Save=FALSE)
 {	
 	// Fake out the other end, just verify the audio works:
 	//play_api_test(22050, 16, 1, 0);
-	int32_t result = audio_setup( 0, 22050, 1, 16 );
-	
-	
-	//play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
+	int destination = 1;	
+	int32_t result = audio_setup( destination, 22050, 1, AUDIO_SAMPLE_SIZE );
 	
 	//printf( "Listening for incoming tcpip audio...\n");
 	AUDIO_tcpip_ListeningOn = TRUE;
@@ -275,9 +279,10 @@ void audio_two_way()
 void audio_cancel()
 {
 	printf( "Cancelling audio connection.\n");
-	//audio_terminate_requested = TRUE;
-	AUDIO_tcpip_SendingOn = FALSE;
+
+	AUDIO_tcpip_SendingOn   = FALSE;
 	AUDIO_tcpip_ListeningOn = FALSE;
+	audio_close( );
 	
 	nlp_reply_formulated      = TRUE;
 	strcpy(NLP_Response, "Okay, I am terminating our audio connection.");
@@ -287,26 +292,25 @@ void audio_cancel()
 
 /*****************************************************************
 Do the work of the Telegram :
-return  TRUE = GPIO Telegram was Handled by this routine
-		FALSE= GPIO Telegram not Handled by this routine
+return  number of extra bytes extracted (ie. in addition to the strlen)
+		This number will be added to the char* ptr in the General_protocol()		
 *****************************************************************/
-BOOL Parse_Audio_Statement( char* mSentence )	
+int Parse_Audio_Statement( char* mSentence )	
 {
-	BOOL retval = FALSE;
-	std::string* subject  	= extract_word( mSentence, &subject_list );
-	if (subject==NULL) return FALSE;  // subject matter must pertain.
-	printf("Parse_Audio_Statement\n");
+	int retval = -1;
 	
+	printf("Parse_Audio_Statement\n");	
+	std::string* subject  	= extract_word( mSentence, &subject_list );	
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 );
 	std::string* object     = extract_word( mSentence, &object_list  );
 	std::string* adjective  = extract_word( mSentence, &adjective_list );	
 	std::string* preposition = extract_word( mSentence, &preposition_list );
 	//int prepos_index     = get_preposition_index( mSentence );
-	diagram_sentence(subject, verb, adjective, object, preposition );
+	//diagram_sentence(subject, verb, adjective, object, preposition );
 
 	if ((compare_word( subject, "audio")==0) ||
 		(compare_word( subject, "microphone")==0))
-	{	    
+	{	
 	    //printf("Processing audio telegram. verb=%s\n", verb->c_str());
 	    // implied subject (party being spoken to) is the other end (ie. sequencer from lcd rpi):
 		if ((compare_word(verb, "upload"   ) ==0)  ||
@@ -315,53 +319,51 @@ BOOL Parse_Audio_Statement( char* mSentence )
 		    (compare_word(verb, "incoming" ) ==0) )
 		{
 			audio_listen();
-			retval = TRUE;
+			retval=0;
 		}
 		if ((compare_word(verb, "hear") ==0) ||
 		    (compare_word(verb, "listen") ==0))
 		{
 			if (compare_word(adjective, "your") ==0)
-			{	audio_listen();		retval = TRUE;	}
+			{	audio_listen();	
+				retval=0;	}
 		}
 		if (compare_word(verb, "send") ==0)
 		{
 			//if (strcmp(object->c_str(), "me") ==0)
-			{	send_audio();	retval = TRUE;	}
+			{	send_audio();	retval=0;	}
 			//if (strcmp(object->c_str(), "you") ==0)
 			//{	audio_listen();		retval = TRUE;	}
 		}
 		if ((compare_word(verb, "mute") ==0) )
-		{
-			
+		{			
 		    AUDIO_tcpip_SendingMuted = TRUE;
-			retval = TRUE;		    
 
 			nlp_reply_formulated = TRUE;
 			strcpy (NLP_Response, "Muted.");			
+			retval=0;			
 		}
 		if ((compare_word(verb, "unmute") ==0) )
 		{
 		    AUDIO_tcpip_SendingMuted = FALSE;
-			retval = TRUE;		    
 
 			nlp_reply_formulated = TRUE;
 			strcpy (NLP_Response, "Unmuted.");			
-
+			retval=0;
 		}
 		if ((compare_word(verb, "silence") ==0) )
 		{
 		    AUDIO_tcpip_ListeningSilenced = TRUE;
-			retval = TRUE;		    
 			nlp_reply_formulated = TRUE;
 			strcpy (NLP_Response, "Silenced.");			
-
+			retval=0;
 		}
 		if ((compare_word(verb, "unsilence") ==0) )
 		{
 		    AUDIO_tcpip_ListeningSilenced = FALSE;
-		    retval = TRUE;
 			nlp_reply_formulated = TRUE;
 			strcpy (NLP_Response, "unSilenced.");			
+			retval=0;
 		}
 		
 		if ((compare_word(verb, "close") ==0) ||
@@ -371,13 +373,13 @@ BOOL Parse_Audio_Statement( char* mSentence )
 		    (compare_word(verb, "kill" ) ==0))
 			{
 				 audio_cancel(); 
-				 retval = TRUE;
+				 retval=0;
 			}
 	}
 	if (compare_word( adjective, "two way")==0 )
 	{
 	    audio_two_way();
-	    retval = TRUE;
+	    retval=0;
 	};
 
 	if (compare_word( subject, "recording")==0)
@@ -391,15 +393,37 @@ BOOL Parse_Audio_Statement( char* mSentence )
 		    if (compare_word(object, "me") ==0)
 		    {
 			send_audio_file("test.wav");
-			retval = TRUE;
+			retval=0;
 		    }
 		}	    
 	 }
-	if ((compare_word( subject, "audio buffer")==0) &&
+	if ((compare_word( subject, "audio_buffer")==0) &&
 		( compare_word( adjective,  "new"  )==0))
 	{
-		BOOL handled = handle_audio_data( );
-		retval = TRUE;	
+		int text_length = strlen(mSentence)+1;
+		BYTE* audio_data_ptr = mSentence + text_length;
+		char* size_ptr = strrchr(mSentence, ' ') + 1;
+		int length = 0;
+		if (size_ptr)
+			length = atoi(size_ptr);
+		
+		//bytes_rxd = should have value from serverthread.
+		int index_within_buffer = (mSentence-socket_buffer);
+		int local_bytes_rxd = bytes_rxd - index_within_buffer - text_length;
+		//printf("init:  index=%d;  bytes_rxd=%d;  local_bytes_rxd=%d\n", index_within_buffer, bytes_rxd, local_bytes_rxd );
+
+		while (local_bytes_rxd < length)
+		{
+			local_bytes_rxd += read(connfd, audio_data_ptr+local_bytes_rxd, length);
+			//printf("RXD AUDIO BUFFER:  length=%d;  bytes_rxd=%d\n", length, local_bytes_rxd );
+		}
+		// audio_data_ptr is within socket_buffer (large 5MB buffer)
+		//printf("RXD AUDIO BUFFER:  length=%d = bytes_rxd=%d\n", length, local_bytes_rxd );
+		
+		// restart at beginning of audio data:
+		audio_data_ptr = mSentence + text_length;
+		BOOL handled   = handle_audio_data( audio_data_ptr, length );
+		retval = length;
 	}
 	if (compare_word( subject, "music")==0)
 	{	        	    
@@ -411,7 +435,7 @@ BOOL Parse_Audio_Statement( char* mSentence )
 		    if (compare_word(object, "me") ==0)
 		    {
 			send_audio_file("test.mp3");
-			retval = TRUE;
+			retval=0;
 		    }
 		}
 	}
@@ -421,7 +445,7 @@ BOOL Parse_Audio_Statement( char* mSentence )
 	{
 		if (object)  {
 			if (compare_word( object, "connection")==0)
-			{	audio_two_way();		retval = TRUE;	}
+			{	audio_two_way();	retval=0;	}
 		}
 	}
 

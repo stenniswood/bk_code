@@ -220,12 +220,13 @@ void camera_cancel()
 
 /*****************************************************************
 Do the work of the Telegram :
-return  TRUE = Telegram was Handled by this routine
-		FALSE= Telegram not Handled by this routine
+return  -1	=> Not handled
+		else number of extra bytes extracted from the mSentence buffer.
+			- besides strlen(mSentence)! 
 *****************************************************************/
-BOOL Parse_Camera_Statement( char* mSentence )							
+int Parse_Camera_Statement( char* mSentence )							
 {
-	BOOL retval = FALSE;
+	int retval=-1;
 
 	printf("Parse_Camera_Statement\n");
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);	
@@ -242,25 +243,25 @@ BOOL Parse_Camera_Statement( char* mSentence )
 		{
 			float result = atof(object->c_str());
 			set_camera_tilt_to( result );
-			retval=TRUE;
+			retval=0;
 		}
 		if (compare_word(verb, "lower") ==0)
 		{
 			float result = atof(object->c_str());
 			lower_camera_by( result );
-			retval=TRUE;
+			retval=0;
 		}
 		if (compare_word(verb, "raise") ==0)
 		{
 			float result = atof(object->c_str());
 			raise_camera_by( result );		
-			retval=TRUE;
+			retval=0;
 		}
 		if (compare_word(verb, "what is") ==0)
 		{
 			float result = atof(object->c_str());
 			get_camera_tilt( result );
-			retval=TRUE;
+			retval=0;
 		}
 	}
 	else if (compare_word( subject, "camera pan")==0)
@@ -269,7 +270,7 @@ BOOL Parse_Camera_Statement( char* mSentence )
 		{
 			float result = atof(object->c_str());
 			set_camera_pan_to( result );
-			retval=TRUE;
+			retval=0;
 		}
 		if ((compare_word(verb, "pan left") ==0)
 		||  (compare_word(verb, "move left") ==0)
@@ -277,7 +278,7 @@ BOOL Parse_Camera_Statement( char* mSentence )
 		{
 			float result = atof(object->c_str());
 			move_camera_left_by( result );
-			retval=TRUE;
+			retval=0;
 		}
 		if ((compare_word(verb, "pan right") ==0)
 		||  (compare_word(verb, "move right") ==0)
@@ -285,13 +286,13 @@ BOOL Parse_Camera_Statement( char* mSentence )
 		{
 			float result = atof(object->c_str());
 			move_camera_right_by( result );			
-			retval=TRUE;
+			retval=0;
 		}
 		if (compare_word(verb, "what is")==0)
 		{
 			float result = atof(object->c_str());
 			get_camera_pan( result );
-			retval=TRUE;
+			retval=0;
 		}
 	}
 	else if ((compare_word( subject, "camera")==0)  ||
@@ -319,15 +320,14 @@ BOOL Parse_Camera_Statement( char* mSentence )
 		  				  ((compare_word(preposition, "to")==0) && (compare_word(object, "me")==0)) );
 			printf("cond1=%d; cond2=%d;\n", cond_1, cond_2 );
 			if (cond_1)
-			{    camera_watch();		retval = TRUE;		}					  				  
+			{    camera_watch();		retval = 0;		}					  				  
 			else if (cond_2)
-			{    send_camera();			retval = TRUE;		}
-			
+			{    send_camera();			retval = 0;		}
 		}
 		if (compare_word( adjective, "two way")==0 )
 		{
 		    camera_two_way();
-		    retval = TRUE;
+		    retval = 0;
 		};
 		
 		if ((compare_word(verb, "mute") ==0) ||
@@ -335,14 +335,14 @@ BOOL Parse_Camera_Statement( char* mSentence )
 		{
 		    CAMERA_tcpip_SendingMuted = TRUE;	// Blocked, other side wont be able to see
 			cli_ipc_write_response( "Camera muted (electronically blocked)" );			    
-		    retval = TRUE;		    
+		    retval = 0;		    
 		}
 		if ((compare_word(verb, "unmute") ==0) ||
 			(compare_word(verb, "unblock") ==0))
 		{
 		    CAMERA_tcpip_SendingMuted = FALSE;	// Blocked, other side wont be able to see
 			cli_ipc_write_response( "Camera live!" );			    		    
-		    retval = TRUE;
+		    retval = 0;
 		}
 
 		if ((compare_word(verb, "close") ==0) ||
@@ -352,32 +352,32 @@ BOOL Parse_Camera_Statement( char* mSentence )
 		    (compare_word(verb, "kill" ) ==0))
 		{
 		    camera_cancel();
-		    retval = TRUE;
+		    retval = 0;
 		};
 		
 		if (compare_word(verb, "lower") ==0)
 		{
 			float result = atof(object->c_str());
 			lower_camera_by( result );
-			retval=TRUE;
+			retval=0;
 		}		
 		if (compare_word(verb, "raise") ==0)
 		{
 			float result = atof(object->c_str());
 			raise_camera_by( result );
-			retval=TRUE;
+			retval=0;
 		}		
 		if (compare_word(verb, "move left") ==0)
 		{
 			float result = atof(object->c_str());
 			move_camera_left_by( result );		
-			retval=TRUE;
+			retval=0;
 		}		
 		if (compare_word(verb, "move right") ==0)
 		{
 			float result = atof(object->c_str());
 			move_camera_left_by( result );		
-			retval=TRUE;
+			retval=0;
 		}
 		
 		if (compare_word(verb, "start") ==0)
@@ -389,12 +389,12 @@ BOOL Parse_Camera_Statement( char* mSentence )
 						
 			// Recording			
 				// recording verb will take precedence over "start"
-			retval=TRUE;
+			retval=0;
 		}
 
 		if (compare_word(verb, "stop") ==0)
 		{
-			retval=TRUE;		
+			retval=0;		
 		}
 
 		if (compare_word(verb, "change") ==0)
@@ -411,7 +411,7 @@ BOOL Parse_Camera_Statement( char* mSentence )
 			if (compare_word(object, "height") ==0)
 			{
 			}
-			retval=TRUE;			
+			retval=0;			
 		}		
 	}
 	printf( "Parse_Camera_Statement done\n" );

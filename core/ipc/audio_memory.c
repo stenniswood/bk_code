@@ -155,9 +155,9 @@ void audio_ipc_write_buffer( short* mBuffer, long int mLength )
 	ipc_memory_aud->UpdateCounter++;
 	ipc_memory_aud->update_samples  = mLength;
 
-	printf("%d: %d bytes \n", ipc_memory_aud->UpdateCounter, mLength );
+	printf("%d: %d samples \n", ipc_memory_aud->UpdateCounter, mLength );
 	//printf("%d:Copying %d bytes to shared mem.\n", SentenceCounter, length);
-	memcpy( ipc_memory_aud->audio_data, mBuffer, mLength );
+	memcpy( (char*)ipc_memory_aud->audio_data, (char*)mBuffer, mLength );
 }
 
 void audio_ipc_write_audio_connection_status( char* mStatus )

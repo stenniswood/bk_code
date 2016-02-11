@@ -46,12 +46,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OUT_CHANNELS(num_channels) ((num_channels) > 4 ? 8: (num_channels) > 2 ? 4: (num_channels))
  short Sinewave[N_WAVE];
 
+const int bitdepth = 16; 
+
 void create_sinewave(short* mBuffer, int mSize, float freq, float phase) 
 {
-	float Amplitude = 1024*8;
-	//freq = (2.*3.1415 / (float)N_WAVE);		// 4 waves per buffer (256 samples per wave)
-	//printf("freq=%6.2f  n_wave=%6.2f \n", freq, (float)N_WAVE);
-	
+	float Amplitude = 1024*8;	
 	for (int i=0; i<mSize; i++)
 	{
 		mBuffer[i] = Amplitude * sin( (float)i * freq + phase );
@@ -324,7 +323,12 @@ int32_t audioplay_set_dest(AUDIOPLAY_STATE_T *st, const char *name)
    return success;
 }
 
-
+/* 
+ OMX_IndexConfigAudioRenderingLatency:
+ This config allows the client to query the current latency of audio rendering. 
+ The latency is returned as the number of samples that an audio rendering component 
+ has received but have not been played.
+*/
 uint32_t audioplay_get_latency(AUDIOPLAY_STATE_T *st)
 {
    OMX_PARAM_U32TYPE param;
@@ -402,7 +406,7 @@ void play_api_test(int samplerate, int bitdepth, int nchannels, int dest)
          }
       }
 
-      // try and wait for a minimum latency time (in ms) before
+      // wait for a minimum latency time (in ms) before
       // sending the next packet
       while((latency = audioplay_get_latency(st)) > (samplerate * (MIN_LATENCY_TIME + CTTW_SLEEP_TIME) / 1000))
          usleep(CTTW_SLEEP_TIME*1000);
@@ -425,14 +429,15 @@ int 				buffer_size = 0;
 AUDIOPLAY_STATE_T *	st;
 uint8_t*			buf;
 uint32_t 			latency;
-   
-int32_t audio_setup( int dest, int samplerate, int nchannels, int bitdepth )
+
+int32_t audio_setup( int dest, int samplerate, int nchannels, int mBuffNumberOfSamples )
 {
    bcm_host_init();		// is this needed in akbInstant?  i don't know.
 	
-   printf("Outputting audio to %s\n", dest==0 ? "analogue":"hdmi");
+   printf("audio_setup() ");	
+   printf("Outputting audio to %s\t", dest==0 ? "analogue":"hdmi");
 
-   buffer_size = (BUFFER_SIZE_SAMPLES * bitdepth * OUT_CHANNELS(nchannels)) >> 4;
+   buffer_size = (mBuffNumberOfSamples * bitdepth * OUT_CHANNELS(nchannels)) >> 4;
    printf("buff_size=%d\n", buffer_size);
    
    assert(dest == 0 || dest == 1);
@@ -450,31 +455,31 @@ int32_t audio_setup( int dest, int samplerate, int nchannels, int bitdepth )
 // rework if real buffer fitting is desired! 
 uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate )
 {
-	int bytes_sent   =0;
-	int bytes_to_send=length;
-	int32_t ret;
-	if (length > buffer_size)
+	int bytes_sent     = 0;
+	int bytes_to_send  = length*2;
+	if (bytes_to_send > buffer_size)
 		bytes_to_send = buffer_size;
-
-//	while (bytes_sent < length)
-	{
+	int32_t ret;
+	
+	//printf("audio_add_play_buffer() samps=%d; bytes_to_send=%d \n", length, bytes_to_send);
+	
 		while((buf=audioplay_get_buffer(st)) == NULL)
 			usleep(10*1000);
 
 		memcpy( buf, mBuffer, bytes_to_send );
 		
-		// try and wait for a minimum latency time (in ms) before
-		// sending the next packet
+		// Wait until the current samples are 'almost' all played.  ie 22050*(20+10)/1000 = 22.050*30 = 661 samples prior, we can queue the buffer.
 		while((latency = audioplay_get_latency(st)) > (samplerate*(MIN_LATENCY_TIME+CTTW_SLEEP_TIME)/1000))
-			usleep(CTTW_SLEEP_TIME*1000);
+			usleep(CTTW_SLEEP_TIME*1000);		// 10ms
 
-		ret = audioplay_play_buffer( st, buf, buffer_size );		
+		ret = audioplay_play_buffer( st, buf, bytes_to_send );
 		assert(ret == 0);
-	}  
+
 	return (uint8_t*)ret;
 }
 
 void audio_close(  )
 {
+	printf("audio_close() \n");
    audioplay_delete(st);
 }

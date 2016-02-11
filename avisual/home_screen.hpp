@@ -2,7 +2,9 @@
 #define _HOME_SCREEN_HPP_
 
 
+extern TextView 	RobotResponse;
 extern ClientList	AvailClients;
+
 void 				init_home_screen();
 
 #endif

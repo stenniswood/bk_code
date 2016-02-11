@@ -16,7 +16,6 @@
 #include "packer.h"
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
- 
 #include "can_id_list.h"
 #include "cmd_process.h"
 #include "leds.h"
@@ -26,7 +25,6 @@
 #include "window_layouts.hpp"
 #include "callbacks.hpp"
 #include "vector_file.hpp"
-
 #include "mouse_oop.hpp"
 #include "touch_gesture.hpp"
 #include "keyboard_dev.hpp"
@@ -44,6 +42,7 @@
 #include "visual_memory.h"
 #include "audio_memory.h"
 #include "CAN_memory.h"
+
 #include "client_list_control.hpp"
 #include "home_screen.hpp"
 
@@ -77,13 +76,9 @@ void init_ipc( const char* mVectorFileName )
 	//bkInstant_connected = connect_shared_abkInstant_memory(); 
 
 	// AUDIO : 
-	if (aud_allocate_memory() == -1)
-	{
-		printf("Cannot allocate memory.\n");
-		return;
-	}
-	aud_attach_memory();
-	can_connect_shared_memory(FALSE);
+	int result = audio_connect_shared_memory(TRUE);
+
+	result = can_connect_shared_memory(FALSE);
 	printf("============== IPC DONE ==============\n");
 }
 
@@ -208,8 +203,9 @@ void ethernet_interface()		/* wifi comms */
 {
 	if ( cli_is_new_update() )
 	{	
-		if (Debug) printf("New sentence : %s\n", get_sentence());
-		CmdText.set_text( get_sentence() );		
+		//if (Debug) printf("New sentence : %s\n", get_sentence());
+		if (ipc_memory_client)
+			RobotResponse.set_text			( ipc_memory_client->Sentence );		//ConnectionStatus
 		AvailClients.update_available_client_list();
 		AvailClients.Invalidate();		
 		UpdateDisplaySemaphore=1;			
@@ -217,7 +213,8 @@ void ethernet_interface()		/* wifi comms */
 	if ( cli_is_new_connection_status() )
 	{	
 		if (Debug) printf("New status : %s\n", get_connection_status());	
-		ConnectionStatus.set_text( get_connection_status() );		
+		if (ipc_memory_client)
+			RobotResponse.set_text( get_connection_status() );		
 		UpdateDisplaySemaphore=1;
 	}
 }

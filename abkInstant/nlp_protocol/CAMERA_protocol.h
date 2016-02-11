@@ -12,7 +12,7 @@ extern FILE* sending_camera_playback_file_fd;		// prerecorded cam (robot's histo
 
 
 void Init_Camera_Protocol();
-BOOL Parse_Camera_Statement( char* mSentence );
+int Parse_Camera_Statement( char* mSentence );
 //BOOL Perform_Camera_actions( char* mAction, char* mAdjectives, char* mObjects );
 
 

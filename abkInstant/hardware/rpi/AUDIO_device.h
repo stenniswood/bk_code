@@ -59,7 +59,7 @@ void create_sinewave(short* mBuffer, int mSize, float freq, float phase=0.);
 void play_api_test(int samplerate, int bitdepth, int nchannels, int dest);
 
 // BK:
-int32_t  audio_setup 		  ( int dest, int samplerate, int channels, int bitdepth );
+int32_t  audio_setup 		  ( int dest, int samplerate, int channels, int mBuffNumberOfSamples );
 uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate );
 void	 audio_close		  ( );
 

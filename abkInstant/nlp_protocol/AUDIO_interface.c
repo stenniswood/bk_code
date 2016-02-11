@@ -43,7 +43,7 @@ Tenniswood - 2014
 // short or byte?!  byte since deals with header ptr data. 
 static byte 	buffer[AUDIO_BUFFER_SIZE];		// 4 byte token + 4 byte length
 byte			audio_socket_buffer[AUDIO_OUTPUT_BUFFER_SIZE+100];
-static int 	 	bytes_rxd=0;
+//static int 	 	bytes_rxd=0;
 
 struct wav_header wave_header;						// first packet
 BOOL 		start_new_file = TRUE;
@@ -52,44 +52,45 @@ char* 		header_position = (char*)&wave_header;	// start at the top
 BOOL		play_started = FALSE;
 
 
+BOOL handle_audio_header( )
+{
+	// for some reason sizeof below was giving 2 bytes extra!
+	long int header_length = 38; //sizeof(struct wav_header);
+	
+	//printf("receving header...Expecting %d bytes\n", header_length); 
+	memcpy( (char*)header_position, buffer, bytes_rxd ); 
+	header_position += bytes_rxd;
+	char* end_of_header = (char*)(&wave_header);
+	end_of_header += header_length;		// points to 1 after the end!
+	if ( header_position > end_of_header ) 	// need to wait for more data.
+	{
+		header_received = TRUE;
+		// shift left overs:
+		int shift = (header_position-end_of_header);
+		memcpy(buffer, buffer+shift, bytes_rxd-shift);
+		print_audio_header( &wave_header );
+		
+	} else if ( header_position == end_of_header ) 	// need to wait for more data.
+	{
+		// shift left overs:
+		print_audio_header( &wave_header );			
+		header_received = TRUE;
+		return TRUE;
+	} else {
+		print_audio_header( &wave_header );
+		return TRUE;
+	}
+}
+
 /******************************************************
 * Process 
 * return true 	- The telegram was handled.
 *        false  - Not known token
 ******************************************************/
-BOOL handle_audio_data( )
+BOOL handle_audio_data( BYTE* mAudioData, int mLength )
 {
-	//printf("Inside handle_audio_data()\n");
+	printf("Inside handle_audio_data()\t");
 	BOOL retval = TRUE;
-	if (header_received==FALSE)
-	{
-		// first packet sent over should be the AUDIO_header:
-				// for some reason sizeof below was giving 2 bytes extra!
-		long int header_length = 38; //sizeof(struct wav_header);
-		//printf("receving header...Expecting %d bytes\n", header_length); 
-		memcpy( (char*)header_position, buffer, bytes_rxd ); 
-		header_position += bytes_rxd;
-		char* end_of_header = (char*)(&wave_header);
-		end_of_header += header_length;		// points to 1 after the end!
-		if ( header_position > end_of_header ) 	// need to wait for more data.
-		{
-			header_received = TRUE;
-			// shift left overs:
-			int shift = (header_position-end_of_header);
-			memcpy(buffer, buffer+shift, bytes_rxd-shift);
-			print_audio_header( &wave_header );
-			
-		} else if ( header_position == end_of_header ) 	// need to wait for more data.
-		{
-			// shift left overs:
-			print_audio_header( &wave_header );			
-			header_received = TRUE;
-			return TRUE;
-		} else {
-			print_audio_header( &wave_header );
-			return TRUE;
-		}
-	}
 
 	if (AUDIO_save_requested)
 	{
@@ -101,33 +102,39 @@ BOOL handle_audio_data( )
 			OpenAudioFile( fn );
 			start_new_file = FALSE;
 		} else {
-			AppendAudioData( buffer, bytes_rxd );
+			//AppendAudioData( buffer, bytes_rxd );
+			AppendAudioData( mAudioData, mLength );
 		}
 	}
 	
 	// Put into audio_memory (for avisual or other app)
-	if (ipc_memory_aud != NULL)
+	if (ipc_memory_aud)
 	{
 		printf(".");	
-		audio_ipc_write_buffer( (short*)buffer, bytes_rxd>>1 );
+		//audio_ipc_write_buffer( (short*)buffer, bytes_rxd>>1 );
+		audio_ipc_write_buffer( (short*)mAudioData, mLength>>1 );
 	}
 
 	if (AUDIO_tcpip_ListeningOn)
 	{
 		int audio_dest = 0;
+		header_received = TRUE;
+		play_started	= TRUE;
 		if ((header_received) && (play_started==FALSE))		
 		{
-			audio_setup(   audio_dest, 
+//			audio_setup(   audio_dest, 22050, 1 );							
+/*			audio_setup(   audio_dest, 
 							wave_header.sample_rate, 
-							wave_header.num_channels, 
-							wave_header.bits_per_sample );
+							wave_header.num_channels );	*/
+
 			printf("Audio Setup completed\n");
 			play_started = TRUE;
 		}
 		else if (play_started==TRUE)
 		{
-			printf("Audio sending buffer.\n");
-			audio_add_play_buffer( (short*)buffer, bytes_rxd, wave_header.sample_rate );			
+			//printf("Audio sending buffer.\n");
+			//wave_header.sample_rate 
+			audio_add_play_buffer( (short*)mAudioData, mLength>>1, 22050);			
 		}
 	}	
 	return retval;
@@ -160,21 +167,62 @@ short FIR[255];
 int FIR_length=255;
 //long int file_position = 0;
 
+/* Combo Buffer:
+	char nlp_message[127];
+	sprintf( nlp_message, "new audio_buffer %6d", mLength*2 );
+	
+	int len = strlen(nlp_message);
+	int byte_length = mLength*2 + len;
+	char* telegram = new char[byte_length];
+	
+	strcpy(telegram, nlp_message);
+	memcpy(telegram+len+1, (char*)mAudioData, mLength*2 );	
+	SendTelegram( telegram, byte_length );
+	delete nlp_message;	
+
+*/
+void send_audio_message( short* mAudioData, int mLength )
+{
+	static long int total_bytes_transmitted = 0;
+	
+	char nlp_message[40];
+	sprintf( nlp_message, "new audio_buffer %6d", mLength*2 );
+	SendTelegram( nlp_message, strlen(nlp_message)+1 );
+		
+	SendTelegram( (char*)mAudioData, mLength*2 );
+	total_bytes_transmitted += mLength*2;
+	printf("total_bytes_transmitted=%ld\n", total_bytes_transmitted );
+}
 
 /* 	Called from server_thread, when there is no incoming data.
 	This function is polled to send audio data when available and
 	the data is requested.
 */
-void audio_interface()
+void audio_interface( )
 {
 	struct sCAN* tmpCAN = NULL;
 	int    bufSize = 255;
 	unsigned char  buff[255];
-	
+	static long int	counter =0;
+	static short Sinewaves[N_WAVE*2];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
+				
 	if (AUDIO_tcpip_SendingOn)
 	{
-	    //printf("Audio_SendingOn is ON!\n");	    
-	    if (sending_audio_file_fd)
+	    //printf("Audio_SendingOn is ON!\n");	
+	    if (1)
+	    {
+	    	if (counter++>200000) 
+	    	{
+				float freq = 5*(2.*3.1415 / (float)N_WAVE);
+				create_sinewave(Sinewaves,  N_WAVE, freq, 0.);
+				freq = 8.*(2.*3.1415 / (float)N_WAVE);
+				create_sinewave( &(Sinewaves[N_WAVE]), N_WAVE, freq, 0. );
+
+				send_audio_message( Sinewaves, N_WAVE*2 );
+				counter = 0;
+	    	}
+	    }
+	    else if (sending_audio_file_fd)
 	    {
 			// file position will be maintained automatically as long as the file descriptor is
 			// not destroyed.
@@ -188,7 +236,7 @@ void audio_interface()
 			/* the messages will be pulled off of the Received buffer.
 			   and stored in Recieved buffer at the other instant end.  */
 			if (ipc_memory_aud)
-			{				
+			{
 				// PUMP AUDIO RECORDING QUEUE:
 				BOOL available = audio_is_new_rxbuffer();
 				if (available)

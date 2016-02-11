@@ -24,11 +24,12 @@ public:
 	void			convert_all_to_lower( );
 	
 	bool			is_group_member( char*  mLookupWord );
-	void			extract_member ( char*  mSentence, bool mWholeWordOnly=true );	
+	string*			extract_member ( char*  mSentence, bool mWholeWordOnly=true );	
 	
 private:
-   list<string>  	m_synonyms;
-
+	list<string>  	m_synonyms;
+	list<string>  	m_all_extracted;		// all matching words in the sentence.
+	
 };
 
 
@@ -56,13 +57,13 @@ public:
 	void			add_word( string&  mNewAlias );		// could be simple string.
 	void			add_new ( Alias&  mNewAlias );
 	
-	void			is_group_member( char*  mLookupWord, bool mWholeWordOnly=true );
-	void			extract_member( char*  mSentence, bool mWholeWordOnly=true );	
-
+	bool			is_group_member( char*  mLookupWord, bool mWholeWordOnly=true );
+	string*			extract_member ( char*  mSentence, bool mWholeWordOnly=true   );	
 
 private:
-   list<Alias>  	m_alias_groups;
-
+	list<Alias>  	m_alias_groups;
+	list<string>  	m_all_extracted;		// all matching words in the sentence.
+	
 };
 
 

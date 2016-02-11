@@ -67,7 +67,7 @@ bool	Alias::is_group_member( char*  mLookupWord )
 /* Returns - 
 
 */
-void Alias::extract_member( char*  mSentence, bool mWholeWordOnly=true )
+string* Alias::extract_member( char*  mSentence, bool mWholeWordOnly=true )
 {
 	string  Sentence(mSentence);
 	list<string>::iterator iter = m_synonyms.begin();
@@ -139,7 +139,7 @@ void	WordGroup::add_new( Alias&  mNewAlias )
 	m_alias_groups.push_back( mNewAlias );
 }
 
-void	WordGroup::is_group_member( char*  mLookupWord, bool mWholeWordOnly=true )
+bool	WordGroup::is_group_member( char*  mLookupWord, bool mWholeWordOnly )
 { 
    list<Alias>::iterator iter = m_alias_groups.begin();
    while (iter != m_alias_groups.end())
@@ -148,7 +148,7 @@ void	WordGroup::is_group_member( char*  mLookupWord, bool mWholeWordOnly=true )
    }   	
 }
 
-void	WordGroup::extract_member( char*  mSentence, bool mWholeWordOnly=true )
+string*	 WordGroup::extract_member( char*  mSentence, bool mWholeWordOnly )
 { 
    list<Alias>::iterator iter = m_alias_groups.begin();   
    while (iter != m_alias_groups.end())

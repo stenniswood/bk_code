@@ -24,10 +24,7 @@
 #include "CAN_memory.h"
 #include "CAN_util.h"
 #include "AUDIO_interface.h"
-
-
 #include "protocol.h"
-//#include "devices.h"
 
 #include "serverthread.h"
 #include "GENERAL_protocol.h"
@@ -42,20 +39,12 @@
 #include "client_memory.hpp"
 
  
-/* Ah, this may even hold frames of 1080i video, so... let's make it big: 5MB  */
-#define MAX_SENTENCE_LENGTH 5*1024*1024
-char	 		buffer[MAX_SENTENCE_LENGTH];
-
-
+char	 		socket_buffer[MAX_SENTENCE_LENGTH];
 char 			broadcast_addr[16];		// 
 static char 	ip_addr[16]; 			// for user feedback
 int 	 		listenfd = 0, connfd = 0;    
-
-#define OUTPUT_BUFFER_SIZE 65535
-static BYTE 	general_socket_buff[OUTPUT_BUFFER_SIZE];
-static void 	exit1() {	while (1==1) {  }; }
-
 int 			bytes_txd;
+int 			bytes_rxd=0;
 
 byte  REQUEST_client_connect_to_robot = FALSE;
 char* REQUESTED_client_ip    = NULL;
@@ -65,7 +54,7 @@ int   connection_established = FALSE;
 struct sockaddr_in serv_addr;   
 struct sockaddr_in client_addr;		// will receive the clients IP on accept()
 
-
+static void 	exit1() {	while (1==1) {  }; }
 
 /********************************************************************
 Init - Initialize all submodules
@@ -329,7 +318,7 @@ void* server_thread(void*)
 			/* Get data from the client. For streaming data, remember multiple 'telegrams'
 				may come in a single read.  
 			 */
-			int bytes_rxd = read(connfd, buffer, bytes_available);
+			bytes_rxd = read(connfd, socket_buffer, bytes_available);
 			int errsv = errno;
 			if (bytes_rxd == 0)
 			{
@@ -344,14 +333,24 @@ void* server_thread(void*)
 			}
 			else 	// DATA ARRIVED, HANDLE:
 			{
-				buffer[bytes_rxd]       = 0;
-				char* next_telegram_ptr = buffer;								
-
-				while ( (next_telegram_ptr-buffer) < bytes_rxd )
+				socket_buffer[bytes_rxd]       = 0;
+				char* next_telegram_ptr = socket_buffer;
+				
+				while ( (next_telegram_ptr-socket_buffer) < bytes_rxd )
 				{
-					//printf("Start parsing. buff_index=%d of bytes_rxd=%d; \n", telegram_end_marker, bytes_rxd);
+					int buff_index = (next_telegram_ptr-socket_buffer);
+					if (buff_index > 10) 
+					{
+						for (int c=buff_index-3; c<buff_index+26; c++)
+							if (socket_buffer[c]==0)
+								printf("|");
+							else
+								printf("%c", socket_buffer[c]);
+						printf( ":  NextString = %s\n", next_telegram_ptr );
+					}
+					printf(" Start parsing. buff_index=%d of bytes_rxd=%d; \n", buff_index, bytes_rxd);
 					next_telegram_ptr   = Parse_Statement( next_telegram_ptr );					
-					// next the problem of split packages - which will occur!							
+					// next the problem of split packages - which will occur! 
 				}
 				//printf("Done parsing. %d\n", connfd);
 
@@ -360,8 +359,9 @@ void* server_thread(void*)
 					Send_Reply();
 					nlp_reply_formulated = false;
 				}
-				//ipc_write_command_text( buffer );
-				//done = Parse_done(buffer);
+				printf("\n");
+				//ipc_write_command_text( socket_buffer );
+				//done = Parse_done(socket_buffer);
 			}
 		}  // end while()		
 		done = FALSE;

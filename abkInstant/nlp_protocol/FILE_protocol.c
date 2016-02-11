@@ -122,19 +122,16 @@ Do the work of the Telegram :
 return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
 *****************************************************************/
-BOOL Parse_File_Statement(char* mSentence)			
+int Parse_File_Statement(char* mSentence)			
 {
-	BOOL retval = FALSE;
-	std::string* subject  	= extract_word( mSentence, &subject_list 	);
-	if (subject==NULL) return FALSE;  // subject matter must pertain.
+	int retval = -1;
 	printf("Parse_FILE_Statement\n");
-		
+	
+	std::string* subject  	= extract_word( mSentence, &subject_list 	);
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
-
 	std::string* object 	= extract_word( mSentence, &object_list  	);
 	//std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-	int prepos_index      	= get_preposition_index( mSentence );
-
+	//int prepos_index      	= get_preposition_index( mSentence );
 
 	if ((strcmp( subject->c_str(), "file")==0) || 
 		(strcmp( subject->c_str(), "files")==0) ||
@@ -153,9 +150,10 @@ BOOL Parse_File_Statement(char* mSentence)
 			// later on.  Not necessary now!
 			printf( "Listening for incoming file...\n");
 			create_file_thread( FALSE,  TRUE, BASE_FILE_PORT );
-			retval = TRUE;
+			retval = 0;
 		}
 	}
+	printf("Parse_FILE_Statement done\n");	
 	return retval;
 }
 

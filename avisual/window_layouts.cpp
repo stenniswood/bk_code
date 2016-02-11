@@ -22,16 +22,8 @@
 #include "client_memory.hpp"
 #include "client_list_control.hpp"
  
-
-
 #define Debug 1
 
-
-// Avisual display:
-
-
-
-//TabularListBox  tab_lb(600, 20, 620, 5, -1);
 static TabularListBox  adren_board_list;
 
 /********************* A sample Window ****************/
@@ -75,7 +67,6 @@ CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
 //ButtonArrayMot MyArray( 700, 1070, 350, 100);
 static char ConnectionStatusText[128];
 extern TextView 	ConnectionStatus;
-extern TextView 	CmdText;
 
 void set_headings()
 {
@@ -152,93 +143,6 @@ void populate_listbox()
 }
 
 
-
-
-extern ClientList	AvailClients;
-//static TabularListBox	tabb ( 100, 400, 750, 50  );
-
-void init_avisual()
-{
-	char* str = new char[255];
-	strcpy (str, "This is where the incoming text will go! What is the best way to count to the second line?  Okay. I don't know what else to say.  Fourier Transforms are amazingly fast! How can I say thanks for the things he has done for me?");
-	strcpy (ConnectionStatusText, "Not connected");	
-
-	ConnectionStatus.set_text				( ConnectionStatusText );
-	ConnectionStatus.set_text_size			( 18.0		 );
-	ConnectionStatus.set_text_color			( 0xFFFF0000 );
-	ConnectionStatus.set_background_color	( 0xFFFfFf00 );
-	ConnectionStatus.center_vertical		( TRUE		 );
-	ConnectionStatus.center_horizontal		( TRUE		 );	
-
-	CmdText.set_position  		( 50, 1230, 690, 500 );
-	CmdText.set_text	  		( str  		 );
-	CmdText.set_text_size 		( 25.0 		 );
-	CmdText.set_text_color		( 0xFFFFFFFF );
-	CmdText.set_background_color( 0xFF9f9f0f );
-
-	// This should be hidden until asked for via voice.
-//	AvailableClients.set_position( 10, 10, 400, 100 );
-	AvailClients.move_to( 100, 100 );
-	AvailClients.calc_metrics();
-	AvailClients.set_headings();	
-	AvailClients.update_available_client_list();
-	
-
-	//set_headings();
-/*	if (Debug) printf("SET_HEADINGS() - \n");
-	populate_listbox();
-	if (Debug) printf("POPULATED LISTBOX () - \n");
-	
-	adren_board_list_set_headings();
-	adren_board_list.set_width_height( 300,300 );
-	adren_board_list.move_to( 10, 10 );
-	
-	//adren_board_list.copy_position_vert 				(&AvailableClients);
-	//adren_board_list.set_text_size				    ( 12.0 );
-	adren_board_list.adjust_height_for_num_visible_items( 8 );
-	adren_board_list.move_to(100, 100);
-	adren_board_list.calc_widths_from_text			    (   );
-	adren_board_list.calc_column_positions_from_widths  (   );
-	//adren_board_list.calc_metrics();
-	if (Debug) adren_board_list.print_positions();
-
-	//printf("CALC_METRICS() - DONE \n");
-	//pack_sample_window();	
-	//test_icon.set_position( 100, 200, 313, 200);
-	test_icon.set_file		( (char*)"./resources/folder.jpg" );
-	test_image.set_file		( (char*)"./resources/desert0.jpg" );
-	test_image.set_position	( 200, 450, 313, 200);	
-
-	sb.copy_position_vert   ( &test_image );
-	sb.set_position_left_of ( &test_image );
-	sb.set_max_value		( 11  );
-	sb.set_min_value		( 0   );
-	sb.scroll_to    		( 1   );
-	sb.set_amount_visible	( 10  );
- 
-	hsb.copy_position_horiz (&test_image );
-	hsb.set_position_below  ( &test_image );
-	hsb.set_max_value		( 100 );
-	hsb.set_min_value		( 0   );
-	hsb.scroll_to    		( 20  );
-	hsb.set_amount_visible	( 50 );
-	
-	l1.set_position 		( 500, 600, 300, 70 );
-	l1.set_level_percent	( 50.0 );
-*/
-	// Add to display manager:
-	MainDisplay.remove_all_objects(		);
-	MainDisplay.add_object( &ConnectionStatus );
-	MainDisplay.add_object( &CmdText 	);
-//	MainDisplay.add_object( &l1 		);
-	MainDisplay.add_object( &AvailClients );
-//	MainDisplay.add_object( &tabb );	
-//	MainDisplay.add_object( &tabb );	
-	printf("ADDING TABULAR LIST BOX  Avail Clients!!!!\n");
-//	MainDisplay.add_object( &test_icon  );
-//	MainDisplay.add_object( &adren_board_list );
-	MainDisplay.load_resources();
-}
 
 // L, R, T, B
 //StickFigure  sf1( 100, 300, 300, 100 );

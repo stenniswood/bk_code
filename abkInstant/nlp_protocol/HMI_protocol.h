@@ -2,7 +2,7 @@
 
 
 void Init_HMI_Protocol();
-BOOL Parse_HMI_Statement(char* mStatement);
+int  Parse_HMI_Statement(char* mStatement);
 							
 							
 

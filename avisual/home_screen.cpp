@@ -26,38 +26,40 @@
 
 TextView 		ConnectionStatus( 50, 700, 500, 50 	);
 ClientListPanel	AvailClients 	( 20, 700, 160, 50	);
-TextView 		CmdText		 	( 50, 700, 350, 200 );
-EditBox 		SampleEdit	 	( 50, 700, 450, 355 );
+TextView 		RobotResponse 	( 50, 700, 350, 200 );
+EditBox 		ClientInputEdit( 50, 700, 450, 355 );
 
 static char ConnectionStatusText[128];
 static char CommandText[128];
 
 void init_home_screen()
 {
-	char* str = new char[255];
-	strcpy (str, "This is where the incoming text will go! What is the best way to count to the second line?  Okay. I don't know what else to say.  Fourier Transforms are amazingly fast! How can I say thanks for the things he has done for me?");
-	strcpy (ConnectionStatusText, "Not connected");	
-
-	ConnectionStatus.set_text				( ConnectionStatusText );
-	ConnectionStatus.set_text_size			( 18.0		 );
-	ConnectionStatus.set_text_color			( 0xFFFF0000 );
-	ConnectionStatus.set_background_color	( 0xFFFfFf00 );
-	ConnectionStatus.center_vertical		( TRUE		 );
-	ConnectionStatus.center_horizontal		( TRUE		 );	
-
-	strcpy(CommandText, "Robot, show me the accuracy of your positioning. Show me a histogram for right leg positions.\
-	 Lift your left leg.  Raise both arms.  Go to the bedroom and get my shoes." );	
-	CmdText.set_text			( CommandText );
-	CmdText.set_text_size 		( 16.0 		 );
-	CmdText.set_text_color		( 0x9FFF0000 );
-	CmdText.set_background_color( 0x7FFfFf00 );
+	RobotResponse.set_text			( "Not Connected" );		//ConnectionStatus
+	if (ipc_memory_client)
+		RobotResponse.set_text			( ipc_memory_client->Sentence );		//ConnectionStatus
+	RobotResponse.set_text_size 		( 16.0 		 );
+	RobotResponse.set_text_color		( 0xCFFF0000 );
+	RobotResponse.set_background_color( 0xFFFFFf00 );
 	
 	// This should be hidden until asked for via voice.
 	//AvailClients.move_to( 20, 75 );
 
-	SampleEdit.set_text_size 		( 16.0 		 );
-//	SampleEdit.set_text_color		( 0x9FFF0000 );
-//	SampleEdit.set_background_color ( 0x7FFfFf00 );
+	strcpy(CommandText, "connect to 192.168.2.14, Robot, show me the accuracy of your positioning. Show me a histogram for right leg positions.\
+	 Lift your left leg.  Raise both arms.  Go to the bedroom and get my shoes." );	
+	ClientInputEdit.set_text			( CommandText );
+	ClientInputEdit.set_text_size 		( 16.0 );	
+
+//	MainDisplay.add_object( &ConnectionStatus );
+//	MainDisplay.add_object( &adren_board_list );
+
+	// Add to display manager:
+	MainDisplay.remove_all_objects(		  );
+	MainDisplay.add_object( &ClientInputEdit   );
+	MainDisplay.add_object( &RobotResponse 	  );
+	MainDisplay.add_object( &AvailClients );
+	MainDisplay.load_resources();
+}
+
 
 /*	if (Debug) printf("SET_HEADINGS() - \n");
 	populate_listbox();
@@ -75,16 +77,5 @@ void init_home_screen()
 	adren_board_list.calc_column_positions_from_widths  (   );
 	//adren_board_list.calc_metrics();
 	if (Debug) adren_board_list.print_positions();
-
 	//pack_sample_window();	
-*/
-//	MainDisplay.add_object( &ConnectionStatus );
-//	MainDisplay.add_object( &adren_board_list );
-
-	// Add to display manager:
-	MainDisplay.remove_all_objects(		  );
-	MainDisplay.add_object( &SampleEdit   );
-	MainDisplay.add_object( &CmdText 	  );
-	MainDisplay.add_object( &AvailClients );
-	MainDisplay.load_resources();
-}
+	*/

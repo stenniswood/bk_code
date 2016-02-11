@@ -23,15 +23,13 @@ INC = $(INC_CORE)
 INC		 +=	 ./threads/ ./nlp_protocol/ ./nlp_adrenaline/ ./voice/ ./util/ ./nlp_core/ $(HARDWARE_PATH) \
 			 /home/pi/bk_code/abkInstant/  /home/pi/raspicam/interface  \
 			 /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/
-
 SELF_INC   = ../../abkInstant/ ./ ../
 
-#			  /opt/vc/include/interface/vcos/pthreads/ 
+#			  /opt/vc/include/interface/vcos/pthreads/
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 		 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
-LIBFLAGS   =   -lpthread  -lm
+LIBFLAGS   = -lpthread  -lm
 
-DEPS   	   = 
 #CFLAGS    =  -fpermissive -Wwrite-strings 
 #CFLAGS    += -DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -U_FORTIFY_SOURCE -Wall -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -ftree-vectorize -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -Wno-psabi
 
@@ -56,17 +54,16 @@ THREAD_OBJS 	= video_thread.o can_thread.o file_thread.o \
 HARDWARE_OBJS = GPIO_device.o AUDIO_device.o IMAGE_device.o CAMERA_device.o 
 ILCLIENT_OBJS = ilclient.o ilcore.o
 WIFI_OBJS     = udp_transponder.o client.o
-UTIL_OBJS     = client_to_socket.o
 VIDEO_OBJS    = vc_vchi_gencmd.c vc_vchi_filesys.c vc_vchi_dispmanx.c vc_vchi_cecservice.c \
 				vc_service_common.c vcilcs_out.c vcilcs_in.c vcilcs_common.c vcilcs.c
 
 # APP CODE
+UTIL_OBJS = client_to_socket.o AUDIO_file_util.o CAMERA_util.o CAN_util.o IMAGE_file_util.o VIDEO_file_util.o
+
 NLP_CORE_OBJS = prefilter.o nlp_extraction.o alias.o
 NLP_PROTOCOL_OBJS = GENERAL_protocol.o	CAN_protocol.o	GPIO_protocol.o	\
-	AUDIO_protocol.o	CAN_util.o		CAMERA_protocol.o \
-	AUDIO_file_util.o	FILE_protocol.o		IMAGE_protocol.o	CAMERA_util.o	  \
-	package_commands.o	IMAGE_file_util.o	HMI_protocol.o	\
-	AUDIO_interface.o 
+	AUDIO_protocol.o	CAMERA_protocol.o FILE_protocol.o	IMAGE_protocol.o  \
+	package_commands.o	HMI_protocol.o	AUDIO_interface.o
 
 NLP_ADRENALINE_OBJS  =	 Adrenaline_nlp.o     	Adren_bigmotor_talk.o  		\
 	Adren_lcd_talk.o     Adren_pwm_talk.o	 Adren_analog_talk.o  		\

@@ -22,9 +22,9 @@
 #include "protocol.h"
 #include "devices.h"
 #include "CAN_memory.h"
-#include "CAN_util.h"
-#include "GENERAL_protocol.h"
-#include "CAMERA_device.h"
+//#include "CAN_util.h"
+//#include "GENERAL_protocol.h"
+//#include "CAMERA_device.h"
 //#include "thread_control.h"
 
 

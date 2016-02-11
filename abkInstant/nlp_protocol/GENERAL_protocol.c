@@ -273,10 +273,13 @@ char* Parse_Statement(char*  mSentence)
 	printf( "Sentence:|%s|\n", mSentence );
 
 	bool okay = prefilter_text(mSentence);
- 	char* end_of_telegram = mSentence + strlen(mSentence);
+ 	char* end_of_telegram = mSentence + strlen(mSentence) +1/*nullterminator*/;
+	//char* new_end_of_telegram = end_of_telegram;
+	int result =-1;
+	
 	if (!okay)
 	{
-		printf("Prefilter determined a VoiceResponse!\n");
+		//printf("Prefilter determined a VoiceResponse!\n");
 		if (ClientRequestPending)
 		{
 			// For those cases where the response comes from the other end:
@@ -289,30 +292,39 @@ char* Parse_Statement(char*  mSentence)
 	if (strcmp(mSentence, "I don't understand. Ignoring.")==0)
 		return;
 	
-	int result = Parse_Audio_Statement( mSentence );
-	
-	if (result==FALSE)
-		result = Parse_Camera_Statement( mSentence );
+	// AUDIO:
+	result = Parse_Audio_Statement( mSentence );
+	if (result>=0) 
+		return (end_of_telegram + result);	
 
-	if (result==FALSE)
-		result = Parse_File_Statement  ( mSentence );
-		/* ie. File transfer, directory, backup, etc. */		
-		
-	if (result==FALSE)
-		result = Parse_HMI_Statement   ( mSentence ); 
-		/* ie mouse, keyboard, PS3 controller, etc. */
+	result = Parse_Camera_Statement( mSentence );
+	if (result>=0)	
+		return (end_of_telegram + result);		
+
+	result = Parse_CAN_Statement( mSentence );
+	if (result>=0)	
+		return (end_of_telegram + result);		
 	
-	if (result==FALSE)
-	{	
-		char* new_end_of_telegram = Parse_CAN_Statement( mSentence );
-		result = (new_end_of_telegram > mSentence);
-		end_of_telegram = new_end_of_telegram;
-	}
-	if (result==FALSE)
-	{	
-		nlp_reply_formulated = TRUE;
-		strcpy (NLP_Response, "I don't understand. Ignoring.");		
-	}
+	result = Parse_File_Statement  ( mSentence );	/* ie. File transfer, directory, backup, etc. */		
+	if (result>=0)	
+		return (end_of_telegram + result);		
+		
+	result = Parse_HMI_Statement   ( mSentence ); 	/* ie mouse, keyboard, PS3 controller, etc. */	
+	if (result>=0)	
+		return (end_of_telegram + result);
+/*
+	result = Parse_IMAGE_Statement   ( mSentence ); 	
+	if (result>=0)	
+		return (end_of_telegram + result);
+	result = Parse_GPIO_Statement   ( mSentence ); 	
+	if (result>=0)	
+		return (end_of_telegram + result);
+
+*/
+
+	// Not handled:
+	nlp_reply_formulated = TRUE;
+	strcpy (NLP_Response, "I don't understand. Ignoring.");		
 	return end_of_telegram;
 }
 
