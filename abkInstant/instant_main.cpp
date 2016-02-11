@@ -103,7 +103,7 @@ void create_another_client_thread()		// really serverthread which initiates conn
 #define USE_CAN		1
 #define USE_SWAY	0
 #define USE_PICAMSCAN	0
-#define USE_AUDIO	0
+#define USE_AUDIO	1
 
 /* Inter Process Communications (via shared memory)		
 */
@@ -143,7 +143,7 @@ void establish_ipc()
 	if (USE_AUDIO)
 	{
 		printf("************************* AUDIO SHARED MEMORY *****************************\n");	
-	    result =  audio_connect_shared_memory(FALSE);
+	    result =  audio_connect_shared_memory(TRUE);
 	}  
 
 	if (USE_CAN)

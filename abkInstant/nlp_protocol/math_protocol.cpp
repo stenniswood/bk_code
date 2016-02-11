@@ -52,6 +52,8 @@ FILE* sending_camera_playback_file_fd = NULL;		// prerecorded cam (robot's histo
 static WordGroup  	subject_list;		// we'll use this as "interrogative" listing the common ways of asking a math question.
 static WordGroup 	verb_list;
 
+// does verb_list extraction match an Alias word.
+
 static std::list<std::string> 	preposition_list;
 static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;

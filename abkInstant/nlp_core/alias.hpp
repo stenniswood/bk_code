@@ -59,6 +59,9 @@ public:
 	
 	bool			is_group_member( char*  mLookupWord, bool mWholeWordOnly=true );
 	string*			extract_member ( char*  mSentence, bool mWholeWordOnly=true   );	
+	Alias*			get_alias( int mIndex );
+	Alias*			get_alias( string& mAliasWordId );		// main word which describes the alias.
+					
 
 private:
 	list<Alias>  	m_alias_groups;

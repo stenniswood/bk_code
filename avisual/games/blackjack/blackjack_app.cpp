@@ -78,7 +78,9 @@ void 	BlackJackApp::Initialize	(	)
 int		BlackJackApp::onCreate(	)	
 {
 	int retval = Application::onCreate();
-    ((BlackJack*)m_main_window)->onPlace();
+	printf("BlackJackApp::onCreate(	)	\n");
+	
+    //((BlackJack*)m_main_window)->onPlace();
     return retval;
 }
 
@@ -113,8 +115,8 @@ void	BlackJackApp::Preferences	(	)
 
 int		BlackJackApp::Quit			(	)
 { 
-	Application::Quit();
-} 	
+	return Application::Quit();
+}
 
 void	BlackJackApp::file_new		( )
 { 

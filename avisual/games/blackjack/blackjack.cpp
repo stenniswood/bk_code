@@ -25,7 +25,7 @@
 
 //using namespace std;
 const int TITLE_HEIGHT = 32;
-const int CARD_WIDTH = 62;
+const int CARD_WIDTH   = 62;
 
 #define Debug 1
 

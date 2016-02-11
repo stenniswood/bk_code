@@ -398,6 +398,7 @@ void cli_ipc_add_new_client( struct stClientData* mEntry )
 	memcpy( (char*)&(ipc_memory_client->ClientArray[size]), 
 				mEntry,  sizeof(struct stClientData)  );				
 				
+	ipc_memory_client->UpdateCounter++;
 	ipc_memory_client->NumberClients++;
 }
 

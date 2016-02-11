@@ -72,7 +72,7 @@ void init_ipc( const char* mVectorFileName )
 	create_threads();
 	
 	bkInstant_connected = connect_shared_client_memory( FALSE );
-	printf("init_ipc %d \n", bkInstant_connected );
+	//printf("init_ipc %d \n", bkInstant_connected );
 	//bkInstant_connected = connect_shared_abkInstant_memory(); 
 
 	// AUDIO : 
@@ -201,18 +201,18 @@ void sequencer_interface()
 
 void ethernet_interface()		/* wifi comms */
 {
+	//	if (ipc_memory_client)
 	if ( cli_is_new_update() )
 	{	
 		//if (Debug) printf("New sentence : %s\n", get_sentence());
-		if (ipc_memory_client)
-			RobotResponse.set_text			( ipc_memory_client->Sentence );		//ConnectionStatus
+		RobotResponse.set_text			( ipc_memory_client->Sentence );		//ConnectionStatus
 		AvailClients.update_available_client_list();
 		AvailClients.Invalidate();		
 		UpdateDisplaySemaphore=1;			
 	}
 	if ( cli_is_new_connection_status() )
 	{	
-		if (Debug) printf("New status : %s\n", get_connection_status());	
+		//if (Debug) printf("New status : %s\n", get_connection_status());	
 		if (ipc_memory_client)
 			RobotResponse.set_text( get_connection_status() );		
 		UpdateDisplaySemaphore=1;
@@ -270,7 +270,8 @@ int main( int argc, char *argv[] )
 	{	
 		gui_interface();
 		//if (bkInstant_connected)
-		//	ethernet_interface();
+		if (ipc_memory_client)
+			ethernet_interface();
 
 		MainDisplay.idle_tasks();	
 		//printf("done with MainDisplay.idle_tasks()\n");

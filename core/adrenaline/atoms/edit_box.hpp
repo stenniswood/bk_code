@@ -23,15 +23,18 @@ public:
 	
 	virtual void 	Initialize	(	);
 	int				calc_metrics(   );
-	void			insert		( char mKey );
-	void			backspace	(  );
+	void			insert		( char* mKey   );
+	void			backspace	(  			  );
 	void			delete_chars( int mNumber );	// from cursor position!
 	void			Realloc		( long int mSize );
 	
-	virtual int		onKey	  	( char mKey 		);
+	virtual int		onKey	  	( char* mKey 	);
 	virtual int		onClick		( int x, int y, bool mouse_is_down=true );
-	
+//	virtual int		onFlinger	( FlingerEvent mFlinger );
+
 	char*		m_cursor;	
+	char*		m_selection_start;	
+	char*		m_selection_end;	
 	int			m_capacity;
 	
 };

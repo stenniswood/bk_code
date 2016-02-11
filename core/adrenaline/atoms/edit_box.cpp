@@ -57,6 +57,9 @@ void EditBox::Initialize(	)
 	background_color = 0xFF000000;
 	text_color		 = 0xFFFFFFFF;
 	m_cursor		 = text;
+	m_selection_start = m_cursor;
+	m_selection_end   = m_cursor;	
+	
 }
 
 int	EditBox::calc_metrics()
@@ -64,11 +67,13 @@ int	EditBox::calc_metrics()
 	return 0;
 }
 
-void EditBox::insert( char mKey )
+/* Insert char */
+void EditBox::insert( char* mKey )
 {
+	long int insert_length = strlen(mKey);
 	long int length = strlen(text);
-	memcpy( m_cursor+1, m_cursor, length );
-	*m_cursor = mKey;
+	memcpy( m_cursor+insert_length, m_cursor, length );		// hope that works!
+	strcpy( m_cursor, mKey );
 	m_cursor++;
 }
 
@@ -82,7 +87,7 @@ void EditBox::backspace(  )
 void EditBox::delete_chars( int mNumber )	// from cursor position!
 {
 	long int length = strlen(text);
-	memcpy( m_cursor, m_cursor+1, length );	
+	memcpy( m_cursor, m_cursor+mNumber, length );	
 }
 
 int EditBox::onKey( char mKey )

@@ -135,8 +135,8 @@ int	Application::onCreate	(  )
 {
 	// What about creating all the App's various windows?  
 	// These are done on set_main_window()	
-	printf("Application::onCreate()\n");	
-	setup_app_menu();
+	printf("Application::onCreate()\n");
+	setup_app_menu ();
 	setup_main_menu();
 	setup_sidebar  ();
 	return 1;

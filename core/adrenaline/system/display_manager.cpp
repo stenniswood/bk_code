@@ -249,7 +249,19 @@ void DisplayManager::start_app( Application* mApp )
 	if (Debug) printf("DISPLAY MANAGER:  START APP #%d .......... \n", m_current_running_app );
 
 	mApp->onCreate();
+	printf("DISPLAY MANAGER:  onCreate \n" );
 	mApp->register_with_display_manager();
+	printf("DISPLAY MANAGER:  register_with_display_manager \n" );
+}
+
+void DisplayManager::print_running_apps(  )
+{
+	vector<Application*>::iterator iter = m_running_apps->begin();
+	while (iter != m_running_apps->end())
+	{
+		printf("#%d - %s\n", (*iter)->m_application_name.c_str() );
+		iter++;		
+	}
 }
 
 void DisplayManager::set_main_window( Control* mNewWindow )

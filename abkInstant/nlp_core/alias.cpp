@@ -139,13 +139,36 @@ void	WordGroup::add_new( Alias&  mNewAlias )
 	m_alias_groups.push_back( mNewAlias );
 }
 
-bool	WordGroup::is_group_member( char*  mLookupWord, bool mWholeWordOnly )
-{ 
+Alias*	WordGroup::get_alias( int mIndex )
+{
+   list<Alias>::iterator iter = m_alias_groups.begin();
+   while (iter != m_alias_groups.end())
+   {
+		iter++;   // blahs
+   }   	
+	return &(*iter);
+}
+
+Alias*	WordGroup::get_alias( string& mAliasWordId )		// main word which describes the alias.
+{
    list<Alias>::iterator iter = m_alias_groups.begin();
    while (iter != m_alias_groups.end())
    {
 		iter++;   
    }   	
+	return &(*iter);
+}
+
+bool	WordGroup::is_group_member( char*  mLookupWord, bool mWholeWordOnly )
+{ 
+   list<Alias>::iterator iter = m_alias_groups.begin();
+   while (iter != m_alias_groups.end())
+   {
+   		if (iter->is_group_member(mLookupWord))
+			return true;
+		iter++;
+   }   	
+	return false;
 }
 
 string*	 WordGroup::extract_member( char*  mSentence, bool mWholeWordOnly )
