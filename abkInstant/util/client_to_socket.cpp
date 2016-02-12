@@ -13,11 +13,13 @@
 #include <string>
 #include <vector>
 #include <pthread.h>
+#include <list>
+
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
 #include "can_txbuff.h"
 #include "can_id_list.h"
-#include "cmd_process.h"
+//#include "cmd_process.h"
 #include "buttons.h"
 #include "leds.h"
 #include "vector_math.h"
@@ -39,6 +41,8 @@
 #include "CAMERA_protocol.h"
 #include "prefilter.hpp"
 #include "nlp_extraction.hpp"
+
+using namespace std;
 
 //#define NLP_DEBUG 1
 
@@ -166,7 +170,7 @@ std::string* preposition=NULL;
 
 BOOL extract_nlp_words()
 {
-    if (ipc_memory_client==NULL)  return;
+    if (ipc_memory_client==NULL)  return FALSE;
 
     char* mSentence = ipc_memory_client->Sentence;
 	printf( "Client Sentence:|%s|\n", mSentence );
@@ -221,7 +225,7 @@ void handle_client_request()
 		// Pass the request to the other end:
 		strcpy (relay_buffer, ipc_memory_client->Sentence );
 		length = strlen(relay_buffer);
-		SendTelegram( relay_buffer, length);
+		SendTelegram( (BYTE*)relay_buffer, length);
 	}
 
 	result = compare_word(verb, "disconnect");
@@ -233,7 +237,7 @@ void handle_client_request()
 		// Pass the request to the other end:
 		strcpy (relay_buffer, ipc_memory_client->Sentence );
 		length = strlen(relay_buffer);
-		SendTelegram( relay_buffer, length);
+		SendTelegram( (BYTE*)relay_buffer, length);
 	}
 
 	result = compare_word(verb, "connect");
@@ -286,7 +290,7 @@ void handle_client_request()
 				
 				strcpy (relay_buffer, "send CAN");
 				int length = strlen(relay_buffer);
-				SendTelegram( relay_buffer, length);
+				SendTelegram( (BYTE*)relay_buffer, length);
 			}
 			
 			result = compare_word(subject, "audio");
@@ -299,7 +303,7 @@ void handle_client_request()
 				strcpy (relay_buffer, "send audio to me");
 				printf("Relaying: %s\n", relay_buffer);
 				length = strlen(relay_buffer);
-				SendTelegram( relay_buffer, length);
+				SendTelegram( (BYTE*)relay_buffer, length);
 					
 			}
 			result = compare_word(subject, "camera");			
@@ -311,7 +315,7 @@ void handle_client_request()
 				// Pass the request to the other end:
 				strcpy (relay_buffer, "send camera to me");
 				length = strlen(relay_buffer);
-				SendTelegram( relay_buffer, length);
+				SendTelegram( (BYTE*)relay_buffer, length);
 			
 		    }
 		    result = compare_word(subject, "file");			
@@ -354,13 +358,13 @@ void handle_client_request()
 				send_camera();
 				strcpy (relay_buffer, "sending camera to you.");
 				length = strlen(relay_buffer);
-				SendTelegram( relay_buffer, length);				    
+				SendTelegram( (BYTE*)relay_buffer, length);				    
 			}
 			else if (cond_2)
 			{
 				strcpy 	   (relay_buffer, "send camera to me.");
 				length = strlen(relay_buffer);
-				SendTelegram( relay_buffer, length);
+				SendTelegram( (BYTE*)relay_buffer, length);
 			}
 		}
 	}
@@ -375,7 +379,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, ipc_memory_client->Sentence);
 			length = strlen(relay_buffer);
-			SendTelegram( relay_buffer, length);
+			SendTelegram( (BYTE*)relay_buffer, length);
 		}
 	}
 	// 
@@ -388,7 +392,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, ipc_memory_client->Sentence);
 			length = strlen(relay_buffer);
-			SendTelegram( relay_buffer, length);
+			SendTelegram( (BYTE*)relay_buffer, length);
 		}
 	}
 	
@@ -413,7 +417,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "receive audio ");
 			length = strlen(relay_buffer);
-			SendTelegram( relay_buffer, length);
+			SendTelegram( (BYTE*)relay_buffer, length);
 		    
 		}
 		result = compare_word(subject, "camera");			
@@ -424,7 +428,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "receive camera ");
 			length = strlen(relay_buffer);
-			SendTelegram( relay_buffer, length);
+			SendTelegram( (BYTE*)relay_buffer, length);
 		}
 		result = compare_word(subject, "file");			
 		if (result==0)
@@ -451,7 +455,7 @@ void handle_client_request()
 			//char coBuff[127];
 			strcpy ((char*)relay_buffer, "stop CAN");
 			length = strlen( (char*)relay_buffer );
-			SendTelegram( relay_buffer, length);
+			SendTelegram( (BYTE*)relay_buffer, length);
 			CAN_SendingOn = FALSE;
 			CAN_ListeningOn = FALSE;			
 			clear_tcp_transmitting_flag_ipc_can();
@@ -464,7 +468,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "stop audio ");
 			length = strlen(relay_buffer);
-			SendTelegram( relay_buffer, length);
+			SendTelegram( (BYTE*)relay_buffer, length);
 		    
 		}
 		result = compare_word(subject, "camera");			
@@ -476,7 +480,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "stop camera ");
 			length = strlen(relay_buffer);
-			SendTelegram( relay_buffer, length);		    
+			SendTelegram( (BYTE*)relay_buffer, length);		    
 		}
 		result = compare_word(subject, "file");			
 		if (result==0)

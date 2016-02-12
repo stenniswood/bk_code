@@ -9,7 +9,7 @@
 	avisual polls 
  ************************************************************/
 
-#include <list>
+//#include <list>
 
 #define IPC_KEY_CLI  1274 
 #define MAX_CLIENTS  300
@@ -86,7 +86,7 @@ void cli_ack_response	  ();
 //void cli_ipc_add_new_client  ( struct in_addr mbeacon_ip_list );
 void cli_reset_client_list	   (  );
 void cli_ipc_add_new_client	   ( struct stClientData* mEntry );
-void cli_ipc_add_new_clients   ( std::list<struct in_addr> mbeacon_ip_list );
+//void cli_ipc_add_new_clients   ( std::list<struct in_addr> mbeacon_ip_list );
 BOOL cli_is_new_client			( );
 void cli_ack_new_client			( );
 

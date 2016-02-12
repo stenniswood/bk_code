@@ -20,6 +20,8 @@
 #include <pthread.h>
 
 
+using namespace std;
+
 
 
 void diagram_sentence(	std::string* subject,

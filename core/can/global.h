@@ -14,11 +14,18 @@
 #define	True	1
 #define	False	0
 
+#ifndef int8_t
 #define int8_t   char
+#endif
+#ifndef uint8_t
 #define uint8_t  unsigned char
+#endif
+#ifndef uint16_t
 #define uint16_t unsigned char
-
+#endif
+#ifndef byte
 #define byte uint8_t
+#endif
 
 //typedef	_Bool bool;
 //typedef	boolean Bool;

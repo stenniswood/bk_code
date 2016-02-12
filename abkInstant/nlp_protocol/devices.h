@@ -11,7 +11,7 @@ struct DEVICE_CAPS {
 
 struct DEVICE_CAPS* DEVICE_ComposeAudioCapabilitiesStructure( );
 
-struct WAVE_HEADER 
+/*struct WAVE_HEADER 
 {
 	short 	format;				// PCM=1
 	short 	channels_rxd;	
@@ -19,7 +19,7 @@ struct WAVE_HEADER
 	int		byte_rate;	
 	short 	block_align;		
 	short 	bits_per_sample;		
-};
+};*/
 
 void AUDIO_init_hdr( byte mChannels, short mSampleRate );
 

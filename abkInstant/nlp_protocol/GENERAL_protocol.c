@@ -269,7 +269,7 @@ return  TRUE = GPIO Telegram was Handled by this routine
 *****************************************************************/
 char* Parse_Statement(char*  mSentence)
 {	
-	if (mSentence==NULL) return; 
+	if (mSentence==NULL) return mSentence; 
 	printf( "Sentence:|%s|\n", mSentence );
 
 	bool okay = prefilter_text(mSentence);
@@ -290,7 +290,7 @@ char* Parse_Statement(char*  mSentence)
 	}
 
 	if (strcmp(mSentence, "I don't understand. Ignoring.")==0)
-		return;
+		return end_of_telegram;
 	
 	// AUDIO:
 	result = Parse_Audio_Statement( mSentence );

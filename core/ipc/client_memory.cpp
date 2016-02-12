@@ -387,7 +387,7 @@ int cli_find_name(char* mName)
 			return i;
 		//printf(" %s\t%s\t%s \n", ptr[i].name, ptr[i].address, ptr[i].machine );
 	}
-	return ;	
+	return -1;	
 }
 
 void cli_reset_client_list	   (  )

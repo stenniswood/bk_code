@@ -67,7 +67,7 @@ bool	Alias::is_group_member( char*  mLookupWord )
 /* Returns - 
 
 */
-string* Alias::extract_member( char*  mSentence, bool mWholeWordOnly=true )
+string* Alias::extract_member( char*  mSentence, bool mWholeWordOnly)
 {
 	string  Sentence(mSentence);
 	list<string>::iterator iter = m_synonyms.begin();

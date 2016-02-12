@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <semaphore.h>
+#include <stdint.h>
 #include "AudioToolbox/AudioToolbox.h"	// Mac specific
 #include "bk_system_defs.h"
 #include "protocol.h"
@@ -28,6 +29,18 @@ int    intermediate_buff_index    = 0;
 int    intermediate_cb_buff_index = 0;
 BOOL	PlaybackStarted = FALSE;
 BOOL 	audio_hardware_enabled = FALSE;
+
+
+void create_sinewave(short* mBuffer, int mSize, float freq, float phase) 
+{
+	float Amplitude = 1024*8;	
+	for (int i=0; i<mSize; i++)
+	{
+		mBuffer[i] = Amplitude * sin( (float)i * freq + phase );
+		//printf("%4d  ", Sinewave[i]);
+		//if ((i%16)==0)			printf("\n"); 
+	}
+}
 
 
 AudioQueueRef 					queue;
@@ -203,7 +216,7 @@ BOOL AUDIO_QueueBuffer( char* mBuffer, int mSize )
 	printf("\n"); 
 }
 
-int32_t audio_setup_and_play ( int dest, int samplerate, int channels, int bitdepth )
+int32_t audio_setup ( int dest, int samplerate, int channels, int mBuffNumberOfSamples )
 {
 	return 0; 
 }
@@ -270,7 +283,7 @@ void record_callback( void *ptr,
   if (RemoteListener) {
 	osize = Cmd_Audio_Data( audio_socket_buffer, (short*)&(AudioBuffers[intermediate_cb_buff_index]), 
 							buf->mAudioDataByteSize );		// Send to Client
-	SendAudioTelegram( (BYTE*)audio_socket_buffer, osize );
+	SendTelegram( (BYTE*)audio_socket_buffer, osize );
   	//printf ("Sending CMD_AUDIO_DATA: size=%d osize=%d\n", buf->mAudioDataByteSize, osize );
   }
 
@@ -347,9 +360,14 @@ void AUDIO_CloseRecorder()
 	audio_hardware_enabled = FALSE;
 	RecordStarted 		   = FALSE;
 	int osize = Cmd_Audio_End( audio_socket_buffer );
-	SendAudioTelegram( audio_socket_buffer, osize );
+	SendTelegram( audio_socket_buffer, osize );
 	printf("--Mac AUDIO HARDWARE SHUTDOWN!\n");  
 }
+void audio_close(  )
+{
+	AUDIO_CloseRecorder();
+}
+
 
 
 /*******************************************************************/

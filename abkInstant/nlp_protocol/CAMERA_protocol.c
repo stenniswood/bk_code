@@ -181,7 +181,7 @@ void send_camera()
 	printf("%s\n", NLP_Response);
 }
 
-void camera_watch(BOOL Save=FALSE)
+void camera_watch(BOOL Save)
 {	
 	// Maybe want to verify the source IP address for security purposes
 	// later on.  Not necessary now!

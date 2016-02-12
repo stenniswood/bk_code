@@ -2,9 +2,9 @@ RPI = 1
 linux_desktop = 2
 Mac = 3
 
-PLATFORM  = $(RPI)
+#PLATFORM  = $(RPI)
 #PLATFORM = $(linux_desktop)
-#PLATFORM  = $(Mac)
+PLATFORM  = $(Mac)
 
 ifeq ($(PLATFORM), $(RPI))
 HARDWARE_PATH = ./hardware/rpi/
@@ -63,7 +63,7 @@ UTIL_OBJS = client_to_socket.o AUDIO_file_util.o CAMERA_util.o CAN_util.o IMAGE_
 NLP_CORE_OBJS = prefilter.o nlp_extraction.o alias.o
 NLP_PROTOCOL_OBJS = GENERAL_protocol.o	CAN_protocol.o	GPIO_protocol.o	\
 	AUDIO_protocol.o	CAMERA_protocol.o FILE_protocol.o	IMAGE_protocol.o  \
-	package_commands.o	HMI_protocol.o	AUDIO_interface.o
+		HMI_protocol.o	AUDIO_interface.o package_commands.o
 
 NLP_ADRENALINE_OBJS  =	 Adrenaline_nlp.o     	Adren_bigmotor_talk.o  		\
 	Adren_lcd_talk.o     Adren_pwm_talk.o	 Adren_analog_talk.o  		\
@@ -85,7 +85,11 @@ LIBFLAGS 	+= -L../core/libs/ilclient -L./hardware/rpi/ -L/opt/vc/lib -lrt
 endif
 
 #LDFLAGS    = -L/opt/vc/lib/ -lGLESv2 -lEGL -ljpeg -lkhrn_static -lopenmaxil -lbcm_host  -lpthread -lrt  
+
+# Following is for video on RPI
+ifeq ($(PLATFORM), $(RPI))
 LDFLAGS = -lvchostif -lmmal -lmmal_core -lmmal_util -lvcos -lvcsm -lvcilcs -lvchiq_arm -lvcfiled_check -lvmcs_rpc_client 
+endif
 
 
 %.o: %.cpp $(DEPS)
@@ -121,6 +125,8 @@ clean:
 	rm -rf ./threads/*.o 			
 	rm -rf ./nlp_protocol/*.o 				
 	rm -rf ./nlp_adrenaline/*.o 					
+	rm -rf ./nlp_core/*.o	
 	rm -rf ./voice/*.o 	
+	rm -rf ./util/*.o
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 

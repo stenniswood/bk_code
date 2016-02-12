@@ -1,4 +1,5 @@
 /* BK Instant main file.  */
+#include "AUDIO_device.h"
 #include <sys/time.h>
 #include <string.h>
 #include <errno.h>
@@ -9,6 +10,9 @@
 #include <string>
 #include <vector>
 #include <pthread.h>
+#include <stdint.h>
+
+
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
 #include "can_txbuff.h"
@@ -28,6 +32,12 @@
 #include "CAN_memory.h"
 #include "udp_transponder.hpp"
 #include "thread_control.h"
+#include "client_to_socket.hpp"
+
+#define  uint32_t long int
+
+
+#include "AUDIO_device.h"
 
 
 // Right now this is user settable.  Need to detect:
@@ -35,19 +45,21 @@ BOOL	PiCAN_Present=FALSE;
 
 struct sCAN MMsg;
 byte 		count = 0;
-int  		fd;
+int  			fd;
 long  		SerialNumber_ = 0x56789CD;
 #define 	Debug 0
 pthread_t 	udp_tx_thread_id;
 pthread_t 	udp_rx_thread_id;
 pthread_t 	server_thread_id;
 
+// SET THIS IN serverThread Parse whatever.
+int create_client_thread_requested = 0;		// from a serverthread which received a request to connect to another RPI.
+
 
 void create_threads()
 {
-	/* These threads are located in :   
-	*/
-	
+	/* These threads are located in :   	*/
+
 	// CREATE UDP - Transponder : 
 	const char *message1 = "every second";
 	int iret1 = pthread_create( &udp_tx_thread_id, NULL, udp_transponder_function, (void*) message1);
@@ -69,64 +81,80 @@ void create_threads()
 	iret2 = pthread_create( &server_thread_id, NULL, server_thread, (void*) message1);
 	if (iret2)
 	{
-		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
+		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
 		exit(EXIT_FAILURE);
 	}
 	// CLIENT PROTOCOL... thread needed?  No.
 }
 
 
+
+void create_another_client_thread()		// really serverthread which initiates connection (ie. client thread)
+{
+	// TBD!!!	
+	const char *message1 = "client blah";
+	// ETHERNET SERVER PROTOCOL:
+	int iret2 = pthread_create( &server_thread_id, NULL, server_thread, (void*) message1);
+	if (iret2)
+	{
+		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
+		exit(EXIT_FAILURE);
+	}
+}
+
+// WHICH IPC MEMORY TO SETUP ON STARTUP?
 #define USE_AVISUAL 0
 #define USE_CAN		1
 #define USE_SWAY	0
 #define USE_PICAMSCAN	0
-#define USE_AUDIO	0
+#define USE_AUDIO	1
 
 /* Inter Process Communications (via shared memory)		
 */
 void establish_ipc()
 {
 	printf("************************* SHARED MEMORY *****************************\n");
-	// Allocate a shared memory so we can accept user commands (ie. connect, send audio, etc)
+	// Always have a Client connection, so we can accept user commands (ie. connect, send audio, etc)
 	int result = connect_shared_client_memory(TRUE);
+	printf("Update/Ack Counters = %d/%d\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);			
+			
 
-	printf("************************* avisual SHARED MEMORY *****************************\n");
 	if (USE_AVISUAL)
 	{
+		printf("************************* AVISUAL SHARED MEMORY *****************************\n");
 		vis_allocate_memory();
 		vis_attach_memory  ();
 		vis_fill_memory	   ();
-	} 
+	}
 	//else vis_deallocate_memory( 98307 );
 
 	if (USE_SWAY)
 	{
+		printf("************************* SWAY SHARED MEMORY *****************************\n");	
 		sway_allocate_memory();
-		sway_attach_memory  (); 
+		sway_attach_memory  ();
 		sway_fill_memory	();
-	} 
-	//	else sway_deallocate_memory();	
+	}
+	//	else sway_deallocate_memory();
 
 	if (USE_PICAMSCAN) 
 	{
+		printf("************************* PICAMSCAN SHARED MEMORY *****************************\n");	
 		picam_allocate_memory();
 		picam_attach_memory  ();
 		picam_fill_memory	 ();
-	} 
+	}
 //	else picam_deallocate_memory(  );	// 98307
-
 	
 	if (USE_AUDIO)
 	{
-		aud_allocate_memory();
-		aud_attach_memory  (); 
-		aud_fill_memory	   ();
-	}  
-	//else aud_deallocate_memory();
-
+		printf("************************* AUDIO SHARED MEMORY *****************************\n");	
+	    result =  audio_connect_shared_memory(TRUE);
+	}
 
 	if (USE_CAN)
 	{
+		printf("************************* CAN SHARED MEMORY *****************************\n");	
 	    result =  can_connect_shared_memory(FALSE);
 	} 
 	printf("****************** END SHARED MEMORY SETUP *******************");	
@@ -136,15 +164,15 @@ void init( )
 {	
 	//fuse_init ( );
 	establish_ipc();
-		
+
 	// Button boards set to 0x0E, 0x04, 0x13 which is 250 Kbps :
 
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
 	// and attach myInterrupt() to the interrupt
 	create_threads();
 
-	printf("done with board request()!\n");
-
+	init_client_request();	
+	printf("done with init()!\n");
 }
   
 void help()
@@ -168,178 +196,23 @@ void print_args(int argc, char *argv[])
 	printf("\n");
 }
 
-/* 	Interface between Command Central and CAN
-	Process and Transmit CAN messages 
-*/
-void can_interface()
+
+/* Client request shared memory.  */
+void scan_client()
 {
-	// PUMP TRANSMIT MESSAGE QUEUE:
-/*	if (ReadyToSendAnother)
-	{
-		SendNext();		// Transmit next can message
-	}
-	// HANDLE ANY RX MESSAGES:
-	while (RxMessageAvailable())
-	{
-		struct sCAN* tmp = GetNext();
-		//callback_main( tmp );
-	}		*/
-}
-
-#if (PLATFORM==Mac)
-char amon_command[] = "~/bk_code/amonitor/amon";
-#elif (PLATFORM==RPI)
-char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon";
-#elif (PLATFORM==linux_desktop)
-char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
-#endif
-
-
-int start_amon() 
-{
-    int pid;
-    switch (pid=fork()) {
-        case -1:
-			printf("fork() = -1\n");
-            return 0;
-        case 0:
-            execvp(amon_command, NULL);
-            printf("returned from ececvp\n");
-        default:
-            return 0;
-    }
-    return 1;
-}
-
-/* Note the client can do any of these:
-	establish a connection
-	audio  						(send and/or receive)
-	file transfer				
-	image transfer				
-	HMI							
-	CAN							
-*/
-void handle_client_request()
-{
-	if (ipc_memory_client==NULL)	return;
- 
- 	printf ("Sentence:%s|\n", ipc_memory_client->Sentence );
-	int result = strcmp(ipc_memory_client->Sentence, "whoami");
-	if (result==0)
-		printf("whoami\n");
-
-	result = strcmp(ipc_memory_client->Sentence, "list");
-	if (result==0)
-		printf("list\n");
-
-	result = strcmp(ipc_memory_client->Sentence, "disconnect");
-	if (result==0)
-		result = disconnect_from_robot( );
-
-	// AFTER THIS BEGIN 2+ WORD COMMANDS:
-	char* space = strchr(ipc_memory_client->Sentence, ' ');
-	if (space==NULL)  {  return;	};
-	*space = 0;
-	space++;
-	
-	result = strcmp(ipc_memory_client->Sentence, "connect");
-	if (result==0) {
-		printf("connecting..\n");
-		result = connect_to_robot( space );
-	}
-
-	result = strcmp(ipc_memory_client->Sentence, "send");			
-	if (result==0)
-	{
-		printf("sending..\n");
-		result = strcmp(space, "can");			
-		if (result==0)
-		{
-			start_amon();
-			printf("sending..CAN\n");
-			Cmd_client_CAN_Start();		// in core/wifi/client.c
-		}
-		result = strcmp(space, "audio");
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "video");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "file");			
-		if (result==0)
-		{
-			send_file_transmit_request();
-		}
-		result = strcmp(space, "mouse");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "keyboard");
-		if (result==0)
-		{
-		}
-		
-	}
-
-	result = strcmp(ipc_memory_client->Sentence, "stop");
-	if (result==0)
-	{
-		printf("stoping..\n");
-		result = strcmp(space, "can");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "audio");
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "video");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "file");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "mouse");			
-		if (result==0)
-		{
-		}
-		result = strcmp(space, "keyboard");
-		if (result==0)
-		{
-		}	
-	}
-}
-
-void scan_inputs()
-{
-	//printf("%d %d\n", ipc_memory_client->RequestCount, ipc_memory_client->AcknowledgedCount);
 	// CHECK CLIENT MEMORY FOR REQUEST:
-	if (ipc_memory_client->RequestCount > ipc_memory_client->AcknowledgedCount)
+	if (cli_is_new_update())
 	{
-		printf("calling handle_client_request() \n");
+		//printf("is new update.\n");
 		handle_client_request();
-		ipc_memory_client->AcknowledgedCount++;
+		// Now wait until our response is taken.  Don't want to reprocess it on 
+		// next pass thru here!
+		//cli_wait_for_ack_update();		// should be a timeout on this though.
+		//printf("client response was sent.\n");
 	}	
 }
 		
-void update_outputs()
-{
-	// Update Client List:
-/*	int size = ipc_memory_client->NumberClients;
-	for (int i=0; i<size; i++)
-		cli_ipc_add_new_client( mClientText );		
-*/	
-}
 
-void ethernet_interface()	{	/* wifi comms 	 */ }
-void voice_interface()		{	/* NLP/Synthesis */ }
-
-char filespath[64];
-char filename [64];
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
 	are only set when the Enable is.  maybe.		*/
@@ -348,7 +221,6 @@ int main( int argc, char *argv[] )
 {
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg 
-	int value    	= 0;
 	if (argc>1)
 	{
 		if ((strcmp(argv[first_param], "help") == 0))
@@ -357,43 +229,72 @@ int main( int argc, char *argv[] )
 			return 0;
 		}
 	}
-	init();
-	printf("===============================================\n");
+	init();	// <-- Serverthread is established
 	
-	CAN_SendingOn   = FALSE;
-	CAN_ListeningOn = FALSE;
+	printf("===============================================\n");
 	if (argc>1)
 	{
-		// FORCE CLIENT CONNECTION :
-		/*int error = connect_to_robot(argv[1]);
-		if (error==0)	// Success,
-		{
+		// TEST CLIENT CONNECTION :
+		/*
 			WifiConnected = TRUE;
 			TransportCAN  = TRUE;
 			send_file_transmit_request( );
 			strcpy(filespath, "/home/pi/abkInstant/media/");
 			strcpy(filename, "test" );
 			create_file_tx_thread( argv[1], filespath, filename, BASE_FILE_PORT );
-			//Cmd_client_CAN_Start( );
-		}*/
+		*/
 	}
-	printf("================= Checking command line arguments ========================\n");	
+	printf("================= Checking command line arguments ========================\n");		
 
-	printf("================= Main Loop ==========================\n");
-	int count = 0;
-	Init_CAN_Protocol();
-	sleep(1);
-	//Parse_CAN_Statement( "incoming CAN");
-	//create_CAN_thread( FALSE,  TRUE );
+//		play_api_test(22050, 16, 1, 0);
+
+#define N_WAVES          1024*32    /* dimension of Sinewave[] */
+	static short Sinewaves[N_WAVES*2];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
+
+	float freq = 1*(2.*3.1415 / (float)N_WAVES);
+	create_sinewave(Sinewaves,  N_WAVES, freq, 0.);
+	freq = 10.*(2.*3.1415 / (float)N_WAVES);
+	create_sinewave( &(Sinewaves[N_WAVES]), N_WAVES, freq, 0. );
+
+	int32_t result = audio_setup( 0, 22050, 1, N_WAVES*2 );
+	for (int j=0; j<4; j++)
+	{
+		uint8_t* result = audio_add_play_buffer( Sinewaves, N_WAVES*2, 22050 );
+//		result = audio_add_play_buffer( Sinewave_2, N_WAVE, 22050 );
+	}
+
+/*		short Sinewave_2[N_WAVE];
+		float freq = 3*(2.*3.1415 / (float)N_WAVE);
+		create_sinewave(Sinewave,  N_WAVE, freq, 0.);
+		freq = 5.*(2.*3.1415 / (float)N_WAVE);
+		create_sinewave(Sinewave_2, N_WAVE, freq, 0.);
+
+		int32_t result = audio_setup( 1, 22050, 1, N_WAVE );
+		for (int j=0; j<4; j++)
+		{
+			uint8_t* result = audio_add_play_buffer( Sinewave, N_WAVE, 22050 );
+			result = audio_add_play_buffer( Sinewave_2, N_WAVE, 22050 );
+		}	
+*/
+	
+	printf("================= Main Loop ==========================\n");	
 	while (1) 
 	{
-		//printf("Loop %d\n", count++);
-		can_interface();			// empty
-		ethernet_interface();		// empty
-		voice_interface();			// empty
-		scan_inputs();
-		update_outputs();
-		usleep(100000);
+		//voice_interface();		// empty
+		scan_client();
+		usleep(50000);
 	}
 }
 
+
+
+
+
+void update_outputs()
+{
+	// Update Client List:
+/*	int size = ipc_memory_client->NumberClients;
+	for (int i=0; i<size; i++)
+		cli_ipc_add_new_client( mClientText );		
+*/	
+}

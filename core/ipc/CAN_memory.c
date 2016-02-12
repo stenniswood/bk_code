@@ -416,13 +416,13 @@ int can_connect_shared_memory(char mAllocate)
 void		set_tcp_receiving_flag_ipc_can()
 {
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return 0;
+			return ;
 	ipc_memory_can->isReceiving = TRUE;
 }
 void		clear_tcp_receiving_flag_ipc_can()
 {
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return 0;
+			return ;
 	ipc_memory_can->isReceiving = FALSE;
 }
 BOOL		is_tcp_receiving_flag_ipc_can   ()
@@ -436,13 +436,13 @@ BOOL		is_tcp_receiving_flag_ipc_can   ()
 void		set_tcp_transmitting_flag_ipc_can()
 {
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return 0;
+			return ;
 	ipc_memory_can->isTransmitting = TRUE;
 }
 void		clear_tcp_transmitting_flag_ipc_can()
 {
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return 0;
+			return ;
 	ipc_memory_can->isTransmitting = FALSE;
 }
 BOOL		is_tcp_transmitting_flag_ipc_can   ()

@@ -47,9 +47,9 @@ void dump_buffer(BYTE* buffer, int bufSize)
 int pack_CAN_msg( struct sCAN* msg, BYTE* buffer, int bufSize )
 {
 	// NLP "token" 
-	strcpy(buffer, "CAN_message");
+	strcpy((char*)buffer, "CAN_message");
 	// now pack CAN in binary form:
-	int len = strlen(buffer);
+	int len = strlen((char*)buffer);
 	BYTE* ptr = buffer + len + 1 /*null terminator*/;
 
     *ptr = msg->id.group.block;				ptr++;

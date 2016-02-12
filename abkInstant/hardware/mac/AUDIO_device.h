@@ -13,9 +13,14 @@ extern "C" {
 //#include "bcm_host.h"
 //#include "ilclient.h"
 
+
+
 #define BUFFER_SIZE_SAMPLES 1024
 
 typedef int int32_t;
+//typedef long unsigned int uint32_t;
+void create_sinewave(short* mBuffer, int mSize, float freq, float phase=0.); 
+
 
 struct WAVE_HEADER 
 {
@@ -63,7 +68,7 @@ void test_function(int id);
 
 
 // BK:
-int32_t audio_setup_and_play ( int dest, int samplerate, int channels, int bitdepth );
+int32_t audio_setup ( int dest, int samplerate, int channels, int mBuffNumberOfSamples );
 uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate );
 void	 audio_close		  ( );
 

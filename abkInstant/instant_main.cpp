@@ -1,5 +1,5 @@
 /* BK Instant main file.  */
-#include "AUDIO_device.h"
+//#include "AUDIO_device.h"
 #include <sys/time.h>
 #include <string.h>
 #include <errno.h>
@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 #include <pthread.h>
+#include <stdint.h>
+
 
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
@@ -31,6 +33,9 @@
 #include "udp_transponder.hpp"
 #include "thread_control.h"
 #include "client_to_socket.hpp"
+
+#define  uint32_t long int
+
 
 #include "AUDIO_device.h"
 

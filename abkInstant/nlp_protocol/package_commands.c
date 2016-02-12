@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
+
+#include "bk_system_defs.h"
 #include "protocol.h"
 #include "devices.h"
+#include "AUDIO_device.h"
 #include "package_commands.h"
 
 

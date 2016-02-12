@@ -103,7 +103,7 @@ BOOL handle_audio_data( BYTE* mAudioData, int mLength )
 			start_new_file = FALSE;
 		} else {
 			//AppendAudioData( buffer, bytes_rxd );
-			AppendAudioData( mAudioData, mLength );
+			AppendAudioData( (char*)mAudioData, mLength );
 		}
 	}
 	
@@ -187,9 +187,9 @@ void send_audio_message( short* mAudioData, int mLength )
 	
 	char nlp_message[40];
 	sprintf( nlp_message, "new audio_buffer %6d", mLength*2 );
-	SendTelegram( nlp_message, strlen(nlp_message)+1 );
+	SendTelegram( (unsigned char*)nlp_message, strlen(nlp_message)+1 );
 		
-	SendTelegram( (char*)mAudioData, mLength*2 );
+	SendTelegram( (unsigned char*)mAudioData, mLength*2 );
 	total_bytes_transmitted += mLength*2;
 	printf("total_bytes_transmitted=%ld\n", total_bytes_transmitted );
 }
@@ -204,13 +204,14 @@ void audio_interface( )
 	int    bufSize = 255;
 	unsigned char  buff[255];
 	static long int	counter =0;
-	static short Sinewaves[N_WAVE*2];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
+
 				
 	if (AUDIO_tcpip_SendingOn)
 	{
 	    //printf("Audio_SendingOn is ON!\n");	
 	    if (1)
 	    {
+/*			static short Sinewaves[N_WAVE*2];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
 	    	if (counter++>200000) 
 	    	{
 				float freq = 5*(2.*3.1415 / (float)N_WAVE);
@@ -220,7 +221,7 @@ void audio_interface( )
 
 				send_audio_message( Sinewaves, N_WAVE*2 );
 				counter = 0;
-	    	}
+	    	} */
 	    }
 	    else if (sending_audio_file_fd)
 	    {

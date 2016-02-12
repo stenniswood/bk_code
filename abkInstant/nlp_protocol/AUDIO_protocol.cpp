@@ -247,7 +247,7 @@ void send_audio()
 	strcpy(NLP_Response, "Okay, I will begin sending you my audio.");
 }
 
-void audio_listen(BOOL Save=FALSE)
+void audio_listen(BOOL Save)
 {	
 	// Fake out the other end, just verify the audio works:
 	//play_api_test(22050, 16, 1, 0);
@@ -401,7 +401,7 @@ int Parse_Audio_Statement( char* mSentence )
 		( compare_word( adjective,  "new"  )==0))
 	{
 		int text_length = strlen(mSentence)+1;
-		BYTE* audio_data_ptr = mSentence + text_length;
+		BYTE* audio_data_ptr = (BYTE*)mSentence + text_length;
 		char* size_ptr = strrchr(mSentence, ' ') + 1;
 		int length = 0;
 		if (size_ptr)
@@ -421,7 +421,7 @@ int Parse_Audio_Statement( char* mSentence )
 		//printf("RXD AUDIO BUFFER:  length=%d = bytes_rxd=%d\n", length, local_bytes_rxd );
 		
 		// restart at beginning of audio data:
-		audio_data_ptr = mSentence + text_length;
+		audio_data_ptr = (BYTE*) mSentence + text_length;
 		BOOL handled   = handle_audio_data( audio_data_ptr, length );
 		retval = length;
 	}
