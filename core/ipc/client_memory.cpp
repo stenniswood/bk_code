@@ -394,11 +394,14 @@ void cli_reset_client_list	   (  )
 {
 	ipc_memory_client->NumberClients = 0;
 }
+
 void cli_ipc_add_new_client( struct stClientData* mEntry )
 {
+	if (ipc_memory_client==NULL) return;
+	
 	int   size  = ipc_memory_client->NumberClients;
 	memcpy( (char*)&(ipc_memory_client->ClientArray[size]), 
-				mEntry,  sizeof(struct stClientData)  );				
+				mEntry,  sizeof(struct stClientData)  );
 				
 	ipc_memory_client->NewClientUpdateCounter++;
 	ipc_memory_client->NumberClients++;

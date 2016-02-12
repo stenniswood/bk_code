@@ -15,6 +15,7 @@
 #include "bk_system_defs.h" 
 #include "client_memory.hpp"
 #include "udp_transponder.hpp"
+#include "serverthread.h"
 
 
 #define Debug 0
@@ -44,15 +45,11 @@ int convert_to_string_array( char* mText, char mDelim )
 	B)  Let's only keep 1 list.  either the list immediately below, or the client memory 
 		list, and the client_list_object.  So we have 3 lists right now!
 	
-
 */
 
-// Remove this:
-//list<struct stBK_Header> beacon_ip_list;
 
 /*  
 Find if in the ipc_memory_client->ClientArray[]
-	// deprecated beacon_ip_list:
 
 Return TRUE => Already added.
 	   FALSE => Not added.
@@ -77,7 +74,6 @@ void print_beacons()
 	if (ipc_memory_client)
 	for (int c=0; c<ipc_memory_client->NumberClients; c++)
 	{
-		c++;
 		printf("#%d IP=%s; %s  %s  \n", c, ipc_memory_client->ClientArray[c].address, 
 							ipc_memory_client->ClientArray[c].name, 
 							ipc_memory_client->ClientArray[c].machine );
@@ -91,55 +87,25 @@ void print_beacons()
 struct stClientData*  extract_beacon_text( char* mip, char in_buf[] )
 {
 	static struct stClientData hdr;
-
-  	 printf("Adding IP...\n");  	 
-	 int num_strings = convert_to_string_array( in_buf );	  
-	 char* ptr = in_buf+strlen(in_buf)+1;		// skip to second string.		 
-
-	  // EXTRACT HOST NAME
-	  char* ptr2 = strchr( ptr, '=');
-	  strcpy ( hdr.name, ptr2+1);
-
-	  // EXTRACT MACHINE TYPE:	  
-	  ptr = ptr2+strlen(ptr2)+1;				// skip to 3rd string.
-	  ptr2 = strchr(ptr, '=');
-	  strcpy( hdr.machine, ptr2+1 );
-	  
-	  // ADD IP ADDRESS:
-	  strcpy ( hdr.address, mip );
-	  
-	  return &hdr;
+	
+	printf("Adding IP...\n");
+	int num_strings = convert_to_string_array( in_buf );	  
+	char* ptr = in_buf+strlen(in_buf)+1;		// skip to second string.		 
+	
+	// EXTRACT HOST NAME
+	char* ptr2 = strchr( ptr, '=');
+	strcpy ( hdr.name, ptr2+1);
+	
+	// EXTRACT MACHINE TYPE:	  
+	ptr = ptr2+strlen(ptr2)+1;				// skip to 3rd string.
+	ptr2 = strchr(ptr, '=');
+	strcpy( hdr.machine, ptr2+1 );
+	
+	// ADD IP ADDRESS:
+	strcpy ( hdr.address, mip );
+	return &hdr;
 }
 
-/* 
-	Put the list<string> of clients into the ipc_memory.
-//			char* ip_str = inet_ntoa((*iter).addr);	
-
-void update_client_list()
-{
-	if (ipc_memory_client)
-	{	
-		cli_reset_client_list();
-		list<struct stBK_Header>::iterator iter = beacon_ip_list.begin();
-		int byte_array_size = 0;
-		struct stClientData tmp;
-		
-		// Now add each client as a string followed by a null terminator.  Hence a string array.
-		while(( iter != beacon_ip_list.end()) && (byte_array_size<MAX_CLIENTS))
-		{			
-			// Copy 1 client:
-			strcpy( tmp.address,  iter->ip_address);
-			strcpy( tmp.name,  	  iter->hostname  );
-			strcpy( tmp.machine,  iter->machine_type );			
-			strcpy( tmp.status,   "idle");				// want connected/notconnected with multi clients.
-			
-			tmp.network = 1;		// TCP_IP
-			cli_ipc_add_new_client( &tmp );						
-			iter++;
-		}
-	}
-}
-*/
 
 //--------------------- END CLIENT LIST ---------------------------------------
 //=============================================================================
@@ -157,16 +123,11 @@ void compose_message()
 	sprintf(out_buf, "APP_NAME=BK robot server\nHOST_NAME=%s\nMACHINE_TYPE=%s\n", name, MACHINE_TYPE );	
 }
 
-
-#include "serverthread.h"
-
 void* udp_transponder_function(void* msg)
 { 
   int                  client_s;        // Client socket descriptor
   struct sockaddr_in   server_addr;     // Server Internet address
   int                  addr_len;        // Internet address length
-
-  char                 in_buf[4096];    // Input buffer for data
   int                  retcode;         // Return code
   int                  iOptVal;         // Socket option value
   int                  iOptLen;         // Socket option length
@@ -266,13 +227,11 @@ void* udp_receive_function(void* msg)
 	  // Copy the four-byte client IP address into an IP address structure
 	  memcpy(&client_ip_addr, &client_addr.sin_addr.s_addr, 4);
 	  char* ip = inet_ntoa(client_ip_addr);	  
+	  
 	  if ( !is_already_added( ip ) )
-//	  if ( !is_already_added( &client_ip_addr ) )
-	  {		
-		//struct stClientData
+	  {		  
 		struct stClientData*  hdr = extract_beacon_text( ip, in_buf );
 		cli_ipc_add_new_client(  hdr );		
-		//update_client_list();	// put into IPC memory
 		print_beacons();
 		// Output the received message
 		printf("Msg: %s \n", in_buf);
@@ -298,3 +257,34 @@ void* udp_receive_function(void* msg)
   }
   return NULL;  
 }
+
+
+/* 
+	Put the list<string> of clients into the ipc_memory.
+//			char* ip_str = inet_ntoa((*iter).addr);	
+
+void update_client_list()
+{
+	if (ipc_memory_client)
+	{	
+		cli_reset_client_list();
+		list<struct stBK_Header>::iterator iter = beacon_ip_list.begin();
+		int byte_array_size = 0;
+		struct stClientData tmp;
+		
+		// Now add each client as a string followed by a null terminator.  Hence a string array.
+		while(( iter != beacon_ip_list.end()) && (byte_array_size<MAX_CLIENTS))
+		{			
+			// Copy 1 client:
+			strcpy( tmp.address,  iter->ip_address);
+			strcpy( tmp.name,  	  iter->hostname  );
+			strcpy( tmp.machine,  iter->machine_type );			
+			strcpy( tmp.status,   "idle");				// want connected/notconnected with multi clients.
+			
+			tmp.network = 1;		// TCP_IP
+			cli_ipc_add_new_client( &tmp );						
+			iter++;
+		}
+	}
+}
+*/

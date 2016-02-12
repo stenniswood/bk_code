@@ -208,7 +208,6 @@ void scan_client()
 		// Now wait until our response is taken.  Don't want to reprocess it on 
 		// next pass thru here!
 		//cli_wait_for_ack_update();		// should be a timeout on this though.
-		//printf("client response was sent.\n");
 	}	
 }
 		
@@ -280,7 +279,6 @@ int main( int argc, char *argv[] )
 	printf("================= Main Loop ==========================\n");	
 	while (1) 
 	{
-		//voice_interface();		// empty
 		scan_client();
 		usleep(50000);
 	}

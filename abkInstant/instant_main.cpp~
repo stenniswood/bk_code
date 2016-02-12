@@ -1,5 +1,5 @@
 /* BK Instant main file.  */
-#include "AUDIO_device.h"
+//#include "AUDIO_device.h"
 #include <sys/time.h>
 #include <string.h>
 #include <errno.h>
