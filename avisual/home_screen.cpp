@@ -25,38 +25,38 @@
  
 
 TextView 		ConnectionStatus( 50, 700, 500, 50 	);
+EditBox 		ClientInputEdit ( 50, 700, 420, 300 );
+TextView 		RobotResponse 	( 50, 700, 290, 190 );
 ClientListPanel	AvailClients 	( 20, 700, 160, 50	);
-TextView 		RobotResponse 	( 50, 700, 350, 200 );
-EditBox 		ClientInputEdit( 50, 700, 450, 355 );
 
 static char ConnectionStatusText[128];
 static char CommandText[128];
 
+
 void init_home_screen()
 {
-	RobotResponse.set_text			( "Not Connected" );		//ConnectionStatus
-	if (ipc_memory_client)
-		RobotResponse.set_text			( ipc_memory_client->Sentence );		//ConnectionStatus
-	RobotResponse.set_text_size 		( 16.0 		 );
-	RobotResponse.set_text_color		( 0xCFFF0000 );
-	RobotResponse.set_background_color( 0xFFFFFf00 );
-	
-	// This should be hidden until asked for via voice.
-	//AvailClients.move_to( 20, 75 );
-
 	strcpy(CommandText, "connect to 192.168.2.14, Robot, show me the accuracy of your positioning. Show me a histogram for right leg positions.\
 	 Lift your left leg.  Raise both arms.  Go to the bedroom and get my shoes." );	
 	ClientInputEdit.set_text			( CommandText );
 	ClientInputEdit.set_text_size 		( 16.0 );	
 
-//	MainDisplay.add_object( &ConnectionStatus );
-//	MainDisplay.add_object( &adren_board_list );
+
+	RobotResponse.set_text				( "Not Connected" );		//ConnectionStatus
+	if (ipc_memory_client)
+		RobotResponse.set_text			( ipc_memory_client->Sentence );		//ConnectionStatus
+	RobotResponse.set_text_size 		( 16.0 		 );
+	RobotResponse.set_text_color		( 0xCFFF0000 );
+	RobotResponse.set_background_color  ( 0xFFFFFf00 );
+	
+	// This should be hidden until asked for via voice.
+	//AvailClients.move_to( 20, 75 );
 
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		  );
 	MainDisplay.add_object( &ClientInputEdit   );
 	MainDisplay.add_object( &RobotResponse 	  );
 	MainDisplay.add_object( &AvailClients );
+//	MainDisplay.add_object( &adren_board_list );
 	MainDisplay.load_resources();
 }
 

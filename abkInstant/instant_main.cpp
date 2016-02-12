@@ -11,7 +11,6 @@
 #include <vector>
 #include <pthread.h>
 
-
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
 #include "can_txbuff.h"
@@ -112,6 +111,8 @@ void establish_ipc()
 	printf("************************* SHARED MEMORY *****************************\n");
 	// Always have a Client connection, so we can accept user commands (ie. connect, send audio, etc)
 	int result = connect_shared_client_memory(TRUE);
+	printf("Update/Ack Counters = %d/%d\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);			
+			
 
 	if (USE_AVISUAL)
 	{
@@ -137,14 +138,14 @@ void establish_ipc()
 		picam_allocate_memory();
 		picam_attach_memory  ();
 		picam_fill_memory	 ();
-	} 
+	}
 //	else picam_deallocate_memory(  );	// 98307
 	
 	if (USE_AUDIO)
 	{
 		printf("************************* AUDIO SHARED MEMORY *****************************\n");	
 	    result =  audio_connect_shared_memory(TRUE);
-	}  
+	}
 
 	if (USE_CAN)
 	{
@@ -189,16 +190,6 @@ void print_args(int argc, char *argv[])
 	}
 	printf("\n");
 }
-
-
-/*#if (PLATFORM==Mac)
-char amon_command[] = "~/bk_code/amonitor/amon";
-#elif (PLATFORM==RPI)
-char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon > /dev/null";
-#elif (PLATFORM==linux_desktop)
-char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
-#endif */
-
 
 
 /* Client request shared memory.  */

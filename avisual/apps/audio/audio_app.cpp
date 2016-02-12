@@ -142,7 +142,7 @@ void* process_audio(void*)
 
 	while ( 1 )
 	{
-		if ( (ipc_memory_aud->update_counter) > last_count )
+		if ( (ipc_memory_aud->UpdateCounter) > last_count )
 		{
 /*			last_count  = ipc_memory_aud->update_counter;
 			ipc_memory_aud->acknowledge_counter++;
@@ -329,10 +329,6 @@ void AudioApp::configure_wave_views(int mChannels, short* mDataCh1, short* mData
 	}
 }
 
-int	AudioApp::onPlace			(	)
-{
-
-}
 
 
 

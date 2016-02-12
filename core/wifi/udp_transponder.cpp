@@ -18,11 +18,20 @@
 
 
 #define Debug 0
-
-
-//---------------------- CLIENT LIST --------------------------------------------
 using namespace std;
 
+//---------------------- CLIENT LIST --------------------------------------------
+/* TODO:
+	A)  Need timeouts on the beacons.  If they stop responding, for x amount of time
+		(maybe 1 minute), then we have to clear them from the list - or set a bit 
+		indicating inactive.
+	B)  Let's only keep 1 list.  either the list immediately below, or the client memory 
+		list, and the client_list_object.  So we have 3 lists right now!
+	
+
+*/
+
+// Remove this:
 list<struct stBK_Header> beacon_ip_list;
 
 /*  
@@ -102,6 +111,7 @@ struct stBK_Header*  extract_beacon_text( struct in_addr* client_ip_addr, char i
 	  strcpy ( hdr.ip_address, ip );
 	  hdr.addr = *client_ip_addr;
 	  
+	  
 	  return &hdr;
 }
 
@@ -125,10 +135,11 @@ void update_client_list()
 			// Copy 1 client:
 			strcpy( tmp.address,  iter->ip_address);
 			strcpy( tmp.name,  	  iter->hostname  );
-			strcpy( tmp.machine,  iter->machine_type );
+			strcpy( tmp.machine,  iter->machine_type );			
+			strcpy( tmp.status,   "idle");				// want connected/notconnected with multi clients.
+			
 			tmp.network = 1;		// TCP_IP
-			cli_ipc_add_new_client( &tmp );
-						
+			cli_ipc_add_new_client( &tmp );						
 			iter++;
 		}
 	}

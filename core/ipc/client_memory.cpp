@@ -148,12 +148,13 @@ int cli_get_segment_size()
 	printf ("Client segment size: %d\n", segment_size);
 	return segment_size;
 }
+
 void cli_fill_memory()
 {
 	int size = cli_get_segment_size();
 	memset(client_shared_memory, 0, size);
 	printf("cli_fill_memory() - ");
-	printf("%d NumCli=%d\n", size, ipc_memory_client->NumberClients );
+	printf("%d NumClients=%d\n", size, ipc_memory_client->NumberClients );
 	
 }
 
@@ -327,11 +328,12 @@ void cli_ack_connection_status()
 
 BOOL cli_is_new_update()
 {
-	if (ipc_memory_client->UpdateCounter > ipc_memory_client->AcknowledgedCounter)
-	{
-		//printf("Latest_count = %d/%d\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);			
-		return TRUE;
-	}
+	if (ipc_memory_client)
+		if (ipc_memory_client->UpdateCounter > ipc_memory_client->AcknowledgedCounter)
+		{
+			printf("Update/Ack Counters = %d/%d\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);			
+			return TRUE;
+		}
 	return FALSE;
 }
 void cli_ack_update_status()
@@ -387,20 +389,41 @@ int cli_find_name(char* mName)
 	}
 	return ;	
 }
+
 void cli_reset_client_list	   (  )
 {
 	ipc_memory_client->NumberClients = 0;
 }
-
 void cli_ipc_add_new_client( struct stClientData* mEntry )
 {
 	int   size  = ipc_memory_client->NumberClients;
 	memcpy( (char*)&(ipc_memory_client->ClientArray[size]), 
 				mEntry,  sizeof(struct stClientData)  );				
 				
-	ipc_memory_client->UpdateCounter++;
+	ipc_memory_client->NewClientUpdateCounter++;
 	ipc_memory_client->NumberClients++;
+	
+//	ipc_memory_client->UpdateCounter++;		Cannot use this counter because it also triggers a new client sentence parsing!!
+//	therefore the NewClientUpdateCounter.
 }
+
+BOOL cli_is_new_client()
+{
+	if (ipc_memory_client)
+		if (ipc_memory_client->NewClientUpdateCounter > ipc_memory_client->NewClientAcknowledgedCounter)
+		{
+			printf("Update/Ack Counters = %d/%d\n", ipc_memory_client->NewClientUpdateCounter, ipc_memory_client->NewClientAcknowledgedCounter);
+			return TRUE;
+		}
+	return FALSE;
+}
+
+void cli_ack_new_client()
+{
+	if (ipc_memory_client)
+		ipc_memory_client->NewClientAcknowledgedCounter = ipc_memory_client->NewClientUpdateCounter;
+}
+
 
 /*void cli_ipc_add_new_client( struct in_addr mbeacon_ip_list, char* mTextMsg )
 {

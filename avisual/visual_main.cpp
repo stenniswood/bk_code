@@ -169,12 +169,12 @@ void gui_interface()
 	MainDisplay.update_invalidated();	
 	//printf("MainDisplay.update_invalidated. \n");
 
-	if (ipc_memory_client)
-		if (cli_is_new_update())
-		{
-			Last_Retrieved_Number = ipc_memory_client->NumberClients;
-			UpdateDisplaySemaphore = 1;
-		}
+
+	if (cli_is_new_client())
+	{
+		Last_Retrieved_Number = ipc_memory_client->NumberClients;
+		UpdateDisplaySemaphore = 1;
+	}
     ////////////////////////////////////////
 	if (UpdateDisplaySemaphore)
 	{

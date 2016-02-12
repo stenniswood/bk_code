@@ -26,20 +26,24 @@ struct stClientData {
 /******************** CLIENT MEMORY MAP *****************/
 struct client_ipc_memory_map
 {
-	long int StatusCounter;
 	char	 ConnectionStatus[64];
 	char	 OurBeaconName[128];
-	char	 ipAddress[40];	
+	char	 ipAddress[40];
+		
+	long int StatusCounter;
 	long int StatusAcknowledgedCounter;
 
-	long int UpdateCounter;					// Incremented on change to any of below:
+	long int UpdateCounter;								// Incremented on change to any of below:
 	long int AcknowledgedCounter; 
 	
-	long int ResponseCounter;					// Incremented on change to any of below:
-	long int ResponseAcknowledgedCounter;					// Incremented on change to any of below:
+	long int ResponseCounter;							// Incremented on change to any of below:
+	long int ResponseAcknowledgedCounter;				// Incremented on change to any of below:
 			
-	char	 Sentence[255];					// verbal commands (NLP) activate connection requests.	
-	
+	char	 Sentence[255];								// verbal commands (NLP) activate connection requests.	
+
+	long int NewClientUpdateCounter;					// Incremented on change to any of below:
+	long int NewClientAcknowledgedCounter;
+
 	int		 NumberClients;	
 	struct stClientData ClientArray[MAX_CLIENTS];		// String array (dimension of NumberClients)
 	//short	 ScreenNumber;								// Which screen is being displayed.  voice commands can change.  Simplistic for now a single number per page.	
@@ -49,7 +53,8 @@ extern char* 	client_shared_memory;
 extern int 		client_segment_id;
 extern struct   client_ipc_memory_map* ipc_memory_client;
 
-/******************** CLIENT MEMORY MAP *****************/
+/*********************************************************/
+/******************** CLIENT MEMORY MAP  *****************/
 /*********************************************************/
 
 void cli_dump_ipc			( );
@@ -66,23 +71,28 @@ void cli_reattach_memory	( );
 int  cli_get_segment_size   ( );
 void cli_fill_memory		( );
 
+
 void cli_ipc_write_connection_status( char* mStatus   );
+
 void cli_ipc_write_sentence	 	    ( char* mSentence );
 
 void cli_ipc_write_response	 	    ( char* mSentence );
+void cli_wait_for_ack_update();
+
 void cli_wait_for_response();
 void cli_ack_response	  ();
 
-// for instant to fill in the shared mem buffer:
+// CLIENT LIST:
 //void cli_ipc_add_new_client  ( struct in_addr mbeacon_ip_list );
 void cli_reset_client_list	   (  );
 void cli_ipc_add_new_client	   ( struct stClientData* mEntry );
 void cli_ipc_add_new_clients   ( std::list<struct in_addr> mbeacon_ip_list );
-void cli_print_clients		   ( );
+BOOL cli_is_new_client			( );
+void cli_ack_new_client			( );
 
-// new:
+void cli_print_clients		   ( );
 int  cli_find_name(char*);
-void cli_wait_for_ack_update();
+
 /************************************************************/
 
 /************************************************************/

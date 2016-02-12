@@ -6,7 +6,6 @@
 /*
 
 */
-
 #define TINY_EDIT_TEXT 			40
 #define SMALL_EDIT_TEXT 		255
 #define MEDIUM_EDIT_TEXT 		16384
@@ -19,7 +18,6 @@ class EditBox : public TextView
 public:
 	EditBox( int Left, int Right, int Top, int Bottom );
 	EditBox( long int mSizeCatagory = SMALL_EDIT_TEXT);
-//	EditBox( );
 	
 	virtual void 	Initialize	(	);
 	int				calc_metrics(   );
@@ -28,15 +26,16 @@ public:
 	void			delete_chars( int mNumber );	// from cursor position!
 	void			Realloc		( long int mSize );
 	
-	virtual int		onKey	  	( char* mKey 	);
+	virtual int		onKey	  	( char mKey 	);
 	virtual int		onClick		( int x, int y, bool mouse_is_down=true );
 //	virtual int		onFlinger	( FlingerEvent mFlinger );
+
 
 	char*		m_cursor;	
 	char*		m_selection_start;	
 	char*		m_selection_end;	
 	int			m_capacity;
-	
+	bool		m_first_click;
 };
 
 
