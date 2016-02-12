@@ -19,6 +19,18 @@ extern short Sinewave[N_WAVE];
  
 typedef int int32_t;
 
+struct WAVE_HEADER 
+{
+	short 	format;				// PCM=1
+	short 	channels_rxd;	
+	int 	sample_rate;	
+	int		byte_rate;	
+	short 	block_align;		
+	short 	bits_per_sample;		
+};
+
+
+
 typedef struct {
    sem_t 				sema;
    ILCLIENT_T*			client;
