@@ -1,17 +1,10 @@
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 
 
 
 void Init_Robot_Legs_Protocol();
-int Parse_Robot_Legs_Statement( char* mSentence );
+int Parse_Robot_Legs_Statement( Sentence& mSentence );
 
 
 
-
-#ifdef  __cplusplus
-}
-#endif
 
