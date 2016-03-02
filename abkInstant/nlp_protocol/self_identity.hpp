@@ -10,5 +10,12 @@
 #define self_identity_hpp
 
 #include <stdio.h>
+#include "nlp_sentence.hpp"
+
+void Init_Self_Identity_Protocol  ( );
+int  Parse_Self_Identity_Statement( Sentence& mSentence );
+
+
+
 
 #endif /* self_identity_hpp */

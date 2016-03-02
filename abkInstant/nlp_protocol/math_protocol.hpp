@@ -1,17 +1,10 @@
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 
+#include "nlp_sentence.hpp"
 
 
-void Init_Math_Protocol();
-int Parse_Math_Statement( char* mSentence );
+void Init_Math_Protocol  ( );
+int  Parse_Math_Statement( Sentence& mSentence );
 
 
-
-
-#ifdef  __cplusplus
-}
-#endif
 

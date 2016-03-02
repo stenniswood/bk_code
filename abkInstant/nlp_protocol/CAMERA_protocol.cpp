@@ -14,12 +14,14 @@
 #include <string>
 #include "protocol.h"
 #include "devices.h"
-#include "GENERAL_protocol.h"
-#include "CAMERA_protocol.h"
-#include "CAMERA_device.h"
+#include "GENERAL_protocol.hpp"
+#include "CAMERA_protocol.hpp"
+#include "CAMERA_device.hpp"
 #include "CAMERA_util.h"
 #include "nlp_extraction.hpp"
 #include "client_memory.hpp"
+#include "nlp_sentence.hpp"
+
 
 
 /* Suggested statements:
@@ -49,7 +51,6 @@ FILE* sending_camera_playback_file_fd = NULL;		// prerecorded cam (robot's histo
 
 static std::list<std::string>  	subject_list;
 static std::list<std::string> 	verb_list;
-static std::list<std::string> 	preposition_list;
 static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
@@ -88,18 +89,6 @@ static void init_verb_list()
 	verb_list.push_back( "I am" );		
 }
 
-static void init_preposition_list()
-{   // Object might be a numerical value preceded by a preposition.
-	// ie. "set camera tilt _to_ _25.5 degrees"
-	// prepositions to look for :
-	//		to by as 
-	preposition_list.push_back( "to" );
-	preposition_list.push_back( "from" );	
-	preposition_list.push_back( "as" );	
-	preposition_list.push_back( "by" );		
-	preposition_list.push_back( "for");
-	preposition_list.push_back( "in" );
-}
 
 static void init_adjective_list()
 { 
@@ -132,7 +121,6 @@ static void init_word_lists()
 	init_verb_list();
 	init_object_list();
 	init_adjective_list();
-	init_preposition_list();
 }
 
 void Init_Camera_Protocol()
@@ -232,10 +220,10 @@ int Parse_Camera_Statement( char* mSentence )
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);	
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
 	std::string* object 	= extract_word( mSentence, &object_list  	);	
-	std::string* preposition= extract_word( mSentence, &preposition_list  );	
+//	std::string* preposition= extract_word( mSentence, &preposition_list  );
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-	int prepos_index      	= get_preposition_index( mSentence );
-    diagram_sentence		( subject, verb, adjective, object, preposition );
+//	int prepos_index      	= get_preposition_index( mSentence, preposition_list );
+    diagram_sentence		( subject, verb, adjective, object, NULL );
 
 	if (compare_word( subject, "camera tilt")==0)
 	{
@@ -315,9 +303,11 @@ int Parse_Camera_Statement( char* mSentence )
 		{	
 			printf("verb matched!\n");
 			int cond_1 = ((compare_word (adjective, "my")==0) ||
-		  				  ((compare_word(preposition, "to")==0) && (compare_word(object, "you")==0)) );
-			int cond_2 = ((compare_word (adjective, "your") ==0) ||
-		  				  ((compare_word(preposition, "to")==0) && (compare_word(object, "me")==0)) );
+                          (preposition_list.has_group_member("to") && (compare_word(object, "you")==0)) );
+		  	
+            int cond_2 = ((compare_word (adjective, "your") ==0) ||
+		  				  ((preposition_list.has_group_member("to")==0) && (compare_word(object, "me")==0)) );
+            
 			printf("cond1=%d; cond2=%d;\n", cond_1, cond_2 );
 			if (cond_1)
 			{    camera_watch();		retval = 0;		}					  				  
@@ -334,14 +324,14 @@ int Parse_Camera_Statement( char* mSentence )
 			(compare_word(verb, "block") ==0) )
 		{
 		    CAMERA_tcpip_SendingMuted = TRUE;	// Blocked, other side wont be able to see
-			cli_ipc_write_response( "Camera muted (electronically blocked)" );			    
+			cli_ipc_write_response( "Camera muted (electronically blocked)", "instant" );
 		    retval = 0;		    
 		}
 		if ((compare_word(verb, "unmute") ==0) ||
 			(compare_word(verb, "unblock") ==0))
 		{
 		    CAMERA_tcpip_SendingMuted = FALSE;	// Blocked, other side wont be able to see
-			cli_ipc_write_response( "Camera live!" );			    		    
+			cli_ipc_write_response( "Camera live!", "instant" );
 		    retval = 0;
 		}
 
@@ -412,9 +402,9 @@ int Parse_Camera_Statement( char* mSentence )
 			{
 			}
 			retval=0;			
-		}		
+		}
 	}
-	printf( "Parse_Camera_Statement done\n" );
+	if (retval>-1)  printf( "Parse_Camera_Statement done\n" );
 	return retval;
 }
 

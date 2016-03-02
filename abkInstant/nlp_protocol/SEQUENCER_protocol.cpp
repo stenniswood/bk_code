@@ -1,3 +1,4 @@
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -10,73 +11,76 @@
 #include <string.h>
 #include <string>
 #include <list>
+
 #include "protocol.h"
 #include "devices.h"
 #include "CAN_memory.h"
+#include "client_memory.hpp"
+#include "sequencer_memory.hpp"
+
 #include "CAN_util.h"
-#include "GENERAL_protocol.h"
-#include "CAMERA_device.h"
-#include "thread_control.h"
+#include "GENERAL_protocol.hpp"
+#include "CAMERA_device.hpp"
+#include "nlp_extraction.hpp"
+#include "prefilter.hpp"
+#include "string_util.h"
+#include "nlp_sentence.hpp"
 
-
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
 BOOL SEQ_ListeningOn;	// if true we will be receiving CAN Traffic.
 BOOL SEQ_SendingOn;		// if true we will be sending CAN Traffic.
 
-static std::list<std::string>  	subject_list;
-static std::list<std::string> 	verb_list;
-static std::list<std::string> 	preposition_list;
+WordGroup  	subject_list;
+WordGroup 	verb_list;
+
 static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
 //#define NLP_DEBUG 1
 
-
 static void init_subject_list()
 {
-	subject_list.push_back( "sequencer" 	);
-	subject_list.push_back( "sequence" 	);
-	subject_list.push_back( "capabilities" 	);
+	subject_list.add_word( "sequencer"      );
+	subject_list.add_word( "sequence"       );
+	subject_list.add_word( "robot" 	);
 }
 
 static void init_verb_list()
 {
-	verb_list.push_back( "open" 	 );
-	verb_list.push_back( "queue" );
-	verb_list.push_back( "store" 	 );
-	verb_list.push_back( "repeat" );
+    Word raise, lower, rotate_left, walk, stop;
+    
+    raise.add_new("raise");
+    raise.add_new("lift");
 
-	verb_list.push_back( "close" 	 );
-	verb_list.push_back( "stop" 	 );	
-	verb_list.push_back( "end" 	 );
-	verb_list.push_back( "terminate" );
-	verb_list.push_back( "kill" 	 );			
-	
-	verb_list.push_back( "play" 	 );			
-	verb_list.push_back( "replay" );
-	verb_list.push_back( "run" 	 );
-	verb_list.push_back( "rerun" 	 );
-	
-	verb_list.push_back( "set" );	
-	verb_list.push_back( "I am" );		
-	verb_list.push_back( "how much" );			
+    lower.add_new("lower");
+    lower.add_new("drop");
+
+    rotate_left.add_new("rotate");
+    rotate_left.add_new("twist ");
+    rotate_left.add_new("turn");
+    rotate_left.add_new("swivel");      // left/right comes from the object!
+    
+    walk.add_new("walk");
+    walk.add_new("step");
+    walk.add_new("come");
+    
+    stop.add_new( "stop"   );
+    stop.add_new( "freeze" );
+    stop.add_new( "end"    );
+
+    verb_list.add_new( raise );
+	verb_list.add_new( lower );
+	verb_list.add_new( rotate_left );
+    verb_list.add_new( walk );
+    verb_list.add_new( stop );
+
+/*    verb_list.add_word( "play" 	 );
+	verb_list.add_word( "replay" );
+	verb_list.add_word( "run" 	 );
+	verb_list.add_word( "rerun" );
+	verb_list.add_word( "set" ); */
 }
 
-static void init_preposition_list()
-{   // Object might be a numerical value preceded by a preposition.
-	// ie. "set camera tilt _to_ _25.5 degrees"
-	// prepositions to look for :
-	//		to by as 
-	preposition_list.push_back( "to" );
-	preposition_list.push_back( "from" );	
-	preposition_list.push_back( "as" );	
-	preposition_list.push_back( "by" );		
-	preposition_list.push_back( "for");
-	preposition_list.push_back( "in" );
-}
 
 static void init_adjective_list()		// and adverbs
 { 
@@ -100,7 +104,7 @@ static void init_object_list()
 	object_list.push_back( "arm"	);
 	object_list.push_back( "foot"	);
 	object_list.push_back( "ankle" );
-	object_list.push_back( "knee" );	
+	object_list.push_back( "knee"  );	
 	object_list.push_back( "hip"	);
 	object_list.push_back( "step"	);
 	
@@ -116,7 +120,6 @@ static void init_word_lists()
 	init_subject_list();
 	init_verb_list();
 	init_object_list();
-	init_preposition_list();
 	init_adjective_list();	
 }
 
@@ -126,7 +129,7 @@ not all the CAN driving code):
 return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
 *****************************************************************/
-void Init_CAN_Protocol()
+void Init_Sequencer_Protocol()
 {
 	init_word_lists();
 }
@@ -180,37 +183,12 @@ int start_sequencer()
 }
 
 
-std::string* subject = NULL;
-std::string* verb = NULL;
-std::string* object = NULL;
-std::string* adjective=NULL;
+static std::string* subject  = NULL;
+static std::string* verb     = NULL;
+static std::string* object   = NULL;
+static std::string* adjective=NULL;
 
-BOOL  extract_nlp_words()
-{
-    if (ipc_memory_client==NULL)  return;
 
-    char* mSentence = ipc_memory_client->Sentence;    
-    trim_trail_space( ipc_memory_client->Sentence );
-
-    subject = extract_word( mSentence, &subject_list );
-    if (subject==NULL)   // subject matter must pertain.
-    {
-	printf("Reply:  What do you want me to do with %s\n", subject->c_str());
-	return FALSE;
-    }
-
-    verb 	= extract_word( mSentence, &verb_list 	 );
-    if (verb==NULL)
-    {
-	printf("Reply:  What do you want me to do with %s\n", subject->c_str());
-	return FALSE;
-    }
-
-    object    = extract_word( mSentence, &object_list  );
-    adjective = extract_word( mSentence, &adjective_list  );	
-    diagram_sentence(subject, verb, adjective, object );
-    return TRUE;
-}
 
 
 /*****************************************************************
@@ -222,31 +200,34 @@ return:	pointer to the next telegram (ie. after all our header and data bytes)
 		this will be null if end of the received buffer (terminator added in serverthread.c
 		by the number of bytes read).
 *****************************************************************/
-char* Parse_Sequencer_Statement( char* mSentence )
+int Parse_Sequencer_Statement( Sentence& mSentence )
 {
+	int retval = -1;
+    if (ipc_memory_client==NULL)  return FALSE;
+    
 	printf("Parse_Sequencer_Statement() ");	
-	BOOL result = extract_nlp_words();
-	if (result==FALSE) 	return;
+    int subject_count	= subject_list.evaluate_sentence( mSentence.m_sentence );
+    int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence );
 
-	char* retval = mSentence + strlen(mSentence)+ 1/*nullterminator*/;	
-
+    string* object 		= extract_word( mSentence.m_sentence, &object_list  	  );
+    string* adjective	= extract_word( mSentence.m_sentence, &adjective_list    );
+    //diagram_sentence		( subject, verb, adjective, object, preposition );
+    
 	/* Main thing we want for starters is:
-
 	   "sequencer, queue up these named poses and "run", "animate", "play"
 	   them.  Repeat 5 times."
 	   
 	   */
-	if ( (strcmp( subject->c_str(), "sequencer")==0) )
+	if ( (compare_word( subject, "sequencer")==0) )
 	{
-		if ( (strcmp(verb->c_str(), "queue") ==0) ||
-			 (strcmp(verb->c_str(), "store") ==0)  )
+		if ( (compare_word(verb, "queue") ==0) ||
+			 (compare_word(verb, "store") ==0)  )
 		{
 			printf( "Storing sequence list for playback \n");
-
-			retval = TRUE;
+			retval=0;
 		}
-		if ( (strcmp(verb->c_str(), "replay") ==0) ||
-			 (strcmp(verb->c_str(), "play") ==0)  )
+		if ( (compare_word(verb, "replay") ==0) ||
+			 (compare_word(verb, "play") ==0)  )
 		{
 			// Maybe want to verify the source IP address for security purposes
 			// later on.  Not necessary now!
@@ -260,10 +241,8 @@ char* Parse_Sequencer_Statement( char* mSentence )
 				//if (action)
 				//	printf("No action for request to start amon!\n");
 			}
-			int available = seq_connect_shared_sequencer_memory( TRUE );			
+			available = seq_connect_shared_sequencer_memory( TRUE );
 
-			CAN_SendingOn   = TRUE;
-			set_tcp_transmitting_flag();
 			
 			/* the messages will be pulled off of the Received buffer.
 			   and stored in Recieved buffer at the other instant end.  */
@@ -273,68 +252,29 @@ char* Parse_Sequencer_Statement( char* mSentence )
 				Can we do that?  bidirectional - okay.  the receive would have to poll
 				for bytes available and if none, then do any sending.  Yes.								
 			*/
-			//retval = TRUE;
+			retval=0;
 		}
-		if ( (strcmp(verb->c_str(), "stop") ==0) ||
-			 (strcmp(verb->c_str(), "stopping") ==0)  )
+		if ( (compare_word(verb, "stop") ==0) ||
+			 (compare_word(verb, "stopping") ==0)  )
 		{
-			CAN_SendingOn   = FALSE;
-			clear_tcp_transmitting_flag();			
 			// Leave connection to IPC and amon running.
+			retval=0;
+		}
+
+		if (compare_word(verb, "how much") ==0)
+		{
 			//retval = TRUE;
 		}
-
-		if (strcmp(verb->c_str(), "how much") ==0)
-		{
-			//retval = TRUE;
-		}
 	}
-	else if ( (strcmp( subject->c_str(), "pose")==0) &&
-		     (strcmp(adjective->c_str(), "new") ==0)  )
+	else if ( (compare_word( subject, "pose")==0) &&
+		     (compare_word(adjective, "new") ==0)  )
 	{
-	/*	static struct sPose msg;
-		//dump_buffer(mSentence, 25); 
-		byte* ptr = ((byte*)mSentence + strlen("new pose")+1);		
-
-	//	int bytes_extracted = extract_pose( &pose, ptr );
-		printf("extract_pose() %d bytes\n", bytes_extracted );
-		
-		if (bytes_extracted) {
-		    // add name & angles to SQL.
-			print_rx_position();
-		}
-
-		retval += bytes_extracted;	*/
 	}
-	else if (strcmp( subject->c_str(), "sequencer")==0)
+	else if (compare_word( subject, "sequencer")==0)
 	{
-/*		if (strcmp(verb->c_str(), "send") ==0)
-		{
-			//float result = atof(mObject->c_str());			
-		}
-		if ((strcmp(verb->c_str(), "wait") ==0))
-		{
-			// check preposition "for" or "on" 
-			// "then"
-			// "plot"
-		}
-		if ((strcmp(verb->c_str(), "plot") ==0) ||
-			(strcmp(verb->c_str(), "graph") ==0) )
-		{
-			// check preposition "for" or "on" 
-			// "then"
-			// "plot"
-		}
-		if (strcmp(verb->c_str(), "record")==0)
-		{
-			// "value"
-		} */
 	}
-	printf("Parse_Sequencer_Statement() ");
+	if (retval>-1)  printf("Parse_Sequencer_Statement() ");
 	return retval;
 }
 
 
-#ifdef  __cplusplus
-}
-#endif

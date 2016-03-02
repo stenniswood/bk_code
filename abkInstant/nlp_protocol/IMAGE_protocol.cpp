@@ -11,7 +11,7 @@
 #include <list>
 #include <string>
 #include "bk_system_defs.h"
-#include "GENERAL_protocol.h"
+#include "GENERAL_protocol.hpp"
 
 #include "protocol.h"
 #include "devices.h"
@@ -30,7 +30,6 @@ ignore all upgrade notices.
 
 static std::list<std::string>  	subject_list;
 static std::list<std::string> 	verb_list;
-static std::list<std::string> 	preposition_list;
 static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
@@ -66,18 +65,6 @@ static void init_verb_list()
 	verb_list.push_back( "I am" );		
 }
 
-static void init_preposition_list()
-{   // Object might be a numerical value preceded by a preposition.
-	// ie. "set camera tilt _to_ _25.5 degrees"
-	// prepositions to look for :
-	//		to by as 
-	preposition_list.push_back( "to" );
-	preposition_list.push_back( "from" );	
-	preposition_list.push_back( "as" );	
-	preposition_list.push_back( "by" );		
-	preposition_list.push_back( "for");
-	preposition_list.push_back( "in" );
-}
 
 static void init_adjective_list()
 { 
@@ -109,7 +96,6 @@ static void init_word_lists()
 	init_subject_list();
 	init_verb_list();
 	init_object_list();
-	init_preposition_list();
 }
 
 /*****************************************************************
@@ -126,27 +112,27 @@ void Init_IMAGE_Protocol()
 
 BOOL Parse_IMAGE_Statement(char* mSentence)
 {
+    int retval = -1;
+    
 	std::string* subject  	= extract_word( mSentence, &subject_list );
 	if (subject==NULL) return FALSE;  // subject matter must pertain.
-	printf("Parse_HMI_Statement\n");
-			
+	printf("Parse_IMAGE_Statement\n");
+
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 );
 	std::string* object 	= extract_word( mSentence, &object_list  );
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-	int prepos_index      	= get_preposition_index( mSentence );
 
-	int retval = FALSE;
-	if ((strcmp( subject->c_str(), "mouse")==0) ||
-		(strcmp( subject->c_str(), "touch")==0) ||
-		(strcmp( subject->c_str(), "keyboard")==0) ||
-		(strcmp( subject->c_str(), "controller")==0))
+	if ((compare_word( subject, "picture")==0) ||
+		(compare_word( subject, "image")==0) ||
+		(compare_word( subject, "jpg")==0) ||
+		(compare_word( subject, "gif")==0))
 	{
 		//printf("Processing hmi telegram. verb=%s\n", verb->c_str());
-		if ((strcmp(verb->c_str(), "upload") ==0) ||
-		    (strcmp(verb->c_str(), "transfer") ==0)   ||
-		    (strcmp(verb->c_str(), "incoming") ==0)   ||
-		    (strcmp(verb->c_str(), "receive") ==0)	 ||
-		    (strcmp(verb->c_str(), "save") ==0))
+		if ((compare_word(verb, "upload") ==0) ||
+		    (compare_word(verb, "transfer") ==0)   ||
+		    (compare_word(verb, "incoming") ==0)   ||
+		    (compare_word(verb, "receive") ==0)	 ||
+		    (compare_word(verb, "save") ==0))
 		{
 			//float result = atof(mObject->name.c_str());
 			// Maybe want to verify the source IP address for security purposes
@@ -156,7 +142,7 @@ BOOL Parse_IMAGE_Statement(char* mSentence)
 			retval = TRUE;
 		}
 
-		if ( (strcmp(verb->c_str(), "send") ==0) && // preposition "to"
+		if ( (compare_word(verb, "send") ==0) && // preposition "to"
 			 (strcmp(object->c_str(), "you") ==0) )
 		{
 			printf( "Listening for IMAGE...\n");
@@ -164,15 +150,16 @@ BOOL Parse_IMAGE_Statement(char* mSentence)
 			retval = TRUE;			
 		}	
 
-		if ((strcmp(verb->c_str(), "close") ==0) ||
-		    (strcmp(verb->c_str(), "stop" ) ==0)  ||
-		    (strcmp(verb->c_str(), "end"  ) ==0)  ||		    
-		    (strcmp(verb->c_str(), "terminate") ==0)  ||		    		    
-		    (strcmp(verb->c_str(), "kill" ) ==0))
+		if ((compare_word(verb, "close") ==0) ||
+		    (compare_word(verb, "stop" ) ==0)  ||
+		    (compare_word(verb, "end"  ) ==0)  ||		    
+		    (compare_word(verb, "terminate") ==0)  ||		    		    
+		    (compare_word(verb, "kill" ) ==0))
 			{
-				 //hmi_terminate_requested = TRUE;
-			}
+                retval=TRUE;
+            }
 	}
+    if (retval>-1)  printf("Parse_IMAGE_Statement - done\n");    
 	return retval;
 }
 
@@ -196,5 +183,6 @@ BOOL Process_IMAGE_Telegrams( UINT mToken, byte* mheader, int DataLength, int mc
 			
 			Notice this wouldn't work with audio/video since it is continual.
 		*/
+    return FALSE;
 }
 

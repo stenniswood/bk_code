@@ -15,10 +15,10 @@
 #include "devices.h"
 #include "CAN_memory.h"
 #include "CAN_util.h"
-#include "GENERAL_protocol.h"
-#include "CAMERA_device.h"
+#include "GENERAL_protocol.hpp"
+#include "CAMERA_device.hpp"
 //#include "thread_control.h"
-#include "CAN_protocol.h"
+#include "CAN_protocol.hpp"
 #include "nlp_extraction.hpp"
 #include "prefilter.hpp"
 
@@ -29,7 +29,6 @@ BOOL CAN_SendingOn;		// if true we will be sending CAN Traffic.
 
 static std::list<std::string>  	subject_list;
 static std::list<std::string> 	verb_list;
-static std::list<std::string> 	preposition_list;
 static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
@@ -72,18 +71,6 @@ static void init_verb_list()
 	verb_list.push_back( "how much" );			
 }
 
-static void init_preposition_list()
-{   // Object might be a numerical value preceded by a preposition.
-	// ie. "set camera tilt _to_ _25.5 degrees"
-	// prepositions to look for :
-	//		to by as 
-	preposition_list.push_back( "to" );
-	preposition_list.push_back( "from" );	
-	preposition_list.push_back( "as" );	
-	preposition_list.push_back( "by" );		
-	preposition_list.push_back( "for");
-	preposition_list.push_back( "in" );
-}
 
 static void init_adjective_list()
 { 
@@ -115,7 +102,6 @@ static void init_word_lists()
 	init_subject_list();
 	init_verb_list();
 	init_object_list();
-	init_preposition_list();
 }
 
 /*****************************************************************
@@ -254,30 +240,7 @@ int Parse_CAN_Statement( char* mSentence )
 		}
 		retval = bytes_extracted;		
 	}
-	else if (compare_word( subject, "can_lkjh")==0)
-	{
-/*		if (compare_word( verb, "send") ==0)
-		{
-			//float result = atof(mObject->c_str());			
-		}
-		if ((compare_word( verb, "wait") ==0))
-		{
-			// check preposition "for" or "on" 
-			// "then"
-			// "plot"
-		}
-		if ((compare_word( verb, "plot") ==0) ||
-			(compare_word( verb, "graph") ==0) )
-		{
-			// check preposition "for" or "on" 
-			// "then"
-			// "plot"
-		}
-		if (compare_word( verb, "record")==0)
-		{
-			// "value"
-		} */
-	}
+    if (retval>-1) printf("Parse_CAN_Statement - done\n");
 	return retval;
 }
 

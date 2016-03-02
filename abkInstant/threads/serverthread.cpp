@@ -17,24 +17,24 @@
 #include <termios.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <string>
-#include <list>
+//#include <string>
+//#include <list>
 #include <sys/ioctl.h>
 #include "bk_system_defs.h"
 #include "CAN_base.h"
 #include "CAN_memory.h"
 #include "CAN_util.h"
-#include "AUDIO_interface.h"
+#include "AUDIO_interface.hpp"
 #include "protocol.h"
 
 #include "serverthread.h"
-#include "GENERAL_protocol.h"
-#include "CAN_protocol.h"
-#include "HMI_protocol.h"
-#include "GPIO_protocol.h"
-#include "FILE_protocol.h"
-#include "AUDIO_protocol.h"
-#include "CAMERA_protocol.h"
+#include "GENERAL_protocol.hpp"
+#include "CAN_protocol.hpp"
+#include "HMI_protocol.hpp"
+#include "GPIO_protocol.hpp"
+#include "FILE_protocol.hpp"
+#include "AUDIO_protocol.hpp"
+#include "CAMERA_protocol.hpp"
 #include "visual_memory.h"
 #include "bk_system_defs.h"
 #include "client_memory.hpp"
@@ -68,6 +68,7 @@ static void init_server()
     struct ifaddrs * ifa=NULL;
     void * tmpAddrPtr=NULL;
     getifaddrs(&ifAddrStruct);
+    
 	// Go thru each (device/connection) IP address (ie. wifi, ethernet - en0, en1, etc.)
     for (ifa = ifAddrStruct; ifa != NULL;  ifa=ifa->ifa_next)
     {
@@ -105,8 +106,7 @@ static void init_server()
 
 void SendTelegram( BYTE* mBuffer, int mSize)
 {
-	//printf("Sending: ");
-	write(connfd, mBuffer, mSize ); 
+	write(connfd, mBuffer, mSize );
 }
 
 void update_ipc_status( struct sockaddr_in* sa )
@@ -126,14 +126,14 @@ void update_ipc_status_no_connection( )
 	cli_ipc_write_connection_status( msg );
 }		
 
-BOOL Parse_done( char* mSentence ) 
+/*BOOL Parse_done( char* mSentence )
 {
-/* They might say:
+* They might say:
 	close this connection
 	go back to doing whatever you were.
 	disconnect [us].
 	... after 1 hour.  after the transfer is complete. when noone is present for a while.
-*/
+*
 	std::string* verb = extract_verb  ( mSentence );
 	sObject* object   = extract_object( mSentence );	// direct object of sentence.
 	if (object==NULL) return FALSE;
@@ -149,7 +149,7 @@ BOOL Parse_done( char* mSentence )
 		}
 	}
 	return FALSE;
-}
+} */
 
 // Send nlp response:
 void Send_Reply()
@@ -166,15 +166,6 @@ void Send_Reply()
 	printf("Reply sent.\n");	
 }
 
-void Init_NLP_word_lists()
-{
-	Init_General_Protocol	();
-	Init_HMI_Protocol		();
-	Init_FILE_Protocol		();
-	Init_CAN_Protocol		();	
-	Init_Camera_Protocol	();	
-	Init_Audio_Protocol		();	
-}
 
 
 /* Return 1 => Error
@@ -274,11 +265,10 @@ void establish_connection()
 * return true 	- The telegram was handled.
 *        false  - Not known token
 ******************************************************/
-void* server_thread(void*)
+void* server_thread(void* mTxt)
 {
     time_t 	ticks; 
 	init_server        ( );		// Get "ip_addr" of this machine.
-	Init_NLP_word_lists( );		// parser
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     memset(&serv_addr, '0', sizeof(serv_addr));

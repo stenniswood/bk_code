@@ -12,15 +12,22 @@
 #include <sys/types.h>
 #include <time.h> 
 #include <string>
+
 #include "protocol.h"
 #include "devices.h"
+
 #include "GENERAL_protocol.hpp"
 #include "nlp_extraction.hpp"
 #include "client_memory.hpp"
 #include "nlp_sentence.hpp"
 #include "client_to_socket.hpp"
-
 #include "Alias.hpp"
+
+#include "simulator_memory.h"
+
+//#include "walking_robot.h"
+//extern glWalkingRobot      robot;
+
 
 /* Suggested statements:
 		Raise your left/right leg [all the way up]
@@ -39,93 +46,63 @@
 
 #define Debug 0
 
+
+/* Do this b/c likely this will be part of a database.  
+ Return :   1 => success
+ */
+int get_room_coord( Sentence& mSentence, MathVector& center )
+{
+    center.dimension(3);
+    center[1] = 5;
+
+    int found = mSentence.is_found_in_sentence("first bedroom");
+    if (found)    {   center[0]=225;  center[2]=75;  return 1; }
+    
+    found = mSentence.is_found_in_sentence("master bedroom");
+    if (found)    {   center[0]=350;  center[2]=75;  return 1; }
+    
+    found = mSentence.is_found_in_sentence("bathroom");
+    if (found)    {   center[0]=330;  center[2]=250;  return 1; }
+    
+    found = mSentence.is_found_in_sentence("dining room");
+    if (found)    {   center[0]=125;  center[2]=250;  return 1; }
+    
+    found = mSentence.is_found_in_sentence("kitchen");
+    if (found)    {   center[0]=210;  center[2]=250;  return 1; }
+    
+    found = mSentence.is_found_in_sentence("living room");
+    if (found)    {   center[0]=75;  center[2]=75;  return 1; }
+    
+    found = mSentence.is_found_in_sentence("entry way") || mSentence.is_found_in_sentence("entrance") || mSentence.is_found_in_sentence("entryway");
+    if (found)    {   center[0]=40;  center[2]=200;  return 1; }
+
+    found = mSentence.is_found_in_sentence("storage closet");       // bedroom walk-in
+    if (found)    {   center[0]=40;  center[2]=250;  return 1; }
+    
+    found = mSentence.is_found_in_sentence("closet");       // bedroom walk-in
+    if (found)    {   center[0]=375;  center[2]=200;  return 1; }
+
+    int numNums = mSentence.number_of_numbers_present();
+    if (numNums==3)
+    {
+        int Windex=0;
+        for ( ; Windex < mSentence.m_num_words; Windex++ )
+            if (mSentence.is_nth_word_a_number( Windex ))
+                break;
+        
+        center[0] = mSentence.get_nth_word_as_a_number( Windex );
+        center[1] = mSentence.get_nth_word_as_a_number( Windex+1 );
+        center[2] = mSentence.get_nth_word_as_a_number( Windex+2 );
+        return 1;
+    }
+    return 0;
+}
+
+
+
 /***********************************************************************
-All Incoming Video will also be saved to the hard-drive on those 
-systems with enough capacity.  This allows the user to call back anything
-in its memory banks.  Think star trek logs.  "There were two people outside
-your side door yesterday...    Can you replay it?  
-What was the topic of it?  How long was it?  A smart robot could even
-use the info to answer questions.  On Sept 20th, you said you wanted to
-ignore all upgrade notices.
-***********************************************************************/
-/* VIDEO refers to a video file.  Where as CAMERA refers to live cam. */
 
-
-static WordGroup  	subject_list;		// we'll use this as "interrogative" listing the common ways of asking a math question.
-static WordGroup 	verb_list;
-
-
-static std::list<std::string> 	adjective_list;
-static std::list<std::string>  	object_list;
-
-
-/*static void init_subject_list()
-{
-	// these are a clue that math question might be coming.
-	subject_list.add_word("leg");		// towards end of sentence.
-	subject_list.add_word("knee");
-	subject_list.add_word("foot");	
-	subject_list.add_word("calf");	
-	subject_list.add_word("ankle");	
-	subject_list.add_word("ankle");
-	
-	// sentence must contain 2 or more numbers too.
-}
-
-static void init_verb_list()
-{
-    Word mult;
-    Word divide;
-    Word plus;
-    Word minus;
-	
-	mult.add_new("rasise");
-	mult.add_new("multiplied by");
-
-	divide.add_new("divided by");
-	divide.add_new("divide");
-	divide.add_new("over");	
-	divide.add_new("split");	
-	//divide.add_new("separated");		// implied times.
-	
-	plus.add_new("plus");
-	plus.add_new("added");
-	plus.add_new("add");		
-	
-	minus.add_new("minus");			
-	minus.add_new("subtract");			
-	minus.add_new("subtracted");	
-		
-	verb_list.add_new(mult  );
-	verb_list.add_new(divide);
-	verb_list.add_new(plus  );
-	verb_list.add_new(minus );
-			
-	//verb_list.add_new("for each of ");
-	
-}
-
-
-static void init_adjective_list()
-{ 
-
-}
-
-static void init_object_list()
-{   // Object might be a numerical value preceded by a preposition.
-	// ie. "set camera tilt _to_ _25.5 degrees"
-	// prepositions to look for :
-	//		to by as 
-	object_list.push_back( "me" );
-}
-
-static void init_word_lists()
-{
-	init_subject_list();
-	init_verb_list();
-	init_object_list();
-	init_adjective_list();
-}*/
+ ***********************************************************************/
 
 void Init_Robot_Legs_Protocol()
 {    
@@ -145,39 +122,83 @@ return  -1	=> Not handled
 int Parse_Robot_Legs_Statement( Sentence& mSentence )
 {
 	int retval=-1;
-
+    enum ServoIndices servo_index;
+    int Robot_id=0;
+    
 	if (Debug)  printf("Parse_Robot_Legs_Statement\n");
-/*	int subject_count  	= subject_list.evaluate_sentence( mSentence.m_sentence );
-	int verb_count 		= verb_list.evaluate_sentence   ( mSentence.m_sentence );
-//	bool result = contains_two_or_more_numbers( mSentence );
- 
-	string* object 		= extract_word( mSentence.m_sentence, &object_list  	);
-	string* adjective	= extract_word( mSentence.m_sentence, &adjective_list  );
-    //diagram_sentence		( subject, verb, adjective, object, preposition ); */
 
-	if (mSentence.is_found_in_sentence("leg"))
-	{
-		if (mSentence.is_found_in_sentence( "raise"))
+    if (mSentence.is_found_in_sentence( "raise"))
+    {
+        if (mSentence.is_found_in_sentence("legs"))
+        {
+            servo_index = LEFT_HIP_FB_SWING;
+            sim_robot_angle( Robot_id,  servo_index, 60.0 );       // degrees
+            // need a wait for ack in here!
+            
+            servo_index = RIGHT_HIP_FB_SWING;
+            sim_robot_angle( Robot_id,  servo_index, 60.0 );       // degrees
+            form_response("raising legs");
+            retval = 0;
+        }
+        if (mSentence.is_found_in_sentence("leg"))
 		{
+            if (mSentence.is_found_in_sentence("left"))
+                servo_index = LEFT_HIP_FB_SWING;
+            else
+                servo_index = RIGHT_HIP_FB_SWING;
+            sim_robot_angle( Robot_id,  servo_index, 60.0 );       // degrees
+
             form_response("raising leg");
             retval = 0;
 		}
-        
-        if (mSentence.is_found_in_sentence( "lower"))
-		{
+    }
+    
+    if (mSentence.is_found_in_sentence( "lower"))
+    {
+        if (mSentence.is_found_in_sentence("legs"))
+        {
+            servo_index = LEFT_HIP_FB_SWING;
+            sim_robot_angle( Robot_id,  servo_index, 0.0 );       // degrees
+            servo_index = RIGHT_HIP_FB_SWING;
+            sim_robot_angle( Robot_id,  servo_index, 0.0 );       // degrees
+            form_response("raising legs");
+            retval = 0;
+        }
+        if (mSentence.is_found_in_sentence("leg"))
+        {
+            if (mSentence.is_found_in_sentence("left"))
+                servo_index = LEFT_HIP_FB_SWING;
+            else
+                servo_index = RIGHT_HIP_FB_SWING;
+            sim_robot_angle( Robot_id,  servo_index, 0.0 );       // degrees
+
             form_response("lowering leg");
             retval = 0;
-		}
+        }
     }
     if (mSentence.is_found_in_sentence("knee"))
     {
         if (mSentence.is_found_in_sentence( "bend" ))
         {
+            if (mSentence.is_found_in_sentence("left"))
+                servo_index = LEFT_KNEE;
+            else
+                servo_index = RIGHT_KNEE;
+            // how far?  all the way, 90, little=45, etc.
+            sim_robot_angle( Robot_id,  servo_index, 60.0 );       // degrees
+
             form_response("bending knee");
             retval = 0;
         }
         if (mSentence.is_found_in_sentence( "straighten"))
         {
+            if (mSentence.is_found_in_sentence("left"))
+                servo_index = LEFT_KNEE;
+            else
+                servo_index = RIGHT_KNEE;
+            // how far?  all the way, 90, little=45, etc.
+            sim_robot_angle( Robot_id,  servo_index, 0.0 );       // degrees
+
             form_response("straightening knee");
             retval = 0;
         }
@@ -186,11 +207,25 @@ int Parse_Robot_Legs_Statement( Sentence& mSentence )
     {
         if (mSentence.is_found_in_sentence( "extend" ))
         {
+            if (mSentence.is_found_in_sentence("left"))
+                servo_index = LEFT_ANKLE_SWING;
+            else
+                servo_index = RIGHT_ANKLE_SWING;
+            // how far?  all the way, 90, little=45, etc.
+            sim_robot_angle( Robot_id,  servo_index, 45.0 );       // degrees
+
             form_response("extending");
             retval = 0;
         }
         if (mSentence.is_found_in_sentence( "pull"))
         {
+            if (mSentence.is_found_in_sentence("left"))
+                servo_index = LEFT_ANKLE_SWING;
+            else
+                servo_index = RIGHT_ANKLE_SWING;
+            // how far?  all the way, 90, little=45, etc.
+            sim_robot_angle( Robot_id,  servo_index, -30.0 );       // degrees
+            
             form_response("flexing");
             retval = 0;
         }
@@ -201,7 +236,27 @@ int Parse_Robot_Legs_Statement( Sentence& mSentence )
         }
 
     }
-
+    if (mSentence.is_found_in_sentence("assume") &&
+        (mSentence.is_found_in_sentence("pose") || mSentence.is_found_in_sentence("position")) )
+    {
+        int word_index = mSentence.get_word_index("pose");
+        int mMoveSequenceIndex= mSentence.get_nth_word_as_a_number(word_index+1);
+        int repetitions=1;
+        sim_robot_predefined ( Robot_id,   mMoveSequenceIndex,  repetitions);
+        form_response("standard pose");
+        retval = 0;
+    }
+    if (mSentence.is_found_in_sentence("go to"))
+    {
+        MathVector Source;      // not used.  Robot moves from where it currently is.
+        MathVector Destination(3);
+        int dest_found = get_room_coord( mSentence, Destination );
+        if (dest_found) {
+            sim_move_robot( Robot_id,  Destination,  Source, false );
+            form_response("walking to a new position");
+            retval = 0;
+        }
+    }
     if (mSentence.is_found_in_sentence("walk"))
     {
         form_response("walking");
@@ -216,11 +271,17 @@ int Parse_Robot_Legs_Statement( Sentence& mSentence )
 
     if (mSentence.is_found_in_sentence("sit"))
     {
+        enum PredefinedPoses mMoveSequenceIndex = SIT;
+        sim_robot_predefined ( Robot_id,   mMoveSequenceIndex,  1);
+        
         form_response("dont mind if i do.");
         retval = 0;
     }
     if (mSentence.is_found_in_sentence("stand"))
     {
+        enum PredefinedPoses mMoveSequenceIndex = STAND;
+        sim_robot_predefined ( Robot_id,   mMoveSequenceIndex,  1);
+        
         form_response("standing");
         retval = 0;
     }
@@ -235,6 +296,13 @@ int Parse_Robot_Legs_Statement( Sentence& mSentence )
     {
         form_response("sequence executing");
         retval = 0;
+    }
+
+    // OVERRIDE IF SIM not running : 
+    bool simulator_available = is_sim_ipc_memory_available();
+    if ((simulator_available==false) && (retval==0))
+    {
+        form_response("Sorry the simulator is not currently running.");
     }
 	
 	if (retval>-1)  printf( "Parse_Robot_Legs_Statement done\n" );

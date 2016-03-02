@@ -10,5 +10,10 @@
 #define ThreeD_object_protocol_hpp
 
 #include <stdio.h>
+#include "nlp_sentence.hpp"
+
+void Init_ThreeD_Protocol  ( );
+int  Parse_ThreeD_Statement( Sentence& mSentence );
+
 
 #endif /* ThreeD_object_protocol_hpp */

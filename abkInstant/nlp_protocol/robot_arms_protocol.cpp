@@ -19,13 +19,13 @@
 #include <sys/types.h>
 #include <time.h>
 #include <string>
-#include "protocol.h"
-#include "devices.h"
+//#include "protocol.h"
+//#include "devices.h"
 #include "GENERAL_protocol.hpp"
 #include "nlp_extraction.hpp"
 #include "client_memory.hpp"
 #include "nlp_sentence.hpp"
-#include "client_to_socket.hpp"
+//#include "client_to_socket.hpp"
 #include "robot_arms_protocol.hpp"
 #include "Alias.hpp"
 

@@ -12,14 +12,14 @@
 #include <list>
 #include "protocol.h"
 #include "devices.h"
-#include "GENERAL_protocol.h"
-#include "GPIO_protocol.h"
-#include "GPIO_device.h"
+#include "GENERAL_protocol.hpp"
+#include "GPIO_protocol.hpp"
+#include "GPIO_device.hpp"
+#include "nlp_extraction.hpp"
 
 
 static std::list<std::string>  	subject_list;
 static std::list<std::string> 	verb_list;
-static std::list<std::string> 	preposition_list;
 static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
@@ -51,18 +51,6 @@ static void init_verb_list()
 	verb_list.push_back( "set" );	
 }
 
-static void init_preposition_list()
-{   // Object might be a numerical value preceded by a preposition.
-	// ie. "set camera tilt _to_ _25.5 degrees"
-	// prepositions to look for :
-	//		to by as 
-	preposition_list.push_back( "to" );
-	preposition_list.push_back( "from" );	
-	preposition_list.push_back( "as" );	
-	preposition_list.push_back( "by" );		
-	preposition_list.push_back( "for");
-	preposition_list.push_back( "in" );
-}
 
 static void init_adjective_list()
 { 
@@ -96,7 +84,6 @@ static void init_word_lists()
 	init_subject_list();
 	init_verb_list();
 	init_object_list();
-	init_preposition_list();
 }
 
 /*****************************************************************
@@ -112,52 +99,74 @@ void Init_GPIO_Protocol()
 
 /* ACTION FUNCTIONS: */
 
-int extract_pin_number( std::string* mSentence )
+int extract_pin_number( std::string& mSentence )
 {
-	// find first [0..9] after either "GPIO" or "pin"	
+	// find first [0..9] after either "GPIO" or "pin"
+    return -1;
 }
-			
+
+
 /*****************************************************************
 Do the work of the Telegram :
 return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
 *****************************************************************/
-void Parse_GPIO_Acknowledgement( sObject* mSubject, sObject* mVerb, 
-								 sObject* mObject, std::string* mSentence )
+int Parse_GPIO_Acknowledgement( char* mSentence )
 {
-	int pin = extract_pin_number( mSentence );
+    int retval=-1;
+    std::string Sentence(mSentence);
+	int pin = extract_pin_number( Sentence );
 	
-	if (strcmp( mSubject->name.c_str(), "GPIO")==0)
+    std::string* subject  	= extract_word( mSentence, &subject_list 	);
+    std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
+    std::string* object 	= extract_word( mSentence, &object_list  	);
+    std::string* adjective	= extract_word( mSentence, &adjective_list  );
+    //int prepos_index      = get_preposition_index( mSentence, preposition_list );
+    
+#ifdef NLP_DEBUG
+    diagram_sentence(subject, verb, adjective, object );
+#endif
+    
+    
+	if (compare_word( subject, "GPIO")==0)
 	{
-		if (strcmp(mVerb->name.c_str(), "set") ==0)
+		if (compare_word(verb, "set") ==0)
 		{
-			if (strcmp(mObject->name.c_str(), "input") ==0)
+			if (compare_word(object, "input") ==0)
 			{
 				set_GPIO_DDR( pin, TRUE );
+                retval=0;
 			}
-			if (strcmp(mObject->name.c_str(), "output") ==0)
+			if (compare_word(object, "output") ==0)
 			{
 				set_GPIO_DDR( pin, FALSE );
-			}
-			if ((strcmp(mObject->name.c_str(), "1") ==0)
-			||  (strcmp(mObject->name.c_str(), "high") ==0)
-			||  (strcmp(mObject->name.c_str(), "on") ==0))			
+                retval=0;
+            }
+			if ((compare_word(object, "1") ==0)
+			||  (compare_word(object, "high") ==0)
+			||  (compare_word(object, "on") ==0))
 			{
 				set_GPIO( pin, 1 );
+                retval=0;
 			}
-			if ((strcmp(mObject->name.c_str(), "0") ==0)
-			||  (strcmp(mObject->name.c_str(), "low") ==0)
-			||  (strcmp(mObject->name.c_str(), "off") ==0))			
+			if ((compare_word(object, "0") ==0)
+			||  (compare_word(object, "low") ==0)
+			||  (compare_word(object, "off") ==0))
 			{
-				set_GPIO( pin, 0 );			
+				set_GPIO( pin, 0 );
+                retval=0;
 			}
 		}
-		if ((strcmp(mVerb->name.c_str(), "read")==0)
-		||  (strcmp(mVerb->name.c_str(), "what is")==0))
+		if ((compare_word(verb, "read")==0)
+		||  (compare_word(verb, "what is")==0))
 		{
 			int value = read_GPIO( pin );
+            retval=0;
 		}
 	}
+    if (retval>-1)  printf("Parse_GPIO_Statement - done\n");
+
+    return retval;
 }
 
 /*****************************************************************

@@ -10,5 +10,12 @@
 #define calendar_protocol_hpp
 
 #include <stdio.h>
+#include "nlp_sentence.hpp"
+
+
+void Init_Calendar_Protocol  ( );
+int  Parse_Calendar_Statement( Sentence& mSentence );
+
+
 
 #endif /* calendar_protocol_hpp */

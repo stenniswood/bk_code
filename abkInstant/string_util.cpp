@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <string.h>
 #include <stdint.h>
 
 #include "bk_system_defs.h"

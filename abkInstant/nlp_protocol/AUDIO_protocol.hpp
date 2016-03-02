@@ -20,7 +20,9 @@ extern FILE* sending_audio_file_fd;
 /* Action Initiators */
 void send_audio_file( char* mFilename );
 void send_audio		( );
-void audio_listen	(BOOL Save=FALSE);
+//void audio_listen	(BOOL Save=FALSE);
+void audio_listen	();     // c doesn't support audio_listen
+
 void audio_two_way	( );
 void audio_cancel	( );
 

@@ -22,16 +22,13 @@ Tenniswood - 2014
 #include <pthread.h>
 #include <semaphore.h>
 #include "bk_system_defs.h"
-//#include "devices.h"
-//#include "thread_control.h"
-//#include "audio_thread.h"
 #include "utilities.h"
 #include "audio_memory.h"
-#include "AUDIO_device.h"
+#include "AUDIO_device.hpp"
 #include "AUDIO_protocol.hpp"
 #include "AUDIO_file_util.h"
 #include "serverthread.h"
- 
+
 
 
 #define MAX_USERS     10
@@ -210,7 +207,6 @@ void audio_interface( )
 	if (AUDIO_tcpip_SendingOn)
 	{
 	    //printf("Audio_SendingOn is ON!\n");	
-	    if (1)
 	    {
 /*			static short Sinewaves[N_WAVE*2];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
 	    	if (counter++>200000) 
@@ -224,7 +220,8 @@ void audio_interface( )
 				counter = 0;
 	    	} */
 	    }
-	    else if (sending_audio_file_fd)
+	    //else
+        if (sending_audio_file_fd)
 	    {
 			// file position will be maintained automatically as long as the file descriptor is
 			// not destroyed.
