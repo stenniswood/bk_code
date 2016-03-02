@@ -1,6 +1,9 @@
 
+#include <string>
+#include <list>
 
-bool is_word_break( char mTest );		// ' ', '.', '?', etc.
+
+int get_preposition_index(char*  mSentence, std::list<std::string>& mPreposition_list );
 
 
 void diagram_sentence(	std::string* subject,
@@ -19,3 +22,6 @@ void extract_nlp_words( std::list<std::string>* subject_list,
 
 // return of 0=> match :
 int compare_word( std::string* mSubject, char* mWord );
+
+
+

@@ -1,6 +1,5 @@
 #include <iostream>
 #include <list>
-#include <string.h>
 #include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,10 +13,11 @@
 #include <time.h> 
 #include "protocol.h"
 #include "devices.h"
-#include "package_commands.h"
 #include <termios.h>
 #include <unistd.h>
 #include <pthread.h>
+#include "string_util.h"
+
 
 
 using namespace std;
@@ -43,18 +43,7 @@ void diagram_sentence(	std::string* subject,
 	printf("\n");
 }
 
-bool is_word_break( char mTest )
-{
-	if ((mTest==' ') || (mTest=='.') || (mTest==',') || (mTest==';') || (mTest=='?') || (mTest=='!'))
-	{
-		if (mTest=='.') 
-			printf("is_word_break\n");
 
-		return true;	
-	}
-	else 
-		return false;	
-}
 
 /*****************************************************************
 	extract_word()

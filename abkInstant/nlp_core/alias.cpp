@@ -13,49 +13,90 @@
 #include <time.h> 
 
 #include "nlp_extraction.hpp"
-#include "alias.hpp"
+#include "Alias.hpp"
+#include "string_util.h"
 
 
 
-
-
-Alias::Alias()
+Word::Word()
 {
-
+    m_synonyms      = new vector<string>;
+    m_all_extracted = new vector<string>;
 }
 
-Alias::~Alias()
+Word::Word(const char* mWordsString)
 {
-
+    m_synonyms      = new vector<string>;
+    m_all_extracted = new vector<string>;
+    
+    add_words( mWordsString );
 }
 
-void	Alias::add_new( char*  mNew )
+Word::Word(const Word& mCopy)
 {
-	m_synonyms.push_back( mNew );
+    // Can't just copy the pointers, b/c we never know the scope of the one being passed in, it may go away and delete it's vectors.
+
+    // So we have to allocate new ones,
+    m_synonyms      = new vector<string>;
+    m_all_extracted = new vector<string>;
+    
+    // and then copy the data.
+    for (int i=0; i<mCopy.m_synonyms->size(); i++)
+        m_synonyms->push_back( (*mCopy.m_synonyms)[i] );
+
+    for (int i=0; i<mCopy.m_all_extracted->size(); i++)
+        m_all_extracted->push_back( (*mCopy.m_all_extracted)[i] );
+    
 }
 
-void	Alias::add_new( string mNew )
+Word::~Word()
 {
-	m_synonyms.push_back( mNew );
+    delete m_synonyms;
+    delete m_all_extracted;
 }
 
-void	Alias::convert_all_to_lower( )
+/* Add a whole bunch of words at once in a single string:  add_words("times, multiply, multiplied by");
+ */
+void Word::add_words(const char* mWordsList)      // ',' deliminated
 {
-	list<string>::iterator iter = m_synonyms.begin();
-	while ( iter != m_synonyms.end())
+    char tmp_str[1024];
+    int num_words = 0;
+    strcpy( tmp_str, mWordsList );
+    
+    char** m_words = split( tmp_str, ' ', &num_words );
+    for (int w=0; w<num_words; w++)
+        add_new( m_words[w]);
+    
+    delete m_words;
+}
+
+void	Word::add_new( char*  mNew )
+{
+	m_synonyms->push_back( mNew );
+}
+
+void	Word::add_new( string mNew )
+{
+	m_synonyms->push_back( mNew );
+}
+
+void	Word::convert_all_to_lower( )
+{
+	vector<string>::iterator iter = m_synonyms->begin();
+	while ( iter != m_synonyms->end())
 	{
 		//convert_to_lower_case( char* str );
 		iter++;
 	}	
 }
 
-bool	Alias::is_group_member( char*  mLookupWord )
+bool	Word::is_synonym( const char*  mLookupWord )
 {
 	if (mLookupWord==NULL) return false;	
 	//string lookup(mLookupWord);
 	
-	list<string>::iterator iter = m_synonyms.begin();
-	while ( iter != m_synonyms.end())
+	vector<string>::iterator iter = m_synonyms->begin();
+	while ( iter != m_synonyms->end())
 	{
 		if (strcmp(iter->c_str(), mLookupWord)==0)
 			return true;
@@ -63,120 +104,224 @@ bool	Alias::is_group_member( char*  mLookupWord )
 	}
 	return false;
 }
+bool Word::is_synonym( string  mLookupWord )
+{
+	return is_synonym( mLookupWord.c_str() );
+}
 
-/* Returns - 
+int  Word::get_num_synonyms()
+{
+    return m_synonyms->size();
+}
+
+int	Word::number_times_found()	// within the sentence.
+{
+	return (int)m_all_extracted->size();
+}
+
+bool is_whole_word(string& mSentence, size_t mWordStartIndex, int mWord_length )
+{
+	// Found, now verify whole word:
+	if (mWordStartIndex==0)	// if at start of string, must have a space after the word.
+	{				
+		if (is_word_break( mSentence[mWord_length] ))
+			return true;
+	} 
+	// if at end of string, must have a space at start of word:
+	else if (mWordStartIndex==(mSentence.length()-mWord_length))
+	{
+		if (mWordStartIndex==0)	return true;	// only word in sentence?
+		if (is_word_break(mSentence[mWordStartIndex-1]))
+			return true;			
+	}
+	else		// must have space at start and end of word.
+	{
+		if ( is_word_break(mSentence[mWordStartIndex-1]) && is_word_break(mSentence[mWordStartIndex+mWord_length]) )
+			return true;
+	}
+	return false;
+}
+
+/* 
+Returns - 
 
 */
-string* Alias::extract_member( char*  mSentence, bool mWholeWordOnly)
+int Word::evaluate_sentence( char*  mSentence, bool mWholeWordOnly)
 {
 	string  Sentence(mSentence);
-	list<string>::iterator iter = m_synonyms.begin();
-	//printf(" Sentence=%s;  wl_count=%d;  (NOT_FOUND=%d)\n", Sentence.c_str(), m_word_list->size(), string::npos );
+    size_t size = m_all_extracted->size();
+    m_all_extracted->clear();
+	vector<string>::iterator iter = m_synonyms->begin();
+	//printf(" Sentence=%s;  wl_count=%ld;  (NOT_FOUND=%ld)\n", Sentence.c_str(), m_synonyms->size(), string::npos );
 
-	// want to make this whole words only.  
 	int i=0;
-	for ( ; iter != m_synonyms.end(); iter++, i++)
+	for ( ; iter != m_synonyms->end(); iter++, i++)
 	{
 		// Get Lenth of test word in the list:
-		int word_length = strlen( iter->c_str() );	
+        string tmp_str = *iter;
+		size_t word_length = strlen( tmp_str.c_str() );
 		
 		// Find the test word:
 		size_t pos = Sentence.find( (*iter).c_str() );
+		
 		while (pos != string::npos)
 		{	
 			//printf(" word_length=%d; %s\t", word_length, iter->c_str() );
 			//printf(" pos=%d;   end=%d\n", pos, (Sentence.length()-word_length) );
-
-			// Found, now verify whole word:
-			if (pos==0)	// if at start of string, must have a space after the word.
-			{				
-				if (is_word_break( Sentence[word_length] ))
-					return &(*iter);
-					//printf("rejected 1\n");
-			} 
-			else if (pos==(Sentence.length()-word_length))		// if at end of string, must have aspace at start of word.
-			{
-				if (pos==0)	return &(*iter);	
-				if (is_word_break(Sentence[pos-1]))
-					return &(*iter);			
-					//printf("rejected 2\n");
-			}
-			else		// must have space at start and end of word.
-			{
-				if (pos==0)	return &(*iter);	
-				if ( is_word_break(Sentence[pos-1]) && is_word_break(Sentence[pos+word_length]) )
-					return &(*iter);					
-					//printf("rejected 3\n");					
-			}
+			bool whole_word = is_whole_word( Sentence, pos, (int)word_length );
+			if (mWholeWordOnly==false)			
+				m_all_extracted->push_back( *iter );
+			else if (whole_word)
+				m_all_extracted->push_back( *iter );
+				
 			// next find:
 			pos = Sentence.find( (*iter), pos+1 );
 		}
 	}
 
-	return (NULL);
+	return (int)(m_all_extracted->size());
 }
 
 /************************************************************************
 	
 ************************************************************************/
+
 WordGroup::WordGroup()
 {
- 
+    m_Words         = new vector<Word>;
+    m_all_extracted = new vector<Word>;
+}
+
+WordGroup::WordGroup(const WordGroup& mWG)
+{
+    m_Words         = new vector<Word>;
+    m_all_extracted = new vector<Word>;
+    
+    // and then copy the data.
+    for (int i=0; i<mWG.m_Words->size(); i++)
+        m_Words->push_back( (*mWG.m_Words)[i] );
+    
+    for (int i=0; i<mWG.m_all_extracted->size(); i++)
+        m_all_extracted->push_back( (*mWG.m_all_extracted)[i] );
+    
 }
 WordGroup::~WordGroup()
 {
- 
-}
-void	WordGroup::add_word( string&  mNewAlias )
-{ 
-	Alias tmp;
-	tmp.add_new( mNewAlias );
-	add_new(tmp);	
-}		// could be simple string.
-
-void	WordGroup::add_new( Alias&  mNewAlias )
-{ 
-	m_alias_groups.push_back( mNewAlias );
+    delete m_Words;
+    delete m_all_extracted;
 }
 
-Alias*	WordGroup::get_alias( int mIndex )
+void	WordGroup::add_word( const char*  mNewWord )		// could be simple string.
 {
-   list<Alias>::iterator iter = m_alias_groups.begin();
-   while (iter != m_alias_groups.end())
+    static string tmp;
+    tmp = mNewWord;
+    add_word( tmp );
+}
+void	WordGroup::add_word( string&  mNewWord )
+{ 
+	Word tmp;
+	tmp.add_new( mNewWord );
+	add_new(tmp);
+    printf("size=%d  wg_size=%ld\n", tmp.get_num_synonyms(), m_Words->size() );
+
+    /*int size = m_Words->front().get_num_synonyms();
+    Word* ptr = get_Word(0);    
+    printf("Word ptr=%ld  synynom_ptr=%ld\n", ptr, ptr->m_synonyms );
+    int size2 = ptr->get_num_synonyms(); */
+}
+
+void	WordGroup::add_new( Word&  mNewWord )
+{ 
+	m_Words->push_back( mNewWord );
+}
+
+
+Word*	WordGroup::get_Word( int mIndex )
+{
+   vector<Word>::iterator iter = m_Words->begin();
+   while (iter != m_Words->end() && (mIndex))
    {
-		iter++;   // blahs
+		iter++;
+        mIndex--;
+   }
+    printf("size=%d\n",     iter->get_num_synonyms() );
+    printf("wg_size=%ld\n", m_Words->size()   );
+	return &(*iter);
+}
+
+Word*	WordGroup::get_Word( string& mWordWordId )		// main word which describes the Word.
+{
+   vector<Word>::iterator iter = m_Words->begin();
+//   while (iter != m_Words->end() && ( mWordWordId.compare(*iter) ))
+   {
+//		iter++;
+        // BLAH!!
    }   	
 	return &(*iter);
 }
 
-Alias*	WordGroup::get_alias( string& mAliasWordId )		// main word which describes the alias.
-{
-   list<Alias>::iterator iter = m_alias_groups.begin();
-   while (iter != m_alias_groups.end())
-   {
-		iter++;   
-   }   	
-	return &(*iter);
-}
-
-bool	WordGroup::is_group_member( char*  mLookupWord, bool mWholeWordOnly )
+bool	WordGroup::has_group_member( char*  mLookupWord, bool mWholeWordOnly )
 { 
-   list<Alias>::iterator iter = m_alias_groups.begin();
-   while (iter != m_alias_groups.end())
+   vector<Word>::iterator iter = m_Words->begin();
+   while (iter != m_Words->end())
    {
-   		if (iter->is_group_member(mLookupWord))
+   		if (iter->is_synonym(mLookupWord))
 			return true;
 		iter++;
    }   	
 	return false;
 }
 
-string*	 WordGroup::extract_member( char*  mSentence, bool mWholeWordOnly )
+int	 WordGroup::evaluate_sentence( char*  mSentence, bool mWholeWordOnly )
 { 
-   list<Alias>::iterator iter = m_alias_groups.begin();   
-   while (iter != m_alias_groups.end())
+	int result=0;
+    m_all_extracted->clear();        // Start Over with new Sentence!
+    vector<Word>::iterator iter = m_Words->begin();
+   while (iter != m_Words->end())
    {
-		iter++;   
-   }   
+   		result = iter->evaluate_sentence( mSentence, mWholeWordOnly );
+   		if (result)
+   			m_all_extracted->push_back( *iter );
+		iter++;
+   }
+   return (int)m_all_extracted->size();
 }	
+
+int WordGroup::was_found_in_sentence( string mWordWord )
+{
+	vector<Word>::iterator iter = m_all_extracted->begin();
+	while (iter != m_all_extracted->end())
+	{
+		if ( iter->is_synonym( mWordWord ) )
+			return 1;
+        iter++;
+	}
+	return 0;
+}
+
+// within the sentence.
+int	WordGroup::number_times_found()
+{
+   return (int)m_all_extracted->size();
+}
+
+
+/*****************************************************************************************************
+ 
+ ****************************************************************************************************/
+
+Vocabulary::Vocabulary()
+{
+    m_wordgroups = new vector<WordGroup>;
+}
+
+Vocabulary::~Vocabulary()
+{
+    delete m_wordgroups;
+}
+
+void Vocabulary::add_new( WordGroup mNewWord )
+{
+    m_wordgroups->push_back(mNewWord);
+}
 
