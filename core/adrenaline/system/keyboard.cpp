@@ -355,14 +355,15 @@ float Keyboard::geometric_distance( int x, int y, int key, bool mAlternate )
 	return distance;
 }
 
-int Keyboard::find_min_distance( int x, int y, int key, bool mAlternate )
+/* returns key index of closest */
+int Keyboard::find_min_distance( int x, int y, bool mAlternate )
 {
 	float min_distance = 1000;
 	float distance     = 0;
 	int   min_index    = 0;
 	for (int i=0; i<m_keys.size(); i++) 
 	{
-		distance = geometric_distance( x, y, key, mAlternate );
+		distance = geometric_distance( x, y, i, mAlternate );
 		if (distance < min_distance)
 		{
 			min_distance = distance;
@@ -377,6 +378,7 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 	char key;
 	if (Debug) printf("Keyboard::onClick()  x,y = %d,%d\n", x, y );
 	if ((Debug) && m_alt_down) printf("===== ALT KEYBOARD ACTIVE ===\n");
+	int closest_key = find_min_distance( x,y, m_alt_down );
 	
 	int key_index;
 	if (m_alt_down) {
