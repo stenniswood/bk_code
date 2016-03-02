@@ -27,7 +27,7 @@ DropDownBox::DropDownBox()
 
 void DropDownBox::Initialize(	)
 {
-
+	strcpy (class_name, "DropDownBox");		
 }
 
 int	DropDownBox::calc_metrics()

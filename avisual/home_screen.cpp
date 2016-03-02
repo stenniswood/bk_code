@@ -32,6 +32,17 @@ ClientListPanel	AvailClients 	( 20, 700, 160, 50	);
 static char ConnectionStatusText[128];
 static char CommandText[255];
 
+void send_to_viki( void* mEditBoxPtr )
+{
+	printf("send_to_viki() callback reached!\n");
+	
+	EditBox* eb = 	(EditBox*)mEditBoxPtr;
+	char* str = eb->get_text();
+	cli_ipc_write_sentence( str );
+}
+/* viki works on a polling basis, so where are we going to do that polling at?  MainLoop.  Already in there.
+	ethernet_interface. */
+
 
 void init_home_screen()
 {
@@ -40,13 +51,14 @@ void init_home_screen()
 	strcpy (CommandText, "what time?");
 	ClientInputEdit.set_text			( CommandText );
 	ClientInputEdit.set_text_size 		( 16.0 			);	
+	ClientInputEdit.set_return_key_listener( send_to_viki, &ClientInputEdit );
+	
 	//printf("init_home_screen() ClientInput text setup\n");
 	
 	RobotResponse.set_text				( "Not Connected" );				// ConnectionStatus	
 	if (ipc_memory_client) {
 		//printf("init_home_screen() RobotResponse text %s\n", ipc_memory_client->Sentence );
-		RobotResponse.set_text			( ipc_memory_client->Sentence );	// ConnectionStatus
-		
+		RobotResponse.set_text			( ipc_memory_client->Sentence );	// ConnectionStatus		
 	}
 	RobotResponse.set_text_size 		( 16.0 		 );
 	RobotResponse.set_text_color		( 0xCFFF0000 );

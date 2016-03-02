@@ -39,6 +39,7 @@ float	GyroView::get_angle_deg			( )
 
 void 	GyroView::Initialize			( )
 {  
+	strcpy (class_name, "GyroView");
 	m_angle_radians = 0.0;
 	m_left_margin = left;
 	m_right_margin = left+width;

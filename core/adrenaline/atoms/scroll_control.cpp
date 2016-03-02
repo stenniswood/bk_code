@@ -48,6 +48,7 @@ ScrollControl::~ScrollControl()
 void ScrollControl::Initialize()
 {
 	//Control::Initialize();
+	strcpy (class_name, "ScrollControl");					
 	vsb = NULL;
 	hsb = NULL;
 	h_first_visible_value = 0;

@@ -46,6 +46,7 @@ HorizontalMenu::~HorizontalMenu()
 void 	HorizontalMenu::Initialize (	)  
 { 
 	Control::Initialize();
+	strcpy (class_name, "HorizontalMenu");		
 	background_color = 0xFFFFFFFF;
 	m_selected_color = 0xFF007FBF;
 	text_color 		 = 0xFF000000;

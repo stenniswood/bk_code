@@ -54,6 +54,7 @@ ListBox::~ListBox()
 void ListBox::Initialize()
 {
 	ScrollControl::Initialize();
+	strcpy (class_name, "ListBox");			
 	first_visible_line = 0;	
 	EvenColor 		= 0xFFFFFFFF;
 	OddColor  		= 0xFF589AE8;

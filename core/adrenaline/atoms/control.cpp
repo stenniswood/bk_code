@@ -46,6 +46,7 @@ Control::~Control()
 
 void Control::Initialize() 
 {
+	strcpy (class_name, "Control");
 	created		= false;
 	text		= NULL;
 	HasBorder 	= true;	
@@ -362,8 +363,8 @@ Control* Control::ChildrenHitTest( int x, int y )
 	{
 		retval = (*iter)->HitTest( x,y );		
 		if (retval) {
-			//printf("Hit: %s\t", retval);
-			(*iter)->print_positions();
+			if (Debug) printf("Hit: %s %s\t", (*iter)->class_name, retval);
+			if (Debug) (*iter)->print_positions();
 			hit_objects.push_back( retval );
 		}
 		iter++;

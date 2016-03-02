@@ -47,6 +47,7 @@ ScrollBar::~ScrollBar()
 
 void ScrollBar::Initialize()
 {
+	strcpy (class_name, "ScrollBar");				
 	m_MaxValue	  = 100;
 	m_MinValue	  = 0;	
 	m_AmountVisibleValue = 10;

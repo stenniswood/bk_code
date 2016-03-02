@@ -147,10 +147,10 @@ void gui_interface()
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
 			{ 
-				printf("clicked an object %x!\n", object_clicked);
+				printf("clicked an object %s %x!\n", object_clicked->class_name, object_clicked);
 				int num = object_clicked->onClick( x, y );
 				//UpdateDisplaySemaphore=1;
-				//printf("clicked an object - called onClick() DONE\n");				
+				printf("clicked an object - called onClick() DONE\n");				
 			}  
 			left_mouse_button_prev = result;
 		}
@@ -175,11 +175,12 @@ void gui_interface()
 	if (invalid)
 	{	
 		UpdateDisplaySemaphore = 1;
-		//printf("Test for invalid children.  Found! \n");	
+		printf("Test for invalid children.  Found! \n");	
 	}
 
-	MainDisplay.draw_invalid_children();
-	MainDisplay.update_invalidated();	
+	//MainDisplay.draw_invalid_children();
+	//printf("MainDisplay.draw_invalid_children done. \n");
+	//MainDisplay.update_invalidated();		
 	//printf("MainDisplay.update_invalidated. \n");
 
 

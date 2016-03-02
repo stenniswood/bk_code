@@ -68,6 +68,8 @@ Calendar::~Calendar()
 
 void Calendar::Initialize(	) 
 {
+	strcpy(class_name, "Calendar");
+	
 	time_t t 	  =  time(NULL);
 	m_local_time  =  *localtime(&t);	
 	m_shown_month = m_local_time.tm_mon;
@@ -101,7 +103,8 @@ int Calendar::onCreate	(	)
 
 int Calendar::draw 		(	)
 {	
-	if (Visible==false) return 0;
+	//printf("Calendar::draw()\n");
+	if (Visible==false) { return 0; }
 	
 	printf("Time=%d:%d:%d\n",      m_local_time.tm_hour, m_local_time.tm_min, m_local_time.tm_sec );
 	printf("Date: %d %s :%d:%d\n", m_local_time.tm_mon, Months[m_local_time.tm_mon].c_str(),

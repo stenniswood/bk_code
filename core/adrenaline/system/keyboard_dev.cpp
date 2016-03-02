@@ -64,7 +64,7 @@ char map_key(int code)
 	return ch;
 }
 
- 
+/* If a real keyboard is plugged in (via usb) */
 void *Keyboard_eventThread(void *arg) 
 {
 	const char *dev = "/dev/input/by-path/platform-20980000.usb-usb-0:1.4.1:1.0-event-kbd";
@@ -90,6 +90,7 @@ void *Keyboard_eventThread(void *arg)
             break;
         }
         
+		// Read Linux Event for the key        
 		if (keyboard_ev.type==EV_KEY)
 		{
 			

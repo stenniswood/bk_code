@@ -36,6 +36,7 @@ IconListBox::~IconListBox()
 
 void IconListBox::Initialize			( )
 {
+	strcpy (class_name, "IconListBox");		
 }
 int	IconListBox::onPlace(  )	// chance to place children.
 {

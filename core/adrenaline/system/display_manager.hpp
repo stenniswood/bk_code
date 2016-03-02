@@ -15,7 +15,7 @@
 #include "keyboard.hpp"
 //using namespace std;
 
-
+extern Keyboard		m_keyboard;
 /* Packages Objects for display */
 class DisplayManager : public IconView
 {

@@ -18,7 +18,7 @@ public:
 
 	virtual void 	Initialize			  (					);	
 	virtual void  	set_text_size		  ( float TextSize	);
-	void  			set_text  			  ( const char* NewText, bool mWrapContent=false );	// Allocates and copies!
+	virtual void  	set_text  			  ( const char* NewText, bool mWrapContent=false );	// Allocates and copies!
 	void  			set_text_color 	  	  ( long int TextColor 	);
 	void  			set_border_color      ( long mColor 	) { border_color= mColor; 	  }
 	void  			set_background_color  ( long mColor 	) { background_color= mColor; }
@@ -101,6 +101,9 @@ public:
 	long int			z_order;
 
 	bool				invalidated;		// forces a redraw in display manager.  not implemented yet.	
+	char				class_name[20];	
+	char				action_word[20];	// for verbal commands. push, 
+	
 protected:
 	std::vector<Control*>	m_child_controls;
 
@@ -117,6 +120,7 @@ protected:
 	long int 	text_color;
 
 	char*		text;
+
 	bool		Visible;
 	bool		HasBorder;
 	long int 	background_color;

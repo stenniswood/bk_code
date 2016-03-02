@@ -39,6 +39,7 @@ RadioButton::RadioButton()
 
 void RadioButton::Initialize()
 {
+	strcpy (class_name, "RadioButton");				
 	HasBorder = false;
 	checked   = false;
 	box_rectangle[0]=left;

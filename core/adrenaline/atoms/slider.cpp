@@ -32,6 +32,7 @@
 SliderControl::SliderControl()
 : Control()
 {
+	strcpy (class_name, "SliderControl");					
 	xAxisLabel	= NULL; //(char*)" ";
 	yAxisLabel  = NULL; //(char*)" ";
 	title 		= NULL; //(char*)" ";	

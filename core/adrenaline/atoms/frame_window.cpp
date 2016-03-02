@@ -38,6 +38,7 @@ void	FrameWindow::Initialize		 (   )
 {
 	if (Debug) printf("\t\tFrameWindow::Initialize()\n");
 	Window::Initialize();
+	strcpy (class_name, "FrameWindow");
 	body_height = height-(1.5*text_size);
 	
 	int t = bottom+height;

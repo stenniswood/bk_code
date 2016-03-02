@@ -39,6 +39,7 @@ PowerLevel::PowerLevel()
 
 void PowerLevel::Initialize()
 {
+	strcpy (class_name, "PowerLevel");				
 	background_color = 0xFF000000;
 	number_levels    = 10;
 	if (height>5.)

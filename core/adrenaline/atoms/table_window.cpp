@@ -34,7 +34,7 @@ TableWindow::~TableWindow( )
 
 void TableWindow::Initialize(   )
 {
-
+	strcpy (class_name, "TableWindow");					
 }
 
 int   	TableWindow::draw 			 (	 )

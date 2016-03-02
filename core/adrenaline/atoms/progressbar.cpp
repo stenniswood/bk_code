@@ -32,6 +32,7 @@ ProgressBar::ProgressBar()
 void ProgressBar::Initialize()
 {
 	Control::Initialize();
+	strcpy (class_name, "ProgressBar");					
 	show_percent = false;
 	fill_color = 0xFFFF0000;
 	text_color = 0xFFFFFFFF;

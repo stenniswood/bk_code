@@ -51,6 +51,7 @@ DirectoryListBox::~DirectoryListBox( )
 
 void DirectoryListBox::Initialize()
 {
+	strcpy (class_name, "DirListBox");
 	width=200; height=100;
 	show_hidden_files = false;
 	set_odd_color 		 ( 0xFFCFCFFF );

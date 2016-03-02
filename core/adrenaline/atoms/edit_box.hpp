@@ -25,17 +25,29 @@ public:
 	void			backspace	(  			  );
 	void			delete_chars( int mNumber );	// from cursor position!
 	void			Realloc		( long int mSize );
+	virtual void  	set_text  	( const char* NewText, bool mWrapContent=false );	// Allocates and copies!
+	char*			get_text	( );
+
+			void	set_return_key_listener( void (*callback)(void*), void* mReturnCallbackContext	);
+		
+	virtual int		onReceiveFocus( 		 	);
+	virtual int		onEndFocus	( 			 	);
 	
 	virtual int		onKey	  	( char mKey 	);
 	virtual int		onClick		( int x, int y, bool mouse_is_down=true );
 //	virtual int		onFlinger	( FlingerEvent mFlinger );
 
-
+	size_t		m_length;
 	char*		m_cursor;	
 	char*		m_selection_start;	
 	char*		m_selection_end;	
 	int			m_capacity;
 	bool		m_first_click;
+	
+private:
+	void 	 (*on_return_callback)(void*);	// When Return key is pressed on the keyboard.
+	void* 	 on_return_context;				// often this pointer to a Control*
+
 };
 
 

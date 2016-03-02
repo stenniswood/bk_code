@@ -35,6 +35,7 @@ MarqueeView::MarqueeView( int Left, int Right, int Top, int Bottom )
 	text_color		= 0xFF9f9f0f;
 	border_color 	 = 0xFFffffff;
 	background_color = 0xFf202020;
+	strcpy (class_name, "MarqueeView");				
 }
 
 MarqueeView::MarqueeView()
@@ -50,6 +51,7 @@ MarqueeView::MarqueeView()
 	text_color		= 0xFF9f9f0f;
 	border_color 	= 0xFFffffff;
 	background_color = 0xFf202020;
+	strcpy (class_name, "MarqueeView");			
 }
 
 void MarqueeView::set_position ( int Left, int Right, int Top, int Bottom )

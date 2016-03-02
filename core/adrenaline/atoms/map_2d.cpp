@@ -38,6 +38,7 @@ Map2D( int Width, int Height )
 
 void 			Map2D::Initialize() 
 { 
+	strcpy (class_name, "Map2D");		
 }
 
 void 			Map2D::print_info			( 						) 

@@ -32,8 +32,8 @@
 #define KEY_SPACING_COL 64
 #define KEY_SPACING_ROW 64
 
-#define Debug 0
-
+#define Debug 1
+#define Printf if (Debug) printf
 
 Keyboard::Keyboard( int Left,  int Right, int Top, int Bottom )
 :Window(Left, Right, Top,Bottom)
@@ -185,7 +185,8 @@ void Keyboard::Initialize()
 	initialize_keys();
 	initialize_alt_keys();
 	adjust_height();
-
+	strcpy (class_name, "Keyboard");	
+	
 	text_color       = 0xFF000000;
 	background_color = 0xFF7F7FFF;
 	key_color  		 = 0xFFFFFFFF;	
@@ -258,7 +259,7 @@ int Keyboard::draw()
 	
 	StrokeWidth(2);			
 	Stroke_l   ( 0xFF000000 );
-	if (Debug) printf("Key_color = %x\n", key_color );
+	//if (Debug) printf("Key_color = %x\n", key_color );
 	Fill_l     ( key_color );			// background_color
 	Roundrect  ( 0, sample_y,  width, 1.5*text_size, 15.0, 15.0 );
 
@@ -266,11 +267,14 @@ int Keyboard::draw()
 	Stroke_l   ( 0xFFFF0000 );
 	Fill_l 	   ( text_color );
 	Text	   ( 0, sample_y, m_composition, SerifTypeface, 16 );
-
+	//if (Debug) printf("Keyboard::draw() %s\n", m_composition );		
+	
 	if (m_alt_down)
 		draw_alt_keys();
 	else 
 		draw_keys();
+
+	if (Debug) printf("Keyboard::draw() done\n" );		
 }
 
 Control* Keyboard::HitTest( int x, int y )
@@ -280,11 +284,19 @@ Control* Keyboard::HitTest( int x, int y )
 	return retval;
 }
 
+
+void Keyboard::set_composition	  ( char* mOriginalText )
+{
+	m_index = strlen( mOriginalText );
+	strcpy(m_composition, mOriginalText );
+}
+
 void Keyboard::append_character	(char mChar)
 {
 	m_composition[m_index] 		= mChar;
 	m_composition[m_index+1]    = 0; 
 	m_index++;  
+	printf("append_character()  m_index=%d; %s \n", m_index, m_composition);
 }
 
 int Keyboard::handle_special_keys( int mKeyIndex )
@@ -372,26 +384,31 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 		key = m_alt_keys[key_index].text[0];
 	} else {
 		key_index = KeyHitTest   ( x,y );
+		if (Debug) printf("KeyHitTest() = %d\n", key_index );
 		if (m_shift_down)	{		
 			m_shift_down = false;	// just 1 key! 
 			key = toupper( m_keys[key_index].text[0] );
 		} else 
 			key = tolower( m_keys[key_index].text[0] );
+		if (Debug) printf("key = %c\n", key );
 	}
 
 	if (key_index >= 0) 		// hit 
 	{
 		Invalidate();
-		int result = handle_special_keys( key_index );
-		MainDisplay.relay_key( key );
-		if (result)	 return TRUE;
+		int is_special_key = handle_special_keys( key_index );
+		if (is_special_key)	 {
+			MainDisplay.relay_key( key_index );
+			return TRUE;
+		} else
+			MainDisplay.relay_key( key );
 
-		append_character	 ( key );
+		append_character ( key );
 		if (m_index>BUFFER_LENGTH)	m_index = BUFFER_LENGTH;
 		
 		if (Debug) printf(" Keyboard::key_index=%d xy=<%d,%d>: key:<%d,%d>  %c\n",key_index, x,y, 
 						m_keys[key_index].x, m_keys[key_index].y, m_keys[key_index].text[0] );												 
-		if (Debug) printf(" Keyboard::%d %s\t%c\n",m_index, m_composition, key );
+		if (Debug) printf(" Keyboard::%d %c %s\n",m_index, key, m_composition );
 		return TRUE;
 	}
 

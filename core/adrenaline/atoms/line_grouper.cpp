@@ -31,7 +31,7 @@
 
 VerticalLineGroup::VerticalLineGroup(  )
 {
-	
+	strcpy (class_name, "VerticalLineGroup");			
 }
 VerticalLineGroup::~VerticalLineGroup(  )
 {

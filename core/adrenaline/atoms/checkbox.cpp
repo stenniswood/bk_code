@@ -35,6 +35,7 @@ CheckBox::CheckBox()
 void CheckBox::Initialize()
 {
 	Control::Initialize();
+	strcpy (class_name, "Checkbox");	
 	checked 			= false;
 	HasBorder 			= true;			// light transparent border
 	text_color 			= 0xFFFFFFFF;

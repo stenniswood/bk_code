@@ -19,7 +19,8 @@
 #include "display_manager.hpp"
 
 
-#define Debug 0
+#define Debug 1
+#define Printf if (Debug) printf
 
 EditBox::EditBox( int Left, int Right, int Top, int Bottom )
 :TextView( Left, Right, Top, Bottom )
@@ -52,6 +53,7 @@ void EditBox::Realloc( long int mSize )
 void EditBox::Initialize(	)
 {
 	TextView::Initialize();
+	strcpy (class_name, "EditBox");	
 	//printf("EditBox::Initialize\n");
 	text = new char[m_capacity];
 	background_color = 0xFF000000;
@@ -67,14 +69,51 @@ int	EditBox::calc_metrics()
 	return 0;
 }
 
-/* Insert char */
+// Allocates and copies!
+void EditBox::set_text( const char* NewText, bool mWrapContent )
+{
+	size_t length = strlen(NewText);
+	if (length> (m_capacity/2.))   {
+		m_capacity = length * 2;
+		free(text);
+		text = new char[length];
+	}	
+	strcpy(text, NewText);
+//	if (mWrapContent)
+//		wrap_content();
+}
+
+char* EditBox::get_text( )
+{
+	return text;
+}
+
+void EditBox::set_return_key_listener( void (*callback)(void*), void* mReturnCallback )
+{
+	on_return_callback = callback;
+	on_return_context  = mReturnCallback;
+}
+
+
+/* Insert char */ 
 void EditBox::insert( char* mKey )
 {
-	long int insert_length = strlen(mKey);
-	long int length = strlen(text);
-	memcpy( m_cursor+insert_length, m_cursor, length );		// hope that works!
+	long int insert_length = strlen(mKey);	
+	long int length        = strlen(text);
+	int index_into_text    = (m_cursor-text);
+	int bytes_to_shift     = (length-index_into_text)+1;
+	
+	printf("EditBox::insert()  inserting %ld into %ld, cursor at %d; remaining Bytes=%d\n", 
+				insert_length, length, index_into_text, bytes_to_shift  );
+	
+	memmove( m_cursor+insert_length, m_cursor, bytes_to_shift );
+	printf("EditBox::insert  text =%s\n", text);
+	
+	char tmp = m_cursor[insert_length];
 	strcpy( m_cursor, mKey );
-	m_cursor++;
+	m_cursor[insert_length] = tmp;
+	printf("EditBox::insert  text =%s\n", text);
+	m_cursor+=insert_length;
 }
 
 void EditBox::backspace(  )
@@ -92,27 +131,52 @@ void EditBox::delete_chars( int mNumber )	// from cursor position!
 
 int EditBox::onKey( char mKey )
 {
+	char tmp[2];
+	tmp[0]=mKey;
+	tmp[1]='\0';		// end of string.
+	
 	if (Debug) printf("EditBox::onKey ( %x = %d = %c )\n", mKey, mKey, mKey );
 	if (mKey == BACK_SPACE_KEY)	{
 		if (Debug) printf("EditBox::onKey BACKSPACE  %d %c \n", mKey, mKey);
 		backspace();
+	} else if (mKey == RETURN_KEY) {
+		printf("RETURN_KEY pressed calling callback\n");
+		on_return_callback( on_return_context );
 	} else
-		insert( mKey );
+		insert( tmp );
 	if (Debug) printf("EditBox::%s|\n", text );
 	Invalidate();
+	return 1;
+}
+
+int	EditBox::onReceiveFocus( 		 	)
+{
+	return 0;
+}
+int	EditBox::onEndFocus	( 			 	)
+{
+	return 0;
 }
 
 int	EditBox::onClick( int x, int y, bool mouse_is_down )
 {
+	Printf("EditBox::onClick()\n");
+	
+	if (text) {
+		m_length = strlen(text);	
+		m_cursor = text+m_length;
+	}
 	if (m_first_click)
 	{	
 		// select all text : 
+
 		m_selection_start = text;
 		m_selection_end   = text + m_capacity-1;
 		m_first_click 	  = false;
 	}
 
 	MainDisplay.grab_focus( this );
+	m_keyboard.set_composition( text );
 	MainDisplay.show_keyboard();
 	return 1;	
 }

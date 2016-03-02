@@ -44,6 +44,7 @@ Button::~Button()
 
 void Button::Initialize()
 {
+	strcpy (class_name, "Button");
 	hot_touch = false;
 	text_size = 14.0;
 	sunken    = false;

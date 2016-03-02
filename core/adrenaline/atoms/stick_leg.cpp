@@ -22,6 +22,7 @@
 StickLeg::StickLeg(int Left, int Right, int Top, int Bottom )
 :Control(Left, Right, Top, Bottom)
 {
+	strcpy (class_name, "StickLeg");					
 	mp = NULL;
 	AbdominBox.width  = 12.0;
 	AbdominBox.height = 13.0;	
@@ -33,6 +34,7 @@ StickLeg::StickLeg(int Left, int Right, int Top, int Bottom )
 StickLeg::StickLeg()
 :Control()
 {
+	strcpy (class_name, "StickLeg");					
 	mp = NULL;
 	AbdominBox.width  = 12.0;
 	AbdominBox.height = 13.0;

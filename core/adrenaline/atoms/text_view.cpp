@@ -48,7 +48,8 @@ TextView::TextView()
 void TextView::Initialize(	)
 {
 	ScrollControl::Initialize();
-
+	strcpy (class_name, "TextView");	
+	
 	//if (Debug) printf("TextView::Initialize()\n");
 	style 			= 0;
 	text_size 		= 14.0;

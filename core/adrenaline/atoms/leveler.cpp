@@ -21,6 +21,7 @@
 
 Leveler::Leveler(float Max, float Min)
 {
+	strcpy (class_name, "Leveler");		
 	xAxisLabel	= (char*)"X Axis";
 	yAxisLabel  = (char*)"Y Axis";
 	title 		= (char*)"Leveler";	
@@ -31,6 +32,7 @@ Leveler::Leveler(float Max, float Min)
 
 Leveler::Leveler()
 {
+	strcpy (class_name, "Leveler");		
 	xAxisLabel	= (char*)" ";
 	yAxisLabel  = (char*)" ";
 	title 		= (char*)" ";	

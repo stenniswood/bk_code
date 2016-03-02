@@ -54,6 +54,7 @@ SpinnerControl::~SpinnerControl()
 
 void 	SpinnerControl::Initialize(	)
 { 
+	strcpy (class_name, "SpinnerControl");					
 	margin 		= 8;
 	m_alignment = ALIGN_RIGHT;
 	m_value     = 0;

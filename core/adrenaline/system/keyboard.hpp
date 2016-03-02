@@ -24,8 +24,8 @@ struct stKey
 class Keyboard : public Window
 {
 public:
-	Keyboard( int Left,  int Right, int Top, int Bottom );
-	Keyboard();
+	Keyboard ( int Left,  int Right, int Top, int Bottom );
+	Keyboard ();
 	~Keyboard();
 
 	void	initialize_alt_keys	();	
@@ -34,11 +34,12 @@ public:
 	void	adjust_height		();
 	int 	handle_special_keys ( int mKeyIndex );
 	void	append_character	(char mChar);
-		
+
 	void				draw_keys();
 	void				draw_alt_keys();	
 	virtual int			draw();
 
+	void				set_composition	  ( char* mOriginalText );
 	int					KeyHitTest		  ( int x, int y 	);
 	int					AltKeyHitTest	  ( int x, int y 	);
 	float 				geometric_distance( int x, int y, int key, bool mAlternate=true );
@@ -47,8 +48,8 @@ public:
 	virtual Control*	HitTest	( int x, int y 	);
 	virtual int 		onClick	( int x, int y, bool mouse_is_down );
 
-	char m_composition[BUFFER_LENGTH];		// the typed text buffer.
-	int  m_index;		
+	char 					m_composition[BUFFER_LENGTH];		// the typed text buffer.
+	int  					m_index;		
 	vector<struct stKey>	m_keys;
 	vector<struct stKey>	m_alt_keys;	
 	bool					m_shift_down;

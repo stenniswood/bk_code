@@ -56,6 +56,7 @@ void TabularListBox::Initialize()
 {
 	if (Debug) printf("TabularListBox::Initialize()\n");
 	ListBox::Initialize();
+	strcpy (class_name, "TabularListBox");						
 	header_text_color       = 0xFF000000;
 	header_background_color = 0xFF9f9f9f;
 	header_border_color     = 0xFFBFBFBF;

@@ -29,7 +29,7 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug  0
+#define Debug  1
 #define Debug2 0
 
 Keyboard		m_keyboard;
@@ -96,6 +96,7 @@ void DisplayManager::call_on_creates( )
 void DisplayManager::Initialize()
 {	
 	IconView::Initialize();
+	strcpy (class_name, "DisplayManager");	
 	m_running_apps = new std::vector<Application*>();
 	
 	// put actual icons on it:
@@ -447,7 +448,8 @@ int   DisplayManager::draw(	)
 	if (Debug)  printf("SystemBar: %x\n", (unsigned int*)&m_sb );
 	if (Debug)  printf("Side  Bar: %x\n", (unsigned int*)&m_side );
 	if (Debug)  printf("StatusBar: %x\n", (unsigned int*)&m_status );
-	if (Debug)  printf("Keyboard: %x\t" , (unsigned int*)&m_keyboard );
+	if (Debug)  printf("Keyboard: %x\n" , (unsigned int*)&m_keyboard );
+	if (Debug)  printf("Calendar: %x\n" , (unsigned int*)&m_calendar );	
 	if ((Debug) && m_keyboard.is_visible()) printf("KB Visible!");
 	if (Debug)  printf("\n");
 
@@ -477,13 +479,15 @@ int	DisplayManager::draw_invalid_children( )
 	vector<Control*>::iterator	iter = m_child_controls.begin();
 	for ( int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
+		//printf("draw_invalid_children: %d %x\t", i, (*iter) );
+		//printf("					 : %s\n", (*iter)->class_name );
 		if 	((*iter)->is_invalid())
 		{
 			if ((*iter)->is_visible())
 				 (*iter)->draw();
 			else { 
 				draw();		// redraw everything.
-				return TRUE;
+				//return TRUE;
 			}
 		}
 	}
@@ -493,11 +497,14 @@ int	DisplayManager::draw_invalid_children( )
 /* Mark all objects as valid, since we just redrew */
 int	DisplayManager::update_invalidated(  )
 {
+	printf("child count=%d\n", m_child_controls.size() );
 	vector<Control*>::iterator	iter = m_child_controls.begin();
 	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
+		//printf("update_invalidated() %d %x\n", i, (*iter) );
 		(*iter)->Revalidate();
 	}	
+	//printf("child count=%d\n", m_child_controls.size() );
 	return 1;
 }
 void  DisplayManager::end_draw(	)
@@ -507,8 +514,8 @@ void  DisplayManager::end_draw(	)
 
 int   DisplayManager::draw_children( )
 {	
-	if (Debug) { printf("\t\tside bar	\t");	m_side.print_positions();	}
-	if (Debug) { printf("\t\tstatus bar	\t");	m_status.print_positions();	}
+	if (Debug2) { printf("\t\tside bar	\t");	m_side.print_positions();	}
+	if (Debug2) { printf("\t\tstatus bar	\t");	m_status.print_positions();	}
 
 	sort_z_order();	
 	vector<Control*>::iterator	iter = m_child_controls.begin();

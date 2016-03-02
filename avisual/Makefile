@@ -18,7 +18,7 @@ endif
 
 
 CC		   = g++
-OPTIONS	   =  -Wwrite-strings -fpermissive -Wreturn-type
+OPTIONS	   =  -Wwrite-strings -fpermissive -Wreturn-type -Wformat
 # 
 # INCLUDE PATHS:
 CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
@@ -26,7 +26,7 @@ CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 	 		 ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
 			 ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \
 			 ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
-APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/
+APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/ ./apps/file_editer/ ./apps/video/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 INC		= $(CORE_INC) $(APPS_INC) $(GAMES_INC) ./voice/ ./kinetic/ ./
 SELF_INC   = ../../avisual/ ./ ../ 
