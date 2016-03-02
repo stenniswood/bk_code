@@ -1,6 +1,11 @@
 #ifndef _CLIENT_MEMORY_HPP_
 #define _CLIENT_MEMORY_HPP_
 
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
+    
 /************************************************************
 	Data Flow - Client List from UDP received to avisual 
 	
@@ -8,12 +13,10 @@
 	Then puts it into this shared memory.
 	avisual polls 
  ************************************************************/
-
 //#include <list>
 
-#define IPC_KEY_CLI  1274 
+#define IPC_KEY_CLI  0x04D4   // 1236 in decimal.
 #define MAX_CLIENTS  300
-
 
 struct stClientData {
 	char	name[40];		// hostname
@@ -26,27 +29,26 @@ struct stClientData {
 /******************** CLIENT MEMORY MAP *****************/
 struct client_ipc_memory_map
 {
-	char	 ConnectionStatus[64];
 	char	 OurBeaconName[128];
 	char	 ipAddress[40];
-		
+    
+    char	 ConnectionStatus[64];
 	long int StatusCounter;
 	long int StatusAcknowledgedCounter;
 
+    char	 Sentence[255];								// verbal commands (NLP) activate connection requests.
 	long int UpdateCounter;								// Incremented on change to any of below:
-	long int AcknowledgedCounter; 
-	
+	long int AcknowledgedCounter;
+
+    char	 Response[255];								// verbal commands (NLP) activate connection requests.
 	long int ResponseCounter;							// Incremented on change to any of below:
 	long int ResponseAcknowledgedCounter;				// Incremented on change to any of below:
-			
-	char	 Sentence[255];								// verbal commands (NLP) activate connection requests.	
+    char     ResponderName[100];                        // "instant", "simulator", etc
 
 	long int NewClientUpdateCounter;					// Incremented on change to any of below:
 	long int NewClientAcknowledgedCounter;
-
 	int		 NumberClients;	
 	struct stClientData ClientArray[MAX_CLIENTS];		// String array (dimension of NumberClients)
-	//short	 ScreenNumber;								// Which screen is being displayed.  voice commands can change.  Simplistic for now a single number per page.	
 };
 
 extern char* 	client_shared_memory;
@@ -61,24 +63,24 @@ void cli_dump_ipc			( );
 void cli_save_segment_id	( char* mFilename );
 int  cli_read_segment_id	( char* mFilename );
 
-BOOL is_client_ipc_memory_available();
-int  connect_shared_client_memory( char mAllocate=FALSE );
+bool is_client_ipc_memory_available();
+int  connect_shared_client_memory( char mAllocate );
 int  cli_allocate_memory	( );
 void cli_deallocate_memory	( int msegment_id );
 int  cli_attach_memory		( );
 void cli_detach_memory		( );
 void cli_reattach_memory	( );
-int  cli_get_segment_size   ( );
+long int  cli_get_segment_size   ( );
 void cli_fill_memory		( );
 
 
 void cli_ipc_write_connection_status( char* mStatus   );
-
 void cli_ipc_write_sentence	 	    ( char* mSentence );
+//void cli_ipc_write_response	 	    ( char* mSentence );        // don't want duplicates, but
+void cli_ipc_write_response         ( char* mSentence, char* mResponderName);
 
-void cli_ipc_write_response	 	    ( char* mSentence );
 void cli_wait_for_ack_update();
-
+bool is_new_response      ();
 void cli_wait_for_response();
 void cli_ack_response	  ();
 
@@ -86,8 +88,7 @@ void cli_ack_response	  ();
 //void cli_ipc_add_new_client  ( struct in_addr mbeacon_ip_list );
 void cli_reset_client_list	   (  );
 void cli_ipc_add_new_client	   ( struct stClientData* mEntry );
-//void cli_ipc_add_new_clients   ( std::list<struct in_addr> mbeacon_ip_list );
-BOOL cli_is_new_client			( );
+bool cli_is_new_client			( );
 void cli_ack_new_client			( );
 
 void cli_print_clients		   ( );
@@ -97,17 +98,21 @@ int  cli_find_name(char*);
 
 /************************************************************/
 
-char* get_connection_status		();
-char* get_sentence				();
-int   read_status_counter		();
-int   read_sentence_counter		();
-BOOL  cli_is_new_connection_status	();
-BOOL  cli_is_new_update				();
+char*       cli_get_connection_status		();
+char*       cli_get_sentence				();
+long int    cli_read_status_counter         ();
+long int    cli_read_sentence_counter		();
+bool        cli_is_new_connection_status	();
+bool        cli_is_new_update				();
 
-void cli_ack_connection_status	();
-void cli_ack_update_status		();
+void        cli_ack_connection_status	();
+void        cli_ack_update_status		();
 
 /************************************************************/
+
+#ifdef  __cplusplus
+}
+#endif
 
 
 #endif

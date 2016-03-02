@@ -25,7 +25,7 @@ AUTHOR	:  Stephen Tenniswood
 #include <stdio.h> 
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <string.h>
+#include <string>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/types.h>
@@ -33,16 +33,12 @@ AUTHOR	:  Stephen Tenniswood
 #include <list>
 #include <arpa/inet.h>
 #include <errno.h>
-#include "bk_system_defs.h"
-#include "interrupt.h"
 #include "client_memory.hpp"
 
 
 char* 	client_shared_memory;
 int 	client_segment_id;
 struct  client_ipc_memory_map* ipc_memory_client = NULL;
-
-#define Debug 0
 
 
 void cli_dump_ipc()
@@ -68,7 +64,7 @@ void cli_save_segment_id(char* mFilename)
 	}
 	
 	//FILE* fd = fopen("client_shared_memseg_id.cfg", "w");
-	if (Debug) printf("Segment_id=%d\n", client_segment_id );
+	printf("Segment_id=%d\n", client_segment_id );
 	char line[80];
 	//fprintf( fd, "%d", client_segment_id );
 	sprintf( line, "%d", client_segment_id );
@@ -84,18 +80,18 @@ int cli_read_segment_id(char* mFilename)
 		printf("CLI_read_segment_id - ERROR: %s \n", strerror(errno) );	
 		return -1;
 	}
-	int result = fread( tline, 1, 20, fd);		//	fscanf( fd, "%d", &can_segment_id );
+	size_t result = fread( tline, 1, 20, fd);		//	fscanf( fd, "%d", &can_segment_id );
 	tline[result] = 0;
-	client_segment_id = atol( tline );
+	client_segment_id = atoi( tline );
 	fclose( fd );
-	if (Debug) printf("cli_segment_id= %d \n", client_segment_id );	
+	printf("cli_segment_id= %d \n", client_segment_id );	
 	return client_segment_id;
 }
 
 int cli_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct client_ipc_memory_map);
-	if (Debug) printf ("Client shm seg size=%d\n", shared_segment_size );
+	printf ("Client shm seg size=%d\n", shared_segment_size );
 	
 	/* Allocate a shared memory segment. */
 	client_segment_id = shmget( IPC_KEY_CLI, shared_segment_size, IPC_CREAT | 0666 );
@@ -103,20 +99,20 @@ int cli_allocate_memory( )
 	if (client_segment_id==-1)
 		printf("cli_allocate_memory - ERROR: %s \n", strerror(errsv) );
 	else 
-		if (Debug) printf ("Client shm segment_id=%d\n", client_segment_id );
+		printf ("Client shm segment_id=%d\n", client_segment_id );
+	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
 	return client_segment_id;
 }
 
 int cli_attach_memory()
 {
 	/* Attach the shared memory segment. */
-	int error=0;
 	client_shared_memory = (char*)shmat(client_segment_id, 0, 0);
 	if (client_shared_memory==(char*)-1) {
-		if (Debug) printf("cli_attach_memory - Error: %s \n", strerror(errno) );
+		printf("cli_attach_memory - Error: %s \n", strerror(errno) );
 		return 0;
 	} else 
-		if (Debug) printf ("Client shm attached at address %p\n", client_shared_memory); 	
+		printf ("Client shm attached at address %p\n", client_shared_memory); 	
 
 	ipc_memory_client = (struct client_ipc_memory_map*)client_shared_memory;
 	return 1;
@@ -131,7 +127,7 @@ void cli_reattach_memory()
 		return;
 	}
 	ipc_memory_client	 = (struct client_ipc_memory_map*)client_shared_memory;	
-	if (Debug) printf ("Client shm reattached at address %p\n", client_shared_memory); 
+	printf ("Client shm reattached at address %p\n", client_shared_memory); 
 }
 
 void cli_detach_memory()
@@ -140,22 +136,23 @@ void cli_detach_memory()
 	shmdt (client_shared_memory);
 }
 
-int cli_get_segment_size()
+long int cli_get_segment_size()
 {
 	struct 		shmid_ds	shmbuffer;
 	/* Determine the segment’s size. */
 	shmctl (client_segment_id, IPC_STAT, &shmbuffer);
-	int segment_size = shmbuffer.shm_segsz;
-	if (Debug) printf ("Client segment size: %d\n", segment_size);
+	size_t segment_size = shmbuffer.shm_segsz;
+	printf ("Client segment size: %ld\n", segment_size);
 	return segment_size;
 }
 
 void cli_fill_memory()
 {
-	int size = cli_get_segment_size();
+	size_t size = cli_get_segment_size();
 	memset(client_shared_memory, 0, size);
-	if (Debug) printf("cli_fill_memory() - ");
-	if (Debug) printf("%d NumClients=%d\n", size, ipc_memory_client->NumberClients );	
+	printf("cli_fill_memory() - ");
+	printf("%ld NumClients=%d\n", size, ipc_memory_client->NumberClients );
+	
 }
 
 void cli_deallocate_memory(int msegment_id)
@@ -176,7 +173,7 @@ FORMAT:
 */
 void cli_ipc_write_sentence( char* mSentence )
 {
-	int length = strlen(mSentence);	
+	size_t length = strlen(mSentence);
 	int MaxAllowedLength = sizeof(ipc_memory_client->Sentence);	
 	if (length>MaxAllowedLength) {
 		length = MaxAllowedLength;
@@ -186,25 +183,25 @@ void cli_ipc_write_sentence( char* mSentence )
 	strcpy(ipc_memory_client->Sentence, mSentence);
 	printf("|%s|\n", ipc_memory_client->Sentence );
 	ipc_memory_client->UpdateCounter++;	
-	if (Debug) printf("UpdateCount=%ld; AcknowledgedCounter=%ld\n", ipc_memory_client->UpdateCounter,
-			ipc_memory_client->AcknowledgedCounter ); 
+	printf("UpdateCount=%ld; AcknowledgedCounter=%ld\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter );
 }
 
-void cli_ipc_write_response( char* mSentence )
+void cli_ipc_write_response( char* mSentence, char* mResponderName )
 {
-	int length = strlen(mSentence);	
+	size_t length = strlen(mSentence);
 	int MaxAllowedLength = sizeof(ipc_memory_client->Sentence);	
 	if (length>MaxAllowedLength) {
 		length = MaxAllowedLength;
 		mSentence[MaxAllowedLength] = 0;
 	}
-	strcpy(ipc_memory_client->Sentence, mSentence);
+	strcpy(ipc_memory_client->Sentence,      mSentence      );
+    strcpy(ipc_memory_client->ResponderName, mResponderName );
 	ipc_memory_client->ResponseCounter++;	
 }
 
 void cli_ipc_write_connection_status( char* mStatus )
 {
-	int length = strlen(mStatus);	
+	size_t length = strlen(mStatus);
 	int MaxAllowedLength = sizeof(ipc_memory_client->ConnectionStatus);
 	if (length > MaxAllowedLength) {
 		length = MaxAllowedLength;	// do not write into memory of next variable.
@@ -226,7 +223,7 @@ void cli_ipc_write_connection_status( char* mStatus )
 
 
 #if (PLATFORM==Mac)
-char cli_segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/client/cli_shared_memseg_id.cfg";
+char cli_segment_id_filename[] = "/Users/stephentenniswood/code/Mac/bk_code/client/cli_shared_memseg_id.cfg";
 #elif (PLATFORM==RPI)
 char cli_segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
 #elif (PLATFORM==linux_desktop)
@@ -234,26 +231,26 @@ char cli_segment_id_filename[] = "/home/steve/bk_code/client/cli_shared_memseg_i
 #endif
 
 
-BOOL is_client_ipc_memory_available()
+bool is_client_ipc_memory_available()
 {
 	struct shmid_ds buf;			// shm data descriptor.
 
-	if (Debug) printf("Checking for client IPC memory... ");
-	if (Debug) printf( "reading segment id: %s\n", cli_segment_id_filename );
+	printf("Checking for client IPC memory... ");
+	printf( "reading segment id: %s\n", cli_segment_id_filename );
 	
 	// First see if the memory is already allocated:
 	client_segment_id = cli_read_segment_id( cli_segment_id_filename );
 	int retval = shmctl(client_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
-		if (Debug) printf("Error: %s\n", strerror(errno) );
-		return FALSE;
+		printf("Error: %s\n", strerror(errno) );
+		return false;
 	}
-	if (Debug) printf( " Found segment, size=%ld and %ld attachments.\n", buf.shm_segsz, buf.shm_nattch );
+	printf( " Found segment, size=%ld and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
 	
 	if ((buf.shm_segsz > 0)			// segment size > 0
 	    && (buf.shm_nattch >= 1))	// number of attachments.
-		return TRUE;	
-	return FALSE;
+		return true;
+	return false;
 }
 
 
@@ -267,8 +264,8 @@ Return :
 */
 int connect_shared_client_memory( char mAllocate )
 {
-	BOOL available = is_client_ipc_memory_available();
-
+	bool available = is_client_ipc_memory_available();
+ 
 	if ((!available) && (mAllocate))
 	{
 		int result = cli_allocate_memory( );
@@ -276,7 +273,9 @@ int connect_shared_client_memory( char mAllocate )
 			printf("Cannot allocate shared memory!\n");
 		}
 		cli_attach_memory( );
-		cli_fill_memory  ( );
+		cli_fill_memory  ( );				
+		
+		printf("Saving segment id: ");
 		cli_save_segment_id( cli_segment_id_filename );		
 		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
 			return 1;
@@ -290,33 +289,33 @@ int connect_shared_client_memory( char mAllocate )
 	return 0;	
 }
  
-char* get_connection_status()
+char* cli_get_connection_status()
 {
 	return (ipc_memory_client->ConnectionStatus);
 }
-char* get_sentence()
+char* cli_get_sentence()
 {
 	return (ipc_memory_client->Sentence);
 }
 
-int read_status_counter()
+long int cli_read_status_counter()
 {
 	return ipc_memory_client->StatusCounter;
 }
-int read_sentence_counter()
+long int cli_read_sentence_counter()
 {
 	return ipc_memory_client->UpdateCounter;
 }
 
-BOOL cli_is_new_connection_status()
+bool cli_is_new_connection_status()
 {
-	int latest_count = read_status_counter();
+	size_t latest_count = cli_read_status_counter();
 	if (latest_count > ipc_memory_client->StatusAcknowledgedCounter)
 	{
 		//printf("Latest_count = %d/%d\n", latest_count, ipc_memory_client->StatusAcknowledgedCounter );
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 void cli_ack_connection_status()
@@ -324,15 +323,15 @@ void cli_ack_connection_status()
 	ipc_memory_client->StatusAcknowledgedCounter = ipc_memory_client->StatusCounter;
 }
 
-BOOL cli_is_new_update()
+bool cli_is_new_update()
 {
 	if (ipc_memory_client)
 		if (ipc_memory_client->UpdateCounter > ipc_memory_client->AcknowledgedCounter)
 		{
-			if (Debug) printf("Update/Ack Counters = %ld/%ld\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);			
-			return TRUE;
+			printf("Update/Ack Counters = %ld/%ld\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);
+			return true;
 		}
-	return FALSE;
+	return false;
 }
 void cli_ack_update_status()
 {
@@ -349,12 +348,19 @@ void cli_wait_for_ack_update()
 	{
 	}
 }
-
+bool is_new_response()
+{
+    return (ipc_memory_client->ResponseAcknowledgedCounter < ipc_memory_client->ResponseCounter);
+}
 void cli_wait_for_response()
 {
-	while (ipc_memory_client->ResponseAcknowledgedCounter > ipc_memory_client->ResponseCounter)
+    printf("ResponseAcknowledgedCounter=%ld, ResponseCounter=%ld\n",
+           ipc_memory_client->ResponseAcknowledgedCounter, ipc_memory_client->ResponseCounter);
+    while (is_new_response()==false)
+	//while (ipc_memory_client->ResponseAcknowledgedCounter >= ipc_memory_client->ResponseCounter)
 	{
-	}	
+	}
+    
 }
 
 void cli_print_clients()
@@ -408,15 +414,15 @@ void cli_ipc_add_new_client( struct stClientData* mEntry )
 //	therefore the NewClientUpdateCounter.
 }
 
-BOOL cli_is_new_client()
+bool cli_is_new_client()
 {
 	if (ipc_memory_client)
 		if (ipc_memory_client->NewClientUpdateCounter > ipc_memory_client->NewClientAcknowledgedCounter)
 		{
-			if (Debug) printf("Update/Ack Counters = %ld/%ld\n", ipc_memory_client->NewClientUpdateCounter, ipc_memory_client->NewClientAcknowledgedCounter);
-			return TRUE;
+			printf("Update/Ack Counters = %ld/%ld\n", ipc_memory_client->NewClientUpdateCounter, ipc_memory_client->NewClientAcknowledgedCounter);
+			return true;
 		}
-	return FALSE;
+	return false;
 }
 
 void cli_ack_new_client()

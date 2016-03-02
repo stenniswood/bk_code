@@ -2,6 +2,7 @@
 	The one in ../core/wifi/serverthread.c is Token based
 	This one is simple NLP words based and is the current choice.
 */
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -105,8 +106,6 @@ static void init_server()
 void SendTelegram( BYTE* mBuffer, int mSize)
 {
 	//printf("Sending: ");
-	//short Token = *((UINT*)mBuffer);
-	//Print_Msg_Acknowledgement( Token );  printf("\n");
 	write(connfd, mBuffer, mSize ); 
 }
 
@@ -210,6 +209,8 @@ int connect_to_robot(char *ip_address )
    return 0;
 }
 
+fd_set rfds;
+	
 void establish_connection()
 {
 	/****************************
@@ -219,25 +220,24 @@ void establish_connection()
 	*/
 	printf("establish_connection()\n");	
     socklen_t size = (socklen_t)sizeof(client_addr);	
-    memset(&client_addr, '0', sizeof(client_addr) );
+    memset(&client_addr, '0', sizeof(socklen_t) );
 	
 	struct timeval tv;
 	tv.tv_sec = 10;		// want immediate return
 	tv.tv_usec = 0;
 
 	int connection_pending = 0;
-	fd_set rfds;
-	int max_fds = max( listenfd, connfd )+1;
+	//int max_fds = max( listenfd, connfd )+1;
+	int max_fds = listenfd+1;
 
 	while (!connection_established)
 	{
-		FD_ZERO(&rfds);
+		FD_ZERO(&rfds);		
 		FD_SET(listenfd, &rfds);
-	//	FD_SET(connfd,   &rfds);
 
-		tv.tv_sec = 0;		// want immediate return
-		tv.tv_usec = 0;
-
+		tv.tv_sec  = 0;		// want immediate return
+		tv.tv_usec = 0;		
+		
 		// CHECK FOR AN INCOMING CONNECTION TO ACCEPT:
 		int number_active = select( max_fds, &rfds, NULL, NULL, &tv );
 		if (number_active==-1)
