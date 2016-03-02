@@ -1,7 +1,7 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
+ 
 /* Note - Sometimes the Raspberry Pi doesn't play over HDMI anyway.
 		  and doing "raspi-config" doesn't help.
 		  Answer is to uncomment the line in "/boot/config.txt" which says

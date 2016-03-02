@@ -24,7 +24,7 @@
 #include "audio_memory.h"
 #include "serverthread.h"
 #include "nlp_extraction.hpp"
-
+ 
 /* Suggested Statements:
 
 	start 2 way audio to me.
