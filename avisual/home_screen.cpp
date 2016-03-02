@@ -30,20 +30,24 @@ TextView 		RobotResponse 	( 50, 700, 290, 190 );
 ClientListPanel	AvailClients 	( 20, 700, 160, 50	);
 
 static char ConnectionStatusText[128];
-static char CommandText[128];
+static char CommandText[255];
 
 
 void init_home_screen()
 {
-	strcpy(CommandText, "connect to 192.168.2.14, Robot, show me the accuracy of your positioning. Show me a histogram for right leg positions.\
-	 Lift your left leg.  Raise both arms.  Go to the bedroom and get my shoes." );	
+	//strcpy(CommandText, "connect to 192.168.2.14, Robot, show me the accuracy of your positioning. Show me a histogram for right leg positions.\
+	// Lift your left leg.  Raise both arms.  Go to the bedroom and get my shoes." );	
+	strcpy (CommandText, "what time?");
 	ClientInputEdit.set_text			( CommandText );
-	ClientInputEdit.set_text_size 		( 16.0 );	
-
-
-	RobotResponse.set_text				( "Not Connected" );		//ConnectionStatus
-	if (ipc_memory_client)
-		RobotResponse.set_text			( ipc_memory_client->Sentence );		//ConnectionStatus
+	ClientInputEdit.set_text_size 		( 16.0 			);	
+	//printf("init_home_screen() ClientInput text setup\n");
+	
+	RobotResponse.set_text				( "Not Connected" );				// ConnectionStatus	
+	if (ipc_memory_client) {
+		//printf("init_home_screen() RobotResponse text %s\n", ipc_memory_client->Sentence );
+		RobotResponse.set_text			( ipc_memory_client->Sentence );	// ConnectionStatus
+		
+	}
 	RobotResponse.set_text_size 		( 16.0 		 );
 	RobotResponse.set_text_color		( 0xCFFF0000 );
 	RobotResponse.set_background_color  ( 0xFFFFFf00 );
@@ -57,7 +61,7 @@ void init_home_screen()
 	MainDisplay.add_object( &RobotResponse 	  );
 	MainDisplay.add_object( &AvailClients );
 //	MainDisplay.add_object( &adren_board_list );
-	MainDisplay.load_resources();
+//	MainDisplay.load_resources();
 }
 
 

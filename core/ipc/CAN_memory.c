@@ -43,7 +43,7 @@ struct  can_ipc_memory_map* ipc_memory_can=NULL;	// structured memory.
 
 
 
-#define Debug 1
+#define Debug 0
 
 static void print_message(struct sCAN* msg)
 {	
@@ -132,7 +132,6 @@ void init_can_memory()
 	//byte 	 	RxTail=0;		 each user should keep his own copy.
 	ipc_memory_can->RxOverFlow=FALSE;		// indicator if not receiving quickly enough.
 
-
 	ipc_memory_can->isTransmitting=FALSE;	// is being sent over tcp/ip (not local can card)
 	ipc_memory_can->TxHead=0;
 	ipc_memory_can->TxTail=0;
@@ -143,16 +142,16 @@ void init_can_memory()
 int can_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct can_ipc_memory_map);
-	printf ("CAN shm seg size=%d\n", shared_segment_size );
+	if (Debug) printf ("CAN shm seg size=%d\n", shared_segment_size );
 	
 	/* Allocate a shared memory segment. */
 	can_segment_id = shmget( IPC_KEY_CAN, shared_segment_size, IPC_CREAT | 0666 );
 	int errsv = errno;
 	if (can_segment_id==-1) {
-		printf("can_allocate_memory - shmget ERROR: %s \n", strerror(errsv) );
+		if (Debug) printf("can_allocate_memory - shmget ERROR: %s \n", strerror(errsv) );
 		return 0;
 	} else {
-		printf ("CAN Allocated %d bytes shm segment_id=%d\n", shared_segment_size, can_segment_id );
+		if (Debug) printf ("CAN Allocated %d bytes shm segment_id=%d\n", shared_segment_size, can_segment_id );
 		init_can_memory();
 	}
 		// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
@@ -165,10 +164,10 @@ int can_attach_memory()
 	/* Attach the shared memory segment. */
 	can_shared_memory = (char*)shmat( can_segment_id, 0, 0 );
 	if (can_shared_memory==(char*)-1) {
-		printf("can_attach_memory - ERROR: %s \n", strerror(errno) );
+		if (Debug) printf("can_attach_memory - ERROR: %s \n", strerror(errno) );
 		return 0;
 	} else 
-		printf ("CAN shm attached at address %p\n", can_shared_memory); 		
+		if (Debug) printf ("CAN shm attached at address %p\n", can_shared_memory); 		
 	ipc_memory_can	  = (struct can_ipc_memory_map*)can_shared_memory;
 	return 1;
 }
@@ -180,7 +179,7 @@ void can_reattach_memory()
 	if (can_shared_memory==(char*)-1) {
 		printf("can_attach_memory - ERROR: %s \n", strerror(errno) );
 	} else 
-		printf ("CAN shm reattached at address %p\n", can_shared_memory); 	
+		if (Debug) printf ("CAN shm reattached at address %p\n", can_shared_memory); 	
 	ipc_memory_can = (struct can_ipc_memory_map*)can_shared_memory;	
 }
 
@@ -264,7 +263,7 @@ void AddToRxList( struct sCAN* mMsg )
 void print_rx_position()
 {
 	if (ipc_memory_can)
-		printf("Added to CAN IPC memory: %d, lap=%d\n", ipc_memory_can->RxHead, ipc_memory_can->RxHeadLap );
+		if (Debug) printf("Added to CAN IPC memory: %d, lap=%d\n", ipc_memory_can->RxHead, ipc_memory_can->RxHeadLap );
 }
 
 BOOL  shm_isRxMessageAvailable( int* mTail, int* mTailLaps )
@@ -286,7 +285,7 @@ BOOL  shm_isRxMessageAvailable( int* mTail, int* mTailLaps )
 		*mTailLaps = ipc_memory_can->RxHeadLap - 1;
 		tail_count = head_count - (MAX_CAN_RX_MESSAGES-10);	// allow room for 10 more, since the Tail is slower than the head.
 		*mTail = (tail_count - *mTailLaps * MAX_CAN_RX_MESSAGES);		
-		printf("OverFlow; mTail=%d;  mTailLaps=%d; \n", *mTail, *mTailLaps );
+		if (Debug) printf("OverFlow; mTail=%d;  mTailLaps=%d; \n", *mTail, *mTailLaps );
 	}
 
 //	if (head_count < tail_count)
@@ -324,7 +323,7 @@ void CAN_save_segment_id(char* mFilename)
 	char line[40];
 	//FILE* fd = fopen(mFilename, "w");
 	FILE* fd = fopen(mFilename, "w");
-	printf("Saved Segment_id=%d\n", can_segment_id );
+	if (Debug) printf("Saved Segment_id=%d\n", can_segment_id );
 	sprintf( line, "%d", can_segment_id );
 	fwrite( line, strlen(line), 1, fd );
 	fclose( fd );
@@ -343,7 +342,7 @@ int CAN_read_segment_id(char* mFilename)
 	tline[result] = 0;
 	int tmp_can_segment_id = atol( tline );
 	fclose( fd );
-	printf("can_segment_id= %d \n", tmp_can_segment_id );	
+	if (Debug) printf("can_segment_id= %d \n", tmp_can_segment_id );	
 	return tmp_can_segment_id;
 }
 
@@ -361,15 +360,15 @@ BOOL is_CAN_IPC_memory_available()
 {
 	struct shmid_ds buf;			// shm data descriptor.
 
-	printf("Checking for CAN IPC memory... ");
+	if (Debug) printf("Checking for CAN IPC memory... ");
 	// First see if the memory is already allocated:
 	can_segment_id = CAN_read_segment_id( segment_id_filename );
 	int retval = shmctl(can_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
-		printf("Error: %s\n", strerror(errno) );
+		if (Debug) printf("Error: %s\n", strerror(errno) );
 		return FALSE;
 	}
-	printf( " Found segment, size=%d and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+	if (Debug) printf( " Found segment, size=%d and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
 	
 	if ((buf.shm_segsz > 0)			// segment size > 0
 	    && (buf.shm_nattch >= 1))	// number of attachments.
@@ -390,7 +389,7 @@ int can_connect_shared_memory(char mAllocate)
 {
 	BOOL available = is_CAN_IPC_memory_available();
 	if ((!available) && (mAllocate))  {
-		printf("can_connect_shared_memory() allocating.\n");
+		if (Debug) printf("can_connect_shared_memory() allocating.\n");
 		// First see if the memory is already allocated:
 	    //shmctl(can_segment_id, IPC_RMID, NULL);
 		// Now Re-allocate : 

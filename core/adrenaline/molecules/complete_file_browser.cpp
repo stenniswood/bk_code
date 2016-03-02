@@ -22,7 +22,7 @@
 
 
  
-#define Debug 1
+#define Debug 0
 
 
 FavoritesPane::FavoritesPane()
@@ -32,7 +32,7 @@ FavoritesPane::FavoritesPane()
 
 int FavoritesPane::onCreate	(  )
 {
-	printf("FavoritesPane::onCreate	(  )\n");	
+	if (Debug) printf("FavoritesPane::onCreate	(  )\n");	
 	set_odd_color( 0xFF00207F );
 	set_even_color( 0xFF00207F );
 	add_item("home");				m_paths.push_back("/home/pi/");
@@ -56,7 +56,7 @@ ClippingsPane::ClippingsPane()
 }
 int	ClippingsPane::onCreate(  )
 {
-	printf("ClippingsPane::onCreate	(  )\n");
+	if (Debug) printf("ClippingsPane::onCreate	(  )\n");
 	//set_odd_color ( 0xFF7F2020 );
 	//set_even_color( 0xFF7F2020 );
 	//clear_items();
@@ -100,27 +100,27 @@ void CompleteFileBrowser::set_base_path( char* mBasePath )
 
 int CompleteFileBrowser::onPlace	(  )	// chance to place children.
 {
-	printf("CompleteFileBrowser::onPlace(  )\n");
+	if (Debug) printf("CompleteFileBrowser::onPlace(  )\n");
 	m_favorites_pane.set_width_height( 120, height );	
 	m_favorites_pane.move_to		 ( left, bottom );
 	
-	printf("  m_clippings_pane (  )\n");
+	if (Debug) printf("  m_clippings_pane (  )\n");
 	//m_clippings_pane.set_width_height( 100, 50 );
-	printf("  m_clippings_pane::set_width_height (  )\n");	
+	if (Debug) printf("  m_clippings_pane::set_width_height (  )\n");	
 	float clippings_left = left+width - m_clippings_pane->get_width();
 	//m_clippings_pane->move_to		 ( clippings_left, bottom );
 	
-	printf("  m_browser_pane ( )\n");	
+	if (Debug) printf("  m_browser_pane ( )\n");	
 	float b_width = clippings_left - m_favorites_pane.get_width() + left;
 	m_browser_pane.set_width_height	 ( b_width, height );
 	m_browser_pane.move_to			 ( m_favorites_pane.get_width()+left, bottom);	
-	printf("****** CompleteFileBrowser::onPlace\n"); m_browser_pane.print_positions();	
+	if (Debug) printf("****** CompleteFileBrowser::onPlace\n"); m_browser_pane.print_positions();	
 	return 1;
 }
 
 int	CompleteFileBrowser::onCreate(  )
 {
-	printf("CompleteFileBrowser::onCreate(  )\n");
+	if (Debug) printf("CompleteFileBrowser::onCreate(  )\n");
 	register_child( &m_favorites_pane);
 	register_child( &m_browser_pane	 );
 	//register_child( m_clippings_pane);

@@ -20,6 +20,9 @@
 #include "touch_gesture.hpp"
 
 
+#define Debug 0
+
+
 float degrees( float mRad )
 {
 	return mRad * (360. / M_PI);
@@ -27,7 +30,7 @@ float degrees( float mRad )
 
 DraggerGesture::DraggerGesture()
 {  
-	printf("DraggerGesture::DraggerGesture()\n");
+	if (Debug) printf("DraggerGesture::DraggerGesture()\n");
 	Initialize();
 }
 
@@ -43,7 +46,7 @@ DraggerGesture::DraggerGesture()
 */
 void DraggerGesture::Initialize()
 {
-	printf("DraggerGesture::Initialize() ...\n"); 
+	if (Debug) printf("DraggerGesture::Initialize() ...\n"); 
 	m_enlarge_ratio 		  = 1.0;
 	m_rotate_angle_relative	  = 0.;
 	m_last_gesture_recognized = 0;
@@ -66,8 +69,8 @@ float distance( struct finger_info f1, struct finger_info f2 )
 // We only want to trigger this 1 time on the release!
 bool DraggerGesture::recognize_tap ( )			// 1 finger distance between
 {
-	static int init_x=0;
-	static int init_y=0;
+	//static int init_x=0;
+	//static int init_y=0;
 	static int state = 1;
 	switch(state)
 	{
@@ -95,18 +98,18 @@ bool DraggerGesture::recognize_tap ( )			// 1 finger distance between
 						return false;		// start over!
 					}
 					else {
-						printf("TAP EVENT RECEIVED! %d \n", m_last_gesture_recognized);
+						if (Debug) printf("TAP EVENT RECEIVED! %d \n", m_last_gesture_recognized);
 						m_last_gesture_recognized = TOUCH_GESTURE_TAP;
 						return true;
 					}
 				} else {
-						printf("TAP EVENT RECEIVED!\n");
+						if (Debug) printf("TAP EVENT RECEIVED!\n");
 						m_last_gesture_recognized = TOUCH_GESTURE_TAP;
 						return true;				
 				}
 			}
 			break;
-	default: printf("DraggerGesture::recognize_tap() default\n");
+	default: if (Debug) printf("DraggerGesture::recognize_tap() default\n");
 			break;
 	}
 	return false;
@@ -154,12 +157,12 @@ bool DraggerGesture::recognize_enlarge ( )
 					     (distance2 > m_initial_distance*1.2))
 				{
 					m_last_gesture_recognized |= TWO_ENLARGE;
-					printf("ENLARGE EVENT RECEIVED:  Ratio=%6.2f\n", m_enlarge_ratio);
+					if (Debug) printf("ENLARGE EVENT RECEIVED:  Ratio=%6.2f\n", m_enlarge_ratio);
 					return true;
 				}
 			} 
 			else {
-				printf("recognize_enlarge:  init=%6.2f; final=%6.2f   Enlarge= %6.2f\n",
+				if (Debug) printf("recognize_enlarge:  init=%6.2f; final=%6.2f   Enlarge= %6.2f\n",
 						 m_initial_distance, distance2, m_enlarge_ratio );
 				m_last_gesture_recognized &= ~TWO_ENLARGE;
 				state = 1;			
@@ -212,12 +215,12 @@ bool DraggerGesture::recognize_rotation( )
 					     (angle2 > m_initial_angle*1.2))
 				{
 					m_last_gesture_recognized |= TWO_ROTATE;
-					printf("ROTATE EVENT RECEIVED:  Angle=%6.2f\n", m_rotate_angle_relative);
+					if (Debug) printf("ROTATE EVENT RECEIVED:  Angle=%6.2f\n", m_rotate_angle_relative);
 					return true;
 				}
 			} 
 			else {
-				printf("recognize_rotation:  initial=%6.2f;  final=%6.2f   Change=%6.2f", 
+				if (Debug) printf("recognize_rotation:  initial=%6.2f;  final=%6.2f   Change=%6.2f", 
 								m_initial_angle, angle2, m_rotate_angle_relative );
 				m_last_gesture_recognized &= ~TWO_ROTATE;
 				state = 1;
@@ -235,9 +238,9 @@ bool DraggerGesture::recognize_z_enlarge( )			// 3 fingers distance between thum
 	static float init_dist_0_1 = 0.;
 	static float init_dist_1_2 = 0.;
 	static float init_dist_2_0 = 0.;
-	static int stationary_index_1 = 0;	// this is const dist to 
-	static int stationary_index_2 = 0;	// this one.
-	static int moving_index = 0;	// this one.
+	//static int stationary_index_1 = 0;	// this is const dist to 
+	//static int stationary_index_2 = 0;	// this one.
+	//static int moving_index = 0;	// this one.
 	
 	if (m_num_fingers_down != 3) return false;
 	// Calc Distance between all fingers:
@@ -436,7 +439,7 @@ bool DraggerGesture::flinger_one_finger( )
 				else
 				{
 					m_last_gesture_recognized |= FLINGER_ONE_DRAG;
-					printf("SCROLL DRAG EVENT RECEIVED:  d<x,y>=<%6.2f,%6.2f>\n", 
+					if (Debug) printf("SCROLL DRAG EVENT RECEIVED:  d<x,y>=<%6.2f,%6.2f>\n", 
 								m_drag_amount_dx, m_drag_amount_dy );
 					return true;
 				}
@@ -450,7 +453,7 @@ bool DraggerGesture::flinger_one_finger( )
 			{
 				m_drag_amount_dy = dy;
 				m_drag_amount_dx = dx;
-				printf("SCROLL DRAG EVENT RECEIVED:  d<x,y>=<%6.2f,%6.2f>\n", 
+				if (Debug) printf("SCROLL DRAG EVENT RECEIVED:  d<x,y>=<%6.2f,%6.2f>\n", 
 								m_drag_amount_dx, m_drag_amount_dy );
 
 				// The speed will be taken from the very last two coordinates received!
@@ -473,7 +476,7 @@ bool DraggerGesture::flinger_one_finger( )
 				m_fling_speed = (max_change / time_delta_f);		
 									// pixels / second 
 				m_last_gesture_recognized |= FLINGER_ONE_FLING;
-				printf("SCROLL FLING RECEIVED: max=%6.3f deltaTime=%6.3f Speed=%6.2f\n", 
+				if (Debug) printf("SCROLL FLING RECEIVED: max=%6.3f deltaTime=%6.3f Speed=%6.2f\n", 
 							max_change, time_delta_f, m_fling_speed);
 			}
 			break;
@@ -493,7 +496,7 @@ void DraggerGesture::handle_recognize( )
 		y    = max_y - m_finger_history[0][0].y;
 		left = UNHANDLED_EVENT | (0x01);
 		m_last_gesture_recognized &= ~TOUCH_GESTURE_TAP;
-		printf("DraggerGesture::handle_recognize( )  left = %x\n", left );
+		if (Debug) printf("DraggerGesture::handle_recognize( )  left = %x\n", left );
 	}  
 //	else printf("DraggerGesture::handle_recognize()  %d %d \n", m_last_gesture_recognized,TOUCH_GESTURE_TAP );	
 }

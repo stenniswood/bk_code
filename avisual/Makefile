@@ -63,9 +63,11 @@ AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   test_layouts.o test_combo_layouts.o client_list_control.o \
 			  test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
 			  power.o home_screen.o 
-APPS_OBJS =  file_editor_app.o video_app.o video.o 
-DRAW_APP_OBJS = draw_app.o draw_canvas.o 
-CAN_APP_OBJS = can_app.o gyro_window.o analog_board_app.o filter_select.o msg_value_composer.o
+APPS_OBJS =  
+FILE_EDIT_OBJS = file_editor_app.o 
+VIDEO_APP_OBJS = video_app.o video.o 
+DRAW_APP_OBJS  = draw_app.o draw_canvas.o 
+CAN_APP_OBJS   = can_app.o gyro_window.o analog_board_app.o filter_select.o msg_value_composer.o
 AUDIO_APP_OBJS = audio_app.o audio_app_menu.o 
 ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot_performance.o \
 			robot_vision.o
@@ -125,6 +127,8 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ../core/can/,			$(CAN_OBJS))			\
 		$(addprefix ../core/ipc/,			$(IPC_OBJS))			\
 		$(addprefix ./apps/,				$(APPS_OBJS))			\
+		$(addprefix ./apps/file_editer/,	$(FILE_EDIT_OBJS))		\
+		$(addprefix ./apps/video/,			$(VIDEO_APP_OBJS))		\
 		$(addprefix ./apps/audio/,			$(AUDIO_APP_OBJS))		\
 		$(addprefix ./apps/CAN/,			$(CAN_APP_OBJS))		\
 		$(addprefix ./apps/draw/,			$(DRAW_APP_OBJS))		\

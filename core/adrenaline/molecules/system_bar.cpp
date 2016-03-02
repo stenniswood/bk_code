@@ -178,7 +178,7 @@ void SystemBar::set_menu( HorizontalMenu* mMenu )
 int	SystemBar::onCreate(  )
 {
 	// Inflate the menu's:
-	printf("\tSystemBar::onCreate()\n" );	
+	if (Debug) printf("\tSystemBar::onCreate()\n" );	
 	
 	static bool first_time = true;
 	if (first_time)
@@ -186,7 +186,7 @@ int	SystemBar::onCreate(  )
 		init_system_hmenu(  );	
 		first_time = false; 	
 	};	
-	printf("\tSystem Menu:  sysmenu:%x  draw_menu: \n", &system_hmenu );
+	if (Debug) printf("\tSystem Menu:  sysmenu:%x  draw_menu: \n", &system_hmenu );
 	m_Menu = &system_hmenu;	
 
 	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_side) );

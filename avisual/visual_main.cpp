@@ -65,21 +65,34 @@ void create_threads()
 /***********************************************************************/
 int bkInstant_connected = FALSE;
 int can_connected = FALSE;
+int audio_mem_connected = FALSE;			// audio memory is not necessary to hear audio.
 
 void init_ipc( const char* mVectorFileName )
 {
-	// Ready-to-send, Receive buffer full 
-	create_threads();
-	
+	printf("============== IPC MEMORY ==============\n");
 	bkInstant_connected = connect_shared_client_memory( FALSE );
+	if (bkInstant_connected)
+		printf("IPC Client - attached to memory.\n");
+	else
+		printf("IPC Client - unavailable.\n");
+	
 	//printf("init_ipc %d \n", bkInstant_connected );
 	//bkInstant_connected = connect_shared_abkInstant_memory(); 
 
 	// AUDIO : 
-	int result = audio_connect_shared_memory(TRUE);
+	audio_mem_connected = audio_connect_shared_memory(TRUE);
+	if (audio_mem_connected)
+		printf("IPC Audio - attached to memory.\n");
+	else
+		printf("IPC Audio - unavailable.\n");
 
-	result = can_connect_shared_memory(FALSE);
-	printf("============== IPC DONE ==============\n");
+	can_connected = can_connect_shared_memory(FALSE);
+	if (can_connected)
+		printf("IPC CAN - attached to memory.\n");
+	else
+		printf("IPC CAN - unavailable.\n");
+
+	printf("=====================================\n");
 }
 
 void help()
@@ -236,13 +249,15 @@ extern Wave dWave;
 int main( int argc, char *argv[] )
 { 
 	printf("======= main() ==============\n");		
+	create_threads();
 	init_ipc("simple_walk.csv");
 	DisplayNum = 4;
 
-	printf("======= Checking command line arguments ==============\n");	
-	print_args( argc, argv );
 	if (argc>1)
 	{
+		printf("======= Checking command line arguments ==============\n");	
+		print_args( argc, argv );
+
 		if ((strcmp(argv[1], "help") == 0))
 		{
 			print_test_list();
@@ -254,7 +269,7 @@ int main( int argc, char *argv[] )
 			load_test_screen(DisplayNum); 
 		} 
 	} else 
-		init_home_screen();		// opening screen!	Located in window_layouts.cpp
+		init_home_screen();		// opening screen!	
 
 	printf("================= init_home_screen() ==========================\n");	
 	UpdateDisplaySemaphore=1;

@@ -19,7 +19,7 @@
 #include "test_layouts.hpp"
 #include "file_browser.hpp"
 
-#define Debug 1
+#define Debug 0
 
 
 FileBrowser::FileBrowser()
@@ -52,9 +52,9 @@ void FileBrowser::Initialize( )
 
 void FileBrowser::set_base_path( char* mBasePath )
 {
-	printf("Set base_path( %s )\n", mBasePath );
+	if (Debug) printf("Set base_path( %s )\n", mBasePath );
 	base_path = mBasePath;
-	printf("FileBrowser:: base_path = %s\n", base_path.c_str() );
+	if (Debug) printf("FileBrowser:: base_path = %s\n", base_path.c_str() );
 	path_descriptor->Invalidate();
 	collapse_to_level(0);
 	add_level( base_path.c_str() );
@@ -83,10 +83,10 @@ float FileBrowser::compute_width_all_dirs(  )
 int FileBrowser::onPlace	(  )	// chance to place children.
 {
 	// if views take more room than available:
-	printf("FileBrowser::onPlace\n");
+	if (Debug) printf("FileBrowser::onPlace\n");
 	
 	float total_width = compute_width_all_dirs();
-	printf("total_width=%6.2f, width=%6.2f\n", total_width, width );
+	if (Debug) printf("total_width=%6.2f, width=%6.2f\n", total_width, width );
 	
 	if (total_width > width)
 	{
@@ -95,11 +95,11 @@ int FileBrowser::onPlace	(  )	// chance to place children.
 		//printf("last_right=%6.2f\n", last_right);
 		float left_edge = (left+width);
 		int iter = levels.size()-1;
-		printf("last_right=%6.2f;  edge=%6.2f\n", last_right, left_edge );
+		if (Debug) printf("last_right=%6.2f;  edge=%6.2f\n", last_right, left_edge );
 		while (iter >= 0)
 		{
 			left_edge -= levels[iter]->get_width();
-			printf("left_edge=%6.2f;\n", left_edge );			
+			if (Debug) printf("left_edge=%6.2f;\n", left_edge );			
 			// Until no more room (leaving favorites)
 			if (left_edge > last_right)
 				levels[iter]->move_to( left_edge, bottom);
@@ -122,7 +122,7 @@ int FileBrowser::onPlace	(  )	// chance to place children.
 		}
 		Invalidate();		
 	}
-	printf("FileBrowser::onPlace()  done\n");
+	if (Debug) printf("FileBrowser::onPlace()  done\n");
 	return 1;	
 }
 
@@ -154,7 +154,7 @@ int	FileBrowser::onCreate(  )
 	// Width & Height should be set by now!
 	if (Debug) printf("FileBrowser::onCreate() \n");
 	create_file_browser( );
-	Control::onCreate  ( );
+	return Control::onCreate  ( );
 	//if (Debug) printf("FileBrowser::onCreate(  ) done\n");	
 }
 
@@ -210,7 +210,7 @@ int	FileBrowser::which_level_clicked ( float x, float y )
 
 void FileBrowser::collapse_to_level( int mLevelIndex )
 {
-	printf("FileBrowser::collapse_to_level( %d )\n", mLevelIndex );
+	if (Debug) printf("FileBrowser::collapse_to_level( %d )\n", mLevelIndex );
 	int size = levels.size();
 	for (int i=size-1; i>=mLevelIndex; i--)
 	{
@@ -223,8 +223,9 @@ void FileBrowser::collapse_to_level( int mLevelIndex )
 
 int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 {
+	int retval = 0;
 	//if (Debug) 
-	printf("FileBrowser::onClick() Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		
+	if (Debug) printf("FileBrowser::onClick() Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		
 	bool start_closing = false;
 	int  size = levels.size();
 
@@ -256,11 +257,12 @@ int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 	if (dir) {
 		//printf("item is a directory2!\n");
 		add_level( complete_path.c_str() );	
-		printf("add_level done!\n");
+		if (Debug) printf("add_level done!\n");
 	}
 
 	onPlace();
 	Invalidate();
+	return retval;
 }
 
 // Need to draw a > marker on each list box's selected item.

@@ -29,7 +29,7 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug  1
+#define Debug  0
 #define Debug2 0
 
 Keyboard		m_keyboard;
@@ -123,7 +123,7 @@ void DisplayManager::hide_keyboard	(   )
 }
 void DisplayManager::show_calendar	(   )
 {
-	printf("DisplayManager::show_calendar	(   )\n");
+	if (Debug) printf("DisplayManager::show_calendar	(   )\n");
 	m_calendar_summary.show();
 	m_calendar_summary.draw();
 	m_calendar_summary.set_z_order( ++m_z_order_counter );
@@ -131,12 +131,12 @@ void DisplayManager::show_calendar	(   )
 	m_calendar.show();
 	m_calendar.draw();
 	m_calendar.set_z_order( ++m_z_order_counter );
-	printf("DisplayManager::show_calendar  %d	\n", m_z_order_counter);
+	if (Debug) printf("DisplayManager::show_calendar  %d	\n", m_z_order_counter);
 	sort_z_order();
 }
 void DisplayManager::hide_calendar	(   )
 {
-	printf("DisplayManager::hide_calendar(   )\n");
+	if (Debug) printf("DisplayManager::hide_calendar(   )\n");
 	m_calendar.hide();
 	m_calendar_summary.hide();
 	//m_calendar.Invalidate();
@@ -249,9 +249,9 @@ void DisplayManager::start_app( Application* mApp )
 	if (Debug) printf("DISPLAY MANAGER:  START APP #%d .......... \n", m_current_running_app );
 
 	mApp->onCreate();
-	printf("DISPLAY MANAGER:  onCreate \n" );
+	if (Debug) printf("DISPLAY MANAGER:  onCreate \n" );
 	mApp->register_with_display_manager();
-	printf("DISPLAY MANAGER:  register_with_display_manager \n" );
+	if (Debug) printf("DISPLAY MANAGER:  register_with_display_manager \n" );
 }
 
 void DisplayManager::print_running_apps(  )
@@ -444,11 +444,11 @@ int   DisplayManager::draw(	)
 {
 	if (Debug2) printf("\n======display manager draw===========\tStart:\n" );
 	start_screen();
-	if (Debug)  printf("SystemBar: %x\n", &m_sb );
-	if (Debug)  printf("Side  Bar: %x\n", &m_side );
-	if (Debug)  printf("StatusBar: %x\n", &m_status );
-	if (Debug)  printf("Keyboard: %x\t" , &m_keyboard );
-	if (m_keyboard.is_visible()) printf("KB Visible!");
+	if (Debug)  printf("SystemBar: %x\n", (unsigned int*)&m_sb );
+	if (Debug)  printf("Side  Bar: %x\n", (unsigned int*)&m_side );
+	if (Debug)  printf("StatusBar: %x\n", (unsigned int*)&m_status );
+	if (Debug)  printf("Keyboard: %x\t" , (unsigned int*)&m_keyboard );
+	if ((Debug) && m_keyboard.is_visible()) printf("KB Visible!");
 	if (Debug)  printf("\n");
 
 	draw_background();

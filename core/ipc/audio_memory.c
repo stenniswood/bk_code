@@ -37,6 +37,9 @@ char* 	audio_shared_memory;
 int 	audio_segment_id=0;
 struct  audio_ipc_memory_map* ipc_memory_aud=NULL;
 
+#define Debug 0
+
+
 void dump_audio_ipc()
 {
 	int length = sizeof(struct audio_ipc_memory_map);
@@ -87,10 +90,10 @@ int audio_allocate_memory( )
 		printf("audio_allocate_memory - shmget ERROR: %s \n", strerror(errsv) );
 		return 0;
 	} else {
-		printf ("Audio Allocated %d bytes shm segment_id=%d\n", shared_segment_size, audio_segment_id );
+		if (Debug) printf ("Audio Allocated %d bytes shm segment_id=%d\n", shared_segment_size, audio_segment_id );
 		init_audio_memory();
 	}
-	printf ("AUDIO shared memory segment_id=%d\n", audio_segment_id );
+	if (Debug) printf ("AUDIO shared memory segment_id=%d\n", audio_segment_id );
 	return audio_segment_id;	
 }
 
@@ -99,7 +102,7 @@ int audio_attach_memory()
 	/* Attach the shared memory segment. */
 	audio_shared_memory = (char*) shmat (audio_segment_id, 0, 0);
 	ipc_memory_aud			 = (struct audio_ipc_memory_map*)audio_shared_memory;
-	printf ("AUDIO shared memory attached at address %p\n", audio_shared_memory); 	
+	if (Debug) printf ("AUDIO shared memory attached at address %p\n", audio_shared_memory); 	
 }
 
 void audio_reattach_memory()
@@ -107,7 +110,7 @@ void audio_reattach_memory()
 	/* Reattach the shared memory segment, at a different address. */ 
 	audio_shared_memory = (char*) shmat (audio_segment_id, (void*) 0x5000000, 0); 
 	ipc_memory_aud			 = (struct audio_ipc_memory_map*)audio_shared_memory;	
-	printf ("AUDIO shared memory reattached at address %p\n", audio_shared_memory); 
+	if (Debug) printf ("AUDIO shared memory reattached at address %p\n", audio_shared_memory); 
 }
 
 void audio_detach_memory()
@@ -122,7 +125,7 @@ int audio_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (audio_segment_id, IPC_STAT, &shmbuffer);
 	int segment_size = shmbuffer.shm_segsz;
-	printf ("AUDIO segment size: %d\n", segment_size);
+	if (Debug) printf ("AUDIO segment size: %d\n", segment_size);
 	return segment_size;
 }
 
@@ -155,7 +158,7 @@ void audio_ipc_write_buffer( short* mBuffer, long int mLength )
 	ipc_memory_aud->UpdateCounter++;
 	ipc_memory_aud->update_samples  = mLength;
 
-	printf("%d: %d samples \n", ipc_memory_aud->UpdateCounter, mLength );
+	if (Debug) printf("%d: %d samples \n", ipc_memory_aud->UpdateCounter, mLength );
 	//printf("%d:Copying %d bytes to shared mem.\n", SentenceCounter, length);
 	memcpy( (char*)ipc_memory_aud->audio_data, (char*)mBuffer, mLength );
 }
@@ -171,7 +174,7 @@ void audio_ipc_write_audio_connection_status( char* mStatus )
 
 	//printf("%d:Copying %d bytes to shared mem.\n", StatusCounter, length );
 	strcpy( ipc_memory_aud->ConnectionStatus, mStatus);
-	printf( "|%s|\n", ipc_memory_aud->ConnectionStatus );
+	if (Debug) printf( "|%s|\n", ipc_memory_aud->ConnectionStatus );
 }
 
 BOOL audio_is_new_rxbuffer()
@@ -197,7 +200,7 @@ void audio_save_segment_id(char* mFilename)
 {
 	char line[40];
 	FILE* fd = fopen(mFilename, "w");
-	printf("audio saved Segment_id=%d\n", audio_segment_id );
+	if (Debug) printf("Saved audio Segment_id=%d\n", audio_segment_id );
 	sprintf( line, "%d", audio_segment_id );
 	fwrite( line, strlen(line), 1, fd );
 	fclose( fd );
@@ -216,7 +219,7 @@ int audio_read_segment_id(char* mFilename)
 	tline[result] = 0;
 	int tmp_audio_segment_id = atol( tline );
 	fclose( fd );
-	printf("audio_segment_id= %d \n", tmp_audio_segment_id );	
+	if (Debug) printf("audio_segment_id= %d \n", tmp_audio_segment_id );	
 	return tmp_audio_segment_id;
 }
 
@@ -234,15 +237,15 @@ BOOL is_audio_ipc_memory_available()
 {
 	struct shmid_ds buf;			// shm data descriptor.
 
-	printf("Checking for audio IPC memory... ");
+	if (Debug) printf("Checking for audio IPC memory... ");
 	// First see if the memory is already allocated:
 	audio_segment_id = audio_read_segment_id( segment_id_filename );
 	int retval = shmctl(audio_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
-		printf("Error: %s\n", strerror(errno) );
+		if (Debug) printf("Error: %s\n", strerror(errno) );
 		return FALSE;
 	}
-	printf( " Found segment, size=%d and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+	if (Debug) printf( " Found segment, size=%d and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
 	
 	if ((buf.shm_segsz > 0)			// segment size > 0
 	    && (buf.shm_nattch >= 1))	// number of attachments.
@@ -255,7 +258,7 @@ int audio_connect_shared_memory(char mAllocate)
 {
 	BOOL available = is_audio_ipc_memory_available();
 	if ((!available) && (mAllocate))  {
-		printf("audio_connect_shared_memory() allocating.\n");
+		if (Debug) printf("audio_connect_shared_memory() allocating.\n");
 		int result = audio_allocate_memory();
 		if (!result) 
 		{	printf("ERROR: can_connect_shared_memory() cannot allocate.\n");
@@ -272,7 +275,7 @@ int audio_connect_shared_memory(char mAllocate)
 			return 0;
 	}
 	return 1;
-
 }
+
 /* See udp_transponder for update_client_list()		*/
 
