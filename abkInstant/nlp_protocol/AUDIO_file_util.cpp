@@ -4,8 +4,10 @@
 #include "bk_system_defs.h"
 #include "protocol.h"
 #include "devices.h"
-#include "AUDIO_interface.h"
-#include "AUDIO_protocol.h"
+#include "AUDIO_interface.hpp"
+#include "AUDIO_protocol.hpp"
+#include "AUDIO_device.hpp"
+
 
 
 /***********************************************************************
@@ -22,7 +24,7 @@ ignore all upgrade notices.
 char   path[] = "./audio/";
 char   base[] = "BK_MEDIA_";
 char   AudioFilename[255];
-struct WAVE_HEADER audio_hdr;
+//struct WAVE_HEADER audio_hdr;
 FILE*  wave_file;
 long   TotalAudioDataLengthBytes = 0;	// Holds total accumulated over all frames received.
 BOOL   SaveFileOpen = FALSE;
@@ -226,7 +228,7 @@ Probably call Ogvorbis library.  mp3 still under
 patents?
 *************************************************/
 WORD* CompressAudioData( WORD* mAudio )
-{
+{ return 0;
 }
 
 /************************************************
@@ -235,7 +237,7 @@ Probably call Ogvorbis library.  mp3 still under
 patents?
 *************************************************/
 WORD* UncompressAudioData( WORD* mAudio )
-{
+{ return 0;
 }
 
 

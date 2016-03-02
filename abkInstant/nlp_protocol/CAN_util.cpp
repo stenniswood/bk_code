@@ -7,7 +7,7 @@
 #include "devices.h"
 #include "CAN_base.h"
 #include "CAN_memory.h"
-#include "CAN_protocol.h"
+#include "CAN_protocol.hpp"
 #include "serverthread.h"
 
 

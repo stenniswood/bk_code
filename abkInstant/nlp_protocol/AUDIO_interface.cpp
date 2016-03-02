@@ -24,11 +24,11 @@ Tenniswood - 2014
 #include "bk_system_defs.h"
 //#include "devices.h"
 //#include "thread_control.h"
-#include "audio_thread.h"
+//#include "audio_thread.h"
 #include "utilities.h"
 #include "audio_memory.h"
 #include "AUDIO_device.h"
-#include "AUDIO_protocol.h"
+#include "AUDIO_protocol.hpp"
 #include "AUDIO_file_util.h"
 #include "serverthread.h"
 
@@ -38,10 +38,10 @@ Tenniswood - 2014
 #define MAX_LISTENERS 12
 
 
-#define 		AUDIO_BUFFER_SIZE 16384
+#define 		AUDIO_OUTPUT_BUFFER_SIZE 16384
 
 // short or byte?!  byte since deals with header ptr data. 
-static byte 	buffer[AUDIO_BUFFER_SIZE];		// 4 byte token + 4 byte length
+static byte 	buffer[AUDIO_OUTPUT_BUFFER_SIZE];		// 4 byte token + 4 byte length
 byte			audio_socket_buffer[AUDIO_OUTPUT_BUFFER_SIZE+100];
 //static int 	 	bytes_rxd=0;
 
@@ -80,6 +80,7 @@ BOOL handle_audio_header( )
 		print_audio_header( &wave_header );
 		return TRUE;
 	}
+    return FALSE;
 }
 
 /******************************************************

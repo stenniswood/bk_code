@@ -14,11 +14,13 @@
 #include <string>
 #include "protocol.h"
 #include "devices.h"
-#include "GENERAL_protocol.h"
+#include "GENERAL_protocol.hpp"
 #include "nlp_extraction.hpp"
 #include "client_memory.hpp"
+#include "nlp_sentence.hpp"
+#include "client_to_socket.hpp"
 
-#include "alias.hpp"
+#include "Alias.hpp"
 
 /* Suggested statements:
 		Raise your left/right leg [all the way up]
@@ -35,6 +37,8 @@
 				
 */
 
+#define Debug 0
+
 /***********************************************************************
 All Incoming Video will also be saved to the hard-drive on those 
 systems with enough capacity.  This allows the user to call back anything
@@ -50,12 +54,12 @@ ignore all upgrade notices.
 static WordGroup  	subject_list;		// we'll use this as "interrogative" listing the common ways of asking a math question.
 static WordGroup 	verb_list;
 
-static std::list<std::string> 	preposition_list;
+
 static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
 
-static void init_subject_list()
+/*static void init_subject_list()
 {
 	// these are a clue that math question might be coming.
 	subject_list.add_word("leg");		// towards end of sentence.
@@ -70,9 +74,12 @@ static void init_subject_list()
 
 static void init_verb_list()
 {
-	Alias mult,divide,plus,minus;
+    Word mult;
+    Word divide;
+    Word plus;
+    Word minus;
 	
-	mult.add_new("times");
+	mult.add_new("rasise");
 	mult.add_new("multiplied by");
 
 	divide.add_new("divided by");
@@ -98,20 +105,6 @@ static void init_verb_list()
 	
 }
 
-static void init_preposition_list()
-{   // Object might be a numerical value preceded by a preposition.
-	// help to establish order of operations:
-	//    ie.  subtract 21 from 101.
-	//      or what is 101 subtract 21
-	// 	
-
-	preposition_list.push_back( "to" );
-	preposition_list.push_back( "from" );	
-	preposition_list.push_back( "as" );	
-	preposition_list.push_back( "by" );		
-	preposition_list.push_back( "for");
-	preposition_list.push_back( "in" );
-}
 
 static void init_adjective_list()
 { 
@@ -132,20 +125,16 @@ static void init_word_lists()
 	init_verb_list();
 	init_object_list();
 	init_adjective_list();
-	init_preposition_list();
-}
+}*/
 
 void Init_Robot_Legs_Protocol()
 {    
-    init_word_lists();
-}
+   // init_word_lists();
+} 
 
 
 /**** ACTION INITIATORS:    (4 possible actions) *****/
-bool contains_two_or_more_numbers( char* mSentence )
-{
-	/* blah */
-}
+
 
 /*****************************************************************
 Do the work of the Telegram :
@@ -153,203 +142,102 @@ return  -1	=> Not handled
 		else number of extra bytes extracted from the mSentence buffer.
 			- besides strlen(mSentence)! 
 *****************************************************************/
-int Parse_Robot_Legs_Statement( char* mSentence )
+int Parse_Robot_Legs_Statement( Sentence& mSentence )
 {
 	int retval=-1;
 
-	printf("Parse_Robot_Legs_Statement\n");
-	string* subject  	= subject_list.extract_word( mSentence );	
-	string* verb 		= verb_list.extract_word   ( mSentence );
-	bool result = contains_two_or_more_numbers( mSentence );
-	if (result == false)		// must have!
-			return retval;
-	if (verb==NULL)				// must have!
-			return retval;
-				
-	string* object 		= extract_word( mSentence, &object_list  	);	
-	string* preposition = extract_word( mSentence, &preposition_list  );
-	string* adjective	= extract_word( mSentence, &adjective_list  );	
-	int prepos_index      	= get_preposition_index( mSentence );
-    diagram_sentence		( subject, verb, adjective, object, preposition );
+	if (Debug)  printf("Parse_Robot_Legs_Statement\n");
+/*	int subject_count  	= subject_list.evaluate_sentence( mSentence.m_sentence );
+	int verb_count 		= verb_list.evaluate_sentence   ( mSentence.m_sentence );
+//	bool result = contains_two_or_more_numbers( mSentence );
+ 
+	string* object 		= extract_word( mSentence.m_sentence, &object_list  	);
+	string* adjective	= extract_word( mSentence.m_sentence, &adjective_list  );
+    //diagram_sentence		( subject, verb, adjective, object, preposition ); */
 
-	if (compare_word( subject, "camera tilt")==0)
+	if (mSentence.is_found_in_sentence("leg"))
 	{
-		if (compare_word(verb, "set") ==0)
+		if (mSentence.is_found_in_sentence( "raise"))
 		{
-			float result = atof(object->c_str());
-			set_camera_tilt_to( result );
-			retval=0;
+            form_response("raising leg");
+            retval = 0;
 		}
-		if (compare_word(verb, "lower") ==0)
+        
+        if (mSentence.is_found_in_sentence( "lower"))
 		{
-			float result = atof(object->c_str());
-			lower_camera_by( result );
-			retval=0;
+            form_response("lowering leg");
+            retval = 0;
 		}
-		if (compare_word(verb, "raise") ==0)
-		{
-			float result = atof(object->c_str());
-			raise_camera_by( result );		
-			retval=0;
-		}
-		if (compare_word(verb, "what is") ==0)
-		{
-			float result = atof(object->c_str());
-			get_camera_tilt( result );
-			retval=0;
-		}
-	}
-	else if (compare_word( subject, "camera pan")==0)
-	{
-		if (compare_word(verb, "set") ==0)
-		{
-			float result = atof(object->c_str());
-			set_camera_pan_to( result );
-			retval=0;
-		}
-		if ((compare_word(verb, "pan left") ==0)
-		||  (compare_word(verb, "move left") ==0)
-		||  (compare_word(verb, "rotate left") ==0))
-		{
-			float result = atof(object->c_str());
-			move_camera_left_by( result );
-			retval=0;
-		}
-		if ((compare_word(verb, "pan right") ==0)
-		||  (compare_word(verb, "move right") ==0)
-		||  (compare_word(verb, "rotate right") ==0))
-		{
-			float result = atof(object->c_str());
-			move_camera_right_by( result );			
-			retval=0;
-		}
-		if (compare_word(verb, "what is")==0)
-		{
-			float result = atof(object->c_str());
-			get_camera_pan( result );
-			retval=0;
-		}
-	}
-	else if ((compare_word( subject, "camera")==0)  ||
-		     (compare_word( subject, "web cam")==0)  ||
-		     (compare_word( subject, "eyes")==0) )
-	{
-		printf("matched subject\n");
-		
-		/* It might be nice to redirect these statements to a subject of:
-			camera tilt/pan.  This would get our subject more and more exacting.
-			The preprocessor would know that Lowering a camera has to do with the tilt,
-				and not any video properties.							
-		*/
-		if ((compare_word(verb, "receive") ==0) ||
-			(compare_word(verb, "watch") ==0)  ||
-			(compare_word(verb, "view") ==0)   ||
-			(compare_word(verb, "spy") ==0)	   ||
-			(compare_word(verb, "show") ==0)   ||
-			(compare_word(verb, "send") ==0) )
-		{	
-			printf("verb matched!\n");
-			int cond_1 = ((compare_word (adjective, "my")==0) ||
-		  				  ((compare_word(preposition, "to")==0) && (compare_word(object, "you")==0)) );
-			int cond_2 = ((compare_word (adjective, "your") ==0) ||
-		  				  ((compare_word(preposition, "to")==0) && (compare_word(object, "me")==0)) );
-			printf("cond1=%d; cond2=%d;\n", cond_1, cond_2 );
-			if (cond_1)
-			{    camera_watch();		retval = 0;		}					  				  
-			else if (cond_2)
-			{    send_camera();			retval = 0;		}
-		}
-		if (compare_word( adjective, "two way")==0 )
-		{
-		    camera_two_way();
-		    retval = 0;
-		};
-		
-		if ((compare_word(verb, "mute") ==0) ||
-			(compare_word(verb, "block") ==0) )
-		{
-		    CAMERA_tcpip_SendingMuted = TRUE;	// Blocked, other side wont be able to see
-			cli_ipc_write_response( "Robot_Legs muted (electronically blocked)" );			    
-		    retval = 0;		    
-		}
-		if ((compare_word(verb, "unmute") ==0) ||
-			(compare_word(verb, "unblock") ==0))
-		{
-		    CAMERA_tcpip_SendingMuted = FALSE;	// Blocked, other side wont be able to see
-			cli_ipc_write_response( "Robot_Legs live!" );			    		    
-		    retval = 0;
-		}
+    }
+    if (mSentence.is_found_in_sentence("knee"))
+    {
+        if (mSentence.is_found_in_sentence( "bend" ))
+        {
+            form_response("bending knee");
+            retval = 0;
+        }
+        if (mSentence.is_found_in_sentence( "straighten"))
+        {
+            form_response("straightening knee");
+            retval = 0;
+        }
+    }
+    if (mSentence.is_found_in_sentence("foot"))
+    {
+        if (mSentence.is_found_in_sentence( "extend" ))
+        {
+            form_response("extending");
+            retval = 0;
+        }
+        if (mSentence.is_found_in_sentence( "pull"))
+        {
+            form_response("flexing");
+            retval = 0;
+        }
+        if (mSentence.is_found_in_sentence( "keep level"))
+        {
+            form_response("holding level");
+            retval = 0;
+        }
 
-		if ((compare_word(verb, "close") ==0) ||
-		    (compare_word(verb, "stop" ) ==0)  ||
-		    (compare_word(verb, "end"  ) ==0)  ||		    
-		    (compare_word(verb, "terminate") ==0)  ||		    		    
-		    (compare_word(verb, "kill" ) ==0))
-		{
-		    camera_cancel();
-		    retval = 0;
-		};
-		
-		if (compare_word(verb, "lower") ==0)
-		{
-			float result = atof(object->c_str());
-			lower_camera_by( result );
-			retval=0;
-		}		
-		if (compare_word(verb, "raise") ==0)
-		{
-			float result = atof(object->c_str());
-			raise_camera_by( result );
-			retval=0;
-		}		
-		if (compare_word(verb, "move left") ==0)
-		{
-			float result = atof(object->c_str());
-			move_camera_left_by( result );		
-			retval=0;
-		}		
-		if (compare_word(verb, "move right") ==0)
-		{
-			float result = atof(object->c_str());
-			move_camera_left_by( result );		
-			retval=0;
-		}
-		
-		if (compare_word(verb, "start") ==0)
-		if (compare_word(verb, "show") ==0)
-		{
-			// Look for "with highest/medium/low resolution/quality"
-			
-			// Look for output device
-						
-			// Recording			
-				// recording verb will take precedence over "start"
-			retval=0;
-		}
+    }
 
-		if (compare_word(verb, "stop") ==0)
-		{
-			retval=0;		
-		}
+    if (mSentence.is_found_in_sentence("walk"))
+    {
+        form_response("walking");
+        retval = 0;
+    }
 
-		if (compare_word(verb, "change") ==0)
-		{
-			if (compare_word(object, "resolution") ==0)
-			{
-			}
-			if (compare_word(object, "frame rate") ==0)
-			{
-			}			
-			if (compare_word(object, "width") ==0)
-			{
-			}
-			if (compare_word(object, "height") ==0)
-			{
-			}
-			retval=0;			
-		}		
-	}
-	printf( "Parse_Robot_Legs_Statement done\n" );
+    if (mSentence.is_found_in_sentence("step"))
+    {
+        form_response("stepping");
+        retval = 0;
+    }
+
+    if (mSentence.is_found_in_sentence("sit"))
+    {
+        form_response("dont mind if i do.");
+        retval = 0;
+    }
+    if (mSentence.is_found_in_sentence("stand"))
+    {
+        form_response("standing");
+        retval = 0;
+    }
+    
+    if (mSentence.is_found_in_sentence("stop"))
+    {
+        form_response("Stopping by your command!");
+        retval = 0;
+    }
+
+    if (mSentence.is_found_in_sentence("run sequence"))
+    {
+        form_response("sequence executing");
+        retval = 0;
+    }
+	
+	if (retval>-1)  printf( "Parse_Robot_Legs_Statement done\n" );
 	return retval;
 }
 
