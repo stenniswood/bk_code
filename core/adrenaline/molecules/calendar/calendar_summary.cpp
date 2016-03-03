@@ -13,13 +13,13 @@
 #include "calendar.hpp"
 #include "calendar_summary.hpp"
 
-#define DEBUG 1
+#define Debug 0
+#define dprintf if (Debug) printf
+
 
 /* This should retrieve all entries from the SQL database for the selected day.
 
 */
-
-
 CalendarSummary::CalendarSummary ( )
 { 
 	Initialize();

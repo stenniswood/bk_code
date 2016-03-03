@@ -19,10 +19,12 @@ const unsigned short WAVE_FORMAT_ALAW  		= 0x0006; 	// 	8-bit ITU-T G.711 A-law
 const unsigned short WAVE_FORMAT_MULAW 		= 0x0007; 	// 	8-bit ITU-T G.711 µ-law
 const unsigned short WAVE_FORMAT_EXTENSIBLE = 0xFFFE;
 
+#include "global.h"
+
 //typedef unsigned char  byte;
-typedef unsigned char  BYTE;
+/*typedef unsigned char  BYTE;
 typedef unsigned short WORD;
-typedef unsigned long  DWORD;
+typedef unsigned long  DWORD;*/
 
 typedef struct {
   WORD  wFormatTag;

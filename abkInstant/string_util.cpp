@@ -51,7 +51,7 @@ char** split(char *src_str, const char deliminator, int *num_sub_str)
     {
       sub_strings[idx++] = src_str_tmp;
       //printf("sub_string_%ld: [%s]\t%x\n", idx-1, sub_strings[idx-1], sub_strings[idx-1] );
-      printf("sub_string_%ld: [%s]\n", idx-1, sub_strings[idx-1] );
+      //printf("sub_string_%ld: [%s]\n", idx-1, sub_strings[idx-1] );
         
       found_null = false;
     }

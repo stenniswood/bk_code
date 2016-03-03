@@ -13,12 +13,17 @@
 #include "calendar.hpp"
 
 
-#define DEBUG 1
+const int CALENDAR_DEFAULT_HEIGHT = 200;
+const int CALENDAR_DEFAULT_WIDTH  = 250;
+char days_of_week_1_letter[] = { 'S', 'M', 'T', 'W', 'T', 'F', 'S' };
+
+#define Debug 0
+#define dprintf if (Debug) printf
 
 void prev_month_cb( void* mCalendar )
 {
 	Calendar* cal = (Calendar*) mCalendar;
-	printf("prev_month_cb!!  %d \n", cal->m_shown_month );
+	dprintf("prev_month_cb!!  %d \n", cal->m_shown_month );
 	cal->previous_month();
 	cal->Invalidate();
 }
@@ -26,16 +31,11 @@ void prev_month_cb( void* mCalendar )
 void next_month_cb( void* mCalendar )
 {
 	Calendar* cal = (Calendar*) mCalendar;
-	printf("next_month_cb!!  %d \n", cal->m_shown_month );
+	dprintf("next_month_cb!!  %d \n", cal->m_shown_month );
 	cal->next_month();
 	cal->Invalidate();
 }
 
-
-const int CALENDAR_DEFAULT_HEIGHT = 200;
-const int CALENDAR_DEFAULT_WIDTH  = 250;
-
-char days_of_week_1_letter[] = { 'S', 'M', 'T', 'W', 'T', 'F', 'S' };
 
 string days_of_week_abrev[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thurs", "Fri", "Sat"
@@ -58,7 +58,7 @@ Calendar::Calendar( Rectangle* mRect )
 { 
 	Initialize(	);
 }
-Calendar::Calendar( int Width, int Height 					 ) 
+Calendar::Calendar( int Width, int Height ) 
 { 
 	Initialize(	);
 }
@@ -106,10 +106,10 @@ int Calendar::draw 		(	)
 	//printf("Calendar::draw()\n");
 	if (Visible==false) { return 0; }
 	
-	printf("Time=%d:%d:%d\n",      m_local_time.tm_hour, m_local_time.tm_min, m_local_time.tm_sec );
-	printf("Date: %d %s :%d:%d\n", m_local_time.tm_mon, Months[m_local_time.tm_mon].c_str(),
+	dprintf("Time=%d:%d:%d\n",      m_local_time.tm_hour, m_local_time.tm_min, m_local_time.tm_sec );
+	dprintf("Date: %d %s :%d:%d\n", m_local_time.tm_mon, Months[m_local_time.tm_mon].c_str(),
 								   m_local_time.tm_mday, m_local_time.tm_year+1900 );
-	printf("%s (%d)\nBUTTONS: \n", days_of_week[m_local_time.tm_wday].c_str(), m_local_time.tm_wday );
+	dprintf("%s (%d)\nBUTTONS: \n", days_of_week[m_local_time.tm_wday].c_str(), m_local_time.tm_wday );
 	
 	Control::draw(); 
 	switch(m_display_mode)
@@ -168,7 +168,7 @@ int Calendar::draw_1month_view_small(	)
 	char date[8];
 
 	// DRAW MONTH NAME
-	text_color = 0xFFFFFF00;
+	text_color = 0xFFFF0000;
 	Fill_l   ( text_color );
 	Stroke_l ( 0xFFFFFF00 );		
 	float x= left + m_prev.get_width() + 20.;
@@ -178,7 +178,9 @@ int Calendar::draw_1month_view_small(	)
 	// DRAW YEAR
 	sprintf(date_str, "%4d", m_shown_year );	
 	int text_width = TextWidth( date_str, SerifTypeface, text_size );
-	TextEnd(m_next.get_left()-text_width, y, date_str, SerifTypeface, text_size );
+	float year_x = left+width - m_next.get_left()-text_width;
+	dprintf("Year is: %s; m_next.left=%d;  x=%6.1f; width=%d\n", date_str, m_next.get_left(), year_x, text_width );
+	TextEnd(year_x, y, date_str, SerifTypeface, text_size );	// 
 	
 	// DRAW DAYS of the WEEK : 
 	x= left + 10.;
@@ -186,42 +188,77 @@ int Calendar::draw_1month_view_small(	)
 	date_str[0] = 0;
 	for (int i=0; i<7; i++) 
 	{
-		sprintf(date, " %c ", days_of_week_1_letter[i] );
+		sprintf(date, " %2c ", days_of_week_1_letter[i] );
 		strcat (date_str, date  );
 	}
-	printf("Date Str (1week) %6.2f %6.2f : %s \n", x, y, date_str );
+	dprintf("Date Str (1week) %6.2f %6.2f : %s \n", x, y, date_str );
 	Text(x, y, date_str, SerifTypeface, text_size );
 
 	// Calc number of days to back off for the first week.
-	struct tm som;	
+	static struct tm som;	
 	som.tm_mon  = m_shown_month;
 	som.tm_mday = 1;
-	som.tm_year = m_shown_year;
+	som.tm_year = m_shown_year-1900;
 	som.tm_hour = 1; som.tm_min = 0; som.tm_sec = 0;
-	mktime( &som );
-	printf("First of the %d month is on %s %d \n", som.tm_mon, days_of_week[som.tm_wday].c_str(), som.tm_wday );
-
+	time_t first_day_t = mktime( &som );
+	dprintf("First of the %s month is on %s %d \n", Months[som.tm_mon].c_str(), 
+					days_of_week[som.tm_wday].c_str(), som.tm_wday );
 	int wday    = som.tm_wday;
-	som.tm_mday -= wday;	
+	
+	// Compute days until start of month (to show on first week of the month)
+	// Get Last day of previous month : 
+	som.tm_mday = 0;
 	mktime( &som );
-	printf("Cal starts with %d (%d) \n", som.tm_mday, som.tm_mon );
-	// should now have the m_wday set!
+	int prev_month_end = som.tm_mday;
+	// Get Last day of shown month : 
+	som.tm_mon  = m_shown_month+1;  // have to put it to the next month minus 1 day!
+	som.tm_mday = 0;				// minus 1
+	mktime( &som );
+	int this_month_end = som.tm_mday;	
+	// Now back off number of weekdays:
+	som.tm_mon  = m_shown_month;
+	som.tm_year = m_shown_year-1900;
+	som.tm_mday = 1-wday;
+	mktime( &som );
+	dprintf("Cal starts with %d (%d) month_end=%d\n", som.tm_mday, som.tm_mon, prev_month_end );
 
+	// get Current Day:
+	time( &first_day_t );
+	struct tm* lt = localtime( &first_day_t );
+	m_local_time = *lt;
+	int today = lt->tm_mday;
+	int this_month = lt->tm_mon;
+	
 	// DRAW NUMBERS : 
-	x = left + 10.;
-	y -=  (text_size*1.5);
+	float margin = 10.;
+	float y_increment = (text_size*1.5);
+	y -= y_increment;
 	int day = som.tm_mday;
-	for (int i=0; i<5; i++)
+	float day_width = (width-2*margin) / 7.;
+	int month_offset = -1;
+	for (int w=0; w<5; w++)		// week in month.
 	{
-		date_str[0] = 0;		// restart
-		for (int j=0; j<7; j++, day++) {
-			if (day>30) day = 1;
-			sprintf(date, "%2d ", day);
-			strcat (date_str, date);
+		x = left + margin;
+		dprintf("Date:  " );
+		for (int d=0; d<7; d++, day++) 
+		{
+			if ((day>prev_month_end) && (month_offset==-1)) { day = 1; month_offset=0; }
+			if ((day>this_month_end) && (month_offset==0))  { day = 1; month_offset=1; }
+			
+			sprintf(date, "%2d", day);
+			dprintf("%s ", date );
+			if ((day==today) && (m_shown_month+month_offset==this_month)) {		/* Highlight Today! */
+				Fill_l   ( 0xFFFFFFFF );
+				Stroke_l ( 0xFFFFFF00 );		
+				Rect(x,y, day_width, y_increment );
+				Fill_l   ( text_color );
+				Stroke_l ( 0xFFFFFF00 );						
+			}
+			Text(x, y, date, SerifTypeface, text_size );
+			x += day_width;
 		}
-		printf("Date Str (1week) %6.2f %6.2f : %s \n", x,y, date_str );
-		Text(x, y, date_str, SerifTypeface, text_size );
-		y -= text_size*1.25;
+		dprintf("\n");
+		y -= y_increment;
 	}
 	return 1;
 }

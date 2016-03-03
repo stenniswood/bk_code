@@ -246,7 +246,6 @@ int Parse_Calendar_Statement( Sentence& mSentence )
         nlp_reply_formulated = TRUE;
         retval = 0;
     }
-    
     foundS = mSentence.is_found_in_sentence( "what" );
     foundO = mSentence.is_found_in_sentence ( "year" );
     if (foundS && foundO)
@@ -283,6 +282,8 @@ int Parse_Calendar_Statement( Sentence& mSentence )
     {
         
     }
+    if (nlp_reply_formulated)
+    	printf("Response: %s\n", CLIENT_Response );
         
     if (retval>-1)   printf( "Parse_Calendar_Statement done\n" );
     return retval;

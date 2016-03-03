@@ -29,7 +29,7 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug  1
+#define Debug  0
 #define Debug2 0
 
 Keyboard		m_keyboard;
@@ -497,7 +497,7 @@ int	DisplayManager::draw_invalid_children( )
 /* Mark all objects as valid, since we just redrew */
 int	DisplayManager::update_invalidated(  )
 {
-	printf("child count=%d\n", m_child_controls.size() );
+	if (Debug) printf("child count=%d\n", m_child_controls.size() );
 	vector<Control*>::iterator	iter = m_child_controls.begin();
 	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{

@@ -35,6 +35,8 @@ public:
 	int 	handle_special_keys ( int mKeyIndex );
 	void	append_character	(char mChar);
 
+
+
 	void				draw_keys();
 	void				draw_alt_keys();	
 	virtual int			draw();
@@ -43,7 +45,7 @@ public:
 	int					KeyHitTest		  ( int x, int y 	);
 	int					AltKeyHitTest	  ( int x, int y 	);
 	float 				geometric_distance( int x, int y, int key, bool mAlternate=true );
-	int 				find_min_distance ( int x, int y, int key, bool mAlternate );
+	int 				find_min_distance ( int x, int y, bool mAlternate );
 
 	virtual Control*	HitTest	( int x, int y 	);
 	virtual int 		onClick	( int x, int y, bool mouse_is_down );

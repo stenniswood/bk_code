@@ -175,14 +175,13 @@ void gui_interface()
 	if (invalid)
 	{	
 		UpdateDisplaySemaphore = 1;
-		printf("Test for invalid children.  Found! \n");	
+		//printf("Test for invalid children.  Found! \n");	
 	}
 
-	//MainDisplay.draw_invalid_children();
+	MainDisplay.draw_invalid_children();
 	//printf("MainDisplay.draw_invalid_children done. \n");
-	//MainDisplay.update_invalidated();		
+	MainDisplay.update_invalidated();		
 	//printf("MainDisplay.update_invalidated. \n");
-
 
 	if (cli_is_new_client())
 	{
@@ -215,22 +214,32 @@ void sequencer_interface()
 
 void ethernet_interface()		/* wifi comms */
 {
-	//	if (ipc_memory_client)
-	if ( cli_is_new_update() )
-	{	
-		//if (Debug) printf("New sentence : %s\n", get_sentence());
-		RobotResponse.set_text			( ipc_memory_client->Sentence );		//ConnectionStatus
-		AvailClients.update_available_client_list();
-		AvailClients.Invalidate();		
-		UpdateDisplaySemaphore=1;			
-	}
 	if ( cli_is_new_connection_status() )
 	{	
 		//if (Debug) printf("New status : %s\n", get_connection_status());	
 		if (ipc_memory_client)
-			RobotResponse.set_text( get_connection_status() );		
+			RobotResponse.set_text( cli_get_connection_status() );
+		cli_ack_connection_status();
 		UpdateDisplaySemaphore=1;
 	}
+
+	if ( cli_is_new_update() )
+	{	
+		//if (Debug) printf("New sentence : %s\n", get_sentence());
+		AvailClients.update_available_client_list();
+		AvailClients.Invalidate();		
+		UpdateDisplaySemaphore=1;			
+	}
+	if (is_new_response() )
+	{
+		printf("---Receive New Response: %s\n", ipc_memory_client->Sentence);
+		RobotResponse.set_text( ipc_memory_client->Sentence );		//ConnectionStatus
+		printf("Receive New Response: %s\n", ipc_memory_client->Response);
+		RobotResponse.Invalidate();
+		cli_ack_response();
+		UpdateDisplaySemaphore=1;			
+	}
+	
 }
 
 void voice_interface()
@@ -276,7 +285,7 @@ int main( int argc, char *argv[] )
 	UpdateDisplaySemaphore=1;
 	MainDisplay.onCreate();
 	dev_keyboard_init();
-	
+
 	//audio_file_open();
 	//play_waveform( &dWave, 1 );
 	//audio_play();
@@ -284,10 +293,10 @@ int main( int argc, char *argv[] )
 	printf("================= Main Loop ==========================\n");	
 	while (1)
 	{	
-		gui_interface();
-		//if (bkInstant_connected)
 		if (ipc_memory_client)
 			ethernet_interface();
+
+		gui_interface();
 
 		MainDisplay.idle_tasks();	
 		//printf("done with MainDisplay.idle_tasks()\n");

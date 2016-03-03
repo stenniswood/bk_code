@@ -120,6 +120,7 @@ instant: $(APP_CPP_OBJS) 						\
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps  *.bak 
+	rm -rf ../core/*/*.o 
 	rm -rf ../core/ipc/*.o 
 	rm -rf ../core/can/*.o 
 	rm -rf ../core/msg/*.o 
@@ -127,6 +128,8 @@ clean:
 	rm -rf ../core/misc/*.o
 	rm -rf ../core/fusion/*.o
 	rm -rf ./adrenaline/*.o 
+	rm -rf ./adrenaline/*/*.o 
+	rm -rf ./adrenaline/*/*/*.o 	
 	rm -rf ./hardware/*/*.o 	
 	rm -rf ./threads/*.o 			
 	rm -rf ./nlp_protocol/*.o 				

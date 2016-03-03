@@ -379,7 +379,8 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 	if (Debug) printf("Keyboard::onClick()  x,y = %d,%d\n", x, y );
 	if ((Debug) && m_alt_down) printf("===== ALT KEYBOARD ACTIVE ===\n");
 	int closest_key = find_min_distance( x,y, m_alt_down );
-	
+	if (Debug)  printf("Min Distance, closest key is %d. \t", closest_key );
+		
 	int key_index;
 	if (m_alt_down) {
 		key_index = AltKeyHitTest( x,y );
@@ -392,8 +393,8 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 			key = toupper( m_keys[key_index].text[0] );
 		} else 
 			key = tolower( m_keys[key_index].text[0] );
-		if (Debug) printf("key = %c\n", key );
 	}
+	if (Debug)	printf("KeyHitTest()=%d; key=%c\n", key_index, key );
 
 	if (key_index >= 0) 		// hit 
 	{

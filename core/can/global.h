@@ -33,6 +33,7 @@
 #define BOOL unsigned char
 #define BYTE unsigned char
 #define WORD unsigned short
+#define DWORD unsigned long
 
 //typedef	_Bool bool;
 //typedef	boolean Bool;
