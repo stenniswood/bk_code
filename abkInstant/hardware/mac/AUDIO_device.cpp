@@ -11,15 +11,17 @@
 #include "protocol.h"
 #include "devices.h"
 #include "utilities.h"
-#include "package_commands.h"
-#include "audio_thread.h"
+#include "serverthread.h"
+#include "AUDIO_device.hpp"
 
 
 /************ VARIABLES & CONSTANTS ****************************/
 //#define AUDIO_BUFF_SIZES 3844
+static struct WAVE_HEADER audio_hdr;
 
 #define BUFFERS 	4
 #define ONE_SECOND_HIFI_SIZE  (44100*4)
+
 float  mult    		= 1.0;
 char   up_down  	= 'u';
 double phase    	= 0;
@@ -30,22 +32,39 @@ int    intermediate_cb_buff_index = 0;
 BOOL	PlaybackStarted = FALSE;
 BOOL 	audio_hardware_enabled = FALSE;
 
-
-void create_sinewave(short* mBuffer, int mSize, float freq, float phase) 
-{
-	float Amplitude = 1024*8;	
-	for (int i=0; i<mSize; i++)
-	{
-		mBuffer[i] = Amplitude * sin( (float)i * freq + phase );
-		//printf("%4d  ", Sinewave[i]);
-		//if ((i%16)==0)			printf("\n"); 
-	}
-}
-
-
+// Mac Specific :
 AudioQueueRef 					queue;
 AudioQueueBufferRef 			buf_ref[BUFFERS];
 AudioStreamBasicDescription 	fmt = { 0 };
+
+/* FUNCTION LIST:
+    struct DEVICE_CAPS* DEVICE_ComposeAudioCapabilitiesStructure( )         data structure only - no hardware interaction
+    void callback(void *ptr, AudioQueueRef queue, AudioQueueBufferRef buf_ref)      // Playback callback buffer done playing.
+    void InitFormatParameters(  BYTE mChannels, short mSampleRate )         data structure only - no hardware interaction
+    void AUDIO_init_hdr( BYTE mChannels, short mSampleRate  )               data structure only - no hardware interaction
+ 
+    void AUDIO_SetupPlayer( BYTE mChannels, short mSampleRate )
+    void AUDIO_StartPlay();
+    BOOL AUDIO_QueueBuffer( char* mBuffer, int mSize )
+ 
+    int32_t  audio_setup ( int dest, int samplerate, int channels, int mBuffNumberOfSamples )
+    uint8_t* audio_add_play_buffer( short* mBuffer, int length, int samplerate )
+    void AUDIO_ClosePlayer()
+ 
+    void record_callback( void *ptr,
+                            AudioQueueRef 						rqueue,
+                            AudioQueueBufferRef 				buf_ref,
+                            const AudioTimeStamp               *inStartTime,
+                            UInt32                              inNumberPacketDescriptions,
+                            const AudioStreamPacketDescription *inPacketDescs  )
+    void AUDIO_SetupRecorder(int mSampleRate);
+    void AUDIO_StartRecord()
+    void AUDIO_CloseRecorder()
+    void audio_close(  )
+    void fillBuffer( short* mBuffer, int mNumSamps, double freq )
+
+ 
+ */
 
 /*****************************************************************
 This function needs to be redone for each different hardware 
@@ -82,21 +101,19 @@ void callback(void *ptr, AudioQueueRef queue, AudioQueueBufferRef buf_ref)
   OSStatus status;
   AudioQueueBuffer *buf = buf_ref;
   int    nsamp = buf->mAudioDataByteSize / 2;
-  short *samp = (short*)buf->mAudioData;
-  printf ("Callback! index=%d nbytes: %d\n", intermediate_cb_buff_index, buf->mAudioDataByteSize);
+  short *samp  = (short*)buf->mAudioData;
+  //printf ("Callback! index=%d nbytes: %d\n", intermediate_cb_buff_index, buf->mAudioDataByteSize);
 
   // FILL DATA HERE:  
   memcpy( samp, &(AudioBuffers[intermediate_cb_buff_index]), buf->mAudioDataByteSize );
-  
-  //memcpy( samp, &(samp), buf->mAudioDataByteSize );
 
   intermediate_cb_buff_index++;
   if ((intermediate_cb_buff_index % BUFFERS)==0)
       intermediate_cb_buff_index = 0;	// play back is slower than incoming data (loose a buffer)  
-  
+
   // REQUEUE:  
   status = AudioQueueEnqueueBuffer( queue, buf_ref, 0, NULL );
-  printf ("Enqueue status: %d\n", status);
+  //printf ("Enqueue status: %d\n", status);
 }
 
 /***************************************************************
@@ -136,15 +153,15 @@ void AUDIO_SetupPlayer( BYTE mChannels, short mSampleRate )
 {
   OSStatus 	status;
   int 		i;
-  InitFormatParameters( mChannels, mSampleRate );
-  AUDIO_init_hdr( mChannels, mSampleRate );
+  InitFormatParameters( mChannels, mSampleRate );               // internal function
+  AUDIO_init_hdr( mChannels, mSampleRate );                     // internal function
   printf("AUDIO_SetupPlayer: done with AUDIO_init_hdr\n");
-    
+
   // CONNECT TO OUTPUT DEVICE:
   status = AudioQueueNewOutput(&fmt, callback, &phase, NULL,  //CFRunLoopGetCurrent(),
 			                   kCFRunLoopCommonModes, 0, &queue);
 
-  if (status == kAudioFormatUnsupportedDataFormatError) puts ("oops!");
+  if (status == kAudioFormatUnsupportedDataFormatError) puts ("oops, bad audio format!");
   else printf("NewOutput status: %d\n", status);
 
   // We'll start by just enqueue 1 buffer.  The rest will get enqueue by the callback
@@ -213,11 +230,15 @@ BOOL AUDIO_QueueBuffer( char* mBuffer, int mSize )
 	    memcpy( &(AudioBuffers[index]), mBuffer, mSize );
 	}
    	intermediate_buff_index++;   		
-	printf("\n"); 
+	printf("\n");
+    return TRUE;
 }
 
-int32_t audio_setup ( int dest, int samplerate, int channels, int mBuffNumberOfSamples )
+
+int32_t audio_setup ( int dest, int samplerate, int channels, int mBuffNumberOfSamples, int mDirection )
 {
+    AUDIO_SetupPlayer( channels, samplerate );
+    AUDIO_StartPlay();
 	return 0; 
 }
 
@@ -281,9 +302,17 @@ void record_callback( void *ptr,
   	AppendAudioData( (char*)&(AudioBuffers[intermediate_cb_buff_index]), buf->mAudioDataByteSize );
   
   if (RemoteListener) {
-	osize = Cmd_Audio_Data( audio_socket_buffer, (short*)&(AudioBuffers[intermediate_cb_buff_index]), 
-							buf->mAudioDataByteSize );		// Send to Client
-	SendTelegram( (BYTE*)audio_socket_buffer, osize );
+	/* SJT:  
+     
+     */
+    char msg[] = "new audio_buffer";
+	SendTelegram( (BYTE*)msg, strlen(msg) );
+      
+    //  osize = Cmd_Audio_Data( audio_socket_buffer, (short*)&(AudioBuffers[intermediate_cb_buff_index]),
+	//						buf->mAudioDataByteSize );		// Send to Client
+      BYTE audio_socket_buffer[buf->mAudioDataByteSize];
+      memcpy( audio_socket_buffer, (short*)&(AudioBuffers[intermediate_cb_buff_index]), buf->mAudioDataByteSize );
+    SendTelegram( (BYTE*)audio_socket_buffer, buf->mAudioDataByteSize );
   	//printf ("Sending CMD_AUDIO_DATA: size=%d osize=%d\n", buf->mAudioDataByteSize, osize );
   }
 
@@ -333,6 +362,7 @@ void AUDIO_SetupRecorder(int mSampleRate)
 	); 
 }
 
+
 /*****************************************************************
 Initialize the Wave Format structure
 ****************************************************************/
@@ -359,13 +389,15 @@ void AUDIO_CloseRecorder()
 	
 	audio_hardware_enabled = FALSE;
 	RecordStarted 		   = FALSE;
-	int osize = Cmd_Audio_End( audio_socket_buffer );
-	SendTelegram( audio_socket_buffer, osize );
+	//int osize = Cmd_Audio_End( audio_socket_buffer );
+	//SendTelegram( audio_socket_buffer, osize );
 	printf("--Mac AUDIO HARDWARE SHUTDOWN!\n");  
 }
+
 void audio_close(  )
 {
-	AUDIO_CloseRecorder();
+	//AUDIO_CloseRecorder();
+    AUDIO_ClosePlayer();
 }
 
 

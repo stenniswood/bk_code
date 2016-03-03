@@ -27,6 +27,13 @@
 #define byte uint8_t
 #endif
 
+#define	TRUE	1
+#define	FALSE	0
+
+#define BOOL unsigned char
+#define BYTE unsigned char
+#define WORD unsigned short
+
 //typedef	_Bool bool;
 //typedef	boolean Bool;
 

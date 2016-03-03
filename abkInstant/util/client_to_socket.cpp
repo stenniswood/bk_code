@@ -17,15 +17,7 @@
 
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
-#include "can_txbuff.h"
-#include "can_id_list.h"
-//#include "cmd_process.h"
-#include "buttons.h"
-#include "leds.h"
-#include "vector_math.h"
-#include "catagorization.h"
 #include "serverthread.h"
-#include "client.h"
 #include "visual_memory.h"
 #include "sway_memory.h"
 #include "audio_memory.h"
@@ -33,25 +25,29 @@
 #include "client_memory.hpp"
 #include "CAN_memory.h"
 #include "udp_transponder.hpp"
-#include "GENERAL_protocol.h"
+#include "GENERAL_protocol.hpp"
 #include "client_to_socket.hpp"
 
-#include "CAN_protocol.h"
-#include "AUDIO_protocol.h"
-#include "CAMERA_protocol.h"
-#include "prefilter.hpp"
+#include "CAN_protocol.hpp"
+#include "AUDIO_protocol.hpp"
+#include "CAMERA_protocol.hpp"
+#include "math_protocol.hpp"
+#include "self_identity.hpp"
+
 #include "nlp_extraction.hpp"
+#include "prefilter.hpp"
+
 
 using namespace std;
 
 //#define NLP_DEBUG 1
 
 bool ClientRequestPending = false;
+char* CLIENT_Response=NULL;
 
 // These should be classes with synonyms:
 static std::list<std::string>  	subject_list;
 static std::list<std::string> 	verb_list;
-static std::list<std::string> 	preposition_list;
 static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
@@ -110,19 +106,6 @@ static void init_verb_list()
 	verb_list.push_back( "how much" );			
 }
 
-static void init_preposition_list()
-{   // Object might be a numerical value preceded by a preposition.
-	// ie. "set camera tilt _to_ _25.5 degrees"
-	// prepositions to look for :
-	//		to by as 
-	preposition_list.push_back( "to" );
-	preposition_list.push_back( "from" );	
-	preposition_list.push_back( "as" );	
-	preposition_list.push_back( "by" );		
-	preposition_list.push_back( "for");
-	preposition_list.push_back( "in" );
-}
-
 static void init_adjective_list()
 { 
 	adjective_list.push_back( "highest" );
@@ -162,32 +145,27 @@ void init_client_request()
 	init_word_lists();
 }
 
-std::string* subject = NULL;
-std::string* verb    = NULL;
-std::string* object  = NULL;
-std::string* adjective=NULL;
-std::string* preposition=NULL;
+static std::string* subject = NULL;
+static std::string* verb    = NULL;
+static std::string* object  = NULL;
+static std::string* adjective=NULL;
+static std::string* preposition=NULL;
 
-BOOL extract_nlp_words()
+static BOOL extract_nlp_words()
 {
-    if (ipc_memory_client==NULL)  return FALSE;
-
-    char* mSentence = ipc_memory_client->Sentence;
-	printf( "Client Sentence:|%s|\n", mSentence );
-	bool okay = prefilter_text( mSentence );
-	if (!okay) 
-	{ 
-		printf("ignored\n"); 
-		return FALSE;	
-	};
-
-    subject   = extract_word( mSentence, &subject_list    );
+    
+/*    subject   = extract_word( mSentence, &subject_list    );
     verb 	  = extract_word( mSentence, &verb_list 	  );
     object    = extract_word( mSentence, &object_list     );
-	preposition= extract_word( mSentence, &preposition_list  );	    
     adjective = extract_word( mSentence, &adjective_list  );
-    diagram_sentence		( subject, verb, adjective, object );
+    diagram_sentence		( subject, verb, adjective, object );  */
     return TRUE;
+}
+
+void disconnect_from_robot()
+{
+    connection_established = false;
+    close(connfd);
 }
 
 /* Note the client can do any of these:
@@ -202,25 +180,22 @@ void handle_client_request()
 {
     char  relay_buffer[255];
     int   length=0;
-    char* CLIENT_Response=NULL;
-	printf("handle_client_request() - ");
 
+	printf("handle_client_request() - ");
 	if (ipc_memory_client==NULL)	return;
 	ClientRequestPending = true;
+    char* sentence = ipc_memory_client->Sentence;
+    printf( "Client Sentence:|%s|\n", sentence );
+    
+    Sentence theSentence(sentence);
+    if (theSentence.is_voice_response())  return ;      // no action!
+    
+    Parse_Statement( sentence );        // GENERAL Protocol.
 
-	int result = extract_nlp_words();
-	if (result==FALSE) return;
-
-	result = compare_word( subject, "whoami" );	
-	if (result==0)
-		printf("whoami\n");
-
-	result = compare_word(subject, "list");
-	if (result==0)
-		printf("list\n");
-
-	result = compare_word(subject, "text");
-	if (result==0)
+    
+    bool found = theSentence.is_found_in_sentence( "text" );
+	//result = compare_word(subject, "text");
+	if (found)
 	{
 		// Pass the request to the other end:
 		strcpy (relay_buffer, ipc_memory_client->Sentence );
@@ -228,20 +203,24 @@ void handle_client_request()
 		SendTelegram( (BYTE*)relay_buffer, length);
 	}
 
-	result = compare_word(verb, "disconnect");
-	if (result==0)
-		result = disconnect_from_robot( );
-
-	if ( (compare_word( subject, "sequencer")==0) )
+   found= theSentence.is_found_in_sentence( "disconnect" );
+//	result = compare_word(verb, "disconnect");
+    if (found) {
+		disconnect_from_robot( );
+        form_response("okay, disconnected");
+    }
+   found= theSentence.is_found_in_sentence( "sequencer" );
+	if ( found )
 	{
 		// Pass the request to the other end:
 		strcpy (relay_buffer, ipc_memory_client->Sentence );
 		length = strlen(relay_buffer);
 		SendTelegram( (BYTE*)relay_buffer, length);
 	}
-
-	result = compare_word(verb, "connect");
-	if (result==0) {
+    
+   found= theSentence.is_found_in_sentence( "connect" );
+//	result = compare_word(verb, "connect");
+	if (found) {
 		printf("connecting..\n");
 		char* space = strchr(ipc_memory_client->Sentence, ' ');
 		if (space==NULL)  {  printf("space returning\n"); return;	};
@@ -265,8 +244,9 @@ void handle_client_request()
 			CLIENT_Response= "Connected Welcome!";		
 		}
 	}
-	result = compare_word(verb, "receive");
-	if (result==0)
+   found= theSentence.is_found_in_sentence( "receive" );
+//	result = compare_word(verb, "receive");
+	if (found)
 	{
 		if (!connection_established)
 		{
@@ -278,8 +258,9 @@ void handle_client_request()
 		} 
 		else 
 		{
-		    result = compare_word(subject, "can");
-		    if (result==0)
+           found= theSentence.is_found_in_sentence( "can" );
+	//	    result = compare_word(subject, "can");
+		    if (found)
 		    {
 				// No amon at this end.
 				int attached = can_connect_shared_memory(TRUE);	// allocate if not already.
@@ -292,9 +273,9 @@ void handle_client_request()
 				int length = strlen(relay_buffer);
 				SendTelegram( (BYTE*)relay_buffer, length);
 			}
-			
-			result = compare_word(subject, "audio");
-			if (result==0)
+			found = theSentence.is_found_in_sentence( "audio" );
+//			result = compare_word(subject, "audio");
+			if (found)
 			{
 				// okay receive audio has been requested by client,			
 				audio_listen();		// AUDIO_protocol.c
@@ -306,8 +287,9 @@ void handle_client_request()
 				SendTelegram( (BYTE*)relay_buffer, length);
 					
 			}
-			result = compare_word(subject, "camera");			
-			if (result==0)
+			found = theSentence.is_found_in_sentence( "camera" );
+//			result = compare_word(subject, "camera");
+			if (found)
 			{
 				// okay receive audio has been requested by client,			
 				camera_watch();		// AUDIO_interface.c
@@ -318,16 +300,20 @@ void handle_client_request()
 				SendTelegram( (BYTE*)relay_buffer, length);
 			
 		    }
-		    result = compare_word(subject, "file");			
-		    if (result==0)
+           found= theSentence.is_found_in_sentence( "file" );
+//		    result = compare_word(subject, "file");
+		    if (found)
 		    {
-				send_file_transmit_request();
+				// Pass the request to the other end:
+				strcpy (relay_buffer, "send file:  ");
+				strcat (relay_buffer, "filename");
+				length = strlen(relay_buffer);
+				SendTelegram( (BYTE*)relay_buffer, length);
 		    }
-		
 		}
 	}
 
-	result = ((compare_word(subject, "camera")==0) ||
+	int result = ((compare_word(subject, "camera")==0) ||
 		      (compare_word( subject, "web cam")==0)  ||
 		      (compare_word( subject, "eyes")==0) );
 	if (result)
@@ -336,7 +322,7 @@ void handle_client_request()
 		{
 			cli_ack_update_status();
 			CLIENT_Response= "No Connection!";
-			cli_ipc_write_response( CLIENT_Response );
+			cli_ipc_write_response( CLIENT_Response, "instant" );
 			ClientRequestPending= false;
 			return;
 		} 
@@ -401,6 +387,15 @@ void handle_client_request()
 	result = compare_word(verb, "send");	
 	if (result==0)
 	{
+        if (!connection_established)
+        {
+            // The request comes thru IPC Client memory.  So the response will be
+            // placed there as well.
+            CLIENT_Response= "No Connection!";
+            //printf("receive but no connection\n");
+            //  will be done at end of this function!
+        } 
+        else {
 		result = compare_word(subject, "can");			
 		if (result==0)
 		{
@@ -408,7 +403,11 @@ void handle_client_request()
 			start_amon();
 			printf("sending..CAN\n");
 			// this is the "token" to indicate can messages are coming.
-			Cmd_client_CAN_Start();		// in core/wifi/client.c
+
+            strcpy (relay_buffer, "receive CAN");
+            int length = strlen(relay_buffer);
+            SendTelegram( (BYTE*)relay_buffer, length);
+            //Cmd_client_CAN_Start();		// in core/wifi/client.c
 		}
 		result = compare_word(subject, "audio");
 		if (result==0)
@@ -433,7 +432,12 @@ void handle_client_request()
 		result = compare_word(subject, "file");			
 		if (result==0)
 		{
-			send_file_transmit_request();
+				// Pass the request to the other end:
+				strcpy (relay_buffer, "send file:  ");
+				strcat (relay_buffer, "filename");
+				length = strlen(relay_buffer);
+				SendTelegram( (BYTE*)relay_buffer, length);
+
 		}
 		result = compare_word(subject, "mouse");			
 		if (result==0)
@@ -442,7 +446,9 @@ void handle_client_request()
 		result = compare_word(subject, "keyboard");
 		if (result==0)
 		{
-		}		
+        }
+        }
+        
 	}
 
 	result = compare_word(verb, "stop");
@@ -500,7 +506,7 @@ void handle_client_request()
 	cli_ack_update_status();
 	if (CLIENT_Response)
 	{
-		cli_ipc_write_response( CLIENT_Response );
+		cli_ipc_write_response( CLIENT_Response, "instant" );
 		ClientRequestPending= false;
 	}
 	printf("handle_client_request() done \n");		

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <vector>
 #include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -13,7 +14,7 @@
 #include <time.h> 
 
 #include "nlp_extraction.hpp"
-#include "Alias.hpp"
+#include "alias.hpp"
 #include "string_util.h"
 
 
@@ -222,7 +223,7 @@ void	WordGroup::add_word( string&  mNewWord )
 	Word tmp;
 	tmp.add_new( mNewWord );
 	add_new(tmp);
-    printf("size=%d  wg_size=%ld\n", tmp.get_num_synonyms(), m_Words->size() );
+    //printf("size=%d  wg_size=%ld\n", tmp.get_num_synonyms(), m_Words->size() );
 
     /*int size = m_Words->front().get_num_synonyms();
     Word* ptr = get_Word(0);    
@@ -244,8 +245,6 @@ Word*	WordGroup::get_Word( int mIndex )
 		iter++;
         mIndex--;
    }
-    printf("size=%d\n",     iter->get_num_synonyms() );
-    printf("wg_size=%ld\n", m_Words->size()   );
 	return &(*iter);
 }
 

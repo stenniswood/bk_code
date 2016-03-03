@@ -1,11 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <semaphore.h>
+#include "bcm_host.h"
+#include "ilclient.h"
+
 #include "bk_system_defs.h"
 #include "protocol.h"
-#include "devices.h"
+//#include "devices.h"
+
+
 #include "AUDIO_interface.hpp"
 #include "AUDIO_protocol.hpp"
+#include "AUDIO_device.hpp"
+
 
 
 /***********************************************************************
@@ -67,7 +75,7 @@ BOOL OpenAudioFile( char* mFilename )
 	wave_file = fopen(mFilename, "wb");
 	if (wave_file==NULL) {
 		printf(" %s \n", mFilename );
-		printf("Error opening file, make sure you are running as root 'sudo ./server' \n");
+		printf("Error opening file, make sure you are running as root 'sudo ./instant' \n");
 		return FALSE;
 	}
 	printf("Opened file: %s \n", mFilename );
@@ -110,7 +118,7 @@ BOOL OpenAudioFileRead( char* mFilename )
 
 	//	FILE* wave_file;
 	//strcpy( AudioFilename, mFilename );
-	//wave_file = fopen(mFilename, "r");
+    sending_audio_file_fd = fopen(mFilename, "r");
 	if (sending_audio_file_fd==NULL) {
 		printf(" %s \n", mFilename );
 		printf("Error opening file, make sure you are running as root 'sudo ./server' \n");
@@ -120,17 +128,17 @@ BOOL OpenAudioFileRead( char* mFilename )
 
 	// WRITES:
 	fread( (void*)riff, 		1, 4, sending_audio_file_fd );
-	fread( (void*)qs,		1, 4, sending_audio_file_fd );
+	fread( (void*)qs,           1, 4, sending_audio_file_fd );
 	fread( (void*)wave, 		1, 4, sending_audio_file_fd );
 	
 	// FORMAT SUB CHUNK :
 	fread( (void*)fmt,  			1, 4, sending_audio_file_fd );
-	fread( (void*)&fmt_chunk_size, 1, 4, sending_audio_file_fd );
-	fread( (void*)&audio_hdr,  	2, 8, sending_audio_file_fd );
+	fread( (void*)&fmt_chunk_size,  1, 4, sending_audio_file_fd );
+	fread( (void*)&audio_hdr,       2, 8, sending_audio_file_fd );
 				
 	// DATA SUB CHUNK (written in AppendAudioData() only)
 	fread( (void*)data,  		1, 4, sending_audio_file_fd );		// ID
-	fread( (void*)qs,  		1, 4, sending_audio_file_fd );		// Size unknown at this time.
+	fread( (void*)qs,           1, 4, sending_audio_file_fd );		// Size unknown at this time.
 
 	// Need to know the Total File size!  When streaming, we don't know at the start.
 	// So keep an accumulated byte count and seek to the top of the file and update this
@@ -139,6 +147,7 @@ BOOL OpenAudioFileRead( char* mFilename )
 	TotalAudioDataLengthBytes = 0;
 	return TRUE;
 }
+
 void  read_chunk( byte* mBuffer, int mSize )
 {
 	fread( (void*)mBuffer,  1, mSize, sending_audio_file_fd );
@@ -170,7 +179,7 @@ can compute the chunk sizes and update the file
 void UpdateChunkSizes( int mDataChunkSize )
 {
 	int mRIFFChunkSize = 36 + mDataChunkSize;
-	char qs[] = "    ";
+	char qs[]   = "    ";
 	char ones[] = "1111";
 	char twos[] = "2222";
 		

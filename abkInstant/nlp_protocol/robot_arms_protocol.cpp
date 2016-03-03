@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <string.h>
 #include <list>
+#include <vector>
 #include <string.h>
 #include <string>
 #include <sys/types.h>
@@ -27,7 +28,7 @@
 #include "nlp_sentence.hpp"
 //#include "client_to_socket.hpp"
 #include "robot_arms_protocol.hpp"
-#include "Alias.hpp"
+#include "alias.hpp"
 
 /* Suggested statements:
  Raise/lower your left/right arm [all the way up]

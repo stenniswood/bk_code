@@ -1,12 +1,9 @@
-
-
-
 #ifndef _Word_
 #define _Word_
  
 //#include <string>
-#include <list>
-#include <vector>
+//#include <list>
+//#include <vector>
 
 using namespace std;
 

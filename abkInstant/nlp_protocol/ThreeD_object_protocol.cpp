@@ -6,7 +6,7 @@
 //  Copyright © 2016 Stephen Tenniswood. All rights reserved.
 //
 
-#include "ThreeD_object_protocol.hpp"
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -16,6 +16,7 @@
 #include <errno.h>
 #include <string.h>
 #include <list>
+#include <vector>
 #include <string.h>
 #include <string>
 #include <sys/types.h>
@@ -29,11 +30,11 @@
 #include "client_memory.hpp"
 #include "nlp_sentence.hpp"
 #include "client_to_socket.hpp"
-#include "Alias.hpp"
+#include "alias.hpp"
 
 #include "simulator_memory.h"
 
-
+#include "ThreeD_object_protocol.hpp"
 
 /* Suggested statements:
     Make a box a lot longer than it is wide.

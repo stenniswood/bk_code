@@ -26,6 +26,9 @@ AUTHOR	:  Stephen Tenniswood
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string>
+// #if (PLATFORM==RPI)
+#include <string.h>
+// #endif
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/types.h>
@@ -402,14 +405,15 @@ void cli_reset_client_list	   (  )
 void cli_ipc_add_new_client( struct stClientData* mEntry )
 {
 	if (ipc_memory_client==NULL) return;
-	
+
 	int   size  = ipc_memory_client->NumberClients;
 	memcpy( (char*)&(ipc_memory_client->ClientArray[size]), 
 				mEntry,  sizeof(struct stClientData)  );
-				
+					
 	ipc_memory_client->NewClientUpdateCounter++;
 	ipc_memory_client->NumberClients++;
-	
+	printf("cli_ipc_add_new_client() size=%d;  NewClientUpdateCounter=%d\n", ipc_memory_client->NumberClients, ipc_memory_client->NewClientUpdateCounter);
+		
 //	ipc_memory_client->UpdateCounter++;		Cannot use this counter because it also triggers a new client sentence parsing!!
 //	therefore the NewClientUpdateCounter.
 }

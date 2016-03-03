@@ -12,32 +12,32 @@
 #include <pthread.h>
 #include <stdint.h>
 
+#if (PLATFORM==RPI)
+#include "bcm_host.h"
+#include "ilclient.h"
+#endif
 
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
-#include "can_txbuff.h"
 #include "can_id_list.h"
 #include "cmd_process.h"
-#include "buttons.h"
-#include "leds.h"
-#include "vector_math.h"
-#include "catagorization.h"
 #include "serverthread.h"
-#include "client.h"
 #include "visual_memory.h"
 #include "sway_memory.h"
 #include "audio_memory.h"
 #include "picamscan_memory.h"
 #include "client_memory.hpp"
+#include "simulator_memory.h"
+
 #include "CAN_memory.h"
 #include "udp_transponder.hpp"
-#include "thread_control.h"
+#include "GENERAL_protocol.hpp"
 #include "client_to_socket.hpp"
+#include "tone_generator.h"
 
 #define  uint32_t long int
 
-
-#include "AUDIO_device.h"
+#include "AUDIO_device.hpp"
 
 
 // Right now this is user settable.  Need to detect:
@@ -67,21 +67,21 @@ void create_threads()
 	{
 		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
 		exit(EXIT_FAILURE);
-	}
+	} 
 
 	// UDP Receiver :  
 	int iret2 = pthread_create( &udp_rx_thread_id, NULL, udp_receive_function, (void*) message1);
 	if (iret2)
 	{
-		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
+		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
 		exit(EXIT_FAILURE);
 	}
 
 	// ETHERNET SERVER PROTOCOL:
-	iret2 = pthread_create( &server_thread_id, NULL, server_thread, (void*) message1);
-	if (iret2)
+	int iret3 = pthread_create( &server_thread_id, NULL, server_thread, (void*) message1);
+	if (iret3)
 	{
-		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
+		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret3);
 		exit(EXIT_FAILURE);
 	}
 	// CLIENT PROTOCOL... thread needed?  No.
@@ -116,8 +116,7 @@ void establish_ipc()
 	printf("************************* SHARED MEMORY *****************************\n");
 	// Always have a Client connection, so we can accept user commands (ie. connect, send audio, etc)
 	int result = connect_shared_client_memory(TRUE);
-	printf("Update/Ack Counters = %d/%d\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);			
-			
+	printf("Update/Ack Counters = %d/%d\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);	
 
 	if (USE_AVISUAL)
 	{
@@ -156,7 +155,13 @@ void establish_ipc()
 	{
 		printf("************************* CAN SHARED MEMORY *****************************\n");	
 	    result =  can_connect_shared_memory(FALSE);
-	} 
+	}
+	
+    
+    int sim_available = connect_shared_simulator_memory( FALSE );
+    if (sim_available)
+        printf("************************* SIMULATOR SHARED MEMORY *****************************\n");
+    
 	printf("****************** END SHARED MEMORY SETUP *******************");	
 }
 
@@ -171,10 +176,10 @@ void init( )
 	// and attach myInterrupt() to the interrupt
 	create_threads();
 
-	init_client_request();	
+	init_client_request();
 	printf("done with init()!\n");
 }
-  
+
 void help()
 {
 	printf("bk Instant! (Media Center) \n"								);
@@ -228,6 +233,7 @@ int main( int argc, char *argv[] )
 			return 0;
 		}
 	}
+    Init_General_Protocol();
 	init();	// <-- Serverthread is established
 	
 	printf("===============================================\n");
@@ -245,36 +251,24 @@ int main( int argc, char *argv[] )
 	}
 	printf("================= Checking command line arguments ========================\n");		
 
-//		play_api_test(22050, 16, 1, 0);
 
-#define N_WAVES          1024*32    /* dimension of Sinewave[] */
-	static short Sinewaves[N_WAVES*2];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
+#define N_WAVES  1024*32    // dimension of Sinewave[]
 
-	float freq = 1*(2.*3.1415 / (float)N_WAVES);
-	create_sinewave(Sinewaves,  N_WAVES, freq, 0.);
-	freq = 10.*(2.*3.1415 / (float)N_WAVES);
-	create_sinewave( &(Sinewaves[N_WAVES]), N_WAVES, freq, 0. );
-
-	int32_t result = audio_setup( 0, 22050, 1, N_WAVES*2 );
-	for (int j=0; j<4; j++)
+	static short Sinewaves[N_WAVES];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
+    
+    int   period = get_note_period( 5 , 4, 22050 );
+    saw_tooth_left ( Sinewaves, period, N_WAVES );
+    period = get_note_period( 3 , 4, 22050 );
+    saw_tooth_right( Sinewaves, period, N_WAVES );
+    //silence_channel(Sinewaves, N_WAVES, 1);
+    
+	int32_t result = audio_setup( 0, 22050, 2, N_WAVES );
+    for (int j=0; j<4; j++)
 	{
-		uint8_t* result = audio_add_play_buffer( Sinewaves, N_WAVES*2, 22050 );
-//		result = audio_add_play_buffer( Sinewave_2, N_WAVE, 22050 );
+		uint8_t* result = audio_add_play_buffer( Sinewaves, N_WAVES, 22050 );
 	}
-
-/*		short Sinewave_2[N_WAVE];
-		float freq = 3*(2.*3.1415 / (float)N_WAVE);
-		create_sinewave(Sinewave,  N_WAVE, freq, 0.);
-		freq = 5.*(2.*3.1415 / (float)N_WAVE);
-		create_sinewave(Sinewave_2, N_WAVE, freq, 0.);
-
-		int32_t result = audio_setup( 1, 22050, 1, N_WAVE );
-		for (int j=0; j<4; j++)
-		{
-			uint8_t* result = audio_add_play_buffer( Sinewave, N_WAVE, 22050 );
-			result = audio_add_play_buffer( Sinewave_2, N_WAVE, 22050 );
-		}	
-*/
+    usleep(2000000);
+    audio_close();
 	
 	printf("================= Main Loop ==========================\n");	
 	while (1) 
@@ -286,13 +280,3 @@ int main( int argc, char *argv[] )
 
 
 
-
-
-void update_outputs()
-{
-	// Update Client List:
-/*	int size = ipc_memory_client->NumberClients;
-	for (int i=0; i<size; i++)
-		cli_ipc_add_new_client( mClientText );		
-*/	
-}

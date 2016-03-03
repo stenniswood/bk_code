@@ -16,6 +16,7 @@
 #include <errno.h>
 #include <string>
 #include <list>
+#include <vector>
 #include <sys/types.h>
 #include <time.h>
 #include <string>
@@ -24,7 +25,7 @@
 #include "GENERAL_protocol.hpp"
 #include "nlp_extraction.hpp"
 #include "client_memory.hpp"
-#include "Alias.hpp"
+#include "alias.hpp"
 #include "nlp_sentence.hpp"
 #include "client_to_socket.hpp"
 

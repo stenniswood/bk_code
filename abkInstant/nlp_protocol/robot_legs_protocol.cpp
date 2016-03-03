@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <string.h>
 #include <list>
+#include <vector>
 #include <string.h>
 #include <string>
 #include <sys/types.h>
@@ -21,7 +22,7 @@
 #include "client_memory.hpp"
 #include "nlp_sentence.hpp"
 #include "client_to_socket.hpp"
-#include "Alias.hpp"
+#include "alias.hpp"
 
 #include "simulator_memory.h"
 

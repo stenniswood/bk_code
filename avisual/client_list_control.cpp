@@ -102,6 +102,8 @@ void ClientList::update_available_client_list()
 	}
 	cli_print_clients();
 	clear_items();
+	//if (Debug) printf("===================================================\n");
+		
 	for (int i=0; i<ipc_memory_client->NumberClients; i++)
 		set_row( &(ipc_memory_client->ClientArray[i]) );
 	if (Debug) printf("===================================================\n");

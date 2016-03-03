@@ -6,15 +6,15 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-#include <string>
-#include <list>
+//#include <string>
+//#include <list>
 #include <sys/types.h>
 #include <time.h> 
 #include "protocol.h"
 //#include "devices.h"
-#include "GENERAL_protocol.h"
+//#include "GENERAL_protocol.h"
 #include "bk_system_defs.h"
-#include "GPIO_device.h"
+#include "GPIO_device.hpp"
 
 
 #ifdef RPI_GPIO
@@ -35,6 +35,7 @@ BOOL set_GPIO( byte mPin, byte mValue )
 	//  if (PinModes[Pin]==OUTPUT)		// if not configured, do nothing.
 		digitalWrite( mPin, mValue);
   #endif
+    return 1;
 }
 
 BOOL read_GPIO( byte mPin )
@@ -42,6 +43,8 @@ BOOL read_GPIO( byte mPin )
   #ifdef RPI_GPIO					  
 		*mValue = digitalRead( mPin );
   #endif
+    return 1;
+    
 }
 
 BOOL set_GPIO_DDR( byte mPin, byte mInput )
@@ -52,4 +55,6 @@ BOOL set_GPIO_DDR( byte mPin, byte mInput )
 	else
 		pinMode( mPin, OUTPUT);
 #endif
+    return 1;
+    
 }

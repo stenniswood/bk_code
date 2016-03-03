@@ -40,8 +40,8 @@ public:
 
     int             is_found_in_sentence    ( const char* mSearchWord, bool mOrItsPlural = false ); // returns word index of first occurence.
     int             next_word_matches       ( const char* mSearchWord, bool mOrItsPlural = false ); // returns word index of first occurence.
-    int             next_word_is_a_number   ( ); // returns word index of first occurence.
-
+    bool            next_word_is_a_number   ( ); // returns word index of first occurence.
+    int             number_of_numbers_present();    // counts how many words in the sentence are numbers.
     
     char*           get_nth_word( int mIndex );
     int             get_word_index( char* mWord, int mSentenceStartingWordIndex=0 );

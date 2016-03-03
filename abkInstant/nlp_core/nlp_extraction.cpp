@@ -1,6 +1,7 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -11,8 +12,8 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <time.h> 
-#include "protocol.h"
-#include "devices.h"
+//#include "protocol.h"
+//#include "devices.h"
 #include <termios.h>
 #include <unistd.h>
 #include <pthread.h>

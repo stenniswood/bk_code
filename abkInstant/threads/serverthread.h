@@ -1,7 +1,8 @@
-
-#ifdef  __cplusplus
+#ifndef _SERVER_THREAD_H_
+#define _SERVER_THREAD_H_
+/*#ifdef  __cplusplus
 extern "C" {
-#endif
+#endif */
 
 #define UINT unsigned int
 #define WORD unsigned short
@@ -25,23 +26,21 @@ void Print_General_Msg_Acknowledgement	(UINT mToken);
 void Print_Msg_Acknowledgement			(UINT mToken);
 BOOL Process_GeneralPurpose_Telegram	( UINT  mToken, char* mMessage, int DataLength, int mconnfd );
 BOOL Process_Telegram					( UINT  mToken, char* mMessage, WORD mDataLength, int mconnfd );
-void SendTelegram					( BYTE* mBuffer, int mSize); 
+void SendTelegram						( BYTE* mBuffer, int mSize );
 
 void update_ipc_status				( struct sockaddr_in* sa );
 void update_ipc_status_no_connection( );
 
 
-void* server_thread(void*);
-
-void transmit_queued_entities();
-
+void* server_thread					( void*);
+void  transmit_queued_entities		( );
 
 extern BOOL 	nlp_reply_formulated;
 extern char		NLP_Response[255];
 extern char 	broadcast_addr[16];	
 
-#ifdef  __cplusplus
+/*#ifdef  __cplusplus
 }
+#endif */
+
 #endif
-
-

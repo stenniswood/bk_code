@@ -1,9 +1,9 @@
 #ifndef _BK_SYSTEM_H_
 #define _BK_SYSTEM_H_
 
-#ifdef  __cplusplus
+/*#ifdef  __cplusplus
 extern "C" {
-#endif
+#endif */
 
 
 // USE THESE FOR COLOR CODING THE PRINTF's!
@@ -66,8 +66,8 @@ union float_array
 //void delay( long int mdelay );
 void chip_init(void);
 
-#ifdef  __cplusplus
+/*#ifdef  __cplusplus
 }
-#endif
+#endif */
 
 #endif

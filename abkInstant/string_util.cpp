@@ -3,9 +3,13 @@
 #include <string>
 #include <string.h>
 #include <stdint.h>
+#include <inttypes.h>
 
-#include "bk_system_defs.h"
+
+//#include "bk_system_defs.h"
 #include "string_util.h"
+
+typedef unsigned char byte;
 
 #define TRUE 1
 #define FALSE 0

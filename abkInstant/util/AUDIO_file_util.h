@@ -3,6 +3,7 @@
 // from audio_util.c : 
 char* GetNewAudioFileName	( BOOL mOutgoing	);
 BOOL  OpenAudioFile			( char* mFilename	);
+BOOL  OpenAudioFileRead		( char* mFilename );
 void  AppendAudioData		( char* mBuffer, int mSize );
 void  CloseAudioFile		(					);
 void  FindFile_by_ClosestTimestamp( int mFile );

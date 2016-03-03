@@ -11,6 +11,7 @@
 #include <string.h>
 #include <string>
 #include <list>
+#include <vector>
 
 #include "protocol.h"
 #include "devices.h"

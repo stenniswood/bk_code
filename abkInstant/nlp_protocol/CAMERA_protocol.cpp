@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <string.h>
 #include <list>
+#include <vector>
 #include <string.h>
 #include <string>
 #include <sys/types.h>

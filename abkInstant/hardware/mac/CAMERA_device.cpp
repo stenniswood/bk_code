@@ -13,14 +13,14 @@
 #include <time.h> 
 #include "protocol.h"
 #include "devices.h"
-#include "package_commands.h"
+//#include "package_commands.h"
 #include <termios.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <string>
 //#include "udp_transponder.h"
 #include "serverthread.h"
-#include "CAMERA_device.h"
+#include "CAMERA_device.hpp"
 
 // Here we need to establish IPC to the atiltcam/ process.
 // This is done via Shared memory.
@@ -61,11 +61,11 @@ void move_camera_right_by( float mDegrees )
 
 float get_camera_tilt( float mDegrees )
 {
-	
+    return 0.0;
 }
 float get_camera_pan( float mDegrees )
 {
-	
+    return 0.0;	
 }
 
 

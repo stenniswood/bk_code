@@ -14,7 +14,14 @@
 #include <time.h> 
 #include "protocol.h"
 #include "devices.h"
+
+#if (PLATFORM==RPI)
+#include "bcm_host.h"
+#include "ilclient.h"
+#endif
+
 #include "utilities.h"
+#include "global.h"
 #include "package_commands.h"
 #include "GENERAL_protocol.hpp"
 #include "AUDIO_protocol.hpp"
@@ -194,7 +201,7 @@ void Init_Audio_Protocol()
 	int result = audio_connect_shared_memory( TRUE );
 }
 
-#include "serverthread.h"
+
 
 /**** ACTION INITIATORS:    (4 possible actions) *****/
 void send_audio_file ( char* mFilename )
@@ -202,10 +209,10 @@ void send_audio_file ( char* mFilename )
     sending_audio_file_fd  = fopen( mFilename, "r" );
     if (sending_audio_file_fd == NULL)
     {
-	nlp_reply_formulated=TRUE;
-	sprintf ( NLP_Response, "Sorry, the audio file %s does not exist!", mFilename );
-	printf( NLP_Response );
-	return;
+		nlp_reply_formulated=TRUE;
+		sprintf ( NLP_Response, "Sorry, the audio file %s does not exist!", mFilename );
+		printf( NLP_Response );
+		return;
     }
     
     BOOL success = OpenAudioFileRead( mFilename );
@@ -216,11 +223,12 @@ void send_audio_file ( char* mFilename )
     }
     
     // Send the Header:
-    char tmp[80];
+    static char tmp[80];
+    int length = (int)strlen(tmp);
     sprintf(tmp, "new audio_header");
-    SendTelegram( (BYTE*)&tmp,       strlen(tmp) );
-    SendTelegram( (BYTE*)&audio_hdr, sizeof(struct WAVE_HEADER));
-    
+  // put back in!!  
+//    SendTelegram( tmp,       length );
+//    SendTelegram( (BYTE*)&audio_hdr, (int)sizeof(struct WAVE_HEADER));    
     
 	AUDIO_tcpip_SendingOn = TRUE;
 	nlp_reply_formulated=TRUE;

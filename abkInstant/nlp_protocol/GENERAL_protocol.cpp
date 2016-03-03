@@ -2,6 +2,7 @@
 #include <list>
 #include <string.h>
 #include <string>
+#include <vector>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -19,6 +20,11 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#include "nlp_extraction.hpp"
+#include "prefilter.hpp"
+#include "client_to_socket.hpp"
+#include "client_memory.hpp"
+#include "nlp_sentence.hpp"
 
 #include "serverthread.h"
 #include "GENERAL_protocol.hpp"
@@ -37,11 +43,6 @@
 #include "easter_eggs_protocol.hpp"
 
 
-#include "nlp_extraction.hpp"
-#include "prefilter.hpp"
-#include "client_to_socket.hpp"
-#include "client_memory.hpp"
-#include "nlp_sentence.hpp"
 
 
  

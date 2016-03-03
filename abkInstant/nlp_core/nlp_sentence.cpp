@@ -7,6 +7,8 @@
 //
 #include <stdlib.h>
 #include <string>
+#include <string.h>
+#include <vector>
 
 #include "nlp_sentence.hpp"
 #include "string_util.h"
@@ -76,7 +78,7 @@ bool Sentence::prefilter_text(  )
 void Sentence::set( char*  mNew )
 {
     // COPY THE RAW Sentence:
-    size_t length   = strlen(mNew);
+    size_t length   = strlen(mNew)+1;
     m_raw_sentence  = new char[length];
     m_sentence      = new char[length];
     m_sentence      = new char[length];
@@ -98,8 +100,18 @@ void Sentence::set( char*  mNew )
 */
 int Sentence::is_found_in_sentence( const char* mSearchWord, bool mOrItsPlural )
 {
+    int retval=0;
+    // When Multiple words are passed in:  such as "go to"
+    size_t length  = strlen(mSearchWord);
+    char* searches = new char[length];
+    strcpy(searches, mSearchWord);
+    int num_search_words=1;
+    char** search_words = split(searches, ' ', &num_search_words);
+    int num_found = 0;
+    
+    // Also search for it's plural:
     char plural[80];
-    if (mOrItsPlural)
+    if ((num_search_words==1) && (mOrItsPlural))
     {
         // Add an 's' to the word :
         strcpy(plural, mSearchWord);
@@ -108,20 +120,23 @@ int Sentence::is_found_in_sentence( const char* mSearchWord, bool mOrItsPlural )
         plural[length+1] = 0;
     }
     
+    // Search :
     int resultP = -1;
     for (int w=0; w<m_num_words; w++)
     {
-        int result = strcmp( m_words[w], mSearchWord );
-        if (result==0)
+        int result = strcmp( m_words[w], search_words[num_found] );
+        if (result==0) {
+            num_found++;
+            if (retval==0) retval = w;      // want first occurence.
             return w+1;
-
-        if (mOrItsPlural) {
+        }
+        if ((num_search_words==1) && (mOrItsPlural)) {
             result = strcmp( m_words[w], plural );
             if (result==0)
                 return w+1;
         }
     }
-    return 0;
+    return retval;
 }
 void Sentence::set_word_pointer( int  mWordIndex )
 {
@@ -144,8 +159,9 @@ int  Sentence::next_word_matches( const char* mSearchWord, bool mOrItsPlural )
 } // returns word index of first occurence.
 
 /* Note: does not increment! */
-int  Sentence::next_word_is_a_number( )
+bool  Sentence::next_word_is_a_number( )
 {
+    if (m_last_search_found_index>=m_num_words) return false;
     return is_nth_word_a_number(m_last_search_found_index);
 } // returns word index of first occurence.
 
@@ -243,7 +259,7 @@ bool  Sentence::is_nth_word_a_number    ( int mIndex )
             (m_words[mIndex][i]=='0') || (m_words[mIndex][i]=='1') || (m_words[mIndex][i]=='2') ||
             (m_words[mIndex][i]=='3') || (m_words[mIndex][i]=='4') || (m_words[mIndex][i]=='5') ||
             (m_words[mIndex][i]=='6') || (m_words[mIndex][i]=='7') || (m_words[mIndex][i]=='8') ||
-            (m_words[mIndex][i]=='9') || (m_words[mIndex][i]=='.') )
+            (m_words[mIndex][i]=='9') || (m_words[mIndex][i]=='.') || (m_words[mIndex][i]=='-') )
         {}
         else
             return false;
@@ -255,6 +271,20 @@ float Sentence::get_nth_word_as_a_number( int mIndex )
 {
     float result = atof(m_words[mIndex] );
     return result;
+}
+
+// counts how many words in the sentence are numbers.
+int Sentence::number_of_numbers_present()
+{
+    bool isNum=false;
+    int count=0;
+    for (int w=0; w<m_num_words; w++)
+    {
+        isNum = is_nth_word_a_number(w);
+        if (isNum)
+            count++;
+    }
+    return count;
 }
 
 // Use to find prepositions positions (or any word) :

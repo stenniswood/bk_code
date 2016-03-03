@@ -132,7 +132,7 @@ int main( int argc, char *argv[] )
 		cli_wait_for_ack_update();
 		cli_wait_for_response();		
 		cli_ack_response();		
-		printf("RESPONSE:  %s\n", get_sentence() );
+		printf("RESPONSE:  %s\n", cli_get_sentence() );
 	}
 	printf("================= DONE ========================\n");
 }

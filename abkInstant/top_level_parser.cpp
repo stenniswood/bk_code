@@ -58,10 +58,10 @@
 
 void top_level_parse(char* mSentence)
 {
-	char* filt_sentence = prefilter(mSentence);
+/*	char* filt_sentence = prefilter(mSentence);
 	char* object_list = extract_objects(filt_sentence);
 	char* action_list = extract_actions(filt_sentence);	
-	perform(action_list, object_list);
+	perform(action_list, object_list);*/
 	
 
 }

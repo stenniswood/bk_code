@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#if (PLATFORM==RPI)
+#include "bcm_host.h"
+#include "ilclient.h"
+#endif
 
 #include "bk_system_defs.h"
 #include "protocol.h"
 #include "devices.h"
-#include "AUDIO_device.h"
+#include "AUDIO_device.hpp"
 #include "package_commands.h"
 
 

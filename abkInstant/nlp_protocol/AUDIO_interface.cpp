@@ -21,14 +21,23 @@ Tenniswood - 2014
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
+
+#if (PLATFORM==RPI)
+#include "bcm_host.h"
+#include "ilclient.h"
+#endif
+
 #include "bk_system_defs.h"
-#include "utilities.h"
+
+//#include "utilities.h"
 #include "audio_memory.h"
 #include "AUDIO_device.hpp"
 #include "AUDIO_protocol.hpp"
+
+//#define WORD unsigned short
+
 #include "AUDIO_file_util.h"
 #include "serverthread.h"
-
 
 
 #define MAX_USERS     10
