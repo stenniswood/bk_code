@@ -5,6 +5,11 @@
 extern "C" {
 #endif */
 
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define dprintf if (Debug) printf("%s ", __FILENAME__); if (Debug) printf
+
+#define radians(arg) (3.1415*arg/180.0)
+#define degrees(arg) (arg*180.0/3.1415)
 
 // USE THESE FOR COLOR CODING THE PRINTF's!
 #define KNRM  "\x1B[0m"

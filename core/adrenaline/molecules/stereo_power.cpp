@@ -17,6 +17,10 @@
 
 #define margin_percent 0.07
 
+#define Debug 0
+#define dprintf if (Debug) printf
+
+
 
 StereoPowerLevels::StereoPowerLevels(int Left, int Right, int Top, int Bottom )
 : Control(Left,Right,Top,Bottom)
@@ -28,8 +32,6 @@ StereoPowerLevels::StereoPowerLevels( int Width, int Height )
 : Control (Width,Height)
 {
 	Initialize();
-//	width  = Width;
-//	height = Height;
 }
 
 StereoPowerLevels::StereoPowerLevels()
@@ -45,7 +47,6 @@ void StereoPowerLevels::Initialize()
 
 	set_max ( 100.);
 	set_min (   0.);
-	//set_width_height( width, height );
 }
 
 void StereoPowerLevels::set_width_height ( int Width,  int Height )
@@ -76,7 +77,7 @@ StereoPowerLevels::~StereoPowerLevels()
 int StereoPowerLevels::draw( )
 {
 	Control::draw();
-	printf("StereoPowerLevels::draw()\n");
+	dprintf("StereoPowerLevels::draw()\n");
 	left_ch.draw();
 	right_ch.draw();		
 }

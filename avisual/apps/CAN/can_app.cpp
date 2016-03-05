@@ -141,7 +141,7 @@ void 	CANApp::Initialize		(	)
 	m_application_name = "CAN App";	
 	Application::Initialize();
 			
-	m_gyro 	  		= new GyroView   ();
+	m_gyro 	  		= new GyroOverview   ();
 	m_analog  		= new AnalogView ();
 	m_msgs 	  		= new CANMessages();	// defined in ../core/adrenaline/molecules/can_window.cpp
 	m_msg_view    	= new CANMessageView();		

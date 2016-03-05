@@ -3,8 +3,16 @@
 
 #include "scroll_control.hpp"
 
+// Mask 0x03
+#define TEXTVIEW_ALIGN_MASK_HORIZ 0xFFFC
+#define TEXTVIEW_ALIGN_LEFT 	 0x00
+#define TEXTVIEW_ALIGN_CENTER 0x01
+#define TEXTVIEW_ALIGN_RIGHT  0x02
+
 #define CENTER_HORIZONTAL 0x01
-#define CENTER_VERTICAL   0x02
+
+// Mask 0x04
+#define CENTER_VERTICAL   0x04
 
 class TextView : public ScrollControl 
 {
@@ -28,7 +36,8 @@ public:
 	int  			count_num_lines_present	( 								);
 	virtual void  	set_position			( int Left, int Right, int Top, int Bottom );
 	virtual void  	set_text_size		  	( float TextSize		 		);
-		
+ 
+	void 	set_alignment_horizontal		( byte mAlign=TEXTVIEW_ALIGN_LEFT );		
 	void 	center_vertical  	( BOOL on )	{ if (on) style |= CENTER_VERTICAL;	else style &= ~CENTER_VERTICAL;	};
 	void 	center_horizontal	( BOOL on )	{ if (on) style |= CENTER_HORIZONTAL; else style &= ~CENTER_HORIZONTAL;	};
 

@@ -53,7 +53,7 @@ void 	VerticalMenu::Initialize(	)
 	callback_all_items = NULL;
 	has_scroller	= false;
 	isTopDown  		= true;
-	text_size 		= 15;
+	text_size 		= 19;
 	text_color 		= 0xFF000000;	
 }
 
@@ -229,9 +229,11 @@ Application*	VerticalMenu::get_application(   )
 int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 {
 	int result = get_hit_index( x, y );
+	//printf("VerticalMenu::onClick() hit=%d\n", result);
+
 	if ((result < m_entries.size()) && (result >= 0))
 	{
-		if (Debug) printf("VerticalMenu:: Selected Item #%d: %s\n", result, m_entries[result].text );
+		printf("VerticalMenu:: Selected Item #%d: %s\n", result, m_entries[result].text );
 		if (callback_all_items) {
 			Application* app = get_application(   );
 			callback_all_items( NULL, result, app );

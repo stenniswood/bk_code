@@ -16,7 +16,6 @@ ifeq ($(PLATFORM), $(Mac))
 HOME_PATH = /Users/stephentenniswood/
 endif
 
-
 CC		   = g++
 OPTIONS	   =  -Wwrite-strings -fpermissive -Wreturn-type -Wformat
 # 
@@ -28,16 +27,23 @@ CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 			 ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
 APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/ ./apps/file_editer/ ./apps/video/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
-INC		= $(CORE_INC) $(APPS_INC) $(GAMES_INC) ./voice/ ./kinetic/ ./
+SQL_INC    = -I/usr/include/mysql
+INC		= $(CORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
+
+
 SELF_INC   = ../../avisual/ ./ ../ 
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 		 	 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
 #$(info $$INC is [${INC}])
 
 # LIBRARY FLAGS :
+SQL_LIB = -L/usr/lib/arm-linux-gnueabihf -lmysqlclient -lpthread -lz -lm -lrt -ldl
 LIBFLAGS   = -L../core/libs/ilclient/ -L/opt/vc/lib -L../core/libs/vgfont/  \
-			-ljpeg -lshapes -lwiringPi -lm 
-CFLAGS = -g -Wall -DPLATFORM=$(PLATFORM) -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
+			-ljpeg -lshapes -lwiringPi -lm $(SQL_LIB)
+SQL_CFLAGS = -I/usr/include/mysql -DBIG_JOINS=1  -fno-strict-aliasing -g
+CFLAGS = -g -Wall -DPLATFORM=$(PLATFORM) -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) \
+		-DMac=$(Mac) $(SQL_CFLAGS)
+
 #CFLAGS +=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX \
 #		-D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 \
 #		-U_FORTIFY_SOURCE -Wall -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -ftree-vectorize \
@@ -54,16 +60,16 @@ CAN_OBJS   = can_id_list.o
 #CAN_Interface.o can_instance.o can_eid.o can_buff.o can_txbuff.o bk_system_defs.o 
 #MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
 # ipc_mem_bkinstant.o
-MSG_OBJS   =  parser_tilt.o 
-MISC_OBJS  = vector_math.o ini_file.o fft.o
+MSG_OBJS    =  parser_tilt.o 
+MISC_OBJS   = vector_math.o ini_file.o fft.o
 HARDWARE_OBJS = AUDIO_device.o sinewave.o tone_generator.o
-FUSE_OBJS  = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o 
-VG_OBJS    = libshapes.o oglinit.o 
+FUSE_OBJS   = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o 
+VG_OBJS     = libshapes.o oglinit.o 
 AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   test_layouts.o test_combo_layouts.o client_list_control.o \
 			  test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
 			  power.o home_screen.o 
-APPS_OBJS =  
+APPS_OBJS   = 
 FILE_EDIT_OBJS = file_editor_app.o 
 VIDEO_APP_OBJS = video_app.o video.o 
 DRAW_APP_OBJS  = draw_app.o draw_canvas.o 
@@ -92,12 +98,13 @@ ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			stick_leg.o tab_control.o table_window.o tabular_listbox.o \
 			TextFile.o text_view.o tk_colors.o wave_view.o window.o    \
 			horizontal_menu.o vertical_menu.o spinner.o can_msg_view.o wave.o \
-			edit_box.o drop_down_box.o listbox_icon.o
+			edit_box.o drop_down_box.o listbox_icon.o GyroViewI.o
 ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
 			stereo_power.o stick_figure.o system_bar.o can_window.o   \
-			application.o file_editor.o label_edit_box.o complete_file_browser.o icon_bar.o
-ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o
+			application.o file_editor.o label_edit_box.o complete_file_browser.o \
+			icon_bar.o 
+ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o calendar_entry.o
 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o 

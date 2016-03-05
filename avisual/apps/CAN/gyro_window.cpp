@@ -35,7 +35,7 @@ int graph_index = 0;
 	
 void update_value_cb ( void* mObj )
 {
-	GyroView* gv = (GyroView*)mObj;
+	GyroOverview* gv = (GyroOverview*)mObj;
 	gv->m_match_data[graph_index].instance = mvc->m_instance;
 	gv->m_match_data[graph_index].id = mvc->m_id;	
 	gv->m_match_data[graph_index].start_byte = mvc->m_id;	
@@ -45,7 +45,7 @@ void update_value_cb ( void* mObj )
 void change_value_cb ( void* mObj )
 {
 	printf("=== change_value_cb === \n");	
-	GyroView* gv = (GyroView*)mObj;
+	GyroOverview* gv = (GyroOverview*)mObj;
 	
 	graph_index = 0;
 	mvc = new MsgValueComposer( );
@@ -63,25 +63,25 @@ void change_value_cb ( void* mObj )
 }
 
 /****************************************************************
-		GyroView Class Implementation
+		GyroOverview Class Implementation
 ****************************************************************/
-GyroView::GyroView()
+GyroOverview::GyroOverview()
 {
 	Initialize();
 }
-GyroView::GyroView( int Left, int Right, int Top, int Bottom )
+GyroOverview::GyroOverview( int Left, int Right, int Top, int Bottom )
 : Window (Left,Right,Top,Bottom)
 {
 	Initialize();
 }
-GyroView::GyroView( int Width, int Height  )
+GyroOverview::GyroOverview( int Width, int Height  )
 {
 	left=0; bottom=0; 
 	width  = Width;
 	height = Height;
 	Initialize();
 }
-GyroView::~GyroView()
+GyroOverview::~GyroOverview()
 {
 	
 }
@@ -90,10 +90,10 @@ const char x_title[] = "X Axis Accel/Gyro";
 const char y_title[] = "Y Axis Accel/Gyro";
 const char z_title[] = "Z Axis Accel/Gyro";
 
-void GyroView::Initialize(	)
+void GyroOverview::Initialize(	)
 {
 	Window::Initialize();
-	printf("---GyroView::Initialize()\n");
+	printf("---GyroOverview::Initialize()\n");
 
 /*	accel[0]  = new DataSet();
 	gyro [0]  = new DataSet();
@@ -168,12 +168,12 @@ void GyroView::Initialize(	)
 	add_control( &m_value3 );		
 }
 
-int GyroView::calc_metrics()
+int GyroOverview::calc_metrics()
 {	
 	return 0;
 }
 
-int GyroView::place_views()
+int GyroOverview::place_views()
 {
 	// 3 graphs side by side.
 	int	Number_of_graphs = 3;
@@ -182,7 +182,7 @@ int GyroView::place_views()
 	float graph_margin   = graph_x_spacing * 0.1;	
 	float graph_height   = (height)*0.8;
 	float graph_h_margin = (height)*0.1;	
-	printf("GyroView::place_views() \n");
+	printf("GyroOverview::place_views() \n");
 
 	m_value1.move_to( graph_margin, 150 );
 	m_value2.move_to( graph_margin+150, 150 );
@@ -205,7 +205,7 @@ int GyroView::place_views()
 	return 1;
 }
 
-int	GyroView::handle_generic_msg ( struct sCAN* msg )
+int	GyroOverview::handle_generic_msg ( struct sCAN* msg )
 {
 	float gyro_sum_x = 0;
 	float gyro_sum_y = 0;
@@ -259,7 +259,7 @@ int	GyroView::handle_generic_msg ( struct sCAN* msg )
 	Invalidate();		
 	return retval;
 }
-int	GyroView::handle_incoming_msg	( struct sCAN* msg )
+int	GyroOverview::handle_incoming_msg	( struct sCAN* msg )
 {
 	float gyro_sum_x = 0;
 	float gyro_sum_y = 0;
@@ -308,36 +308,36 @@ int	GyroView::handle_incoming_msg	( struct sCAN* msg )
 	return 0;
 }
 
-int	GyroView::setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms )
+int	GyroOverview::setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms )
 {
 	return 0;
 }
-void GyroView::register_with_display_manager()
+void GyroOverview::register_with_display_manager()
 {
 //	MainDisplay.remove_all_objects(	);
 //	MainDisplay.load_resources();	
 }
 
-int	GyroView::setup_triggered_response_msg( struct sCAN* mTriggerMsg, struct sCAN* mResponse )
+int	GyroOverview::setup_triggered_response_msg( struct sCAN* mTriggerMsg, struct sCAN* mResponse )
 {
 	return 0;
 }
-void GyroView::fill_phony_msgs()
+void GyroOverview::fill_phony_msgs()
 {
 
 }
-int	GyroView::onCreate(  )	// chance to load resources, call functions which use fonts
+int	GyroOverview::onCreate(  )	// chance to load resources, call functions which use fonts
 {
 	if (created)	return 0;
 	// add code here!
 	int retval = Window::onCreate();
 	return retval;
 }
-int	GyroView::onClick	( int x, int y, bool mouse_is_down)
+int	GyroOverview::onClick	( int x, int y, bool mouse_is_down)
 {
 	return Window::onClick( x,y,mouse_is_down);	
 }
-int GyroView::draw(	)
+int GyroOverview::draw(	)
 {
 	return Window::draw();
 }

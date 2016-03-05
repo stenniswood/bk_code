@@ -4,6 +4,7 @@
 #include <time.h>
 #include "control.hpp"
 #include "button.hpp"
+#include "calendar_entry.hpp"
 
 /* This window will show the activities for a day on the calendar.
 	It sits beside the calendar and changes each time the user clicks a different day.
@@ -20,13 +21,12 @@ public:
 	virtual void 	Initialize(	);
 	
 	int				show_date	( int mMonth, int mDay );	// other than the current
-	void			previous_month();
-	void			next_month();
+
 
 	virtual int   	onCreate			(	);	
 	virtual int   	draw 				(	);	
-	int   			draw_day_summary	(	);		
-	int   			draw_day_details 	(	);			
+	void   			draw_day_summary	(	);		
+	void   			draw_entry_details 	(	);			
 
 
 	int				set_on_click_listener( void (*callback)(void*), void* mOn_click_context );
@@ -39,6 +39,12 @@ public:
 	
 	struct tm		m_local_time;	
 	int				m_display_mode;
+	
+	float			m_left_margin;
+	int				m_row_index;
+	
+	CalendarEntry 	ce;
+	
 };
 
  

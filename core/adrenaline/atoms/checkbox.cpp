@@ -62,6 +62,10 @@ void CheckBox::wrap_content( )
 	height = text_size*1.5;	
 }
 
+void CheckBox::set_text( const char* NewText, bool mWrapContent=false )	// Allocates and copies!		
+{
+	Control::set_text( NewText, true);
+}
 int	CheckBox::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
 {
 	on_click_context  = mOn_click_context;
@@ -111,6 +115,17 @@ int	CheckBox::set_height_to_text()
 	height = 1.5*text_size;
 }*/
 
+Control* CheckBox::HitTest ( int x, int y 	)
+{
+	Control* retval=NULL;
+
+	retval = Control::HitTest(x,y);
+	printf("CheckBox::HitTest() %x\n", retval);
+	print_positions();
+	return retval;
+}
+
+
 int	CheckBox::set_check(bool CheckOn)
 {
 	checked = CheckOn;
@@ -118,6 +133,7 @@ int	CheckBox::set_check(bool CheckOn)
 
 int	CheckBox::onClick(int x, int y, bool mouse_is_down)
 {
+	printf("CheckBox::onClick()\n");
 	checked = !checked;		// some listeners want the check to change before
 							// so that they know the new state.
 							// what if others want the old state?

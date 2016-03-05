@@ -25,13 +25,13 @@ struct stValueInfo {
 	int	 num_bytes;
 };
 
-class GyroView : public Window
+class GyroOverview : public Window
 {
 public:
-	GyroView ( );
-	GyroView ( int Left, int Right, int Top, int Bottom );
-	GyroView ( int Width, int Height 					);
-	~GyroView( );
+	GyroOverview ( );
+	GyroOverview ( int Left, int Right, int Top, int Bottom );
+	GyroOverview ( int Width, int Height 					);
+	~GyroOverview( );
 
 	virtual void 	Initialize  ( );
 	int				calc_metrics( );

@@ -54,7 +54,10 @@
 */
 /***********************************************************************/
 extern int DisplayNum;
+
 #define Debug 0
+#define dprintf if (Debug) printf
+
 
 pthread_t udp_thread;  
 void create_threads()
@@ -143,14 +146,14 @@ void gui_interface()
 	{
 		//if (left_mouse_button_prev == 0)
 		{
-			printf(" Left button clicked!  mousexy=(%d,%d)\n", x,y );
+			dprintf(" Left button clicked!  mousexy=(%d,%d)\n", x,y );
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
 			{ 
-				printf("clicked an object %s %x!\n", object_clicked->class_name, object_clicked);
+				dprintf("clicked an object %s %x!\n", object_clicked->class_name, object_clicked);
 				int num = object_clicked->onClick( x, y );
 				//UpdateDisplaySemaphore=1;
-				printf("clicked an object - called onClick() DONE\n");				
+				dprintf("clicked an object - called onClick() DONE\n");				
 			}  
 			left_mouse_button_prev = result;
 		}
@@ -252,6 +255,7 @@ void behavior_interface()
 }
 
 extern Wave dWave;
+#include "calendar_entry.hpp"
 
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
@@ -276,7 +280,7 @@ int main( int argc, char *argv[] )
 		} else {
 			DisplayNum = atoi(argv[1]);
 			if (Debug) printf("Loading Test Screen # %d\n", DisplayNum);
-			load_test_screen(DisplayNum); 
+			//load_test_screen(DisplayNum); 
 		} 
 	} else 
 		init_home_screen();		// opening screen!	
@@ -285,6 +289,19 @@ int main( int argc, char *argv[] )
 	UpdateDisplaySemaphore=1;
 	MainDisplay.onCreate();
 	dev_keyboard_init();
+
+	CalendarEntry ce;
+	ce.connect_to_calendar_db();
+	//ce.create_calendar_table_nq();
+	//ce.query(false);
+	
+	ce.m_user_id = 2;
+	ce.m_location = "629 Junk";
+	ce.m_description = "This stuff is working well";
+	//ce.sql_add();
+	
+	ce.find_date( 2 );
+	
 
 	//audio_file_open();
 	//play_waveform( &dWave, 1 );

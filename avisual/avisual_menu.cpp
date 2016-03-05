@@ -53,7 +53,7 @@ int show_atom_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 	switch(mMenuIndex) 
 	{	
 	case 0:	init_simple_button_test	();		break;
-	case 1:	init_simple_textview_test();	break;
+	case 1:	init_gyro_view		    ();		break;
 	case 2:	init_textview_test		();		break;
 	case 3: init_progressbar_test	();		break;
 	case 4: init_radio_button_test	();		break;
@@ -79,7 +79,7 @@ void init_atom_menu()
 	if (Debug) printf("init_atom_menu()\n");
 	atoms.add_simple_command( "init_simple_button_test" );
 	if (Debug) printf("init_atom_menu() 1\n");
-	atoms.add_simple_command( "init_simple_textview_test" );
+	atoms.add_simple_command( "init_gyro_view" );
 	atoms.add_simple_command( "init_textview_test"		);
 	atoms.add_simple_command( "init_progressbar_test"   );
 	atoms.add_simple_command( "init_radio_button_test"  );

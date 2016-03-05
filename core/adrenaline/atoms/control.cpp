@@ -146,16 +146,12 @@ int	Control::onCreate(  )
 
 void Control::wrap_content( ) 
 { 	
-	//if (created==false)  return;	//if fonts are not yet loaded...
 	VGfloat text_width;
-	//if (((width==-1.) || (height==-1.)) && (text))
 	if (text)
 	{
 		text_width = TextWidth( (char*)text, SerifTypeface, (int)text_size );
-		//if (width == -1.)
-			width  = text_width*1.2;
-		//if (height== -1.)
-			height = text_size*1.5;
+		width  = text_width*1.5;
+		height = text_size*2;
 		//printf("\t\tControl::wrap_content() Got Called! w=%6.1f h=%6.1f\n", width, height);			
 	}
 }

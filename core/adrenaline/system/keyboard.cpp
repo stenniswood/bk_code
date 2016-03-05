@@ -25,7 +25,7 @@
 #include "client_memory.hpp"
 #include "client_list_control.hpp"
 #include "keyboard.hpp"
-
+#include "bk_system_defs.h"
 
 #define KEY_WIDTH  50
 #define KEY_HEIGHT 50
@@ -33,7 +33,8 @@
 #define KEY_SPACING_ROW 64
 
 #define Debug 1
-#define Printf if (Debug) printf
+
+
 
 Keyboard::Keyboard( int Left,  int Right, int Top, int Bottom )
 :Window(Left, Right, Top,Bottom)
@@ -54,7 +55,7 @@ Keyboard::~Keyboard()
 
 void	Keyboard::initialize_keys()
 {
-	if (Debug) printf("Initilizing Keyboard\n");
+	dprintf("Initilizing Keyboard\n");
 	struct stKey key;
 	key.width  = KEY_WIDTH;
 	key.height = KEY_HEIGHT;		// we'll adjust the height to match the 16:9 aspect ratio for which the data is intended.	
@@ -119,7 +120,7 @@ void	Keyboard::initialize_keys()
 
 void	Keyboard::initialize_alt_keys()
 {
-	if (Debug) printf("Initilizing Symbol Keyboard\n");
+	dprintf("Initilizing Symbol Keyboard\n");
 	struct stKey key;
 	key.width  = KEY_WIDTH;
 	key.height = KEY_HEIGHT;		// we'll adjust the height to match the 16:9 aspect ratio for which the data is intended.	
@@ -196,7 +197,7 @@ void Keyboard::Initialize()
 	m_alt_down   = false;
 	m_index = 0;
 	memset(m_composition, 0, 127);
-	if (Debug) printf("===Keyboard::Initialize()  Key_color = %x\n", key_color );	
+	dprintf("===Keyboard::Initialize()  Key_color = %x\n", key_color );	
 }
 
 void Keyboard::adjust_height()
@@ -259,7 +260,7 @@ int Keyboard::draw()
 	
 	StrokeWidth(2);			
 	Stroke_l   ( 0xFF000000 );
-	//if (Debug) printf("Key_color = %x\n", key_color );
+	dprintf("Key_color = %x\n", key_color );
 	Fill_l     ( key_color );			// background_color
 	Roundrect  ( 0, sample_y,  width, 1.5*text_size, 15.0, 15.0 );
 
@@ -274,13 +275,13 @@ int Keyboard::draw()
 	else 
 		draw_keys();
 
-	if (Debug) printf("Keyboard::draw() done\n" );		
+	dprintf("Keyboard::draw() done\n" );		
 }
 
 Control* Keyboard::HitTest( int x, int y )
 {
 	Control* retval = Window::HitTest(x,y);
-	if (Debug) printf("Keyboard::HitTest()  %x\n", retval); 
+	dprintf("Keyboard::HitTest()  %x\n", retval); 
 	return retval;
 }
 
@@ -296,7 +297,7 @@ void Keyboard::append_character	(char mChar)
 	m_composition[m_index] 		= mChar;
 	m_composition[m_index+1]    = 0; 
 	m_index++;  
-	printf("append_character()  m_index=%d; %s \n", m_index, m_composition);
+	dprintf("append_character()  m_index=%d; %s \n", m_index, m_composition);
 }
 
 int Keyboard::handle_special_keys( int mKeyIndex )
@@ -376,10 +377,10 @@ int Keyboard::find_min_distance( int x, int y, bool mAlternate )
 int Keyboard::onClick(int x, int y, bool mouse_is_down)
 {
 	char key;
-	if (Debug) printf("Keyboard::onClick()  x,y = %d,%d\n", x, y );
+	dprintf("Keyboard::onClick()  x,y = %d,%d\n", x, y );
 	if ((Debug) && m_alt_down) printf("===== ALT KEYBOARD ACTIVE ===\n");
 	int closest_key = find_min_distance( x,y, m_alt_down );
-	if (Debug)  printf("Min Distance, closest key is %d. \t", closest_key );
+	dprintf("Min Distance, closest key is %d. \t", closest_key );
 		
 	int key_index;
 	if (m_alt_down) {
@@ -387,14 +388,14 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 		key = m_alt_keys[key_index].text[0];
 	} else {
 		key_index = KeyHitTest   ( x,y );
-		if (Debug) printf("KeyHitTest() = %d\n", key_index );
+		dprintf("KeyHitTest() = %d\n", key_index );
 		if (m_shift_down)	{		
 			m_shift_down = false;	// just 1 key! 
 			key = toupper( m_keys[key_index].text[0] );
 		} else 
 			key = tolower( m_keys[key_index].text[0] );
 	}
-	if (Debug)	printf("KeyHitTest()=%d; key=%c\n", key_index, key );
+	dprintf("KeyHitTest()=%d; key=%c\n", key_index, key );
 
 	if (key_index >= 0) 		// hit 
 	{
@@ -409,9 +410,9 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 		append_character ( key );
 		if (m_index>BUFFER_LENGTH)	m_index = BUFFER_LENGTH;
 		
-		if (Debug) printf(" Keyboard::key_index=%d xy=<%d,%d>: key:<%d,%d>  %c\n",key_index, x,y, 
+		dprintf(" Keyboard::key_index=%d xy=<%d,%d>: key:<%d,%d>  %c\n",key_index, x,y, 
 						m_keys[key_index].x, m_keys[key_index].y, m_keys[key_index].text[0] );												 
-		if (Debug) printf(" Keyboard::%d %c %s\n",m_index, key, m_composition );
+		dprintf(" Keyboard::%d %c %s\n",m_index, key, m_composition );
 		return TRUE;
 	}
 

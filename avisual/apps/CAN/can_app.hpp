@@ -73,7 +73,7 @@ public:
 	NetworkView*			m_board_view;		// in ../core/adrenaline/molecules/adren_network_view.cpp
 	CANMessageView*			m_msg_view;			// in ../core/adrenaline/atoms/
 	CANMessages*			m_msgs;				// in ../core/adrenaline/molecules/can_window.cpp
-	GyroView*				m_gyro;				// in apps/CAN/gyro_window.h
+	GyroOverview*			m_gyro;				// in apps/CAN/gyro_window.h
 	AnalogView*				m_analog;			// in apps/CAN/analog_board_app.cpp
 };
 

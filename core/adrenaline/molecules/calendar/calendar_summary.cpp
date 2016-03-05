@@ -11,11 +11,16 @@
 #include "/home/pi/openvg/shapes.h"
 #include "adrenaline_windows.h"
 #include "calendar.hpp"
+#include "calendar_entry.hpp"
 #include "calendar_summary.hpp"
+#include "bk_system_defs.h"
 
-#define Debug 0
-#define dprintf if (Debug) printf
 
+
+
+#define Debug 1
+
+const float ROW_SPACING_MULTIPLIER = 1.25;
 
 /* This should retrieve all entries from the SQL database for the selected day.
 
@@ -39,21 +44,22 @@ CalendarSummary::~CalendarSummary( )
 void 	CalendarSummary::Initialize(	)
 { 
 	Control::Initialize();
+	m_left_margin = 10;
 	//background_color = 0xFFFFFF00;
 	background_color = 0xFFA0002C;	
 }
+
+/* The user wants to see the specified month and day */
 int		CalendarSummary::show_date	( int mMonth, int mDay )
 { 
+	ce.m_scheduled_time_bd.tm_mon = mMonth;
+	ce.m_scheduled_time_bd.tm_mday = mDay;	
+	ce.find_date();
+		
 }	
-void	CalendarSummary::previous_month()
-{ 
-}
-void	CalendarSummary::next_month()
-{ 
-}
 int   	CalendarSummary::onCreate			(	)
 { 
-	//printf("CalendarSummary::onCreate()\n");
+	dprintf("CalendarSummary::onCreate()\n");
 	int retval = Control::onCreate();
 	return retval;
 }	
@@ -61,20 +67,37 @@ int   	CalendarSummary::draw 				(	)
 { 
 	return Control::draw();
 }	
-int   	CalendarSummary::draw_day_summary	(	)
-{ 
 
-}		
-int   	CalendarSummary::draw_day_details 	(	)
+void 	CalendarSummary::draw_day_summary	(	)
 { 
+	MYSQL_ROW result = ce.goto_first_row();		//mysql_fetch_row( ce.m_result );	
+	while (result)
+	{		
+		ce.extract_result();
+		draw_entry_details();
+		result = ce.goto_next_row();
+	}
 }
+
+/* For the last row fetched inside CalendarEntry ce class */
+void  	CalendarSummary::draw_entry_details 	( )
+{ 
+	string text = ce.form_summary_string();
+	//stroke_color( text_color );
+	float x = m_left_margin;
+	float y = m_row_index * text_size * ROW_SPACING_MULTIPLIER;
+	Text(x,y, text.c_str(), SerifTypeface,  text_size);	
+}
+
 int		CalendarSummary::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
 { 
 }
+
 int		CalendarSummary::onClick		(int x, int y, bool mouse_is_down)
 { 
 	return Control::onClick(x,y,mouse_is_down);
 }
+
 void	CalendarSummary::place_views	( )
 { 
 }

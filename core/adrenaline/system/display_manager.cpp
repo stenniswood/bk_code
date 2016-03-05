@@ -111,7 +111,7 @@ void DisplayManager::show_keyboard	(   )
 	m_keyboard.show();
 	m_keyboard.draw();
 	m_keyboard.z_order = ++m_z_order_counter;	// for the hittest 
-	if (Debug)  printf("DisplayManager::show_keyboard  %d	\n", m_z_order_counter);
+	if (Debug)  printf("DisplayManager::show_keyboard  %ld	\n", m_z_order_counter);
 	sort_z_order();
 }
 
@@ -132,7 +132,7 @@ void DisplayManager::show_calendar	(   )
 	m_calendar.show();
 	m_calendar.draw();
 	m_calendar.set_z_order( ++m_z_order_counter );
-	if (Debug) printf("DisplayManager::show_calendar  %d	\n", m_z_order_counter);
+	if (Debug) printf("DisplayManager::show_calendar  %ld	\n", m_z_order_counter);
 	sort_z_order();
 }
 void DisplayManager::hide_calendar	(   )
@@ -151,7 +151,7 @@ void DisplayManager::grab_focus( Control* mControl )
 
 bool DisplayManager::relay_key( char mKey )
 {
-	if (Debug) printf("DisplayManager::relay_key %d %c; focus=%x \n", mKey, mKey, m_focus);	
+	if (Debug) printf("DisplayManager::relay_key %d %c; focus=%p \n", mKey, mKey, m_focus);	
 	if (m_focus==NULL)	return false;
 	m_focus->onKey(mKey);
 	return true;
@@ -215,8 +215,8 @@ int	DisplayManager::onPlace( )
 	m_calendar.hide		   ( );
 	
 	float summary_w = 250;
-	//float summary_h = m_calendar.get_height();
-	m_calendar_summary.set_position( m_calendar.get_left()-summary_w, m_calendar.get_right(), 
+	//float summary_h = m_calendar.get_height();   m_calendar.get_left()-summary_w
+	m_calendar_summary.set_position( 0, m_calendar.get_right(), 
 									 m_calendar.get_height(), 0.0 );
 	m_calendar_summary.onCreate( );
 	m_calendar_summary.hide    ( );	
@@ -257,10 +257,11 @@ void DisplayManager::start_app( Application* mApp )
 
 void DisplayManager::print_running_apps(  )
 {
+	int i=0;
 	vector<Application*>::iterator iter = m_running_apps->begin();
 	while (iter != m_running_apps->end())
 	{
-		printf("#%d - %s\n", (*iter)->m_application_name.c_str() );
+		printf("#%d - %s\n", i++, (*iter)->m_application_name.c_str() );
 		iter++;		
 	}
 }
@@ -445,11 +446,11 @@ int   DisplayManager::draw(	)
 {
 	if (Debug2) printf("\n======display manager draw===========\tStart:\n" );
 	start_screen();
-	if (Debug)  printf("SystemBar: %x\n", (unsigned int*)&m_sb );
-	if (Debug)  printf("Side  Bar: %x\n", (unsigned int*)&m_side );
-	if (Debug)  printf("StatusBar: %x\n", (unsigned int*)&m_status );
-	if (Debug)  printf("Keyboard: %x\n" , (unsigned int*)&m_keyboard );
-	if (Debug)  printf("Calendar: %x\n" , (unsigned int*)&m_calendar );	
+	if (Debug)  printf("SystemBar: %p\n", (unsigned int*)&m_sb );
+	if (Debug)  printf("Side  Bar: %p\n", (unsigned int*)&m_side );
+	if (Debug)  printf("StatusBar: %p\n", (unsigned int*)&m_status );
+	if (Debug)  printf("Keyboard: %p\n" , (unsigned int*)&m_keyboard );
+	if (Debug)  printf("Calendar: %p\n" , (unsigned int*)&m_calendar );	
 	if ((Debug) && m_keyboard.is_visible()) printf("KB Visible!");
 	if (Debug)  printf("\n");
 
@@ -467,7 +468,7 @@ int DisplayManager::any_invalid_children()
 	{
 		if 	((*iter)->is_invalid())
 		{
-			if (Debug) printf("invalid child:  %x\n", (*iter) );
+			if (Debug) printf("invalid child:  %p\n", (*iter) );
 			return TRUE;	
 		}
 	}	
@@ -521,7 +522,7 @@ int   DisplayManager::draw_children( )
 	vector<Control*>::iterator	iter = m_child_controls.begin();
 	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
-		if (Debug2) printf("draw child %d %x\n", i, *iter );
+		if (Debug2) printf("draw child %d %p\n", i, *iter );
 		(*iter)->draw();		
 	}
 
@@ -556,7 +557,7 @@ int   DisplayManager::draw_background( 	)
 Control* DisplayManager::HitTest( int x, int y )
 {
 	Control* retval = Control::HitTest(x,y);
-	if (Debug)  printf("DisplayManager::HitTest()  %x \n", retval );
+	if (Debug)  printf("DisplayManager::HitTest()  %p \n", retval );
 	
 	if (retval==this)
 		return NULL;	// don't want display manager empty space to do anything.

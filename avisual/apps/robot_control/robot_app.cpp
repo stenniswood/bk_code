@@ -19,6 +19,8 @@
 #include "bcm_host.h"
 #include <fontinfo.h>
 #include <shapes.h>
+
+
 #include "Graphbase.hpp"
 #include "adrenaline_windows.h"
 #include "draw_app.hpp"
@@ -27,10 +29,13 @@
 #include "robot_app.hpp"
 #include "robot_vision.hpp"
 #include "client_memory.hpp"
-
+#include "bk_system_defs.h"
 
 
 RobotApp* robot_app=NULL;
+
+
+#define Debug 1
 
 
 void init_robot_app() 
@@ -79,6 +84,7 @@ void RobotApp::Initialize		(	)
 	robot_vision 	  = new RobotVisionPanel();	
 	m_main_window 	  = (Control*) robot_panel;
 
+	MainDisplay.set_main_window(m_main_window);
 	// Connect to the Vision RPI:	
 	
 }

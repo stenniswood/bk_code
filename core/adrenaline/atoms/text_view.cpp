@@ -23,8 +23,8 @@
 
 
 #define margin_percent 0.07
-#define Debug 1
-
+#define Debug 0
+#define dprintf if (Debug) printf
 
 TextView::TextView(int Left, int Right, int Top, int Bottom )
 :ScrollControl(Left, Right, Top, Bottom)
@@ -216,7 +216,7 @@ int TextView::count_num_lines_present(  )
 		eol = get_end_of_line( ptr );
 		char remember = *eol;	// eol
 		*eol = 0;
-		printf("length_from_start=%d; eol_length=%d;|%s|\n", (eol-text), (eol-ptr), ptr );
+		dprintf("length_from_start=%d; eol_length=%d;|%s|\n", (eol-text), (eol-ptr), ptr );
 		*eol = remember;		// restore
 		Lines++;				// Count it!
 		ptr = eol+1;
@@ -232,13 +232,16 @@ char* TextView::draw_one_line( char* mtext, int mVerticalPix )
 	char* eol = get_end_of_line( mtext );
 	char tmp = *eol;
 	*eol = 0;
-
-	if (style & CENTER_HORIZONTAL)
+	VGfloat font_width = TextWidth( mtext, *font, text_size );
+	const int pad = 10;
+	
+	if (style & TEXTVIEW_ALIGN_CENTER)
 	{
-		VGfloat font_width = TextWidth( mtext, *font, text_size );
 		int space = (width-(font_width))/2;		
 		Text(left+space,  bottom+mVerticalPix, mtext, *font, text_size );
-	} else {
+	} else if (style & TEXTVIEW_ALIGN_RIGHT) {		
+		TextEnd(left+width-pad,  bottom+mVerticalPix, mtext, *font, text_size );	
+	} else 	{
 		Text(m_left_margin, bottom+mVerticalPix, mtext, *font, text_size );
 	}
 	*eol = tmp;
@@ -250,6 +253,13 @@ void  TextView::set_text_size( float TextSize )
 	ScrollControl::set_text_size( TextSize );
 	calc_metrics();
 }
+
+void TextView::set_alignment_horizontal( byte mAlign )	
+{ 
+	style &= TEXTVIEW_ALIGN_MASK_HORIZ; 
+	style |= mAlign;
+	printf(" TextView::set_alignment_horizontal() style=%d\n", style );
+};
 
 /********************************************************************
  Comment on RoundRect & TextMid!!!!

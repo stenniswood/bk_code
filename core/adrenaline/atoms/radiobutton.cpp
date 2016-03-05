@@ -16,6 +16,9 @@
 
 
 #define margin_percent 0.07
+#define Debug 1
+#define dprintf if (Debug) printf
+
 
 RadioButton::RadioButton(int Left, int Right, int Top, int Bottom )
 {
@@ -39,7 +42,7 @@ RadioButton::RadioButton()
 
 void RadioButton::Initialize()
 {
-	strcpy (class_name, "RadioButton");				
+	strcpy (class_name, "RadioButton");
 	HasBorder = false;
 	checked   = false;
 	box_rectangle[0]=left;
@@ -197,13 +200,23 @@ int RadioButton::draw()
 	Fill_l  ( text_color );	
 	Text(x, bottom+space_y, text, SerifTypeface, text_size );				
 }
-
+// Allocates and copies!	
+void RadioButton::set_text( const char* NewText, bool mWrapContent )
+{
+	Control::set_text( NewText, true);
+}
+/*Control* RadioButton::HitTest ( int x, int y 	)
+{
+	printf("RadioButton::HitTest()\n");
+	return Control::HitTest(x,y);
+}*/
 int	RadioButton::onClick(int x, int y, bool mouse_is_down)
 {
-	printf("RadioButton::onClick() %s\n", text);
+	dprintf("RadioButton::onClick() %s\n", text);
 //	checked = !checked;
 	select();
 //	draw();
+	Invalidate();
 	return -1;
 }
 

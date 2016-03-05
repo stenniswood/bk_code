@@ -14,12 +14,15 @@ public:
 	RadioButton( int Width, int Height );
 	
 	void 		  Initialize();	
-	
+
+	virtual void  set_text  	( const char* NewText, bool mWrapContent=false );	// Allocates and copies!	
 	virtual void  wrap_content	( );
 	int			  join_group	( RadioButton* mNewButton );
 	int			  select    	(  );
 	float		  get_longest_width();
 	void		  expand_group_widths();		// make all radiobuttons in this group the width of the longest.
+
+	//	virtual Control*	HitTest		  ( int x, int y 	);
 		
 	virtual int   draw 	 ( );	
 	virtual	int	  onClick(int x, int y, bool mouse_is_down=true);
