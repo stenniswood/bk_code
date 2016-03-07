@@ -6,6 +6,8 @@ void load_test_screen(int number);
 
 void init_simple_button_test();
 void init_gyro_view();
+void init_loadcell_view();
+
 void init_textview_test();
 
 void init_textfile_view();

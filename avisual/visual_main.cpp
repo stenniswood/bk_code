@@ -45,7 +45,7 @@
 
 #include "client_list_control.hpp"
 #include "home_screen.hpp"
-
+#include "can_sql_logger.hpp"
 
 
 /*
@@ -298,11 +298,44 @@ int main( int argc, char *argv[] )
 	ce.m_user_id = 2;
 	ce.m_location = "629 Junk";
 	ce.m_description = "This stuff is working well";
-	//ce.sql_add();
+	ce.sql_add();
 	
-	ce.find_date( 2 );
 	
-
+	SQL_Logger sl;
+	sl.connect_to_logger_db ();
+	sl.create_readings_table();
+	sl.create_CAN_table     ();
+	sl.create_viki_table    ();
+	stLoadCellReading lcRead;
+	lcRead.sensor[0] = 1.0;
+	lcRead.sensor[1] = 2.0;
+	lcRead.sensor[2] = 3.0;
+	lcRead.sensor[3] = 4.0;	
+	lcRead.sensor[4] = 5.0;
+	lcRead.sensor[5] = 6.0;
+	lcRead.sensor[6] = 7.0;
+	lcRead.sensor[7] = 8.0;
+	lcRead.num_reads = 8;	
+	sl.add_loadcell( lcRead );
+	
+	stGyroReading  gRead;
+	gRead.tilt = 30.0;
+	gRead.pitch = 45.0;
+	gRead.heading = 12.0;
+	sl.add_gyro( gRead );	
+	
+	struct tm start;
+	start.tm_mon = 2;
+	start.tm_mday = 2;
+	start.tm_year = 2016-1900;
+	mktime(&start);
+	struct tm end;
+	end.tm_mon = 3;
+	end.tm_mday = 20;	
+	end.tm_year = 2016-1900;
+	mktime(&end);
+	sl.find_reading( start, end );
+	
 	//audio_file_open();
 	//play_waveform( &dWave, 1 );
 	//audio_play();

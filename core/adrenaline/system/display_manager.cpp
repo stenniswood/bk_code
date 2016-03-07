@@ -219,7 +219,9 @@ int	DisplayManager::onPlace( )
 	m_calendar_summary.set_position( 0, m_calendar.get_right(), 
 									 m_calendar.get_height(), 0.0 );
 	m_calendar_summary.onCreate( );
+	m_calendar_summary.show_date( 2, 6 );
 	m_calendar_summary.hide    ( );	
+	
 	if (Debug) printf("=== CALENDAR_SUMMARY :  ");
 	m_calendar_summary.print_positions();
 	return 1;

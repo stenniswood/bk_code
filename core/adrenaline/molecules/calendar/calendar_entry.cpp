@@ -10,20 +10,16 @@
 #include <time.h>
 #include <my_global.h>
 #include <mysql.h>
-
+#include "bk_system_defs.h"
 #include "calendar.hpp"
 #include "calendar_entry.hpp"
-
 
 
 //extern MYSQL *calendar_db;
 MYSQL 		 *calendar_db = NULL;
 
 #define Debug 0
-#define dprintf if (Debug) printf
-
-
-
+//#define dprintf if (Debug) printf
 
 
 void object_finish_with_error( )
@@ -155,7 +151,7 @@ void CalendarEntry::find_entry_nq		( int mCalendar_id   )
 	query_string += ";";
 }
 
-void CalendarEntry::find_date( int mUser_id   )
+void CalendarEntry::find_date( int mUser_id )
 {
 	query_string =  "SELECT * FROM bk_useraccounts.calendar WHERE ";
 	query_string += "bk_useraccounts.calendar.user_id="; 
@@ -163,6 +159,7 @@ void CalendarEntry::find_date( int mUser_id   )
 	query_string += "bk_useraccounts.calendar.date="; 
 	query_string += form_date_string( );
 	query_string += ";";	
+	dprintf("%s\n", query_string.c_str() );
 	query(true);
 }
 void CalendarEntry::find_location		( string mLocation   )
@@ -234,6 +231,10 @@ int  CalendarEntry::query( bool mRetrieving )
   return row_count;
 }
 
+int	CalendarEntry::get_number_results()
+{
+	return mysql_num_rows(m_result);
+}
 void CalendarEntry::extract_result( )
 {
 	if (m_row) {

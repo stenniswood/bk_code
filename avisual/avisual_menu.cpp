@@ -58,7 +58,8 @@ int show_atom_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 	case 3: init_progressbar_test	();		break;
 	case 4: init_radio_button_test	();		break;
 	case 5: init_check_button_test	();		break;
-	case 6: init_simple_text		();		break;
+//	case 6: init_simple_text		();		break;
+	case 6: init_loadcell_view		();		break;
 	case 7: init_simple_path		();		break;
 	case 8: pack_sample_window		();		break;
 	case 9: init_frame_window		();		break;		
@@ -84,7 +85,8 @@ void init_atom_menu()
 	atoms.add_simple_command( "init_progressbar_test"   );
 	atoms.add_simple_command( "init_radio_button_test"  );
 	atoms.add_simple_command( "init_check_button_test"	);
-	atoms.add_simple_command( "init_simple_text"		);
+	//atoms.add_simple_command( "init_simple_text"		);
+	atoms.add_simple_command( "init_loadcell_view"		);	
 	atoms.add_simple_command( "init_simple_path"		);
 	atoms.add_simple_command( "pack_sample_window"		);
 	atoms.add_simple_command( "init_frame_window"		);

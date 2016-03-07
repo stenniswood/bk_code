@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <string>
 #include <time.h>
+#include <math.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "/home/pi/openvg/fontinfo.h"
@@ -49,6 +50,57 @@ string Months[12] = {
 		"April", 	"May",  	"June",  
 		"July",  	"August", 	"September",
 		"October",  "November", "December" };
+
+
+Grid::Grid()
+{
+}
+Grid::Grid(int mLeft, int mRight, int mTop, int mBottom )
+{
+	set_boundary(mLeft, mRight, mTop, mBottom);	
+}
+Grid::~Grid()
+{
+}
+void Grid::set_boundary (int mLeft, int mRight, int mTop, int mBottom )
+{
+	left   = mLeft;
+	bottom = mBottom;
+	width  = mRight - mLeft;
+	height = mTop- mBottom;
+}
+void Grid::create(int mRows, int mCols)
+{
+	float y = bottom;
+	float x = left;
+	float y_inc = height / mRows;
+	float x_inc = width / mCols;
+	
+	for (int r=0; r<mRows; r++)
+	{	m_row_bottom_y.push_back( trunc(y) );	y+= y_inc;		}
+	for (int c=0; c<mCols; c++)
+	{	m_column_start_x.push_back( trunc(x) );	x+= x_inc;		}
+
+}
+void Grid::hit_test(int mx, int my)
+{
+	int rows = m_row_bottom_y.size();
+	int cols = m_column_start_x.size();
+	
+	for (int r=0; r<rows; r++)
+	{
+		if (my < m_row_bottom_y[r])
+			m_hit_row = r;
+		for (int c=0; c<cols; c++)
+		{
+			if (mx < m_column_start_x[c]) 
+				m_hit_col = c;
+		}	
+	}
+}
+
+
+
 
 Calendar::Calendar() 
 { 
@@ -209,18 +261,18 @@ int Calendar::draw_1month_view_small(	)
 	// Get Last day of previous month : 
 	som.tm_mday = 0;
 	mktime( &som );
-	int prev_month_end = som.tm_mday;
+	m_prev_month_end = som.tm_mday;
 	// Get Last day of shown month : 
 	som.tm_mon  = m_shown_month+1;  // have to put it to the next month minus 1 day!
 	som.tm_mday = 0;				// minus 1
 	mktime( &som );
-	int this_month_end = som.tm_mday;	
+	m_this_month_end = som.tm_mday;	
 	// Now back off number of weekdays:
 	som.tm_mon  = m_shown_month;
 	som.tm_year = m_shown_year-1900;
 	som.tm_mday = 1-wday;
 	mktime( &som );
-	dprintf("Cal starts with %d (%d) month_end=%d\n", som.tm_mday, som.tm_mon, prev_month_end );
+	dprintf("Cal starts with %d (%d) month_end=%d\n", som.tm_mday, som.tm_mon, m_prev_month_end );
 
 	// get Current Day:
 	time( &first_day_t );
@@ -242,8 +294,8 @@ int Calendar::draw_1month_view_small(	)
 		dprintf("Date:  " );
 		for (int d=0; d<7; d++, day++) 
 		{
-			if ((day>prev_month_end) && (month_offset==-1)) { day = 1; month_offset=0; }
-			if ((day>this_month_end) && (month_offset==0))  { day = 1; month_offset=1; }
+			if ((day>m_prev_month_end) && (month_offset==-1)) { day = 1; month_offset=0; }
+			if ((day>m_this_month_end) && (month_offset==0))  { day = 1; month_offset=1; }
 			
 			sprintf(date, "%2d", day);
 			dprintf("%s ", date );
@@ -272,8 +324,42 @@ int	Calendar::set_on_click_listener( void (*callback)(void*), void* mOn_click_co
 { 
 	return 1;
 }
+
+int	Calendar::find_date_clicked( int x, int y )
+{
+	int month_offset = -1;
+	int day = -1;
+	float margin = 10.;
+	float grid_left;
+	float day_width = (width-2*margin) / 7.;	
+	// Find which Day was clicked:
+	// (make grid of dates), then find what number is in that grid point.
+	float grid_bottom = bottom + height - (text_size*1.25);
+	float y_increment = (text_size*1.5);
+	if (y<grid_bottom) 
+	{
+		for (int w=0; w<5; w++)		// week in month.
+		{
+			grid_left = left + margin;
+			for (int d=0; d<7; d++, day++) 
+			{
+				if ((day>m_prev_month_end) && (month_offset==-1)) { day = 1; month_offset=0; }
+				if ((day>m_this_month_end) && (month_offset==0))  { day = 1; month_offset=1; }
+				grid_left += day_width;
+				if ((x<grid_left) && (y>grid_bottom) )
+				{
+					return day;
+				}
+			}
+			grid_bottom -= y_increment;
+		}
+	}	
+	return -1;	
+}
+
 int Calendar::onClick(int x, int y, bool mouse_is_down) 
-{ 
+{
+	int date = find_date_clicked(x,y); 
 	Control::onClick(x,y,mouse_is_down); 
 	return 1;	
 }

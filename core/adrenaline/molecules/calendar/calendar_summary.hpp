@@ -26,7 +26,7 @@ public:
 	virtual int   	onCreate			(	);	
 	virtual int   	draw 				(	);	
 	void   			draw_day_summary	(	);		
-	void   			draw_entry_details 	(	);			
+	void   			draw_entry_details 	( int mRow_index );			
 
 
 	int				set_on_click_listener( void (*callback)(void*), void* mOn_click_context );

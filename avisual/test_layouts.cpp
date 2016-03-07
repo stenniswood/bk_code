@@ -35,6 +35,7 @@ AUTHOR	: Steve Tenniswood
 #include "card_games.h"
 #include "GyroViewI.hpp"
 
+#include "load_cell_view.hpp"
 #include "test_layouts.hpp"
 #include "test_combo_layouts.hpp"
 #include "test_game_layouts.hpp"
@@ -484,6 +485,29 @@ void init_gyro_view()
 		
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( view  );
+}
+
+void init_loadcell_view()
+{
+	int w = MainDisplay.screen_width /2. ;
+	LoadCellView* left  = new LoadCellView(50, w, 400, 50    );
+	LoadCellView* right = new LoadCellView(w+20, w*2, 400, 50);
+
+	// 200 lbs / 4 = 50lbs nominal
+	left->set_sensor_value( 0, 75 ); 	// heel left
+	left->set_sensor_value( 1, 65 );
+	left->set_sensor_value( 2, -25 ); 	// toe left
+	left->set_sensor_value( 3, -30 );
+
+	right->set_sensor_value( 0, 50 );
+	right->set_sensor_value( 1, 60 );
+	right->set_sensor_value( 2, 25 ); 
+	right->set_sensor_value( 3, 20 ); 	
+
+		
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( left  );
+	MainDisplay.add_object( right  );	
 }
 
 ScrollBar My_sb;

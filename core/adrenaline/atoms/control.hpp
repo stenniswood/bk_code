@@ -68,7 +68,6 @@ public:
 	virtual int   	draw				(	);
 	int   			draw_border			(   );
 	int 			erase				(   );
-	
 
 	void			Revalidate			( );
 	void			Invalidate			( )			{ invalidated = true; };

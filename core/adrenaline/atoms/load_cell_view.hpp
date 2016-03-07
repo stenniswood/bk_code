@@ -1,5 +1,5 @@
-#ifndef _GYRO_VIEW_
-#define _GYRO_VIEW_
+#ifndef _LOADCELL_VIEW_
+#define _LOADCELL_VIEW_
 
 #include "scroll_control.hpp"
 /* This shows 4 load cells in a "foot" pattern.  ie four rectangles with color

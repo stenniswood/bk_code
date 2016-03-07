@@ -16,8 +16,9 @@
 #include "/home/pi/openvg/shapes.h"
 #include "control.hpp"
 #include "display.h"
-#include "GyroViewI.hpp"
+#include "load_cell_view.hpp"
 
+#define Debug 0
 
 
 LoadCellView::LoadCellView( )
@@ -25,6 +26,7 @@ LoadCellView::LoadCellView( )
 	Initialize(); 
 }
 LoadCellView::LoadCellView( int Left, int Right, int Top, int Bottom )
+:Control( Left, Right, Top, Bottom )
 { 
 	Initialize();
 }
@@ -44,17 +46,27 @@ float	LoadCellView::get_sensor_value	( int mSensorNumber)
 
 void 	LoadCellView::Initialize		(	)
 {
-	for (int i=0; i<4; i++)  {
+	HasBorder = true;
+
+	for (int i=0; i<4; i++)  
 		m_sensor_values[i]  = 0.0;				// North is 0 degrees.
-		m_sensor_left[i]    = 0.0;
-		m_sensor_bottom[i]  = 0.0;
-	}
-	
-	m_sensor_width   = 20;		// the rectangle representing the sensor.
-	m_sensor_height  = 30;	
+
+	m_sensor_width   = 50;		// the rectangle representing the sensor.
+	m_sensor_height  = 75;	
 	
 	m_left_margin   = 10;
 	m_right_margin  = 10;	 
+
+	float x_inc = (width-m_sensor_width*2) / 3.;
+	m_sensor_left[0]    = left + x_inc;
+	m_sensor_left[1]    = m_sensor_left[0] + m_sensor_width + x_inc;
+	m_sensor_left[2]    = left + x_inc;
+	m_sensor_left[3]    = m_sensor_left[0] + m_sensor_width + x_inc;
+		
+	m_sensor_bottom[0] = bottom+0.2*height+ text_size*1.5;
+	m_sensor_bottom[1] = bottom+0.2*height+ text_size*1.5;
+	m_sensor_bottom[2] = m_sensor_bottom[0]+m_sensor_height*1.5+10;
+	m_sensor_bottom[3] = m_sensor_bottom[0]+m_sensor_height*1.5+10;
 }
 
 void 	LoadCellView::calc_metrics		(  )
@@ -70,16 +82,31 @@ void 	LoadCellView::set_width_height  ( int Width, int Height )
 void 	LoadCellView::draw_a_sensor		(  )
 { 
 }
+const float MAX_LOAD_CELL_READING = 110.0;		// lbs
+
 int   	LoadCellView::draw   			(  )
 { 
+	Control::draw();
+	
+	long box_color = 0xFF000000;
 	float TotalWeight = 0.0;
 	Stroke_l ( 0xFF00FF00 );
 	Fill_l   ( 0xFF00003F );	
+	dprintf(" loadcell width=%6.1f; h=%6.2f;\n", m_sensor_width, m_sensor_height );
+	
 	for (int i=0; i<4; i++)  {
 		// change color to m_sensor_values[i] mapped color.
-		Fill_l   ( 0xFF00003F );
-		Rectangle(  m_sensor_left[i], m_sensor_bottom[i], 
-					m_sensor_left[i]+m_sensor_width, m_sensor_bottom[i]+m_sensor_height );
+		box_color = 0xFF000000;
+		int scaled_reading = ceil( fabs(255. * m_sensor_values[i] / MAX_LOAD_CELL_READING) );
+		if (m_sensor_values[i] < 0.0)
+			box_color |= (scaled_reading);		
+		else
+			box_color |= (scaled_reading<<16);		
+		dprintf("Box color= %x;  l=%6.2f; b=%6.2f\n", box_color, m_sensor_left[i], m_sensor_bottom[i] );
+		Stroke_l ( 0xFF00FF00 );
+		Fill_l   ( box_color );
+		Roundrect(  m_sensor_left[i], m_sensor_bottom[i], 
+					m_sensor_width, m_sensor_height, 10, 10 );
 		TotalWeight += m_sensor_values[i];
 	}
 	// Maybe draw a net direction vector.
@@ -88,7 +115,8 @@ int   	LoadCellView::draw   			(  )
 	char title[50];
 	sprintf(title, "Total Weight: %5.1f", TotalWeight ); 	
 	Fill_l   ( 0xFFFFFFFF );	
-	TextMid( m_center_x, bottom+0.1*height, title, SerifTypeface, text_size );	
+	float center_x = left+ width/2.;
+	TextMid( center_x, bottom+0.1*height, title, SerifTypeface, text_size );	
 	
 }	
 

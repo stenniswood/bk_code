@@ -36,6 +36,7 @@ public:
 	
 	MYSQL_ROW		goto_first_row();
 	MYSQL_ROW		goto_next_row();
+	int				get_number_results();
 	
 	char*			form_date_string	 (  );			// suitable to be added to SQL.
 	char*			form_time_string	 (  );			// suitable to be added to SQL.
