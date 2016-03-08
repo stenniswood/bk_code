@@ -54,6 +54,24 @@ void Rectangle::print_positions()
 			get_left(), get_bottom(), get_width(), get_height() );	
 }
 
+void Rectangle::shrink( float mFraction )
+{
+	float w = get_width();
+	float h = get_height();
+	
+	float nw = (1-mFraction) * w;		// shrink by 0.1 (10%) 
+	float nh = (1-mFraction) * h;
+
+	left += mFraction/2. * w;			// shift by half the shrinkage.
+	bottom	+= mFraction/2. * h;
+		
+	coords[TOP]   = bottom + nh;
+	coords[RIGHT] = left   + nw;
+
+	coords[LEFT]	= left;
+	coords[BOTTOM]	= bottom;
+}
+
 void	Rectangle::draw( )
 {
 	Rect( left, bottom, get_width(), get_height() );	
@@ -69,3 +87,7 @@ int		Rectangle::hit_test	(float x, float y)
 	return 0;
 }
 
+float Rectangle::get_width	( )		
+{ return coords[RIGHT]-coords[LEFT];   }
+float Rectangle::get_height	( )		
+{ return coords[TOP] - coords[BOTTOM]; }

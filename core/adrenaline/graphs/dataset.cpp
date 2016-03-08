@@ -73,9 +73,11 @@ float DataSet::calc_min( )
 }
 
 
-void DataSet::add( float new_member ) 
+void DataSet::add( float new_member, bool mComputeStats ) 
 {
 	Data.push_back( new_member );
+	if (mComputeStats)
+		compute_stats();
 }
 
 void DataSet::shift( )
@@ -114,6 +116,10 @@ void  DataSet::compute_stats()	// Does the crunching
 	//printf("================dataset Average=%6.3f=========\n", average);
 }
 
+void DataSet::reset	()
+{
+	Data.clear();
+}
 /* this is done in specific graph
 float DataSet::calc_scale( )
 {

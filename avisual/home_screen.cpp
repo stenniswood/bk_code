@@ -38,12 +38,15 @@ void send_to_viki( void* mEditBoxPtr )
 	
 	EditBox* eb = 	(EditBox*)mEditBoxPtr;
 	char* str = eb->get_text();
+	if (is_client_ipc_memory_available()==false)
+		RobotResponse.set_text("Viki is down.");
+		
 	cli_ipc_write_sentence( str );
 }
 /* viki works on a polling basis, so where are we going to do that polling at?  MainLoop.  Already in there.
 	ethernet_interface. */
 
-
+ 
 void init_home_screen()
 {
 	//strcpy(CommandText, "connect to 192.168.2.14, Robot, show me the accuracy of your positioning. Show me a histogram for right leg positions.\

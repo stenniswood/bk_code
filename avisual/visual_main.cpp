@@ -303,9 +303,9 @@ int main( int argc, char *argv[] )
 	
 	SQL_Logger sl;
 	sl.connect_to_logger_db ();
-	sl.create_readings_table();
-	sl.create_CAN_table     ();
-	sl.create_viki_table    ();
+	//sl.create_readings_table();
+	//sl.create_CAN_table     ();
+	//sl.create_viki_table    ();
 	stLoadCellReading lcRead;
 	lcRead.sensor[0] = 1.0;
 	lcRead.sensor[1] = 2.0;
@@ -315,7 +315,7 @@ int main( int argc, char *argv[] )
 	lcRead.sensor[5] = 6.0;
 	lcRead.sensor[6] = 7.0;
 	lcRead.sensor[7] = 8.0;
-	lcRead.num_reads = 8;	
+	lcRead.num_reads = 8;	 
 	sl.add_loadcell( lcRead );
 	
 	stGyroReading  gRead;
@@ -334,7 +334,7 @@ int main( int argc, char *argv[] )
 	end.tm_mday = 20;	
 	end.tm_year = 2016-1900;
 	mktime(&end);
-	sl.find_reading( start, end );
+	sl.find_reading( "load cell", start, end );
 	
 	//audio_file_open();
 	//play_waveform( &dWave, 1 );

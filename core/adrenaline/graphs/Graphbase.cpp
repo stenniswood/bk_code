@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
@@ -11,9 +12,10 @@
 #include "Graphbase.hpp"
 #include "bk_system_defs.h"
 #include "display.h"
-
+ 
 #define margin_percent 0.07
-
+#define Debug 1
+  
 Graphbase::Graphbase(int Left, int Right, int Top, int Bottom )
 : Control( Left,Right,Top,Bottom )
 {
@@ -36,10 +38,11 @@ void  Graphbase::Initialize	()
 	title 		= NULL;
 
 	draw_options= 0x0F;			// draw by default (labels must be set however)
-	title_color = 0xFF00FF7F;	
-	xlabel_color= 0xFF00FF7F;
-	ylabel_color= 0xFF00FF7F;
+	title_color = 0xFFFFFFFF;	
+	xlabel_color= 0xFF8F2F5F;
+	ylabel_color= 0xFF00FF5F;
 
+	m_max = m_min = 0;
 	title_size  = 16.0;	
 	xlabel_size = 14.0;
 	ylabel_size = 14.0;	
@@ -49,6 +52,10 @@ void Graphbase::set_text( char* Title, char* xLabel, char* yLabel )
 	title 		= Title;
 	xAxisLabel	= xLabel;
 	yAxisLabel  = yLabel;
+}
+void Graphbase::reset_data( )
+{
+	data_series.clear();
 }
 
 void Graphbase::set_title ( char* Title )
@@ -197,6 +204,7 @@ void Graphbase::remove_data_series( int mIndex )
 
 int Graphbase::draw() 
 {
+	dprintf("Graphbase::draw() \n");
 	Control::draw();
 
 	Fill  (44, 77, 232, 1.0);				   // Big blue marble
@@ -209,7 +217,7 @@ int Graphbase::draw()
 		draw_x_axis_label	 (  );
 	if (draw_options & SHOW_Y_LABEL)
 		draw_y_axis_label	 (  );
-
+ 
 	//printf("yaxis=%s\n", yAxisLabel);
 	//printf("NumberLines=%d\n", NumberHorizontalLines);	  
 
@@ -227,27 +235,27 @@ int Graphbase::draw()
 	return TRUE;
 }
 
-/* Calculates max for all data series */
+/* Calculates m_max for all data series */
 void Graphbase::find_max()
 {
 	float tmp_max = -10000000.;
 	for(int s=0; s<data_series.size(); s++)
 	{
 		tmp_max = data_series[s].get_max();
-		if (tmp_max > max)
-			max = tmp_max;			
+		if (tmp_max > m_max)
+			m_max = tmp_max;			
 	}
 }
 
-/* Calculates min for all data series */
+/* Calculates m_min for all data series */
 void Graphbase::find_min()
 {
 	float tmp_min = 0.;	
 	for(int s=0; s<data_series.size(); s++)
 	{
 		tmp_min = data_series[s].get_min();
-		if (tmp_min > min)
-			min = tmp_min;			
+		if (tmp_min > m_min)
+			m_min = tmp_min;			
 	}
 }
 
@@ -259,30 +267,40 @@ int Graphbase::count_data_series()
 
 int Graphbase::draw_x_scale() 
 {
+	dprintf("Graphbase::draw_x_scale() \n");
 	Fill_l(xlabel_color);
-	float divs 		= NumberHorizontalLines;
+	float divs 		= NumberVerticalLines;
 	float alpha 	= 1.0;
-	VGfloat x_spacing = (width / NumberVerticalLines);
+	VGfloat x_spacing;
+	if (NumberVerticalLines==0)	
+		divs =  1;
+	x_spacing = (width / divs);
 
+	
 	for (int x=left; x <=left+width; x+=x_spacing) 
 	{
-		TextEnd( 0, 0, yAxisLabel, SerifTypeface, ylabel_size );
+		if (xAxisLabel)
+			TextEnd( 0, 0, xAxisLabel, SerifTypeface, xlabel_size );
 	}
 	return TRUE;
 }
 
 int Graphbase::draw_y_scale() 
 {
+	dprintf("Graphbase::draw_y_scale() \n");
 	Fill_l(xlabel_color);
 	float divs 		= NumberHorizontalLines;
 	float alpha 	= 1.0;
+	if (NumberHorizontalLines==0) 
+		divs = 1;
 	float y_spacing = ((float)(height)) / (divs);	
 
 	// HORIZONTAL:
 	Fill_l( grid_color );	//  255, 0, 125, alpha);
 	for (VGfloat y=bottom; y <= bottom+height; y+=y_spacing)
 	{
-		TextEnd( 0, 0, yAxisLabel, SerifTypeface, ylabel_size );
+		if (yAxisLabel)
+			TextEnd( 0, 0, yAxisLabel, SerifTypeface, ylabel_size );
 	}
 	return TRUE;
 }

@@ -49,7 +49,7 @@ public:
 	float		get_aspect_ratio (  );		// width / height  ratio 1080 = 16/9	
 	float		get_width		 (	)		{  return screen_width;	 };
 	float 		get_height		 (	)		{  return screen_height; };
-	Rectangle*	get_useable_rect ( );	// max client coordinates to avoid the sidebars, status and system bars.
+	Rectangle*	get_useable_rect ( );		// max client coordinates to avoid the sidebars, status and system bars.
 	Rectangle*	get_centered_rect( float width, float height );	// centers the window within the useable area.
 	void		center_window    ( Window* mWin				 );	
 	

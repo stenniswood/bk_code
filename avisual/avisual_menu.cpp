@@ -34,9 +34,11 @@
 #include "video_app.hpp"
 #include "window_layouts.hpp"
 #include "robot_app.hpp"
+#include "datalog_graph.hpp"
 
 
 HorizontalMenu hm		(-1,-1);
+VerticalMenu   view     (-1,-1);
 VerticalMenu   atoms    (-1,-1);
 VerticalMenu   molecules(-1,-1);
 VerticalMenu   apps		(-1,-1);
@@ -46,6 +48,29 @@ VerticalMenu   power_menu(-1,-1);		// power switch pushed.
 
 #define Debug 0
 #define ifprintf if (Debug) printf
+
+int show_view_screens (void* menuPtr, int mMenuIndex, Application* mApp )
+{
+	switch(mMenuIndex) 
+	{	
+	case 0:	init_datalog_graph	();		break;
+	case 1:	init_listbox		();		break;
+	case 2:	init_tab_listbox	();		break;
+	case 3:	init_grid_test		();		break;
+	default: break;
+	}	
+}
+
+void init_view_menu()
+{
+	dprintf("init_view_menu()\n");
+	view.add_simple_command( "Data log graph"		);
+	view.add_simple_command( "ListBox demo" 		);
+	view.add_simple_command( "Tabular ListBox demo"	);
+	view.add_simple_command( "Grid test demo"		);	
+	view.add_callback_all_items( show_view_screens );	
+}
+
 
 int show_atom_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 {
@@ -64,16 +89,17 @@ int show_atom_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 	case 8: pack_sample_window		();		break;
 	case 9: init_frame_window		();		break;		
 	case 10: init_textfile_view		();		break;		
-	case 11: init_horiz_menu		();		break;			
-	case 12: init_vert_menu			();		break;
-	case 13: init_combo_menu		();		break;
-	case 14: init_spinner_menu		();		break;
-	case 15: init_listbox			();		break;	
-	case 16: init_tab_listbox		();		break;			
-	case 17: /*init_CAN_msg_view	();*/		break;
+//	case 11: init_horiz_menu		();		break;			
+//	case 12: init_vert_menu			();		break;
+	case 11: init_combo_menu		();		break;
+	case 12: init_spinner_menu		();		break;
+	case 13: init_listbox			();		break;	
+	case 14: init_tab_listbox		();		break;			
+	case 15: /*init_CAN_msg_view	();*/		break;
 	default: break;
 	}
 }
+
 
 void init_atom_menu()
 {
@@ -91,12 +117,12 @@ void init_atom_menu()
 	atoms.add_simple_command( "pack_sample_window"		);
 	atoms.add_simple_command( "init_frame_window"		);
 	atoms.add_simple_command( "init_textfile_view"		);	
-	atoms.add_simple_command( "init_horiz_menu"			);
-	atoms.add_simple_command( "init_vert_menu"			);
+	//atoms.add_simple_command( "init_horiz_menu"			);
+	//atoms.add_simple_command( "init_vert_menu"			);
 	atoms.add_simple_command( "init_combo_menu"			);
 	atoms.add_simple_command( "init_spinner_menu"		);
-	atoms.add_simple_command( "init_listbox"			);
-	atoms.add_simple_command( "init_tab_listbox"		);
+	//atoms.add_simple_command( "init_listbox"			);
+	//atoms.add_simple_command( "init_tab_listbox"		);
 	atoms.add_simple_command( "init_CAN_msg_view"		);
 	atoms.add_callback_all_items( show_atom_screens );
 	
@@ -219,6 +245,7 @@ HorizontalMenu system_hmenu;
 void init_system_hmenu( )
 {
 	if (Debug) printf("init_system_hmenu 1\n");
+	init_view_menu		(  );
 	init_atom_menu		(  );
 	init_molecule_menu  (  );	
 	init_apps_menu		(  );
@@ -229,7 +256,7 @@ void init_system_hmenu( )
 	system_hmenu.m_entries.clear();
 	system_hmenu.add_entry_text( "File" );
 	system_hmenu.add_entry_text( "Edit" );	
-	system_hmenu.add_entry_text( "View" );	
+	system_hmenu.add_sub_menu( "View",      &view 	);
 	system_hmenu.add_sub_menu( "Atoms",     &atoms 	);
 	system_hmenu.add_sub_menu( "Molecules", &molecules );
 	system_hmenu.add_sub_menu( "Apps", 		&apps 	);

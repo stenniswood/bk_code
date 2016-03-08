@@ -15,10 +15,11 @@ public:
 	Grid(int mLeft, int mRight, int mTop, int mBottom );	
 	~Grid();
 
-	void			set_boundary (int mLeft, int mRight, int mTop, int mBottom );		
-	void			create(int mRows, int mCols);
-	void			hit_test(int mx, int mY);	
-	
+	void			set_boundary ( int mLeft, int mRight, int mTop, int mBottom );
+	void			create		 ( int mRows, int mCols );
+	void			hit_test	 ( int mx, int mY 		);
+	void			draw		 ();
+
 	int 			m_hit_row;
 	int				m_hit_col;
 	vector<int>		m_column_start_x;
@@ -60,11 +61,14 @@ public:
 	int				m_shown_year;
 	Button			m_prev;
 	Button			m_next;
+	Button			m_close;		// or maybe a swipe down.
+	
 	struct tm		m_local_time;	
 	int				m_display_mode;
 	
 	int				m_prev_month_end;
 	int				m_this_month_end;
+	Grid			m_grid;
 };
 
  

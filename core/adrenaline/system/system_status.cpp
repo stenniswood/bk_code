@@ -37,7 +37,7 @@ void show_calendar( void* mSystemStatusBar )
 		MainDisplay.show_calendar();
 	else 
 		MainDisplay.hide_calendar();
-	printf("show_calendar :: SHOW CALENDAR\n");	
+	dprintf("show_calendar :: SHOW CALENDAR\n");	
 }
 
 
@@ -107,17 +107,14 @@ void SystemStatusBar::onPlace(   )
 	if (Debug) printf(" SystemStatusBar::place()\n");
 	float status_left = m_power_button->get_right();
 	
-	
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);	
-	//asctime(&timeinfo)
-	char time[128];
-	sprintf(time, "%d-%d-%d  %d:%d:%d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	char time[28];
+	strftime(time, 26, "%a %l:%M %p", &tm);	// %m:%d
 
 	// CALENDAR BUTTON
 	m_calendar->set_text			(time, true);	//("Thu 11:33 am");
 	m_calendar->onCreate();
-	m_calendar->set_width_height( m_calendar->get_width(), height);
 	float left_anchor = left+ width - m_calendar->get_width();
 	m_calendar->move_to(left_anchor, bottom);
 	if (Debug) m_calendar->print_positions();

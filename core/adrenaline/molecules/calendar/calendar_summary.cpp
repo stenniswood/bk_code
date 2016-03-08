@@ -45,7 +45,6 @@ void 	CalendarSummary::Initialize(	)
 { 
 	Control::Initialize();
 	
-	
 	//background_color = 0xFFFFFF00;
 	background_color = 0xFFA0002C;	
 }
@@ -58,16 +57,16 @@ int		CalendarSummary::show_date	( int mMonth, int mDay )
 	ce.find_date(2);
 	int number_entries = ce.get_number_results();
 	dprintf("CalendarSummary::show_date() %d entries found for this date\n", number_entries );
-}	
+}
+
 int   	CalendarSummary::onCreate			(	)
 { 
 	dprintf("CalendarSummary::onCreate()\n");
 	int retval = Control::onCreate();
 	m_left_margin = left+10;	
-	
-//	show_date(
 	return retval;
-}	
+}
+
 int   	CalendarSummary::draw 				(	)
 { 
 	int retval = Control::draw();

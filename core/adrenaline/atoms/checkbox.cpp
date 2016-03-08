@@ -66,6 +66,7 @@ void CheckBox::set_text( const char* NewText, bool mWrapContent=false )	// Alloc
 {
 	Control::set_text( NewText, true);
 }
+
 int	CheckBox::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
 {
 	on_click_context  = mOn_click_context;

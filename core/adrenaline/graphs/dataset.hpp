@@ -2,6 +2,7 @@
 #define _DATA_SET_H_
 
 #include <vector>
+#include <string>
 
 /* Need to redo this class and use a vector<float> template! */
 
@@ -13,11 +14,12 @@ public:
 
 	float operator [] (int index) { return Data[index]; };
 	float get_datum 	( int index 			 )  { return Data[index]; };
-	void set_datum 		( int index, float datum )	{ Data[index]=datum; };		
+	void  set_datum 		( int index, float datum )	{ Data[index]=datum; };		
+ 	void	reset		();
  	
 	int	 get_size 		( )  { return Data.size(); };	
 	void set_data 		( float* data, int n );	// sets pointer (does not free existing memory)
-	void add	  		( float new_member   );
+	void add	  		( float new_member, bool mComputeStats=true );
 	void shift_add		( float new_member   );		// removes first element adds new to end.
 
 	// Statistics :
@@ -34,8 +36,11 @@ public:
 	float get_min		(  )	{ return min;     };
 	void  shift	 		(  );
 
+	std::string				name;		// series name.
+	
 private:
 	std::vector<float>	Data;
+
 	
 	// Stats:
 	float average;

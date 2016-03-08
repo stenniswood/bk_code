@@ -189,9 +189,7 @@ void Window::pack_above ( Control* mNewControl, Control* mReferenceControl, byte
 */
 int	Window::add_control_local_coords( Control* mControl )
 {
-	int dLeft   = left;
-	int dBottom = bottom;
-	mControl->move_by( left, bottom );
+	mControl->move_by( left, bottom ); 
 	register_child( mControl );	
 }
 
@@ -225,7 +223,7 @@ void	Window::move_to			( float NewX, float NewY )
 
 void	Window::set_width_height( int NewWidth, int NewHeight )
 {
-	width = NewWidth;
+	width  = NewWidth;
 	height = NewHeight;
 
 	// For a new window, first time geting width height, need to do this.

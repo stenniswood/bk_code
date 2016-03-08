@@ -19,6 +19,9 @@ public:
 	virtual void  wrap_content	( );
 	int			  join_group	( RadioButton* mNewButton );
 	int			  select    	(  );
+	int			  get_selected_index(  );	// scans from top of group. index according to linked list.
+	RadioButton*  get_selected  (  );		// scans from top of group. 
+	
 	float		  get_longest_width();
 	void		  expand_group_widths();		// make all radiobuttons in this group the width of the longest.
 

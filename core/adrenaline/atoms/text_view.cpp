@@ -259,7 +259,19 @@ void TextView::set_alignment_horizontal( byte mAlign )
 	style &= TEXTVIEW_ALIGN_MASK_HORIZ; 
 	style |= mAlign;
 	printf(" TextView::set_alignment_horizontal() style=%d\n", style );
-};
+}
+void TextView::center_vertical  	( BOOL on )	
+{ 
+	if (on) style |= TEXTVIEW_CENTER_VERTICAL;	
+	else style &= ~TEXTVIEW_CENTER_VERTICAL;	
+}
+void TextView::center_horizontal	( BOOL on )	
+{ 
+	if (on) style |= TEXTVIEW_CENTER_HORIZONTAL; 
+	else style &= ~TEXTVIEW_CENTER_HORIZONTAL;	
+}
+
+
 
 /********************************************************************
  Comment on RoundRect & TextMid!!!!
@@ -281,7 +293,7 @@ int TextView::draw()
 	int vertical    = height-line_height;
 	char* ptr       = text-1;
 	
-	if (style & CENTER_VERTICAL)
+	if (style & TEXTVIEW_CENTER_VERTICAL)
 	{
 		int num_lines   = count_num_lines_present();
 		int text_height = (num_lines*line_height);

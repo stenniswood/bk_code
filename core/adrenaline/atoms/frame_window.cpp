@@ -15,10 +15,11 @@
 #include "listbox.hpp"
 #include "display.h"
 #include "window.hpp"
+#include "display_manager.hpp"
+  
 #include "frame_window.hpp"
 
-
-#define Debug 0
+#define Debug 1
  
 FrameWindow::FrameWindow ( )
 :Window()
@@ -36,65 +37,60 @@ FrameWindow::~FrameWindow( )
 }
 void	FrameWindow::Initialize		 (   )
 {
-	if (Debug) printf("\t\tFrameWindow::Initialize()\n");
-	Window::Initialize();
 	strcpy (class_name, "FrameWindow");
-	body_height = height-(1.5*text_size);
+	Window::Initialize();
+	title_height = 1.5*text_size;
+		
+
+	
+	calc_metrics();
+	dprintf("\t\tFrameWindow::Initialize() done\n");
+}
+void FrameWindow::calc_metrics(  	)
+{
+	body_height = height-title_height;
+	m_buttons_radius = (title_height * 0.9) / 2.;
 	
 	int t = bottom+height;
 	int b = packer_vertical_position = bottom+body_height;
 
 	close_button_coords[LEFT]  = left+LEFT_PADDING_CLOSE;			
-	close_button_coords[RIGHT] = left+LEFT_PADDING_CLOSE+2.0*MIN_MAX_CLOSE_CIRCLE_RADIUS;			
+	close_button_coords[RIGHT] = left+LEFT_PADDING_CLOSE+2.0*m_buttons_radius;			
 	close_button_coords[TOP]   = t;			
 	close_button_coords[BOTTOM]= b;
 
 	min_button_coords[LEFT]    = close_button_coords[RIGHT]+LEFT_PADDING_CLOSE;
-	min_button_coords[RIGHT]   = close_button_coords[RIGHT]+3.0*MIN_MAX_CLOSE_CIRCLE_RADIUS;
+	min_button_coords[RIGHT]   = close_button_coords[RIGHT]+3.0*m_buttons_radius;
 	min_button_coords[TOP]     = t;			
 	min_button_coords[BOTTOM]  = b;
 		
 	max_button_coords[LEFT]  = min_button_coords[RIGHT]+LEFT_PADDING_CLOSE;
-	max_button_coords[RIGHT] = min_button_coords[RIGHT]+3.0*MIN_MAX_CLOSE_CIRCLE_RADIUS;
+	max_button_coords[RIGHT] = min_button_coords[RIGHT]+3.0*m_buttons_radius;
 	max_button_coords[TOP]   = t;			
 	max_button_coords[BOTTOM]= b;
-}
+	
+}	
 
 void FrameWindow::move_to			( float NewX, float NewY )
 {
 	float deltaX = NewX-left;
 	float deltaY = NewY-bottom;
 	Window::move_to( NewX, NewY );
-	
-	close_button_coords[LEFT]  += deltaX;
-	close_button_coords[RIGHT] += deltaX;
-	close_button_coords[TOP]   += deltaY;
-	close_button_coords[BOTTOM]+= deltaY;
-
-	min_button_coords[LEFT]  += deltaX;
-	min_button_coords[RIGHT] += deltaX;
-	min_button_coords[TOP]   += deltaY;
-	min_button_coords[BOTTOM]+= deltaY;
-		
-	max_button_coords[LEFT]  += deltaX;
-	max_button_coords[RIGHT] += deltaX;
-	max_button_coords[TOP]   += deltaY;
-	max_button_coords[BOTTOM]+= deltaY;
+	calc_metrics();	
 }
 
 void FrameWindow::set_width_height( int NewWidth, int NewHeight )
 {
-	if (NewHeight<(1.5*text_size)) return ;		// Not allowed
-	
+	if (NewHeight<title_height) return ;		// Not allowed
 	Window::set_width_height( NewWidth, NewHeight );
-	body_height = height-1.5*text_size;
+	calc_metrics();
 }
 
 int   	FrameWindow::draw_header( )
 {
 	Stroke_l( 0xAFFFFFFF );
 	Fill_l  ( 0xFF9f9fAf );
-	Rect    ( left, bottom+body_height, width, height-body_height );
+	Rect    ( left, bottom+body_height, width, title_height );
 }
 
 /* Draws the close, minimize, and maximize buttons
@@ -102,28 +98,28 @@ ala Mac style.
 */
 int   	FrameWindow::draw_close ( bool mHovering )
 {
-	Stroke_l( 0xFF2F0000 );
+	Stroke_l( 0xFF8F0000 );
 	Fill_l  ( 0xFFFF0000 );	
 	//if (mHovering)
 	{
 		// Draw x
 		float center_x   = (close_button_coords[RIGHT]-close_button_coords[LEFT])/2.0+close_button_coords[LEFT];
-		float center_y   = (close_button_coords[TOP]-close_button_coords[BOTTOM])/2.0+close_button_coords[BOTTOM];		
-		if (Debug) printf("Close button:  %6.1f, %6.1f, %6.1f, %6.1f \n", close_button_coords[0],
-				close_button_coords[1], close_button_coords[2], close_button_coords[3] );
+		float center_y   = (title_height)/2.0+close_button_coords[BOTTOM];
+		//dprintf("Close button:  %6.1f, %6.1f, %6.1f, %6.1f \n", close_button_coords[0],
+		//		close_button_coords[1], close_button_coords[2], close_button_coords[3] );
 				
 		float angle_rad  = 45.0*M_PI/180.0;
-		float x_component= MIN_MAX_CLOSE_CIRCLE_RADIUS * sin(angle_rad);
-		Circle( center_x, center_y, MIN_MAX_CLOSE_CIRCLE_RADIUS );	
+		float x_component= m_buttons_radius * sin(angle_rad);
+		Circle( center_x, center_y, m_buttons_radius );	
 		// assume y_component is identical.
 		float left_x  = center_x-x_component;
 		float right_x = center_x+x_component;
-		Line( left_x, center_y-x_component, right_x, center_y+x_component );
-		Line( left_x, center_y+x_component, right_x, center_y-x_component );
+		//Line( left_x, center_y-x_component, right_x, center_y+x_component );
+		//Line( left_x, center_y+x_component, right_x, center_y-x_component );
 	}
 }
 
-int FrameWindow::draw_min (	bool mHovering )
+int FrameWindow::draw_min(	bool mHovering )
 {
 	Stroke_l( 0xFFFFFF00 );
 	Fill_l  ( 0xFFFFFF00 );
@@ -132,16 +128,17 @@ int FrameWindow::draw_min (	bool mHovering )
 	{
 		float center_x = (min_button_coords[1]-min_button_coords[0])/2.0+min_button_coords[0];
 		float center_y = (min_button_coords[2]-min_button_coords[3])/2.0+min_button_coords[3];
-		if (Debug) printf("Min button:  %6.1f, %6.1f, %6.1f, %6.1f \n", min_button_coords[0],
-				min_button_coords[1], min_button_coords[2], min_button_coords[3] );
+		
+		//dprintf("Min button:  %6.1f, %6.1f, %6.1f, %6.1f \n", min_button_coords[0],
+		//		min_button_coords[1], min_button_coords[2], min_button_coords[3] );
 
-		Circle( center_x, center_y, MIN_MAX_CLOSE_CIRCLE_RADIUS );
-		Stroke_l( 0xFF0F0F00 );
-		Line(min_button_coords[0], center_y, min_button_coords[1], center_y );
+		Circle( center_x, center_y, m_buttons_radius );
+		Stroke_l( 0xFF8F8F00 );
+		//Line(min_button_coords[0], center_y, min_button_coords[1], center_y );
 	}
 }
 
-int FrameWindow::draw_max (	bool mHovering )
+int FrameWindow::draw_max(	bool mHovering )
 {
 	Stroke_l( 0xFF00FF00 );
 	Fill_l  ( 0xFF00FF00 );
@@ -149,11 +146,11 @@ int FrameWindow::draw_max (	bool mHovering )
 	{
 		float center_x = (max_button_coords[1]-max_button_coords[0])/2.0+max_button_coords[0];
 		float center_y = (max_button_coords[2]-max_button_coords[3])/2.0+max_button_coords[3];
-		Circle( center_x, center_y, MIN_MAX_CLOSE_CIRCLE_RADIUS );
+		Circle( center_x, center_y, m_buttons_radius );
 	
-		Stroke_l( 0xFF0F0000 );	
-		Line( max_button_coords[0], center_y, max_button_coords[1], center_y ); 
-		Line( center_x, center_y-MIN_MAX_CLOSE_CIRCLE_RADIUS, center_x, center_y+MIN_MAX_CLOSE_CIRCLE_RADIUS );
+		Stroke_l( 0xFF008F00 );	
+		//Line( max_button_coords[0], center_y, max_button_coords[1], center_y ); 
+		//Line( center_x, center_y-m_buttons_radius, center_x, center_y+m_buttons_radius );
 	}
 }
 
@@ -211,18 +208,19 @@ void FrameWindow::restore_pixels()
 
 Control* FrameWindow::HitTest(int x, int y)
 {
+	//int title_bar_hit = HitTestTitleBar(x,y);  what sense in doing here?
 	return Window::HitTest(x,y);
 }
 
 
-int	FrameWindow::HitTestArea(int x, int y)
+int	FrameWindow::HitTestTitleBar(int x, int y)
 {
 	int hdrT = bottom+ height;
 	int hdrB = bottom+ body_height;
 	
-	if ((y>hdrB) && (y<hdrT))
-	{
-		// check for close:
+	if ((y>hdrB) && (y<hdrT))	// In the title bar region?
+	{		
+		// yes, check for close:
 		if ((x>close_button_coords[LEFT]) && (x<close_button_coords[RIGHT]))
 			return CLOSE_HIT;
 
@@ -234,26 +232,46 @@ int	FrameWindow::HitTestArea(int x, int y)
 		if ((x>max_button_coords[LEFT]) && (x<max_button_coords[RIGHT]))
 			return MAX_HIT;
 		
-		// candidate for drag
+		// General Titlebar area, candidate for drag
 		return DRAG_HIT;
 
 	} else {
 		// check child controls.
-		return CLIENT_AREA_HIT;
+		// return CLIENT_AREA_HIT;
 		return 0;		// miss!
 	}
-}
+	return 0;
+}  
 
 int FrameWindow::onClick(int x, int y, bool mouse_is_down)
 {
-	int hit_object = HitTestArea( x, y );
-	if (hit_object==DRAG_HIT)  // && Mouse is down
+	Rectangle* rect=NULL;
+	int title_bar_hit = HitTestTitleBar( x, y );
+	dprintf("HitTestTitleBar() = %d\n", title_bar_hit );	
+	switch(title_bar_hit)
 	{
-		if (mouse_is_down)
-			restore_pixels(); 		// we're moving out.  put camp ground back as we found it.
-		else
-			save_pixels( /*screen_width, screen_height */ );		
-	}		
+	case CLOSE_HIT: 
+			
+			break;
+	case MIN_HIT:			
+			set_width_height( max_button_coords[RIGHT], title_height );	
+			Invalidate();			
+			break;
+	case MAX_HIT: 
+			rect = MainDisplay.get_useable_rect();
+			set_width_height( rect->get_width(), rect->get_height() );	
+			Invalidate();		
+			break;
+	case DRAG_HIT : 
+			if (mouse_is_down)
+				restore_pixels(); 		// we're moving out.  put camp ground back as we found it.
+			else
+				save_pixels( /*screen_width, screen_height */ );		
+			Invalidate();	
+			break;
+	default : break;
+	}
+	
 	// Disperse to affected child:
 	Control::onClick(x,y, mouse_is_down);	
 }

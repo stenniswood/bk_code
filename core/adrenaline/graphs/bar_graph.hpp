@@ -15,8 +15,6 @@ public:
 	int   	draw_body		(  				);
 	void  	draw_data_series(  				);
 
-	void	set_max			( float mMax	)	{ max = mMax; 		};
-	void	set_min			( float mMin	)	{ min = mMin;		};
 	void	set_auto_scale	( bool  mOn		)	{ auto_scale = mOn; };
 	void 	calc_scale		(  );
 	float 	calc_auto_scale ( );

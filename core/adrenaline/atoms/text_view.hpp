@@ -9,10 +9,10 @@
 #define TEXTVIEW_ALIGN_CENTER 0x01
 #define TEXTVIEW_ALIGN_RIGHT  0x02
 
-#define CENTER_HORIZONTAL 0x01
+#define TEXTVIEW_CENTER_HORIZONTAL 0x01
 
 // Mask 0x04
-#define CENTER_VERTICAL   0x04
+#define TEXTVIEW_CENTER_VERTICAL   0x04
 
 class TextView : public ScrollControl 
 {
@@ -37,9 +37,9 @@ public:
 	virtual void  	set_position			( int Left, int Right, int Top, int Bottom );
 	virtual void  	set_text_size		  	( float TextSize		 		);
  
-	void 	set_alignment_horizontal		( byte mAlign=TEXTVIEW_ALIGN_LEFT );		
-	void 	center_vertical  	( BOOL on )	{ if (on) style |= CENTER_VERTICAL;	else style &= ~CENTER_VERTICAL;	};
-	void 	center_horizontal	( BOOL on )	{ if (on) style |= CENTER_HORIZONTAL; else style &= ~CENTER_HORIZONTAL;	};
+	void 			set_alignment_horizontal( byte mAlign=TEXTVIEW_ALIGN_LEFT );		
+	void 			center_vertical  		( BOOL on );
+	void 			center_horizontal		( BOOL on );
 
 	char* 			draw_one_line( char* mtext, int mVerticalPix );
 	virtual int   	draw   		 (	);	

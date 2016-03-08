@@ -57,7 +57,7 @@ static Window		ParentWindowF(450, 1050, 500, 100);
 static TextView 	SampleText;
 static ListBox  	AvailableClients;
 static IconView		test_image;
-static IconView		test_icon ( 50,200 );
+static IconView		test_icon ( 50,200 ); 
 /*************************************************************************/
 static PowerLevel		 pl		(-1,-1);
 static StereoPowerLevels spl  	(-1,-1);
@@ -148,17 +148,14 @@ void init_progressbar_test()
 	
 	ProgressBar* tmp = new ProgressBar();
 	tmp->set_percentage	(50.0);
-	tmp->move_to(100,500);
 	tmp->copy_position_horiz( &MyProgress );
 	//tmp->show_percentage();
-	//tmp->set_position_above ( &MyProgress );
-	//tmp->print_positions();
+	tmp->set_position_above ( &MyProgress );
 
 	ProgressBar* tmp2 = new ProgressBar();
-	tmp2->move_to ( 100, 200 );
+	tmp2->set_position_above ( tmp );
 	tmp2->copy_position_horiz( &MyProgress );
 	tmp2->set_percentage(20.0);
-	//tmp2->print_positions();	
 
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
@@ -169,8 +166,7 @@ void init_progressbar_test()
 
 void init_radio_button_test()
 {
-
-	MyRadio1.move_to ( 200, 300 );
+	MyRadio1.move_to ( 200, 300 ); 
 	MyRadio1.set_text("AM Radio");
 	MyRadio2.set_text("FM Radio");
 	MyRadio3.set_text("XM Radio", true);
@@ -187,7 +183,7 @@ void init_radio_button_test()
 	MyRadio2.select();
 		
 	//MyRadio1.onClick(5,5);
-		
+
 	// Need a group box:
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);
@@ -200,27 +196,40 @@ void init_radio_button_test()
 CheckBox check1(-1, -1);
 CheckBox check2(-1, -1);
 
+void sample_callback( void* mPtr )
+{
+	TextView* text = (TextView*)mPtr;
+	static int count = 0;
+	char str[80];
+	sprintf(str, "Thanks for checking me! %d", count++);
+	text->set_text(str, true);
+}
+
 void init_check_button_test()
 {
+	float ty =  2*MainDisplay.screen_height/3;
+	TextView* text = new TextView();
+	text->set_text("waiting for callback...", true);	
+	text->move_to( 10, ty);
+	
 	check1.move_to(50, 250);
 
 	check1.set_text("Select me");
 	check2.set_text("Pick me too! ");
+	check1.set_on_click_listener( sample_callback, text );
+	
 	check1.set_check();
 
 	// Aha architecture problem:  height of check1 is not determined until onCreate()
 	// yet here we need it to place check2.  
-	// Think of how to best do this after lunch.
-	
+	// Think of how to best do this after lunch.	
 	//check1.copy_position_horiz( &check2 );
-
-	//check1.print_positions();
-	//check2.print_positions();
 	
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		);	
 	MainDisplay.add_object( &check1 );
 	MainDisplay.add_object( &check2 );	
+	MainDisplay.add_object( text );
 	check2.set_position_below( &check1, true, 50. );
 }
 
@@ -335,6 +344,8 @@ void pack_sample_window()
 	populate_simple_lb				(		);
 	AvailableClients.set_text_size	( 18.0  );
 
+	Rectangle* rect = MainDisplay.get_useable_rect( );
+	ParentWindowF.set_position( rect );
 	if (Debug) ParentWindowF.print_positions	( );
 	ParentWindowF.pack_control		( &MyButt, PACK_FILL_PARENT, PACKER_ALIGN_TOP  	);
 	ParentWindowF.pack_below        ( &AvailableClients, &MyButt, PACK_FILL_PARENT  );
@@ -355,8 +366,12 @@ void pack_sample_window()
 
 void init_frame_window()
 {
-	if (Debug) ParentWindowFrame.print_positions();
+	Rectangle* rect = MainDisplay.get_useable_rect( );
+	ParentWindowFrame.move_to		  ( rect->get_left(), rect->get_bottom()  );
+	ParentWindowFrame.set_width_height( rect->get_width()/2, rect->get_height()/2 );
 	
+	if (Debug) ParentWindowFrame.print_positions();
+		
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &ParentWindowFrame );
 }
@@ -366,8 +381,10 @@ TextView tf;
 
 void init_textfile_view()
 {
-	tf.set_width_height	( 600, 600 );
-	tf.move_to  		( 100, 100 );	
+	Rectangle* rect = MainDisplay.get_useable_rect( );
+		
+	tf.set_width_height	( rect->get_width(), rect->get_height() );
+	tf.move_to  		( rect->get_left(), rect->get_bottom() );	
 	tf.load_file		( textfilename );
 	
 	MainDisplay.remove_all_objects(	);
@@ -421,8 +438,8 @@ void init_vert_menu			()
 
 void init_combo_menu()
 {
-	//vm.set_width_height( 200, 200 );
-	simple.move_to			 ( 100, 500 		);	
+
+	//simple.move_to			 ( 100, 500 		);	
 	simple.add_simple_command( "init_simple_button_test" );
 	simple.add_simple_command( "init_gyro_view" );
 	simple.add_simple_command( "init_textview_test"		);
@@ -434,15 +451,15 @@ void init_combo_menu()
 	simple.add_simple_command( "pack_sample_window"		);
 	simple.add_simple_command( "init_frame_window"		);
 	simple.add_simple_command( "init_textfile_view"		);	
-	simple.add_simple_command( "init_horiz_menu"		);
-	simple.add_simple_command( "init_vert_menu"			);
-	simple.add_simple_command( "init_combo_menu"		);		
 	simple.add_simple_command( "init_spinner_menu"		);		
 	simple.add_simple_command( "init_CAN_msg_view"		);	
 	simple.add_callback_all_items( menu_callback  );
-	
-	hm.set_width_height(640, 30);
-	hm.move_to( 100, 768-36 );
+
+	Rectangle* rect = MainDisplay.get_useable_rect( );
+	float menu_bottom = 2.0*rect->get_height()/3.0;
+	hm.move_to( rect->get_left()+10, menu_bottom );	
+	hm.set_width_height(rect->get_width()-10, 30 );
+	//hm.move_to( 100, 768-36 );
 	hm.add_entry_text( "File" );
 	hm.add_entry_text( "Edit" );	
 	hm.add_entry_text( "View" );	
@@ -527,12 +544,15 @@ void init_scrollbar()
 
 void init_listbox()
 {
+	Rectangle* rect = MainDisplay.get_useable_rect( );
 	//AvailableClients.set_top_down	( false );
 	AvailableClients.set_width_height( 200, 200 );
-	AvailableClients.move_to		 ( 400, 400 );
+
 	AvailableClients.adjust_height_for_num_visible_items( 9 );
 	populate_simple_lb				 (		);
 	AvailableClients.set_text_size	 ( 18.0 );
+	// Should set the bottom of the list box at the below coordinate!
+	AvailableClients.move_to		 ( rect->get_left(), rect->get_bottom() );
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &AvailableClients );

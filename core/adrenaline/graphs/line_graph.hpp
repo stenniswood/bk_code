@@ -12,18 +12,16 @@ public:
 	LineGraph( int Left, int Right, int Top, int Bottom );
 
 	void  	set_stroke_width( float new_width	) 	{ stroke_width = new_width; };	
-	int   	draw_body		(  				);
+	virtual int   	draw_body		(  				);
 	void  	draw_data_series(  				);
 
-	void	set_max			( float mMax	)	{ max = mMax; 		};
-	void	set_min			( float mMin	)	{ min = mMin;		};
 	void	set_auto_scale	( bool  mOn		)	{ auto_scale = mOn; };
 	void 	calc_scale		(  				);
-	float 	calc_auto_scale ( 				);
 
 protected:
-	void  line_plot		  ( DataSet* data, long int Color );
-
+	void  	line_plot		( DataSet* data, long int Color );
+	int 	calc_auto_scale ( 				);		// call calc_scale it will go here.
+	
 private:
 	float 	max,min;
 	bool	auto_scale;

@@ -158,6 +158,45 @@ int	RadioButton::join_group( RadioButton* mNewButton )
 	mNewButton->Prev = this;
 }
 
+int	RadioButton::get_selected_index(  )		// scans from top of group. index according to linked list.
+{
+	// Find the head: go in the Prev way:
+	RadioButton* tmp = Prev;
+	RadioButton* head = this;
+	while (tmp) { head=tmp;   tmp = tmp->Prev;  }
+		
+	// Count to the selected:
+	tmp = head;
+	int index = 0;
+	while (tmp->checked==false) {
+		index++; tmp = tmp->Next;		
+	};
+	return index;
+}
+
+RadioButton*  RadioButton::get_selected  (  )		// scans from top of group. 
+{	
+	// Go in the Next way :
+	if (checked) return this;
+	
+	RadioButton* tmp = Next;
+	while (tmp)
+	{
+		if (tmp->checked)
+			return tmp;
+		tmp = tmp->Next;
+	}	
+	// Now go in the Prev way:
+	tmp = Prev;
+	while (tmp)
+	{
+		if (tmp->checked)
+			return tmp;
+		tmp = tmp->Prev;
+	}
+	return NULL;
+}
+
 long int half_intensity( long int mColor )
 {
 	static long int Half;
@@ -203,8 +242,9 @@ int RadioButton::draw()
 // Allocates and copies!	
 void RadioButton::set_text( const char* NewText, bool mWrapContent )
 {
-	Control::set_text( NewText, true);
+	Control::set_text( NewText, true );
 }
+
 /*Control* RadioButton::HitTest ( int x, int y 	)
 {
 	printf("RadioButton::HitTest()\n");

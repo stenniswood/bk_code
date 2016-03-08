@@ -19,6 +19,7 @@ public:
 	virtual void 	Initialize			  (					);	
 	virtual void  	set_text_size		  ( float TextSize	);
 	virtual void  	set_text  			  ( const char* NewText, bool mWrapContent=false );	// Allocates and copies!
+	virtual char*  	get_text  			  (  )	{ return text;	}
 	void  			set_text_color 	  	  ( long int TextColor 	);
 	void  			set_border_color      ( long mColor 	) { border_color= mColor; 	  }
 	void  			set_background_color  ( long mColor 	) { background_color= mColor; }
@@ -26,7 +27,7 @@ public:
 	// set_position should call move_to() and set_width_height() both are virtual.  so this need not be!
 	virtual void 	wrap_content	  	  ( 				);
 
-	void			set_position	  	  ( Rectangle* mRect );
+	void			set_position	  	  ( Rectangle* mRect ); 
 	void		 	set_position	  	  ( int Left, int Right, int Top, int Bottom );
 	virtual void 	set_width_height  	  ( int Width, int Height 		 );//  { width = Width; height=Height; };
 	virtual void  	move_to	  		  	  ( float Left,   float  Bottom	 );

@@ -36,9 +36,11 @@ public:
 	inline float 	get_top		( )		{ return coords[TOP];    };
 	inline float 	get_bottom	( )		{ return coords[BOTTOM]; };
 
-	inline float 	get_width	( )		{ return coords[RIGHT]-coords[LEFT];   };
-	inline float 	get_height	( )		{ return coords[TOP] - coords[BOTTOM]; };
+	float 	get_width	( )		;
+	float 	get_height	( )		;
 	void	print_positions();
+	
+	void			shrink		( float mPercent );
 
 	void	draw		();
 	int		hit_test	( float x,     float y);	

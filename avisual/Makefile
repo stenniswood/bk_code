@@ -17,7 +17,7 @@ HOME_PATH = /Users/stephentenniswood/
 endif
 
 CC		   = g++
-OPTIONS	   =  -Wwrite-strings -fpermissive -Wreturn-type -Wformat
+OPTIONS	   = -Wwrite-strings -fpermissive -Wreturn-type -Wformat
 # 
 # INCLUDE PATHS:
 CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
@@ -28,7 +28,7 @@ CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/ ./apps/file_editer/ ./apps/video/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 SQL_INC    = -I/usr/include/mysql
-INC		= $(CORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
+INC		   = $(CORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
 
 
 SELF_INC   = ../../avisual/ ./ ../ 
@@ -67,8 +67,8 @@ FUSE_OBJS   = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 VG_OBJS     = libshapes.o oglinit.o 
 AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   test_layouts.o test_combo_layouts.o client_list_control.o \
-			  test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
-			  power.o home_screen.o can_sql_logger.o
+			   test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
+			   power.o home_screen.o datalog_graph.o can_sql_logger.o
 APPS_OBJS   = 
 FILE_EDIT_OBJS = file_editor_app.o 
 VIDEO_APP_OBJS = video_app.o video.o 
@@ -117,7 +117,6 @@ VOICE_OBJS 	=
 	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
 %.o: %.c $(DEPS) 
 	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
-
 
 avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ./voice/, 				$(VOICE_OBJS)) 			\

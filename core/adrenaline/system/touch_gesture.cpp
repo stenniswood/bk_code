@@ -9,9 +9,11 @@
 #include <math.h>
 #include <shapes.h>
 #include <fontinfo.h>
+#include <vector>
 
 #include "VG/openvg.h"
 #include "VG/vgu.h"
+#include "bk_system_defs.h"
 #include "Graphbase.hpp"
 #include "control.hpp"
 #include "button.hpp"
@@ -23,10 +25,10 @@
 #define Debug 0
 
 
-float degrees( float mRad )
+/*float degrees( float mRad )
 {
-	return mRad * (360. / M_PI);
-}
+	return mRad * (180. / M_PI);
+}*/
 
 DraggerGesture::DraggerGesture()
 {  

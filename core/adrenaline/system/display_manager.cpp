@@ -29,7 +29,7 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug  0
+#define Debug  0 
 #define Debug2 0
 
 Keyboard		m_keyboard;
@@ -131,11 +131,12 @@ void DisplayManager::show_calendar	(   )
 
 	m_calendar.show();
 	m_calendar.draw();
+	if (Debug) printf("DisplayManager::returned from m_calendar.draw(); \n");
 	m_calendar.set_z_order( ++m_z_order_counter );
 	if (Debug) printf("DisplayManager::show_calendar  %ld	\n", m_z_order_counter);
 	sort_z_order();
 }
-void DisplayManager::hide_calendar	(   )
+void DisplayManager::hide_calendar	(   ) 
 {
 	if (Debug) printf("DisplayManager::hide_calendar(   )\n");
 	m_calendar.hide();
@@ -332,25 +333,18 @@ float DisplayManager::get_aspect_ratio()
 Rectangle*	DisplayManager::get_useable_rect( )
 {
 	static Rectangle rect;
-	if (Debug) printf("DisplayManager::get_useable_rect( )\n");
+	if (Debug) printf("DisplayManager::get_useable_rect( )\t");
 
 	// TOP : 
-	float top2 = m_sb.get_bottom();
-	if (Debug)  printf("get_bottom() = %6.1f\n", top2 );
-	float top2_ = m_sb.get_bottom_();
-	if (Debug)  printf("get_bottom() = %6.1f\n", top2_ );	
-
-	m_sb.print_positions();	
+	float top2 = m_sb.get_bottom();				// sb is system bar, not status bar!
 	rect.set_top( top2 );
 
 	// Right Side:	
 	if (m_side.is_visible()==true) {
 		float l2 = m_side.get_left_()-1; 
-		if (Debug)  printf("right side = %6.1f\n", l2 );
 		rect.set_right( l2 );
 	} else
 		rect.set_right( screen_width );
-	if (Debug)  printf("right = %6.1f\n", rect.get_right() );
 	
 	// no task bar yet!
 	rect.set_left( 0 );
@@ -362,6 +356,8 @@ Rectangle*	DisplayManager::get_useable_rect( )
 		rect.set_bottom( m_keyboard.get_height() );
 	else
 		rect.set_bottom( 0 );
+	if (Debug)	
+		rect.print_positions();
 	return &rect;
 }
 

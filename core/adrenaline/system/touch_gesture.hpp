@@ -1,8 +1,9 @@
 #ifndef _DRAGGER_GESTURE_HPP_
 #define _DRAGGER_GESTURE_HPP_
 
-#include <vector>
+//#include <vector>
 #include "mouse_oop.hpp"
+// class Mouse;
 
 
 const int THREE_UP			= 0x001;

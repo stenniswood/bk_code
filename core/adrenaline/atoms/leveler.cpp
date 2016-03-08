@@ -8,7 +8,6 @@
 #include "VG/vgu.h"
 #include "/home/pi/openvg/fontinfo.h"
 #include "/home/pi/openvg/shapes.h"
-#include "line_graph.h"
 #include "leveler.hpp"
 
 #define MARKER_HEIGHT 20
@@ -32,7 +31,7 @@ Leveler::Leveler(float Max, float Min)
 
 Leveler::Leveler()
 {
-	strcpy (class_name, "Leveler");		
+	strcpy (class_name, "Leveler");	
 	xAxisLabel	= (char*)" ";
 	yAxisLabel  = (char*)" ";
 	title 		= (char*)" ";	

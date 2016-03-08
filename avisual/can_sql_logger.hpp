@@ -41,8 +41,9 @@ public:
 	
 	int				query				( bool mRetrieving=true );
 		
-	void			find_reading		( struct tm start_time_bd, struct tm end_time_bd,	int mUser_id = 1 );
+	void			find_reading		( string mDataType, struct tm start_time_bd, struct tm end_time_bd,	int mUser_id = 1 );
 
+	void			add_body_position	( struct stBodyPositionVector& mRead );
 	void			add_gyro			( stGyroReading& 	 mRead );
 	void			add_loadcell		( stLoadCellReading& mRead );
 	void			add_gps				( stGPSReading&  	 mRead );
@@ -62,6 +63,8 @@ public:
 public:
 	MYSQL_RES*		m_result;
 	MYSQL_ROW		m_row;
+	
+	float			readings[8];
 	
 	// DATA :	
 	int				_id;	

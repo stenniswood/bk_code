@@ -2,6 +2,8 @@
 #define _GRAPHBASE_
 
 #include <vector>
+#include <string>
+
 #include "bk_system_defs.h"
 #include "dataset.hpp"
 #include "control.hpp"
@@ -23,7 +25,10 @@ public:
 	Graphbase();
 
 	virtual void  Initialize	(					);
-	void  set_text  	 		( char* Title, char* xLabel, char* yLabel );
+	void  	set_text  	 		( char* Title, char* xLabel=NULL, char* yLabel=NULL );
+	void	set_max				( float mMax	)	{ m_max = mMax; 		};
+	void	set_min				( float mMin	)	{ m_min = mMin;		};
+	void	reset_data			( );
 
 	void  show_title()			{ draw_options &= SHOW_TITLE; 	};
 	void  show_x_labels()		{ draw_options &= SHOW_X_LABEL; };
@@ -36,12 +41,13 @@ public:
 	void  set_title 			( char* Title 		);
 	void  set_xLabel			( char* Label 		);
 	void  set_yLabel			( char* Label 		);
-	void  set_position			( int Left, int Right, int Top, int Bottom );
+	virtual void  set_position			( int Left, int Right, int Top, int Bottom );
 	void  calc_body_coords		(					  );
 	void  move_to	  			( int Left, int Right );
 
 	// This links the Datasets together!
 	void  add_data_series	  	( DataSet* NewData );
+	//void  add_data_point	  	( int mSeries, DataSet* NewData );	
 	void  remove_data_series	( int index /*DataSet* OldData*/ );
 
 	void  set_horizontal_lines	( int NumberLines ) { NumberHorizontalLines=NumberLines; };	
@@ -79,7 +85,7 @@ protected:
 	float	xlabel_size ;
 	float	ylabel_size ;
 
-	float 	max,min;
+	float 	m_max,m_min;
 	
 	// the guts of the graph goes here (title,labels,etc are outside this):
 	float	body_left,  body_bottom;

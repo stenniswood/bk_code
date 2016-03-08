@@ -1,15 +1,19 @@
-// line graph OpenVG program
+// line graph OpenVG program 
 // Steve Tenniswood
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
 #include "line_graph.hpp"
 #include "display.h" 
+
+ 
+#define Debug 1 
 
 long int ColorSequence[10] = { 
 0x00FF0000, 0x0000FF00, 0x000000FF, 0x007F7F7F,
@@ -22,8 +26,6 @@ LineGraph::LineGraph()
 	stroke_width = 5.0;
 	//ShowVerticalLines=false;
 	auto_scale = false;
-	min =0;
-	max =0;
 	Initialize();
 }
 
@@ -33,8 +35,6 @@ LineGraph::LineGraph( int Left, int Right, int Top, int Bottom )
 	stroke_width = 5.0;
 	//ShowVerticalLines=false;
 	auto_scale = false;
-	min =0;
-	max =0;
 	Initialize();
 }
 
@@ -74,20 +74,28 @@ void LineGraph::draw_data_series( )
 	}	
 }
 
-float LineGraph::calc_auto_scale( )
+int LineGraph::calc_auto_scale( )
 {
 	// get max of all data series:
 	float tmp_max,tmp_min;
+	if (data_series.size()==0)
+		return -1;
+	//assert( data_series.size()>0 );
+	m_max = data_series[0].get_max();		// initialize with something valid!
+	m_min = data_series[0].get_min();
+	dprintf("m_max=%6.1f; m_min=%6.1f\n", m_max, m_min);
 	
+	// SCAN all data series:
 	for (int s=0; s<data_series.size(); s++)
 	{
 		tmp_max = data_series[s].get_max();
 		tmp_min = data_series[s].get_min();
-		if (tmp_max > max)	max = tmp_max;
-		if (tmp_min > min)	min = tmp_min;
+		if (tmp_max > m_max)	m_max = tmp_max;
+		if (tmp_min < m_min)	m_min = tmp_min;
 	}	
-	// round max and min 
-	return 1.0;
+	dprintf("m_max=%6.1f; m_min=%6.1f\n", m_max, m_min);	
+	// round m_max and m_min 
+	return 1;
 }
 
 void LineGraph::calc_scale( )
@@ -100,10 +108,12 @@ void LineGraph::calc_scale( )
 		calc_auto_scale();
 	}
 
+	float div = (m_max-m_min);
+	if (div==0) div=1;
 	xscale  = 1.0; 	
-	yscale  = ypixels/(max-min);
+	yscale  = ypixels/(m_max-m_min);
 	xoffset = 0;
-	yoffset = min;	
+	yoffset = m_min;	
 }
 
 int LineGraph::draw_body() 

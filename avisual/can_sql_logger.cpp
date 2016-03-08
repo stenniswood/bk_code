@@ -11,12 +11,14 @@
 #include "calendar.hpp"
 #include "calendar_entry.hpp"
 #include "can_sql_logger.hpp"
+#include "sequencer_memory.hpp"
+
 
 //extern MYSQL *logger_db;
 MYSQL 		 *logger_db = NULL;
 
 #define Debug 0
-//#define dprintf if (Debug) printf
+
 
 
 static void object_finish_with_error( )
@@ -53,7 +55,7 @@ void SQL_Logger::connect_to_logger_db()
 
 int  SQL_Logger::query( bool mRetrieving )
 {
-	printf("%s\n", query_string.c_str() );
+	dprintf("%s\n", query_string.c_str() );
 	
   if (mysql_query(logger_db, query_string.c_str() ))
   {
@@ -65,12 +67,12 @@ int  SQL_Logger::query( bool mRetrieving )
   if (mRetrieving) {
 	  m_result = mysql_store_result(logger_db);
 	  if (m_result == NULL)  {
-		  printf("query Error result==null!\n");
+		  dprintf("query Error result==null!\n");
 		  return 0; 
 	  }
 	  row_count = mysql_num_rows(m_result);
   }    
-  printf("row_count=%d\n", row_count);
+  dprintf("row_count=%d\n", row_count);
   return row_count;
 }
 
@@ -157,17 +159,20 @@ char* form_date_time_string( struct tm& time_bd )
 	return tmp;
 }
 
-void SQL_Logger::find_reading( struct tm start_time_bd, 
+void SQL_Logger::find_reading( string mDataType, struct tm start_time_bd, 
 							   struct tm end_time_bd,	int mUser_id = 1 )
 {
 	query_string =  "SELECT * FROM bk_useraccounts.data_log WHERE ";
 	query_string += "bk_useraccounts.data_log.timestamp BETWEEN '";
 	query_string += form_date_string(start_time_bd);
-	query_string += "' AND '";	
+	query_string += "' AND '";		
 	query_string += form_date_string( end_time_bd );
-	query_string += "';";	
+	query_string += "' AND read_type='";	
+	query_string += mDataType;
+	query_string += "' ;";		
+	printf("   query_string=%s\n", query_string.c_str() );
 	query(true);
-	printf("Num Results=%d\n", get_number_results() );
+	dprintf("Num Results=%d\n", get_number_results() );
 }
 
 char* append_float( float mFloat )
@@ -206,11 +211,50 @@ void SQL_Logger::add_gyro( stGyroReading& mRead				 )
 	query(false);
 }
 
+void SQL_Logger::add_body_position( struct stBodyPositionVector& mRead )
+{
+	char value[16];
+	float num_elements = sizeof(struct stBodyPositionVector)/ sizeof(float);
+	float* ptr = (float*)&mRead;
+	
+	query_string = "INSERT INTO bk_useraccounts.data_log VALUES ('0', CURRENT_TIMESTAMP,";	
+	for (int r=0; r<8; r++)
+	{
+		query_string += append_float(ptr[r]);		
+		query_string += ", ";
+	}
+	query_string += "'Body Position'";					query_string += ", ";
+	query_string += "'servo group 1'";				
+	query_string += "); ";
+	query(false);
+
+	query_string = "INSERT INTO bk_useraccounts.data_log VALUES ('0', CURRENT_TIMESTAMP,";	
+	for (int r=8; r<8*2; r++)
+	{
+		query_string += append_float(ptr[r]);		
+		query_string += ", ";
+	}
+	query_string += "'Body Position'";					query_string += ", ";
+	query_string += "'servo group 2'";				
+	query_string += "); ";
+	query(false);
+	
+	query_string = "INSERT INTO bk_useraccounts.data_log VALUES ('0', CURRENT_TIMESTAMP,";	
+	for (int r=16; r<8*3; r++)
+	{
+		query_string += append_float(ptr[r]);		
+		query_string += ", ";
+	}
+	query_string += "'Body Position'";					query_string += ", ";
+	query_string += "'servo group 3'";				
+	query_string += "); ";
+	query(false);	
+}
+
 void SQL_Logger::add_gps( stGPSReading& mRead				 )
 {
 	char value[16];
 	query_string = "INSERT INTO bk_useraccounts.data_log VALUES ('0', CURRENT_TIMESTAMP, ";	
-
 	query_string += append_float(mRead.longitude);		query_string += ", ";
 	query_string += append_float(mRead.latitude );		
 	query_string += "'GPS'";					query_string += ", ";
@@ -219,6 +263,24 @@ void SQL_Logger::add_gps( stGPSReading& mRead				 )
 	query(false);	
 }
 
+MYSQL_ROW SQL_Logger::goto_first_row()
+{
+	m_row = mysql_fetch_row( m_result );
+	return m_row;
 
+}
+MYSQL_ROW SQL_Logger::goto_next_row()
+{
+	m_row = mysql_fetch_row( m_result );
+	return m_row;
+}
+
+void SQL_Logger::extract_result	( )		// for the last fetched row.
+{
+	if (m_row) {
+		for (int r=0; r<8; r++)
+			readings[r] = atof(m_row[r+2]);
+	}
+}
 
 

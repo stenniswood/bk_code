@@ -18,7 +18,7 @@ const int CALENDAR_DEFAULT_HEIGHT = 200;
 const int CALENDAR_DEFAULT_WIDTH  = 250;
 char days_of_week_1_letter[] = { 'S', 'M', 'T', 'W', 'T', 'F', 'S' };
 
-#define Debug 0
+#define Debug 1
 #define dprintf if (Debug) printf
 
 void prev_month_cb( void* mCalendar )
@@ -35,6 +35,11 @@ void next_month_cb( void* mCalendar )
 	dprintf("next_month_cb!!  %d \n", cal->m_shown_month );
 	cal->next_month();
 	cal->Invalidate();
+}
+
+void close_calendar_cb( void* mCalendar )
+{
+	MainDisplay.hide_calendar();
 }
 
 
@@ -99,6 +104,15 @@ void Grid::hit_test(int mx, int my)
 	}
 }
 
+void Grid::draw ()
+{
+	
+	for (int r=0; r<m_row_bottom_y.size(); r++)
+		Line( left, m_row_bottom_y[r], left+width, m_row_bottom_y[r] );
+	for (int c=0; c<m_column_start_x.size(); c++)
+		Line( m_column_start_x[c], bottom, m_column_start_x[c], bottom+height );
+	
+}
 
 
 
@@ -130,15 +144,15 @@ void Calendar::Initialize(	)
 	
 	background_color = 0xFFA0002C;
 	set_width_height( CALENDAR_DEFAULT_WIDTH, CALENDAR_DEFAULT_HEIGHT );
-	m_prev.set_text( "<", true );
-	m_next.set_text( ">", true );
 
 	m_prev.set_on_click_listener( prev_month_cb, this );
 	m_next.set_on_click_listener( next_month_cb, this );
+	m_close.set_on_click_listener( close_calendar_cb, this );
 	
 	register_child( &m_prev );
 	register_child( &m_next );	
-	place_views();	
+	register_child( &m_close );		
+	//place_views();	
 }
 
 int	Calendar::show_date	( int mMonth, int mDay ) 
@@ -149,6 +163,10 @@ int	Calendar::show_date	( int mMonth, int mDay )
 int Calendar::onCreate	(	) 
 { 
 	int retval = Control::onCreate();
+	m_prev.set_text( "<", true );
+	m_next.set_text( ">", true );
+	m_close.set_text( " . ", true );	
+	
 	place_views();
 	return retval;
 }
@@ -185,6 +203,8 @@ void	Calendar::place_views()
 	float top = bottom+height;	
  	m_next.set_position( left+width-m_next.get_width(), left+width, top, top-m_next.get_height() );
  	m_prev.set_position( left, left+m_prev.get_width(), top, top-m_prev.get_height() );
+ 	m_close.move_to( left+width-m_close.get_width(),  bottom );
+ 	
 }
 
 int Calendar::draw_simple_view(	) 

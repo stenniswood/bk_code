@@ -72,8 +72,8 @@ public:
 
 	void	   set_mode	 	 ( int mMode  );
 	BOOL	   move_to	 	 ( int mIndex );
-	BOOL	   start_over 	 ( 			  )  { move_to(0);		};
-	BOOL	   next_vector 	 ( 			  )  { CurrentIndex++;	};
+	BOOL	   start_over 	 ( 			  )  { return move_to(0);		};
+	BOOL	   next_vector 	 ( 			  )  { CurrentIndex++;	return false; };
 
 	OneVector* get_vector	 ( 			  );
 	OneVector* get_ivector   ( int mIndex );

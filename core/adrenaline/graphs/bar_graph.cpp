@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <string>
 #include <math.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
@@ -54,7 +55,7 @@ void BarGraph::calc_scale( )
 	bar_space = bar_width_spacing * 0.1;	
 	group_space = group_xpixel_spacing * 0.1;	
 	
-	yscale   	= (height / max);
+	yscale   	= (height / m_max);
 }
 
 //extern float sqrt_2pi;
@@ -63,7 +64,7 @@ void BarGraph::calc_scale( )
 int BarGraph::draw_body() 
 { 	
 	calc_scale();
-	printf("max = %6.2f\n", max);
+	printf("m_max = %6.2f\n", m_max);
 	
 	Fill_l  ( bar_color );	   		// Big blue marble
 	Stroke	( 255, 128, 128, 0.5);

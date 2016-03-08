@@ -177,6 +177,9 @@ FORMAT:
 */
 void cli_ipc_write_sentence( char* mSentence ) 
 {
+	if (ipc_memory_client)	
+		return ;
+
 	size_t length = strlen(mSentence);
 	int MaxAllowedLength = sizeof(ipc_memory_client->Sentence);	
 	if (length>MaxAllowedLength) {
