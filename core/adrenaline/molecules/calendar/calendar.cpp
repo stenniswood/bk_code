@@ -14,6 +14,8 @@
 #include "calendar.hpp"
 
 
+const 	float x_margin = 10.;
+
 const int CALENDAR_DEFAULT_HEIGHT = 200;
 const int CALENDAR_DEFAULT_WIDTH  = 250;
 char days_of_week_1_letter[] = { 'S', 'M', 'T', 'W', 'T', 'F', 'S' };
@@ -80,42 +82,64 @@ void Grid::create(int mRows, int mCols)
 	float x = left;
 	float y_inc = height / mRows;
 	float x_inc = width / mCols;
-	
+
+	m_row_bottom_y.clear();
+	m_column_start_x.clear();
 	for (int r=0; r<mRows; r++)
 	{	m_row_bottom_y.push_back( trunc(y) );	y+= y_inc;		}
 	for (int c=0; c<mCols; c++)
 	{	m_column_start_x.push_back( trunc(x) );	x+= x_inc;		}
 
+	m_row_bottom_y.push_back( bottom+height );
+	m_column_start_x.push_back( left+width );	
 }
 void Grid::hit_test(int mx, int my)
 {
 	int rows = m_row_bottom_y.size();
 	int cols = m_column_start_x.size();
-	
+	m_hit_row = -1;
+	m_hit_col = -1;
 	for (int r=0; r<rows; r++)
 	{
 		if (my < m_row_bottom_y[r])
-			m_hit_row = r;
-		for (int c=0; c<cols; c++)
-		{
-			if (mx < m_column_start_x[c]) 
-				m_hit_col = c;
-		}	
+		{	m_hit_row = r-1;  break; }
+	}	
+	for (int c=0; c<cols; c++)
+	{
+		if (mx < m_column_start_x[c]) 
+		{	m_hit_col = c-1;	break; }
 	}
+
+	if ((m_hit_col>=0) && (m_hit_row>=0))
+		printf("GRID HIT:  row,col=<%d,%d>\n", m_hit_row, m_hit_col );
 }
 
 void Grid::draw ()
-{
-	
+{	
 	for (int r=0; r<m_row_bottom_y.size(); r++)
 		Line( left, m_row_bottom_y[r], left+width, m_row_bottom_y[r] );
+
+	//printf("Grid: # Cols=%d\n", m_column_start_x.size() );
 	for (int c=0; c<m_column_start_x.size(); c++)
-		Line( m_column_start_x[c], bottom, m_column_start_x[c], bottom+height );
-	
+		Line( m_column_start_x[c], bottom, m_column_start_x[c], bottom+height );	
+
+	// Draw Inverted square if clicked:		
+	if ((m_hit_col>=0) && (m_hit_row>=0))
+	{
+		float t_left = m_column_start_x[m_hit_col];
+		float t_bottom  = m_row_bottom_y  [m_hit_row];
+		float t_width  = m_column_start_x[m_hit_col+1] - m_column_start_x[m_hit_col];
+		float t_height = m_row_bottom_y[m_hit_row+1] - m_row_bottom_y[m_hit_row];
+		//Stroke_l( box_border_color );
+		Fill_l  ( 0xFFFFFFFF );	
+		Rect( t_left, t_bottom, t_width, t_height );
+	}
+		
 }
 
-
-
+/********************************************************************************
+							class Calendar
+********************************************************************************/
 Calendar::Calendar() 
 { 
 	Initialize(	);
@@ -151,8 +175,7 @@ void Calendar::Initialize(	)
 	
 	register_child( &m_prev );
 	register_child( &m_next );	
-	register_child( &m_close );		
-	//place_views();	
+	register_child( &m_close );
 }
 
 int	Calendar::show_date	( int mMonth, int mDay ) 
@@ -204,7 +227,12 @@ void	Calendar::place_views()
  	m_next.set_position( left+width-m_next.get_width(), left+width, top, top-m_next.get_height() );
  	m_prev.set_position( left, left+m_prev.get_width(), top, top-m_prev.get_height() );
  	m_close.move_to( left+width-m_close.get_width(),  bottom );
- 	
+
+	// Must Match the draw() 	
+	float w = (width-2*x_margin);
+	float y= bottom + height - (text_size*1.25) - (text_size*1) - (text_size*1.5)+4;	
+ 	m_grid.set_boundary ( left+x_margin, left+x_margin+w, y, y-5*(text_size*1.5) );
+ 	m_grid.create(5,7);
 }
 
 int Calendar::draw_simple_view(	) 
@@ -234,11 +262,14 @@ void Calendar::next_month()
 	}
 }
 
+
 int Calendar::draw_1month_view_small(	) 
 {
 	char date_str[24];
 	char date[8];
 
+	//m_grid.draw();
+	
 	// DRAW MONTH NAME
 	text_color = 0xFFFF0000;
 	Fill_l   ( text_color );
@@ -254,6 +285,7 @@ int Calendar::draw_1month_view_small(	)
 	dprintf("Year is: %s; m_next.left=%d;  x=%6.1f; width=%d\n", date_str, m_next.get_left(), year_x, text_width );
 	TextEnd(year_x, y, date_str, SerifTypeface, text_size );	// 
 	
+
 	// DRAW DAYS of the WEEK : 
 	x= left + 10.;
 	y -= (text_size*2);
@@ -302,15 +334,14 @@ int Calendar::draw_1month_view_small(	)
 	int this_month = lt->tm_mon;
 	
 	// DRAW NUMBERS : 
-	float margin = 10.;
 	float y_increment = (text_size*1.5);
 	y -= y_increment;
 	int day = som.tm_mday;
-	float day_width = (width-2*margin) / 7.;
+	float day_width = (width-2*x_margin) / 7.;
 	int month_offset = -1;
 	for (int w=0; w<5; w++)		// week in month.
 	{
-		x = left + margin;
+		x = left + x_margin;
 		dprintf("Date:  " );
 		for (int d=0; d<7; d++, day++) 
 		{
@@ -379,6 +410,7 @@ int	Calendar::find_date_clicked( int x, int y )
 
 int Calendar::onClick(int x, int y, bool mouse_is_down) 
 {
+	m_grid.hit_test(x,y);
 	int date = find_date_clicked(x,y); 
 	Control::onClick(x,y,mouse_is_down); 
 	return 1;	

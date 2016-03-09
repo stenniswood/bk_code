@@ -243,6 +243,7 @@ public:
 	GridFrameWindow();
 	void			setupgrid();
 	virtual int		draw();
+	virtual int			onClick		  ( int x, int y, bool mouse_is_down=true );	
 	Grid grid;
 };
 GridFrameWindow::GridFrameWindow()
@@ -260,6 +261,11 @@ int GridFrameWindow::draw()
 {
 	FrameWindow::draw();
 	grid.draw();	
+}
+
+int	GridFrameWindow::onClick( int x, int y, bool mouse_is_down=true )
+{
+	grid.hit_test( x,y );
 }
 
 GridFrameWindow grid_test;
