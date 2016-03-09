@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <string> 
+#include <list>
 #include <math.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
@@ -190,6 +191,7 @@ int ListBox::draw_text()
 			draw_one_row( i, y );
 		//printf( "y=%6.3f Num_lines=%d LH=%6.3f, TextSize=%6.3f above=%6.3f\n", y, num_lines, LineHeight, text_size);
 	}
+	return 1;
 }
 
 void ListBox::adjust_height_for_num_visible_items( int mNumber_items_shown )
@@ -240,6 +242,7 @@ int ListBox::draw_line_backgrounds()
 		if (i==selected_item)
 			Fill_selected_line(left, y, width, LineHeight);
 	}
+	return 1;
 }
 
 int ListBox::draw()
@@ -254,6 +257,7 @@ int ListBox::draw()
 	draw_text();
 	
 	if (vsb) vsb->draw();
+	return 1;
 }
  
 void ListBox::set_text_size( float mTextSize )
@@ -264,6 +268,7 @@ void ListBox::set_text_size( float mTextSize )
 
 void ListBox::clear_items( )  
 {
+	int size = LineTexts.size();
 	LineTexts.clear();
 	enable_v_scroll_bar(false);
 	Invalidate();
@@ -296,7 +301,7 @@ void ListBox::set_item( const char* mString )
 
 void ListBox::print_info(	)
 {
-	printf("ListBox:: FirstVisibleItem=%d of %d; VisibleLines=%d; body_height=%6.1f; ", 
+	printf("ListBox:: FirstVisibleItem=%d of %d; VisibleLines=%d; body_height=%d; ", 
 				first_visible_line, LineTexts.size(),  
 				number_lines_visible, body_height  );
 
@@ -331,8 +336,9 @@ void ListBox::select( int mIndex )
 // chance to load resources, call functions which use fonts (already loaded before this call) etc.
 int ListBox::onCreate( )
 {
-	ScrollControl::onCreate( );
+	int retval= ScrollControl::onCreate( );
 	calc_metrics( );
+	return retval;
 }
 
 // Returns the select index of the listbox:
@@ -367,7 +373,7 @@ int	ListBox::get_selection( )
 
 Control* ListBox::HitTest(int x, int y)
 {
-	ScrollControl::HitTest(x,y);
+	return ScrollControl::HitTest(x,y);
 }
 
 // "Special Mouse events"  Used for scrolling.
@@ -376,12 +382,14 @@ int ListBox::onGesture( DraggerGesture* mGesture )
 	if (mGesture->m_last_gesture_recognized == FLINGER_ONE_DRAG) 
 	{
 		//scroll to
+		return 1;
 	}
 	
 	if (mGesture->m_last_gesture_recognized == FLINGER_ONE_FLING) 
 	{
-	
+		return 1;
 	}	
+	return 0;
 }
 
 int	ListBox::onClick(int Mousex, int Mousey, bool mouse_is_down)

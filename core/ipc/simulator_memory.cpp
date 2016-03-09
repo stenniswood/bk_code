@@ -28,12 +28,14 @@ AUTHOR	:  Stephen Tenniswood
 #include <unistd.h>
 #include <errno.h>
 #include <vector>
+#include <string>
 #include <assert.h>
 #include "global.h"
 
+#include "bk_system_defs.h"
 #include "simulator_memory.h"
 
-
+#define Debug 0
 
 char* 	simulator_shared_memory;
 int 	simulator_segment_id;
@@ -94,7 +96,7 @@ void sim_save_segment_id(char* mFilename)
 {
 	FILE* fd = fopen(mFilename, "w");
 	//FILE* fd = fopen("simulator_shared_memseg_id.cfg", "w");
-	printf("Segment_id=%d\n", simulator_segment_id );
+	dprintf("Segment_id=%d\n", simulator_segment_id );
 	fprintf( fd, "%d", simulator_segment_id );
 	fclose( fd );
 }
@@ -119,7 +121,7 @@ void delete_all_shm()
 int sim_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct simulator_ipc_memory_map);
-    printf("sim shared_seg_size=%d\n", shared_segment_size);
+    dprintf("sim shared_seg_size=%d\n", shared_segment_size);
 
 	/* Allocate a shared memory segment. */
 	simulator_segment_id = shmget( IPC_KEY_SIM, shared_segment_size, IPC_CREAT | 0666 );
@@ -129,7 +131,8 @@ int sim_allocate_memory( )
         printf("%s\n", strerror(errsv));
     
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	printf ("Sim3D shm segment_id=%d\n", simulator_segment_id );
+	dprintf ("Sim3D shm segment_id=%d\n", simulator_segment_id );
+	printf ("Sim3D shm allocated %d bytes\n", shared_segment_size );
 	return simulator_segment_id;
 }
 
@@ -138,7 +141,7 @@ long sim_attach_memory()
 	/* Attach the shared memory segment. */
 	simulator_shared_memory = (char*) shmat (simulator_segment_id, 0, 0);
 	ipc_memory_sim			= (struct simulator_ipc_memory_map*)simulator_shared_memory;
-	printf ("Sim3D shm attached at address %p\n\n", simulator_shared_memory);
+	dprintf ("Sim3D shm attached at address %p\n\n", simulator_shared_memory);
     return (long)simulator_shared_memory;
 }
 
@@ -147,7 +150,7 @@ void sim_reattach_memory()
 	/* Reattach the shared memory segment, at a different address. */ 
 	simulator_shared_memory = (char*) shmat (simulator_segment_id, (void*) 0x5000000, 0); 
 	ipc_memory_sim			= (struct simulator_ipc_memory_map*)simulator_shared_memory;
-	printf ("Sim3D shm reattached at address %p\n", simulator_shared_memory);
+	dprintf ("Sim3D shm reattached at address %p\n", simulator_shared_memory);
 }
 
 void sim_detach_memory()
@@ -171,17 +174,17 @@ bool is_sim_ipc_memory_available()
 {
     struct shmid_ds buf;			// shm data descriptor.
     
-    printf("Checking for simulator IPC memory... ");
-    printf( "reading segment id: %s\n", sim_segment_id_filename );
+    dprintf("Checking for simulator IPC memory... ");
+    dprintf( "reading segment id: %s\n", sim_segment_id_filename );
     
     // First see if the memory is already allocated:
     simulator_segment_id = sim_read_segment_id( sim_segment_id_filename );
     int retval = shmctl(simulator_segment_id, IPC_STAT, &buf);
     if (retval==-1) {
-        printf("Error: %s\n", strerror(errno) );
+        dprintf("Error: %s\n", strerror(errno) );
         return false;
     }
-    printf( " Found segment, size=%ld and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+    dprintf( " Found segment, size=%ld and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
     
     if ((buf.shm_segsz > 0)			// segment size > 0
         && (buf.shm_nattch >= 1))	// number of attachments.
@@ -207,7 +210,7 @@ int connect_shared_simulator_memory( char mAllocate )
         sim_attach_memory( );
         sim_fill_memory  ( );
         
-        printf("Saving segment id: ");
+        dprintf("Saving segment id: ");
         sim_save_segment_id( sim_segment_id_filename );
         if ((ipc_memory_sim!=(struct simulator_ipc_memory_map*)-1) && (ipc_memory_sim != NULL))
             return 1;
@@ -228,7 +231,7 @@ unsigned long sim_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (simulator_segment_id, IPC_STAT, &shmbuffer);
 	unsigned long segment_size = shmbuffer.shm_segsz;
-	printf ("Sim3D segment size: %lu\n", segment_size);
+	dprintf ("Sim3D segment size: %lu\n", segment_size);
 	return segment_size;
 }
 

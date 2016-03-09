@@ -21,7 +21,7 @@
 #include "CAN_Interface.hpp"
 #include "can_id_list.h"
 #include "cmd_process.h"
-#include "serverthread.h"
+#include "serverthread.hpp"
 #include "visual_memory.h"
 #include "sway_memory.h"
 #include "audio_memory.h"
@@ -109,18 +109,27 @@ void create_another_client_thread()		// really serverthread which initiates conn
 #define USE_PICAMSCAN	0
 #define USE_AUDIO	1
 
+int bkInstant_connected = FALSE;
+int can_connected = FALSE;
+int audio_mem_connected = FALSE;			// audio memory is not necessary to hear audio.
+
 /* Inter Process Communications (via shared memory)		
 */
 void establish_ipc()
 {
 	printf("************************* SHARED MEMORY *****************************\n");
 	// Always have a Client connection, so we can accept user commands (ie. connect, send audio, etc)
-	int result = connect_shared_client_memory(TRUE);
-	printf("Update/Ack Counters = %d/%d\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);	
+	bkInstant_connected = connect_shared_client_memory(TRUE);
+	if (bkInstant_connected)
+		printf("IPC Client - attached to memory.\n");
+	else
+		printf("IPC Client - unavailable.\n");
+	
+	//printf("Update/Ack Counters = %d/%d\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);	
 
 	if (USE_AVISUAL)
 	{
-		printf("************************* AVISUAL SHARED MEMORY *****************************\n");
+		//printf("************************* AVISUAL SHARED MEMORY *****************************\n");
 		vis_allocate_memory();
 		vis_attach_memory  ();
 		vis_fill_memory	   ();
@@ -129,7 +138,7 @@ void establish_ipc()
 
 	if (USE_SWAY)
 	{
-		printf("************************* SWAY SHARED MEMORY *****************************\n");	
+		//printf("************************* SWAY SHARED MEMORY *****************************\n");	
 		sway_allocate_memory();
 		sway_attach_memory  ();
 		sway_fill_memory	();
@@ -138,7 +147,7 @@ void establish_ipc()
 
 	if (USE_PICAMSCAN) 
 	{
-		printf("************************* PICAMSCAN SHARED MEMORY *****************************\n");	
+		//printf("************************* PICAMSCAN SHARED MEMORY *****************************\n");	
 		picam_allocate_memory();
 		picam_attach_memory  ();
 		picam_fill_memory	 ();
@@ -147,20 +156,32 @@ void establish_ipc()
 	
 	if (USE_AUDIO)
 	{
-		printf("************************* AUDIO SHARED MEMORY *****************************\n");	
-	    result =  audio_connect_shared_memory(TRUE);
+		//printf("************************* AUDIO SHARED MEMORY *****************************\n");	
+	    audio_mem_connected =  audio_connect_shared_memory(TRUE);
+	    if (audio_mem_connected)
+			printf("IPC Audio - attached to memory.\n");
+		else
+			printf("IPC Audio - unavailable.\n");
+
 	}
 
 	if (USE_CAN)
 	{
-		printf("************************* CAN SHARED MEMORY *****************************\n");	
-	    result =  can_connect_shared_memory(FALSE);
+		//printf("************************* CAN SHARED MEMORY *****************************\n");	
+	    can_connected =  can_connect_shared_memory(FALSE);
+	    if (can_connected)
+			printf("IPC CAN - attached to memory.\n");
+		else
+			printf("IPC CAN - unavailable.\n");
 	}
 	
     
     int sim_available = connect_shared_simulator_memory( FALSE );
     if (sim_available)
-        printf("************************* SIMULATOR SHARED MEMORY *****************************\n");
+		printf("IPC Simulator - attached to memory.\n");
+	else
+		printf("IPC Simulator - unavailable.\n");    
+    //printf("************************* SIMULATOR SHARED MEMORY *****************************\n");
     
 	printf("****************** END SHARED MEMORY SETUP *******************");	
 }

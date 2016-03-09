@@ -13,13 +13,13 @@
 #include <time.h> 
 #include "protocol.h"
 #include "devices.h"
-#include "package_commands.h"
+//#include "package_commands.h"
 #include <termios.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <string>
 //#include "udp_transponder.h"
-#include "serverthread.h"
+#include "serverthread.hpp"
 #include "CAMERA_device.hpp"
 
 // Here we need to establish IPC to the atiltcam/ process.

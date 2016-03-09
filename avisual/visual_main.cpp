@@ -213,11 +213,12 @@ void gui_interface()
 // Where does it evalutate Menu's and call their callbacks?
 
 void sequencer_interface()
-{	/* select script, play, loop, link, etc */ }
+{	/* select script, play, loop, link, etc */ 
+}
 
 void ethernet_interface()		/* wifi comms */
 {
-	if ( cli_is_new_connection_status() )
+	if ( cli_is_new_connection_status() )		// not really used anymore.
 	{	
 		//if (Debug) printf("New status : %s\n", get_connection_status());	
 		if (ipc_memory_client)
@@ -225,12 +226,16 @@ void ethernet_interface()		/* wifi comms */
 		cli_ack_connection_status();
 		UpdateDisplaySemaphore=1;
 	}
-
-	if ( cli_is_new_update() )
-	{	
-		//if (Debug) printf("New sentence : %s\n", get_sentence());
+	if ( cli_is_new_client() )		// udp_thread found a new beacon.
+	{
 		AvailClients.update_available_client_list();
 		AvailClients.Invalidate();		
+		cli_ack_new_client();
+		UpdateDisplaySemaphore=1;					
+	}
+	if ( cli_is_new_update() )		// a new request (sentence)
+	{
+		
 		UpdateDisplaySemaphore=1;			
 	}
 	if (is_new_response() )
@@ -290,7 +295,7 @@ int main( int argc, char *argv[] )
 	MainDisplay.onCreate();
 	dev_keyboard_init();
 
-	CalendarEntry ce;
+/*	CalendarEntry ce;
 	ce.connect_to_calendar_db();
 	//ce.create_calendar_table_nq();
 	//ce.query(false);
@@ -335,7 +340,7 @@ int main( int argc, char *argv[] )
 	end.tm_year = 2016-1900;
 	mktime(&end);
 	sl.find_reading( "load cell", start, end );
-	
+*/	
 	//audio_file_open();
 	//play_waveform( &dWave, 1 );
 	//audio_play();

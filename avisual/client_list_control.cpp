@@ -1,3 +1,4 @@
+
 #include <shapes.h>
 #include <fontinfo.h>
 #include <stdio.h>
@@ -9,7 +10,7 @@
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-
+       
 #include "CAN_Interface.h"
 #include "dataset.hpp"
 #include "display.h"
@@ -166,6 +167,12 @@ int	ClientListPanel::onCreate(  )
 	add_control( &m_connect );
 		
 	Window::onCreate();
+
+	// Create a Timer for updating the list box,  No!
+	// Should have a callback from the udp_transponder receive thread.
+	// then on new client callback will update.	
+	//		No again!  udp_transponder is in Instant, not avisual!
+	//      So... we poll cli_is_new_client() instead.
 }
 
 int ClientListPanel::place_views( )

@@ -37,7 +37,7 @@ Tenniswood - 2014
 //#define WORD unsigned short
 
 #include "AUDIO_file_util.h"
-#include "serverthread.h"
+#include "serverthread.hpp"
 
 
 #define MAX_USERS     10

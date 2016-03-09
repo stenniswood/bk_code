@@ -17,7 +17,7 @@
 
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
-#include "serverthread.h"
+#include "serverthread.hpp"
 #include "visual_memory.h"
 #include "sway_memory.h"
 #include "audio_memory.h"

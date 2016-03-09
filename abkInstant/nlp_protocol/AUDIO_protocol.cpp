@@ -20,19 +20,23 @@
 #include "ilclient.h"
 #endif
 
+#include "bk_system_defs.h"
 #include "utilities.h"
 #include "global.h"
-#include "package_commands.h"
+
 #include "GENERAL_protocol.hpp"
 #include "AUDIO_protocol.hpp"
 #include "AUDIO_file_util.h"
 #include "AUDIO_interface.hpp"
 #include "AUDIO_device.hpp"
 #include "audio_memory.h"
-#include "serverthread.h"
+#include "serverthread.hpp"
 #include "nlp_extraction.hpp"
 
 #include "AUDIO_device.hpp"
+
+
+#define Debug 0
 
 
 /* Suggested Statements:
@@ -226,9 +230,9 @@ void send_audio_file ( char* mFilename )
     static char tmp[80];
     int length = (int)strlen(tmp);
     sprintf(tmp, "new audio_header");
-  // put back in!!  
-//    SendTelegram( tmp,       length );
-//    SendTelegram( (BYTE*)&audio_hdr, (int)sizeof(struct WAVE_HEADER));    
+
+    SendTelegram( (unsigned char*)tmp,       length );
+    SendTelegram( (unsigned char*)&audio_hdr, (int)sizeof(struct WAVE_HEADER));    
     
 	AUDIO_tcpip_SendingOn = TRUE;
 	nlp_reply_formulated=TRUE;
@@ -302,7 +306,7 @@ int Parse_Audio_Statement( char* mSentence )
 {
 	int retval = -1;
 	
-	printf("Parse_Audio_Statement\n");	
+	dprintf("Parse_Audio_Statement\n");	
 	std::string* subject  	= extract_word( mSentence, &subject_list );	
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 );
 	std::string* object     = extract_word( mSentence, &object_list  );

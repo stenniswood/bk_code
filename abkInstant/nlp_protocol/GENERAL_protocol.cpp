@@ -26,7 +26,7 @@
 #include "client_memory.hpp"
 #include "nlp_sentence.hpp"
 
-#include "serverthread.h"
+#include "serverthread.hpp"
 #include "GENERAL_protocol.hpp"
 #include "AUDIO_protocol.hpp"
 #include "CAMERA_protocol.hpp"

@@ -1,9 +1,5 @@
 #ifndef _AUDIO_PROTOCOL_
 #define _AUDIO_PROTOCOL_
-/*#ifdef  __cplusplus
-extern "C" {
-#endif */
-
 
 
 /* Note - Sometimes the Raspberry Pi doesn't play over HDMI anyway.
@@ -36,9 +32,5 @@ void 	Init_Audio_Protocol();
 int 	Parse_Audio_Statement( char* mSentence );
 
 
-
-/*#ifdef  __cplusplus
-}
-#endif */
 
 #endif

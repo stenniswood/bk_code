@@ -18,7 +18,8 @@
 #include <vector>
 #include <sys/types.h>
 #include <time.h>
-#include <string>
+#include <string.h>
+#include "bk_system_defs.h"
 #include "protocol.h"
 #include "devices.h"
 #include "GENERAL_protocol.hpp"
@@ -30,6 +31,8 @@
 
 #include "self_identity.hpp"
 
+
+#define Debug 0
 
 /***********************************************************************
 
@@ -160,7 +163,7 @@ int Parse_Self_Identity_Statement( Sentence& mSentence )
     int object_count    = object_list.evaluate_sentence ( mSentence.m_sentence 	 );
     int adjective_count = adjective_list.evaluate_sentence( mSentence.m_sentence );
     
-    printf("Parse_Self_Identity_Statement\n");
+    dprintf("Parse_Self_Identity_Statement\n");
     //diagram_sentence		( subject, verb, adjective, object, preposition );
     
     bool foundS = mSentence.is_found_in_sentence ( "who" );
@@ -218,7 +221,7 @@ int Parse_Self_Identity_Statement( Sentence& mSentence )
         retval = 0;
     }
     
-    if (retval)     printf( "Parse_Self_Identity_Statement done\n" );
+    if (retval>-1)     printf( "Parse_Self_Identity_Statement done\n" );
     return retval;
 }
 

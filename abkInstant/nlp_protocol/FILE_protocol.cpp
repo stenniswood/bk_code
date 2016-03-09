@@ -22,6 +22,8 @@
 
 
 
+#define Debug 0
+
 /***********************************************************************
 All Incoming Video will also be saved to the hard-drive on those 
 systems with enough capacity.  This allows the user to call back anything
@@ -111,7 +113,7 @@ return  TRUE = GPIO Telegram was Handled by this routine
 int Parse_File_Statement(char* mSentence)			
 {
 	int retval = -1;
-	printf("Parse_FILE_Statement\n");
+	dprintf("Parse_FILE_Statement\n");
 	
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);

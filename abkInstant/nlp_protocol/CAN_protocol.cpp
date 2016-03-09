@@ -23,7 +23,7 @@
 #include "prefilter.hpp"
 
 
-
+#define Debug 0
 BOOL CAN_ListeningOn;	// if true we will be receiving CAN Traffic.
 BOOL CAN_SendingOn;		// if true we will be sending CAN Traffic.
 
@@ -154,7 +154,8 @@ return:	pointer to the next telegram (ie. after all our header and data bytes)
 *****************************************************************/
 int Parse_CAN_Statement( char* mSentence )
 {
-	printf("Parse_CAN_Statement - \n");
+	static long msg_counter = 0;
+	dprintf("Parse_CAN_Statement - \n");
 	//char* retval = mSentence + strlen(mSentence)+ 1/*nullterminator*/;
 	int retval = -1;
 	
@@ -228,8 +229,11 @@ int Parse_CAN_Statement( char* mSentence )
 		}
 	}
 	else if (compare_word( subject, "can_message")==0)
-	{
+	{	
 		static struct sCAN msg;
+		if ((msg_counter++ % 1000)==0)
+			printf("CAN msg counter = %d\n", msg_counter );			
+
 		//dump_buffer(mSentence, 25); 
 		byte* ptr = ((byte*)mSentence + strlen("CAN_message")+1);		
 		int bytes_extracted = extract_CAN_msg( &msg, ptr );

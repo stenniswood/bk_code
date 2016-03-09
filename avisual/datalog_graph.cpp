@@ -37,11 +37,12 @@ AUTHOR	: Steve Tenniswood
 #include "calendar.hpp"
 #include "client_list_control.hpp"
 #include "home_screen.hpp"
-
+#include "window_layouts.hpp"
 
 #define Debug 1
  
 LineGraph lg;
+//Histogram hg;		uses the one in window_layouts.cpp
 //FrameWindow graph_win;
 FrameWindow dlg;
 
@@ -55,6 +56,8 @@ Calendar start_date;				// Change to date picker
 Calendar end_date;
 Button Okay;
 Button Cancel;
+RadioButton rb_report_linegraph (-1,-1);
+RadioButton rb_report_histogram (-1,-1);
 
 DataSet ds[8];
 struct tm start_time_bd;
@@ -117,9 +120,6 @@ void fill_graph_with_data(string mread_type)
 	}	
 	printf("fill_graph_with_data()=%d\n", counter);
 
-	// ADD DATA SERIES TO GRAPH :
-	for (int d=0; d<8; d++)	
-		lg.add_data_series( &(ds[d]) );
 }
 void reset_all_data()
 {
@@ -127,12 +127,48 @@ void reset_all_data()
 	for (int i=0; i<8; i++)
 		ds[i].reset();
 }
+void setup_histogram(string read_type, Rectangle* rect)
+{
+	string yLabel;	
+	hg.set_text  	 	( read_type.c_str(), "time" );
+	hg.move_to			( rect->get_left(), rect->get_bottom() );
+	hg.set_width_height	( rect->get_width(), rect->get_height() );
+
+	fill_graph_with_data(read_type);
+	// ADD DATA SERIES TO GRAPH :
+	for (int d=0; d<8; d++)	
+		hg.add_data_series( &(ds[d]) );
+
+	//hg.set_auto_scale( true );
+	hg.calc_scale();
+	hg.Invalidate();
+}
+void setup_linegraph(string read_type, Rectangle* rect)
+{
+	string yLabel;	
+	lg.set_text  	 	( read_type.c_str(), "time" );
+	lg.move_to			( rect->get_left(), rect->get_bottom() );
+	lg.set_width_height	( rect->get_width(), rect->get_height() );
+
+	fill_graph_with_data(read_type);
+	// ADD DATA SERIES TO GRAPH :
+	for (int d=0; d<8; d++)	
+		lg.add_data_series( &(ds[d]) );
+
+	lg.set_auto_scale( true );
+	lg.calc_scale();
+	printf("okay_callback() calc_scale done\n" );		
+	lg.Invalidate();
+
+}
 void okay_callback( void* mPtr )
 {
 	dprintf("okay_callback() \n" ); 
 	reset_all_data();
 	// grab the info:
 	// Which radio button selected?
+	int report_index = rb_report_linegraph.get_selected_index();
+	//RadioButton* report_selected = rb_report_linegraph.get_selected();			// traverses the whole group
 
 	RadioButton* selected = rb_gyro.get_selected();			// traverses the whole group
 	string read_type = selected->get_text();
@@ -148,26 +184,23 @@ void okay_callback( void* mPtr )
 	end_time_bd.tm_mday = 30;
 	end_time_bd.tm_year = 2016-1900;	
 
-	// Layout the LineGraph:
+	// Layout the Graph:
 	Rectangle* rect = MainDisplay.get_useable_rect( );
-	printf("okay_callback() : \n lg=%p; rect=%p \n", &lg, rect );
 	rect->shrink(0.1);	
-	printf("okay_callback() rect=\n" );	rect->print_positions();
-	printf("okay_callback() printed.\n" );	
+	if (Debug) { printf("okay_callback() rect=\n" );	rect->print_positions();	}
 
-	string yLabel;	
-	lg.set_text  	 	( read_type.c_str(), "time" );
-	lg.move_to			( rect->get_left(), rect->get_bottom() );
-	lg.set_width_height	( rect->get_width(), rect->get_height() );
-
-	fill_graph_with_data(read_type);
-	lg.set_auto_scale( true );
-	lg.calc_scale();
-	printf("okay_callback() calc_scale done\n" );		
-	lg.Invalidate();
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &lg );
+	MainDisplay.remove_all_objects(	);	
+	switch (report_index)
+	{
+	case 0 : setup_linegraph(read_type, rect);
+			MainDisplay.add_object( &lg );
+			break;
+	case 1 : setup_histogram(read_type, rect);
+			MainDisplay.add_object( &hg );
+			break;
+	default:
+			break;	
+	}
 	dprintf("okay_callback() done\n");
 }
 
@@ -197,7 +230,11 @@ void init_datalog_graph()
 		rb_gyro.join_group	( &rb_gps );
 		rb_gyro.join_group	( &rb_reading );	
 	
-			
+		rb_report_linegraph.set_text( "Line Graph", true);
+		rb_report_histogram.set_text( "Histogram", true);
+		rb_report_linegraph.join_group	( &rb_report_histogram );	
+		
+		
 		dlg.add_control( &Okay ); 
 		dlg.add_control( &Cancel );	
 		dlg.add_control( &rb_gyro );
@@ -205,6 +242,9 @@ void init_datalog_graph()
 		dlg.add_control( &rb_body_position );
 		dlg.add_control( &rb_gps );
 		dlg.add_control( &rb_reading );	
+		
+		dlg.add_control( &rb_report_linegraph );	
+		dlg.add_control( &rb_report_histogram );			
 		//dlg.add_object( &start_date );
 		//dlg.add_object( &end_date );			
 
@@ -224,6 +264,11 @@ void init_datalog_graph()
 		rb_reading.set_position_below		( &rb_gps, 		true, padding );			
 		rb_loadcell.select();
 			
+		float left = rect->get_left() + 2*rect->get_width() / 3.;
+		rb_report_linegraph.move_to 		 			( left, 300 );
+		rb_report_histogram.set_position_below			( &rb_body_position, true, padding );	
+		rb_report_linegraph.select();
+		
 		Cancel.move_to ( rect->get_left()+10, rect->get_bottom()+10 );
 		Okay.move_to ( rect->get_right()-Okay.get_width()-20, rect->get_bottom()+10 );		
 	}

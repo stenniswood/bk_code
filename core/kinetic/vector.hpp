@@ -7,7 +7,7 @@
 
 using namespace std;
 
-extern float radians( float degrees );
+//extern float radians( float degrees );
 
 /* An object in a 2D floor plan	*/
 class MathVector

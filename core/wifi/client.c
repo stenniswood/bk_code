@@ -21,7 +21,7 @@ incoming file for you from 192.168.1.144:
 #include "client.h"
 #include "CAN_memory.h"
 #include "protocol.h"  // for dumpbuffer()
-#include "serverthread.h"
+//#include "serverthread.hpp"
 
 
 //#define BK_MEDIA_PORT 8080

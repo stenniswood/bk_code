@@ -21,6 +21,9 @@
 //#include "hmi_thread.h"
 #include "nlp_extraction.hpp"
 
+
+#define Debug 0
+
 /* Sample Sentences:
 	receive my [mouse/touch/[and]keyboard] input
 	receive my mouse input
@@ -119,7 +122,7 @@ return  TRUE = GPIO Telegram was Handled by this routine
 *****************************************************************/
 int Parse_HMI_Statement(char* mSentence)
 {
-	printf("Parse_HMI_Statement\n");
+	dprintf("Parse_HMI_Statement\n");
 	int retval = -1;	
 	
 	std::string* subject  	= extract_word( mSentence, &subject_list );

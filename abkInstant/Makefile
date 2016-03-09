@@ -102,9 +102,9 @@ endif
 	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
 
 instant: $(APP_CPP_OBJS) 						\
+		$(addprefix ./threads/, 	$(THREAD_OBJS)) 	\
 		$(addprefix ./nlp_protocol/, $(NLP_PROTOCOL_OBJS)) 	\
 		$(addprefix ./nlp_core/, 	$(NLP_CORE_OBJS)) 	\
-		$(addprefix ./threads/, 	$(THREAD_OBJS)) 	\
 		$(addprefix ./util/, 		$(UTIL_OBJS)) 		\
 		$(addprefix $(HARDWARE_PATH), 	$(HARDWARE_OBJS)) 	\
 		$(addprefix ../core/ipc/, 	$(IPC_OBJS)) 		\

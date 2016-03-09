@@ -25,6 +25,8 @@
 
 
 
+#define Debug 0
+
 /* Suggested statements:
 	Show camera on [TV,robot,kitchen tv, phone, etc]
 	stop camera.
@@ -217,7 +219,7 @@ int Parse_Camera_Statement( char* mSentence )
 {
 	int retval=-1;
 
-	printf("Parse_Camera_Statement\n");
+	dprintf("Parse_Camera_Statement\n");
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);	
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
 	std::string* object 	= extract_word( mSentence, &object_list  	);	

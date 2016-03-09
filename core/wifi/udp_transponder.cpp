@@ -15,7 +15,7 @@
 #include "bk_system_defs.h" 
 #include "client_memory.hpp"
 #include "udp_transponder.hpp"
-#include "serverthread.h"
+#include "serverthread.hpp"
 
 
 #define Debug 0

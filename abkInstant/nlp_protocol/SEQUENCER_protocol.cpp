@@ -38,6 +38,7 @@ static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
 //#define NLP_DEBUG 1
+#define Debug 0
 
 static void init_subject_list()
 {
@@ -206,7 +207,7 @@ int Parse_Sequencer_Statement( Sentence& mSentence )
 	int retval = -1;
     if (ipc_memory_client==NULL)  return FALSE;
     
-	printf("Parse_Sequencer_Statement() ");	
+	dprintf("Parse_Sequencer_Statement() ");	
     int subject_count	= subject_list.evaluate_sentence( mSentence.m_sentence );
     int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence );
 
@@ -274,7 +275,7 @@ int Parse_Sequencer_Statement( Sentence& mSentence )
 	else if (compare_word( subject, "sequencer")==0)
 	{
 	}
-	if (retval>-1)  printf("Parse_Sequencer_Statement() ");
+	if (retval>-1)  printf("Parse_Sequencer_Statement() \n");
 	return retval;
 }
 

@@ -20,13 +20,13 @@ public:
 	
 	virtual void  Initialize	(					);
 	void  	set_data_series		( long mColor, char* mLabel );
-
+	void	add_data_series	  	( DataSet* NewData );
+	void	remove_data_series	( int index /*DataSet* OldData*/ );
+	void	reset				( );
+	
 	void  calc_metrics			(					  );
 
 	// This links the Datasets together!
-	void  add_data_series	  	( DataSet* NewData );
-	void  remove_data_series	( int index /*DataSet* OldData*/ );
-	
 	virtual int   draw			(	);		// Draw calls all the sub draw routines.
 
 

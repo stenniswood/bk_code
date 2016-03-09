@@ -27,7 +27,7 @@
 #include "AUDIO_interface.hpp"
 #include "protocol.h"
 
-#include "serverthread.h"
+#include "serverthread.hpp"
 #include "GENERAL_protocol.hpp"
 #include "CAN_protocol.hpp"
 #include "HMI_protocol.hpp"
@@ -104,7 +104,7 @@ static void init_server()
  	// END OF DISPLAY IP ADDRESS
 }
 
-void SendTelegram( BYTE* mBuffer, int mSize)
+void SendTelegram( unsigned char* mBuffer, int mSize)
 {
 	write(connfd, mBuffer, mSize );
 }
