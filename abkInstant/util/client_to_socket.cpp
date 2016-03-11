@@ -176,12 +176,13 @@ void disconnect_from_robot()
 	HMI							
 	CAN							
 */
+extern int start_amon();	// extern from instant_main.cpp
 void handle_client_request()
 {
     char  relay_buffer[255];
     int   length=0;
 
-	printf("handle_client_request() - ");
+	printf("handle_client_request() - \n");
 	if (ipc_memory_client==NULL)	return;
 	ClientRequestPending = true;
     char* sentence = ipc_memory_client->Sentence;

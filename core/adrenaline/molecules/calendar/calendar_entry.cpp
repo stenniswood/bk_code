@@ -105,8 +105,11 @@ char* CalendarEntry::form_date_time_string( )
 string CalendarEntry::form_summary_string	 (  )			// suitable for Calendar Summary View
 {
 	static string summary;
-	summary = form_time_string();			summary += "\t:";
-	summary += m_description;				summary += "\t:";
+	char tmp[26];
+	strftime( tmp, 25, "%I:%M %p   ", &m_scheduled_time_bd );	
+	summary = tmp;
+	//summary = form_time_string();			summary += "\t:";
+	summary += m_description;				summary += "   :";
 	summary += m_location;
 	
 	// who else is going to be there?
@@ -116,6 +119,7 @@ string CalendarEntry::form_summary_string	 (  )			// suitable for Calendar Summa
 MYSQL_ROW	CalendarEntry::goto_first_row()
 {
 	// force a rewind:	
+	mysql_data_seek( m_result, 0 );
 	m_row = mysql_fetch_row( m_result );
 	return m_row;
 }
@@ -243,6 +247,11 @@ void CalendarEntry::extract_result( )
 //		if (m_row[2])  date = m_row[2];
 //		if (m_row[3])  time = m_row[3];
 //		if (m_row[4])  date_time = m_row[4];
+		char combined[80];
+		strcpy(combined, m_row[2] );
+		strcat(combined, " ");
+		strcat(combined, m_row[3] );
+		strptime( combined, "%Y-%m-%d %H:%M:%S", &m_scheduled_time_bd );
 		
 		m_location		= m_row[5];
 		m_description	= m_row[6];

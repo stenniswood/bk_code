@@ -16,6 +16,7 @@
 #include "nlp_extraction.hpp"
 
 
+#define Debug 0
 
 // Common to all Protocols :
 WordGroup 	preposition_list;
@@ -81,7 +82,7 @@ void Sentence::set( char*  mNew )
     size_t length   = strlen(mNew)+1;
     m_raw_sentence  = new char[length];
     m_sentence      = new char[length];
-    m_sentence      = new char[length];
+    //m_sentence      = new char[length];
     split_holder    = new char[length];
     strcpy(m_raw_sentence, mNew );
     strcpy(m_sentence,     mNew );
@@ -250,7 +251,7 @@ char* Sentence::get_nth_word( int mIndex )
 bool  Sentence::is_nth_word_a_number    ( int mIndex )
 {
     if (mIndex>m_num_words) return false;
-    printf("%d nth word=[%s] %lx\n", mIndex, m_words[mIndex], (long int)m_words[mIndex] );
+    dprintf("%d nth word=[%s] %lx\n", mIndex, m_words[mIndex], (long int)m_words[mIndex] );
     
     size_t length = strlen( m_words[mIndex]);    
     for (int i=0; i<length; i++)
@@ -296,7 +297,7 @@ int Sentence::get_word_index( char* mWord, int mSentenceStartingWordIndex )
         size_t result = strcmp(m_words[i] , mWord);
         if (result == 0)
         {
-            printf("Found at [%d]\n", i );
+            dprintf("Found at [%d]\n", i );
             return (int)i;
         }
     }

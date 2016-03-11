@@ -178,7 +178,7 @@ FORMAT:
 */
 void cli_ipc_write_sentence( char* mSentence ) 
 {
-	if (ipc_memory_client)	
+	if (ipc_memory_client==NULL)	
 		return ;
 
 	size_t length = strlen(mSentence);
@@ -189,7 +189,7 @@ void cli_ipc_write_sentence( char* mSentence )
 	}
 
 	strcpy(ipc_memory_client->Sentence, mSentence);
-	printf("|%s|\n", ipc_memory_client->Sentence );
+	dprintf("Client Request:|%s|\n", ipc_memory_client->Sentence );
 	ipc_memory_client->UpdateCounter++;	
 	dprintf("UpdateCount=%ld; AcknowledgedCounter=%ld\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter );
 }
@@ -337,7 +337,7 @@ bool cli_is_new_update()
 	if (ipc_memory_client)
 		if (ipc_memory_client->UpdateCounter > ipc_memory_client->AcknowledgedCounter)
 		{
-			dprintf("Update/Ack Counters = %ld/%ld\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);
+			//dprintf("Update/Ack Counters = %ld/%ld\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);
 			return true;
 		}
 	return false;
@@ -429,7 +429,7 @@ bool cli_is_new_client()
 	if (ipc_memory_client)
 		if (ipc_memory_client->NewClientUpdateCounter > ipc_memory_client->NewClientAcknowledgedCounter)
 		{
-			if (Debug) printf("Update/Ack Counters = %ld/%ld\n", ipc_memory_client->NewClientUpdateCounter, ipc_memory_client->NewClientAcknowledgedCounter);
+			//if (Debug) printf("Update/Ack Counters = %ld/%ld\n", ipc_memory_client->NewClientUpdateCounter, ipc_memory_client->NewClientAcknowledgedCounter);
 			return true;
 		}
 	return false;

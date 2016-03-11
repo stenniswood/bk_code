@@ -50,6 +50,7 @@ void init_tab_listbox	();
 void init_CAN_msg_view	();
 void init_CAN_app		();
 
+void init_motor_gui_test();
 
 // GAMES:
 void init_cards_only( );

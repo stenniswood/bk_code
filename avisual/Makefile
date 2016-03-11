@@ -68,7 +68,8 @@ VG_OBJS     = libshapes.o oglinit.o
 AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   test_layouts.o test_combo_layouts.o client_list_control.o \
 			   test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
-			   power.o home_screen.o datalog_graph.o can_sql_logger.o
+			   power.o home_screen.o datalog_graph.o can_sql_logger.o \
+			   motor_gui.o 
 APPS_OBJS   = 
 FILE_EDIT_OBJS = file_editor_app.o 
 VIDEO_APP_OBJS = video_app.o video.o 
@@ -90,7 +91,7 @@ CARDCORE_GAME_OBJS  = card.o card_player.o card_player_chips.o deck.o basic_card
 #  button_array_gui.o Container.o 
 ADRENALINE_OBJS   = display.o task_bar.o
 ADRENALINE_SYSTEM_OBJS = system_status.o keyboard.o touch_gesture.o keyboard_dev.o \
-			display_manager.o mouse_oop.o resource_manager.o
+			display_manager.o mouse_oop.o resource_manager.o volume_control.o 
 ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			directory_listbox.o frame_window.o groupbox.o icon.o       \
 			leveler.o line_grouper.o listbox.o marquee.o power_level.o \

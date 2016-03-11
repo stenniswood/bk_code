@@ -17,6 +17,8 @@ struct stKey
 	int y;
 	int width;
 	int height;
+//	int	centroid_x;
+//	int	centroid_y;
 	char text[8];		// A, B, C, Return, etc
 };
 
@@ -35,21 +37,22 @@ public:
 	int 	handle_special_keys ( int mKeyIndex );
 	void	append_character	(char mChar);
 
-
-
 	void				draw_keys();
 	void				draw_alt_keys();	
 	virtual int			draw();
 
 	void				set_composition	  ( char* mOriginalText );
-	int					KeyHitTest		  ( int x, int y 	);
-	int					AltKeyHitTest	  ( int x, int y 	);
-	float 				geometric_distance( int x, int y, int key, bool mAlternate=true );
-	int 				find_min_distance ( int x, int y, bool mAlternate );
+	//int					KeyHitTest		  ( int x, int y 	);
+	//int					AltKeyHitTest	  ( int x, int y 	);
+	float 				geometric_distance( int x, int y, struct stKey key);
+	int 				find_min_distance ( int x, int y);
+	char*				get_key_text	  (int key_index);		// with current shift & alt states.
 
 	virtual Control*	HitTest	( int x, int y 	);
 	virtual int 		onClick	( int x, int y, bool mouse_is_down );
 
+	Button					m_close;
+	
 	char 					m_composition[BUFFER_LENGTH];		// the typed text buffer.
 	int  					m_index;		
 	vector<struct stKey>	m_keys;

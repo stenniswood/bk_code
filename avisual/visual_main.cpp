@@ -348,8 +348,8 @@ int main( int argc, char *argv[] )
 	printf("================= Main Loop ==========================\n");	
 	while (1)
 	{	
-		if (ipc_memory_client)
-			ethernet_interface();
+//		if (ipc_memory_client)
+//			ethernet_interface();
 
 		gui_interface();
 

@@ -38,6 +38,7 @@ Calendar		m_calendar;
 CalendarSummary m_calendar_summary;
 
 
+
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
 : IconView(  Left,  Right,  Top,  Bottom, NULL)
 {
@@ -212,15 +213,16 @@ int	DisplayManager::onPlace( )
 	// PLACE CALENDAR : 
 	m_calendar.set_position( screen_width-m_calendar.get_width(), screen_width, 
 						     m_calendar.get_height(), 0.0 );
+	m_calendar.summary = &m_calendar_summary;
 	m_calendar.onCreate    ( );
 	m_calendar.hide		   ( );
+
 	
 	float summary_w = 250;
 	//float summary_h = m_calendar.get_height();   m_calendar.get_left()-summary_w
 	m_calendar_summary.set_position( 0, m_calendar.get_right(), 
 									 m_calendar.get_height(), 0.0 );
 	m_calendar_summary.onCreate( );
-	m_calendar_summary.show_date( 2, 6 );
 	m_calendar_summary.hide    ( );	
 	
 	if (Debug) printf("=== CALENDAR_SUMMARY :  ");

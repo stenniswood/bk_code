@@ -591,6 +591,10 @@ void init_dropdown_menu()
 	
 }
 
+void init_motor_gui_test()
+{
+
+}
 
 /*CANMessageView 			 msg_view;
 void fill_data( byte* mdata, byte last)

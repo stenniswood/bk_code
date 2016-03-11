@@ -10,6 +10,7 @@
 #include <string.h>
 #include <string>
 #include <list>
+#include <vector>
 
 #include "protocol.h"
 #include "devices.h"
@@ -22,8 +23,9 @@
 #include "nlp_extraction.hpp"
 #include "prefilter.hpp"
 
+#include "nlp_sentence.hpp"
 
-#define Debug 0
+#define Debug 1
 BOOL CAN_ListeningOn;	// if true we will be receiving CAN Traffic.
 BOOL CAN_SendingOn;		// if true we will be sending CAN Traffic.
 
@@ -124,7 +126,7 @@ static char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon";
 static char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
 #endif
 
-int start_amon()
+static int start_amon() 
 {
     int pid;
     switch (pid=fork()) {
@@ -152,29 +154,31 @@ return:	pointer to the next telegram (ie. after all our header and data bytes)
 		this will be null if end of the received buffer (terminator added in serverthread.c
 		by the number of bytes read).
 *****************************************************************/
-int Parse_CAN_Statement( char* mSentence )
+int Parse_CAN_Statement( Sentence& mSentence )
 {
 	static long msg_counter = 0;
 	dprintf("Parse_CAN_Statement - \n");
 	//char* retval = mSentence + strlen(mSentence)+ 1/*nullterminator*/;
-	int retval = -1;
+	int retval = -1;	
+	//printf("Sentence=|%s|;  subject_list_size=%d\n", mSentence.m_sentence, subject_list.size() );
 	
-	//extract_nlp_words( mSentence, &subject_list, &verb_list, &object_list, &adjective_list );
+	std::string* subject  	= extract_word( mSentence.m_sentence, &subject_list 	);
+	std::string* verb 		= extract_word( mSentence.m_sentence, &verb_list 	 	);
+	std::string* object 	= extract_word( mSentence.m_sentence, &object_list  	);
+	std::string* adjective	= extract_word( mSentence.m_sentence, &adjective_list  );	
 
-	std::string* subject  	= extract_word( mSentence, &subject_list 	);
-	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
-	std::string* object 	= extract_word( mSentence, &object_list  	);
-	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-	//int prepos_index      = get_preposition_index( mSentence );
-
+	
 #ifdef NLP_DEBUG
 	diagram_sentence(subject, verb, adjective, object );
 #endif
 
-	if ( (compare_word( subject, "can")==0) ||
+	bool found_can = mSentence.is_found_in_sentence( "can"  ) || mSentence.is_found_in_sentence( "can data"  ) || mSentence.is_found_in_sentence( "can traffic"  );
+	if (found_can)
+/*	if ( (compare_word( subject, "can")==0) ||
 		 (compare_word( subject, "can traffic")==0) ||
-		 (compare_word( subject, "can data")==0) )
+		 (compare_word( subject, "can data")==0) ) */
 	{		
+		printf("Found subject CAN\n");
 		if ( (compare_word( verb, "receive") ==0) ||
 			 (compare_word( verb, "incoming") ==0)  )
 		{
@@ -185,7 +189,7 @@ int Parse_CAN_Statement( char* mSentence )
 		if ( (compare_word( verb, "send") ==0) ||
 			 (compare_word( verb, "route") ==0)  )
 		{
-			//printf( "preparing to send CAN data...\n");
+			printf( "preparing to send CAN data...\n");
 			int action;
 			BOOL available = is_CAN_IPC_memory_available();
 			if (!available)
@@ -228,16 +232,17 @@ int Parse_CAN_Statement( char* mSentence )
 		{
 		}
 	}
-	else if (compare_word( subject, "can_message")==0)
+	else if (mSentence.is_found_in_sentence( "can_message"  ))
+	// if (compare_word( subject, "can_message")==0)
 	{	
+	printf("CAN_message Receiving:\n" );				
 		static struct sCAN msg;
-		if ((msg_counter++ % 1000)==0)
+		if ((msg_counter++ % 100)==0)
 			printf("CAN msg counter = %d\n", msg_counter );			
-
-		//dump_buffer(mSentence, 25); 
-		byte* ptr = ((byte*)mSentence + strlen("CAN_message")+1);		
+		dump_buffer(mSentence.m_sentence, 36); 
+		byte* ptr = ((byte*)mSentence.m_sentence + strlen("CAN_message")+1);
 		int bytes_extracted = extract_CAN_msg( &msg, ptr );
-		//printf("extract_CAN_msg() %d bytes\n", bytes_extracted );
+		printf("extract_CAN_msg() %d bytes\n", bytes_extracted );
 		if (bytes_extracted) {
 			AddToRxList( &msg );	// goes into the received buffer.
 			print_rx_position();

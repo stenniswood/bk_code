@@ -24,10 +24,51 @@
 #include "system_bar.hpp"
 #include "avisual_menu.hpp"
 
+
+#include "client_list_control.hpp"
+#include "home_screen.hpp"
+
 #include "draw_app.hpp"
 
-#define Debug 0
+#define Debug 1
 
+
+StereoPowerLevels volume_control;
+
+/*********************** CALL BACKS ****************************/
+void show_sidebar(void* mObj )
+{
+	if (Debug) 	printf("\n\nshow_sidebar\n");
+	Control* obj = (Control*) mObj;
+	if (obj->is_visible()==true)
+		obj->hide( ); 
+	else
+		obj->show( );
+}
+void show_wifi(void* mObj )
+{
+	if (Debug) 	printf("\n\nshow_wifi\n");
+	Control* obj = (Control*) mObj;
+	if (obj->is_visible()==true)
+		obj->hide( ); 
+	else
+		obj->show( );
+}
+void show_volume(void* mObj )
+{
+	Control* obj = (Control*) mObj;
+	if (Debug) 	printf("\n\nshow_volume callback\n");
+	if (obj->is_visible()==true) {
+		obj->hide( ); 
+		init_home_screen();
+	} else {
+		printf("\n\nshow_volume callback - Showing\n");
+		obj->show( );
+		MainDisplay.remove_all_objects(	);
+		MainDisplay.add_object( obj );	
+	}
+}
+/******************** END CALL BACKS ****************************/
 
 SystemBar::SystemBar() 
 :Control()
@@ -79,6 +120,16 @@ void	SystemBar::onPlace		(	)
 	
 	m_show_taskbar.move_to( 0,        bottom);
 	m_show_sidebar.move_to( width-25, bottom);
+
+	float quarts   = MainDisplay.screen_width / 4.;
+	float vc_left  = 3.* quarts;
+	volume_control.set_width_height( 75, 150);
+	volume_control.move_to( vc_left, bottom-volume_control.get_height() );
+	volume_control.set_max  		( 100.0 );
+	volume_control.set_min  		(   0.0 );
+	volume_control.set_level_left	(  75.0 );
+	volume_control.set_level_right	(  75.0 ); 
+	
 }
 
 int   	SystemBar::draw (	) 
@@ -136,33 +187,6 @@ int	SystemBar::onDoubleClick( 		)
 { 
 }
 
-void show_sidebar(void* mObj )
-{
-	if (Debug) 	printf("\n\nshow_sidebar\n");
-	Control* obj = (Control*) mObj;
-	if (obj->is_visible()==true)
-		obj->hide( ); 
-	else
-		obj->show( );
-}
-void show_wifi(void* mObj )
-{
-	if (Debug) 	printf("\n\nshow_wifi\n");
-	Control* obj = (Control*) mObj;
-	if (obj->is_visible()==true)
-		obj->hide( ); 
-	else
-		obj->show( );
-}
-void show_volume(void* mObj )
-{
-	if (Debug) 	printf("\n\nshow_volume\n");
-	Control* obj = (Control*) mObj;
-	if (obj->is_visible()==true)
-		obj->hide( ); 
-	else
-		obj->show( );
-}
 
 void SystemBar::set_menu( HorizontalMenu* mMenu )
 {
@@ -192,7 +216,7 @@ int	SystemBar::onCreate(  )
 	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_side) );
 	//m_show_taskbar.set_on_click_listener( show_taskbar, MainDisplay.m_show_sidebar );
 	//m_wifi.set_on_click_listener  ( show_wifi,   (void*)&(MainDisplay.m_wifi  ) );
-	//m_volume.set_on_click_listener( show_volume, (void*)&(MainDisplay.m_volume) );
+	m_volume.set_on_click_listener( show_volume, (void*)&(volume_control) );
 
 	//m_child_controls.clear();
 	register_child( m_Menu );

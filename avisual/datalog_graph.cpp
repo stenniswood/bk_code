@@ -256,7 +256,7 @@ void init_datalog_graph()
 		dlg.set_width_height( rect->get_width(), rect->get_height() );
 		dlg.move_to ( rect->get_left(), rect->get_bottom() );
 
-		float padding = 18 * 1.3;
+		float padding = 12 * 1.3;
 		rb_gyro.move_to 		 			( 250, 300 );
 		rb_loadcell.set_position_below		( &rb_gyro, 	true, padding );
 		rb_body_position.set_position_below ( &rb_loadcell, true, padding );
@@ -265,8 +265,8 @@ void init_datalog_graph()
 		rb_loadcell.select();
 			
 		float left = rect->get_left() + 2*rect->get_width() / 3.;
-		rb_report_linegraph.move_to 		 			( left, 300 );
-		rb_report_histogram.set_position_below			( &rb_body_position, true, padding );	
+		rb_report_linegraph.move_to 		  ( left, 300 );
+		rb_report_histogram.set_position_below( &rb_report_linegraph, true, padding );
 		rb_report_linegraph.select();
 		
 		Cancel.move_to ( rect->get_left()+10, rect->get_bottom()+10 );

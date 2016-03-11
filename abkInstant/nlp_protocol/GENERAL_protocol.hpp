@@ -1,4 +1,3 @@
-
 #ifndef _GENERAL_protocol_
 #define _GENERAL_protocol_
 

@@ -30,7 +30,7 @@
 #include "sway_memory.h"
 #include "picamscan_memory.h"
 #include "client_memory.hpp"
-#include "client.h"
+//#include "client.h"
 
 //#include "udp_transponder.hpp"
 //#include "thread_control.h"
@@ -128,8 +128,12 @@ int main( int argc, char *argv[] )
 	// PARSE ARGUMENTS : 
 	if (argc>1)
 	{
-		cli_ipc_write_sentence( argv[1] );		
+		cli_ipc_write_sentence( argv[1] );
+		printf("Client Request:|%s|\n", ipc_memory_client->Sentence );
+		
+		printf("waiting for acknowledge; count=%d, ack=%d\n",ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter  );		
 		cli_wait_for_ack_update();
+		printf("waiting for response...\n");
 		cli_wait_for_response();		
 		cli_ack_response();		
 		printf("RESPONSE:  %s\n", cli_get_sentence() );

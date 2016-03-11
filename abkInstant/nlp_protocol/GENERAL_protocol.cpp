@@ -160,6 +160,7 @@ char* Parse_Statement(char*  mSentence)
 			cli_ipc_write_response( mSentence, "instant" );	
 			ClientRequestPending = false;
 		}
+		nlp_reply_formulated = false;
 		return end_of_telegram;
 	}
 
@@ -198,7 +199,7 @@ char* Parse_Statement(char*  mSentence)
 	result = Parse_Camera_Statement( mSentence );
 	if (result>=0)			return (end_of_telegram + result);
 
-	result = Parse_CAN_Statement( mSentence );
+	result = Parse_CAN_Statement( theSentence ); 
 	if (result>=0)			return (end_of_telegram + result);
 	
 	result = Parse_File_Statement  ( mSentence );	/* ie. File transfer, directory, backup, etc. */		

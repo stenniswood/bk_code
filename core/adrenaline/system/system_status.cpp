@@ -65,7 +65,7 @@ void SystemStatusBar::Initialize	 (   )
 	m_calendar     = new Button(-1,-1);	 
 	m_power_button->hot_touch = true;
 	m_calendar->hot_touch 	  = true;
-	
+	m_calendar->set_text_size( 12 );
 	m_power_button->set_on_click_listener( show_soft_keyboard, this);
 	m_calendar->set_on_click_listener( show_calendar, this);
 	

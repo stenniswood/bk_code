@@ -28,7 +28,7 @@ byte extract_CAN_msg(struct sCAN* Msg, byte* DataPack)
 	Msg->id.group.instance = DataPack[0+3];			// +4
 
 	Msg->header.DLC = (DataPack[0+4] & 0x0F);
-	//printf("DLC=%d\n", Msg->header.DLC); 
+	printf("DLC=%d\n", Msg->header.DLC); 
 	Msg->header.rtr = ((DataPack[0+4] & 0xF0)>>4);	// +5
 	for (int i=0; i<Msg->header.DLC; i++)
 	  Msg->data[i] = DataPack[i+0+5];
@@ -39,7 +39,15 @@ void dump_buffer(BYTE* buffer, int bufSize)
 {
 	printf( "BuffSize=%d: ", bufSize );
 	for (int i=0; i<bufSize; i++)
-		printf("%x ", buffer[i] );
+	{	printf("%x ", buffer[i] );	
+		if ((i%16)==15) printf("\n");
+	}
+	printf("\n");
+	for (int i=0; i<bufSize; i++)
+	{	printf("%c ", buffer[i] );
+		if ((i%16)==0) printf("\n");
+	}	
+
 	printf("\n");
 }
 
@@ -64,7 +72,7 @@ int pack_CAN_msg( struct sCAN* msg, BYTE* buffer, int bufSize )
 	int addedSize = len+1 + 5 + msg->header.DLC;
 	//printf("addedSize: len=%d +1+5 + DLC=%d = %d\n", len, msg->header.DLC, addedSize );
 	
-	//dump_buffer( buffer, addedSize );
+	dump_buffer( buffer, addedSize );
 	
 	return addedSize;
 }

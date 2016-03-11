@@ -10,7 +10,7 @@
 #include "/home/pi/openvg/fontinfo.h"
 #include "/home/pi/openvg/shapes.h"
 #include "adrenaline_windows.h"
-#include "calendar.hpp"
+//#include "calendar.hpp"
 #include "calendar_entry.hpp"
 #include "calendar_summary.hpp"
 #include "bk_system_defs.h"
@@ -20,7 +20,7 @@
 
 #define Debug 1
 
-const float ROW_SPACING_MULTIPLIER = 1.25;
+const float ROW_SPACING_MULTIPLIER = 1.4;
 
 /* This should retrieve all entries from the SQL database for the selected day.
 
@@ -44,6 +44,7 @@ CalendarSummary::~CalendarSummary( )
 void 	CalendarSummary::Initialize(	)
 { 
 	Control::Initialize();
+	set_text_size( 12 );
 	
 	//background_color = 0xFFFFFF00;
 	background_color = 0xFFA0002C;	
@@ -95,8 +96,7 @@ void  	CalendarSummary::draw_entry_details 	( int mRow_index )
 	Stroke_l   ( text_color );		// box color
 	Fill_l     ( text_color );		// box color	
 	float x = m_left_margin;
-	float y = bottom+height - mRow_index * text_size * ROW_SPACING_MULTIPLIER;
-	dprintf("<%4.1f, %4.1f> %s\n", x,y,text.c_str() ); 
+	float y = bottom+height - (mRow_index+1) * text_size * ROW_SPACING_MULTIPLIER;
 	if (y>0)
 		Text(x,y, text.c_str(), SerifTypeface,  text_size);	
 }

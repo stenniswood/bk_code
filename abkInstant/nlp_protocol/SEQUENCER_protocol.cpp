@@ -136,7 +136,7 @@ void Init_Sequencer_Protocol()
 	init_word_lists();
 }
 
-//extern int start_amon();	// extern from instant_main.cpp
+
 #if (PLATFORM==Mac)
 static char amon_command[] = "~/bk_code/amonitor/amon";
 #elif (PLATFORM==RPI)
@@ -153,21 +153,7 @@ static char aseq_command[] = "sudo /home/pi/bk_code/aseq/seq";
 static char aseq_command[] = "";
 #endif
 
-int start_amon() 
-{
-    int pid;
-    switch (pid=fork()) {
-        case -1:
-			printf("fork() = -1 %s\n", strerror(errno) );
-            return 0;
-        case 0:
-            execvp(amon_command, NULL);
-            printf("returned from ececvp\n");
-        default:
-            return 0;
-    }
-    return 1;
-}
+
 int start_sequencer() 
 {
     int pid;

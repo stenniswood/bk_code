@@ -229,7 +229,7 @@ void scan_client()
 	// CHECK CLIENT MEMORY FOR REQUEST:
 	if (cli_is_new_update())
 	{
-		//printf("is new update.\n");
+		printf("is new update.\n");
 		handle_client_request();
 		// Now wait until our response is taken.  Don't want to reprocess it on 
 		// next pass thru here!
@@ -289,7 +289,7 @@ int main( int argc, char *argv[] )
 		uint8_t* result = audio_add_play_buffer( Sinewaves, N_WAVES, 22050 );
 	}
     usleep(2000000);
-    audio_close();
+    audio_close(); 
 	
 	printf("================= Main Loop ==========================\n");	
 	while (1) 

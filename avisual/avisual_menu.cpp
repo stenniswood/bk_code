@@ -57,6 +57,7 @@ int show_view_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 	case 1:	init_listbox		();		break;
 	case 2:	init_tab_listbox	();		break;
 	case 3:	init_grid_test		();		break;
+	case 4:	init_motor_gui_test	();		break;
 	default: break;
 	}	
 }
@@ -68,6 +69,7 @@ void init_view_menu()
 	view.add_simple_command( "ListBox demo" 		);
 	view.add_simple_command( "Tabular ListBox demo"	);
 	view.add_simple_command( "Grid test demo"		);	
+	view.add_simple_command( "Motor control demo"	);		
 	view.add_callback_all_items( show_view_screens );	
 }
 

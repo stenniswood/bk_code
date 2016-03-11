@@ -35,6 +35,14 @@
 #define Debug 1
 
 
+void close_keyboard_cb( void* mKeyboard )
+{
+	printf("close_keyboard_cb()\n");
+	Keyboard* ptr = (Keyboard*) mKeyboard;
+	ptr->hide();
+	ptr->Invalidate();
+	MainDisplay.draw();	
+}
 
 Keyboard::Keyboard( int Left,  int Right, int Top, int Bottom )
 :Window(Left, Right, Top,Bottom)
@@ -188,6 +196,10 @@ void Keyboard::Initialize()
 	adjust_height();
 	strcpy (class_name, "Keyboard");	
 	
+	m_close.set_on_click_listener( close_keyboard_cb, this );
+	m_close.set_text(" . ", true);
+	m_close.move_to( 8,8 );
+	
 	text_color       = 0xFF000000;
 	background_color = 0xFF7F7FFF;
 	key_color  		 = 0xFFFFFFFF;	
@@ -197,6 +209,8 @@ void Keyboard::Initialize()
 	m_alt_down   = false;
 	m_index = 0;
 	memset(m_composition, 0, 127);
+	
+	register_child( &m_close );
 	dprintf("===Keyboard::Initialize()  Key_color = %x\n", key_color );	
 }
 
@@ -260,7 +274,6 @@ int Keyboard::draw()
 	
 	StrokeWidth(2);			
 	Stroke_l   ( 0xFF000000 );
-	dprintf("Key_color = %x\n", key_color );
 	Fill_l     ( key_color );			// background_color
 	Roundrect  ( 0, sample_y,  width, 1.5*text_size, 15.0, 15.0 );
 
@@ -275,16 +288,15 @@ int Keyboard::draw()
 	else 
 		draw_keys();
 
-	dprintf("Keyboard::draw() done\n" );		
+	//dprintf("Keyboard::draw() done\n" );		
 }
 
 Control* Keyboard::HitTest( int x, int y )
 {
 	Control* retval = Window::HitTest(x,y);
-	dprintf("Keyboard::HitTest()  %x\n", retval); 
+	//dprintf("Keyboard::HitTest()  %x\n", retval); 
 	return retval;
 }
-
 
 void Keyboard::set_composition	  ( char* mOriginalText )
 {
@@ -320,102 +332,102 @@ int Keyboard::handle_special_keys( int mKeyIndex )
 	return 0;
 }
 
-int	Keyboard::KeyHitTest	( int x, int y )
-{
-	int size = m_keys.size();	
-	for (int i=0; i<size; i++)
-	{
-		bool hit = ((x>m_keys[i].x) && (y>m_keys[i].y)) &&
-				   ((x<(m_keys[i].x+m_keys[i].width)) && (y<(m_keys[i].y+m_keys[i].height)));
-		if (hit)
-			return i;
-	}
-	return -1;
-}	
 
-int	Keyboard::AltKeyHitTest	( int x, int y )
+float Keyboard::geometric_distance( int x, int y, struct stKey key )
 {
-	int size = m_alt_keys.size();	
-	for (int i=0; i<size; i++)
-	{
-		bool hit = ((x>m_alt_keys[i].x) && (y>m_alt_keys[i].y)) &&
-				   ((x<(m_alt_keys[i].x+m_alt_keys[i].width)) && (y<(m_alt_keys[i].y+m_alt_keys[i].height)));
-		if (hit)
-			return i;
-	}
-	return -1;
-}
-
-float Keyboard::geometric_distance( int x, int y, int key, bool mAlternate )
-{
+	float centroid_x = key.x + key.width/2.;
+	float centroid_y = key.y + key.height/2.;
+	
 	float distance;
-	if (mAlternate)
-		distance = fabs(x - m_alt_keys[key].x) + fabs(y - m_alt_keys[key].y);
-	else
-		distance = fabs(x - m_keys[key].x)     + fabs(y - m_keys[key].y);
+	distance = fabs(x - centroid_x) + fabs(y - centroid_y);
 	return distance;
 }
 
 /* returns key index of closest */
-int Keyboard::find_min_distance( int x, int y, bool mAlternate )
+int Keyboard::find_min_distance( int x, int y )
 {
+	int size = m_keys.size();
+	if (m_alt_down)
+		size = m_alt_keys.size();
+		
 	float min_distance = 1000;
 	float distance     = 0;
 	int   min_index    = 0;
-	for (int i=0; i<m_keys.size(); i++) 
+	for (int i=0; i<size; i++) 
 	{
-		distance = geometric_distance( x, y, i, mAlternate );
+		if (m_alt_down)
+			distance = geometric_distance( x, y, m_alt_keys[i] );
+		else 
+			distance = geometric_distance( x, y, m_keys[i] );
+			
 		if (distance < min_distance)
 		{
 			min_distance = distance;
 			min_index    = i;
+			//dprintf("%d min_dist=%6.1f; %s\n", i, min_distance, m_keys[i].text );
 		}
 	}
 	return min_index;	
 }
 
+char*	Keyboard::get_key_text ( int key_index )		// with current shift & alt states.
+{
+	static char key[8];
+
+	if (m_alt_down)
+	{
+		strcpy(key, m_alt_keys[key_index].text );
+		key[1] = 0;
+		//key = m_alt_keys[key_index].text[0];	
+	}
+	else 
+	{
+		strcpy(key, m_keys[key_index].text );
+		key[1] = 0;
+		if (m_shift_down)	
+			key[0] = toupper( key[0] );
+		else 
+			key[0] = tolower( key[0] );	
+	}
+	return key;
+}
+	
 int Keyboard::onClick(int x, int y, bool mouse_is_down)
 {
+	int retval = Control::onClick(x,y,mouse_is_down); 
+	if (retval>0) return retval;
+	
+	char* key_name;
 	char key;
-	dprintf("Keyboard::onClick()  x,y = %d,%d\n", x, y );
-	if ((Debug) && m_alt_down) printf("===== ALT KEYBOARD ACTIVE ===\n");
-	int closest_key = find_min_distance( x,y, m_alt_down );
-	dprintf("Min Distance, closest key is %d. \t", closest_key );
-		
-	int key_index;
-	if (m_alt_down) {
-		key_index = AltKeyHitTest( x,y );
-		key = m_alt_keys[key_index].text[0];
-	} else {
-		key_index = KeyHitTest   ( x,y );
-		dprintf("KeyHitTest() = %d\n", key_index );
-		if (m_shift_down)	{		
-			m_shift_down = false;	// just 1 key! 
-			key = toupper( m_keys[key_index].text[0] );
-		} else 
-			key = tolower( m_keys[key_index].text[0] );
-	}
-	dprintf("KeyHitTest()=%d; key=%c\n", key_index, key );
+	//dprintf("Keyboard::onClick()  x,y = %d,%d\n", x, y );
+	//if ((Debug) && m_alt_down) printf("===== ALT KEYBOARD ACTIVE ===\n");
+	int closest_key = find_min_distance( x,y );
 
-	if (key_index >= 0) 		// hit 
-	{
-		Invalidate();
-		int is_special_key = handle_special_keys( key_index );
-		if (is_special_key)	 {
-			MainDisplay.relay_key( key_index );
-			return TRUE;
-		} else
-			MainDisplay.relay_key( key );
+	int key_index = closest_key;
+	key_name = get_key_text(closest_key);
+	key = key_name[0];
+	dprintf("Min Distance, closest key is %d = %s", closest_key, key_name );
+	
+	if (m_shift_down)	
+		m_shift_down = false;	// just 1 key! 
 
-		append_character ( key );
-		if (m_index>BUFFER_LENGTH)	m_index = BUFFER_LENGTH;
-		
-		dprintf(" Keyboard::key_index=%d xy=<%d,%d>: key:<%d,%d>  %c\n",key_index, x,y, 
-						m_keys[key_index].x, m_keys[key_index].y, m_keys[key_index].text[0] );												 
-		dprintf(" Keyboard::%d %c %s\n",m_index, key, m_composition );
+	// hit - always will be with centroids
+	Invalidate();
+	int is_special_key = handle_special_keys( key_index );
+	if (is_special_key)	 {
+		MainDisplay.relay_key( key_index );
 		return TRUE;
-	}
+	} else
+		MainDisplay.relay_key( key );
 
-	return FALSE;
+	append_character ( key );
+	if (m_index>BUFFER_LENGTH)	m_index = BUFFER_LENGTH;
+	
+	dprintf(" Keyboard::xy=<%d,%d>; key_index=%d;  key:<%d,%d>  %c\n", x,y, key_index,
+					m_keys[key_index].x, m_keys[key_index].y, m_keys[key_index].text[0] );												 
+	dprintf(" Keyboard::%s\n", m_composition );
+
+	return TRUE;
 }
+
 
