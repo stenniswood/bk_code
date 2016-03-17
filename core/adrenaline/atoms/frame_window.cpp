@@ -39,9 +39,8 @@ void	FrameWindow::Initialize		 (   )
 {
 	strcpy (class_name, "FrameWindow");
 	Window::Initialize();
-	title_height = 1.5*text_size;
-		
-
+	title_height = 1.5*text_size;		
+	m_size_state = NORMAL;
 	
 	calc_metrics();
 	dprintf("\t\tFrameWindow::Initialize() done\n");
@@ -157,11 +156,10 @@ int FrameWindow::draw_max(	bool mHovering )
 int FrameWindow::draw( )
 {
 	Window::draw();
-	
 	draw_header();
 	draw_max   ();
-	draw_min   ();
-	draw_close ();	
+	if (m_size_state != MAXIMIZED)	draw_min   ();
+	draw_close ();
 }
 
 void FrameWindow::allocate_save_buff	()		// for current dimensions.
@@ -219,14 +217,16 @@ int	FrameWindow::HitTestTitleBar(int x, int y)
 	int hdrB = bottom+ body_height;
 	
 	if ((y>hdrB) && (y<hdrT))	// In the title bar region?
-	{		
+	{	
+		printf("HitTestTitleBar() \n");		
 		// yes, check for close:
 		if ((x>close_button_coords[LEFT]) && (x<close_button_coords[RIGHT]))
 			return CLOSE_HIT;
 
 		// check for min:
-		if ((x>min_button_coords[LEFT]) && (x<min_button_coords[RIGHT]))
-			return MIN_HIT;		
+		if (m_size_state != MAXIMIZED)	
+			if ((x>min_button_coords[LEFT]) && (x<min_button_coords[RIGHT]))
+				return MIN_HIT;		
 
 		// check for max:
 		if ((x>max_button_coords[LEFT]) && (x<max_button_coords[RIGHT]))
@@ -242,27 +242,57 @@ int	FrameWindow::HitTestTitleBar(int x, int y)
 	}
 	return 0;
 }  
+void FrameWindow::save_position(   )
+{
+	m_restore_rect.set_left  ( left );
+	m_restore_rect.set_bottom( bottom );
+	m_restore_rect.set_width ( width );	
+	m_restore_rect.set_height(height );
+}
+void FrameWindow::restore_position(   )
+{
+	set_width_height( m_restore_rect.get_width(),m_restore_rect.get_height() );
+	move_to			( m_restore_rect.get_left(), m_restore_rect.get_bottom() );
+}
 
 int FrameWindow::onClick(int x, int y, bool mouse_is_down)
 {
 	Rectangle* rect=NULL;
 	int title_bar_hit = HitTestTitleBar( x, y );
-	dprintf("HitTestTitleBar() = %d\n", title_bar_hit );	
+	printf("HitTestTitleBar() = %d\n", title_bar_hit );	
 	switch(title_bar_hit)
 	{
 	case CLOSE_HIT: 
 			
 			break;
-	case MIN_HIT:			
-			set_width_height( max_button_coords[RIGHT], title_height );	
+	case MIN_HIT:	
+			if (m_size_state == MINIMIZED) {
+				restore_position();
+				m_size_state = NORMAL;				
+			} else  {
+				save_position();
+				set_width_height( max_button_coords[RIGHT], title_height );	
+				m_size_state = MINIMIZED;
+			}
 			Invalidate();			
 			break;
 	case MAX_HIT: 
-			rect = MainDisplay.get_useable_rect();
-			set_width_height( rect->get_width(), rect->get_height() );	
+			if (m_size_state == MAXIMIZED)
+			{
+				restore_position();			
+				m_size_state = NORMAL;			
+			} else {			
+				if (m_size_state != MINIMIZED)
+					save_position();
+				rect = MainDisplay.get_useable_rect();
+				set_width_height( rect->get_width(), rect->get_height() );	
+				move_to(rect->get_left(), rect->get_bottom() );
+				m_size_state = MAXIMIZED;
+			}
 			Invalidate();		
 			break;
 	case DRAG_HIT : 
+			m_size_state = DRAGGING;	
 			if (mouse_is_down)
 				restore_pixels(); 		// we're moving out.  put camp ground back as we found it.
 			else

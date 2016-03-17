@@ -20,7 +20,7 @@ public:
 	
 	virtual void  Initialize	(					);
 	void  	set_data_series		( long mColor, char* mLabel );
-	void	add_data_series	  	( DataSet* NewData );
+	void	add_data_series	  	( DataSet& NewData );
 	void	remove_data_series	( int index /*DataSet* OldData*/ );
 	void	reset				( );
 	
@@ -29,10 +29,11 @@ public:
 	// This links the Datasets together!
 	virtual int   draw			(	);		// Draw calls all the sub draw routines.
 
+	std::string	m_stats;		// number of data points. 
 
 protected:
-	std::vector<long>	m_color;
-	std::vector<string>	m_names;
+	std::vector<long>			m_color;
+	std::vector<std::string>	m_names;
 
 	
 };

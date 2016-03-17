@@ -46,7 +46,7 @@
 #include "client_list_control.hpp"
 #include "home_screen.hpp"
 #include "can_sql_logger.hpp"
-
+#include "serial_loadcell.hpp"
 
 /*
 	What's displayed here is going to be under the control of bkInstant.
@@ -58,12 +58,30 @@ extern int DisplayNum;
 #define Debug 0
 #define dprintf if (Debug) printf
 
+void* serial_interface(void* );
+pthread_t serial_leftfoot_thread_id;
+pthread_t serial_rightfoot_thread_id;
+//pthread_t udp_thread;  
+LoadCell_SerialInterface left_foot;
+LoadCell_SerialInterface right_foot;
 
-pthread_t udp_thread;  
+
 void create_threads()
 {	
-	const char *message1 = "every second";	
-	// unknown yet :
+	int iret1 = pthread_create( &serial_leftfoot_thread_id, NULL, serial_interface, (void*) &left_foot);
+	if (iret1)
+	{
+		fprintf(stderr,"Error - Could not create right_foot thread. return code: %d\n",iret1);
+		exit(EXIT_FAILURE);
+	} 	
+
+	int iret2 = pthread_create( &serial_rightfoot_thread_id, NULL, serial_interface, (void*) &right_foot);
+	if (iret2)
+	{
+		fprintf(stderr,"Error - Could not create right_foot thread. return code: %d\n",iret2);
+		exit(EXIT_FAILURE);
+	}
+	
 }
 /***********************************************************************/
 int bkInstant_connected = FALSE;
@@ -150,7 +168,7 @@ void gui_interface()
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
 			{ 
-				dprintf("clicked an object %s %x!\n", object_clicked->class_name, object_clicked);
+				dprintf("clicked an object %s %p!\n", object_clicked->class_name, object_clicked);
 				int num = object_clicked->onClick( x, y );
 				//UpdateDisplaySemaphore=1;
 				dprintf("clicked an object - called onClick() DONE\n");				
@@ -218,6 +236,8 @@ void sequencer_interface()
 
 void ethernet_interface()		/* wifi comms */
 {
+	if (ipc_memory_client==NULL)  return ;
+	
 	if ( cli_is_new_connection_status() )		// not really used anymore.
 	{	
 		//if (Debug) printf("New status : %s\n", get_connection_status());	
@@ -228,14 +248,15 @@ void ethernet_interface()		/* wifi comms */
 	}
 	if ( cli_is_new_client() )		// udp_thread found a new beacon.
 	{
-		AvailClients.update_available_client_list();
-		AvailClients.Invalidate();		
+		printf("---NEW CLIENT AVAILABLE! \n" );
+		AvailClients.m_clients->update_available_client_list();
+		AvailClients.Invalidate();
 		cli_ack_new_client();
 		UpdateDisplaySemaphore=1;					
 	}
 	if ( cli_is_new_update() )		// a new request (sentence)
 	{
-		
+		printf("---CLIENT New Sentence! \n" );		
 		UpdateDisplaySemaphore=1;			
 	}
 	if (is_new_response() )
@@ -247,7 +268,48 @@ void ethernet_interface()		/* wifi comms */
 		cli_ack_response();
 		UpdateDisplaySemaphore=1;			
 	}
+}
+
+void* serial_interface(void* mParam)				// serial port used for arduino connections & GPS.
+{
+	LoadCell_SerialInterface* mFoot = (LoadCell_SerialInterface*) mParam;
+	static char  app_name[12];
+	static char  read_r[4];
+	static char  no_write_w[4];
+	static char  device_p[4];
+
+	static char  read_[20];
+	static char  no_write_[20];
+	static char  device_[20];
+
+	sprintf(app_name,   "./avisual");
+	sprintf(read_r,     "-R");
+	sprintf(no_write_w, "-w");
+	sprintf(device_p,   "-p");
+
+	sprintf(read_,     "ascii");
+	sprintf(no_write_, "0");
+
+	printf("mFoot=%p;  left_foot=%p\n", mFoot, &left_foot);
+	if (mFoot == &left_foot)	{
+		sprintf(device_,   "/dev/ttyACM0");
+		mFoot->_cl_rx_dump = 1;
+		mFoot->_cl_rx_dump_ascii = 1;		
+		mFoot->_cl_port = strdup("/dev/ttyACM0");
+		mFoot->_cl_tx_bytes = 0;
+		mFoot->left_foot = false;
+	} else {
+		mFoot->_cl_port = strdup("/dev/ttyACM1");	
+		mFoot->_cl_rx_dump = 1;
+		mFoot->_cl_rx_dump_ascii = 1;		
+		mFoot->_cl_tx_bytes = 0;
+		mFoot->left_foot = true;		
+		//sprintf(device_,   "/dev/ttyACM1");
+	}
+	char * argv[] = { app_name, read_r, read_, no_write_w, no_write_, device_p, device_ }; 
 	
+	mFoot->serial_loadcell_main( 7, argv );	
+	return NULL;
 }
 
 void voice_interface()
@@ -295,6 +357,8 @@ int main( int argc, char *argv[] )
 	MainDisplay.onCreate();
 	dev_keyboard_init();
 
+	sql_logger.connect_to_logger_db();
+	
 /*	CalendarEntry ce;
 	ce.connect_to_calendar_db();
 	//ce.create_calendar_table_nq();
@@ -348,8 +412,8 @@ int main( int argc, char *argv[] )
 	printf("================= Main Loop ==========================\n");	
 	while (1)
 	{	
-//		if (ipc_memory_client)
-//			ethernet_interface();
+		
+		ethernet_interface();
 
 		gui_interface();
 
@@ -362,5 +426,6 @@ int main( int argc, char *argv[] )
 		/*sequencer_interface();
 		voice_interface();
 		behavior_interface(); */
+		//serial_interface();	on separate thread!			// serial port used for arduino connections & GPS.
 	}
 }

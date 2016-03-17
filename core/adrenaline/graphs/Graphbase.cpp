@@ -15,6 +15,12 @@
  
 #define margin_percent 0.07
 #define Debug 1
+
+long int ColorSequence[10] = { 
+0x7fFF0000, 0x7f00FF00, 0x7f0000FF, 0x7f7F7F7F,
+0x7f7F3F00, 0x7f007F3F, 0x7f3F007F, 
+0x7f7F7F00, 0x7f007F7F, 0x7fFFFFFF };
+
   
 Graphbase::Graphbase(int Left, int Right, int Top, int Bottom )
 : Control( Left,Right,Top,Bottom )
@@ -175,8 +181,12 @@ int Graphbase::draw_title()
 
 void Graphbase::add_data_series( DataSet* NewSeries )
 {
-	data_series.push_back( *NewSeries );
-	//printf("New Series!\n");
+	// Assing it a color:
+	int color_index = data_series.size() % 10;
+	printf(" Graphbase::add_data_series() size=%d new_series_size=%d; %d \n", data_series.size(), NewSeries->get_size(), color_index );
+	NewSeries->color  = ColorSequence[color_index] | 0xFF000000;
+	
+	data_series.push_back( NewSeries );
 }
 
 void Graphbase::remove_data_series( int mIndex )
@@ -241,7 +251,7 @@ void Graphbase::find_max()
 	float tmp_max = -10000000.;
 	for(int s=0; s<data_series.size(); s++)
 	{
-		tmp_max = data_series[s].get_max();
+		tmp_max = data_series[s]->get_max();
 		if (tmp_max > m_max)
 			m_max = tmp_max;			
 	}
@@ -253,7 +263,7 @@ void Graphbase::find_min()
 	float tmp_min = 0.;	
 	for(int s=0; s<data_series.size(); s++)
 	{
-		tmp_min = data_series[s].get_min();
+		tmp_min = data_series[s]->get_min();
 		if (tmp_min > m_min)
 			m_min = tmp_min;			
 	}

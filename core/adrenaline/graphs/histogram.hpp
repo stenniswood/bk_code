@@ -8,15 +8,15 @@
 class Histogram : public Graphbase
 {
 public:
-	Histogram();
+	Histogram( );
 	Histogram( int Left, int Right, int Top, int Bottom );
-	
-	void 	set_bins		( int NumberOfBins );
-	int   	get_bin_count ( int binNumber );
 
-	float 	get_highest_sample_count	( int mSeriesIndex=0);
-	float 	evaluate_gaussian			(float avg, float stddev, float x);
-	int   	draw_bell_curve			();
+	void 	set_bins		( int NumberOfBins );
+	int   	get_bin_count 	( int binNumber );
+
+	float 	get_highest_sample_count	( int mSeriesIndex=0 );
+	float 	evaluate_gaussian			( float avg, float stddev, float x );
+	int   	draw_bell_curve				( );
 
 	float 	calc_scale	(  );
 	void  	histo_plot	(  );

@@ -45,7 +45,7 @@ BOOL	PiCAN_Present=FALSE;
 
 struct sCAN MMsg;
 byte 		count = 0;
-int  			fd;
+int  		fd;
 long  		SerialNumber_ = 0x56789CD;
 #define 	Debug 0
 pthread_t 	udp_tx_thread_id;

@@ -44,7 +44,7 @@ float Histogram::get_highest_sample_count( int mSeriesIndex )
 		
 	for (int i=0; i<bins; i++)
 	{		
-		count = data_series[mSeriesIndex].count_samples_between( start_val, end_val );
+		count = data_series[mSeriesIndex]->count_samples_between( start_val, end_val );
 		if (count > highest)
 			highest = count;
 			
@@ -60,14 +60,14 @@ float Histogram::calc_scale( )
 {
 	// COMPUTE STATS : 
 	//for (int s=0; s<data_series.size(); s++)
-		data_series[0].compute_stats();
+		data_series[0]->compute_stats();
 	
 	// WE'LL PLACE AVERAGE RIGHT IN THE CENTER:
 	// and allow enough room for 6 sigma (standard formatting)
-	center_value = data_series[0].get_average();
+	center_value = data_series[0]->get_average();
 
 	// Use SixSigma instead on Max/Min!
-	three_sigma       = 3.0 * data_series[0].get_stddev();
+	three_sigma       = 3.0 * data_series[0]->get_stddev();
 	float six_sigma   = 2.0 * three_sigma;
 	bin_value_spacing = six_sigma / bins;
 
@@ -106,7 +106,7 @@ int Histogram::draw_bell_curve()
 
 	for (int xpix=left; xpix<left+width; xpix++)		// for each pixel
 	{
-		eval_y = evaluate_gaussian(center_value, data_series[0].get_stddev(), x_value)*yscale;
+		eval_y = evaluate_gaussian(center_value, data_series[0]->get_stddev(), x_value)*yscale;
 		Line( xpix, bottom+prev_y,  xpix+1, bottom+eval_y);
 		prev_y = eval_y;
 		x_value += xscale;
@@ -120,12 +120,12 @@ void Histogram::draw_stats()
 	Stroke(255, 128, 128, 0.75);
   
 	char n_str[12];
-	sprintf(n_str, "n=%d", data_series[0].get_size() );
+	sprintf(n_str, "n=%d", data_series[0]->get_size() );
 	float x = center_xpix + ((center_xpix - left)/4.0);
 	float y = bottom+height - ((float)(height)/4.0);
 	Text( x,y, n_str, SerifTypeface, 12.0 );
 
-	sprintf(n_str, "avg=%6.1f", data_series[0].get_average() );
+	sprintf(n_str, "avg=%6.1f", data_series[0]->get_average() );
 	Text( x,y+20.0, n_str, SerifTypeface, 12.0 );	
 }
 
@@ -147,7 +147,7 @@ int Histogram::draw_body()
 	float end_val   = start_val + bin_value_spacing;
 	for (int i=0; i<bins; i++, x+=bin_xpixel_spacing)
 	{
-		NumberOfSamples = data_series[0].count_samples_between( start_val, end_val );
+		NumberOfSamples = data_series[0]->count_samples_between( start_val, end_val );
 		Line( x, bottom,  x, bottom+ (NumberOfSamples*yscale) );
 
 		// Bump to next bin:

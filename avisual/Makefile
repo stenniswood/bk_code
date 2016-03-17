@@ -69,7 +69,7 @@ AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   test_layouts.o test_combo_layouts.o client_list_control.o \
 			   test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
 			   power.o home_screen.o datalog_graph.o can_sql_logger.o \
-			   motor_gui.o 
+			   motor_gui.o serial_loadcell.o 
 APPS_OBJS   = 
 FILE_EDIT_OBJS = file_editor_app.o 
 VIDEO_APP_OBJS = video_app.o video.o 
@@ -99,7 +99,8 @@ ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			stick_leg.o tab_control.o table_window.o tabular_listbox.o \
 			TextFile.o text_view.o tk_colors.o wave_view.o window.o    \
 			horizontal_menu.o vertical_menu.o spinner.o can_msg_view.o wave.o \
-			edit_box.o drop_down_box.o listbox_icon.o GyroViewI.o load_cell_view.o
+			edit_box.o drop_down_box.o listbox_icon.o GyroViewI.o load_cell_view.o \
+			slider.o
 ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
 			stereo_power.o stick_figure.o system_bar.o can_window.o   \
@@ -108,7 +109,7 @@ ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o calendar_entry.o
 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
-			 bar_graph.o bar_graph_stacked.o scatter_plot.o 
+			 bar_graph.o bar_graph_stacked.o scatter_plot.o legend.o
 #KINETIC_OBJS = 
 
 # APP CODE

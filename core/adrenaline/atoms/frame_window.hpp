@@ -20,6 +20,14 @@ using namespace std;
 #define TOP 	2
 #define BOTTOM 	3
 
+enum eSizeState
+{
+	MINIMIZED,
+	NORMAL,
+	MAXIMIZED,
+	DRAGGING
+};
+
 /***************************************************************
 The window can be moved around, etc, like a microsoft window.
 It has a title bar area with min, max, and close.
@@ -39,7 +47,8 @@ public:
 	int   			draw_min 				( bool mHovering=false 	);
 	int   			draw_max 				( bool mHovering=false 	);
 	void			calc_metrics			(   					);
-
+	void			save_position			(   					);
+	void			restore_position		(   					);
 
 	virtual void	move_to					( float NewX, float NewY );
 	virtual void	set_width_height		( int NewWidth, int NewHeight );
@@ -57,7 +66,7 @@ public:
 	int		 		onClick					( int x, int y, bool mouse_is_down);
 			
 protected:
-	int				HitTestTitleBar			( int x, int y);
+	int			HitTestTitleBar			( int x, int y);
 	float		close_button_coords[4];
 	float		min_button_coords[4];
 	float		max_button_coords[4];
@@ -65,6 +74,8 @@ protected:
 	float		body_height;
 	float		title_height;
 	bool		is_dragging;
+	Rectangle	m_restore_rect;			// not min nor max window position.
+	enum eSizeState m_size_state;		// normal, minimized, maximized, dragging, etc.
 	
 private:
 	// The contents of the display are saved to memory 

@@ -15,10 +15,6 @@
  
 #define Debug 1 
 
-long int ColorSequence[10] = { 
-0x00FF0000, 0x0000FF00, 0x000000FF, 0x007F7F7F,
-0x007F3F00, 0x00007F3F, 0x003F007F, 
-0x007F7F00, 0x00007F7F, 0x00FFFFFF };
 
 LineGraph::LineGraph()
 :Graphbase()
@@ -69,7 +65,8 @@ void LineGraph::draw_data_series( )
 	int i=0;
 	for (int s=0; s<data_series.size(); s++)
 	{
-		line_plot( &data_series[s], ColorSequence[i] );
+		long int color = data_series[s]->color;	
+		line_plot( data_series[s], color );
 		i++;
 	}	
 }
@@ -81,15 +78,15 @@ int LineGraph::calc_auto_scale( )
 	if (data_series.size()==0)
 		return -1;
 	//assert( data_series.size()>0 );
-	m_max = data_series[0].get_max();		// initialize with something valid!
-	m_min = data_series[0].get_min();
+	m_max = data_series[0]->get_max();		// initialize with something valid!
+	m_min = data_series[0]->get_min();
 	dprintf("m_max=%6.1f; m_min=%6.1f\n", m_max, m_min);
 	
 	// SCAN all data series:
 	for (int s=0; s<data_series.size(); s++)
 	{
-		tmp_max = data_series[s].get_max();
-		tmp_min = data_series[s].get_min();
+		tmp_max = data_series[s]->get_max();
+		tmp_min = data_series[s]->get_min();
 		if (tmp_max > m_max)	m_max = tmp_max;
 		if (tmp_min < m_min)	m_min = tmp_min;
 	}	
@@ -108,6 +105,11 @@ void LineGraph::calc_scale( )
 		calc_auto_scale();
 	}
 
+	char tmp[80];
+	long int samples = data_series[0]->get_size();
+	sprintf(tmp, "Max=%6.1f; Min=%6.1f;  Samples=%d\n", m_max, m_min, samples );
+	m_stats = tmp;
+	
 	float div = (m_max-m_min);
 	if (div==0) div=1;
 	xscale  = 1.0; 	
@@ -118,10 +120,13 @@ void LineGraph::calc_scale( )
 
 int LineGraph::draw_body() 
 {
+	printf("LineGraph::draw_body()\n");	  
+	Fill_l(0xFFFFFFFF);				   // Big blue marble
+	Text(left+10,bottom+20, m_stats.c_str(),  SerifTypeface, 12 );
+	
 	Fill(44, 77, 232, 1);				   // Big blue marble
 	Stroke(255, 128, 128, 0.5);
 	StrokeWidth(2);
-	printf("LineGraph::draw_body()\n");	  
 	
 	//calc_scale( );
 	draw_data_series( );

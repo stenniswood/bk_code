@@ -1,7 +1,7 @@
 #ifndef _SQL_LOGGER_HPP_
 #define _SQL_LOGGER_HPP_
 
-//#include <time.h>
+#include <string>
 #include <ctime>
 #include <my_global.h>
 #include <mysql.h>
@@ -72,6 +72,8 @@ public:
 	
 	string			query_string;
 };
+
+extern SQL_Logger sql_logger;
 
  
 #endif

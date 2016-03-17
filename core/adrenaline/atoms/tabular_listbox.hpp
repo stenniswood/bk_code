@@ -59,7 +59,7 @@ public:
 
 	void			print_tab_info			(   );
 	void			print_client_rect		(   );		// body_height, scroll_bar width
-	void			clear_items			( );
+	void			clear_items				( );
 	
 	virtual int		onCreate	  			(  	);	// after loading resources, call functions which use fonts (already loaded before this call) etc.	
 	void			calc_metrics			(   );

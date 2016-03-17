@@ -72,7 +72,7 @@ public:
 	int		count_data_series();	// how many data series are there?
 
 protected:
-	std::vector<DataSet>	data_series;
+	std::vector<DataSet*>	data_series;
 	
 
 	byte		draw_options;		// bit field 

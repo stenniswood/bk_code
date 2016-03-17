@@ -16,16 +16,17 @@
 //
 DataSet::DataSet( )
 {
-	Next = NULL;
-	Prev = NULL;
 }
 
 DataSet::DataSet( float* data, int NumberElements )
 {
 	for (int i=0; i<NumberElements; i++)
 		Data.push_back( data[i] );
-	Next = NULL;
-	Prev = NULL;
+}
+
+DataSet::~DataSet( 	)
+{
+	Data.clear();
 }
 
 float DataSet::calc_average( )
@@ -120,6 +121,7 @@ void DataSet::reset	()
 {
 	Data.clear();
 }
+
 /* this is done in specific graph
 float DataSet::calc_scale( )
 {

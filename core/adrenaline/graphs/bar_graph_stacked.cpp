@@ -39,13 +39,13 @@ StackedBarGraph::StackedBarGraph( int Left, int Right, int Top, int Bottom )
 void StackedBarGraph::calc_scale( )
 {
 	// COMPUTE STATS : 
-	data_series[0].compute_stats();
+	data_series[0]->compute_stats();
 	
 	find_max();
 	find_min();
 
 	// Use SixSigma instead on Max/Min!
-	int number_bars 		= data_series[0].get_size();
+	int number_bars 		= data_series[0]->get_size();
 	int number_data_series 	= count_data_series();
 	float group_xpixel_spacing= (width / number_bars);	
 	float bar_width_spacing = (group_xpixel_spacing*0.9) / number_data_series;
@@ -69,14 +69,14 @@ int StackedBarGraph::draw_body()
 
 	int margin = 3;
 	float x = left+margin;
-	int bars = data_series[0].get_size();	
+	int bars = data_series[0]->get_size();	
 	DataSet* ptr = NULL;
 	for (int i=0; i<bars; i++ )
 	{
 
 		for (int s=0; s<data_series.size(); s++)
 		{
-			float value = data_series[0].get_datum(i);
+			float value = data_series[0]->get_datum(i);
 			Line( x, bottom,  x+bar_width, bottom+(value*yscale) );
 			x  += (bar_width+bar_space);
 		}		

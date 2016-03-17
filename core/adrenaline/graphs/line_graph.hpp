@@ -1,6 +1,7 @@
 #ifndef _LINEGRAPH_
 #define _LINEGRAPH_
 
+#include <string>
 #include "Graphbase.hpp"
 #include "dataset.hpp"
 
@@ -18,9 +19,11 @@ public:
 	void	set_auto_scale	( bool  mOn		)	{ auto_scale = mOn; };
 	void 	calc_scale		(  				);
 
+	std::string	m_stats;
 protected:
 	void  	line_plot		( DataSet* data, long int Color );
 	int 	calc_auto_scale ( 				);		// call calc_scale it will go here.
+	
 	
 private:
 	float 	max,min;

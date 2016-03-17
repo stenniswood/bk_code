@@ -30,7 +30,7 @@
 
 #include "draw_app.hpp"
 
-#define Debug 1
+#define Debug 0
 
 
 StereoPowerLevels volume_control;

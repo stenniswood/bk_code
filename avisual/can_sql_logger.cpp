@@ -19,7 +19,7 @@ MYSQL 		 *logger_db = NULL;
 
 #define Debug 0
 
-
+SQL_Logger sql_logger;
 
 static void object_finish_with_error( )
 {
@@ -160,7 +160,7 @@ char* form_date_time_string( struct tm& time_bd )
 }
 
 void SQL_Logger::find_reading( string mDataType, struct tm start_time_bd, 
-							   struct tm end_time_bd,	int mUser_id = 1 )
+							   struct tm end_time_bd,	int mUser_id )
 {
 	query_string =  "SELECT * FROM bk_useraccounts.data_log WHERE ";
 	query_string += "bk_useraccounts.data_log.timestamp BETWEEN '";
@@ -184,22 +184,20 @@ char* append_float( float mFloat )
 
 void SQL_Logger::add_loadcell( stLoadCellReading& mRead )
 {
-	char value[16];
 	query_string = "INSERT INTO bk_useraccounts.data_log VALUES ('0', CURRENT_TIMESTAMP,";	
-	for (int r=0; r<mRead.num_reads; r++)
+	for (int r=0; r<8; r++)
 	{
 		query_string += append_float(mRead.sensor[r]);		
 		query_string += ", ";
 	}
 	query_string += "'LOAD CELL'";					query_string += ", ";
-	query_string += "'sensors 1..8'";				
+	query_string += "'sensor_1, sensor_2,sensor_3,sensor_4,sensor_5,sensor_6,sensor_7,sensor_8'";				
 	query_string += "); ";
 	query(false);
 }
 
 void SQL_Logger::add_gyro( stGyroReading& mRead				 )
 {
-	char value[16];
 	query_string = "INSERT INTO bk_useraccounts.data_log VALUES ('0', CURRENT_TIMESTAMP, ";	
 	query_string += append_float(mRead.tilt);		query_string += ", ";
 	query_string += append_float(mRead.pitch);		query_string += ", ";
@@ -213,7 +211,6 @@ void SQL_Logger::add_gyro( stGyroReading& mRead				 )
 
 void SQL_Logger::add_body_position( struct stBodyPositionVector& mRead )
 {
-	char value[16];
 	float num_elements = sizeof(struct stBodyPositionVector)/ sizeof(float);
 	float* ptr = (float*)&mRead;
 	
@@ -253,7 +250,6 @@ void SQL_Logger::add_body_position( struct stBodyPositionVector& mRead )
 
 void SQL_Logger::add_gps( stGPSReading& mRead				 )
 {
-	char value[16];
 	query_string = "INSERT INTO bk_useraccounts.data_log VALUES ('0', CURRENT_TIMESTAMP, ";	
 	query_string += append_float(mRead.longitude);		query_string += ", ";
 	query_string += append_float(mRead.latitude );		

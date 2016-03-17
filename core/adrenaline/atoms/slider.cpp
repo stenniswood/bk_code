@@ -11,6 +11,7 @@
 #include "control.hpp"
 #include "slider.hpp"
 
+
 #define MARKER_HEIGHT 20
 #define MARKER_WIDTH  20
 
@@ -27,9 +28,9 @@
 	set_text( (char*)"SliderControl" );	
 	yMax 	= Max;
 	yMin 	= Min;
-}*/
+}*/ 
 
-SliderControl::SliderControl()
+SliderControl::SliderControl() 
 : Control()
 {
 	strcpy (class_name, "SliderControl");					
@@ -39,6 +40,21 @@ SliderControl::SliderControl()
 //	set_text( (char*)"SliderControl" );	
 	yMax 	= 100;
 	yMin 	= 0;
+}
+
+SliderControl::~SliderControl() 
+{
+}
+void SliderControl::Initialize(	)
+{
+}
+
+int SliderControl::calc_metrics()
+{
+}
+int	SliderControl::onKey( char mKey )
+{
+
 }
 
 /*void SliderControl::set_position(int Left, int Right, int Top, int Bottom)

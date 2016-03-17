@@ -40,13 +40,13 @@ BarGraph::BarGraph( int Left, int Right, int Top, int Bottom )
 void BarGraph::calc_scale( )
 {
 	// COMPUTE STATS : 
-	data_series[0].compute_stats();
+	data_series[0]->compute_stats();
 	
 	find_max();
 	find_min();
 
 	// Use SixSigma instead on Max/Min!
-	int number_bars 		= data_series[0].get_size();
+	int number_bars 		= data_series[0]->get_size();
 	int number_data_series 	= count_data_series();
 	float group_xpixel_spacing= (width / number_bars);	
 	float bar_width_spacing = (group_xpixel_spacing*0.9) / number_data_series;
@@ -73,18 +73,19 @@ int BarGraph::draw_body()
 	DataSet* ptr 	= NULL;	
 	int   	 margin = 3;
 	float 	 x 		= left+margin;
-	int   	 bars 	= data_series[0].get_size();	
+	int   	 bars 	= data_series[0]->get_size();	
 	printf("BarGraph::draw_body() bars=%d\n", bars );
 	
 	for (int i=0; i<bars; i++ )
 	{
 		for (int s=0; s<data_series.size(); s++)
 		{
-			float value = data_series[s].get_datum(i);
+			float value = data_series[s]->get_datum(i);
 			Rect( x, bottom,  bar_width, (value*yscale) );
 			//printf("BarGraph:: x=%6.1f,b=%6.1f; r=%6.1f t=%6.1f \n", x, bottom, x+bar_width, bottom+(value*yscale) );
 			x  += (bar_width+bar_space);
-			ptr = data_series[s].getNext();
+			if (s<(data_series.size()-1))
+				ptr = (data_series[s+1]);
 		}
 		x += group_space;
 	}

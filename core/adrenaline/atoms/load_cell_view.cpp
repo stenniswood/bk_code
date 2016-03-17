@@ -14,9 +14,11 @@
 #include "VG/vgu.h"
 #include "/home/pi/openvg/fontinfo.h"
 #include "/home/pi/openvg/shapes.h"
+
 #include "control.hpp"
 #include "display.h"
 #include "load_cell_view.hpp"
+#include "bk_system_defs.h"
 
 #define Debug 0
 
@@ -41,7 +43,7 @@ void	LoadCellView::set_sensor_value	( int mSensorNumber, float mPoundsofForce )
 }
 float	LoadCellView::get_sensor_value	( int mSensorNumber)
 {
- 
+	return m_sensor_values[mSensorNumber];
 }
 
 void 	LoadCellView::Initialize		(	)
@@ -57,16 +59,16 @@ void 	LoadCellView::Initialize		(	)
 	m_left_margin   = 10;
 	m_right_margin  = 10;	 
 
-	float x_inc = (width-m_sensor_width*2) / 3.;
-	m_sensor_left[0]    = left + x_inc;
-	m_sensor_left[1]    = m_sensor_left[0] + m_sensor_width + x_inc;
-	m_sensor_left[2]    = left + x_inc;
-	m_sensor_left[3]    = m_sensor_left[0] + m_sensor_width + x_inc;
+	float x_inc = (width-m_sensor_width*2) / 5.;
+	m_sensor_left[LEFT_FOOT_HEEL_L]    = left + 2*x_inc;
+	m_sensor_left[LEFT_FOOT_HEEL_R]    = m_sensor_left[LEFT_FOOT_HEEL_L] + m_sensor_width + x_inc;		// Right side of foot.
+	m_sensor_left[LEFT_FOOT_TOE_L]    = left + 2*x_inc;
+	m_sensor_left[LEFT_FOOT_TOE_R]    = m_sensor_left[LEFT_FOOT_HEEL_L] + m_sensor_width + x_inc;		// Right side of foot.
 		
-	m_sensor_bottom[0] = bottom+0.2*height+ text_size*1.5;
-	m_sensor_bottom[1] = bottom+0.2*height+ text_size*1.5;
-	m_sensor_bottom[2] = m_sensor_bottom[0]+m_sensor_height*1.5+10;
-	m_sensor_bottom[3] = m_sensor_bottom[0]+m_sensor_height*1.5+10;
+	m_sensor_bottom[LEFT_FOOT_HEEL_L] = bottom+0.2*height+ text_size*1.5;
+	m_sensor_bottom[LEFT_FOOT_HEEL_R] = bottom+0.2*height+ text_size*1.5;
+	m_sensor_bottom[LEFT_FOOT_TOE_L] = m_sensor_bottom[LEFT_FOOT_HEEL_L]+m_sensor_height*1.5+10;		// toe
+	m_sensor_bottom[LEFT_FOOT_TOE_R] = m_sensor_bottom[LEFT_FOOT_HEEL_L]+m_sensor_height*1.5+10;		// toe 
 }
 
 void 	LoadCellView::calc_metrics		(  )
@@ -75,6 +77,7 @@ void 	LoadCellView::calc_metrics		(  )
 
 void	LoadCellView::print_info		(	)
 { 
+
 }
 void 	LoadCellView::set_width_height  ( int Width, int Height )
 { 
@@ -82,7 +85,7 @@ void 	LoadCellView::set_width_height  ( int Width, int Height )
 void 	LoadCellView::draw_a_sensor		(  )
 { 
 }
-const float MAX_LOAD_CELL_READING = 110.0;		// lbs
+const float MAX_LOAD_CELL_READING = 18.0;		// lbs
 
 int   	LoadCellView::draw   			(  )
 { 
@@ -98,6 +101,8 @@ int   	LoadCellView::draw   			(  )
 		// change color to m_sensor_values[i] mapped color.
 		box_color = 0xFF000000;
 		int scaled_reading = ceil( fabs(255. * m_sensor_values[i] / MAX_LOAD_CELL_READING) );
+		scaled_reading = min (255, scaled_reading);
+		
 		if (m_sensor_values[i] < 0.0)
 			box_color |= (scaled_reading);		
 		else

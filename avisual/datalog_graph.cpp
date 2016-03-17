@@ -38,9 +38,12 @@ AUTHOR	: Steve Tenniswood
 #include "client_list_control.hpp"
 #include "home_screen.hpp"
 #include "window_layouts.hpp"
+#include "legend.hpp"
 
 #define Debug 1
  
+Legend  legend;
+
 LineGraph lg;
 //Histogram hg;		uses the one in window_layouts.cpp
 //FrameWindow graph_win;
@@ -96,14 +99,21 @@ void fill_legend_info(int mReadType )
 			ds[7].name = "Reading 8";	
 			break;
 	};
+	for (int i=0; i<8; i++)
+		legend.add_data_series( ds[i] );
+		
 	printf("fill_legend_info() done\n");
+}
+
+void reset_all_data()
+{
+	lg.reset_data();
+	for (int i=0; i<8; i++)
+		ds[i].reset();
 }
 
 void fill_graph_with_data(string mread_type)
 {
-	// MAKE A LEGEND:
-	int selected_index    = rb_gyro.get_selected_index();	// traverses the whole group
-	fill_legend_info(selected_index);		
 	int counter = 0;
 	
 	// SEARCH SQL:
@@ -117,15 +127,37 @@ void fill_graph_with_data(string mread_type)
 		for (int d=0; d<8; d++)
 			ds[d].add( dlog.readings[d] ); 
 		counter++;
+		if ((counter%10)==0) printf("fill_graph_with_data()=%d\n", counter);
 	}	
 	printf("fill_graph_with_data()=%d\n", counter);
-
 }
-void reset_all_data()
+
+void setup_linegraph(string read_type, Rectangle* rect, Graphbase* mReport)
 {
-	lg.reset_data();
-	for (int i=0; i<8; i++)
-		ds[i].reset();
+	string yLabel;	
+	lg.set_text  	 	( read_type.c_str(), "time" );
+	lg.move_to			( rect->get_left(), rect->get_bottom() );
+	lg.set_width_height	( rect->get_width(), rect->get_height() );
+
+	float w = rect->get_width()/6.;
+	legend.set_width_height( w, rect->get_height()/2. );
+	legend.move_to( rect->get_left() + rect->get_width()-w, rect->get_bottom() );
+
+	fill_graph_with_data(read_type);
+
+	// ADD DATA SERIES TO GRAPH :
+	for (int d=0; d<8; d++)	
+		lg.add_data_series( &(ds[d]) );
+
+	// MAKE A LEGEND:
+	int selected_index    = rb_gyro.get_selected_index();	// traverses the whole group
+	fill_legend_info(selected_index);		
+
+	lg.set_auto_scale( true );
+	lg.calc_scale();
+	printf("okay_callback() calc_scale done\n" );		
+	lg.Invalidate();
+	legend.Invalidate();
 }
 void setup_histogram(string read_type, Rectangle* rect)
 {
@@ -143,24 +175,7 @@ void setup_histogram(string read_type, Rectangle* rect)
 	hg.calc_scale();
 	hg.Invalidate();
 }
-void setup_linegraph(string read_type, Rectangle* rect)
-{
-	string yLabel;	
-	lg.set_text  	 	( read_type.c_str(), "time" );
-	lg.move_to			( rect->get_left(), rect->get_bottom() );
-	lg.set_width_height	( rect->get_width(), rect->get_height() );
 
-	fill_graph_with_data(read_type);
-	// ADD DATA SERIES TO GRAPH :
-	for (int d=0; d<8; d++)	
-		lg.add_data_series( &(ds[d]) );
-
-	lg.set_auto_scale( true );
-	lg.calc_scale();
-	printf("okay_callback() calc_scale done\n" );		
-	lg.Invalidate();
-
-}
 void okay_callback( void* mPtr )
 {
 	dprintf("okay_callback() \n" ); 
@@ -176,8 +191,8 @@ void okay_callback( void* mPtr )
 		
 	// Start date?
 	// end date?
-	start_time_bd.tm_mon  = 2;
-	start_time_bd.tm_mday = 1;
+	start_time_bd.tm_mon  = 3;
+	start_time_bd.tm_mday = 14;
 	start_time_bd.tm_year = 2016-1900;
 	
 	end_time_bd.tm_mon  = 3;
@@ -192,8 +207,9 @@ void okay_callback( void* mPtr )
 	MainDisplay.remove_all_objects(	);	
 	switch (report_index)
 	{
-	case 0 : setup_linegraph(read_type, rect);
+	case 0 : setup_linegraph(read_type, rect, &lg);
 			MainDisplay.add_object( &lg );
+			MainDisplay.add_object( &legend );
 			break;
 	case 1 : setup_histogram(read_type, rect);
 			MainDisplay.add_object( &hg );
@@ -305,12 +321,15 @@ void GridFrameWindow::setupgrid()
 int GridFrameWindow::draw()
 {
 	FrameWindow::draw();
-	grid.draw();	
+	if (m_size_state != MINIMIZED)
+		grid.draw();	
 }
 
 int	GridFrameWindow::onClick( int x, int y, bool mouse_is_down=true )
 {
+	int retval = FrameWindow::onClick(x,y,mouse_is_down);
 	grid.hit_test( x,y );
+	return retval;
 }
 
 GridFrameWindow grid_test;

@@ -2,8 +2,8 @@
 #define _HOME_SCREEN_HPP_
 
 
-extern TextView 	RobotResponse;
-extern ClientList	AvailClients;
+extern TextView 		RobotResponse;
+extern ClientListPanel	AvailClients;
 
 void 				init_home_screen();
 

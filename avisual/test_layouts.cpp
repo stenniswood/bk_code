@@ -42,7 +42,8 @@ AUTHOR	: Steve Tenniswood
 #include "test_graph_layouts.hpp"
 //#include "can_msg_view.hpp"
 #include "window_layouts.hpp"
- 
+#include "load_cell_view.hpp"
+
 
 #define Debug 0
 
@@ -401,6 +402,7 @@ int menu_callback(void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	printf("menu_callback( %4x, %d )\n", menuPtr, mMenuIndex );
 //	load_test_screen( mMenuIndex );
+	return 0;
 }
 
 void init_horiz_menu		()
@@ -504,27 +506,30 @@ void init_gyro_view()
 	MainDisplay.add_object( view  );
 }
 
+LoadCellView* loadcell_left_foot=NULL;
+LoadCellView* loadcell_right_foot=NULL;
+
 void init_loadcell_view()
 {
 	int w = MainDisplay.screen_width /2. ;
-	LoadCellView* left  = new LoadCellView(50, w, 400, 50    );
-	LoadCellView* right = new LoadCellView(w+20, w*2, 400, 50);
+	loadcell_left_foot  = new LoadCellView(50, w, 400, 50    );
+	loadcell_right_foot = new LoadCellView(w+20, w*2, 400, 50);
 
 	// 200 lbs / 4 = 50lbs nominal
-	left->set_sensor_value( 0, 75 ); 	// heel left
-	left->set_sensor_value( 1, 65 );
-	left->set_sensor_value( 2, -25 ); 	// toe left
-	left->set_sensor_value( 3, -30 );
+	loadcell_left_foot->set_sensor_value( 0, 75 ); 	// heel left
+	loadcell_left_foot->set_sensor_value( 1, 65 );
+	loadcell_left_foot->set_sensor_value( 2, -25 ); 	// toe left
+	loadcell_left_foot->set_sensor_value( 3, -30 );
 
-	right->set_sensor_value( 0, 50 );
-	right->set_sensor_value( 1, 60 );
-	right->set_sensor_value( 2, 25 ); 
-	right->set_sensor_value( 3, 20 ); 	
-
-		
+	loadcell_right_foot->set_sensor_value( 0, 50 );
+	loadcell_right_foot->set_sensor_value( 1, 60 );
+	loadcell_right_foot->set_sensor_value( 2, 25 ); 
+	loadcell_right_foot->set_sensor_value( 3, 20 ); 	
+	
 	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( left  );
-	MainDisplay.add_object( right  );	
+	MainDisplay.add_object( loadcell_left_foot  );
+	MainDisplay.add_object( loadcell_right_foot );
+	
 }
 
 ScrollBar My_sb;
@@ -547,12 +552,13 @@ void init_listbox()
 	Rectangle* rect = MainDisplay.get_useable_rect( );
 	//AvailableClients.set_top_down	( false );
 	AvailableClients.set_width_height( 200, 200 );
-
-	AvailableClients.adjust_height_for_num_visible_items( 9 );
+	AvailableClients.clear_items();
+	AvailableClients.clear_items();	
 	populate_simple_lb				 (		);
 	AvailableClients.set_text_size	 ( 18.0 );
+	AvailableClients.adjust_height_for_num_visible_items( 9 );
 	// Should set the bottom of the list box at the below coordinate!
-	AvailableClients.move_to		 ( rect->get_left(), rect->get_bottom() );
+	AvailableClients.move_to		 ( rect->get_left()+50, rect->get_bottom()+50 );
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &AvailableClients );
@@ -562,6 +568,7 @@ void init_tab_listbox()
 {
 	printf("\ninit_tab_listbox\n");
 	static struct HeaderItemInfo hdr_info;
+	tab_lb.clear_items();
 	if (tab_lb.is_created()==false)
 	{
 		hdr_info.start_x  = 10.;
@@ -590,10 +597,20 @@ void init_dropdown_menu()
 {
 	
 }
+#include "motor_gui.hpp"
 
+ServoMotorGuiControl servo;
 void init_motor_gui_test()
 {
-
+	int w = MainDisplay.screen_width/2;
+	int h = 3*MainDisplay.screen_height/4.;
+	printf("init_motor_gui_test:  %d, %d;  w,h=<%d,%d> \n", MainDisplay.screen_width, MainDisplay.screen_height, w, h );
+	servo.set_width_height( w, h);
+	servo.move_to ( MainDisplay.screen_width/4, MainDisplay.screen_height/8. );
+	servo.print_positions();
+	
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &servo );
 }
 
 /*CANMessageView 			 msg_view;

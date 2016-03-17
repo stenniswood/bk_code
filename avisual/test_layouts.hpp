@@ -60,6 +60,12 @@ void init_hearts	( );
 void init_reversi	( );
 void init_battleships( );
 
+#include "load_cell_view.hpp"
+
+extern LoadCellView* loadcell_left_foot;
+extern LoadCellView* loadcell_right_foot;
+
+
 
 // for test only:
 //extern RadioButton 	MyRadio1;

@@ -69,7 +69,7 @@ void ScatterGraph::draw_data_series( )
 	int i=0;
 	for (int s=0; s<data_series.size(); s++)
 	{
-		line_plot( &data_series[s], ColorSequence[i] );
+		line_plot( data_series[s], ColorSequence[i] );
 		i++;
 	}	
 }
@@ -80,8 +80,8 @@ float ScatterGraph::calc_auto_scale( )
 	float tmp_max,tmp_min;
 	for (int s=0; s<data_series.size(); s++)
 	{
-		tmp_max = data_series[s].get_max();
-		tmp_min = data_series[s].get_min();
+		tmp_max = data_series[s]->get_max();
+		tmp_min = data_series[s]->get_min();
 		if (tmp_max > max)	max = tmp_max;
 		if (tmp_min > min)	min = tmp_min;
 	}	

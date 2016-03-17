@@ -1,8 +1,6 @@
-#ifndef _SLIDER_H_
-#define _SLIDER_H_
+//#ifndef _SLIDER_H_
+//#define _SLIDER_H_
 
-//#include <vector>
-//#include <string>
 #include "control.hpp"
 
 /*
@@ -18,6 +16,7 @@ class SliderControl : public Control
 {
 public:
 	SliderControl();	
+	~SliderControl();
 	//SliderControl(float Max, float Min);
 
 	virtual void 	Initialize(	);
@@ -41,7 +40,7 @@ public:
 	void 	draw_l_title		(	);
 	void	draw_marker			(	);
 
-	int draw					(	);
+	virtual int 	draw		(	);
 
 private:
 	float 	yMax, yMin;
@@ -54,4 +53,4 @@ private:
 
 
 
-#endif
+//#endif

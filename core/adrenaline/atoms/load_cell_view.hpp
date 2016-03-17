@@ -8,6 +8,12 @@
 	4 Sensors make up 1 foot. So this will show how the weight is distributed on the foot.
 	Ankles & toes - left and right side of foot.
 */
+enum eLeftMapping {
+	LEFT_FOOT_HEEL_R,
+	LEFT_FOOT_TOE_R,
+	LEFT_FOOT_HEEL_L,
+	LEFT_FOOT_TOE_L,	
+};
 
 class LoadCellView : public Control 
 {
@@ -41,7 +47,6 @@ private:
 	float		m_left_margin;
 	float		m_right_margin;
 
-	
 };
 
  

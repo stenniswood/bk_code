@@ -51,7 +51,7 @@ void ClientList::set_headings()
 	hdr_info.end_x	  = 10.;
 
 	// Column #1 : 
-	hdr_info.text  = "Name";
+	hdr_info.text  = "Name             ";
 	hdr_info.width = -1;
 	hdr_info.alignment = HEADER_ALIGN_LEFT;	
 	add_column( &hdr_info );
