@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <semaphore.h>
-#include "bcm_host.h"
-#include "ilclient.h"
+//#include "bcm_host.h"
+//#include "ilclient.h"
 
 #include "bk_system_defs.h"
 #include "protocol.h"

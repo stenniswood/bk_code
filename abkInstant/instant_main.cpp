@@ -1,5 +1,4 @@
 /* BK Instant main file.  */
-//#include "AUDIO_device.h"
 #include <sys/time.h>
 #include <string.h>
 #include <errno.h>
@@ -37,7 +36,7 @@
 
 #define  uint32_t long int
 
-#include "AUDIO_device.hpp"
+//#include "AUDIO_device.hpp"
 
 
 // Right now this is user settable.  Need to detect:
@@ -275,7 +274,7 @@ int main( int argc, char *argv[] )
 
 #define N_WAVES  1024*32    // dimension of Sinewave[]
 
-	static short Sinewaves[N_WAVES];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
+/*	static short Sinewaves[N_WAVES];			// 8k * 2 = 16k of short = 32k bytes buffer size. correct.
     
     int   period = get_note_period( 5 , 4, 22050 );
     saw_tooth_left ( Sinewaves, period, N_WAVES );
@@ -289,7 +288,7 @@ int main( int argc, char *argv[] )
 		uint8_t* result = audio_add_play_buffer( Sinewaves, N_WAVES, 22050 );
 	}
     usleep(2000000);
-    audio_close(); 
+    audio_close();  */
 	
 	printf("================= Main Loop ==========================\n");	
 	while (1) 
@@ -298,6 +297,3 @@ int main( int argc, char *argv[] )
 		usleep(50000);
 	}
 }
-
-
-

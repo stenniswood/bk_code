@@ -24,7 +24,7 @@ INC		 +=	 ./threads/ ./nlp_protocol/ ./nlp_adrenaline/ ./voice/ ./util/ ./nlp_co
 			 /home/pi/bk_code/abkInstant/  /home/pi/raspicam/interface  \
 			 /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/
 SELF_INC   = ../../abkInstant/ ./ ../
-
+INC += $(SELF_INC)
 #			  /opt/vc/include/interface/vcos/pthreads/
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 		 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
@@ -45,7 +45,7 @@ CFLAGS+=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POS
 KINETIC_OBJS = vector.o
 CAN_OBJS   =  can_eid.o bk_system_defs.o can_id_list.o
 MSG_OBJS   =  packer_lcd.o packer_motor.o packer.o parser_tilt.o
-MISC_OBJS  =  vector_math.o ini_file.o
+MISC_OBJS  =  vector_math.o ini_file.o super_string.o
 FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 APP_CPP_OBJS	= instant_main.o string_util.o 
 IPC_OBJS    	= picamscan_memory.o sway_memory.o visual_memory.o audio_memory.o \

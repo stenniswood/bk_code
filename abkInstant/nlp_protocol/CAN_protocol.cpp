@@ -17,7 +17,7 @@
 #include "CAN_memory.h"
 #include "CAN_util.h"
 #include "GENERAL_protocol.hpp"
-#include "CAMERA_device.hpp"
+//#include "CAMERA_device.hpp"
 //#include "thread_control.h"
 #include "CAN_protocol.hpp"
 #include "nlp_extraction.hpp"
@@ -126,7 +126,7 @@ static char amon_command[] = "sudo /home/pi/bk_code/amonitor/amon";
 static char amon_command[] = "sudo /home/steve/bk_code/amonitor/amon";
 #endif
 
-static int start_amon() 
+int start_amon() 
 {
     int pid;
     switch (pid=fork()) {
