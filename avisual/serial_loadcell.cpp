@@ -26,6 +26,7 @@
 // For both feet combined!
 struct stLoadCellReading sql_data;
 
+
 LoadCell_SerialInterface::LoadCell_SerialInterface()
 {
 	Initialize();
@@ -483,9 +484,10 @@ void LoadCell_SerialInterface::setup_serial_port(int baud)
 	_fd = open(_cl_port, O_RDWR | O_NONBLOCK);
 
 	if (_fd < 0) {
-		printf("Error opening serial port \n");
+		printf("Error opening serial port: %s \n",_cl_port);
 		free(_cl_port);
-		exit(1);
+		//exit(1);
+		_cl_port = NULL;
 	}
 
 	bzero(&newtio, sizeof(newtio)); /* clear struct for new port settings */
@@ -551,7 +553,7 @@ static void print_args(int argc, char *argv[])
 
 int LoadCell_SerialInterface::serial_loadcell_main(int argc, char * argv[])
 {
-	printf("Linux serial test app\n");
+	printf("Linux Loadcell serial app\n");
 	//print_args( argc, argv );	
 	//process_options(argc, argv);	
 
@@ -573,6 +575,8 @@ int LoadCell_SerialInterface::serial_loadcell_main(int argc, char * argv[])
 	} else {
 		setup_serial_port(baud);
 	}
+	if (_cl_port==NULL)
+		return -1;
 
 	if (_cl_single_byte >= 0) {
 		unsigned char data[2];
