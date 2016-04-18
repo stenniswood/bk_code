@@ -24,7 +24,9 @@ INC		 +=	 ./threads/ ./nlp_protocol/ ./nlp_adrenaline/ ./voice/ ./util/ ./nlp_co
 			 /home/pi/bk_code/abkInstant/  /home/pi/raspicam/interface  \
 			 /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/
 SELF_INC   = ../../abkInstant/ ./ ../
-INC += $(SELF_INC)
+MYSQL_INC  = /usr/include/mysql/
+INC += $(SELF_INC) + $(MYSQL_INC)
+
 #			  /opt/vc/include/interface/vcos/pthreads/
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 		 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
@@ -67,7 +69,7 @@ NLP_PROTOCOL_OBJS = GENERAL_protocol.o	CAN_protocol.o	GPIO_protocol.o	\
 	AUDIO_protocol.o	CAMERA_protocol.o FILE_protocol.o	IMAGE_protocol.o  \
 		HMI_protocol.o	AUDIO_interface.o package_commands.o math_protocol.o calendar_protocol.o \
 		robot_legs_protocol.o robot_arms_protocol.o self_identity.o SEQUENCER_protocol.o easter_eggs_protocol.o \
-		ThreeD_object_protocol.o
+		ThreeD_object_protocol.o ordering_protocol.o specific_restaurants.o 
 
 NLP_ADRENALINE_OBJS  =	 Adrenaline_nlp.o     	Adren_bigmotor_talk.o  		\
 	Adren_lcd_talk.o     Adren_pwm_talk.o	 Adren_analog_talk.o  		\
