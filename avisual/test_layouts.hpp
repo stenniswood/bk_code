@@ -64,7 +64,7 @@ void init_battleships( );
 
 extern LoadCellView* loadcell_left_foot;
 extern LoadCellView* loadcell_right_foot;
-
+extern GyroView* gyro_view;
 
 
 // for test only:

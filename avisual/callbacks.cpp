@@ -36,23 +36,19 @@
 #include "listbox.hpp"
 //#include "robot.hpp"
 #include "button_array_gui.hpp"
+#include "GyroViewI.hpp"
+#include "test_layouts.hpp"
 
-
-BOOL ShowAccelerometerData 	= TRUE;
-BOOL ShowGyroData 			= TRUE;
-BOOL ShowMagnetData 		= TRUE;
-BOOL ShowCANData 			= TRUE;
 
 int DisplayNum	 = 1;
 
-int count_accel  = 0;
-int count_gyro   = 0;
-int count_magnet = 0;
 int count_samples= 0;
 int UpdateDisplaySemaphore=0;
 
 //BoardList 			bl;
 extern ListBox  	MyBoardList;
+
+#define Debug 1
 
 /************************* WATCH OUT **************************
 For re-entrant code.  These routines occur during the CAN_isr()
@@ -72,20 +68,6 @@ BOOL callback_board_presence( struct sCAN* mMsg )
 	// goes thru robot to board_list_oop, so this call back is no longer needed!
 }
 
-// This function delegates out to various sub callbacks.
-// based upon the CAN Msg ID
-BOOL callback_main( struct sCAN* mMsg )
-{
-	//printf("Main Callback!\n");
-	//print_message(mMsg);
-	BOOL retval = FALSE;
-	//Onesimus.distribute_CAN_msg( mMsg );	
-	if (retval==FALSE)
-		retval = motor_report_callback( mMsg );		// updates Gui
-	if (retval==FALSE)
-		retval = button_board_callback( mMsg );
-	return retval;
-}
 
 BOOL motor_report_callback( struct sCAN* mMsg )
 {
@@ -151,55 +133,14 @@ BOOL button_board_callback( struct sCAN* mMsg )
 	return FALSE;
 }
 
-
-BOOL callback_tilt_reading( struct sCAN* mMsg )
+void tilt_sensor_update_gui()
 {
-	byte 	result;
-	byte 	junk_count=0;
-
-	BOOL retval = FALSE;
-	switch (mMsg->id.group.id)
-	{
-/*	case ID_ACCEL_XYZ : 
-		count_accel++;
-		parse_accel_msg	(mMsg);		
-		if (ShowAccelerometerData)				
-			print_raw( mMsg, &RawxyzAccel, ShowCANData );
-		process_accel	(ShowAccelerometerData);
-		if (ShowAccelerometerData) 	printf("\n");
-
-		// For Histogram reporting:		
-		sf1.set_ab( AccelAngularPosition.rx );
-		ds_tiltx.shift_add( AccelAngularPosition.rx );
-		ds_tilty.shift_add( AccelAngularPosition.ry );		
-		retval= TRUE;
-		break;
-	case ID_GYRO_XYZ : 
-		count_gyro++;
-		parse_gyro_msg	(mMsg); 
-		if (ShowGyroData)	
-			print_raw(mMsg, &RawxyzGyro, ShowCANData);
-		process_gyro	(ShowGyroData);		
-		if (ShowGyroData) 							printf("\n");
-		retval=TRUE;
-		break;
-	case ID_MAGNET_XYZ : 
-		count_magnet++;
-		parse_magnet_msg(mMsg);
-		if (ShowMagnetData)	
-			print_raw(mMsg, &RawxyzMagnet, ShowCANData);
-		process_magnet	(ShowMagnetData);
-		if (ShowMagnetData) 						printf("\n");
-		retval= TRUE;
-		break; 	
-	default:
-		retval= FALSE;
-		break;	*/
+	if (gyro_view) {
+		dprintf("setting roll/pitch to <%6.2f,%6.2f>\n", AccelAngularPosition.rx, AccelAngularPosition.ry );
+		gyro_view->set_pitch_angle_deg( AccelAngularPosition.rx );
+		gyro_view->set_roll_angle_deg ( AccelAngularPosition.ry );
 	}
-
-	return retval;
 }
-
 
 BOOL callback_instance_catcher( struct sCAN* mMsg )
 {
@@ -213,3 +154,23 @@ BOOL callback_instance_catcher( struct sCAN* mMsg )
 	return retval;
 }
 
+
+
+// This function delegates out to various sub callbacks.
+// based upon the CAN Msg ID
+BOOL callback_main( struct sCAN* mMsg )
+{
+	//print_message(mMsg);
+	BOOL handled = FALSE;
+	//Onesimus.distribute_CAN_msg( mMsg );	
+	//BOOL callback_board_presence( struct sCAN* mMsg );
+	
+	if (handled==FALSE)
+		handled = motor_report_callback( mMsg );		// updates Gui
+	if (handled==FALSE)
+		handled = button_board_callback( mMsg );
+	if (handled==FALSE)
+		handled = callback_tilt_reading( mMsg );
+			
+	return handled;
+}

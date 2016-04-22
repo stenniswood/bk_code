@@ -122,20 +122,55 @@ void 	GyroView::set_width_height  	 ( int Width, int Height 		)
 	calc_metrics();	
 }
 
+/*
+Given:  b & r & m
+
+Circle:		x^2 + y^2 = r^2
+Line  :     y = m*x + b
+Substitute:  x^2 + m^2*x^2 + 2*b*m*x  = r^2 - b^2 = - K1
+			(1+m^2)*x^2 + 2*b*m*x + K1 = 0 
+			a* x^2 + B * x + K1 = 0
+	Two roots:
+			x1 = (-B + sqrt( B*B - 4*a*K1)) / (2*a);
+			x2 = (-B - sqrt( B*B - 4*a*K1)) / (2*a);			
+*/
+void GyroView::find_circle_intersection( float mSlope, float mIntercept, float& mX, float& mY, bool mPositiveRoot )
+{
+	float K1 = -(m_radius * m_radius - mIntercept*mIntercept);
+	float a = 1 + mSlope*mSlope;
+	float B = 2*mIntercept*mSlope;
+	
+	float root1_x = (-B + sqrt( B*B - 4*a*K1 )) / (2*a);
+	float root2_x = (-B - sqrt( B*B - 4*a*K1 )) / (2*a);
+
+	float root1_y = mSlope * root1_x + mIntercept;
+	float root2_y = mSlope * root2_x + mIntercept;
+
+	if (mPositiveRoot)
+	{  mX = root1_x;  mY=root1_y; }
+	else
+	{  mX = root2_x;  mY=root2_y; }
+}
+
 void 	GyroView::draw_line	(  )
 {  
 	Stroke_l ( 0xFFFF7F00 );
 	Fill_l   ( 0xFFFF7F00 );
 
-	float y_offset = m_radius * sin(m_pitch_angle_radians);
+	float y_offset = m_radius * sin(m_pitch_angle_radians);		// Intercept
+	float Slope    = 1 * sin(m_roll_angle_radians);				// Slope
 
-	float x1 = m_center_x + m_delta_x;
-	float x2 = m_center_x - m_delta_x;
-
+	float x1 = 0; //m_center_x + m_delta_x;
 	float y1 = y_offset+ m_center_y + m_delta_y;
-	float y2 = y_offset+ m_center_y - m_delta_y;
+	find_circle_intersection( Slope, y_offset, x1,y1, true );
 	
-	Line(x1,y1, x2,y2);	
+	float x2 = 0; //m_center_x - m_delta_x;
+	float y2 = y_offset+ m_center_y - m_delta_y;
+	find_circle_intersection( Slope, y_offset, x2,y2, false );
+
+	printf("GyroLine: %4.1f,%4.1f;  %4.1f,%4.1f; \n", x1,y1, x2,y2 );
+	//printf("GyroCenter: %4.1f,%4.1f \n", m_center_x, m_center_y );
+	Line(m_center_x+x1, m_center_y+y1, m_center_x+x2, m_center_y+y2);	
 }
 
 void 	GyroView::draw_circle (  )
@@ -143,13 +178,23 @@ void 	GyroView::draw_circle (  )
 	Stroke_l ( 0xFFFFFFFF );
 	Fill_l   ( 0xFF3f0000 );
 	Circle(m_center_x, m_center_y, m_radius*2);	  	// takes a diameter!
-	
+}
+
+void 	GyroView::draw_info(  )
+{
 	// DRAW TEXT:
 	char title[50];
-	sprintf(title, "Angle: %5.1f", 180*m_roll_angle_radians/3.1415 ); 	
-//	Stroke_l ( 0xFFFFFFFF );
+	float roll  = degrees( m_roll_angle_radians );
+	float pitch = degrees( m_pitch_angle_radians);
+	float yaw   = degrees( m_heading );
+	
+	sprintf(title, "Roll, Pitch, yaw:" );
+	Stroke_l ( 0xFF000000 );
 	Fill_l   ( 0xFFFFFFFF );	
-	TextMid( m_center_x, bottom+0.1*height, title, SerifTypeface, text_size );	
+	TextMid( m_center_x, bottom+0.12*height, title, SerifTypeface, text_size );	
+	
+	sprintf(title, "<%5.1f, %5.1f, %5.1f>", roll, pitch, yaw );
+	TextMid( m_center_x, bottom+0.12*height-text_size*1.2, title, SerifTypeface, text_size );	
 }
 
 void 	GyroView::draw_heading(  )
@@ -168,15 +213,31 @@ void 	GyroView::draw_heading(  )
 	Line(h_center_x, h_center_y, x1, y1);
 }
 
+
+int GyroView::handle_incoming_msg( struct sCAN* msg )
+{
+	
+}
+
 int   	GyroView::draw   	(  )
 {  
+	Control::draw();
+	
 	// DRAW BOUNDING BOX:
 	Stroke_l ( background_color );
 	Fill_l   ( background_color );
 	Roundrect( left, bottom, width, height, 15.0, 15.0);
 
+	// DRAW TEXT:
+	char title[50];
+	sprintf(title, "Gyro/Accelerometer" ); 	
+	Stroke_l ( 0xFFFF0000 );
+	Fill_l   ( 0xFFFFFFFF );	
+	TextMid( m_center_x, bottom+0.9*height, title, SerifTypeface, text_size );
+
 	draw_circle();
 	draw_line();
+	draw_info();
 	draw_heading();
 	return 1;
 }	

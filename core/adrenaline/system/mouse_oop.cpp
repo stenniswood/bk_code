@@ -18,26 +18,41 @@ static int 		mouse_fd;
 static int 		quitState  = 0;
 #define    	CUR_SIZ  16				// cursor size, pixels beyond centre dot
 
-#define DEBUG 0
+#define Debug 0
+pthread_t inputThread_id;
 
+//extern Mouse* mouse;
+//extern DraggerGesture mouse; 
+extern Mouse mouse;
 
 // eventThread reads from the mouse input file
 static void* eventThread(void *arg) 
 {
-	if (DEBUG) printf("STarting eventThread...\n");
+	dprintf("eventThread(): \n");
 	char counter=0;
 	char dev_name[40];
 	
-	Mouse* M = (Mouse*) arg;	
+	//Mouse* M = (Mouse*) arg;	
+	Mouse* M = (Mouse*) &mouse;
+	
+	dprintf("Mouse M=%p\n", M );
+	dprintf("Mouse mode=%d\n", M->mouse_mode );
+	
 	// Open mouse driver
 //	if ((mouse_fd = open("/dev/input/mouse0", O_RDONLY)) < 0) {	
-	for (counter=0; counter<9; counter++)
+	for (counter=9; counter>0; counter--)
 	{
+		//sprintf( dev_name, "/dev/input/event2");		
 		sprintf( dev_name, "/dev/input/event%d", counter );		
+		//sprintf( dev_name, "/dev/input/mouse%d", counter );		
 		mouse_fd = open( dev_name, O_RDONLY );
-		if (mouse_fd >= 0)
+		if (mouse_fd >= 0) {
+			dprintf( "Opened Mouse:  %s\n", dev_name );
+			//M->show_mouse();			
 			break;
-		if (counter==9) {
+		} 
+		
+		if (counter==0) {
 			fprintf(stderr, "Error opening Mouse!\n");
 			quitState = 1;
 			return &quitState;
@@ -50,15 +65,17 @@ static void* eventThread(void *arg)
 	while (1) {
 		M->m_prev_ev_time = M->mouse_ev.time;
 		read(mouse_fd, &(M->mouse_ev), sizeof(struct input_event));
-		M->print_event_info();		
+		M->print_event_info();	
+		//M->hide_mouse();
 		M->handle_event();
-		if (DEBUG) printf("\n");
+
+		dprintf("\n");
 	}
 }
 
 void Mouse::print_event_info()
 {
-	if (DEBUG==0) return;
+	if (Debug==0) return;
 
 	if (mouse_ev.type == EV_SYN)
 		printf("EV_SYN:");
@@ -68,7 +85,7 @@ void Mouse::print_event_info()
 		printf("EV_ABS:");	
 	if (mouse_ev.type == EV_KEY)
 		printf("EV_KEY:");
-	printf("t=%d, c=%d, v=%d\t", mouse_ev.type, mouse_ev.code, mouse_ev.value );
+	dprintf("t=%d, c=%d, v=%d\t", mouse_ev.type, mouse_ev.code, mouse_ev.value );
 }
 
 void Mouse::handle_event()
@@ -91,21 +108,21 @@ void Mouse::handle_event()
 		//      mouse_ev.time.tv_usec,mouse_ev.type,mouse_ev.code,mouse_ev.value);
 		if (mouse_ev.code == BTN_LEFT) {
 			left = UNHANDLED_EVENT | (mouse_ev.value & 0x01);
-			if (DEBUG) printf("Left button: evalue=%d\n", mouse_ev.value );
+			if (Debug) printf("Left button: evalue=%d\n", mouse_ev.value );
 		}
 		if (mouse_ev.code == BTN_RIGHT) {
 			right = UNHANDLED_EVENT | (mouse_ev.value & 0x01);
-			if (DEBUG) printf("Right button: value=%d\n", mouse_ev.value);
+			if (Debug) printf("Right button: value=%d\n", mouse_ev.value);
 		}
 	} else 	if (mouse_ev.type == EV_SYN) {
 		for (int f=0; f<m_num_fingers_down; f++) {
 			m_finger_history[f].push_back( m_fingers[f] );
-			if (DEBUG) printf("xy %d = <%6.2f, %6.2f> %d 53:54 \t", f, m_fingers[f].x, m_fingers[f].y, m_finger_history[f].size() );		
+			if (Debug) printf("xy %d = <%6.2f, %6.2f> %d 53:54 \t", f, m_fingers[f].x, m_fingers[f].y, m_finger_history[f].size() );		
 		}
 	}
 	else
 	{
-		if (DEBUG) printf("Unknown type=%d; code=%d value=%d \n", mouse_ev.type, mouse_ev.code, mouse_ev.value);
+		if (Debug) printf("Unknown type=%d; code=%d value=%d \n", mouse_ev.type, mouse_ev.code, mouse_ev.value);
 	}	
 }
 
@@ -126,7 +143,7 @@ void Mouse::extract_finger_info()
 			break;
 	case 24: //printf("Absolute Touch event! Code=%d; value=%d\t", mouse_ev.code, mouse_ev.value );
 			m_fingers[m_finger].pressure = mouse_ev.value;
-			if (DEBUG) printf (" Pressure = %d  %6.2f\n", mouse_ev.value, m_fingers[m_finger].pressure);
+			if (Debug) printf (" Pressure = %d  %6.2f\n", mouse_ev.value, m_fingers[m_finger].pressure);
 			break;
 	case 53: /*  ABS_MT_POSITION_X  */
 			m_fingers[m_finger].x = mouse_ev.value;		
@@ -141,14 +158,14 @@ void Mouse::extract_finger_info()
 
 	case 57: //printf("Absolute Touch event! Code=%d; value=%d\t", mouse_ev.code, mouse_ev.value );
 			if (mouse_ev.value != -1) {
-				if (DEBUG) printf(" Finger Down.");
+				if (Debug) printf(" Finger Down.");
 				m_fingers[m_finger].state = 1;
 				//left = (UNHANDLED_EVENT|(0x01));
 				if (m_num_fingers_down==0) m_num_fingers_down = 1;
 				for (int f=0; f<10; f++)
 					m_finger_history[f].clear();
 			} else {
-				if (DEBUG) printf(" Finger Released!");
+				if (Debug) printf(" Finger Released!");
 				m_fingers[m_finger].state = 0;
 				//left = UNHANDLED_EVENT | (0);
 				m_num_fingers_down = 0;
@@ -159,47 +176,42 @@ void Mouse::extract_finger_info()
 			m_finger = mouse_ev.value;
 			if ((m_finger+1) > m_num_fingers_down)
 				m_num_fingers_down = m_finger+1;			
-			if (DEBUG) printf(" Finger # %d/%d", mouse_ev.value, m_num_fingers_down);			
+			if (Debug) printf(" Finger # %d/%d", mouse_ev.value, m_num_fingers_down);			
 			break;			
-	default: if (DEBUG) printf("Absolute Touch event! Code=%d; value=%d", mouse_ev.code, mouse_ev.value ); 
+	default: if (Debug) printf("Absolute Touch event! Code=%d; value=%d", mouse_ev.code, mouse_ev.value ); 
 			break;			
-	}
-	//printf("\n");
-	
+	}	
 	if ((received & 0x30)==0x30) {		
 		received = (received & 0x0F);
 	}
 	//printf(" Fingers %d \n", m_num_fingers_down);
 }
 
-
 Mouse::Mouse()
 {
-	if (DEBUG) printf("Mouse::Mouse()\n");
-	Initialize();
+	dprintf("Mouse::Mouse()\n");
 }
 Mouse::~Mouse()
 {
- 
 }
 
 void Mouse::load_mouse_images( )
 {
-
 }
 
 void Mouse::Initialize()
 { 
-	if (DEBUG) printf("Mouse::Initialize() ...\n");
+	if (Debug) printf("Mouse::Initialize() ...\n");
 	
 	m_finger 		= 0;
 	m_icon_selected = 0;
 	m_num_fingers_down = 0;
+	mouse_mode 		= 0;
 
 	// get these values from display manager.	
 	x=0;  y=0;
 	left=0;  middle=0; right=0;
-	max_x=0; max_y =0;
+	max_x=MainDisplay.screen_width; max_y =MainDisplay.screen_height;
 	
 	//int 	cur_sx, cur_sy, cur_w, cur_h;	// cursor location and dimensions
 	cur_saved=0;						// amount of data saved in cursor image backup
@@ -208,20 +220,20 @@ void Mouse::Initialize()
 	cursorx = max_x / 2;
 	cursory = max_y / 2;
 	cbsize = (CUR_SIZ * 2) + 1;
-
 	CursorBuffer = vgCreateImage(VG_sABGR_8888, cbsize, cbsize, VG_IMAGE_QUALITY_BETTER);
 	init_fingers();  
+
+	dprintf("Mouse this=%p\n", this );
 	
 	// CREATE A THREAD TO READ FROM DEVICE:
-	pthread_t inputThread;
-	int result = pthread_create(&inputThread, NULL, &eventThread, this);
+	int result = pthread_create( &inputThread_id, NULL, &eventThread, this );
 	if (result != 0) {
-		if (DEBUG) fprintf(stderr, "Unable to initialize the mouse\n");
+		if (Debug) fprintf(stderr, "Unable to initialize the mouse\n");
 	}
-} 	// int mouse_init(int screen_width, int screen_height){ }
+} 	
 
 // saveCursor saves the pixels under the mouse cursor
-void Mouse::save_pixels(VGImage CursorBuffer, int curx, int cury, int screen_width, int screen_height, int s) 
+void Mouse::save_pixels( int curx, int cury, int screen_width, int screen_height, int s) 
 {
 	int sx, sy, ex, ey;
 
@@ -232,7 +244,7 @@ void Mouse::save_pixels(VGImage CursorBuffer, int curx, int cury, int screen_wid
 
 	cur_sx = sx;
 	cur_w  = ex - sx;
-	sy     = cury - s;					   // vertical 
+	sy = cury - s;					// vertical 
 	ey = cury + s;
 	if (sy < 0)				sy = 0;
 	if (ey > screen_height)	ey = screen_height;
@@ -243,13 +255,21 @@ void Mouse::save_pixels(VGImage CursorBuffer, int curx, int cury, int screen_wid
 	vgGetPixels(CursorBuffer, 0, 0, cur_sx, cur_sy, cur_w, cur_h);
 	cur_saved = cur_w * cur_h;
 }
+void Mouse::save_mouse()
+{
+	save_pixels( cursorx, cursory, max_x, max_y, CUR_SIZ);
+}
 
 // restoreCursor restores the pixels under the mouse cursor
-void Mouse::restore_pixels( VGImage CursorBuffer )
+void Mouse::restore_pixels( )
 {
 	if (cur_saved) {
 		vgSetPixels(cur_sx, cur_sy, CursorBuffer, 0, 0, cur_w, cur_h);
 	}
+}
+void Mouse::hide_mouse()
+{
+	restore_pixels(); 
 }
 
 // circleCursor draws a translucent circle as the mouse cursor
@@ -258,6 +278,24 @@ void Mouse::circleCursor(int curx, int cury, int width, int height, int s) {
 	Circle(curx, cury, s);
 	Fill(255, 0, 0, 1);
 	Circle(curx, cury, 2);
+}
+// circleCursor draws a translucent circle as the mouse cursor
+void Mouse::crosshairsCursor(int curx, int cury, int width, int height) 
+{
+	Fill(255, 255, 0, 0.50);
+	Line(curx-width, cury, curx+width, cury );
+	Fill(255, 0, 0, 1);
+	Line(curx, cury-height, curx, cury+height );	
+}
+// for text entry:
+void Mouse::carretCursor(int curx, int cury, int width, int height) 
+{
+	Fill(255, 255, 0, 0.50);
+	float hat_length = width/3;
+	Line(curx-hat_length, cury-height, curx+hat_length, cury-height );
+	Line(curx-hat_length, cury+height, curx+hat_length, cury+height );
+	Fill(255, 0, 0, 1);
+	Line(curx, cury-height, curx, cury+height );	
 }
 
 void Mouse::init_fingers( )
@@ -272,17 +310,14 @@ void Mouse::init_fingers( )
 	}
 }
 
+
 int	Mouse::time_slice()
 {
 	if (x != cursorx || y != cursory) 	// if the mouse moved...
-	{
-		restore_pixels(CursorBuffer);
+	{		
+		hide_mouse();
 		cursorx = x;		// save for comparison on next timeslice.
 		cursory = y;
-		save_pixels(CursorBuffer, cursorx, cursory, max_x, max_y, CUR_SIZ);
-
-		// draw cursor:
-		//draw_cursor(cursorx, cursory, mouse.max_x, mouse.max_y, CUR_SIZ);
 		show_mouse();
 	}
 	if (left & UNHANDLED_EVENT)
@@ -302,28 +337,25 @@ int	Mouse::time_slice()
 void Mouse::close_fd()
 { 
 	close(mouse_fd);
-	restore_pixels(CursorBuffer);			   // not strictly necessary as display will be closed
+	restore_pixels();			   // not strictly necessary as display will be closed
 	vgDestroyImage(CursorBuffer);			   // tidy up memory
 	finish();					   	// Graphics cleanup
 }
 
-void Mouse::hide_mouse()
-{
-	restore_pixels(CursorBuffer); 
-}
-
 void Mouse::show_mouse()
 {
+	save_mouse();
+	dprintf("show_mouse:  mode=%d\n",mouse_mode);
+	switch (mouse_mode)
+	{
 	//void draw_cursor(int curx, int cury, int width, int height, int s) 
-	circleCursor(cursorx, cursory, max_x, max_y, CUR_SIZ);
+	case 0 : circleCursor(cursorx, cursory, max_x, max_y, CUR_SIZ);		break;
+	case 1 : crosshairsCursor(cursorx, cursory, max_x, max_y);			break;	
+	case 2 : carretCursor(cursorx, cursory, max_x, max_y);				break;
+	default: break;
+	}
 }
 
-void Mouse::save_mouse()
-{
-	// draw cursor:
-	save_pixels(CursorBuffer, cursorx, cursory, max_x, max_y, CUR_SIZ);
-	show_mouse();
-}
 
 void Mouse::select_mouse_image(int mIndex)
 {

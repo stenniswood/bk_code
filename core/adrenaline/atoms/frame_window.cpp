@@ -19,7 +19,7 @@
   
 #include "frame_window.hpp"
 
-#define Debug 1
+#define Debug 0
  
 FrameWindow::FrameWindow ( )
 :Window()

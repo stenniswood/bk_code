@@ -33,7 +33,7 @@
 #include "fuse_log.h"
 #include "CAN_Interface.h"
 #include "can_txbuff.h"
-
+#include "callbacks.hpp"
 
 #define cast_f  (struct fXYZ  *)
 #define cast_fr (struct frXYZ *)
@@ -54,12 +54,14 @@ struct fXYZ  BestLinearAcceleration;	// Holds the best estimate of rate of turn.
 
 float  LSE_Gain=99;						// Gain factor (for moving weighted average)
 
+int count_accel  = 0;
+int count_gyro   = 0;
+int count_magnet = 0;
 
-BOOL ShowAccelerometerData 	= TRUE;
-BOOL ShowGyroData 			= TRUE;
+BOOL ShowAccelerometerData 	= FALSE;
+BOOL ShowGyroData 			= FALSE;
 BOOL ShowMagnetData 		= TRUE;
 BOOL ShowCANData 			= TRUE;
-
 BOOL Classify 				= FALSE;
 
 struct timeval fusion_start, fusion_end;
@@ -84,6 +86,65 @@ void fuse_init()
 	fuse_magnet_init();	
 }
 
+
+/* PROCESS FLOW :
+		avisual_main.cpp		Sets up callbacks to this function.
+		callbacks.cpp			This function.
+		parser_tilt.c			Extracts raw xyz (parse_accel_msg, parse_gyro_msg, and parse_magnet_msg )
+		fuse_accel.c			Processes the accelerometer independantly.
+		fuse_gyro.c				Processes the gyro independantly.
+
+*/
+BOOL callback_tilt_reading( struct sCAN* mMsg )
+{
+	byte 	result;
+	byte 	junk_count=0;
+
+	BOOL retval = FALSE;
+	switch (mMsg->id.group.id)
+	{
+	case ID_ACCEL_XYZ : 
+		count_accel++;
+		parse_accel_msg	(mMsg);		
+		if (ShowAccelerometerData)				
+			print_raw( mMsg, &RawxyzAccel, ShowCANData );
+			
+		process_accel	(ShowAccelerometerData);
+		if (ShowAccelerometerData) 	printf("hello\n");
+
+		tilt_sensor_update_gui();
+		
+		// For Histogram reporting:		
+		/*sf1.set_ab( AccelAngularPosition.rx );
+		ds_tiltx.shift_add( AccelAngularPosition.rx );
+		ds_tilty.shift_add( AccelAngularPosition.ry );		*/
+		retval= TRUE;
+		break;
+	case ID_GYRO_XYZ : 
+		count_gyro++;
+		parse_gyro_msg	(mMsg); 
+		if (ShowGyroData)	
+			print_raw(mMsg, &RawxyzGyro, ShowCANData);
+		process_gyro	(ShowGyroData);		
+		if (ShowGyroData) 							printf("\n");
+		retval=TRUE;
+		break;
+	case ID_MAGNET_XYZ : 
+		count_magnet++;
+		parse_magnet_msg(mMsg);
+		if (ShowMagnetData)	
+			print_raw(mMsg, &RawxyzMagnet, ShowCANData);
+		process_magnet( ShowMagnetData );
+		if (ShowMagnetData) 						printf("\n");
+		retval= TRUE;
+		break; 	
+	default:
+		retval= FALSE;
+		break;	
+	}
+
+	return retval;
+}
 
 
 

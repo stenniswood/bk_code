@@ -64,8 +64,6 @@ public:
 
 	LoadCellView*	foot_view;
 	bool			left_foot;
-
-
 };
 
 

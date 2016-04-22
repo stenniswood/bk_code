@@ -508,28 +508,27 @@ void init_gyro_view()
 
 LoadCellView* loadcell_left_foot=NULL;
 LoadCellView* loadcell_right_foot=NULL;
+GyroView* gyro_view=NULL;
 
 void init_loadcell_view()
 {
-	int w = MainDisplay.screen_width /2. ;
-	loadcell_left_foot  = new LoadCellView(50, w, 400, 50    );
-	loadcell_right_foot = new LoadCellView(w+20, w*2, 400, 50);
+	int w; // = MainDisplay.screen_width /2.;
+	w=200;
+	loadcell_left_foot  = new LoadCellView(50,   w+50,   400, 50 );
+	loadcell_right_foot = new LoadCellView(w+70, w+70+w, 400, 50 );
+	loadcell_left_foot->set_name( "left" );
+	loadcell_right_foot->set_name("right");
 
-	// 200 lbs / 4 = 50lbs nominal
-	loadcell_left_foot->set_sensor_value( 0, 75 ); 	// heel left
-	loadcell_left_foot->set_sensor_value( 1, 65 );
-	loadcell_left_foot->set_sensor_value( 2, -25 ); 	// toe left
-	loadcell_left_foot->set_sensor_value( 3, -30 );
-
-	loadcell_right_foot->set_sensor_value( 0, 50 );
-	loadcell_right_foot->set_sensor_value( 1, 60 );
-	loadcell_right_foot->set_sensor_value( 2, 25 ); 
-	loadcell_right_foot->set_sensor_value( 3, 20 ); 	
+	gyro_view = new GyroView(50, 470, 800, 500 ); 
+	gyro_view->set_roll_angle_deg   ( 30 );
+	gyro_view->set_pitch_angle_deg  ( 30 );
+	gyro_view->set_heading_angle_deg( 30 );
 	
+	// 200 lbs / 4 = 50lbs nominal
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( loadcell_left_foot  );
-	MainDisplay.add_object( loadcell_right_foot );
-	
+	MainDisplay.add_object( loadcell_right_foot );	
+	MainDisplay.add_object( gyro_view );
 }
 
 ScrollBar My_sb;
@@ -760,3 +759,12 @@ void print_test_list()
 	default: 	break;
 	}
 } */
+/*  Some dummy values : 
+	loadcell_left_foot->set_sensor_value( 0, 75 ); 	// heel left
+	loadcell_left_foot->set_sensor_value( 1, 65 );
+	loadcell_left_foot->set_sensor_value( 2, -25 ); 	// toe left
+	loadcell_left_foot->set_sensor_value( 3, -30 ); */
+/*	loadcell_right_foot->set_sensor_value( 0, 50 );
+	loadcell_right_foot->set_sensor_value( 1, 60 );
+	loadcell_right_foot->set_sensor_value( 2, 25 ); 
+	loadcell_right_foot->set_sensor_value( 3, 20 ); 	*/

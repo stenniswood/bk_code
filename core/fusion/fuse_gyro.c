@@ -165,9 +165,9 @@ void process_gyro( BOOL ShowData )
 	// TIME STAMP:
 	prev_gyro_timestamp = latest_gyro_timestamp;
 	gettimeofday(&latest_gyro_timestamp, NULL);
-	time_delta = calc_time_delta( &prev_gyro_timestamp, &latest_gyro_timestamp );
+	gyro_time_delta = calc_time_delta( &prev_gyro_timestamp, &latest_gyro_timestamp );
 	if (ShowGyroData)
-		printf("*** GYRO TIME DELTA=%10.4f\n", time_delta );
+		printf("*** GYRO TIME DELTA=%10.4f\n", gyro_time_delta );
 	//calc_gyro_time_delta(DEBUG);
 
 	// Scale & Subtract offset:

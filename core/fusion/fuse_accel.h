@@ -19,7 +19,7 @@ void calc_stationary_angles ( struct fXYZ* mRaw );
 
 char compare_to_1g			( struct fXYZ* mVector, float mMagnitudeThreshold);
 //char compare_to_1g		( struct fXYZ* mVector, float mThreshold, BOOL mShowData);
-void process_accel			( BOOL ShowData 						);
+void process_accel			( BOOL ShowData );		// Output:  AccelAngularPosition (Pitch,Roll)
 
 void print_accel_angles_prev();
 void print_accel_angles();

@@ -22,6 +22,7 @@
 struct fXYZ RawxyzAccel;
 struct fXYZ RawxyzGyro ;
 struct fXYZ RawxyzMagnet;
+
 struct tXYZ Rawxyz;
 
 

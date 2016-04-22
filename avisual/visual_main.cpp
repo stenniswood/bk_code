@@ -47,7 +47,9 @@
 #include "home_screen.hpp"
 #include "can_sql_logger.hpp"
 #include "serial_loadcell.hpp"
+#include "CAN_dispatcher.hpp"
 
+#include "fuse_ag.h"
 /*
 	What's displayed here is going to be under the control of bkInstant.
 	We'll start by showing the incoming text.
@@ -56,7 +58,6 @@
 extern int DisplayNum;
 
 #define Debug 0
-#define dprintf if (Debug) printf
 
 void* serial_interface(void* );
 pthread_t serial_leftfoot_thread_id;
@@ -142,15 +143,36 @@ int Last_Retrieved_Number=0;
 
 DraggerGesture mouse; 
 
+void can_interface()
+{
+	static int	m_rx_tail =0;
+	static int	m_rx_tail_laps =0;
+	struct sCAN* ptr=NULL;
+	
+	// Re-check availability!
+	if (can_connected==FALSE)		
+		can_connected = can_connect_shared_memory(FALSE);
+	if (can_connected)
+		while (shm_isRxMessageAvailable( &m_rx_tail, &m_rx_tail_laps) )
+		{	
+			ptr = shm_GetNextRxMsg (&m_rx_tail, &m_rx_tail_laps);
+			if (ptr) 
+			{
+				dispath_to_all_can_receivers(ptr);
+			}
+		}
+}
+
 void gui_interface()
 {
 	static int left_mouse_button_prev  = 0;
 	static int right_mouse_button_prev = 0;
 
+
 	// HANDLE MOUSE EVENTS :
-	int result = mouse.time_slice();	//int result = mouse_timeslice(); 	
+	//MainDisplay.start_screen(); 	
+	int result = mouse.time_slice();
 	//printf(" mouse.time_slice()  result =%d\n", result );
-	
 	MainDisplay.end_screen(); 
 
 	Control* object_clicked = NULL; 
@@ -290,7 +312,7 @@ void* serial_interface(void* mParam)				// serial port used for arduino connecti
 	sprintf(read_,     "ascii");
 	sprintf(no_write_, "0");
 
-	printf("mFoot=%p;  left_foot=%p\n", mFoot, &left_foot);
+	//printf("mFoot=%p;  left_foot=%p\n", mFoot, &left_foot);
 	if (mFoot == &left_foot)	{
 		sprintf(device_,   "/dev/ttyACM0");
 		mFoot->_cl_rx_dump = 1;
@@ -408,16 +430,19 @@ int main( int argc, char *argv[] )
 	//audio_file_open();
 	//play_waveform( &dWave, 1 );
 	//audio_play();
-
+	mouse.Initialize(); 
+	fuse_init();
+	CAN_add_rx_callback( callback_tilt_reading );
+	//CAN_add_rx_callback( callback_main );
+	
 	printf("================= Main Loop ==========================\n");	
 	while (1)
-	{	
-		
+	{		
 		ethernet_interface();
-
 		gui_interface();
+		can_interface();
 
-		MainDisplay.idle_tasks();	
+		MainDisplay.idle_tasks();		
 		//printf("done with MainDisplay.idle_tasks()\n");
 		
 		// Want to be able to open the screen leaving everything as is.

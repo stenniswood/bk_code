@@ -9,7 +9,6 @@ extern "C" {
 #include "bk_system_defs.h"
 #include "can_eid.h"
 
-
 #define LED2 		8
 #define LED3 		7
 
@@ -37,13 +36,6 @@ void can_setup_receive_mob	( byte mMobNumber,  short mMaskLow, short mMaskHigh, 
 void setMask( uint8_t mByte, long int mMask );
 /* end not implemented */
 
-//Protected Functions:  
-//void print_interrupt_type(byte status);
-//void print_register_name( uint8_t mAddress )
-//void print_tx_register_name( uint8_t mAddress )
-//float print_baud_prescaler( int mCNF1 )
-//void print_bit_timing( byte mCNF2, byte mCNF3, float tq )
-//void print_speed( int mSpeed )
 
 BOOL 	CAN_init(int mspeed, uint8_t mLoopbackMode );
 
@@ -188,3 +180,10 @@ void can_remove_instance_from_filter( byte mMOb_Number 			);
 
 #endif
 
+//Protected Functions:  
+//void print_interrupt_type(byte status);
+//void print_register_name( uint8_t mAddress )
+//void print_tx_register_name( uint8_t mAddress )
+//float print_baud_prescaler( int mCNF1 )
+//void print_bit_timing( byte mCNF2, byte mCNF3, float tq )
+//void print_speed( int mSpeed )

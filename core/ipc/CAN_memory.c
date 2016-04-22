@@ -388,11 +388,16 @@ Return :
 int can_connect_shared_memory(char mAllocate)
 {
 	BOOL available = is_CAN_IPC_memory_available();
-	if ((!available) && (mAllocate))  {
-		if (Debug) printf("can_connect_shared_memory() allocating.\n");
-		// First see if the memory is already allocated:
-	    //shmctl(can_segment_id, IPC_RMID, NULL);
-		// Now Re-allocate : 
+	if (available)  {
+		can_attach_memory();		
+		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+			return 0;
+		return 1;
+	} 
+	// Not Available:
+	if (mAllocate) {
+		dprintf("can_connect_shared_memory() allocating.\n");
+		// Now Allocate : 
 		int result = can_allocate_memory();
 		if (!result) 
 		{	printf("ERROR: can_connect_shared_memory() cannot allocate.\n");
@@ -402,12 +407,8 @@ int can_connect_shared_memory(char mAllocate)
 		can_fill_memory	 ();
 		CAN_save_segment_id(segment_id_filename);
 		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return 0;
-	} else  {
-		can_attach_memory();		
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return 0;
-	}
+			return 0;		
+	}	
 	return 1;
 }
 

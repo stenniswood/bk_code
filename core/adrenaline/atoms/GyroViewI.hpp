@@ -23,12 +23,17 @@ public:
 
 	virtual void 	Initialize			  	(				 );
 	void 			calc_metrics			( 				 );
-	void			print_info				(	);
-	virtual void 	set_width_height  	 	( int Width, int Height 		);
+	void			find_circle_intersection( float mSlope, float mIntercept, 
+											  float& mX, float& mY, bool mPositiveRoot );
+	int				handle_incoming_msg		( struct sCAN* msg );
+
+	void			print_info				(				 		);
+	virtual void 	set_width_height  	 	( int Width, int Height );
 		
 	void 			draw_line	(  );
 	void 			draw_circle (  );
 	void			draw_heading(  );
+	void			draw_info   (  );
 	virtual int   	draw   		(  );	
 	
 

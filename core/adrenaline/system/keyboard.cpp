@@ -32,7 +32,7 @@
 #define KEY_SPACING_COL 64
 #define KEY_SPACING_ROW 64
 
-#define Debug 1
+#define Debug 0
 
 
 void close_keyboard_cb( void* mKeyboard )

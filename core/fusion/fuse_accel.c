@@ -83,6 +83,8 @@ void fuse_accel_init()
 	This is direct result of the asin function.
 
 	Triangulation of readings with gravity (vertical down)
+INPUT :  Scaled 
+OUTPUT:  AccelAngularPosition 
 */
 void calc_stationary_angles( struct fXYZ* mRaw )
 {
@@ -148,6 +150,10 @@ void print_accel_velocity()
 		accel_time_delta, AccelAngularVelocity.rx, AccelAngularVelocity.ry, AccelAngularVelocity.rz );
 }
 
+/*	Subtract and divide by time elapsed. (Degrees per second)
+INPUT :  AccelAngularPosition & AccelAngularPositionPrev
+OUTPUT:  AccelAngularVelocity
+*/
 void compute_accel_angular_velocity()
 {
 	struct fXYZ tmpDelta;
@@ -164,7 +170,7 @@ void compute_accel_angular_velocity()
 /* 
 NAME:	process_accel()
 INPUT:  RawxyzAccel - Data from CAN msg which has been put into the float of the fXYZ structure
-OUTPUT: Result stored in file scope variable: MagnetAngularPosition
+OUTPUT: Result stored in file scope variable: AccelAngularPosition (Pitch,Roll) & AccelAngularVelocity
 DESCRIPTION: Calculates the dot product of the incoming measurement 
 		against the reference vector for each of the x=0, y=0, and
 		z=0 planes.
@@ -174,9 +180,9 @@ void process_accel( BOOL ShowData )
 	// TIME STAMP : 
 	prev_accel_timestamp = latest_accel_timestamp;
 	gettimeofday( &latest_accel_timestamp, NULL	);
-	accel_time_delta = calc_time_delta( &prev_accel_timestamp, &latest_accel_timestamp );
-	//if (ShowData)
-	//	printf("*** ACCEL TIME DELTA=%10.4f\n", accel_time_delta );
+	accel_time_delta = calc_time_delta( &prev_accel_timestamp, &latest_accel_timestamp );	
+	if (ShowData)
+		printf("*** ACCEL TIME DELTA=%10.4f\n", accel_time_delta );
 
 	// Update State Variables:
 	AccelAngularPositionPrev    = AccelAngularPosition;			

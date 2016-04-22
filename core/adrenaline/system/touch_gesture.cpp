@@ -25,15 +25,10 @@
 #define Debug 0
 
 
-/*float degrees( float mRad )
-{
-	return mRad * (180. / M_PI);
-}*/
-
 DraggerGesture::DraggerGesture()
 {  
 	if (Debug) printf("DraggerGesture::DraggerGesture()\n");
-	Initialize();
+	//Initialize();
 }
 
 /* this is a virtual function.  So when the base ctor gets called,
@@ -48,6 +43,7 @@ DraggerGesture::DraggerGesture()
 */
 void DraggerGesture::Initialize()
 {
+	Mouse::Initialize();
 	if (Debug) printf("DraggerGesture::Initialize() ...\n"); 
 	m_enlarge_ratio 		  = 1.0;
 	m_rotate_angle_relative	  = 0.;

@@ -67,7 +67,7 @@ char map_key(int code)
 /* If a real keyboard is plugged in (via usb) */
 void *Keyboard_eventThread(void *arg) 
 {
-	const char *dev = "/dev/input/by-path/platform-20980000.usb-usb-0:1.4.1:1.0-event-kbd";
+	const char *dev = "/dev/input/by-path/platform-20980000.usb-usb-0:1.2.1:1.0-event-kbd";
     ssize_t n;
     int fd;
 
@@ -100,7 +100,7 @@ void *Keyboard_eventThread(void *arg)
 				else shift_down = true;
 			} else if (keyboard_ev.value>=1  && keyboard_ev.value<=2)
 			{
-					if ((shift_down) && (Debug))  printf("shift down");
+					if (shift_down)  dprintf("shift down");
 					
 					ch = map_key(keyboard_ev.code);
 					MainDisplay.relay_key( ch );					

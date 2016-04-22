@@ -56,7 +56,7 @@ LDFLAGS += -lilclient -L$(SDKSTAGE)/opt/vc/lib/ -lGLESv2 -lEGL -lopenmaxil -lbcm
 DEPS   	   = 
 
 # OBJECT LISTS : 
-CAN_OBJS   = can_id_list.o 
+CAN_OBJS    = can_id_list.o 
 #CAN_Interface.o can_instance.o can_eid.o can_buff.o can_txbuff.o bk_system_defs.o 
 #MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
 # ipc_mem_bkinstant.o
@@ -69,8 +69,8 @@ AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   test_layouts.o test_combo_layouts.o client_list_control.o \
 			   test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
 			   power.o home_screen.o datalog_graph.o can_sql_logger.o \
-			   motor_gui.o serial_loadcell.o 
-APPS_OBJS   = 
+			   motor_gui.o serial_loadcell.o CAN_dispatcher.o
+APPS_OBJS      = 
 FILE_EDIT_OBJS = file_editor_app.o 
 VIDEO_APP_OBJS = video_app.o video.o 
 DRAW_APP_OBJS  = draw_app.o draw_canvas.o 
@@ -110,7 +110,7 @@ ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o calendar_entry.o
 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o legend.o
-#KINETIC_OBJS = 
+KINETIC_OBJS = balance.o 
 
 # APP CODE
 VOICE_OBJS 	= 
@@ -121,16 +121,17 @@ VOICE_OBJS 	=
 	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
 
 avisual: $(AVISUAL_OBJS) 					\
-		$(addprefix ./voice/, 				$(VOICE_OBJS)) 			\
-		$(addprefix ./kinetic/, 			$(KINETIC_OBJS)) 		\
+		$(addprefix ./voice/, 			$(VOICE_OBJS)) 			\
+		$(addprefix ../core/kinetic/, 		$(KINETIC_OBJS)) 		\
 		$(addprefix ./games/reversi/, 		$(REV_GAME_OBJS)) 		\
 		$(addprefix ./games/hearts/, 		$(HEARTS_GAME_OBJS)) 	\
-		$(addprefix ./games/, 				$(GAME_OBJS)) 			\
+		$(addprefix ./games/, 			$(GAME_OBJS)) 			\
 		$(addprefix ./games/blackjack/, 	$(BLACKJACK_GAME_OBJS)) \
 		$(addprefix ./games/card_core/, 	$(CARDCORE_GAME_OBJS)) 	\
-		$(addprefix ../core/misc/,			$(MISC_OBJS))  			\
+		$(addprefix ../core/misc/,		$(MISC_OBJS))  			\
 		$(addprefix /home/pi/openvg/,		$(VG_OBJS))  			\
 		$(addprefix ../core/hardware/,		$(HARDWARE_OBJS))		\
+		$(addprefix ../core/fusion/,		$(FUSE_OBJS))  			\
 		$(addprefix ../core/msg/,			$(MSG_OBJS))  			\
 		$(addprefix ../core/can/,			$(CAN_OBJS))			\
 		$(addprefix ../core/ipc/,			$(IPC_OBJS))			\

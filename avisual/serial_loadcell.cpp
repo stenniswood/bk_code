@@ -22,6 +22,7 @@
 #include "serial_loadcell.hpp"
 #include "can_sql_logger.hpp"
 
+#define Debug 0 
 
 // For both feet combined!
 struct stLoadCellReading sql_data;
@@ -84,23 +85,35 @@ void LoadCell_SerialInterface::dump_data(unsigned char * b, int count) {
 	for (i=0; i < count; i++) {
 		printf("%02x ", b[i]);
 	}
-
 	printf("\n");
 }
 
 void LoadCell_SerialInterface::parse_ascii_data()
 {	
 	static int counter = 0;
+	
 	// Data is in accum_buff:
 	int number=0;
-	char* ptr      = strstr( (char*)accum_buff, "left:" );
-	char* ptr_end  = strstr( (char*)ptr, ":lbs" );
-	if (ptr && ptr_end) 
+	left_foot = true;
+	char* ptr = strstr( (char*)accum_buff, "left:" );
+	if (ptr==NULL) {
+		ptr   = strstr( (char*)accum_buff, "right:" );
+		left_foot = false;
+	}
+	// viewing the LoadCellViews
+	if (left_foot)
+		foot_view = loadcell_left_foot;
+	else 
+		foot_view = loadcell_right_foot;
+	bool logging = (foot_view != NULL);		
+	char* ptr_end=NULL;
+	if (ptr)
+		ptr_end  = strstr( (char*)ptr, ":lbs" );
+	if (ptr && ptr_end && logging) 
 	{
 		int line_length = (ptr_end-ptr)-5;
 		strncpy( working_buff, ptr+5, line_length );
 		working_buff[line_length] = 0;
-		//printf("dump ascii:  work_buff=%s\n", working_buff);		
 		char** sensors = split( working_buff, ':', &number);
 		float sensor_v[4];
 
@@ -115,7 +128,7 @@ void LoadCell_SerialInterface::parse_ascii_data()
 		printf("\n"); */
 		
 		int si = 0;
-		if (!left_foot) 
+		if (!left_foot)
 			si = 4;
 		sql_data.sensor[si+0] = sensor_v[0];
 		sql_data.sensor[si+1] = sensor_v[1];
@@ -123,7 +136,7 @@ void LoadCell_SerialInterface::parse_ascii_data()
 		sql_data.sensor[si+3] = sensor_v[3];
 		if (!left_foot) {
 			if ((counter++ % 100)==0)  {				
-				printf("sql logging\n");
+				dprintf("sql logging\n");
 				sql_logger.add_loadcell( sql_data ); 
 			}
 		}						
@@ -138,27 +151,18 @@ void LoadCell_SerialInterface::parse_ascii_data()
 
 void LoadCell_SerialInterface::dump_data_ascii(unsigned char * b, int count)
 {
-	// viewing the LoadCellViews
-	if (left_foot)
-		foot_view = loadcell_left_foot;
-	else 
-		foot_view = loadcell_right_foot;
-	bool logging = (foot_view != NULL);
-	
 	int i;
-	//int len = min(count, WORKING_LENGTH);
 	b[count] = 0;		// need a null terminator for strstr function below.
 
 	for (i=0; i < count; i++) {
-		//printf("%c", b[i]);
+		dprintf("%c", b[i]);
 		if (b[i]=='\n') {
 			*last_pos = 0;
 			last_pos = accum_buff;		// start over!
-			if (left_foot) printf("L:"); else printf("R:");
+			//if (left_foot) dprintf("L:"); else dprintf("R:");
 			//printf( "accum_buff=%s\n", accum_buff );
 			// NOW PARSE BUFFER:
-			if (logging)		// viewing the LoadCellViews
-				parse_ascii_data();
+			parse_ascii_data();
 		} else if (b[i] != '\r') {
 			*last_pos = b[i];
 			last_pos++;
@@ -458,7 +462,7 @@ void LoadCell_SerialInterface::process_write_data()
 		ssize_t c = write(_fd, _write_data, _write_size);
 
 		if (c < 0) {
-			printf("write failed (%d)\n", errno);
+			dprintf("write failed (%d)\n", errno);
 			c = 0;
 		}
 
@@ -553,7 +557,7 @@ static void print_args(int argc, char *argv[])
 
 int LoadCell_SerialInterface::serial_loadcell_main(int argc, char * argv[])
 {
-	printf("Linux Loadcell serial app\n");
+	dprintf("Linux Loadcell serial app\n");
 	//print_args( argc, argv );	
 	//process_options(argc, argv);	
 
@@ -660,7 +664,7 @@ int LoadCell_SerialInterface::serial_loadcell_main(int argc, char * argv[])
 			// transmitting and the receive count equals the
 			// transmit count, suggesting a loopback test that has
 			// finished.
-			printf("No data within one second.\n");
+			printf("No data within one second. %s\n", _cl_port);
 		}
 
 		if (_cl_stats || _cl_tx_time || _cl_rx_time) {
