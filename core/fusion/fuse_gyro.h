@@ -5,7 +5,7 @@ extern "C" {
 
 
 extern struct frXYZ  GyroAdjusted;		// dps (after zero offset)
-extern struct frXYZ  GyroAngles;		// Integration
+extern struct frXYZ  GyroAngles;		// Integration Term (output)
 
 
 extern struct fXYZ AR_weight_gyro; 		// Angular Rate Weights 

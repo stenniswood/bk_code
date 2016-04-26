@@ -28,6 +28,7 @@
 #include "mouse_oop.hpp"
 #include "touch_gesture.hpp"
 #include "keyboard_dev.hpp"
+#include "GyroViewI.hpp"
 #include "test_layouts.hpp"
 
 #include <assert.h>
@@ -351,6 +352,11 @@ extern Wave dWave;
 	are only set when the Enable is.  maybe.		*/
 int main( int argc, char *argv[] )
 { 
+//	DLL_API 
+//  void DLL_CALLCONV FreeImage_Initialise(BOOL load_local_plugins_only FI_DEFAULT(FALSE));
+            
+//    DLL_API FIBITMAP *DLL_CALLCONV FreeImage_Load(FREE_IMAGE_FORMAT fif, const char* filename, int flags FI_DEFAULT(0));
+
 	printf("======= main() ==============\n");		
 	create_threads();
 	init_ipc("simple_walk.csv");
@@ -453,4 +459,6 @@ int main( int argc, char *argv[] )
 		behavior_interface(); */
 		//serial_interface();	on separate thread!			// serial port used for arduino connections & GPS.
 	}
+
+//	DLL_API void DLL_CALLCONV FreeImage_DeInitialise();
 }

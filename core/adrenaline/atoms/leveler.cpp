@@ -140,7 +140,7 @@ int Leveler::draw_l_title()
 	Fill( 255, 255, 255, alpha );
 	// Fix!! should not go outside client Rect!!
 	
-	Text( left+TIC_WIDTH, bottom+height+tenpercent, text, SerifTypeface, size );				
+	Text( left+TIC_WIDTH, bottom+height+tenpercent, text, SerifTypeface, text_size );				
 }
 
 float Leveler::get_level_pixel()
@@ -148,7 +148,9 @@ float Leveler::get_level_pixel()
 	// Interpolate:
 	float pixel_range = (height);
 	float value_range = (yMax - yMin );
-	float ypix = ((Level / value_range) * pixel_range) + bottom;
+	
+	float ypix = (((Level-yMin) / value_range) * pixel_range) + bottom;
+	//printf("Leveler:: Level=%6.2f ypix=%6.2f\n", Level, ypix );
 	return ypix;
 }
 void Leveler::draw_marker(  )

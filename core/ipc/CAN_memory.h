@@ -31,16 +31,16 @@ struct can_ipc_memory_map
 	char		isReceiving;			// data coming in over tcp/ip.
 	int 		RxHeadLap;				// counts each roll over.
 	int 	 	RxHead;
-	//byte 	 	RxTail;		 each user should keep his own copy.
 	struct sCAN Received[MAX_CAN_RX_MESSAGES];
 	byte		RxOverFlow;		// indicator if not receiving quickly enough.
  
 	char		isTransmitting;			// is being sent over tcp/ip (not local can card)
-	int 	 	TxHead;
-	int 	 	TxTail;
+	unsigned int 	 	TxHeadLap;
+	unsigned int 	 	TxHead;
 	struct sCAN Transmit[MAX_CAN_TX_MESSAGES];
 	byte		TxOverFlow;		// indicator if trying to send too quickly.
 };
+	//byte 	 	RxTail;		 each user should keep his own copy.
 /******************** CAN IPC MEMORY MAP *****************/
 /*********************************************************/
 //void copy_can_msg( struct sCAN* mDest, struct sCAN* mSrc );
@@ -60,31 +60,37 @@ void 	can_detach_memory	();
 int		can_get_segment_size();
 
 void 	can_ipc_write_can_connection_status( char* mStatus   );
-void 	can_ipc_write_can_message( struct sCAN* mMsg );
 
-/***** Rx Buffer Functions (replaces former "can_rxbuff.cpp"):	******/
 void 		 sprint_message(char* mBuffer, struct sCAN* msg);
 void 		 copy_can_msg ( struct sCAN* mDest, struct sCAN* mSrc );
-void 		 ipc_add_can_rx_message( struct sCAN* mMsg );
-void 		 AddToRxList  ( struct sCAN* mMsg );
 
+/***** Rx Buffer Functions (replaces former "can_rxbuff.cpp"):	******/
+void 		 ipc_add_can_rx_message  ( struct sCAN* mMsg );
+void 		 AddToRxList  			 ( struct sCAN* mMsg );		// wrapper around ipc_add_can_rx_message()
 BOOL   		 shm_isRxMessageAvailable( int* mTail, int* mTailLaps  );
 struct sCAN* shm_GetNextRxMsg		 ( int* mTail, int* mTailLaps );	// pointer to 1 allocation. overwritten on next call!
 void 		 print_rx_position();
 
+/***** Tx Buffer Functions (replaces former "can_txbuff.cpp"):	******/
+void 		 shm_add_can_tx_message  ( struct sCAN* mMsg );
+BOOL   		 shm_isTxMessageAvailable( int* mTail, int* mTailLaps  );
+struct sCAN* shm_GetNextTxMsg		 ( int* mTail, int* mTailLaps );	// pointer to 1 allocation. overwritten on next call!
+void 		 print_tx_position();
+
+
 // MACROS FOR SETTING IPC FLAGS:
 void		set_tcp_receiving_flag_ipc_can  ();
 void		clear_tcp_receiving_flag_ipc_can();
-BOOL		is_tcp_receiving_flag_ipc_can();
+BOOL		is_tcp_receiving_flag_ipc_can   ();
 
-void		set_tcp_transmitting_flag_ipc_can   ();
+void		set_tcp_transmitting_flag_ipc_can  ();
 void		clear_tcp_transmitting_flag_ipc_can();
-BOOL		is_tcp_transmitting_flag_ipc_can();
-
+BOOL		is_tcp_transmitting_flag_ipc_can   ();
 
 void 	CAN_save_segment_id(char* mFilename);
 int  	CAN_read_segment_id(char* mFilename);
 
+//void 	can_ipc_write_can_message( struct sCAN* mMsg );
 
 #ifdef  __cplusplus
 }

@@ -12,6 +12,8 @@ public:
 	GyroView( int mCenterX, int CenterY, float mRadius );
 	~GyroView();
 	
+	void			set_airplane_mode		( bool mAirplane=false );
+	
 	void			set_roll_angle_deg		( float mDegrees );
 	float			get_roll_angle_deg		( );
 	
@@ -30,6 +32,7 @@ public:
 	void			print_info				(				 		);
 	virtual void 	set_width_height  	 	( int Width, int Height );
 		
+	void			draw_plumb_line(  );
 	void 			draw_line	(  );
 	void 			draw_circle (  );
 	void			draw_heading(  );
@@ -52,7 +55,7 @@ protected:
 	float		m_delta_y_heading;
 	
 private:
-
+	bool		m_airplane_mode;		// draw pitch/roll like a ground plane horizon. Else do plumbline.
 	float		m_left_margin;
 	float		m_right_margin;
 

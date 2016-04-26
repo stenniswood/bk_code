@@ -17,7 +17,8 @@
 #include "control.hpp"
 #include "display.h"
 #include "GyroViewI.hpp"
-
+#include "vector_math.h"
+#include "fuse_accel.h"
 
 GyroView::GyroView( )
 {  
@@ -49,13 +50,14 @@ void 	GyroView::Initialize			( )
 	m_left_margin = left;
 	m_right_margin = left+width;
 	background_color = 0xFF5f5f00;
+	m_airplane_mode = false;
 	
 	calc_metrics();
 	set_roll_angle_deg   (0.0);
 	set_pitch_angle_deg  (0.0);
 	set_heading_angle_deg(0.0);				// North is 0 degrees.	
 }
-void 	GyroView::calc_metrics			( )
+void 	GyroView::calc_metrics( )
 {  
 	float space = width * 0.05;
 	m_left_margin  = left + space;
@@ -65,6 +67,11 @@ void 	GyroView::calc_metrics			( )
 	m_center_y = bottom + height/2;
 	m_radius   = min(width,height)/4.;	// diameter is half the width of the window.
 	// radius should be 1/4.  And the Circle() function takes a diameter not radius.	
+}
+
+void GyroView::set_airplane_mode( bool mAirplane )
+{
+	m_airplane_mode = mAirplane;
 }
 
 /************ ROLL & PITCH ANGLE FUNCTIONS ************/
@@ -173,6 +180,27 @@ void 	GyroView::draw_line	(  )
 	Line(m_center_x+x1, m_center_y+y1, m_center_x+x2, m_center_y+y2);	
 }
 
+void GyroView::draw_plumb_line(  )
+{  
+	Stroke_l ( 0xFFFF7F00 );
+	Fill_l   ( 0xFFFF7F00 );
+	float x1 = m_center_x;
+	float y1 = m_center_y;
+
+	float gravity_angle = atan2( -m_pitch_angle_radians, m_roll_angle_radians );
+	float mag = fabs(AccelScaled.x) + fabs(AccelScaled.y);
+	mag = min(1.0, mag);
+
+	float line_length = m_radius * mag;
+	
+	float x2 = line_length * cos( gravity_angle );
+	float y2 = line_length * sin( gravity_angle );
+
+	x2 += m_center_x;
+	y2 += m_center_y;
+	Line(x1, y1, x2, y2);		
+}
+
 void 	GyroView::draw_circle (  )
 {	
 	Stroke_l ( 0xFFFFFFFF );
@@ -200,8 +228,8 @@ void 	GyroView::draw_info(  )
 void 	GyroView::draw_heading(  )
 {	
 	float heading_radius = m_radius/2;
-	float h_center_x = m_center_x+m_radius+0.8*heading_radius;
-	float h_center_y = m_center_y+m_radius+0.8*heading_radius;
+	float h_center_x = m_center_x+ m_radius+0.9*heading_radius;
+	float h_center_y = m_center_y+ m_radius+0.7*heading_radius;
 	
 	Stroke_l ( 0xFF00FF00 );
 	Fill_l   ( 0xFF00003F );
@@ -235,8 +263,12 @@ int   	GyroView::draw   	(  )
 	Fill_l   ( 0xFFFFFFFF );	
 	TextMid( m_center_x, bottom+0.9*height, title, SerifTypeface, text_size );
 
-	draw_circle();
-	draw_line();
+	draw_circle();	
+	if (m_airplane_mode)
+		draw_line();
+	else
+		draw_plumb_line();
+
 	draw_info();
 	draw_heading();
 	return 1;

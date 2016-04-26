@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <wiringPiSPI.h>
 #include <wiringPi.h>
+#include <unistd.h>
+#include <pthread.h>
+
 
 #include "gpio.h"
 #include "mcp2515_defs.h"
@@ -18,14 +21,17 @@
 #include "packer.h"
 #include "system_msgs_callback.h"
 #include "chevy_codes.h" 
-#include "ini_file.hpp"		// Preferences
+#include "ini_file.hpp"			// Preferences
 #include "CAN_memory.h"
+#include "OS_Dispatch.h"
+#include "OS_timers.h"
 
 
 // Tail for this amon app.
 int RxTail_cmdline=0;
 int RxTail_cmdline_laps=0;
-
+int TxTail_cmdline=0;
+int TxTail_cmdline_laps=0;
 
 int can_speed = CANSPEED_250;
 
@@ -67,7 +73,6 @@ void init(int CAN_Speed )
 	digitalWrite( TX2RTS, 1 	 	);
 	gpio_init   ( );
 
-
 	// set Pin 17/0 generate an interrupt on high-to-low transitions
 	// and attach myInterrupt() to the interrupt
 	if ( wiringPiISR(CAN_INT_PIN, INT_EDGE_FALLING, &CAN_isr) < 0 ) {
@@ -97,6 +102,31 @@ void init(int CAN_Speed )
 	write_register( CANINTE,  0x1F );	// enable 2 TXs & 1 RX	
 	write_register( CANCTRL,  0x10 );	// Abort any transmitting msgs...
 	write_register( CANCTRL,  0x00 );	// 
+}
+
+// CREATE THREADS: 
+pthread_t unknown_thread_id;
+void* unknown_thread(void* n)
+{
+	while (1)
+	{	
+		//printf("unknown_thread()\n");
+		OS_Event_TIC_Counter++;
+		//System_Dispatch();
+		OS_Dispatch();
+		usleep( 1000 );
+	}	
+}
+void create_threads()
+{	
+	// CREATE TIMER THREAD :
+	const char *message1 = "second";
+	int iret1 = pthread_create( &unknown_thread_id, NULL, unknown_thread, (void*) message1);
+	if (iret1)
+	{
+		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
+		exit(EXIT_FAILURE);
+	}
 }
 
 void read_cnfs()
@@ -155,15 +185,17 @@ int main( int argc, char *argv[] )
 	}
 	printf("===============================================\n");
 	int result = can_connect_shared_memory(TRUE);
+	init_can_memory();
 	printf("===============================================\n");		
 	init(can_speed);
+	create_threads();
 	register_dump();
+	struct sCAN* message=NULL;
 
 	int dump_count=0;	
 	while (1) {
-		if (shm_isRxMessageAvailable(&RxTail_cmdline, &RxTail_cmdline_laps))
+		if (shm_isRxMessageAvailable(&RxTail_cmdline, &RxTail_cmdline_laps)) {
 			print_message( shm_GetNextRxMsg(&RxTail_cmdline, &RxTail_cmdline_laps) );
-		else {
 			dump_count++;
 			if (dump_count>40096)
 			{
@@ -173,6 +205,16 @@ int main( int argc, char *argv[] )
 				printf("Tail: %d, %d\n", RxTail_cmdline, RxTail_cmdline_laps); */
 			}
 		}
+
+		// Now Tx Messages (perhaps better as interrupt driven)
+		if (shm_isTxMessageAvailable(&TxTail_cmdline, &TxTail_cmdline_laps))  {
+			// pointer to 1 allocation. overwritten on next call!			
+			message = shm_GetNextTxMsg  (&TxTail_cmdline, &TxTail_cmdline_laps );
+			printf("TX: \t"); print_message( message );
+			// wait until all messages are transmitted.  
+			AddToSendList(message);
+			//send_message(message);
+			//can_send_msg_no_wait(0, message);	// use no wait b/c want to keep Rx msgs flowing.
+		}
 	};	
 }
-

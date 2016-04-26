@@ -56,11 +56,11 @@ LDFLAGS += -lilclient -L$(SDKSTAGE)/opt/vc/lib/ -lGLESv2 -lEGL -lopenmaxil -lbcm
 DEPS   	   = 
 
 # OBJECT LISTS : 
-CAN_OBJS    = can_id_list.o 
-#CAN_Interface.o can_instance.o can_eid.o can_buff.o can_txbuff.o bk_system_defs.o 
-#MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
+CAN_OBJS    = can_id_list.o can_eid.o 
+#CAN_Interface.o can_instance.o can_buff.o can_txbuff.o bk_system_defs.o 
+MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
 # ipc_mem_bkinstant.o
-MSG_OBJS    =  parser_tilt.o 
+//MSG_OBJS    =  parser_tilt.o packer_motor.o
 MISC_OBJS   = vector_math.o ini_file.o fft.o
 HARDWARE_OBJS = AUDIO_device.o sinewave.o tone_generator.o
 FUSE_OBJS   = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o 
@@ -88,7 +88,7 @@ HEARTS_GAME_OBJS 	= hearts_game.o hearts_app.o trick.o
 BLACKJACK_GAME_OBJS = blackjack.o blackjack_app.o 
 CARDCORE_GAME_OBJS  = card.o card_player.o card_player_chips.o deck.o basic_card_game.o
 
-#  button_array_gui.o Container.o 
+# Container.o 
 ADRENALINE_OBJS   = display.o task_bar.o
 ADRENALINE_SYSTEM_OBJS = system_status.o keyboard.o touch_gesture.o keyboard_dev.o \
 			display_manager.o mouse_oop.o resource_manager.o volume_control.o 
@@ -105,7 +105,7 @@ ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
 			stereo_power.o stick_figure.o system_bar.o can_window.o   \
 			application.o file_editor.o label_edit_box.o complete_file_browser.o \
-			icon_bar.o 
+			icon_bar.o compass.o button_array.o button_array_gui.o
 ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o calendar_entry.o
 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \

@@ -100,10 +100,10 @@ void dump_CAN_ipc()
 	printf("RxHead Laps=%d\n", 			ipc_memory_can->RxHeadLap );
 	
 	printf("TxHead=%d\n", 				ipc_memory_can->TxHead );
-	printf("TxTail=%d\n", 				ipc_memory_can->TxTail );
+	printf("TxHead Laps=%d\n", 			ipc_memory_can->TxHeadLap );
 		
-	for (int i=ipc_memory_can->TxHead; i<ipc_memory_can->TxTail; i++)			
-		print_message( &ipc_memory_can->Transmit[i] );	
+//	for (int i=ipc_memory_can->TxHead; i<ipc_memory_can->TxTail; i++)			
+//		print_message( &ipc_memory_can->Transmit[i] );	
 }
 
 void dump_CAN_raw_ipc()
@@ -128,13 +128,13 @@ void init_can_memory()
 		
 	// such as "board not present", or "CAN hardware operational",
 											// or "CAN over tcp/ip"
+	ipc_memory_can->RxHead=0;				
 	ipc_memory_can->RxHeadLap=0;			// counts each roll over.
-	//byte 	 	RxTail=0;		 each user should keep his own copy.
 	ipc_memory_can->RxOverFlow=FALSE;		// indicator if not receiving quickly enough.
 
 	ipc_memory_can->isTransmitting=FALSE;	// is being sent over tcp/ip (not local can card)
 	ipc_memory_can->TxHead=0;
-	ipc_memory_can->TxTail=0;
+	ipc_memory_can->TxHeadLap=0;
 	ipc_memory_can->TxOverFlow=FALSE;		// indicator if trying to send too quickly.	
 }
 
@@ -152,7 +152,7 @@ int can_allocate_memory( )
 		return 0;
 	} else {
 		if (Debug) printf ("CAN Allocated %d bytes shm segment_id=%d\n", shared_segment_size, can_segment_id );
-		init_can_memory();
+		init_can_memory(); 
 	}
 		// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
 	return can_segment_id;	
@@ -230,20 +230,9 @@ void can_ipc_write_can_connection_status( char* mStatus )
 	if (Debug) printf( "|%s|\n", ipc_memory_can->ConnectionStatus );
 }
 
-void can_ipc_write_can_message( struct sCAN* mMsg )
-{		
-	copy_can_msg( &(ipc_memory_can->Transmit[ipc_memory_can->TxTail]), mMsg );
-
-	ipc_memory_can->TxTail++;
-	if (ipc_memory_can->TxTail > MAX_CAN_TX_MESSAGES)
-		ipc_memory_can->TxTail = 0;
-	
-	if (ipc_memory_can->TxTail == ipc_memory_can->TxHead)
-		ipc_memory_can->TxOverFlow = 1;
-}
 void copy_can_msg( struct sCAN* mDest, struct sCAN* mSrc )
 {
-	memcpy( (void*)mDest, (void*)mSrc, sizeof(struct sCAN) );	
+	memcpy( (void*)mDest, (void*)mSrc, sizeof(struct sCAN) );
 }
 
 void ipc_add_can_rx_message( struct sCAN* mMsg )
@@ -288,12 +277,6 @@ BOOL  shm_isRxMessageAvailable( int* mTail, int* mTailLaps )
 		if (Debug) printf("OverFlow; mTail=%d;  mTailLaps=%d; \n", *mTail, *mTailLaps );
 	}
 
-//	if (head_count < tail_count)
-//		printf("h/t: %d/%d \n", head_count, tail_count );
-	/* Not new way.
-	if (ipc_memory_can->RxTail == ipc_memory_can->RxHead)
-		ipc_memory_can->RxTail = ipc_memory_can->RxHead = 0; 
-	(ipc_memory_can->RxHead > ipc_memory_can->RxTail);		*/	
 	return (head_count > tail_count);
 }
 
@@ -317,6 +300,66 @@ struct sCAN* shm_GetNextRxMsg( int* mTail, int* mTailLaps )
 	return &tmp;
 }
 
+/************************ TRANSMIT TX FUNCTIONS *********************************/
+void shm_add_can_tx_message( struct sCAN* mMsg )
+{
+	if ((ipc_memory_can==NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+	{
+		printf("Error: Cannot queue message, CAN ipc memory not available!!\n");
+		return FALSE;
+	}
+	printf("TxHead=%d\n", ipc_memory_can->TxHead );
+	if (ipc_memory_can->TxHead > MAX_CAN_TX_MESSAGES) {
+		ipc_memory_can->TxHead = 0;
+		ipc_memory_can->TxHeadLap++;
+	}
+	copy_can_msg( &(ipc_memory_can->Transmit[ipc_memory_can->TxHead++]), mMsg );	
+}
+BOOL shm_isTxMessageAvailable( int* mTail, int* mTailLaps  )
+{
+	if ((ipc_memory_can==NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+		return FALSE;
+
+	long int tail_count = 				 *mTailLaps * MAX_CAN_TX_MESSAGES + *mTail;	
+	long int head_count = ipc_memory_can->TxHeadLap * MAX_CAN_TX_MESSAGES + ipc_memory_can->TxHead;	
+	long int msgs_qued  = head_count - tail_count;	
+	
+	if (msgs_qued >= MAX_CAN_TX_MESSAGES)		// overrun 
+	{					
+		//printf("RxHeadLap=%d; RxHead=%d\n", ipc_memory_can->RxHeadLap, ipc_memory_can->RxHead);	
+							// scoot tail up keeping as many msgs as possible.
+		//printf("head_count=%d;  tail_count=%d; msgs=%d\n", head_count, tail_count, msgs_qued);
+		ipc_memory_can->TxOverFlow  = TRUE;
+		*mTailLaps = ipc_memory_can->TxHeadLap - 1;
+		tail_count = head_count - (MAX_CAN_TX_MESSAGES-10);	// allow room for 10 more, since the Tail is slower than the head.
+		*mTail = (tail_count - *mTailLaps * MAX_CAN_TX_MESSAGES);		
+		if (Debug) printf("TxOverFlow; mTail=%d;  mTailLaps=%d; \n", *mTail, *mTailLaps );
+	}
+
+	return (head_count > tail_count);
+}
+struct sCAN* shm_GetNextTxMsg( int* mTail, int* mTailLaps )	// pointer to 1 allocation. overwritten on next call!
+{
+	if ((ipc_memory_can==NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+		return NULL;
+
+	static struct sCAN tmp;		
+	copy_can_msg( &tmp, &(ipc_memory_can->Transmit[*mTail]) );
+	(*mTail)++;
+	if (*mTail > MAX_CAN_RX_MESSAGES) {
+		*mTail = 0;
+		(*mTailLaps)++;
+	}
+	if (ipc_memory_can->TxHead == *mTail)
+		ipc_memory_can->TxOverFlow = 0;	// clear it since no more.
+	return &tmp;
+}
+void print_tx_position()
+{
+	if (ipc_memory_can)
+		if (Debug) printf("Added to CAN IPC memory: %d, lap=%d\n", ipc_memory_can->TxHead, ipc_memory_can->TxHeadLap );
+}
+/************************ END TRANSMIT TX FUNCTIONS *********************************/
 
 void CAN_save_segment_id(char* mFilename)
 {
@@ -452,3 +495,21 @@ BOOL		is_tcp_transmitting_flag_ipc_can   ()
 	return ipc_memory_can->isTransmitting;	
 }
 
+
+//	if (head_count < tail_count)
+//		printf("h/t: %d/%d \n", head_count, tail_count );
+	/* Not new way.
+	if (ipc_memory_can->RxTail == ipc_memory_can->RxHead)
+		ipc_memory_can->RxTail = ipc_memory_can->RxHead = 0; 
+	(ipc_memory_can->RxHead > ipc_memory_can->RxTail);		*/	
+/*void can_ipc_write_can_message( struct sCAN* mMsg )
+{		
+	copy_can_msg( &(ipc_memory_can->Transmit[ipc_memory_can->TxHead]), mMsg );
+
+	ipc_memory_can->TxTail++;
+	if (ipc_memory_can->TxTail > MAX_CAN_TX_MESSAGES)
+		ipc_memory_can->TxTail = 0;
+	
+	if (ipc_memory_can->TxTail == ipc_memory_can->TxHead)
+		ipc_memory_can->TxOverFlow = 1;
+}*/

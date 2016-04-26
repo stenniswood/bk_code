@@ -342,5 +342,5 @@ int GyroOverview::draw(	)
 	return Window::draw();
 }
 
-}
+
 

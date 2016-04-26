@@ -96,14 +96,15 @@ byte ButtonArrayMot::setMotor(byte Row, byte Col)
 {
 	if (Row==1)
 	{
-		a[Col-1]->setState( true );			// hip knee ankle leg1
+		a[Col-1]->set_state( true );			// hip knee ankle leg1
 		//motor = Onesimus.get_left_leg()->get_motor( Col-2 );
 	}
 	if (Row==2)
 	{
-		b[Col-1]->setState( true );			// hip knee ankle leg1
+		b[Col-1]->set_state( true );			// hip knee ankle leg1
 		//motor = Onesimus.get_right_leg()->get_motor( Col-2 );
 	}	
+	return 1;
 }
 
 void ButtonArrayMot::MarkStop(byte StopNum)
@@ -138,9 +139,9 @@ void ButtonArrayMot::jog( byte Direction, byte Speed )
 void ButtonArrayMot::release_prev_MotorSelection( int id )
 {
 	if (row1(id))
-		a[id-4]->setState(false);		
+		a[id-4]->set_state(false);		
 	else if (row2(id))
-		b[id-8]->setState(false);	
+		b[id-8]->set_state(false);	
 }
 
 void ButtonArrayMot::set_button_pushed( int B_ID )
@@ -180,7 +181,7 @@ void ButtonArrayMot::set_button_pushed( int B_ID )
 			//motor->setStopValue( 2, motor->getValue() );
 			//Onesimus.SavePreferences();
 		}
-		c[col]->setState( true );		// hip knee ankle leg1 
+		c[col]->set_state( true );		// hip knee ankle leg1 
 	}
 	if (row4(B_ID))			// Bottom Row
 	{
@@ -193,12 +194,12 @@ void ButtonArrayMot::set_button_pushed( int B_ID )
 			jog(CW, 1);		// 18,19 Speed of 1 or 2 
 		if (B_ID>=19)
 			jog(CW, 2);		// 18,19 Speed of 1 or 2 
-		d[col]->setState( true );		// 
+		d[col]->set_state( true );		// 
 	}
 	if (frontRow(B_ID))		// Front Edge
 	{
 		col = B_ID - 0;
-		e[col]->setState( true );		// Screen
+		e[col]->set_state( true );		// Screen
 		//if (B_ID==2)
 		//	motor->adjustZeroOffset( motor->getValue() );
 	}
@@ -210,7 +211,7 @@ void ButtonArrayMot::button_released()
 	// if a motor selection button, restore the state to unsunken.
 	if (row4(PrevPushedButton))			// Stop Jog.	
 	{
-		d[PrevPushedButton-16]->setState(false);
+		d[PrevPushedButton-16]->set_state(false);
 		jog(CCW, 0);		// Speed of 0, 1, or 2
 	}			
 }
@@ -266,6 +267,7 @@ int ButtonArrayMot::draw( )
 	}
 	draw_motor_info( );	
 	if (Debug) 	printf("Done with ButtonArrayMot draw()\n");
+	return 1;
 }
 
 

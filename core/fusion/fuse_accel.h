@@ -5,7 +5,7 @@ extern "C" {
 extern BOOL  LinearAccelerationDetected;
 
 extern struct fXYZ AccelScaled;
-extern struct frXYZ AccelAngularPosition;	// Calc'd from aSin when stationary
+extern struct frXYZ AccelAngularPosition;	// Calc'd from aSin when stationary (OUTPUT)
 extern struct frXYZ AccelAngularVelocity;	// Hold the change in angles (compare to gyro)
 extern struct fXYZ AccelRawVariance;		// Holds the variance as measured during trial stationary data collection.
 extern struct fXYZ AccelAngleVariance;		// Holds the variance as measured during trial stationary data collection.

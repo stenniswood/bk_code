@@ -21,6 +21,7 @@ AUTHOR	: Steve Tenniswood
 #include <shapes.h>
 #include <fontinfo.h>
 
+#include "GyroViewI.hpp"
 #include "CAN_Interface.h"
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"

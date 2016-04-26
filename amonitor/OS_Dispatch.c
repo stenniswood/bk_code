@@ -23,6 +23,7 @@
 #include "can_eid.h"
 #include "OS_timers.h"
 #include "can_board_msg.h"
+#include "can_txbuff.h"
 #include "leds.h"
 
 
@@ -39,6 +40,7 @@ void OS_Dispatch()
 	}
 	if ((OS_Event_TIC_Counter % 10) == 0) 	// 10ms tasks
 	{	
+		can_tx_timeslice();	
 	}
 	if ((OS_Event_TIC_Counter % 33) == 0)	// 20ms tasks
 	{	

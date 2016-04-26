@@ -173,7 +173,6 @@ void can_remove_instance_from_filter( byte mMOb_Number 			);
 #define BT2_100Kbps_A 0x04
 #define BT3_100Kbps_A 0x13
 
-
 #ifdef  __cplusplus
 }
 #endif

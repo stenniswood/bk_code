@@ -18,10 +18,16 @@
 #include <string.h>
 #include <math.h>
 #include <vector>
+#include "VG/openvg.h"
+#include "VG/vgu.h"
+#include "/home/pi/openvg/fontinfo.h"
+#include "/home/pi/openvg/shapes.h"
 
 #include "display.h"
 #include "load_cell_view.hpp"
 #include "bk_system_defs.h"
+#include "fuse_accel.h"
+#include "vector_base.h"
 #include "test_layouts.hpp"
 
 #define Debug 0
@@ -89,3 +95,55 @@ void  standing_balance()
 		default:	break;
 	}
 }
+/************************************************************************/
+bool fuzzy_equal( float mValue, float mAverage, float mStdDev )
+{
+	float upper = mAverage + mStdDev;
+	float lower = mAverage - mStdDev;	
+	if ((mValue > lower) && (mValue<upper))
+		return true;
+	return false;
+}
+bool fuzzy_not_to_exceed( float mValue, float mAverage, float mStdDev )
+{
+	float upper = mAverage + mStdDev;
+	float lower = mAverage - mStdDev;	
+	if ((mValue > lower))
+		return true;
+	return false;
+}
+/************************************************************************/
+
+/************************************************************************
+float Tilt = 10.0;
+void bow( float mDesiredTiltAngleDegrees )
+{
+	// float duty = 40;		// depends on weight of robot above the hip.
+	//robot.rotate_left_hip( duty );
+	//robot.rotate_right_hip( duty );		
+}
+bool bow_end_reached()		// based on Tilt Sensor
+{
+	// Possibility if moving fast, that it skips over the 45deg.  ie. 39, 51degs.	
+	if (fuzzy_not_to_exceed(AccelAngularPosition.rx, radians(45), radians(5) ))
+		return true;
+	return false;
+}
+void reverse_bow( )
+{
+	// float duty = -40;		// depends on weight of robot above the hip.
+	//robot.rotate_left_hip( duty );
+	//robot.rotate_right_hip( duty );
+}
+************************************************************************
+void squat( )
+{
+}
+bool squat_end_reached()
+{
+	return false;
+}
+void reverse_squat()
+{
+}
+*/

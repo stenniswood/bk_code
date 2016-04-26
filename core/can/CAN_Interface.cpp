@@ -167,7 +167,6 @@ DESCRIPTION:  CAN ISR will call the function sent here on a Receive interrupt
 ******************************************************************************/
 void set_system_rx_callback( BOOL (*mCallback)(struct sCAN*) )
 {
-	//printf("set_system_rx_callback(%d)\n", mCallback);
 	rx_system_call_back = mCallback;
 }
 
@@ -181,7 +180,6 @@ DESCRIPTION:  CAN ISR will call the function sent here on a Receive interrupt
 ******************************************************************************/
 void set_model_rx_callback( BOOL (*mCallback)(struct sCAN*) )
 {
-	//printf("set_model_rx_callback(%d)\n", mCallback);
 	rx_model_call_back = mCallback;
 }
 
@@ -262,7 +260,7 @@ void CAN_isr()
 		//printf("rx%d", rxbuff);
 		get_message ( &rxmessage, rxbuff 		);
 		bit_modify  ( CANINTF, rxFlagMask, 0x00 ); 
-		AddToRxList ( &rxmessage );
+		ipc_add_can_rx_message( &rxmessage );
 		if (msg_callbacks( &rxmessage, rxbuff) == FALSE)
 		{
 			// printf(" Rx0:%x:%x\n", status, intf);
@@ -270,7 +268,7 @@ void CAN_isr()
 		// This is a serial transfer of the text.  Slow! May cause the overruns.
 		//print_message( &rxmessage );
 	}
-	if (intf & 0x04 )
+	if (intf & 0x04 )		// TX0 
 	{
 			bit_modify  ( CANINTF, 0x04, 0x00 );
 			digitalWrite( TX0RTS, 1 );
@@ -279,7 +277,7 @@ void CAN_isr()
 			ReadyToSendAnother     = TRUE;		// Set a flag and send next in the main loop.
 			TransmissionInProgress = FALSE;
 	}
-	if (intf & 0x08 )
+	if (intf & 0x08 )		// TX1
 	{
 			bit_modify( CANINTF, 0x08, 0x00 );
 			digitalWrite( TX1RTS, 1 );
@@ -288,7 +286,7 @@ void CAN_isr()
 			ReadyToSendAnother = TRUE;
 			TransmissionInProgress = FALSE;
 	}
-	if (intf & 0x10)
+	if (intf & 0x10)		// TX2 
 	{
 			bit_modify( CANINTF, 0x10, 0x00 );	
 			digitalWrite( TX2RTS, 1 );

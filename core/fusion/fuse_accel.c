@@ -109,7 +109,6 @@ void calc_stationary_angles( struct fXYZ* mRaw )
 	radians_to_degrees( &AccelAngularPosition, &AccelAngularPosition );
 }
 
-
 /*********************************************************************
  ******************   PRECONDITIONING  FUNCTIONS     *****************
  *********************************************************************/

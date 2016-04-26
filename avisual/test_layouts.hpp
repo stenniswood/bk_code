@@ -1,17 +1,13 @@
 
 
 void print_test_list();
-
 void load_test_screen(int number);
 
 void init_simple_button_test();
 void init_gyro_view();
 void init_loadcell_view();
-
 void init_textview_test();
-
 void init_textfile_view();
-
 void init_progressbar_test();
 void init_sidebar_test();
 
@@ -61,11 +57,18 @@ void init_reversi	( );
 void init_battleships( );
 
 #include "load_cell_view.hpp"
+#include "GyroViewI.hpp"
+#include "leveler.hpp"
+#include "compass.hpp"
+
 
 extern LoadCellView* loadcell_left_foot;
 extern LoadCellView* loadcell_right_foot;
 extern GyroView* gyro_view;
-
+extern Leveler   magnet_x;
+extern Leveler   magnet_y;
+extern Leveler   magnet_z;
+extern CompassView	 compass;
 
 // for test only:
 //extern RadioButton 	MyRadio1;

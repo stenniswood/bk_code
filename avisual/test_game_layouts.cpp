@@ -18,13 +18,15 @@ AUTHOR	: Steve Tenniswood
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
+#include <vector>
+#include <string>
 #include "CAN_Interface.h"
 #include "display.h"
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
 
 #include "frame_window.hpp"
-#include <vector>
+#include "GyroViewI.hpp"
 #include "test_layouts.hpp"
 
 #include "visual_memory.h"

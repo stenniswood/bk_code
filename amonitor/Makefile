@@ -21,8 +21,9 @@ OPTIONS	= -std=c99
 INC		= ./ ../core/can/ ../core/misc/ ../core/msg/ ../core/ipc/
 CFLAGS 	= -lwiringPi -lrt -DPLATFORM=$(PLATFORM) \
 		-DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
+LDFLAGS = -lpthread -lrt
 DEPS   	= 
-OBJ     =   amon_main.o gpio.o  OS_Dispatch.o
+OBJ     = amon_main.o gpio.o OS_Dispatch.o 
 
 #can_rxbuff.o ipc_can_rxbuff.o filter_file.o
 CAN_OBJS =  can_instance.o can_eid.o  can_txbuff.o 	 \
@@ -43,9 +44,8 @@ IPC_OBJS  = CAN_memory.o
 amon: $(OBJ) \
 		$(addprefix ../core/can/,  $(CAN_OBJS))  \
 		$(addprefix ../core/misc/, $(MISC_OBJS)) \
-		$(addprefix ../core/misc/, $(MISC_OBJS)) \
-		$(addprefix ../core/ipc/,  $(IPC_OBJS))  
-	gcc -o $@ $^ $(CFLAGS)
+		$(addprefix ../core/ipc/,  $(IPC_OBJS))
+	gcc -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.png *.bak 

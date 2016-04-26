@@ -60,7 +60,7 @@ int count_magnet = 0;
 
 BOOL ShowAccelerometerData 	= FALSE;
 BOOL ShowGyroData 			= FALSE;
-BOOL ShowMagnetData 		= TRUE;
+BOOL ShowMagnetData 		= FALSE;
 BOOL ShowCANData 			= TRUE;
 BOOL Classify 				= FALSE;
 
@@ -110,7 +110,7 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 			print_raw( mMsg, &RawxyzAccel, ShowCANData );
 			
 		process_accel	(ShowAccelerometerData);
-		if (ShowAccelerometerData) 	printf("hello\n");
+		if (ShowAccelerometerData) 	printf("\n");
 
 		tilt_sensor_update_gui();
 		
@@ -129,6 +129,7 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		if (ShowGyroData) 							printf("\n");
 		retval=TRUE;
 		break;
+
 	case ID_MAGNET_XYZ : 
 		count_magnet++;
 		parse_magnet_msg(mMsg);

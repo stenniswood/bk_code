@@ -1,5 +1,5 @@
-#ifndef _BUTTON_ARRAY_HPP_
-#define _BUTTON_ARRAY_HPP_
+#ifndef _BUTTON_ARRAY_GUIHPP_
+#define _BUTTON_ARRAY_GUIHPP_
 
 #include "control.hpp"
 //#include "motor.hpp"
@@ -30,7 +30,7 @@ public:
 	virtual int   	draw( );
 	int 			draw_motor_info();
 	void 			MarkStop(byte StopNum);
-	
+
 protected:
 	byte 		setMotor(byte Row, byte Col);
 	void 		release_prev_MotorSelection( int id );

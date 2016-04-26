@@ -18,13 +18,14 @@ AUTHOR	: Steve Tenniswood
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
+#include <string>
+#include <vector>
 #include "CAN_Interface.h"
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
 #include "display.h"
 #include "display_manager.hpp"
 #include "frame_window.hpp"
-#include <vector>
 #include "power_level.hpp"
 #include "stereo_power.hpp"
 #include "visual_memory.h"
@@ -34,6 +35,7 @@ AUTHOR	: Steve Tenniswood
 #include "can_app.hpp"
 #include "card_games.h"
 #include "GyroViewI.hpp"
+#include "compass.hpp"
 
 #include "load_cell_view.hpp"
 #include "test_layouts.hpp"
@@ -43,7 +45,12 @@ AUTHOR	: Steve Tenniswood
 //#include "can_msg_view.hpp"
 #include "window_layouts.hpp"
 #include "load_cell_view.hpp"
-
+#include "packer_motor.h"
+#include "CAN_memory.h"
+#include "button_array.hpp"
+#include "vector_math.h"
+#include "balance.hpp"
+#include "fuse_ag.h"
 
 #define Debug 0
 
@@ -69,9 +76,7 @@ static RadioButton 	MyRadio4 ( -1, -1 );
 
 static vector<DirectoryListBox>  dir_lb;
 static char 		ConnectionStatusText[128];
-//ButtonArrayMot MyArray	( 700, 1070, 350, 100);
-
-
+//ButtonArrayMot MyArray( 700, 1070, 350, 100);
 
 void init_simple_button_test()
 {
@@ -182,7 +187,6 @@ void init_radio_button_test()
 	MyRadio1.join_group( &MyRadio4 );
 	MyRadio3.select();
 	MyRadio2.select();
-		
 	//MyRadio1.onClick(5,5);
 
 	// Need a group box:
@@ -506,9 +510,112 @@ void init_gyro_view()
 	MainDisplay.add_object( view  );
 }
 
+void do_bow( float mAngle )
+{
+	static float DesiredAngle;
+	static int state=0;	
+	struct sCAN msg;
+	int ldir = +1;
+	int rdir = -1;
+	
+	int instanceL = 31;
+	int instanceR = 21; 
+	// Backward:  L,R = + -
+	// Foreward:  L,R = - +
+
+	float duty = 10;
+	bool fuzzy_compare;
+
+	switch (state)
+	{
+	case 0 :
+		DesiredAngle = mAngle;
+		printf("Perform Bow :  instanceL=%d;  duty=%6.2f \n", instanceL, duty );		
+		pack_move_speed( &msg, instanceL, ldir*duty );
+		shm_add_can_tx_message( &msg );	
+		pack_move_speed( &msg, instanceR, rdir*duty );
+		shm_add_can_tx_message( &msg );
+		state++;
+		break;
+	case 1 :
+		/* Wait until desired Tilt is reached.  */
+		/* 		Msgs are captured in amon and posted to CAN_memory. 
+				These are retrieved and proc'd in background (visual_main: can_interface)
+				
+				This is same thread as the tilt processing.  So we can't loop here.
+					Just a spot check and must return;
+		*/
+			fuzzy_compare = fuzzy_not_to_exceed(BestAngles.ry, DesiredAngle, 5. );
+			if (fuzzy_compare)
+				state++;			
+		break;
+	case 2 : 	
+		printf("Restore Bow to stand :  instanceL=%d;  duty=%6.2f \n", instanceL, duty);
+		duty = -10;
+		pack_move_speed( &msg, instanceL, ldir*duty );
+		shm_add_can_tx_message( &msg );	
+		pack_move_speed( &msg, instanceR, rdir*duty );
+		shm_add_can_tx_message( &msg );
+		state++;
+		break;
+	case 3 :
+		/* Wait until Tilt is back to near zero.  */
+			fuzzy_compare = fuzzy_not_to_exceed(BestAngles.ry, DesiredAngle, 5.);
+			if (fuzzy_compare)
+				state++;
+		break;
+		
+	default: state = 0;  break;
+	}
+}
+
+void robot_hip_test_cb( int row, int col )
+{
+	int ldir = +1;
+	int rdir = -1;
+	int dir  = 1;
+	struct sCAN msg;
+	switch( row )
+	{
+	case 0 : 	dir = +1;		break;
+	case 1 : 	dir = 0;		break;
+	case 2 : 	dir = -1.5;		break;
+	default: break;				
+	}
+	
+	// Column determines the motor instances:
+	byte instanceL = 0;
+	byte instanceR = 0;
+	switch (col)
+	{
+	case 0 : instanceL = 31;
+			 instanceR = 21; 
+			break;		 // Hip
+	case 1 : instanceL = 32;
+			 instanceR = 22; 
+			break;		 // Knee
+	case 2 : instanceL = 33;
+			 instanceR = 23; 
+			break;		 // Ankle
+	default: break;
+	}
+	float duty = 10*dir;
+	printf("Button callback:  instanceL=%d;  duty=%6.2f \n", instanceL, duty);	
+	pack_move_speed( &msg, instanceL, duty*ldir );
+	shm_add_can_tx_message( &msg );
+	printf("Button callback:  instanceR=%d;  duty=%6.2f \n", instanceL, duty);	
+	pack_move_speed( &msg, instanceR, duty*rdir );
+	shm_add_can_tx_message( &msg );
+}
+
 LoadCellView* loadcell_left_foot=NULL;
 LoadCellView* loadcell_right_foot=NULL;
-GyroView* gyro_view=NULL;
+GyroView* 		gyro_view=NULL; 
+Leveler   		magnet_x;
+Leveler   		magnet_y;
+Leveler   		magnet_z;
+CompassView   	compass;
+ButtonArray   	test_buttons(3,3);
 
 void init_loadcell_view()
 {
@@ -519,16 +626,62 @@ void init_loadcell_view()
 	loadcell_left_foot->set_name( "left" );
 	loadcell_right_foot->set_name("right");
 
-	gyro_view = new GyroView(50, 470, 800, 500 ); 
+	gyro_view = new GyroView		( 50, 470, 800, 500 );
 	gyro_view->set_roll_angle_deg   ( 30 );
 	gyro_view->set_pitch_angle_deg  ( 30 );
 	gyro_view->set_heading_angle_deg( 30 );
+
+	magnet_x.set_text("Magnet X");
+	magnet_y.set_text("Magnet Y");
+	magnet_z.set_text("Magnet Z");
+	magnet_x.set_text_size( 12.0 );
+	magnet_y.set_text_size( 12.0 );	
+	magnet_z.set_text_size( 12.0 );		
+	magnet_x.set_position( 600, 700, 800, 200 );
+	magnet_y.set_position( 700, 800, 800, 200 );
+	magnet_z.set_position( 800, 900, 800, 200 );
+	magnet_x.set_max(1024);		magnet_x.set_min(-1024);
+	magnet_y.set_max(1024);		magnet_y.set_min(-1024);
+	magnet_z.set_max(1024);		magnet_z.set_min(-1024);
+
+	compass.set_position_right_of( &magnet_z );
+
+	test_buttons.set_callback( robot_hip_test_cb );
 	
+	test_buttons.set_width_height( 400, 200 );
+	test_buttons.set_position_right_of( &compass, false );
+	test_buttons.move_to( 1300, 200 );
+	test_buttons.create();
+	
+	vector<string> text;
+	text.push_back("+Hips");
+	text.push_back("+Knees");
+	text.push_back("+Ankles");
+	test_buttons.set_button_text_row( 0, text );
+
+	text.clear();	
+	text.push_back("0 Hips");
+	text.push_back("0 Knees");
+	text.push_back("0 Ankles");
+	test_buttons.set_button_text_row( 1, text );
+	
+	text.clear();	
+	text.push_back("-Hips");
+	text.push_back("-Knees");
+	text.push_back("-Ankles");
+	test_buttons.set_button_text_row( 2, text );
+	test_buttons.show_border(true);
+
 	// 200 lbs / 4 = 50lbs nominal
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( loadcell_left_foot  );
 	MainDisplay.add_object( loadcell_right_foot );	
 	MainDisplay.add_object( gyro_view );
+	MainDisplay.add_object( &magnet_x );
+	MainDisplay.add_object( &magnet_y );	
+	MainDisplay.add_object( &magnet_z );
+	MainDisplay.add_object( &compass  );
+	MainDisplay.add_object( &test_buttons  );	
 }
 
 ScrollBar My_sb;
@@ -649,9 +802,9 @@ void init_CAN_msg_view( )
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &msg_view );
 }*/
-//static ListBox  	MyList	   ( 20, 320, 700, 550  );
-//static ProgressBar  MyProgress ( 450, 650, 400, 375 );
-//static CheckBox 	MyCheck	   ( 300, 400, 400, 350 );
+//static ListBox  	 MyList	   ( 20, 320, 700, 550  );
+//static ProgressBar MyProgress( 450, 650, 400, 375 );
+//static CheckBox 	 MyCheck   ( 300, 400, 400, 350 );
 
 
 //////////////////////////////////////////////////////////////////////////

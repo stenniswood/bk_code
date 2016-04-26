@@ -34,4 +34,8 @@ union uXYZ
 	uint16_t value[3];	// xyz as an array
 };
 
+#ifdef  __cplusplus
+}
+#endif
+
 #endif

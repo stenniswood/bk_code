@@ -121,14 +121,14 @@ void pack_move_to_angle( struct sCAN* mMsg, byte mDestInstance,
 
 /* String may be upto 8 characters only! */
 void pack_move_speed( struct sCAN* mMsg, byte mDestInstance, 
-					  float mSpeedPercent )
+					  float mSpeedFraction )
 {
 	mMsg->id = create_CAN_eid( ID_MOVE_SPEED, mDestInstance );
 	mMsg->header.DLC = 2;
 	mMsg->header.rtr = 0;
 
 	// User enters a number [-100.0 , 100.0]
-	short Speed    = mSpeedPercent * 100;	// *100 = 10,000
+	short Speed    = mSpeedFraction * 100;	// *100 = 10,000
 	mMsg->data[0] = hi(Speed);		// 65 535
 	mMsg->data[1] = lo(Speed);		// 10 000
 }

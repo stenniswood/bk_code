@@ -17,6 +17,7 @@
 #include "leds.h"
 #include "vector_math.h"
 #include "parser_tilt.h"
+//#include "CAN_Interface.h"
 
 
 struct fXYZ RawxyzAccel;
@@ -44,6 +45,26 @@ void swap_bytes( struct tXYZ* mXYZ )
 	mXYZ->z = hi(tmp) + (lo(tmp)<<8);
 }
 
+uint8_t print_message(struct sCAN* msg)
+{	
+	printf(" ID=%2X:%4X:%d; ", msg->id.group.block, 
+			 msg->id.group.id, msg->id.group.instance );
+	printf("  %30s\t", getID_Text( msg->id.group.id ) );
+	printf("DLC=%d; ", msg->header.DLC );
+	printf("D[]=");
+	int i;
+	for (i=0; i<8; i++)
+	{
+		if (i >= msg->header.DLC)
+			printf("   ");
+		else
+			printf("%2x ", msg->data[i]);
+	}
+	if (msg->header.rtr==1)	
+		printf("\tRTR\n");
+	else
+		printf("\tDF\n");
+}
 
 /* Observations of Accelerometer Scale :
 change sensitivity with: sudo ./aconf config 9 3 0x03 [0..3]
@@ -62,8 +83,8 @@ Inother words reciprocal of the data sheet.  */
 
 void print_raw( struct sCAN* mMsg, struct fXYZ* mRaw, BOOL mShowCANmsg )
 {
-//	if (mShowCANmsg)
-//		print_message(mMsg);
+	if (mShowCANmsg)
+		print_message(mMsg);
 	print_vector( mRaw );
 	printf("\n");
 }
@@ -85,5 +106,9 @@ void parse_magnet_msg(struct sCAN* mMsg)
 {
 	extract_xyz(mMsg, &Rawxyz);
 	convert_to_real( &Rawxyz, &RawxyzMagnet);	
+	// Swap Rz and Ry!
+	float tmp = RawxyzMagnet.z;
+	RawxyzMagnet.z = RawxyzMagnet.y;
+	RawxyzMagnet.y = tmp;
 }
 

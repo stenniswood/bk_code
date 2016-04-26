@@ -48,6 +48,7 @@ extern Button   		MyButt;
 extern ListBox  		MyBoardList;
 extern ProgressBar  	MyProgress;
 extern CheckBox 		MyCheck;
-extern ButtonArrayMot	MyArray;
+
+//extern ButtonArrayMot	MyArray;
 
 #endif

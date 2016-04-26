@@ -27,6 +27,7 @@ AUTHOR	: Steve Tenniswood
 #include "adrenaline_graphs.h"
 #include "display_manager.hpp"
 #include "frame_window.hpp"
+#include "GyroViewI.hpp"
 #include "test_layouts.hpp"
 #include "visual_memory.h"
 #include "audio_memory.h"

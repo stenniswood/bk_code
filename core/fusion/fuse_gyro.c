@@ -92,6 +92,10 @@ void fuse_gyro_init()
 	GyroVariance.y = Gyro_variance_y;
 	GyroVariance.z = Gyro_variance_z;
 
+	GyroAccumulated.rx = 0;
+	GyroAccumulated.ry = 0;
+	GyroAccumulated.rz = 0;
+	
 	v_reciprocal( &GyroVariance, &AR_weight_gyro );
 }
 
@@ -141,6 +145,8 @@ void print_gyro_result()
 {
 	printf("Gyro  AngularRate [t=%6.3f](degrees/sec):\t\t  Rate about xyz = <%6.2f, %6.2f, %6.2f>\n",
 		gyro_time_delta, GyroAdjusted.rx, GyroAdjusted.ry, GyroAdjusted.rz );
+	printf("Gyro  Accumulated [t=%6.3f](degrees/sec):\t\t  Rotation about xyz = <%6.2f, %6.2f, %6.2f>\n",
+		gyro_time_delta, GyroAccumulated.rx, GyroAccumulated.ry, GyroAccumulated.rz );
 }
 void print_gyro_results()
 {
@@ -167,15 +173,15 @@ void process_gyro( BOOL ShowData )
 	gettimeofday(&latest_gyro_timestamp, NULL);
 	gyro_time_delta = calc_time_delta( &prev_gyro_timestamp, &latest_gyro_timestamp );
 	if (ShowGyroData)
-		printf("*** GYRO TIME DELTA=%10.4f\n", gyro_time_delta );
+		printf("*** GYRO TIME DELTA=%10.4f\n", gyro_time_delta );		
 	//calc_gyro_time_delta(DEBUG);
 
 	// Scale & Subtract offset:
-	scale     ( cast_f &RawxyzGyro,    bits_to_dps,      		cast_f &GyroReading  );
-	subtract  ( cast_f &GyroReading,   cast_f &GyroOffset,      cast_f &GyroAdjusted );
-	accumulate( cast_f &GyroAdjusted,  cast_f &GyroAccumulated, &NumberOffsetAccumulations );
-
-	print_gyro_results();
+	scale( cast_f &RawxyzGyro,    bits_to_dps,   cast_f &GyroReading  );
+	//subtract  ( cast_f &GyroReading,   cast_f &GyroOffset,      cast_f &GyroAdjusted );	
+	//accumulate( cast_f &GyroAdjusted,  cast_f &GyroAccumulated, &NumberOffsetAccumulations );
+	accumulate( cast_f &GyroReading,  cast_f &GyroAccumulated, &NumberOffsetAccumulations );	
+	GyroAngles = GyroAccumulated;
 
 	if (NumberOffsetAccumulations > ACCUMULATOINS_PER_PERIOD)		// gyro is assumed to be not moving during this time period!!
 	{
@@ -186,14 +192,14 @@ void process_gyro( BOOL ShowData )
 	if (sensor_not_moving)
 	{
 		// Accumulate Variances (ie. stddev)
-		subtract  ( cast_f &GyroAdjusted,	cast_f &KnownValue, cast_f &GyroDeviation);		
-		accumulate( cast_f &GyroDeviation, 	cast_f &SumGyroDeviations, &NumberVariancesAccumulated );
-		scale     ( cast_f &SumGyroDeviations, 1.0/NumberVariancesAccumulated,  cast_f &GyroVariance  );
+		//subtract  ( cast_f &GyroAdjusted,	cast_f &KnownValue, cast_f &GyroDeviation);		
+		//accumulate( cast_f &GyroDeviation, 	cast_f &SumGyroDeviations, &NumberVariancesAccumulated );
+		//scale     ( cast_f &SumGyroDeviations, 1.0/NumberVariancesAccumulated,  cast_f &GyroVariance  );
 	}
 
 	// Gyro's best estimate of the sensor orientation angles (wrt gravity).
 	/* Steady accumulation (integration) of the angle deltas */
-	accumulate( cast_f &GyroAdjusted, cast_f &GyroAngles, &NumberReadingAccumulated );
+	//accumulate( cast_f &GyroAdjusted, cast_f &GyroAngles, &NumberReadingAccumulated );
 	// May still be some drift in GyroAngles.  Correct against the accelerometer.
 
 	//printf("AR_weight_gyro:");	print_vector( &AR_weight_gyro  );	printf("\n");
@@ -205,6 +211,7 @@ void process_gyro( BOOL ShowData )
 
 	if (ShowData)
 	{
+		print_gyro_results();
 		//printf("\nACCUM\t:");
 		//print_avector( &GyroAngles );
 	}	

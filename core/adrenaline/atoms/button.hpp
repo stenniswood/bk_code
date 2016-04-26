@@ -29,8 +29,6 @@ private:
 	void (*on_click_callback)(void*);
 	void* on_click_context;				// often this pointer to a Control*
 	
-	
-
 };
 
  

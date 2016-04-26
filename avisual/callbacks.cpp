@@ -139,6 +139,16 @@ void tilt_sensor_update_gui()
 		dprintf("setting roll/pitch to <%6.2f,%6.2f>\n", AccelAngularPosition.rx, AccelAngularPosition.ry );
 		gyro_view->set_pitch_angle_deg( AccelAngularPosition.rx );
 		gyro_view->set_roll_angle_deg ( AccelAngularPosition.ry );
+		dprintf("setting heading to <%6.2f>\n", MagnetAngularPosition.rz );
+		gyro_view->set_heading_angle_deg( MagnetAngularPosition.rz );
+		magnet_x.set_level( RawxyzMagnet.x );
+		magnet_y.set_level( RawxyzMagnet.y );
+		magnet_z.set_level( RawxyzMagnet.z );		
+		gyro_view->Invalidate();
+		magnet_x.Invalidate();
+		magnet_y.Invalidate();
+		magnet_z.Invalidate();		
+		compass.set_heading_angle_deg( MagnetAngularPosition.rz );
 	}
 }
 
@@ -153,8 +163,6 @@ BOOL callback_instance_catcher( struct sCAN* mMsg )
 	}
 	return retval;
 }
-
-
 
 // This function delegates out to various sub callbacks.
 // based upon the CAN Msg ID
