@@ -69,7 +69,8 @@ AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   test_layouts.o test_combo_layouts.o client_list_control.o \
 			   test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
 			   power.o home_screen.o datalog_graph.o can_sql_logger.o \
-			   motor_gui.o serial_loadcell.o CAN_dispatcher.o
+			   motor_gui.o serial_loadcell.o CAN_dispatcher.o robot_moves_1_sequencer.o
+
 APPS_OBJS      = 
 FILE_EDIT_OBJS = file_editor_app.o 
 VIDEO_APP_OBJS = video_app.o video.o 

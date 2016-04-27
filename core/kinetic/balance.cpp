@@ -104,14 +104,41 @@ bool fuzzy_equal( float mValue, float mAverage, float mStdDev )
 		return true;
 	return false;
 }
+/* Return:	false until Value reaches mAverage.
+			true  has reached Avereage within tol.  or past it.		*/
 bool fuzzy_not_to_exceed( float mValue, float mAverage, float mStdDev )
-{
-	float upper = mAverage + mStdDev;
-	float lower = mAverage - mStdDev;	
+{											// +45
+	float upper = mAverage + mStdDev;		// +50
+	float lower = mAverage - mStdDev;		// +40
 	if ((mValue > lower))
 		return true;
 	return false;
 }
+/* Return:	false until Value reaches mAverage.
+			true  has reached Average within tol.  or past it.		*/
+bool fuzzy_less_than_or_equal_to( float mValue, float mAverage, float mStdDev )
+{											// for -45 +- 5. = 
+	float upper = mAverage + mStdDev;		// -40
+	float lower = mAverage - mStdDev;		// -50
+	if ((mValue < upper))
+		return true;
+	return false;
+}
+/* 	mOriginalValue - determines the side of the bell curve we started on.
+					 Values on this side or within the bell curve will be acceptable (false)
+					 Values on the other side and past the fuzzy point, will be stopping
+					 	points (true).
+	Return:	false until Value reaches mAverage.
+			true  has reached Avereage within tol.  or past it.		*/
+bool fuzzy_dont_go_past( float mValue, float mOriginalValue, float mAverage, float mStdDev )
+{
+	float upper = mAverage + mStdDev;
+	float lower = mAverage - mStdDev;	
+	if ((mValue < upper))
+		return true;
+	return false;
+}
+
 /************************************************************************/
 
 /************************************************************************

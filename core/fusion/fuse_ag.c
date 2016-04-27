@@ -125,7 +125,7 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		parse_gyro_msg	(mMsg); 
 		if (ShowGyroData)	
 			print_raw(mMsg, &RawxyzGyro, ShowCANData);
-		process_gyro	(ShowGyroData);		
+		//process_gyro	(ShowGyroData);		
 		if (ShowGyroData) 							printf("\n");
 		retval=TRUE;
 		break;
@@ -135,7 +135,7 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		parse_magnet_msg(mMsg);
 		if (ShowMagnetData)	
 			print_raw(mMsg, &RawxyzMagnet, ShowCANData);
-		process_magnet( ShowMagnetData );
+		//process_magnet( ShowMagnetData );
 		if (ShowMagnetData) 						printf("\n");
 		retval= TRUE;
 		break; 	
@@ -143,7 +143,8 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		retval= FALSE;
 		break;	
 	}
-
+	// Fusion is simple now : 
+	BestAngles = AccelAngularPosition;
 	return retval;
 }
 

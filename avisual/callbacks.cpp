@@ -48,7 +48,7 @@ int UpdateDisplaySemaphore=0;
 //BoardList 			bl;
 extern ListBox  	MyBoardList;
 
-#define Debug 1
+#define Debug 0
 
 /************************* WATCH OUT **************************
 For re-entrant code.  These routines occur during the CAN_isr()
@@ -135,8 +135,9 @@ BOOL button_board_callback( struct sCAN* mMsg )
 
 void tilt_sensor_update_gui()
 {
-	if (gyro_view) {
-		dprintf("setting roll/pitch to <%6.2f,%6.2f>\n", AccelAngularPosition.rx, AccelAngularPosition.ry );
+	if (0) {
+//	if (gyro_view) {
+		dprintf("setting pitch,roll to <%6.2f,%6.2f>\n", AccelAngularPosition.rx, AccelAngularPosition.ry );
 		gyro_view->set_pitch_angle_deg( AccelAngularPosition.rx );
 		gyro_view->set_roll_angle_deg ( AccelAngularPosition.ry );
 		dprintf("setting heading to <%6.2f>\n", MagnetAngularPosition.rz );

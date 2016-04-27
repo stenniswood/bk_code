@@ -25,6 +25,7 @@
 #include "CAN_memory.h"
 #include "OS_Dispatch.h"
 #include "OS_timers.h"
+#include "can_id_list.h"
 
 
 // Tail for this amon app.
@@ -56,6 +57,9 @@ void Button2_isr()
 void Button3_isr()
 {
 	printf("Button 3 Pressed Interrupt\n");
+	printf("RxTail_cmdline,laps= %d, %d\n", RxTail_cmdline, RxTail_cmdline_laps );
+	printf("TxTail_cmdline,laps= %d, %d\n", TxTail_cmdline, TxTail_cmdline_laps );	
+	printf("TxHead,laps = %d, %d\n", ipc_memory_can->TxHead, ipc_memory_can->TxHeadLap );
 }
 
 void init(int CAN_Speed )
@@ -150,11 +154,25 @@ void print_args(int argc, char *argv[])
 	printf("\n");
 }
 
+bool message_reject_filter( struct sCAN* message )
+{
+	if ( message->id.group.id == ID_ACCEL_XYZ )		return true;
+	if ( message->id.group.id == ID_GYRO_XYZ  )		return true;
+	if ( message->id.group.id == ID_MAGNET_XYZ )	return true;		
+	return false;
+}
+
+bool instance_reject_filter( struct sCAN* message )
+{
+	if ( message->id.group.instance == 0 )
+		return true;
+	return false;
+}
 
 int main( int argc, char *argv[] )
 {
 	print_args( argc, argv );
-
+	bool use_reject_filter=false;
 	if (argc>1) {
 		if (strcmp(argv[1], "500k")==0)
 		{
@@ -182,6 +200,8 @@ int main( int argc, char *argv[] )
 //			FilterFile filt( argv[2] );
 //			filt.Read_n_Add(         );
 		}
+		if (strcmp(argv[1], "reject")==0)
+			use_reject_filter = true;
 	}
 	printf("===============================================\n");
 	int result = can_connect_shared_memory(TRUE);
@@ -194,8 +214,14 @@ int main( int argc, char *argv[] )
 
 	int dump_count=0;	
 	while (1) {
-		if (shm_isRxMessageAvailable(&RxTail_cmdline, &RxTail_cmdline_laps)) {
-			print_message( shm_GetNextRxMsg(&RxTail_cmdline, &RxTail_cmdline_laps) );
+		if (shm_isRxMessageAvailable(&RxTail_cmdline, &RxTail_cmdline_laps)) 
+		{
+			message = shm_GetNextRxMsg(&RxTail_cmdline, &RxTail_cmdline_laps);			
+			if (use_reject_filter==false)
+				print_message( message );			
+			else if (( instance_reject_filter(message) == false ) &&
+				( message_reject_filter(message) == false ))
+				print_message( message );
 			dump_count++;
 			if (dump_count>40096)
 			{

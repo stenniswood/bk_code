@@ -51,6 +51,7 @@ AUTHOR	: Steve Tenniswood
 #include "vector_math.h"
 #include "balance.hpp"
 #include "fuse_ag.h"
+#include "robot_moves_1_sequencer.hpp"
 
 #define Debug 0
 
@@ -509,64 +510,14 @@ void init_gyro_view()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( view  );
 }
-
-void do_bow( float mAngle )
+void stop_motors()
 {
-	static float DesiredAngle;
-	static int state=0;	
 	struct sCAN msg;
-	int ldir = +1;
-	int rdir = -1;
-	
-	int instanceL = 31;
-	int instanceR = 21; 
-	// Backward:  L,R = + -
-	// Foreward:  L,R = - +
-
-	float duty = 10;
-	bool fuzzy_compare;
-
-	switch (state)
-	{
-	case 0 :
-		DesiredAngle = mAngle;
-		printf("Perform Bow :  instanceL=%d;  duty=%6.2f \n", instanceL, duty );		
-		pack_move_speed( &msg, instanceL, ldir*duty );
-		shm_add_can_tx_message( &msg );	
-		pack_move_speed( &msg, instanceR, rdir*duty );
-		shm_add_can_tx_message( &msg );
-		state++;
-		break;
-	case 1 :
-		/* Wait until desired Tilt is reached.  */
-		/* 		Msgs are captured in amon and posted to CAN_memory. 
-				These are retrieved and proc'd in background (visual_main: can_interface)
-				
-				This is same thread as the tilt processing.  So we can't loop here.
-					Just a spot check and must return;
-		*/
-			fuzzy_compare = fuzzy_not_to_exceed(BestAngles.ry, DesiredAngle, 5. );
-			if (fuzzy_compare)
-				state++;			
-		break;
-	case 2 : 	
-		printf("Restore Bow to stand :  instanceL=%d;  duty=%6.2f \n", instanceL, duty);
-		duty = -10;
-		pack_move_speed( &msg, instanceL, ldir*duty );
-		shm_add_can_tx_message( &msg );	
-		pack_move_speed( &msg, instanceR, rdir*duty );
-		shm_add_can_tx_message( &msg );
-		state++;
-		break;
-	case 3 :
-		/* Wait until Tilt is back to near zero.  */
-			fuzzy_compare = fuzzy_not_to_exceed(BestAngles.ry, DesiredAngle, 5.);
-			if (fuzzy_compare)
-				state++;
-		break;
-		
-	default: state = 0;  break;
-	}
+	printf("Button callback: Mots 21,31  stopping \n");
+	pack_move_speed( &msg, Hip_instanceL, 0.0 );
+	shm_add_can_tx_message( &msg );
+	pack_move_speed( &msg, Hip_instanceR, 0.0 );
+	shm_add_can_tx_message( &msg );
 }
 
 void robot_hip_test_cb( int row, int col )
@@ -575,37 +526,37 @@ void robot_hip_test_cb( int row, int col )
 	int rdir = -1;
 	int dir  = 1;
 	struct sCAN msg;
-	switch( row )
-	{
-	case 0 : 	dir = +1;		break;
-	case 1 : 	dir = 0;		break;
-	case 2 : 	dir = -1.5;		break;
-	default: break;				
-	}
 	
 	// Column determines the motor instances:
+	float duty=0;
 	byte instanceL = 0;
 	byte instanceR = 0;
 	switch (col)
 	{
-	case 0 : instanceL = 31;
-			 instanceR = 21; 
+	case 0 : instanceL = 59;
+			 instanceR = 59; 
+			 switch( row )	{
+				 case 0 : 	bow_angle=+45; start_bow=true;	break;		// Start state machine on bow thread
+				 case 1 : 	stop_motors();					break;
+				 case 2 : 	bow_angle=-45; start_bow=true;	break;		// Start state machine on bow thread
+				 default: break;				
+			 }			 
 			break;		 // Hip
 	case 1 : instanceL = 32;
 			 instanceR = 22; 
 			break;		 // Knee
 	case 2 : instanceL = 33;
 			 instanceR = 23; 
+			duty = 10*dir;
+			printf("Button callback:  instanceL=%d;  duty=%6.2f \n", instanceL, duty);	
+			pack_move_speed( &msg, instanceL, duty*ldir );
+			shm_add_can_tx_message( &msg );
+			printf("Button callback:  instanceR=%d;  duty=%6.2f \n", instanceL, duty);
+			pack_move_speed( &msg, instanceR, duty*rdir );
+			shm_add_can_tx_message( &msg );
 			break;		 // Ankle
 	default: break;
 	}
-	float duty = 10*dir;
-	printf("Button callback:  instanceL=%d;  duty=%6.2f \n", instanceL, duty);	
-	pack_move_speed( &msg, instanceL, duty*ldir );
-	shm_add_can_tx_message( &msg );
-	printf("Button callback:  instanceR=%d;  duty=%6.2f \n", instanceL, duty);	
-	pack_move_speed( &msg, instanceR, duty*rdir );
-	shm_add_can_tx_message( &msg );
 }
 
 LoadCellView* loadcell_left_foot=NULL;
@@ -616,6 +567,7 @@ Leveler   		magnet_y;
 Leveler   		magnet_z;
 CompassView   	compass;
 ButtonArray   	test_buttons(3,3);
+pthread_t 		bow_thread_id;	
 
 void init_loadcell_view()
 {
@@ -623,7 +575,7 @@ void init_loadcell_view()
 	w=200;
 	loadcell_left_foot  = new LoadCellView(50,   w+50,   400, 50 );
 	loadcell_right_foot = new LoadCellView(w+70, w+70+w, 400, 50 );
-	loadcell_left_foot->set_name( "left" );
+	loadcell_left_foot->set_name ("left" );
 	loadcell_right_foot->set_name("right");
 
 	gyro_view = new GyroView		( 50, 470, 800, 500 );
@@ -654,20 +606,20 @@ void init_loadcell_view()
 	test_buttons.create();
 	
 	vector<string> text;
-	text.push_back("+Hips");
+	text.push_back("+Bow");
 	text.push_back("+Knees");
 	text.push_back("+Ankles");
 	test_buttons.set_button_text_row( 0, text );
 
 	text.clear();	
-	text.push_back("0 Hips");
+	text.push_back("Stop");
 	text.push_back("0 Knees");
 	text.push_back("0 Ankles");
 	test_buttons.set_button_text_row( 1, text );
 	
 	text.clear();	
-	text.push_back("-Hips");
-	text.push_back("-Knees");
+	text.push_back("-Bow"   );
+	text.push_back("-Knees" );
 	text.push_back("-Ankles");
 	test_buttons.set_button_text_row( 2, text );
 	test_buttons.show_border(true);
@@ -682,6 +634,13 @@ void init_loadcell_view()
 	MainDisplay.add_object( &magnet_z );
 	MainDisplay.add_object( &compass  );
 	MainDisplay.add_object( &test_buttons  );	
+	
+	int iret1 = pthread_create( &bow_thread_id, NULL, bow_now_thread, (void*) NULL);
+	if (iret1)
+	{
+		fprintf(stderr,"Error - Could not create right_foot thread. return code: %d\n",iret1);
+		exit(EXIT_FAILURE);
+	}
 }
 
 ScrollBar My_sb;
@@ -921,3 +880,42 @@ void print_test_list()
 	loadcell_right_foot->set_sensor_value( 1, 60 );
 	loadcell_right_foot->set_sensor_value( 2, 25 ); 
 	loadcell_right_foot->set_sensor_value( 3, 20 ); 	*/
+
+/*void robot_hip_test_cb( int row, int col )
+{
+	int ldir = +1;
+	int rdir = -1;
+	int dir  = 1;
+	struct sCAN msg;
+	switch( row )
+	{
+	case 0 : 	dir = +1;		break;
+	case 1 : 	dir = 0;		break;
+	case 2 : 	dir = -1.5;		break;
+	default: break;				
+	}
+	
+	// Column determines the motor instances:
+	byte instanceL = 0;
+	byte instanceR = 0;
+	switch (col)
+	{
+	case 0 : instanceL = 31;
+			 instanceR = 21; 
+			break;		 // Hip
+	case 1 : instanceL = 32;
+			 instanceR = 22; 
+			break;		 // Knee
+	case 2 : instanceL = 33;
+			 instanceR = 23; 
+			break;		 // Ankle
+	default: break;
+	}
+	float duty = 10*dir;
+	printf("Button callback:  instanceL=%d;  duty=%6.2f \n", instanceL, duty);	
+	pack_move_speed( &msg, instanceL, duty*ldir );
+	shm_add_can_tx_message( &msg );
+	printf("Button callback:  instanceR=%d;  duty=%6.2f \n", instanceL, duty);
+	pack_move_speed( &msg, instanceR, duty*rdir );
+	shm_add_can_tx_message( &msg );
+}*/

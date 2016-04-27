@@ -2,6 +2,8 @@
 #define _BALANCE_HPP_
 
 
+#include "load_cell_view.hpp"
+
 void upper_threshold_action();
 void lower_threshold_action();
 
@@ -11,6 +13,7 @@ void  standing_balance();
 
 bool fuzzy_equal( float mValue, float mAverage, float mStdDev );
 bool fuzzy_not_to_exceed( float mValue, float mAverage, float mStdDev );
+bool fuzzy_less_than_or_equal_to( float mValue, float mAverage, float mStdDev );
 
 
 /* This requires info from the Loadcells (serial threads)

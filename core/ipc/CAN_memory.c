@@ -43,7 +43,7 @@ struct  can_ipc_memory_map* ipc_memory_can=NULL;	// structured memory.
 
 
 
-#define Debug 0
+#define Debug 1
 
 static void print_message(struct sCAN* msg)
 {	
@@ -136,6 +136,7 @@ void init_can_memory()
 	ipc_memory_can->TxHead=0;
 	ipc_memory_can->TxHeadLap=0;
 	ipc_memory_can->TxOverFlow=FALSE;		// indicator if trying to send too quickly.	
+	dprintf ("init_CAN_memory() \n" );	
 }
 
 /* return:  0=> error;  greater than 0 segment_ic */
@@ -237,12 +238,12 @@ void copy_can_msg( struct sCAN* mDest, struct sCAN* mSrc )
 
 void ipc_add_can_rx_message( struct sCAN* mMsg )
 {	
-	copy_can_msg( &(ipc_memory_can->Received[ipc_memory_can->RxHead++]), mMsg );
-	
-	if (ipc_memory_can->RxHead > MAX_CAN_RX_MESSAGES) {
+	if (ipc_memory_can->RxHead >= MAX_CAN_RX_MESSAGES) {
 		ipc_memory_can->RxHead = 0;
 		ipc_memory_can->RxHeadLap++;
 	}
+
+	copy_can_msg( &(ipc_memory_can->Received[ipc_memory_can->RxHead++]), mMsg );	
 }
 
 void AddToRxList( struct sCAN* mMsg )
@@ -264,7 +265,7 @@ BOOL  shm_isRxMessageAvailable( int* mTail, int* mTailLaps )
 	long int head_count = ipc_memory_can->RxHeadLap * MAX_CAN_RX_MESSAGES + ipc_memory_can->RxHead;	
 	long int msgs_qued  = head_count - tail_count;
 	
-	
+
 	if (msgs_qued >= MAX_CAN_RX_MESSAGES)		// overrun 
 	{					
 		//printf("RxHeadLap=%d; RxHead=%d\n", ipc_memory_can->RxHeadLap, ipc_memory_can->RxHead);	
@@ -306,13 +307,14 @@ void shm_add_can_tx_message( struct sCAN* mMsg )
 	if ((ipc_memory_can==NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 	{
 		printf("Error: Cannot queue message, CAN ipc memory not available!!\n");
-		return FALSE;
+		return ;
 	}
-	printf("TxHead=%d\n", ipc_memory_can->TxHead );
-	if (ipc_memory_can->TxHead > MAX_CAN_TX_MESSAGES) {
+
+	if (ipc_memory_can->TxHead >= MAX_CAN_TX_MESSAGES) {
 		ipc_memory_can->TxHead = 0;
 		ipc_memory_can->TxHeadLap++;
 	}
+	//dprintf("TxHead=%d\n", ipc_memory_can->TxHead );
 	copy_can_msg( &(ipc_memory_can->Transmit[ipc_memory_can->TxHead++]), mMsg );	
 }
 BOOL shm_isTxMessageAvailable( int* mTail, int* mTailLaps  )
