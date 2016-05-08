@@ -220,9 +220,9 @@ void	BasicCardGame::evaluate_winners()
 	{
 		scores[pi] = (*iter)->get_best_black_jack_score();
 		if (scores[pi] > house_score)
-			(*iter)->set_winner(true);		
+			(*iter)->win();
 		else 
-			(*iter)->set_winner(false);
+			(*iter)->lose();
 	}
 }
 

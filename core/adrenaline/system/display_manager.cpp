@@ -276,7 +276,8 @@ void DisplayManager::set_main_window( Control* mNewWindow )
 	Rectangle* rect = get_useable_rect();
 	if (mNewWindow)
 		mNewWindow->set_position( rect );
-	mNewWindow->onCreate();	// what if it's already created? the control.cpp class will return 0
+	// Removed b/c : add_object down below calls it.
+	//mNewWindow->onCreate();	// what if it's already created? the control.cpp class will return 0
 
 	// Remove old main window, and add in the new! 
 	if ((*m_running_apps)[m_current_running_app]->m_main_window)
@@ -410,7 +411,7 @@ void  DisplayManager::set_background( char* mFileName )
 
 void  DisplayManager::add_object( Control* NewControl )
 {
-	NewControl->onCreate ( );
+	NewControl->onCreate( );
 	register_child( NewControl );
 }
 

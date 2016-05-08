@@ -333,7 +333,7 @@ void BlackJack::place_buttons( int mPlayerIndex )
 	// BUTTONS ARE RELATIVE TO THE CARD PLAYERS POSITIONING:
 	CardPlayerChips* cp = get_player(index);
 	sx = cp->get_left();
-	sy = cp->get_bottom() - below;
+	sy = cp->get_bottom() - below - 2*SCORE_TEXT_HEIGHT;
 	if (Debug) printf("place_buttons: sx,sy = %d,%d\n", sx, sy );
 	hit.move_to( sx, sy );
 	stay.set_position_right_of( &hit, true, 10 );	

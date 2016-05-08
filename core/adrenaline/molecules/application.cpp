@@ -99,7 +99,7 @@ void	Application::setup_sidebar	(	)  // derived class adds these here
 	if (Debug) printf("Application::setup_sidebar() done\n");	
 }
 
-void	Application::setup_main_menu(	)  // derived class adds these here
+void	Application::setup_main_menu(	)  // The horizontal menu. derived class adds these here
 {
 	if (Debug) printf("Application::setup_main_menu()\n");
 	m_main_menu.m_application = this;

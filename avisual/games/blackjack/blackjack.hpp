@@ -8,7 +8,9 @@
 #include "card_player_chips.hpp"
 #include "display_manager.hpp"
 
+/* This is the game's main window 
 
+ */
 class BlackJack : public Control
 {
 public:
@@ -48,7 +50,7 @@ private:
 	std::vector<Deck*>				deck;
 	std::vector<CardPlayerChips*>	m_players;
 	CardPlayerChips*				house;
-	
+
 	Button hit ;
 	Button stay;
 	Button play_again;

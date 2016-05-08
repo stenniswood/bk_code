@@ -54,21 +54,22 @@ int		CardPlayerChips::draw( )
 	CardPlayer::draw( );
 	
 	// Now Draw  "Cash: $235"
-	const int TEXT_HEIGHT=24;
-	float sx = get_width()  + get_left();
-	float sy = get_bottom() - TEXT_HEIGHT;
 
+	float sx = get_width()  + get_left();
+	float sy = get_bottom() - SCORE_TEXT_HEIGHT;
 	char  cash_text[40];	
 	
+	// CASH
 	Stroke_l(0xFF00FF00);
 	Fill_l  (0xFF7FFF00);
 	sprintf(cash_text, "$%6.0f", in_hand );	
 	TextEnd ( sx, sy, cash_text, SerifTypeface, 16 );	
 
+	// WAGER:
 	Stroke_l(0xFFFFFF00);
 	Fill_l  (0xFFFFFF00);
 	sprintf(cash_text, "Bet $%6.0f", wager );	
-	TextEnd ( sx, sy-TEXT_HEIGHT, cash_text, SerifTypeface, 14 );	
+	TextEnd ( sx, sy-SCORE_TEXT_HEIGHT, cash_text, SerifTypeface, 14 );	
 }
 
 

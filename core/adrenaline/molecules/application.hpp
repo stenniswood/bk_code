@@ -20,21 +20,20 @@
 	
 	This onCreate then sets the menus, sidebars, and status, etc.
 */
-
 class Application 
 {
 public:
-	Application ();
+	Application ( );
 	Application ( Rectangle* mRect );
-	~Application();
+	~Application( );
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 	int				calc_metrics	(	);
 	virtual int		background_time_slice(	);
 	
 	virtual void	setup_sidebar	(	);  // derived class adds these here
-	virtual void	setup_main_menu	(	);  // derived class adds these here
-	virtual void	setup_app_menu	(	);  // Name of App, About, Preferences, Quit.
+	virtual void	setup_main_menu	(	);  // The horizontal menu. derived class adds these here
+	virtual void	setup_app_menu	(	);  // The first vertical menu.  Name of App, About, Preferences, Quit.
 	
 	virtual void 	register_with_display_manager();
 
@@ -53,8 +52,8 @@ public:
 	void			About			(	);
 	void			Preferences		(	);
 	int				Quit			(	);	
-			
-	virtual int		onClick(int x, int y, bool mouse_is_down=true);
+
+	virtual int		onClick			( int x, int y, bool mouse_is_down=true );
 	virtual int   	draw		 	(	);
 
 

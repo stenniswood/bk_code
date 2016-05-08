@@ -25,11 +25,19 @@
 #include "CAN_base.h"
 #include "can_window.hpp"
 #include "filter_select.hpp"
+#include "CAN_memory.h"
+#include "packer.h"
 
 
 void rescan_cb( void* mCANMessages )
 {
 	CANMessages* cm = (CANMessages*) mCANMessages;
+	
+	// REQUEST BOARDS PRESENT VIA CAN :
+	struct sCAN msg;
+	pack_board_presence_request( &msg, ASK_PRESENCE );
+	shm_add_can_tx_message( &msg );
+	
 	cm->reset_boards_present();
 	cm->Invalidate();	
 }
@@ -42,7 +50,7 @@ void adjust_filter_cb( void* mCANMessages )
 	fs = new FilterSelector();	
 	fs->set_width_height( 300, 200 );
 	fs->move_to		    ( 200, 100 );
-	fs->onCreate();	
+	fs->onCreate		( );
 //	fs->m_update.set_on_click_listener( update_value_cb, mObj );
 	fs->draw();		
 //	cm->Invalidate();	
@@ -156,7 +164,6 @@ int		CANMessages::onCreate(  )
 	if (created)	return 0;
 		
 	place_views();
-	//fill_phony_msgs();
 	
 	Window::onCreate();
 	m_msg_view.calc_column_positions_from_widths();

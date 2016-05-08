@@ -130,6 +130,7 @@ void 	Drawing2D::Initialize(	)
 { 
 	Control::Initialize();
 	init_main_draw_menu();
+	show_border();
 }
 
 int		Drawing2D::calc_metrics() 
@@ -216,11 +217,12 @@ int Drawing2D::draw_poly_line ( int mIndex )
 
 int Drawing2D::draw( )
 { 
+	int retval = Control::draw();
 	for (int i=0; i < m_lines.size(); i++)
 	{
 		draw_poly_line(i);
 	}
-	return Control::draw();
+	return retval;
 }
 
 int		Drawing2D::get_hit_index		( int Mousex, int Mousey ) 
@@ -243,7 +245,10 @@ bool Drawing2D::append_new_captured	( )
 
 Control* Drawing2D::HitTest ( int x, int y 	)
 {
-	Capture(x,y,1);
+	Control* retval = Control::HitTest( x,y);
+	if (retval)
+		Capture(x,y,1);
+	return retval;
 }
 
 Control* Drawing2D::Capture ( int x, int y, int finger 	)

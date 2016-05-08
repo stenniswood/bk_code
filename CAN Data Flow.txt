@@ -1,0 +1,24 @@
+/* DATA FLOW FOR CAN OPERATION:
+
+amon should be running.  This sets up the CAN IPC memory and will transmit & 
+	receive msgs.
+
+avisual_main.cpp -  Has a background polling of "void can_interface()"
+					This function checks if CAN ipc memory is present,
+					and if so, it checks if a new message has been received.
+					if so, it dispatches the msg to all receivers (see CAN_dispatcher.cpp)
+					
+					Each call of the function will check for the IPC presence and 
+					connect if positive.						
+					
+		Visual_main.cpp sets up one such receiver :						
+			CAN_add_rx_callback( callback_tilt_reading );
+			
+		That receiver "callback_tilt_reading" is in 
+			fuse_ag.c 
+
+	CAN_App  adds itself as a receiver in the Initialize().
+	
+
+
+*/

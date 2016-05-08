@@ -51,6 +51,7 @@ public:
 	virtual void	file_open_recent( );	
 	virtual void	file_save		( );
 	virtual void	file_save_as	( );
+	BOOL			distribute_can_msg( struct sCAN* mMsg );
 
 	void 			add_watch		(	);	
 	void 			line_graph		(	);	

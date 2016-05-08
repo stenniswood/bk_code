@@ -5,6 +5,8 @@
 //#include "control.hpp"
 #include "card_player.hpp"
 
+const int SCORE_TEXT_HEIGHT=24;
+
 
 class CardPlayerChips : public CardPlayer
 {
@@ -15,16 +17,14 @@ public:
 	void	 increase_wager ( float mIncrement = 5.0 );
 	void	 decrease_wager ( float mIncrement = 5.0 );
 
-	void	 buy_in		( float mDollarAmount 	);
+	void	 		buy_in			( float mDollarAmount 	);
 
 	virtual void	win	 ( );
-	virtual void	lose( );
-
-	virtual  int draw	( );
+	virtual void	lose ( );
+	virtual  int 	draw ( );
 		
 	float		in_hand;
 	float		wager;
-
 };
 
 

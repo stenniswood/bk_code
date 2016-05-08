@@ -68,19 +68,15 @@ void 	BlackJackApp::Initialize	(	)
 	*/
 	m_welcome_status   = "Get as close to 21 without going over.";
 	m_application_name = "Black Jack";
-	Application::Initialize();
 	
-	m_main_window      = new BlackJack( 3 );
-	
+	m_main_window      = new BlackJack( 3 );	
 }
 
 // First Time application is run - load resources etc.
 int		BlackJackApp::onCreate(	)	
 {
 	int retval = Application::onCreate();
-	printf("BlackJackApp::onCreate(	)	\n");
-	
-    //((BlackJack*)m_main_window)->onPlace();
+	printf("BlackJackApp::onCreate(	)	\n");		
     return retval;
 }
 

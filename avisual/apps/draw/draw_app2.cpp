@@ -21,10 +21,10 @@
 #include <shapes.h>
 #include "Graphbase.hpp"
 #include "adrenaline_windows.h"
-#include "draw_app.hpp"
+//#include "draw_app.hpp"
 #include "draw_app2.hpp"
 #include "CAN_base.h"
-
+#include "draw_canvas.hpp"
 
 
 
@@ -38,9 +38,9 @@ void init_drawing_app( )
 {
 	printf("init_apps()\n");
 	if (draw_app==NULL)	
-		draw_app = new HeartsApp();
+		draw_app = new DrawApp();
 	if (draw_app)
-		draw_app->register_with_display_manager();
+		MainDisplay.start_app( draw_app );
 }
 
 
@@ -81,14 +81,13 @@ void 	DrawApp::Initialize		(	)
 	m_application_name = "Drawing App";
 	
 	setup_app_menu();
-	setup_menu    ();
+	setup_main_menu();
 	onPlace();	
 
 }	// create all the objects here.
 
 int		DrawApp::onPlace		(	) 
 { 
-	Application::onPlace( );
 
 }
 
@@ -97,18 +96,21 @@ void	DrawApp::setup_app_menu( )
 	Application::setup_app_menu( );
 }
 
-void	DrawApp::setup_menu  	( ) 
+void	DrawApp::setup_main_menu ( ) 
 { 
-	Application::setup_menu();
+	Application::setup_main_menu();
 
 	draw_view_menu.clear_all();
-	draw_view_menu.add_simple_command( "Graph "		 );
-	draw_view_menu.add_simple_command( "Robot Limbs"  );
-	draw_view_menu.add_simple_command( "Button boards");
+	draw_view_menu.add_simple_command( "Erase "	  );
+	draw_view_menu.add_simple_command( "Color" 	  );
+	draw_view_menu.add_simple_command( "Zoom In"  );
+	draw_view_menu.add_simple_command( "Zoom Out" );	
+	draw_view_menu.add_simple_command( "Show brush toolbar" );		
+	draw_view_menu.add_simple_command( "Show shape toolbar" );
 	draw_view_menu.add_callback_all_items( draw_view_menu_actions  );
 
-	m_hMenu.add_entry_text( "Edit" );
-	m_hMenu.add_sub_menu  ( "View",     &draw_view_menu );
+	m_main_menu.add_entry_text( "Edit" );
+	m_main_menu.add_sub_menu  ( "View",     &draw_view_menu );
 }
 
 void 	DrawApp::register_with_display_manager() 
@@ -116,13 +118,13 @@ void 	DrawApp::register_with_display_manager()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object	( m_main_window );
 	MainDisplay.m_status.set_text("Draw App");
-	MainDisplay.set_menu  	( &m_hMenu );
+	MainDisplay.set_menu  	( &m_main_menu );
 }	
 
-int				DrawApp::About			(	) 
+void				DrawApp::About			(	) 
 { 
 }
-int				DrawApp::Preferences		(	) 
+void				DrawApp::Preferences		(	) 
 { 
 }
 

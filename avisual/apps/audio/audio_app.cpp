@@ -276,8 +276,7 @@ void 	AudioApp::Initialize		(	)
 	}
 	WaveformInfo.set_text_size	 ( 12  );
 
-	//printf("AudioApp::Initialize 2\n"); 
-	//if (ipc_memory_aud != NULL)
+	if (ipc_memory_aud != NULL)
 		configure_wave_views( ipc_memory_aud->audio_header.num_channels,
 						  (short*)ipc_memory_aud->audio_data,
 						  (short*)ipc_memory_aud->audio_data   );

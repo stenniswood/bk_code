@@ -170,11 +170,10 @@ int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 			MainDisplay.start_app( can_app );	
 			break;
 	case 4: init_drawing_app		();		break;	
-	case 5: init_drawing_app		();		break;
-	case 6: init_file_editor_app	();		break;
-	case 7: init_pot_objs			();		break;	
-	case 8: init_Video_app			();		break;
-	case 9: init_robot_app();		printf(" --- init_robot_panel --- \n");  break;
+	case 5: init_file_editor_app	();		break;
+	case 6: init_pot_objs			();		break;	
+	case 7: init_Video_app			();		break;
+	case 8: init_robot_app();		printf(" --- init_robot_panel --- \n");  break;
 	default: 	break;
 	}
 	printf("handle_apps_screens() done\n");
@@ -187,7 +186,6 @@ void init_apps_menu()
 	apps.add_simple_command( "File Browser" 	);				
 	apps.add_simple_command( "CAN App" 		);
 	apps.add_simple_command( "Drawing" 		);
-	apps.add_simple_command( "Drawing2" 	);
 	apps.add_simple_command( "File Editor" 	);
 	apps.add_simple_command( "Potentiometer");	// simple app showing Big Motor board potentiometer/encoder results.
 	apps.add_simple_command( "Camera" 		);
