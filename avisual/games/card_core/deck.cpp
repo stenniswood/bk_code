@@ -51,8 +51,14 @@ void Deck::load_resources()
 
 Card* Deck::draw_one()
 {
-	Card* tmp = theDeck[shuffled_indices.back()];
-	shuffled_indices.pop_back();
+	if (shuffled_indices.empty()) 
+		return NULL;
+		
+	int index = shuffled_indices.back();
+	if ((index>theDeck.size()) || (index<0))
+		return NULL;
+	Card* tmp = theDeck[index];
+	shuffled_indices.pop_back();		
 	return tmp;	
 }
 
@@ -95,7 +101,9 @@ void Deck::shuffle()
 	int rnd  = 0;
 	for (int i=0; i < theDeck.size(); i++)
 	{
+		// Random number points to the start_indices[] array.  [0 1 2 3 4...51]
 		rnd2 = rnd = rand() % number_cards_remaining;
+		// Look up the indexed into start_indices.
 		std::list<int>::iterator iter = start_indices.begin();
 		for ( ; rnd>0; rnd-- )
 			iter++;

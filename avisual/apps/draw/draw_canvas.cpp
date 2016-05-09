@@ -231,8 +231,6 @@ int		Drawing2D::get_hit_index		( int Mousex, int Mousey )
 int		Drawing2D::onClick(int x, int y, bool mouse_is_down) 
 { 
 	//int result =  Control::onClick(x,y,mouse_is_down);
-
-
 	//m_all_lines.push_back( m_points );
 }
 

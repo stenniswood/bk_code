@@ -1,26 +1,25 @@
-#ifndef _BLACKJACK_APP2_
-#define _BLACKJACK_APP2_
+#ifndef _REVERSI_APP2_
+#define _REVERSI_APP2_
 
 /**** These function handle the menu commands:   ****/
 
 /***** END OF MENU COMMAND FUNCTIONS *****/
 
 
-void init_blackjack( );
+void init_reversi( );
 
 
-class BlackJackApp : public Application
+class ReversiApp : public Application
 {
 public:
-	BlackJackApp ();
-	BlackJackApp ( Rectangle* mRect );
-	~BlackJackApp();
+	ReversiApp ();
+	ReversiApp ( Rectangle* mRect );
+	virtual ~ReversiApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
-	int				onPlace			(	);
 	virtual int		onCreate	  	(	);	// First Time application is run - load resources etc.
 
-	virtual void	setup_menu  	( );
+	virtual void	setup_main_menu ( );
 	virtual void	setup_app_menu  ( );
 	virtual void 	register_with_display_manager();	
 	
@@ -36,7 +35,7 @@ public:
 
 };
 
-extern BlackJackApp* bj_app;
+extern ReversiApp* reversi_app;
 
 #endif
 

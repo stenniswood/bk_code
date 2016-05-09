@@ -57,8 +57,8 @@ public:
 	void  			print_color_info  	  ( 				 );
 	void          	print_children		  (  				 );
 	
-	bool  			is_visible			  ( );// 					{ return Visible;  };
-	void  			show				  ( bool mShow=true );// 	{ Visible = mShow; };
+	bool  			is_visible			  ( );
+	void  			show				  ( bool mShow=true );
 	void  			hide				  ( );// { Visible = false; };
 	void  			show_border 		  ( bool Show=true ) 	{ HasBorder = Show; };
 

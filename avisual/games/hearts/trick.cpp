@@ -21,7 +21,7 @@
 
 Trick::Trick( int MaxCardsInHand ) 
 :CardPlayer(MaxCardsInHand)
-{
+{ 
 	
 }
 

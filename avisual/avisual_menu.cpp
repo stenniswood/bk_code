@@ -214,6 +214,7 @@ void init_game_menu()
 	games.add_simple_command( "Hearts" 		);
 	games.add_simple_command( "Reversi" 	);
 	games.add_simple_command( "Battleships" );
+	games.set_state( MENU_STATE_GRAYED, 4 );
 	games.add_callback_all_items( show_game_screens  );
 }
 

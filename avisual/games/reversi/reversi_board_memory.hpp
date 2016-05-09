@@ -1,5 +1,5 @@
-#ifndef _OTHELLO_BOARD_MEMORY_
-#define _OTHELLO_BOARD_MEMORY_
+#ifndef _REVERSI_BOARD_MEMORY_
+#define _REVERSI_BOARD_MEMORY_
 
 #define bool bool 
 

@@ -12,9 +12,9 @@ void init_hearts( );
 class HeartsApp : public Application
 {
 public:
-	HeartsApp ();
+	HeartsApp ( );
 	HeartsApp ( Rectangle* mRect );
-	~HeartsApp();
+	virtual ~HeartsApp( );
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 	virtual int		onCreate	  	(	);	// First Time application is run - load resources etc.
@@ -31,7 +31,6 @@ public:
 	virtual void	file_open_recent( );	
 	virtual void	file_save		( );
 	virtual void	file_save_as	( );
-
 };
 
 extern HeartsApp* hearts_app;

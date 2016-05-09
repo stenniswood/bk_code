@@ -25,12 +25,9 @@ HeartsGame::HeartsGame( int mNumber_of_players )
 : BasicCardGame(mNumber_of_players), trick(mNumber_of_players)
 {
 	house = NULL;
-	CardPlayer* cp;
-	int cards_in_hand = number_of_cards_to_start( mNumber_of_players );	
+	CardPlayer* cp; 
+	//int cards_in_hand = number_of_cards_to_start( mNumber_of_players );	
 
-	for (int i=0; i<mNumber_of_players; i++)	{
-	//	players[i]->set_width_height( 4*CARD_WIDTH, 100 );
-	}	
 }
 
 void	HeartsGame::score					( )
@@ -66,7 +63,7 @@ int		HeartsGame::number_of_cards_to_start( int mNumber_of_players )
 int		HeartsGame::remove_cards(	)
 {
 	Card* card;
-	switch(number_of_players)
+	switch(players.size())
 	{
 	case 3:	card = deck[0]->find( '2', 'D' );	// the 2 of diamonds is removed 
 			deck[0]->discard( card );

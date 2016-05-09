@@ -122,7 +122,7 @@ int 	HorizontalMenu::select 	( int mSelected 	)
 
 int HorizontalMenu::draw(	)
 { 
-	//printf("H Menu Draw()\n");
+	// CENTER TEXT:
 	int item_count = m_entries.size();
 	float l = left;
 	float c = (height-text_size) / 2.0 + bottom;
@@ -131,8 +131,7 @@ int HorizontalMenu::draw(	)
 	Stroke_l( background_color );
 	Fill_l  ( background_color );
 	Rect    ( left, bottom, width, height );
-	if (Debug) print_positions();	
-	//printf("HORIZONTAL_MENU::  left=%6.1f; bottom=%6.1f; width=%6.1f; height=%6.1f\n", left, bottom, width, height);
+	if (Debug) print_positions();
 	
 	// Color the Selected Menu:
 	if (m_selection>=0)
@@ -171,8 +170,10 @@ int HorizontalMenu::draw(	)
 	}
 	if ( is_selection_valid() )  {
 		//printf("H Menu selection is valid!\n");
-		if (m_entries[m_selection].menu) {
-			//printf("H Menu selection is a menu\n");		
+		if ((m_entries[m_selection].menu) && 
+			(m_entries[m_selection].menu->is_visible())) 
+		{
+			//printf("H Menu selection is a menu\n");					
 			m_entries[m_selection].menu->draw();
 		}
 	}

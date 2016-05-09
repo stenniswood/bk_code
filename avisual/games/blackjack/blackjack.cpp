@@ -36,6 +36,11 @@ void hit_cb( void* mBlackJack )
 	if (Debug) printf("Hit button pushed\n");
 	// House gets one
 	Card* card = ((BlackJack*)mBlackJack)->draw_one();
+	if (card==NULL)
+	{ 	// need to reshuffle (ideally do not reshuffle the cards in play!)
+		//theDeck.shuffle();	
+	}
+		
 	CardPlayer* cp = ((BlackJack*)mBlackJack)->get_player(  );
 	cp->receive_card( card, true );
 	cp->arrange_cards( );
@@ -122,6 +127,9 @@ int	BlackJack::dealer_play(	)
 	while (decision)
 	{
 		Card* card = draw_one( );
+		if (card==NULL)	{ 	// need to reshuffle (ideally do not reshuffle the cards in play!)
+			//theDeck.shuffle();	
+		}		
 		house->receive_card  ( card, true );
 		house->arrange_cards ( );
 		house->draw();
@@ -233,6 +241,10 @@ void	BlackJack::deal()
 	{
 		// House gets one
 		card = draw_one();
+		if (card==NULL)
+		{ 	// need to reshuffle (ideally do not reshuffle the cards in play!)
+			//theDeck.shuffle();	
+		}
 		house->receive_card( card, face_up );
 		face_up = true;
 		
@@ -242,6 +254,10 @@ void	BlackJack::deal()
 		{
 			if (Debug) printf("dealing player : card # %d\n", i);	
 			card = draw_one();
+			if (card==NULL)
+			{ 	// need to reshuffle (ideally do not reshuffle the cards in play!)
+				//theDeck.shuffle();	
+			}			
 			(*iter)->receive_card( card, true );
 		}
 	}	

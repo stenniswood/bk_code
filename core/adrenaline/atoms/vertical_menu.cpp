@@ -17,7 +17,7 @@
 #include "vertical_menu.hpp"
 
 
-#define Debug 0
+#define Debug 1
 
 
 VerticalMenu::VerticalMenu()
@@ -45,6 +45,7 @@ VerticalMenu::~VerticalMenu()
 void 	VerticalMenu::Initialize(	)
 {
 	ListBox::Initialize();
+
 	
 	set_odd_color ( 0xEFFFFFFF );
 	set_even_color( 0xEFFFFFFF );
@@ -55,6 +56,7 @@ void 	VerticalMenu::Initialize(	)
 	isTopDown  		= true;
 	text_size 		= 19;
 	text_color 		= 0xFF000000;	
+	m_disabled_color = 0xFF7f7f7f;
 }
 
 int  VerticalMenu::calc_metrics()
@@ -70,6 +72,15 @@ int  VerticalMenu::calc_metrics()
 
 	ListBox::calc_metrics();
 	return 1;
+}
+
+int  VerticalMenu::onCreate	(  )
+{
+	if (Debug) printf( "VerticalMenu::onCreate()\n" );
+	ListBox::onCreate();
+	m_underneath = vgCreateImage(VG_sABGR_8888, width, height, 
+								 VG_IMAGE_QUALITY_BETTER);
+	save_pixels();
 }
 
 // New sjt - add to header!
@@ -148,8 +159,18 @@ void 	VerticalMenu::draw_one_row( int mRow, float mY )
 {
 	float above_line_offset = (LineHeight-text_size)/2.0;
 	mY += above_line_offset;
-	Stroke_l( text_color );
-	Fill_l  ( text_color );
+
+	if (m_entries[mRow].state == MENU_STATE_NORMAL)
+	{
+		Stroke_l( text_color );
+		Fill_l  ( text_color );
+	}
+	else if (m_entries[mRow].state == MENU_STATE_GRAYED)
+	{
+		Stroke_l( m_disabled_color );
+		Fill_l  ( m_disabled_color );	
+	}
+	
 	//printf("%6.1f %6.1f   %s \n", left, mY, (char*)get_item(mRow)->c_str() ); 
 	Text( left, mY, (char*)get_item(mRow)->c_str(), SerifTypeface, text_size );
 
@@ -213,10 +234,21 @@ int	VerticalMenu::onHover( int x, int y, bool mouse_is_down )
 	return result;
 }
 
+void VerticalMenu::save_pixels	()
+{	
+	vgGetPixels(m_underneath, 0, 0, left, bottom, width, height);
+}
+void VerticalMenu::restore_pixels()
+{
+	vgSetPixels(left, bottom, m_underneath, 0, 0, width, height );	
+}
+
 void VerticalMenu::close_menu( )
 {
-	//set_visible( false );
 	hide();
+	printf("VerticalMenu::close_menu( )\n");
+	//restore_pixels();
+	Invalidate();
 }	
 
 Application*	VerticalMenu::get_application(   )
@@ -231,7 +263,8 @@ int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 	int result = get_hit_index( x, y );
 	//printf("VerticalMenu::onClick() hit=%d\n", result);
 
-	if ((result < m_entries.size()) && (result >= 0))
+	if (((result < m_entries.size()) && (result >= 0)) &&
+			(m_entries[result].state != MENU_STATE_GRAYED))
 	{
 		printf("VerticalMenu:: Selected Item #%d: %s\n", result, m_entries[result].text );
 		if (callback_all_items) {

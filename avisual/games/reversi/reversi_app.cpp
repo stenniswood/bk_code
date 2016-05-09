@@ -20,54 +20,55 @@
 #include <shapes.h>
 
 #include "adrenaline_windows.h"
-#include "blackjack.hpp"
-#include "blackjack_app.hpp"
+#include "reversi_board.hpp"
+#include "reversi_ai_player.hpp"
+#include "reversi_app.hpp"
 
 
 //static VerticalMenu     bj_file_menu(-1,-1);
-BlackJackApp* 	bj_app = NULL;
+ReversiApp* 	reversi_app = NULL;
 
 static int draw_file_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex)
 	{
-	case 0: bj_app->file_new	 	();		break;
-	case 1: bj_app->file_open	 	();		break;
-	case 2: bj_app->file_open_recent();		break;
-	case 3: bj_app->file_save	 	();		break;
-	case 4: bj_app->file_save_as	();		break;
+	case 0: reversi_app->file_new	 	();		break;
+	case 1: reversi_app->file_open	 	();		break;
+	case 2: reversi_app->file_open_recent();		break;
+	case 3: reversi_app->file_save	 	();		break;
+	case 4: reversi_app->file_save_as	();		break;
 	default: break;
 	} 
 }
 
-void init_blackjack( )
+void init_reversi( )
 {
-	printf("init_blackjack()\n");
+	printf("init_reversi()\n");
 	
-	if (bj_app==NULL)	
-		bj_app = new BlackJackApp();
-	if (bj_app)
-		bj_app->register_with_display_manager();		
+	if (reversi_app==NULL)	
+		reversi_app = new ReversiApp();
+	if (reversi_app)
+		MainDisplay.start_app( reversi_app );
 }
 
-BlackJackApp::BlackJackApp ()
+ReversiApp::ReversiApp ()
 {
 	Initialize(); 
 }
  
-BlackJackApp::BlackJackApp ( Rectangle* mRect )
+ReversiApp::ReversiApp ( Rectangle* mRect )
 {
 	Initialize(); 
 } 
 
-BlackJackApp::~BlackJackApp()
+ReversiApp::~ReversiApp()
 { 
 
 }
 
-void 	BlackJackApp::Initialize	(	)
+void 	ReversiApp::Initialize	(	)
 {
-	//printf("BlackJackApp::Initialize()\n");
+	//printf("ReversiApp::Initialize()\n");
 	/*  Base class is initialized in the base class constructor.
 		ie. The Application::Initialize is invoked there (not this one)
 		Even though the function is virtual, for the base class,
@@ -76,77 +77,70 @@ void 	BlackJackApp::Initialize	(	)
 		Therefore it is uneccessary and should not be put in.
 	*/
 
-	m_application_name = "Black Jack";
-	m_main_window = new BlackJack( 3 );
-	//printf("BlackJackApp::Initialize()\n");	
+	m_application_name = "Reversi";
+	m_main_window = new ReversiBoardView( );
+	//printf("ReversiApp::Initialize()\n");	
 
-	setup_app_menu();
-	setup_menu    ();
-	onPlace();	
+//	setup_app_menu();
+//	setup_menu    ();
+//	onPlace();	
 }
 
-int		BlackJackApp::onPlace		(	)
-{ 
-	Application::onPlace();		// Place the main window.
-	
-	((BlackJack*)m_main_window)->onPlace();
-} 
-
 // First Time application is run - load resources etc.
-int		BlackJackApp::onCreate(	)	
+int		ReversiApp::onCreate(	)	
 {
 	Application::onCreate();
 	
 }
 
-void	BlackJackApp::setup_menu  	( )
+void	ReversiApp::setup_main_menu  	( )
 { 
-	Application::setup_menu();
+	Application::setup_main_menu();
 //	bj_file_menu.create_std_file_menu();
 //	bj_file_menu.add_callback_all_items( draw_file_menu_actions );
 //	m_hMenu.add_sub_menu( "File", &bj_file_menu  );	
 
 } 
 
-void	BlackJackApp::setup_app_menu( )
+void	ReversiApp::setup_app_menu( )
 { 
 	Application::setup_app_menu();
 } 
 
-void 	BlackJackApp::register_with_display_manager()
+void 	ReversiApp::register_with_display_manager()
 { 
 	Application::register_with_display_manager();
 	
 } 	
 
-int		BlackJackApp::About			(	)
+int		ReversiApp::About			(	)
 { 
 	Application::About();
 } 
 
-int		BlackJackApp::Preferences	(	)
+int		ReversiApp::Preferences	(	)
 {
 	Application::Preferences(); 
 } 
 
-int		BlackJackApp::Quit			(	)
+int		ReversiApp::Quit			(	)
 { 
 	Application::Quit();
 } 	
 
-void	BlackJackApp::file_new		( )
+void	ReversiApp::file_new		( )
 { 
 
 } 
-void	BlackJackApp::file_open		( )
+void	ReversiApp::file_open		( )
 { 
 } 	
-void	BlackJackApp::file_open_recent( )
+void	ReversiApp::file_open_recent( )
 { 
 } 	
-void	BlackJackApp::file_save		( )
+void	ReversiApp::file_save		( )
 { 
 } 
-void	BlackJackApp::file_save_as	( )
+void	ReversiApp::file_save_as	( )
 { 
 } 

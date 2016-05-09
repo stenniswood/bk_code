@@ -84,7 +84,8 @@ ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot
 IPC_OBJS   = CAN_memory.o client_memory.o visual_memory.o audio_memory.o 
 ILCLIENT_OBJS = ilclient.o ilcore.o
 
-REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o
+REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o \
+					  reversi_app.o
 HEARTS_GAME_OBJS 	= hearts_game.o hearts_app.o trick.o 
 BLACKJACK_GAME_OBJS = blackjack.o blackjack_app.o 
 CARDCORE_GAME_OBJS  = card.o card_player.o card_player_chips.o deck.o basic_card_game.o
@@ -92,7 +93,8 @@ CARDCORE_GAME_OBJS  = card.o card_player.o card_player_chips.o deck.o basic_card
 # Container.o 
 ADRENALINE_OBJS   = display.o task_bar.o
 ADRENALINE_SYSTEM_OBJS = system_status.o keyboard.o touch_gesture.o keyboard_dev.o \
-			display_manager.o mouse_oop.o resource_manager.o volume_control.o 
+			display_manager.o mouse_oop.o resource_manager.o volume_control.o \
+			system_bar.o running_apps.o
 ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			directory_listbox.o frame_window.o groupbox.o icon.o       \
 			leveler.o line_grouper.o listbox.o marquee.o power_level.o \
@@ -104,7 +106,7 @@ ADRENALINE_ATOMS_OBJS = bitmap.o button.o checkbox.o control.o         \
 			slider.o
 ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			frequency_view.o image_gallery.o list_status.o side_bar.o \
-			stereo_power.o stick_figure.o system_bar.o can_window.o   \
+			stereo_power.o stick_figure.o  can_window.o   \
 			application.o file_editor.o label_edit_box.o complete_file_browser.o \
 			icon_bar.o compass.o button_array.o button_array_gui.o
 ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o calendar_entry.o

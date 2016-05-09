@@ -27,39 +27,44 @@ using namespace std;
 const int TITLE_HEIGHT = 32;
 const int CARD_WIDTH = 62;
 
+/* CALLBACK FOR BUTTONS: */
+void hearts_hit_cb( void* mHearts )
+{
+}
+void hearts_stay_cb( void* mHearts )
+{
+}
+
 
 BasicCardGame::BasicCardGame( int mNumber_of_players )
 : Control(), hit(-1,-1), stay(-1,-1)
 {
-	NameOfTheGame = new char[20];
+	NameOfTheGame = new char[10];
 	strcpy(NameOfTheGame, "Hearts");
-	
+
+	hit.set_text	( "Hit", true );
+	stay.set_text   ( "Stay", true);		
 	hit.move_to 		 ( 100, 100 );
 	stay.move_to		 ( 220, 100 );	
-	hit.set_width_height ( 75, 30 );
-	stay.set_width_height( 75, 30 );
+	hit.set_on_click_listener( hearts_hit_cb, this );
+	stay.set_on_click_listener( hearts_stay_cb, this );
 
-	house = NULL;
-	//house		   = new CardPlayer(4);
-	//house->set_width_height( 4.*CARD_WIDTH, 100 );
+	house  = new CardPlayerChips(4);
+	house->set_width_height( 4*CARD_WIDTH, 100 );
 
 	// CREATE THE PLAYERS:
-	CardPlayer* cp;
+	CardPlayer* cp;	
 	for (int i=0; i<mNumber_of_players; i++)
 	{
 		cp = new CardPlayer ( 13 );
 		cp->set_width_height( 6*CARD_WIDTH, 100 );
 		players.push_back( cp );
-		number_of_players++;
 	}
 
 	// Add 3 decks:
 	Deck* tmp = new Deck();
 	deck.push_back(tmp);
-	//tmp->load_resources();	
-//	tmp = new Deck();
-//	deck.push_back(tmp);	
-
+	
 	whos_turn_is_it = 0;
 }
 
@@ -69,12 +74,15 @@ BasicCardGame::~BasicCardGame()
 	NameOfTheGame = NULL;
 }
 
+void BasicCardGame::load_resources	(	) 
+{
+	deck[0]->load_resources();  
+}
+
 void BasicCardGame::setup_game(	)
 {
-//	deck[0]->load_resources();	
-	deck[0]->onCreate();
 	place_players( 100. );
-	int starting_card_count = number_of_cards_to_start( number_of_players);
+	int starting_card_count = number_of_cards_to_start( players.size() );
 	printf("BasicCardGame::onCreate() start with %d cards\n", starting_card_count );
 	deal( starting_card_count );	
 	printf("BasicCardGame::onCreate() cards dealt\n" );
@@ -85,6 +93,7 @@ void BasicCardGame::setup_game(	)
 int	BasicCardGame::onCreate  (  )
 {
 	printf("BasicCardGame::onCreate()\n" );
+	deck[0]->onCreate();
 	setup_game();
 	
 	//float card_spacing = CARD_WIDTH + 10; 		// this should be done in the card player, not here!
@@ -111,6 +120,8 @@ void	BasicCardGame::score		( )
 // The start of a new game.
 void	BasicCardGame::deal( int n_Cards )
 {
+	printf("Dealing %d card to each %d player\n", n_Cards, players.size() );
+	
 	Card* card;
 	for (int i=0; i<n_Cards; i++)
 	{
@@ -159,7 +170,7 @@ void BasicCardGame::place_buttons( int mPlayerIndex )
 
 void BasicCardGame::place_players( float radius )		// place places around the game's center point.
 {
-	printf("place_players()  %d\n", number_of_players);
+	printf("place_players()  %d\n", players.size());
 	cx = width/2. + left;
 	cy = height/2. + bottom;
 
@@ -173,21 +184,21 @@ void BasicCardGame::place_players( float radius )		// place places around the ga
 	}
 
 	// place hit, stay buttons here.
-	if (number_of_players>4)
+	if (players.size()>4)
 	{
 		// circle configuration.
 		return;
 	}
 	float w,yp;
 	std::vector<CardPlayer*>::iterator  iter = players.begin();
-	if (number_of_players>0)
+	if (players.size()>0)
 	{	
 		w = (*iter)->get_width()/2.;
 		yp = bottom + (cy-bottom-(*iter)->get_height() )/2. ;
 		(*iter)->move_to( cx-w, yp );				// bottom
 		(*iter)->print_positions();
 	}
-	if (number_of_players>1) 
+	if (players.size()>1) 
 	{
 		iter++;
 		w = (*iter)->get_width();
@@ -196,7 +207,7 @@ void BasicCardGame::place_players( float radius )		// place places around the ga
 		printf("player 2 done.\n");
 		(*iter)->print_positions();		
 	}
-	if (number_of_players>2) 
+	if (players.size()>2) 
 	{
 		iter++;		
 		yp = cy-(*iter)->get_height()/2.;		

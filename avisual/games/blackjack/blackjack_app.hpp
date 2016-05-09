@@ -14,7 +14,7 @@ class BlackJackApp : public Application
 public:
 	BlackJackApp ();
 	BlackJackApp ( Rectangle* mRect );
-	~BlackJackApp();
+	virtual ~BlackJackApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 	virtual int		onCreate	  	(	);	// First Time application is run - load resources etc.

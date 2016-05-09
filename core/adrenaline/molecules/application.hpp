@@ -25,7 +25,7 @@ class Application
 public:
 	Application ( );
 	Application ( Rectangle* mRect );
-	~Application( );
+	virtual ~Application( );
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 	int				calc_metrics	(	);

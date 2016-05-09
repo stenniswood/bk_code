@@ -263,12 +263,48 @@ void DisplayManager::start_app( Application* mApp )
 void DisplayManager::print_running_apps(  )
 {
 	int i=0;
+	if (m_running_apps->empty())
+		printf("There are no apps running!\n");
+		
 	vector<Application*>::iterator iter = m_running_apps->begin();
 	while (iter != m_running_apps->end())
 	{
 		printf("#%d - %s\n", i++, (*iter)->m_application_name.c_str() );
 		iter++;		
 	}
+}
+
+void DisplayManager::idle_tasks( )
+{
+	Application* tmp = NULL;
+	if ((m_current_running_app>=0) && (m_current_running_app< m_running_apps->size())) 
+	{
+		//printf("idle task: %d \n", m_current_running_app );		
+		tmp = (*m_running_apps)[m_current_running_app];
+		//tmp->background_time_slice();
+	}
+}
+
+void DisplayManager::close_app( Application* mApp )
+{
+	// If it is the active app:
+	if ((*m_running_apps)[m_current_running_app] == mApp)  {
+		remove_all_objects(	);
+		set_menu		( NULL 	);
+		m_side.unload_controls( );
+		m_status.set_text( "Closed app" );	
+	}
+
+	// Note these are Apps, not m_child_controls.  Other than that same logic as the
+	// remove_object()
+	for (int i=0; i<m_running_apps->size(); i++)
+	{
+		if ((*m_running_apps)[i] == mApp) {
+			m_running_apps->erase( m_running_apps->begin()+i );
+		}
+	} 
+	printf("Deleting %p. \n", mApp);
+	delete mApp;
 }
 
 void DisplayManager::set_main_window( Control* mNewWindow )
@@ -286,26 +322,6 @@ void DisplayManager::set_main_window( Control* mNewWindow )
 	(*m_running_apps)[m_current_running_app]->m_main_window = mNewWindow;
 }
 
-void DisplayManager::idle_tasks( )
-{
-	if ((m_current_running_app>=0) && (m_current_running_app< m_running_apps->size())) 
-	{
-		//printf("idle task: %d \n", m_current_running_app );
-		(*m_running_apps)[m_current_running_app]->background_time_slice();
-	}
-}
-
-void DisplayManager::close_app( Application* mApp )
-{
-	// Note these are Apps, not m_child_controls.  Other than that same logic as the
-	// remove_object()
-	for (int i=0; i<m_running_apps->size(); i++)
-	{
-		if ((*m_running_apps)[i] == mApp)
-			m_running_apps->erase( m_running_apps->begin()+i );
-	} 
-	delete mApp;
-}
 
 void DisplayManager::set_menu( HorizontalMenu* mHMenu )
 {

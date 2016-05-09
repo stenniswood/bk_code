@@ -248,7 +248,8 @@ int ListBox::draw_line_backgrounds()
 int ListBox::draw()
 {
 	if (Debug)  printf("ListBox draw(): bottom=%6.1f; height=%6.1f\n", bottom, height);
-
+	if (is_visible()==false) return 0;
+	
 	// DRAW Scroll Bars:
 	ScrollControl::draw();
 	draw_line_backgrounds();

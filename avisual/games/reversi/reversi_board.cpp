@@ -17,6 +17,12 @@
 #include "reversi_board.hpp"
 
 
+int    TOP_MARGIN	=5;
+int    LEFT_MARGIN	=5;
+int    RIGHT_MARGIN	=5;
+int    BOTTOM_MARGIN=5;
+//const	int BINS 	=8;
+//const 	int VH_LINES =BINS+1;
 
 
 bool TouchIsHorizontal = false;
@@ -24,7 +30,7 @@ Rectangle temp_ship_r;
 
 ReversiBoardView::ReversiBoardView()
 {
-	bm   	= new BoardMemory();
+	bm   			= new BoardMemory();
 	GuessPending	= false;
 	incw			=0;
 	inch			=0;
@@ -60,7 +66,7 @@ void ReversiBoardView::calculatePreliminaries( )
 
 
 // Zero indexed rows and cols:
-Rectangle* ReversiBoardView::calc_square_rect(int row, int col )
+/*Rectangle* ReversiBoardView::calc_square_rect(int row, int col )
 {
 	static Rectangle* tmp   = new Rectangle();
 
@@ -69,7 +75,7 @@ Rectangle* ReversiBoardView::calc_square_rect(int row, int col )
 	tmp->set_top  ( ycols[row+1] );
 	tmp->set_bottom ( ycols[row] );		// 
 	return tmp;
-}
+}*/
 
 // Canvas canvas
 void ReversiBoardView::drawPiece(int row, int col, byte mPlayer)
@@ -100,12 +106,13 @@ void ReversiBoardView::drawAllPieces()
 				drawPiece(r,c, bm->get_square_color(r,c));
 }
 
-void ReversiBoardView::onDraw() {
+int ReversiBoardView::draw() 
+{
 	calculatePreliminaries( );
 	drawGrid     ();
 	drawAllPieces();
 	if (GuessPending)
-		drawGuess( TouchedRow,TouchedColumn);
+		drawGuess( TouchedRow,TouchedColumn );
 }
 
 void Rect_d( Rectangle* mRect )

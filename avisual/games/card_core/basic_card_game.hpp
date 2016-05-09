@@ -29,7 +29,7 @@ public:
 	void 		place_buttons	( int mPlayerIndex 	);
 	void		place_players	( float radius 		);	// place places around the game's center point.
 														// house at top.  square first, then circle.
-	void		load_resources	(	) { deck[0]->load_resources();  };	
+	void		load_resources	(	);	
 	Card*		draw_one		(	);		
 	virtual int	draw  	 		(	);
 	virtual int	onCreate  		(	);
@@ -41,10 +41,10 @@ protected:
 	std::vector<Deck*>			deck;
 	std::vector<CardPlayer*>	players;
 	CardPlayer*					house;
-	
+
 	int		whos_turn_is_it;		// player index
 	int 	deck_index;
-	int 	number_of_players;
+	//int 	number_of_players;
 	int		number_of_decks;
 
 	float 	cx;
