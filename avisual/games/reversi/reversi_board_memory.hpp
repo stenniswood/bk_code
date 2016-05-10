@@ -35,6 +35,7 @@ public:
 	bool scanCol			( byte row, byte col, byte mPlayer, bool mUp 		);
 	bool scanRow			( byte row, byte col, byte mPlayer, bool mRight		);
 	int  countColors		( byte mPlayer 						);
+	void compute_score		();
 	bool scanDiagonal		( byte row, byte col, short row_inc, short col_inc, byte mPlayer );
 	void reverseDiagonal	( byte row, byte col, short row_inc, short col_inc, byte switchingColor );
 	void flipChips			( byte Row, byte Col, byte mPlayer	);
@@ -43,6 +44,9 @@ public:
 	bool isGameOver			( 									);
 	bool validMovePossible	( byte mPlayer						);
 	bool validMoveEitherPlayer();	
+
+	int		m_black_count;
+	int		m_white_count;
 	
 private:
 	//byte board[][] = new byte[MAX_Y][MAX_X];

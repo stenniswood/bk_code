@@ -1,5 +1,7 @@
 #ifndef _REVERSI_BOARD_
 #define _REVERSI_BOARD_
+
+#include <string>
 #include "control.hpp"
 #include "reversi_board_memory.hpp"
 
@@ -17,7 +19,8 @@ class ReversiBoardView : public Control
 public:
 	ReversiBoardView();
 
-	void 	drawPiece(int row, int col, byte mPlayer);
+	void	draw_background  (  );
+	void 	drawPiece		 (int row, int col, byte mPlayer);
 	void 	drawAllPieces	 (	);
 	virtual int 	draw	 (	);
 	
@@ -27,6 +30,10 @@ public:
 	bool 	computeBinTouched( float x, float y		);
 	bool 	onTouchEvent	 ( /*MotionEvent event*/);	
 	void 	calculatePreliminaries( );
+	int		onClick			 ( int x, int y, bool mouse_is_down);
+	void	doGuess			 ( byte row, byte col, byte mColor);
+	void	start_over		 ( );
+	std::string 	form_score_string( );
 	
 	// Import Rectangle class from home_3D maybe.	
 	//Rectangle* 	calc_square_rect(int row, int col );
@@ -36,7 +43,8 @@ public:
 	
 private:
 	int    right;
-	int    bottom;
+	
+	//int    bottom;
 	int    incw	;
 	int    inch	;
 

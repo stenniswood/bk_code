@@ -205,7 +205,6 @@ void CANApp::setup_sidebar(	)
 	MainDisplay.m_side.add_control( tmp, "Refresh" );
 }
 
-
 void 	CANApp::register_with_display_manager() 
 { 
 	Application::register_with_display_manager();			

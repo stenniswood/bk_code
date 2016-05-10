@@ -13,7 +13,6 @@
 #include <string> 
 #include <vector>
 #include <list>
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
@@ -36,7 +35,6 @@ Keyboard		m_keyboard;
 Control			mctrl;
 Calendar		m_calendar;
 CalendarSummary m_calendar_summary;
-
 
 
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
@@ -281,7 +279,7 @@ void DisplayManager::idle_tasks( )
 	{
 		//printf("idle task: %d \n", m_current_running_app );		
 		tmp = (*m_running_apps)[m_current_running_app];
-		//tmp->background_time_slice();
+		tmp->background_time_slice();
 	}
 }
 
@@ -544,6 +542,10 @@ int   DisplayManager::draw_children( )
 	}
 
 	return -1;	
+}
+void DisplayManager::set_status( char* mText )
+{
+	m_status.set_text( mText );
 }
 
 int   DisplayManager::draw_background( 	)

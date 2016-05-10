@@ -25,6 +25,7 @@
 #include "reversi_app.hpp"
 
 
+
 //static VerticalMenu     bj_file_menu(-1,-1);
 ReversiApp* 	reversi_app = NULL;
 
@@ -63,7 +64,7 @@ ReversiApp::ReversiApp ( Rectangle* mRect )
 
 ReversiApp::~ReversiApp()
 { 
-
+	reversi_app = NULL;
 }
 
 void 	ReversiApp::Initialize	(	)
@@ -130,7 +131,7 @@ int		ReversiApp::Quit			(	)
 
 void	ReversiApp::file_new		( )
 { 
-
+	((ReversiBoardView*)m_main_window)->start_over();
 } 
 void	ReversiApp::file_open		( )
 { 

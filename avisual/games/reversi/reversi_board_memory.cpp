@@ -135,6 +135,13 @@ int BoardMemory::countColors( byte mPlayer )
 				count++;
 	return count;
 }
+void BoardMemory::compute_score( )
+{
+	m_black_count = countColors( BLACK_PLAYER );
+	m_white_count = countColors( WHITE_PLAYER );	
+	printf("Reversi Score -- Black:%d  White:%d\n", m_black_count, m_white_count );
+}
+
 /******************************************************************************
  * This is used to determine if the placed location is acceptable.
  * @param row		- placed row

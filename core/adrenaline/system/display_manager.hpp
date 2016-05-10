@@ -28,6 +28,7 @@ public:
 	virtual void	Initialize();
 	
 	void  	set_background		( char* mFileName );
+	void	set_status			( char* mText);
 
 	void	init_screen			(					  );
 	void	start_screen		(					  );
