@@ -112,7 +112,9 @@ static void fill_data( byte* mdata, byte last)
 	mdata[6] = 0xEF;
 	mdata[7] = last;
 }
+/*****************************************************/
 
+/*****************************************************/
 void CANMessages::fill_phony_msgs()
 {
 	struct sCAN can;

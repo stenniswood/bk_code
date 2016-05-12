@@ -17,7 +17,7 @@
 #include "vertical_menu.hpp"
 
 
-#define Debug 1
+#define Debug 0
 
 
 VerticalMenu::VerticalMenu()

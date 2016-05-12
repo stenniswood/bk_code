@@ -14,7 +14,7 @@ class FileEditorApp : public Application
 public:
 	FileEditorApp ();
 	FileEditorApp ( Rectangle* mRect );
-	~FileEditorApp();
+	virtual ~FileEditorApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 

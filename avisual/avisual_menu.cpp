@@ -34,7 +34,10 @@
 #include "video_app.hpp"
 #include "window_layouts.hpp"
 #include "robot_app.hpp"
+#include "finder_app.hpp"
 #include "datalog_graph.hpp"
+#include "gallery_app.hpp"
+
 
 
 HorizontalMenu hm		(-1,-1);
@@ -58,8 +61,9 @@ int show_view_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 	case 2:	init_tab_listbox	();		break;
 	case 3:	init_grid_test		();		break;
 	case 4:	init_motor_gui_test	();		break;
-	default: break;
+	default: 	return 0;				break;
 	}	
+	return 1;
 }
 
 void init_view_menu()
@@ -98,8 +102,9 @@ int show_atom_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 	case 13: init_listbox			();		break;	
 	case 14: init_tab_listbox		();		break;			
 	case 15: /*init_CAN_msg_view	();*/		break;
-	default: break;
+	default: 	return 0;					break;
 	}
+	return 1;
 }
 
 
@@ -126,8 +131,7 @@ void init_atom_menu()
 	//atoms.add_simple_command( "init_listbox"			);
 	//atoms.add_simple_command( "init_tab_listbox"		);
 	atoms.add_simple_command( "init_CAN_msg_view"		);
-	atoms.add_callback_all_items( show_atom_screens );
-	
+	atoms.add_callback_all_items( show_atom_screens );	
 }
 
 int show_molecule_screens( void* menuPtr, int mMenuIndex, Application* mApp )
@@ -137,16 +141,16 @@ int show_molecule_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 	case 0: init_image_gallery		();		break;		
 	case 1: init_okay_cancel_dlg	();		break;
 	case 3: init_directory_lb_test	();		break;
-	case 4: init_file_browser		();		break;			
-	default: 	break;
+	default: 		return 0;				break;
 	}
+	return 1;	
 }
+
 void init_molecule_menu()
 {
 	molecules.add_simple_command( "Image Gallery" 	);
 	molecules.add_simple_command( "Okay Cancel Dialog" );
 	molecules.add_simple_command( "Directory lb" 	);
-	molecules.add_simple_command( "File Browser" 	);				
 	molecules.add_callback_all_items( show_molecule_screens );
 }
 
@@ -160,23 +164,21 @@ int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 	printf("handle_apps_screens()\n");
 	switch(mMenuIndex) 
 	{
-	case 0: init_image_gallery		();		break;		
-	case 1: if (audio_app==NULL)
-				audio_app = new AudioApp();
-			MainDisplay.start_app( audio_app );
-			break;
-	case 2: init_file_browser		();		break;
-	case 3: init_CAN_app();
-			MainDisplay.start_app( can_app );	
-			break;
+//	case 0: init_image_gallery		();		break;		
+	case 0: init_gallery_app		();		break;			
+	case 1: init_audio_app			();		break;
+	case 2: init_finder_app			();		break;
+	case 3: init_CAN_app			();		break;
 	case 4: init_drawing_app		();		break;	
 	case 5: init_file_editor_app	();		break;
 	case 6: init_pot_objs			();		break;	
 	case 7: init_Video_app			();		break;
-	case 8: init_robot_app();		printf(" --- init_robot_panel --- \n");  break;
-	default: 	break;
+	case 8: init_robot_app			();		break;
+	default: return 0;						break;
 	}
+	//MainDisplay.start_app( can_app );
 	printf("handle_apps_screens() done\n");
+	return 1;
 }
 
 void init_apps_menu()
@@ -203,8 +205,9 @@ int show_game_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 	case 2: init_hearts		();		break;
 	case 3: init_reversi	();		break;
 	case 4: init_battleships();		break;	
-	default: break;
+	default: return 0;				break;
 	}
+	return 1;	
 }
 
 void init_game_menu()
@@ -227,8 +230,9 @@ int show_graph_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 	case 2: init_bar_graph		();		break;
 	case 3: init_scatter_graph	();		break;
 	case 4: init_combined_graph	();		break;
-	default: break;
+	default: 	return 0;				break;
 	}
+	return 1;	
 }
 
 void init_graph_menu()
@@ -275,8 +279,9 @@ int handle_power_action( void* menuPtr, int mMenuIndex, Application* mApp )
 	case 1: init_power_restart  ();		break;
 	case 2: init_power_sleep	();		break;
 	case 3: init_logoff_user	();		break;
-	default: break;
+	default: return 0;					break;
 	}
+	return 1;
 }
 
 void init_power_menu()

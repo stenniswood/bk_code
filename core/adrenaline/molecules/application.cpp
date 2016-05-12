@@ -33,7 +33,9 @@ static int app_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 		{
 			case 0: mApp->About();			break;
 			case 1: mApp->Preferences();	break;
-			case 2: mApp->Quit();	MainDisplay.close_app( mApp );	break;
+			case 2: mApp->Quit();	
+					MainDisplay.close_app( mApp );	
+					break;
 			default: return 0; break;
 		} 
 	return 1;
@@ -124,7 +126,6 @@ void	Application::setup_main_menu(	)  // The horizontal menu. derived class adds
 	if (Debug) printf("Application::setup_main_menu() done\n");	
 }
 
-
 int		Application::calc_metrics() 
 { 
 	return 0;
@@ -149,7 +150,7 @@ void Application::register_with_display_manager()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.set_main_window( m_main_window );
 	MainDisplay.set_menu  	   ( &m_main_menu  );
-		
+
 	// Establish the sidebar controls:
 	// Create Sidebar items:
 	MainDisplay.m_side.load_controls( m_sidebar_controls );

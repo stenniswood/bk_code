@@ -33,9 +33,7 @@ void init_blackjack( )
 	if (bj_app==NULL)	
 		bj_app = new BlackJackApp();
 	printf("bj_app=%p\n", bj_app);
-	
-	if (bj_app)
-		MainDisplay.start_app( bj_app );
+	MainDisplay.start_app( bj_app );
 }
 
 /*************************************************************/

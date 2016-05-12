@@ -47,6 +47,10 @@ RobotPerformancePanel::RobotPerformancePanel()
 {
 	Initialize();
 }
+
+RobotPerformancePanel::~RobotPerformancePanel()
+{
+}
 void 	RobotPerformancePanel::Initialize  ( )
 { 
 	Window::Initialize();

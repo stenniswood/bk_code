@@ -36,11 +36,9 @@ DrawApp*  draw_app = NULL;
 
 void init_drawing_app( )
 {
-	printf("init_apps()\n");
 	if (draw_app==NULL)	
 		draw_app = new DrawApp();
-	if (draw_app)
-		MainDisplay.start_app( draw_app );
+	MainDisplay.start_app( draw_app );
 }
 
 
@@ -65,6 +63,7 @@ DrawApp::DrawApp ( Rectangle* mRect )
 }
 DrawApp::~DrawApp() 
 { 
+	draw_app = NULL;
 }
 
 void 	DrawApp::Initialize		(	) 
@@ -76,20 +75,11 @@ void 	DrawApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-
-	m_main_window = new Drawing2D();
 	m_application_name = "Drawing App";
+//	Application::Initialize();	
 	
-	setup_app_menu();
-	setup_main_menu();
-	onPlace();	
-
-}	// create all the objects here.
-
-int		DrawApp::onPlace		(	) 
-{ 
-
-}
+	m_main_window = new Drawing2D();
+}	
 
 void	DrawApp::setup_app_menu( )
 {
@@ -113,16 +103,10 @@ void	DrawApp::setup_main_menu ( )
 	m_main_menu.add_sub_menu  ( "View",     &draw_view_menu );
 }
 
-void 	DrawApp::register_with_display_manager() 
-{ 
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( m_main_window );
-	MainDisplay.m_status.set_text("Draw App");
-	MainDisplay.set_menu  	( &m_main_menu );
-}	
 
 void				DrawApp::About			(	) 
 { 
+	Application::About();
 }
 void				DrawApp::Preferences		(	) 
 { 

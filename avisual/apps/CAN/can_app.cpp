@@ -114,6 +114,7 @@ CANApp::CANApp ( Rectangle* mRect )
 }
 CANApp::~CANApp() 
 { 
+	can_app=NULL;
 }
 
 extern int can_connected;		// visual_main.cpp 
@@ -213,6 +214,7 @@ void 	CANApp::register_with_display_manager()
 
 void	CANApp::About			(	) 
 { 
+	Application::About();
 }
 void	CANApp::Preferences		(	) 
 { 

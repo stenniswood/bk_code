@@ -19,13 +19,15 @@ struct stColor_set {
 	unsigned long even;
 	unsigned long odd;
 	unsigned long selected;
+	unsigned long text;
 };
 
-const struct stColor_set color_set[] = {
+
+/*const struct stColor_set color_set[] = {
 			 { 0xFFFFFFFF, 0xFF589AE8, 0xFF2C5DCE }, 
 			 { 0xFF000000, 0xFF9F9F9F, 0xFF272727 }, 
 			 { 0xFF000000, 0xFFFFFFFF, 0xFF272727 } 
-	};
+	}; */
 
 /*
 	List box does not have a header.  Use HeaderListBox for that!
@@ -48,8 +50,10 @@ public:
 	void 			Fill_mainline	  	( float left, float bottom, float width, float height);
 	void 			Fill_selected_line	( float left, float bottom, float width, float height);
 	void 			Fill_alternateline	( float left, float bottom, float width, float height);
-	void			set_odd_color   	( long int mColor ) { OddColor =mColor; };
-	void			set_even_color  	( long int mColor ) { EvenColor=mColor; };
+	void			set_selected_color  ( long int mColor ) { selected_color= mColor; };
+	void			set_odd_color   	( long int mColor ) { OddColor = mColor; };
+	void			set_even_color  	( long int mColor ) { EvenColor= mColor; };
+	void			set_color_scheme  	( struct stColor_set& mColorSet );
 	void			setAlpha			( float  mAlpha );
 
 	void 			adjust_height_for_num_visible_items( int mNumber_items_shown );

@@ -39,8 +39,7 @@ void init_robot_app()
 {
 	if (robot_app==NULL)
 		robot_app = new RobotApp( );
-	if (robot_app)		
-		MainDisplay.start_app( robot_app );
+	MainDisplay.start_app( robot_app );
 }
 
 RobotApp::RobotApp ()
@@ -53,6 +52,7 @@ RobotApp::RobotApp ( Rectangle* mRect )
 }
 RobotApp::~RobotApp()
 { 
+	robot_app=NULL;
 }
 
 void RobotApp::StartSequence(	)

@@ -25,7 +25,8 @@ CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 	 		 ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
 			 ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \
 			 ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
-APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/ ./apps/file_editer/ ./apps/video/
+APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/ \
+			./apps/file_editer/ ./apps/video/ ./apps/finder/ ./apps/gallery/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 SQL_INC    = -I/usr/include/mysql
 INC		   = $(CORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
@@ -72,7 +73,9 @@ AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   motor_gui.o serial_loadcell.o CAN_dispatcher.o robot_moves_1_sequencer.o
 
 APPS_OBJS      = 
+GALLERY_APP_OBJS = gallery_app.o
 FILE_EDIT_OBJS = file_editor_app.o 
+FINDER_OBJS    = finder_app.o
 VIDEO_APP_OBJS = video_app.o video.o 
 DRAW_APP_OBJS  = draw_app2.o draw_canvas.o 
 CAN_APP_OBJS   = can_app.o gyro_window.o analog_board_app.o filter_select.o msg_value_composer.o
@@ -140,10 +143,12 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ../core/ipc/,			$(IPC_OBJS))			\
 		$(addprefix ./apps/,				$(APPS_OBJS))			\
 		$(addprefix ./apps/file_editer/,	$(FILE_EDIT_OBJS))		\
+		$(addprefix ./apps/finder/,			$(FINDER_OBJS))			\
 		$(addprefix ./apps/video/,			$(VIDEO_APP_OBJS))		\
 		$(addprefix ./apps/audio/,			$(AUDIO_APP_OBJS))		\
 		$(addprefix ./apps/CAN/,			$(CAN_APP_OBJS))		\
 		$(addprefix ./apps/draw/,			$(DRAW_APP_OBJS))		\
+		$(addprefix ./apps/gallery/,		$(GALLERY_APP_OBJS))	\
 		$(addprefix ./apps/robot_control/,	$(ROBOT_CONTROL_OBJS)) \
 		$(addprefix ../core/adrenaline/,	$(ADRENALINE_OBJS)) \
 		$(addprefix ../core/adrenaline/atoms/, $(ADRENALINE_ATOMS_OBJS)) \

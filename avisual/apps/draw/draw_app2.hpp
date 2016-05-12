@@ -17,14 +17,12 @@ class DrawApp : public Application
 public:
 	DrawApp ();
 	DrawApp ( Rectangle* mRect );
-	~DrawApp();
+	virtual ~DrawApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
-	int				onPlace			(	);
 
 	virtual void	setup_main_menu	(	);  // The horizontal menu. derived class adds these here
 	virtual void	setup_app_menu  ( );
-	virtual void 	register_with_display_manager();	
 	
 	void				About			(	);
 	void				Preferences		(	);

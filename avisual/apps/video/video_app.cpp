@@ -71,11 +71,9 @@ static int video_settings_menu_actions( void* menuPtr, int mMenuIndex, Applicati
 
 void init_Video_app( )
 {
-	printf("init_Video_app()\n");
 	if (video_app==NULL)	
 		video_app = new VideoApp();
-	if (video_app)
-		video_app->register_with_display_manager();
+	MainDisplay.start_app( video_app );
 }
 
 
@@ -91,6 +89,7 @@ VideoApp::VideoApp ( Rectangle* mRect )
 }
 VideoApp::~VideoApp() 
 { 
+	video_app = NULL;
 }
 
 void 	VideoApp::Initialize		(	) 
@@ -102,11 +101,11 @@ void 	VideoApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-	m_main_window 	   = new Control();
 	m_welcome_status   = "Video & Camera";
 	m_application_name = "Video App";
-
-
+	//Application::Initialize();
+	
+	m_main_window 	   = new Control();
 }	// create all the objects here.
 
 
@@ -165,14 +164,6 @@ void VideoApp::setup_sidebar(	)
 	tmp->load_resources( );
 	MainDisplay.m_side.add_control( tmp, "Refresh" );
 }
-
-void 	VideoApp::register_with_display_manager() 
-{ 
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( m_main_window );
-	MainDisplay.m_status.set_text("Video App");
-	MainDisplay.set_menu  	( &m_main_menu );
-}	
 
 void		VideoApp::About			(	) 
 { Application::About();

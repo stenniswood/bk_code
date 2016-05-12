@@ -378,7 +378,11 @@ void TabularListBox::set_headings( vector<struct HeaderItemInfo> *mHeaderTexts )
 	calc_widths_from_text();
 	calc_column_positions_from_widths();		
 }
-
+void TabularListBox::set_header_text( string& mText, int mColumn )
+{
+	Headings[mColumn].text = mText;
+}
+	
 void TabularListBox::change_header_titles( string mHeaderTexts, int column )
 {
 	Headings[column].text = mHeaderTexts;

@@ -330,12 +330,18 @@ bool BoardMemory::isGameOver()
 	if (white_count==0) return true;
 	if (black_count==0) return true;
 	
+	// Game is over when there are no legal moves left for both players.
+	bool legal_move = false;
 	// A FULL BOARD:
 	for (byte x=0; x < MAX_X; x++)
 		for (byte y=0; y<MAX_Y; y++)
 		{
-			if (board[x][y] == NOT_PLACED)		// if any square is not placed, then not over.
-				return false;
+			legal_move = isLegalMove(x, y, BLACK_PLAYER );
+			if (legal_move) return false;
+			legal_move = isLegalMove( x, y, WHITE_PLAYER );
+			if (legal_move) return false;
+//			if (board[x][y] == NOT_PLACED)		// if any square is not placed, then not over.
+//				return false;
 		}
 	return true;
 }

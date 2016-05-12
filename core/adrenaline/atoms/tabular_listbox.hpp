@@ -71,6 +71,7 @@ public:
 	virtual int		get_total_lines			( 	)	{ /*printf("tabularListbox::gettotal_lines\n");*/ return LineData.size();  };
 	vector<string>*	get_line_data			( int mIndex );
 	void			set_headings			( vector<struct HeaderItemInfo> *mHeaderTexts );
+	void			set_header_text			( string& mText, int mColumn = 0 );	
 	void			set_column_width		( int mColumn, int mWidth );	
 	void 			change_header_titles	( string mHeaderTexts, int column );
 	void			set_row_col_text		( string mNewText, int row, int col );

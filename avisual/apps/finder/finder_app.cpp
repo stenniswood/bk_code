@@ -7,27 +7,21 @@
 #include <string.h>
 #include <string>
 #include <ctype.h>
-#include "VG/openvg.h"
-#include "VG/vgu.h"
 #include <jpeglib.h>
+
 #include "VG/openvg.h"
 #include "VG/vgu.h"
+#include <fontinfo.h>
+#include <shapes.h>
+
 #include "EGL/egl.h"
 #include "GLES/gl.h"
 #include "bcm_host.h"
-#include <fontinfo.h>
-#include <shapes.h>
 #include "Graphbase.hpp"
 #include "adrenaline_windows.h"
-#include "draw_app.hpp"
-#include "draw_app2.hpp"
-#include "CAN_base.h"
-#include "can_window.hpp"
-#include "gyro_window.h"
-#include "analog_board_app.hpp"
-#include "CAN_memory.h"
 #include "display_manager.hpp"
-
+#include "finder_app.hpp"
+ 
  
 static VerticalMenu     Finder_edit_menu(-1,-1);
 static VerticalMenu     Finder_view_menu(-1,-1);
@@ -40,9 +34,9 @@ static int finder_edit_menu_actions( void* menuPtr, int mMenuIndex, Application*
 {
 	switch(mMenuIndex) 
 	{
-	case 0: finder_app->show_messages();		break;
-	case 1: finder_app->show_network();		break;
-	case 2: finder_app->show_sequencer();		break;		
+	case 0: finder_app->edit_cut();			break;
+	case 1: finder_app->edit_copy();		break;
+	case 2: finder_app->edit_paste();		break;		
 	default: break;
 	} 
 }
@@ -51,11 +45,9 @@ static int finder_view_menu_actions( void* menuPtr, int mMenuIndex, Application*
 {
 	switch(mMenuIndex) 
 	{
-	case 0: finder_app->show_messages();		break;
-	case 1: finder_app->show_network();		break;
-	case 2: finder_app->show_sequencer();		break;		
-	case 3: finder_app->show_gyro();			break;			
-	case 4: finder_app->show_analogs();		break;	
+	case 0: finder_app->show_preview();		break;
+	case 1: finder_app->show_toolbar();		break;
+	case 2: finder_app->show_history();		break;
 	default: break;
 	} 
 }
@@ -64,26 +56,21 @@ static int finder_graph_menu_actions( void* menuPtr, int mMenuIndex, Application
 {
 	switch(mMenuIndex) 
 	{
-	case 0: finder_app->add_watch();		break;
-	case 1: finder_app->line_graph();		break;
-	case 2: finder_app->histogram();		break;		
-	case 3: finder_app->timing();			break;
+	case 0 : break;
 	default: break;
 	} 
 }
 
-void init_Finder_app( )
+void init_finder_app( )
 {
 	printf("init_Finder_app()\n");
 	if (finder_app==NULL)	
 		finder_app = new FinderApp();
-	if (finder_app)
-		finder_app->register_with_display_manager();
+
+	MainDisplay.start_app( finder_app );
 }
 
-
 /************************************************************************/
-
 FinderApp::FinderApp () 
 {
 	Initialize(); 
@@ -94,6 +81,7 @@ FinderApp::FinderApp ( Rectangle* mRect )
 }
 FinderApp::~FinderApp() 
 { 
+	finder_app = NULL;
 }
 
 void 	FinderApp::Initialize		(	) 
@@ -105,32 +93,12 @@ void 	FinderApp::Initialize		(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-	if (ipc_memory_can<=0)
-		m_welcome_status   = "No CAN connection. Connect PiCAN board & run \'amon\'. ";
-	else
-		m_welcome_status   = "Monitor and generate CAN traffic. For vehicle or Adrenaline.";
-	m_application_name = "CAN App";
-	Application::Initialize();
-			
-	m_gyro 	  = new GyroView   ();
-	m_analog  = new AnalogView ();
-	m_msgs 	  = new CANMessages();	// defined in ../core/adrenaline/molecules/can_window.cpp
-					//  contains a CANMessageView & NetworkView
-	m_msg_view    = NULL; // new CANMessageView();		
-	m_board_view  = NULL; // new NetworkView();
-	m_main_window = m_msgs;
-	printf("FinderApp::Initialize()\n");
+	m_welcome_status   = "Adrenaline File browser. ";
+	m_application_name = "Finder";
 
-	m_rx_tail 	   = 0;
-	m_rx_tail_laps = 0;
-
+	m_main_window = new CompleteFileBrowser(1000,600);
 	setup_sidebar ();
 	printf("FinderApp::Initialize() done.\n");
-}	// create all the objects here.
-
-int		FinderApp::onPlace		(	) 
-{ 
-	Application::onPlace( );
 }
 
 void	FinderApp::setup_app_menu( )
@@ -143,32 +111,31 @@ void	FinderApp::setup_main_menu ( )
 	Application::setup_main_menu();
 
 	// EDIT MENU:
-	CAN_edit_menu.clear_all();	
-	CAN_edit_menu.add_simple_command( "Add Triggered Event"  );	
-	CAN_edit_menu.add_simple_command( "Add Periodic Event"  );
-	CAN_edit_menu.add_callback_all_items( can_edit_menu_actions  );
+	Finder_edit_menu.clear_all();
+	Finder_edit_menu.add_simple_command( "Cut file"  );	
+	Finder_edit_menu.add_simple_command( "Copy file"  );
+	Finder_edit_menu.add_simple_command( "Paste file"  );	
+	Finder_edit_menu.add_callback_all_items( finder_edit_menu_actions  );
 
 	// VIEW MENU:
-	CAN_view_menu.clear_all();	
-	CAN_view_menu.add_simple_command( "Messages"  );
-	CAN_view_menu.add_simple_command( "Network"   );
-	CAN_view_menu.add_simple_command( "Sequencer"  );
-	CAN_view_menu.add_simple_command( "Gyro"    );
-	CAN_view_menu.add_simple_command( "Analog"  );		
-	CAN_view_menu.add_callback_all_items( can_view_menu_actions );
+	Finder_view_menu.clear_all();	
+	Finder_view_menu.add_simple_command( "Show Preview"  );
+	Finder_view_menu.add_simple_command( "Show Toolbar"  );
+	Finder_view_menu.add_simple_command( "Show History"  );	
+	Finder_view_menu.add_callback_all_items( finder_view_menu_actions );
 		
 	// GRAPH MENU:  
-	CAN_graph_menu.clear_all();	
-	CAN_graph_menu.add_simple_command( "Watch CAN variable"  );
-	CAN_graph_menu.add_simple_command( "Variable Line Graph"  );	
-	CAN_graph_menu.add_simple_command( "Variable Histogram"  );
-	CAN_graph_menu.add_simple_command( "Timing Graph"  );	
-	CAN_graph_menu.add_callback_all_items( can_graph_menu_actions  );
+	Finder_graph_menu.clear_all();	
+	Finder_graph_menu.add_simple_command( "Watch CAN variable"  );
+	Finder_graph_menu.add_simple_command( "Variable Line Graph"  );	
+	Finder_graph_menu.add_simple_command( "Variable Histogram"  );
+	Finder_graph_menu.add_simple_command( "Timing Graph"  );	
+	Finder_graph_menu.add_callback_all_items( finder_graph_menu_actions  );
 	
 	// H MENU:
-	m_main_menu.add_sub_menu  ( "Edit", &CAN_edit_menu );
-	m_main_menu.add_sub_menu  ( "View", &CAN_view_menu );
-	m_main_menu.add_sub_menu  ( "Graph", &CAN_graph_menu );
+	m_main_menu.add_sub_menu  ( "Edit", &Finder_edit_menu );
+	m_main_menu.add_sub_menu  ( "View", &Finder_view_menu );
+	m_main_menu.add_sub_menu  ( "Graph", &Finder_graph_menu );
 }
 
 void FinderApp::setup_sidebar(	)
@@ -184,11 +151,6 @@ void FinderApp::setup_sidebar(	)
 }
 char Finder_App_Status[] = "FINDER App";
 
-void 	FinderApp::register_with_display_manager() 
-{ 
-	Application::register_with_display_manager();			
-	printf("FinderApp::register_with_display_manager() done\n");		
-}
 
 void	FinderApp::About			(	) 
 { 
@@ -197,36 +159,20 @@ void	FinderApp::Preferences		(	)
 { 
 }
 
-	void 			show_details	( );	// CAN Messages view.
-	void 			show_files		( );	// Adrenaline Network.
-	void 			show_icon		( );	// Robot sequencer
-
-void 	FinderApp::show_details	( )	// CAN Messages view.
-{
-	m_main_window = m_msgs; //_view;
-	MainDisplay.set_main_window( m_main_window );
-}
-
-void 	FinderApp::show_files	( )	// Adrenaline Network.
-{
-	m_main_window = m_board_view;
-	MainDisplay.set_main_window( m_main_window );
-}
-
-void 	FinderApp::show_icon	( )	// Robot sequencer
-{
-
-}
-
-void 	FinderApp::pie_graph		(	) 
-{
-}	
-void 	FinderApp::histogram		(	) 
+void  FinderApp::show_preview	( )	
 {
 }
-void 	FinderApp::timing			(	) 
+
+void FinderApp::show_toolbar	( )	
 {
 }
+
+void FinderApp::show_history	( )	
+{
+//	m_main_window = m_msgs;
+//	MainDisplay.set_main_window( m_main_window );
+}
+
 int		FinderApp::background_time_slice(	)
 {	
 	return 0;
@@ -248,3 +194,14 @@ void	FinderApp::file_save		( )
 void	FinderApp::file_save_as	( ) 
 { 
 }
+
+void FinderApp::edit_cut		( )
+{
+}
+void FinderApp::edit_copy		( )
+{
+}
+void FinderApp::edit_paste		( )
+{
+}
+

@@ -334,6 +334,13 @@ void ListBox::select( int mIndex )
 	selected_item = mIndex;
 }
 
+void ListBox::set_color_scheme( struct stColor_set& mColorSet )
+{
+	set_odd_color		( mColorSet.odd  );
+	set_even_color		( mColorSet.even );
+	set_selected_color	( mColorSet.selected );
+	set_text_color		( mColorSet.text );	
+}
 // chance to load resources, call functions which use fonts (already loaded before this call) etc.
 int ListBox::onCreate( )
 {

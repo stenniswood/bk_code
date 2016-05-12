@@ -279,16 +279,16 @@ void DisplayManager::idle_tasks( )
 	{
 		//printf("idle task: %d \n", m_current_running_app );		
 		tmp = (*m_running_apps)[m_current_running_app];
-		tmp->background_time_slice();
+//		tmp->background_time_slice();
 	}
 }
 
 void DisplayManager::close_app( Application* mApp )
 {
-	// If it is the active app:
+	// If it is the active app : 
 	if ((*m_running_apps)[m_current_running_app] == mApp)  {
 		remove_all_objects(	);
-		set_menu		( NULL 	);
+		set_menu		  ( NULL 	);
 		m_side.unload_controls( );
 		m_status.set_text( "Closed app" );	
 	}
@@ -307,15 +307,17 @@ void DisplayManager::close_app( Application* mApp )
 
 void DisplayManager::set_main_window( Control* mNewWindow )
 {
-	Rectangle* rect = get_useable_rect();
-	if (mNewWindow)
-		mNewWindow->set_position( rect );
-	// Removed b/c : add_object down below calls it.
-	//mNewWindow->onCreate();	// what if it's already created? the control.cpp class will return 0
+	if (mNewWindow==NULL) return;
 
 	// Remove old main window, and add in the new! 
 	if ((*m_running_apps)[m_current_running_app]->m_main_window)
 		remove_object( (*m_running_apps)[m_current_running_app]->m_main_window );
+
+	Rectangle* rect = get_useable_rect();
+	mNewWindow->set_position( rect );	
+
+	// add_object calls - mNewWindow->onCreate();	
+	// what if it's already created? the control.cpp class will return 0
 	add_object ( mNewWindow );
 	(*m_running_apps)[m_current_running_app]->m_main_window = mNewWindow;
 }
@@ -436,8 +438,10 @@ void  DisplayManager::remove_object( Control* NewControl )
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while (iter != m_child_controls.end())
 	{
-		if (*iter == NewControl)
+		if (*iter == NewControl) {
 			m_child_controls.erase( iter );
+			return;
+		}
 		iter++;
 	}
 }

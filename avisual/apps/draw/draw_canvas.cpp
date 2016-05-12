@@ -113,7 +113,6 @@ void init_main_draw_menu()
 }
 
 Drawing2D::Drawing2D() 
-:Window()
 {
 	Initialize();
 }
@@ -123,14 +122,16 @@ Drawing2D::Drawing2D( int Width, int Height  )
 	Initialize();
 }
 Drawing2D::~Drawing2D() 
-{ 
+{
+ 
 }
 
 void 	Drawing2D::Initialize(	) 
 { 
 	Control::Initialize();
 	init_main_draw_menu();
-	show_border();
+	show_border();	
+	m_is_capturing = false;
 }
 
 int		Drawing2D::calc_metrics() 
@@ -216,7 +217,7 @@ int Drawing2D::draw_poly_line ( int mIndex )
 }
 
 int Drawing2D::draw( )
-{ 
+{  
 	int retval = Control::draw();
 	for (int i=0; i < m_lines.size(); i++)
 	{
@@ -225,41 +226,60 @@ int Drawing2D::draw( )
 	return retval;
 }
 
-int		Drawing2D::get_hit_index		( int Mousex, int Mousey ) 
-{ 
-}
-int		Drawing2D::onClick(int x, int y, bool mouse_is_down) 
-{ 
-	//int result =  Control::onClick(x,y,mouse_is_down);
-	//m_all_lines.push_back( m_points );
-}
-
-bool Drawing2D::append_new_captured	( )
-{
-	for (int i=0; i< m_points_in_making.size(); i++)
-		m_lines.push_back( m_points_in_making[i] );
-		
-}
-
 Control* Drawing2D::HitTest ( int x, int y 	)
 {
 	Control* retval = Control::HitTest( x,y);
-	if (retval)
-		Capture(x,y,1);
+	if (m_is_capturing) {
+		Capture(x,y,0);
+		printf("captured: %d,%d\n",x,y);
+	}
 	return retval;
 }
 
+int	Drawing2D::onClick(int x, int y, bool mouse_is_down) 
+{ 
+	//int result =  Control::onClick(x,y,mouse_is_down);
+	if (mouse_is_down) {
+		if (m_is_capturing) {
+			printf("Drawing2D:  Done capturing!\n");
+			append_new_captured();		
+			m_is_capturing = false;
+		} else {
+			printf("Drawing2D:  Now capturing!\n");
+			m_is_capturing = true;
+			init_capture_vectors( 1 );
+			Capture(x,y,0);
+		}
+	} else {
+	}
+}
+
+void Drawing2D::init_capture_vectors( int mNumberFingersPressed	)
+{
+	struct stPath empty;
+	m_points_in_making.clear();
+	for (int i=0; i<mNumberFingersPressed; i++) {
+		empty.finger_index = i;
+		m_points_in_making.push_back( empty );
+	}
+}
 Control* Drawing2D::Capture ( int x, int y, int finger 	)
 {
-//	mouse.
 	struct stPathPoint pt;
 	pt.x = x;
 	pt.y = y;
-	
-	m_points_in_making[0].path_points.push_back( pt );
-	
 
+	m_points_in_making[finger].commands.push_back   ( VG_MOVE_TO_ABS );
+	m_points_in_making[finger].path_points.push_back( pt );
+	return NULL;
 }
+bool Drawing2D::append_new_captured	( )
+{
+	for (int i=0; i< m_points_in_making.size(); i++)
+		m_lines.push_back( m_points_in_making[i] );		
+}
+
+
 
 void simple_path()
 {

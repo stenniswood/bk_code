@@ -35,7 +35,7 @@ public:
 	void			setup_heading_details( 						  );
 	void 			compose_detail_line	( char* path, char* d_name );
 	
-	void			populate			( char* mPath			  );
+	//void			populate			( char* mPath			  );
 	void			populate_files		( char* mPath, int Column );
 	void			populate_directories( char* mPath, int Column );
 

@@ -32,7 +32,7 @@ class CANApp : public Application
 public:
 	CANApp ( );
 	CANApp ( Rectangle* mRect );
-	~CANApp( );
+	virtual ~CANApp( );
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 
