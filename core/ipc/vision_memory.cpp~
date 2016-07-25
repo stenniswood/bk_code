@@ -185,7 +185,7 @@ int eyes_allocate_memory( )
     dprintf("eyes shared_seg_size=%d\n", shared_segment_size);
 
 	/* Allocate a shared memory segment. */
-	eyes_segment_id = shmget( IPC_KEY_EYES, shared_segment_size, IPC_CREAT | 0666 );
+	eyes_segment_id = shmget( IPC_KEY_eyes, shared_segment_size, IPC_CREAT | 0666 );
     int errsv = errno;
     if (errno>0)
         //perror(sys_errlist[errsv]);

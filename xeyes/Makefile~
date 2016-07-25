@@ -21,7 +21,7 @@ OPTIONS	   = -std=c99
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 		 	 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
 SQL_INC    = -I/usr/include/mysql
-INC	       = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/
+INC	       = ./ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/
 
 CFLAGS = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) \
 	     -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)

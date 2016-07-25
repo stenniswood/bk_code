@@ -4,7 +4,7 @@
 #include <vector>
 #include "vector.hpp"
 
-#define IPC_KEY_EYES           0x04D2        // 1234 in decimal!
+#define IPC_KEY_SIM           0x04D2        // 1234 in decimal!
 #define MAX_CLIENT_ARRAY_SIZE 2048
 
 extern char* 	eyes_shared_memory;
