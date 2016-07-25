@@ -69,7 +69,7 @@ LoadCell_SerialInterface right_foot;
 
 
 void create_threads()
-{	
+{
 	int iret1 = pthread_create( &serial_leftfoot_thread_id, NULL, serial_interface, (void*) &left_foot);
 	if (iret1)
 	{
