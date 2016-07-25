@@ -40,18 +40,6 @@ AUTHOR	: Steve Tenniswood
 
 
 
-/*Card card1(3);
-Card card2(4);
-Card card3(5);
-Card* c6 = new Card(6);
-Card* c7 = new Card(7);
-Card* c8 = new Card(8);
-
-CardPlayer player1(4);
-CardPlayer player2(4);
-//Deck deck();
-
-*/
 void init_cards_only( )
 {
 	const int PADDING = 20;	
@@ -157,47 +145,6 @@ void init_card( )
 //	MainDisplay.add_object	( &player1 );
 }
 
-
-//HeartsGame hearts(3);
-/*BlackJack  bj(3);
-void init_blackjack( )
-{
-	printf("init_blackjack()\n");
-	float wide = MainDisplay.get_width();
-	float high = MainDisplay.get_height();
-	bj.set_width_height( wide*(1-0.125), 3.*high/4. );
-	bj.move_to(0.0625*wide, high*(1./8.) );
-	printf("blackjack - positions \n");
-	bj.print_positions();
-	
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &bj 	);
-}*/
-
-/*void init_hearts( )
-{
-	printf("init_hearts()\n");	
-	float wide = MainDisplay.get_width();
-	float high = MainDisplay.get_height();
-	hearts.set_width_height( wide*(1-0.125), high*(3./4.) );
-	hearts.move_to(0.0625*wide, high*(1./8.) );
-	printf("Done setting up\n");
-
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object		  ( &hearts );
-} */
-
-void init_reversi( )
-{
-/*
-	printf("init_reversi()\n");	
-	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object	( &hit  );
-	MainDisplay.add_object	( &stay );	
-*/	
-	// black jack knows how to add all it's graphic objects.
-//	bj.add_to_display_manager( &MainDisplay );	
-}
 
 void init_battleships( )
 {

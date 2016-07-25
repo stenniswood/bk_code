@@ -51,6 +51,7 @@
 #include "CAN_dispatcher.hpp"
 
 #include "fuse_ag.h"
+/***********************************************************************/
 /*
 	What's displayed here is going to be under the control of bkInstant.
 	We'll start by showing the incoming text.
@@ -83,11 +84,11 @@ void create_threads()
 		fprintf(stderr,"Error - Could not create right_foot thread. return code: %d\n",iret2);
 		exit(EXIT_FAILURE);
 	}
-	
 }
+
 /***********************************************************************/
 int bkInstant_connected = FALSE;
-int can_connected = FALSE;
+int can_connected 		= FALSE;
 int audio_mem_connected = FALSE;			// audio memory is not necessary to hear audio.
 
 void init_ipc( const char* mVectorFileName )
@@ -354,7 +355,6 @@ int main( int argc, char *argv[] )
 { 
 //	DLL_API 
 //  void DLL_CALLCONV FreeImage_Initialise(BOOL load_local_plugins_only FI_DEFAULT(FALSE));
-            
 //    DLL_API FIBITMAP *DLL_CALLCONV FreeImage_Load(FREE_IMAGE_FORMAT fif, const char* filename, int flags FI_DEFAULT(0));
 
 	printf("======= main() ==============\n");		
@@ -387,6 +387,37 @@ int main( int argc, char *argv[] )
 
 	sql_logger.connect_to_logger_db();
 	
+	//audio_file_open();
+	//play_waveform( &dWave, 1 );
+	//audio_play();
+	mouse.Initialize(); 
+	fuse_init();
+	CAN_add_rx_callback( callback_tilt_reading );
+	//CAN_add_rx_callback( callback_main );
+	
+	printf("================= Main Loop ==========================\n");	
+	while (1)
+	{		
+		ethernet_interface();
+		gui_interface();
+		can_interface();
+
+		MainDisplay.idle_tasks();		
+		//printf("done with MainDisplay.idle_tasks()\n");
+		
+		// Want to be able to open the screen leaving everything as is.
+		// then do an end again to render the mouse.
+
+		/*sequencer_interface();
+		voice_interface();
+		behavior_interface(); */
+		//serial_interface();	on separate thread!			// serial port used for arduino connections & GPS.
+	}
+
+//	DLL_API void DLL_CALLCONV FreeImage_DeInitialise();
+}
+
+
 /*	CalendarEntry ce;
 	ce.connect_to_calendar_db();
 	//ce.create_calendar_table_nq();
@@ -433,32 +464,3 @@ int main( int argc, char *argv[] )
 	mktime(&end);
 	sl.find_reading( "load cell", start, end );
 */	
-	//audio_file_open();
-	//play_waveform( &dWave, 1 );
-	//audio_play();
-	mouse.Initialize(); 
-	fuse_init();
-	CAN_add_rx_callback( callback_tilt_reading );
-	//CAN_add_rx_callback( callback_main );
-	
-	printf("================= Main Loop ==========================\n");	
-	while (1)
-	{		
-		ethernet_interface();
-		gui_interface();
-		can_interface();
-
-		MainDisplay.idle_tasks();		
-		//printf("done with MainDisplay.idle_tasks()\n");
-		
-		// Want to be able to open the screen leaving everything as is.
-		// then do an end again to render the mouse.
-
-		/*sequencer_interface();
-		voice_interface();
-		behavior_interface(); */
-		//serial_interface();	on separate thread!			// serial port used for arduino connections & GPS.
-	}
-
-//	DLL_API void DLL_CALLCONV FreeImage_DeInitialise();
-}

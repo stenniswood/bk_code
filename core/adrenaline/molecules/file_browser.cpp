@@ -21,6 +21,8 @@
 
 #define Debug 0
 
+struct stColor_set  DefaultColorSet = { 0xFF4F0F0F, 0xFF2F0F0F, 0xFF6F2F2F, 0xFFFFFFFF };
+
 
 FileBrowser::FileBrowser()
 : Control()
@@ -43,8 +45,8 @@ FileBrowser::~FileBrowser()
 
 void FileBrowser::Initialize( )
 {
-	if (Debug) printf("\n\tFileBrowser::Initialize()::\n");
 	//Control::Initialize();
+	if (Debug) printf("\n\tFileBrowser::Initialize()::\n");
 	path_descriptor   = NULL;
 	show_hidden_files = false;
 	if (Debug) printf("\tFileBrowser::Initialize()::done!\n");
@@ -165,9 +167,14 @@ void FileBrowser::add_level( string mAppendPath )
 {
 	if (Debug) printf( "add_level : %s \n", mAppendPath.c_str() );
 	DirectoryListBox*  tmp_dir  = new DirectoryListBox();
-	tmp_dir->set_odd_color       ( 0xFF9FFFFF 	);
+	tmp_dir->set_color_scheme( DefaultColorSet );
 	tmp_dir->populate_directories( mAppendPath.c_str(), 1 );
 
+	// Set the Header text:
+	size_t last_pos = mAppendPath.find_last_of('/',mAppendPath.length()-2);	
+	string directory_name = mAppendPath.substr( last_pos, string::npos );	
+	tmp_dir->set_header_text( directory_name, 0 );
+	
 	float ht = height - path_descriptor->get_height();
 	tmp_dir->set_width_height( 200, ht );		// height will get overwritten
 	tmp_dir->populate_files( mAppendPath.c_str(), 1 );
@@ -266,3 +273,7 @@ int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 }
 
 // Need to draw a > marker on each list box's selected item.
+
+/*	tmp_dir->set_odd_color       ( 0xFF4F0F0F 	);
+	tmp_dir->set_even_color      ( 0xFF2F0F0F 	);
+	tmp_dir->set_text_color		 ( 0xFFFFFFFF 	); */

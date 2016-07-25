@@ -24,7 +24,7 @@ class RobotApp : public Application
 public:
 	RobotApp ();
 	RobotApp ( Rectangle* mRect );
-	~RobotApp();
+	virtual ~RobotApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 

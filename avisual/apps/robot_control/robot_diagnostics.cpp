@@ -32,7 +32,10 @@ RobotDiagnosticsPanel::RobotDiagnosticsPanel()
 { 
 	Initialize();
 }
+RobotDiagnosticsPanel::~RobotDiagnosticsPanel()
+{
 
+}
 void RobotDiagnosticsPanel::Initialize(	)
 {
 	Window::Initialize();	

@@ -26,14 +26,16 @@ using namespace std;
 
 /* Standard handlers for About, Preferences, and Quit() */
 static int app_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
-{
+{ 
 	if (Debug) printf("app_menu_actions() app=%x\n", mApp);
 	if (mApp)
 		switch(mMenuIndex) 
 		{
 			case 0: mApp->About();			break;
 			case 1: mApp->Preferences();	break;
-			case 2: mApp->Quit();			break;
+			case 2: mApp->Quit();	
+					MainDisplay.close_app( mApp );	
+					break;
 			default: return 0; break;
 		} 
 	return 1;
@@ -52,7 +54,7 @@ static int app_file_menu_actions( void* menuPtr, int mMenuIndex, Application* mA
 	default: return 0; 	break;
 	} 
 	return 1;
-}
+} 
  
 
 Application::Application () 
@@ -98,20 +100,6 @@ void	Application::setup_sidebar	(	)  // derived class adds these here
 	MainDisplay.m_side.load_controls( m_sidebar_controls );
 	if (Debug) printf("Application::setup_sidebar() done\n");	
 }
-
-void	Application::setup_main_menu(	)  // derived class adds these here
-{
-	if (Debug) printf("Application::setup_main_menu()\n");
-	m_main_menu.m_application = this;
-	m_main_menu.clear_all();
-	m_main_menu.add_sub_menu( m_application_name.c_str(), &m_app_menu  );
-
-	m_file_menu.create_std_file_menu  ( );
-	m_file_menu.add_callback_all_items( app_file_menu_actions );
-	m_main_menu.add_sub_menu( "File", &m_file_menu  );
-	if (Debug) printf("Application::setup_main_menu() done\n");	
-}
-
 // Name of App, About, Preferences, Quit
 void	Application::setup_app_menu(	)
 {
@@ -122,6 +110,20 @@ void	Application::setup_app_menu(	)
 	m_app_menu.add_simple_command( "Quit"    	);
 	m_app_menu.add_callback_all_items( app_menu_actions );
 	if (Debug) printf("Application::setup_app_menu() done\n");
+}
+
+/* Must call setup_app_menu first!  */
+void	Application::setup_main_menu(	)  // The horizontal menu. derived class adds these here
+{
+	if (Debug) printf("Application::setup_main_menu()\n");
+	m_main_menu.m_application = this;
+	m_main_menu.clear_all();
+	m_main_menu.add_sub_menu( m_application_name.c_str(), &m_app_menu  );
+
+	m_file_menu.create_std_file_menu  ( );
+	m_file_menu.add_callback_all_items( app_file_menu_actions );
+	m_main_menu.add_sub_menu( "File", &m_file_menu  );
+	if (Debug) printf("Application::setup_main_menu() done\n");	
 }
 
 int		Application::calc_metrics() 
@@ -148,7 +150,7 @@ void Application::register_with_display_manager()
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.set_main_window( m_main_window );
 	MainDisplay.set_menu  	   ( &m_main_menu  );
-		
+
 	// Establish the sidebar controls:
 	// Create Sidebar items:
 	MainDisplay.m_side.load_controls( m_sidebar_controls );
@@ -206,12 +208,14 @@ void	Application::Preferences(	)
 int	Application::Quit	() 
 {
 	if (Debug) printf("Application::Quit()\n");
-	MainDisplay.remove_all_objects(	);
+
+/*	MainDisplay.remove_all_objects(	);
 	MainDisplay.set_menu		( NULL 	);
 	MainDisplay.m_side.unload_controls( );
 	MainDisplay.m_status.set_text( "Closed app" );	
+	MainDisplay.close_app(this); */
 	if (Debug) printf("Application::Quit() done \n");
-	return 1;	
+	return 1;
 }
 
 int		Application::onClick(int x, int y, bool mouse_is_down) 

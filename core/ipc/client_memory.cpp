@@ -344,21 +344,26 @@ bool cli_is_new_update()
 }
 void cli_ack_update_status()
 {
+	if (ipc_memory_client==NULL) 		return ;
 	ipc_memory_client->AcknowledgedCounter = ipc_memory_client->UpdateCounter;
 }
 void cli_ack_response()
 {
+	if (ipc_memory_client==NULL) 		return ;
 	ipc_memory_client->ResponseAcknowledgedCounter = ipc_memory_client->ResponseCounter;
 }
 
 void cli_wait_for_ack_update()
 {
+	if (ipc_memory_client==NULL) 		return ;
+	
 	while (ipc_memory_client->AcknowledgedCounter < ipc_memory_client->UpdateCounter)
 	{
 	}
 }
 bool is_new_response()
 {
+	if (ipc_memory_client==NULL) 		return ;
     return (ipc_memory_client->ResponseAcknowledgedCounter < ipc_memory_client->ResponseCounter);
 }
 void cli_wait_for_response()

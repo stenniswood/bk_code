@@ -51,7 +51,11 @@ public:
 	int				set_state			( int mState, int mIndex );
 	int				set_h_parent		( HorizontalMenu* mMenu  );
 	Application*	get_application		(   );
-		
+
+	virtual int		onCreate		  	( );
+	void			save_pixels			( );
+	void			restore_pixels		( );
+	
 	// This will move it's upper left corner to the horizontal menu:
 	int				attach_at			( float x, float y );
 
@@ -68,7 +72,10 @@ public:
 
 protected:
 	HorizontalMenu*			m_horiz_parent;
+	long int				m_disabled_color;
+	VGImage 				m_underneath;		// pixels underneath the menu.
 
+		
 	int		(*callback_all_items)(void*, int, Application*);		// called when any item is selected.
 
 	std::vector<stVertMenuInfo> m_entries;

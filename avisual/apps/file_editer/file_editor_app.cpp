@@ -36,6 +36,7 @@ FileEditorApp::FileEditorApp ( Rectangle* mRect )
 }
 FileEditorApp::~FileEditorApp() 
 { 
+	file_app = NULL;
 }
 
 void 	FileEditorApp::Initialize		(	) 

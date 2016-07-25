@@ -20,26 +20,171 @@ AUTHOR	: Steve Tenniswood
 #include <string>
 #include <iostream>     // std::cout
 #include <new>     
+#include <assert.h>
+#include <unistd.h>
+#include <semaphore.h>
 #include "bk_system_defs.h"
-
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
 #include "visual_memory.h"
 #include "audio_memory.h"
-#include "audio_app.hpp"
+
 #include "audio_app_menu.hpp"
-#include <assert.h>
-#include <unistd.h>
-#include <semaphore.h>
 #include "bcm_host.h"
 #include "ilclient.h"
-
 #include "AUDIO_device.h"
+#include "audio_app.hpp"
 
 
 extern int UpdateDisplaySemaphore;
 
 AudioApp* audio_app = NULL;
+////////////////////// AUDIO GRAPHICS VARIABLES : 
+pthread_t 	audio_view_thread_id;	
+
+float samples [1024];
+float freq_mag[1024];
+short freqs   [1024];
+
+
+void init_audio_app()
+{
+	if (audio_app==NULL)
+		audio_app = new AudioApp();
+	MainDisplay.start_app( audio_app );
+}
+
+// This is the "OnCreate() function!
+// Parse an xml
+AudioApp::AudioApp()
+: Application(),
+dWave(),WaveformInfo(-1,-1), spl(-1,-1), freq_view(-1,-1),
+wave_view_left(-1,-1), wave_view_right(-1,-1), VolumeSlider(-1,-1)
+{
+	Initialize();
+}
+
+AudioApp::AudioApp( Rectangle* mRect )
+: Application( mRect ),
+dWave(),WaveformInfo(-1,-1), spl(-1,-1), freq_view(-1,-1),
+wave_view_left(-1,-1), wave_view_right(-1,-1), VolumeSlider(-1,-1)
+{
+	Initialize();
+}
+
+AudioApp::~AudioApp()
+{
+	printf("AudioApp::~AudioApp()\n");
+	audio_app= NULL;
+}
+
+/* */
+short* sample_waveform()
+{
+	static short data[200];
+	for (int i=0; i<100; i++)
+		data[i] = i*32700./100.;
+	for (int i=101; i<120; i++)
+		data[i] = 1700;
+	for (int i=121; i<200; i++)
+		data[i] = 32700. - ((i-121) * 32700/80.);
+	return data;
+}
+void* process_audio(void*)
+{
+	static long int last_count = 0;
+	if (ipc_memory_aud==NULL) return 0;
+
+	while ( 1 )
+	{
+		if ( (ipc_memory_aud->UpdateCounter) > last_count )
+		{
+/*			last_count  = ipc_memory_aud->update_counter;
+			ipc_memory_aud->acknowledge_counter++;
+			long energy = get_audio_energy( (short*)ipc_memory_aud->audio_data, ipc_memory_aud->update_samples );
+
+			float gain  = 5.0;
+ 			float level = gain * ( (float) energy / 327.67 );
+			// printf("Audio energy: %d, %6.1f\n", energy, level ); 
+			spl.set_level_left	(  level   );
+			spl.set_level_right	(  level   );
+			spl.Invalidate		(		   );
+
+			// Do the FFT and Bin it:
+			int length = 256;
+			if (ipc_memory_aud->update_samples < length)
+			{
+				ShortToFloat	( (short*)ipc_memory_aud->audio_data, samples, length );
+				fftMag			( samples, length,  freq_mag 	);
+				int bins = Bin4	( freq_mag, length 				);
+				FloatToShort	( freq_mag, freqs, ipc_memory_aud->update_samples );
+			}
+			UpdateDisplaySemaphore=1;  */
+		} 
+	} 
+}
+
+// create all the objects here.
+void 	AudioApp::Initialize		(	)
+{
+	/*  Base class is initialized in the base class constructor.
+		ie. The Application::Initialize is invoked there (not this one)
+		Even though the function is virtual, for the base class,
+		it calls the same level (base class) Initialize()
+		Application::Initialize();	This will get called anyway!
+		Therefore it is uneccessary and should not be put in.
+	*/
+	m_application_name = "AudioMaster";
+	m_welcome_status   = "Audio Master";
+	Application::Initialize();
+	
+	VolumeSlider.set_level_percent( 50.0    );	
+	VolumeSlider.set_max		  ( 100.0   );
+	VolumeSlider.set_width_height ( 70,200  );
+	VolumeSlider.move_to		  ( 30, 100 );	
+	VolumeSlider.set_text		  ( "Volume" );
+
+	// also spl stereo power level: 
+	spl.set_max					( 100.0	   );
+	spl.set_min					(   0.0	   );
+	spl.set_level_left			(  50.0    );
+	spl.set_level_right			(  50.0    );
+	spl.set_number_boxes		(  -1 	   );
+	spl.set_width_height		( 100, 200 );
+	spl.move_to					( 100, 100 );
+	//printf("AudioApp::Initialize spl done\n");
+ 
+	WaveformInfo.set_width_height( 300, 150 );
+	WaveformInfo.move_to		 (  10, 730 );
+	char* txt=NULL;
+	if (ipc_memory_aud!=NULL)
+	{ 
+		txt = get_audio_text	( &(ipc_memory_aud->audio_header));	
+		printf("AudioApp::Initialize txt=%s\n",txt);		
+		WaveformInfo.set_text	( txt );		
+	}
+	WaveformInfo.set_text_size	 ( 12  );
+
+	if (ipc_memory_aud != NULL)
+		configure_wave_views( ipc_memory_aud->audio_header.num_channels,
+						  (short*)ipc_memory_aud->audio_data,
+						  (short*)ipc_memory_aud->audio_data   );
+	
+	freq_view.set_width_height		( 1000, 200 );
+	freq_view.move_to				( 220, 520  );
+	freq_view.set_data( sample_waveform(), 200 );
+	//freq_view.set_data( freqs, 64 );
+	printf("AudioApp::Initialize 3\n");
+
+	// CREATE Audio Visual Thread : 
+	int iret1 = pthread_create( &audio_view_thread_id, NULL, process_audio, NULL);
+	if (iret1)
+	{
+		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
+		exit(EXIT_FAILURE);
+	}
+	printf("thread created.\n");
+}
 
 void AudioApp::file_new			() 
 { 
@@ -110,12 +255,6 @@ void audio_backwards		 () { }
 void audio_convert_to_mono	 () { }	
 void audio_convert_to_stereo () { }	
 
-////////////////////// AUDIO GRAPHICS VARIABLES : 
-pthread_t 	audio_view_thread_id;	
-
-float samples [1024];
-float freq_mag[1024];
-short freqs   [1024];
 
 /**********************************************
   How to get the audio in?  use audio_memory.h
@@ -135,69 +274,6 @@ long int get_audio_energy(short* buffer, int length)
 	return sum;	
 }
 
-void* process_audio(void*)
-{
-	static long int last_count = 0;
-	if (ipc_memory_aud==NULL) return 0;
-
-	while ( 1 )
-	{
-		if ( (ipc_memory_aud->UpdateCounter) > last_count )
-		{
-/*			last_count  = ipc_memory_aud->update_counter;
-			ipc_memory_aud->acknowledge_counter++;
-			long energy = get_audio_energy( (short*)ipc_memory_aud->audio_data, ipc_memory_aud->update_samples );
-
-			float gain  = 5.0;
- 			float level = gain * ( (float) energy / 327.67 );
-			// printf("Audio energy: %d, %6.1f\n", energy, level ); 
-			spl.set_level_left	(  level   );
-			spl.set_level_right	(  level   );
-			spl.Invalidate		(		   );
-
-			// Do the FFT and Bin it:
-			int length = 256;
-			if (ipc_memory_aud->update_samples < length)
-			{
-				ShortToFloat	( (short*)ipc_memory_aud->audio_data, samples, length );
-				fftMag			( samples, length,  freq_mag 	);
-				int bins = Bin4	( freq_mag, length 				);
-				FloatToShort	( freq_mag, freqs, ipc_memory_aud->update_samples );
-			}
-			UpdateDisplaySemaphore=1;  */
-		} 
-	} 
-}
-
-short* sample_waveform()
-{
-	static short data[200];
-	for (int i=0; i<100; i++)
-		data[i] = i*32700./100.;
-	for (int i=101; i<120; i++)
-		data[i] = 1700;
-	for (int i=121; i<200; i++)
-		data[i] = 32700. - ((i-121) * 32700/80.);
-	return data;
-}
-
-// This is the "OnCreate() function!
-// Parse an xml
-AudioApp::AudioApp()
-: Application(),
-dWave(),WaveformInfo(-1,-1), spl(-1,-1), freq_view(-1,-1),
-wave_view_left(-1,-1), wave_view_right(-1,-1), VolumeSlider(-1,-1)
-{
-	Initialize();
-}
-
-AudioApp::AudioApp( Rectangle* mRect )
-: Application( mRect ),
-dWave(),WaveformInfo(-1,-1), spl(-1,-1), freq_view(-1,-1),
-wave_view_left(-1,-1), wave_view_right(-1,-1), VolumeSlider(-1,-1)
-{
-	Initialize();
-}
 
 void	AudioApp::setup_app_menu(	)
 {
@@ -236,67 +312,6 @@ void	AudioApp::Preferences		(	)
 	Application::Preferences();
 }
 
-// create all the objects here.
-void 	AudioApp::Initialize		(	)
-{
-	/*  Base class is initialized in the base class constructor.
-		ie. The Application::Initialize is invoked there (not this one)
-		Even though the function is virtual, for the base class,
-		it calls the same level (base class) Initialize()
-		Application::Initialize();	This will get called anyway!
-		Therefore it is uneccessary and should not be put in.
-	*/
-	m_application_name = "AudMaster";
-	m_welcome_status   = m_application_name;
-
-	VolumeSlider.set_level_percent( 50.0    );	
-	VolumeSlider.set_max		  ( 100.0   );
-	VolumeSlider.set_width_height ( 70,200  );
-	VolumeSlider.move_to		  ( 30, 100 );	
-	VolumeSlider.set_text		  ( "Volume" );
-
-	// also spl stereo power level: 
-	spl.set_max					( 100.0	   );
-	spl.set_min					(   0.0	   );
-	spl.set_level_left			(  50.0    );
-	spl.set_level_right			(  50.0    );
-	spl.set_number_boxes		(  -1 	   );
-	spl.set_width_height		( 100, 200 );
-	spl.move_to					( 100, 100 );
-	//printf("AudioApp::Initialize spl done\n");
-
-	WaveformInfo.set_width_height( 300, 150 );
-	WaveformInfo.move_to		 (  10, 730 );
-	char* txt=NULL;
-	if (ipc_memory_aud!=NULL)
-	{ 
-		txt = get_audio_text	( &(ipc_memory_aud->audio_header));	
-		printf("AudioApp::Initialize txt=%s\n",txt);		
-		WaveformInfo.set_text	( txt );		
-	}
-	WaveformInfo.set_text_size	 ( 12  );
-
-	//printf("AudioApp::Initialize 2\n"); 
-	//if (ipc_memory_aud != NULL)
-		configure_wave_views( ipc_memory_aud->audio_header.num_channels,
-						  (short*)ipc_memory_aud->audio_data,
-						  (short*)ipc_memory_aud->audio_data   );
-	
-	freq_view.set_width_height		( 1000, 200 );
-	freq_view.move_to				( 220, 520  );
-	freq_view.set_data( sample_waveform(), 200 );
-	//freq_view.set_data( freqs, 64 );
-	printf("AudioApp::Initialize 3\n");
-
-	// CREATE Audio Visual Thread : 
-	int iret1 = pthread_create( &audio_view_thread_id, NULL, process_audio, NULL);
-	if (iret1)
-	{
-		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
-		exit(EXIT_FAILURE);
-	}
-	printf("thread created.\n");
-}
 
 void AudioApp::register_with_display_manager()
 {
@@ -307,7 +322,7 @@ void AudioApp::register_with_display_manager()
 	MainDisplay.add_object( &wave_view_left  );
 	MainDisplay.add_object( &wave_view_right );
 	MainDisplay.add_object( &freq_view 	 	 );
-	MainDisplay.set_menu  ( &m_main_menu  	 	 );
+	MainDisplay.set_menu  ( &m_main_menu  	 );
 	//MainDisplay.m_status.set_text( m_welcome_status.c_str() );	
 }
 

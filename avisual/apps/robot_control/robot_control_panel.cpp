@@ -122,6 +122,9 @@ RobotPanel::RobotPanel()
 {
 	Initialize();
 }
+RobotPanel::~RobotPanel()
+{
+}
 void RobotPanel::Initialize(	)
 {
 	Window::Initialize();

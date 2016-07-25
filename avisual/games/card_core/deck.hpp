@@ -10,21 +10,21 @@ class Deck
 public:
 	Deck( );
 	
-	void	load_resources();	
+	void			load_resources();	
 
-	Card*	draw_one();
-	void	discard	( Card* mCard );
+	Card*			draw_one();
+	void			discard	( Card* mCard );
 
-	void 	reuse_discarded();		// call when action is required. (ie not a state)
-	
-	void	shuffle	(			 );
-	void	print_order(		 );	
-	void 	order	(			 );
-	Card*	find 	( char mValue, char mSuit );
-	//void	remove_from	(			 );
+	void 			reuse_discarded();		// call when action is required. (ie not a state)
+
+	void			shuffle	(			 );
+	void			print_order(		 );	
+	void 			order	(			 );
+	Card*			find 	( char mValue, char mSuit );
+
 
 	// Use to draw card backs when face down:	
-	void 	draw_image_back( Card* card );
+	void 			draw_image_back( Card* card );
 	virtual int		onCreate  (  );
 		
 private:
@@ -39,4 +39,5 @@ private:
 };
 
 
+	//void	remove_from	(			 );
 #endif

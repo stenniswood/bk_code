@@ -4,7 +4,6 @@
 				 Product of Beyond Kinetics, Inc.
 
 This app transfer Audio, Video, CAN, text, messages, HMI, etc.
-
 ====================================================================
 How to Start:
 	cd ~/bk_code/abkInstant
@@ -18,7 +17,6 @@ A) Connect to another instant :
 
 		aclient [list,host='', ip=''] [open audio,video,CAN,HMI,etc]
 
-	
 B) Start avisual (make sure instant is running already)
 C) Start PiCAM Scan board app ( servo motor commands will move )
 D) Start Segway app
@@ -32,7 +30,7 @@ How it works:
 
 NOTE:  instant allocates memory for shared apps.
 
-	
+
 Command Server Socket
 Command Client Socket
 Data Socket

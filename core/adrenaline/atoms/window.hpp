@@ -87,8 +87,6 @@ protected:
 
 	float			packer_horizontal_l_position;		// Moves Left to Right.
 	float			packer_horizontal_r_position;		// Moves Left to Right.	
-
-private:
 	
 };
 

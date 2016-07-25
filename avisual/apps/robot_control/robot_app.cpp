@@ -19,8 +19,6 @@
 #include "bcm_host.h"
 #include <fontinfo.h>
 #include <shapes.h>
-
-
 #include "Graphbase.hpp"
 #include "adrenaline_windows.h"
 #include "draw_app.hpp"
@@ -34,13 +32,13 @@
 
 RobotApp* robot_app=NULL;
 
-
 #define Debug 1
 
 
 void init_robot_app() 
 {
-	robot_app = new RobotApp( );
+	if (robot_app==NULL)
+		robot_app = new RobotApp( );
 	MainDisplay.start_app( robot_app );
 }
 
@@ -54,11 +52,11 @@ RobotApp::RobotApp ( Rectangle* mRect )
 }
 RobotApp::~RobotApp()
 { 
+	robot_app=NULL;
 }
 
 void RobotApp::StartSequence(	)
 {
-	
 	// SEND ENABLES : 
 	//int result = Req_CAN( mBuffer, mPin, mHigh );		
 	//SendTelegram(mBuffer, mSize );
@@ -74,7 +72,7 @@ void RobotApp::Initialize		(	)
 { 
 	printf("RobotApp:: Initialize() \n");
 	m_application_name = "Robot";
-	m_welcome_status   = "Robot Control Panel";	
+	m_welcome_status   = "Robot Control Panel";
 	Application::Initialize();
 
 	robot_panel 	  = new RobotPanel();
@@ -84,9 +82,10 @@ void RobotApp::Initialize		(	)
 	robot_vision 	  = new RobotVisionPanel();	
 	m_main_window 	  = (Control*) robot_panel;
 
-	MainDisplay.set_main_window(m_main_window);
-	// Connect to the Vision RPI:	
-	
+	// gets done in Application::register_with_display_manager() now.
+	//		MainDisplay.set_main_window(m_main_window);
+
+	// Connect to the Vision RPI:
 }
 
 VerticalMenu view_menu;

@@ -1,6 +1,7 @@
-#ifndef _TEST_COMBO_LAYOUTS_
-#define _TEST_COMBO_LAYOUTS_
+#ifndef _AUDIO_APPS_
+#define _AUDIO_APPS_
 
+#include "application.hpp"
 
 /* These function handle the menu commands:   */
 void audio_file_new			();		
@@ -32,7 +33,7 @@ void audio_convert_to_stereo ();
 
 void configure_wave_views(int mChannels, short* mDataCh1, short* mDataCh2 );
 
-void init_audio_view		(			);
+void init_audio_app	( );
 
 // 12, 7, 16,  not working
 
@@ -41,7 +42,7 @@ class AudioApp : public Application
 public:
 	AudioApp ();
 	AudioApp ( Rectangle* mRect );
-	~AudioApp();
+	virtual ~AudioApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 
@@ -57,7 +58,6 @@ public:
 	virtual void	file_open_recent( );	
 	virtual void	file_save		( );
 	virtual void	file_save_as	( );
-		
 
 	void 			audio_play		( );
 	void 			configure_wave_views(int mChannels, short* mDataCh1, short* mDataCh2 );

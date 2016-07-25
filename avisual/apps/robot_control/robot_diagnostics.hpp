@@ -10,6 +10,7 @@ class RobotDiagnosticsPanel : public Window
 {
 public:
 	RobotDiagnosticsPanel();
+	virtual ~RobotDiagnosticsPanel();
 
 	virtual void 	Initialize(	);
 	void			calc_metrics();

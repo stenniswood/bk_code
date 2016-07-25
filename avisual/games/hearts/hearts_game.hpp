@@ -15,7 +15,8 @@ class HeartsGame : public BasicCardGame
 {
 public:
 	HeartsGame ( int mNumber_of_players=4 );
-
+	virtual ~HeartsGame();
+	
 	// Deals cards, places one in the center.
 	void	setup					(						);
 	void	onPlace					(						);
@@ -26,8 +27,6 @@ public:
 		
 	void	score					(						);
 	void	evaluate_winners		(						);	
-	//void 	set_graphic_center		( float cx, float cy 	);	
-	//void	place_players			( float radius 			);		// place places around the game's center point.
 	void	register_with_display_manager( 					);	
 	Card*	draw_one				(						);
 
@@ -38,3 +37,5 @@ protected:
 
 
 #endif
+	//void 	set_graphic_center		( float cx, float cy 	);	
+	//void	place_players			( float radius 			);		// place places around the game's center point.

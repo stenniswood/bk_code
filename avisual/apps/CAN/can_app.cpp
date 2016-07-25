@@ -30,16 +30,15 @@
 #include "CAN_memory.h"
 #include "display_manager.hpp"
 #include "client_memory.hpp"
+#include "CAN_dispatcher.hpp"
+
  
-static VerticalMenu     CAN_edit_menu(-1,-1);
-static VerticalMenu     CAN_view_menu(-1,-1);
+static VerticalMenu     CAN_edit_menu (-1,-1);
+static VerticalMenu     CAN_view_menu (-1,-1);
 static VerticalMenu     CAN_graph_menu(-1,-1);
-
-
 
 CANApp*  can_app = NULL;
 char CAN_App_Status[] = "CAN App";
-
 
 /***** Handler for Menu's *****/
 static int can_edit_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
@@ -82,7 +81,6 @@ static int can_graph_menu_actions( void* menuPtr, int mMenuIndex, Application* m
 }
 /***** END OF Handler for Menu's *****/
 
-
 void init_CAN_app( )
 {
 	printf("init_CAN_app()\n");
@@ -91,10 +89,16 @@ void init_CAN_app( )
 	MainDisplay.start_app( can_app );
 }
 
+/* This will request CAN from abkInstant.  When the PiCAN card is on a remote 
+	host.
+	
+*/
 void start_can()
 {
 	char working_buffer[127];
 	strcpy( working_buffer, "receive can" );	
+	printf("NOTE: You must have abkInstant running inorder to use this app!\n");
+	printf("NOTE: You must have abkInstant running inorder to use this app!\n");
 	cli_ipc_write_sentence( working_buffer );
 	cli_wait_for_ack_update();	
 }
@@ -110,7 +114,10 @@ CANApp::CANApp ( Rectangle* mRect )
 }
 CANApp::~CANApp() 
 { 
+	can_app=NULL;
 }
+
+extern int can_connected;		// visual_main.cpp 
 
 void 	CANApp::Initialize		(	) 
 { 
@@ -123,27 +130,22 @@ void 	CANApp::Initialize		(	)
 	*/
 
 	// ESTABLISH CAN IPC :
-	int  okay = can_connect_shared_memory(TRUE);		
-	if (!okay)
+	if (can_connected==FALSE)
 		m_welcome_status   = "No CAN connection. Connect PiCAN board & run \'amon\'. ";
 	else {
 		m_rx_tail 	   = 0;
 		m_rx_tail_laps = 0;
 
-		if (ipc_memory_can->isReceiving==FALSE)
-		{	
-			printf("no remote CAN data, requesting...\n");  
-			start_can();
-		}
+		//CAN_add_rx_callback( &distribute_can_msg );
 		m_welcome_status   = "Monitor and generate CAN traffic. For vehicle or Adrenaline.";
 	}
 	// BEGIN APP INIT:	
 	m_application_name = "CAN App";	
 	Application::Initialize();
-			
-	m_gyro 	  		= new GyroOverview   ();
-	m_analog  		= new AnalogView ();
-	m_msgs 	  		= new CANMessages();	// defined in ../core/adrenaline/molecules/can_window.cpp
+
+	m_gyro 	  		= new GyroOverview();
+	m_analog  		= new AnalogView  ();
+	m_msgs 	  		= new CANMessages ();	// defined in ../core/adrenaline/molecules/can_window.cpp
 	m_msg_view    	= new CANMessageView();		
 	m_board_view  	= NULL; // new NetworkView();
 	m_main_window 	= m_msgs;
@@ -204,7 +206,6 @@ void CANApp::setup_sidebar(	)
 	MainDisplay.m_side.add_control( tmp, "Refresh" );
 }
 
-
 void 	CANApp::register_with_display_manager() 
 { 
 	Application::register_with_display_manager();			
@@ -213,6 +214,7 @@ void 	CANApp::register_with_display_manager()
 
 void	CANApp::About			(	) 
 { 
+	Application::About();
 }
 void	CANApp::Preferences		(	) 
 { 
@@ -261,32 +263,46 @@ void 	CANApp::histogram		(	)
 void 	CANApp::timing			(	) 
 {
 }
+
+
+BOOL  CANApp::distribute_can_msg( struct sCAN* mMsg )
+{
+	if (mMsg) 
+	{
+		//printf("got new message\n");
+		
+		// Distribute to All Views :
+		if (m_analog)
+			m_analog->handle_incoming_msg( mMsg );
+		if (m_gyro)
+			m_gyro->handle_incoming_msg  ( mMsg );  
+//			if (m_msgs)
+//				m_msgs->handle_incoming_msg( mMsg ); 
+
+		if (m_board_view)
+			m_board_view->handle_incoming_msg( mMsg );        
+		if (m_msg_view) 
+			m_msg_view->handle_incoming_msg( mMsg ); 
+	}	
+}
+
+/* This method is deprecated though it works.  Because other parts of the OS
+	may use CAN messages too.  Such as the Fusion algorithm.  We don't want to
+	be the exclusive user of these messages.  So instead we'll attached a call
+	back to the CAN_Dispatcher.cpp.
+	
+	The CAN Dispatcher can 
+*/
 int		CANApp::background_time_slice(	)
 {	
-	struct sCAN* ptr=NULL;
-
 	// CHECK CAN : 	
+/*	struct sCAN* ptr=NULL;
 	while (shm_isRxMessageAvailable( &m_rx_tail, &m_rx_tail_laps) )
 	{	
 		//printf("CANApp rx_tail=%d;  rx_tail_laps=%d\n", m_rx_tail, m_rx_tail_laps );
 		ptr = shm_GetNextRxMsg (&m_rx_tail, &m_rx_tail_laps);
-		if (ptr) 
-		{
-			//printf("got new message\n");
-			// Distribute to All Views :
-			if (m_analog)
-				m_analog->handle_incoming_msg( ptr );
-			if (m_gyro)
-				m_gyro->handle_incoming_msg  ( ptr );  
-//			if (m_msgs)
-//				m_msgs->handle_incoming_msg( ptr ); 
-
-            if (m_board_view)
-                m_board_view->handle_incoming_msg( ptr );        
-			if (m_msg_view) 
-				m_msg_view->handle_incoming_msg( ptr ); 
-		}
-	};	
+		distribute_can_msg( ptr );
+	};	*/
 	return 0;
 }
 
@@ -306,3 +322,11 @@ void	CANApp::file_save		( )
 void	CANApp::file_save_as	( ) 
 { 
 }
+
+
+	//CAN_add_rx_callback( BOOL (*mCallback)(struct sCAN*) );		
+	/*if (ipc_memory_can->isReceiving==FALSE)
+	{	
+	printf("no remote CAN data, requesting...\n");  
+	start_can();
+	}*/

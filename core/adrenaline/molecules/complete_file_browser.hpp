@@ -33,7 +33,11 @@ class ClippingsPane : public ListBox
 {
 public:
 	ClippingsPane();
-	virtual int		onCreate(  );
+	
+	void			add_clipping	( string mText );
+
+	virtual int		onCreate(  );	
+	vector<string>	m_clippings;
 };
 
 /******************************************************************/

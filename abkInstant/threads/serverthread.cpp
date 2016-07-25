@@ -19,7 +19,6 @@
 #include <pthread.h>
 #include <string>
 #include <vector>
-//#include <list>
 #include <sys/ioctl.h>
 #include "bk_system_defs.h"
 #include "CAN_base.h"
@@ -112,6 +111,8 @@ void SendTelegram( unsigned char* mBuffer, int mSize)
 	write(connfd, mBuffer, mSize );
 }
 
+/* Update Client memory with connection status.
+*/
 void update_ipc_status( struct sockaddr_in* sa )
 {
 	static char msg[80];
@@ -121,7 +122,8 @@ void update_ipc_status( struct sockaddr_in* sa )
 	strcat(msg, client_ip);		
 	cli_ipc_write_connection_status( msg );
 }		
-
+/* Update Client memory with connection status.
+*/
 void update_ipc_status_no_connection( )
 {
 	static char msg[80];
@@ -129,32 +131,8 @@ void update_ipc_status_no_connection( )
 	cli_ipc_write_connection_status( msg );
 }		
 
-/*BOOL Parse_done( char* mSentence )
-{
-* They might say:
-	close this connection
-	go back to doing whatever you were.
-	disconnect [us].
-	... after 1 hour.  after the transfer is complete. when noone is present for a while.
-*
-	std::string* verb = extract_verb  ( mSentence );
-	sObject* object   = extract_object( mSentence );	// direct object of sentence.
-	if (object==NULL) return FALSE;
 
-	if ((strcmp(verb->c_str(), "close") ==0)	||	
-		(strcmp(verb->c_str(), "disconnect") ==0))				
-	{
-		if ((strcmp(object->name.c_str(), "this connection") ==0)	||
-		    (strcmp(object->name.c_str(), "us") ==0))
-		{
-			printf("Parser is closing!\n");
-			return TRUE;
-		}
-	}
-	return FALSE;
-} */
-
-// Send nlp response:
+// Send nlp response over wifi:
 void Send_Reply()
 {
 	char buffer[255];
@@ -479,3 +457,28 @@ void transmit_queued_entities()
 		case REQ_SHUT_DOWN	:	printf(" REQUEST REQ_SHUT_DOWN ");		break;
 		default: break;
 	} */
+
+/*BOOL Parse_done( char* mSentence )
+{
+* They might say:
+	close this connection
+	go back to doing whatever you were.
+	disconnect [us].
+	... after 1 hour.  after the transfer is complete. when noone is present for a while.
+*
+	std::string* verb = extract_verb  ( mSentence );
+	sObject* object   = extract_object( mSentence );	// direct object of sentence.
+	if (object==NULL) return FALSE;
+
+	if ((strcmp(verb->c_str(), "close") ==0)	||	
+		(strcmp(verb->c_str(), "disconnect") ==0))				
+	{
+		if ((strcmp(object->name.c_str(), "this connection") ==0)	||
+		    (strcmp(object->name.c_str(), "us") ==0))
+		{
+			printf("Parser is closing!\n");
+			return TRUE;
+		}
+	}
+	return FALSE;
+} */

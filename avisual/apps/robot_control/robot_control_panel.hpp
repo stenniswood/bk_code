@@ -10,6 +10,7 @@ class RobotPanel : public Window
 {
 public:
 	RobotPanel();
+	virtual ~RobotPanel();
 
 	virtual void 	Initialize	( );
 	int				calc_metrics( );

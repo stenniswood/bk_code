@@ -12,7 +12,11 @@
 #define MENU_STATE_CIRCLED 		4
 #define MENU_STATE_EMPHASIZED 	5
 
+/*
+This Window : 
+Used by:
 
+*/
 class CANMessages : public Window
 {
 public:
@@ -39,7 +43,7 @@ public:
 	virtual int   	draw		 		(				);
 
 protected:
-	//vector<stVertMenuInfo*>	m_entries;	
+	//vector<stVertMenuInfo*>	m_entries;
 	NetworkView				m_board_view;		// List of all boards present
 	CANMessageView			m_msg_view;
 	//CANFilterView			m_filter_view;

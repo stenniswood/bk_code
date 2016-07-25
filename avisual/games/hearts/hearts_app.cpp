@@ -31,9 +31,10 @@ HeartsApp* 	hearts_app = NULL;
 void init_hearts( )
 {
 	printf("init_hearts()\n");
-	if (hearts_app==NULL)	
+	if (hearts_app==NULL)
 		hearts_app = new HeartsApp();
-	MainDisplay.start_app( hearts_app );
+	if (hearts_app)
+		MainDisplay.start_app( hearts_app );
 }
 
 HeartsApp::HeartsApp ()
@@ -48,7 +49,7 @@ HeartsApp::HeartsApp ( Rectangle* mRect )
 
 HeartsApp::~HeartsApp()
 { 
-
+	hearts_app = NULL;
 }
 
 void 	HeartsApp::Initialize	(	)
@@ -61,18 +62,18 @@ void 	HeartsApp::Initialize	(	)
 		Application::Initialize();	This will get called anyway!
 		Therefore it is uneccessary and should not be put in.
 	*/
-
 	m_application_name = "Hearts";
 	m_main_window = new HeartsGame( 3 );
 	//printf("HeartsApp::Initialize()\n");	
-
 }
 
 // First Time application is run - load resources etc.
 int		HeartsApp::onCreate(	)	
 {
 	int retval = Application::onCreate();
-	((HeartsGame*)m_main_window)->onPlace();	
+	//m_main_window->onCreate();
+	
+	//((HeartsGame*)m_main_window)->onPlace();	
 	return retval;
 }
 

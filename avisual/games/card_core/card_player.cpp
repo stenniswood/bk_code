@@ -17,7 +17,7 @@
 const int Margin = 12;
 #define CARD_SPACE_PADDING 15
 
-
+  
 CardPlayer::CardPlayer( int MaxCardsInHand ) 
 :Control()
 {

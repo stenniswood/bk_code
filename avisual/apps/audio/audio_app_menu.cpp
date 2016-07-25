@@ -54,7 +54,7 @@ int handle_audio_view_menu(void* menuPtr, int mMenuIndex, Application* mApp )
 		case 4:	((AudioApp*)mApp)->show_fft  ();		break;
 		default: break;
 	}
-}
+} 
 int handle_audio_play_menu(void* menuPtr, int mMenuIndex, Application* mApp )
 {
 	switch(mMenuIndex) 

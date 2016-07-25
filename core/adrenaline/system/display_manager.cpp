@@ -13,7 +13,6 @@
 #include <string> 
 #include <vector>
 #include <list>
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <shapes.h>
@@ -36,7 +35,6 @@ Keyboard		m_keyboard;
 Control			mctrl;
 Calendar		m_calendar;
 CalendarSummary m_calendar_summary;
-
 
 
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
@@ -263,6 +261,9 @@ void DisplayManager::start_app( Application* mApp )
 void DisplayManager::print_running_apps(  )
 {
 	int i=0;
+	if (m_running_apps->empty())
+		printf("There are no apps running!\n");
+		
 	vector<Application*>::iterator iter = m_running_apps->begin();
 	while (iter != m_running_apps->end())
 	{
@@ -271,40 +272,56 @@ void DisplayManager::print_running_apps(  )
 	}
 }
 
-void DisplayManager::set_main_window( Control* mNewWindow )
-{
-	Rectangle* rect = get_useable_rect();
-	if (mNewWindow)
-		mNewWindow->set_position( rect );
-	mNewWindow->onCreate();	// what if it's already created? the control.cpp class will return 0
-
-	// Remove old main window, and add in the new! 
-	if ((*m_running_apps)[m_current_running_app]->m_main_window)
-		remove_object( (*m_running_apps)[m_current_running_app]->m_main_window );
-	add_object ( mNewWindow );
-	(*m_running_apps)[m_current_running_app]->m_main_window = mNewWindow;
-}
-
 void DisplayManager::idle_tasks( )
 {
+	Application* tmp = NULL;
 	if ((m_current_running_app>=0) && (m_current_running_app< m_running_apps->size())) 
 	{
-		//printf("idle task: %d \n", m_current_running_app );
-		(*m_running_apps)[m_current_running_app]->background_time_slice();
+		//printf("idle task: %d \n", m_current_running_app );		
+		tmp = (*m_running_apps)[m_current_running_app];
+//		tmp->background_time_slice();
 	}
 }
 
 void DisplayManager::close_app( Application* mApp )
 {
+	// If it is the active app : 
+	if ((*m_running_apps)[m_current_running_app] == mApp)  {
+		remove_all_objects(	);
+		set_menu		  ( NULL 	);
+		m_side.unload_controls( );
+		m_status.set_text( "Closed app" );	
+	}
+
 	// Note these are Apps, not m_child_controls.  Other than that same logic as the
 	// remove_object()
 	for (int i=0; i<m_running_apps->size(); i++)
 	{
-		if ((*m_running_apps)[i] == mApp)
+		if ((*m_running_apps)[i] == mApp) {
 			m_running_apps->erase( m_running_apps->begin()+i );
+		}
 	} 
+	printf("Deleting %p. \n", mApp);
 	delete mApp;
 }
+
+void DisplayManager::set_main_window( Control* mNewWindow )
+{
+	if (mNewWindow==NULL) return;
+
+	// Remove old main window, and add in the new! 
+	if ((*m_running_apps)[m_current_running_app]->m_main_window)
+		remove_object( (*m_running_apps)[m_current_running_app]->m_main_window );
+
+	Rectangle* rect = get_useable_rect();
+	mNewWindow->set_position( rect );	
+
+	// add_object calls - mNewWindow->onCreate();	
+	// what if it's already created? the control.cpp class will return 0
+	add_object ( mNewWindow );
+	(*m_running_apps)[m_current_running_app]->m_main_window = mNewWindow;
+}
+
 
 void DisplayManager::set_menu( HorizontalMenu* mHMenu )
 {
@@ -410,7 +427,7 @@ void  DisplayManager::set_background( char* mFileName )
 
 void  DisplayManager::add_object( Control* NewControl )
 {
-	NewControl->onCreate ( );
+	NewControl->onCreate( );
 	register_child( NewControl );
 }
 
@@ -421,8 +438,10 @@ void  DisplayManager::remove_object( Control* NewControl )
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while (iter != m_child_controls.end())
 	{
-		if (*iter == NewControl)
+		if (*iter == NewControl) {
 			m_child_controls.erase( iter );
+			return;
+		}
 		iter++;
 	}
 }
@@ -527,6 +546,10 @@ int   DisplayManager::draw_children( )
 	}
 
 	return -1;	
+}
+void DisplayManager::set_status( char* mText )
+{
+	m_status.set_text( mText );
 }
 
 int   DisplayManager::draw_background( 	)

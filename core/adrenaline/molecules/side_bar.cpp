@@ -103,8 +103,10 @@ void	SideBar::unload_controls ( )	// does not delete
 void	SideBar::load_controls	 ( vector<Control*>* mSidebar_controls )
 {
 	vector<Control*>::iterator iter = mSidebar_controls->begin();
-	while (iter != mSidebar_controls->end() )
+	while (iter != mSidebar_controls->end() ) {
 		register_child( (*iter) );
+		iter++;
+	}
 }
 
 int		SideBar::add_control( Control* mControl, char* mText )

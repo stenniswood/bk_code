@@ -35,6 +35,7 @@ int FavoritesPane::onCreate	(  )
 	if (Debug) printf("FavoritesPane::onCreate	(  )\n");	
 	set_odd_color( 0xFF00207F );
 	set_even_color( 0xFF00207F );
+	set_text_color( 0xFFFFFFFF );
 	add_item("home");				m_paths.push_back("/home/pi/");
 	add_item("root");				m_paths.push_back("/");
 	add_item("Applications");		m_paths.push_back("/home/pi/avisual/applications/");
@@ -52,7 +53,7 @@ int FavoritesPane::onCreate	(  )
 /*************************************************************/
 ClippingsPane::ClippingsPane()
 {
-
+	
 }
 int	ClippingsPane::onCreate(  )
 {
@@ -62,6 +63,11 @@ int	ClippingsPane::onCreate(  )
 	//clear_items();
 	add_item("junk");
 	return ListBox::onCreate();
+}
+
+void ClippingsPane::add_clipping( string mText )
+{
+	m_clippings.push_back( mText );
 }
 /*************************************************************/
 

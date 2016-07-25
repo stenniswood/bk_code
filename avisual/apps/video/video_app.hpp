@@ -14,14 +14,13 @@ class VideoApp : public Application
 public:
 	VideoApp ();
 	VideoApp ( Rectangle* mRect );
-	~VideoApp();
+	virtual ~VideoApp();
 
 	virtual void 	Initialize		(	);	// create all the objects here.
 
 	virtual void	setup_sidebar	(	);  // derived class adds these here
 	virtual void	setup_main_menu ( );
 	virtual void	setup_app_menu  ( );
-	virtual void 	register_with_display_manager();	
 	
 	void			About			(	);
 	void			Preferences		(	);

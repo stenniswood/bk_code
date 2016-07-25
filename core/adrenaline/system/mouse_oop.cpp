@@ -108,7 +108,9 @@ void Mouse::handle_event()
 		//      mouse_ev.time.tv_usec,mouse_ev.type,mouse_ev.code,mouse_ev.value);
 		if (mouse_ev.code == BTN_LEFT) {
 			left = UNHANDLED_EVENT | (mouse_ev.value & 0x01);
-			if (Debug) printf("Left button: evalue=%d\n", mouse_ev.value );
+//			restore_pixels();
+			//if (Debug) 
+			printf("Left button: evalue=%d\n", mouse_ev.value );
 		}
 		if (mouse_ev.code == BTN_RIGHT) {
 			right = UNHANDLED_EVENT | (mouse_ev.value & 0x01);

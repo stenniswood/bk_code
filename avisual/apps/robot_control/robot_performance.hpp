@@ -11,6 +11,7 @@ class RobotPerformancePanel : public Window
 {
 public:
 	RobotPerformancePanel();
+	virtual ~RobotPerformancePanel();
 
 	virtual void 	Initialize(	);
 	void			calc_metrics();

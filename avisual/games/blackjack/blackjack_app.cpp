@@ -29,13 +29,11 @@ BlackJackApp* 	bj_app = NULL;
 
 void init_blackjack( )
 {
-	printf("init_blackjack()\n");
+	printf("init_blackjack() bj_app=%p\n", bj_app);
 	if (bj_app==NULL)	
 		bj_app = new BlackJackApp();
-	printf("bj_app=%x\n", bj_app);		
-	
-	if (bj_app)
-		MainDisplay.start_app( bj_app );
+	printf("bj_app=%p\n", bj_app);
+	MainDisplay.start_app( bj_app );
 }
 
 /*************************************************************/
@@ -53,11 +51,12 @@ BlackJackApp::BlackJackApp ( Rectangle* mRect )
 
 BlackJackApp::~BlackJackApp()
 { 
-
+	printf("BlackJackApp::~BlackJackApp() Destroyed!\n");
+	bj_app = NULL; 
 }
 
 void 	BlackJackApp::Initialize	(	)
-{
+{ 
 	//printf("BlackJackApp::Initialize()\n");
 	/*  Base class is initialized in the base class constructor.
 		ie. The Application::Initialize is invoked there (not this one)
@@ -68,19 +67,15 @@ void 	BlackJackApp::Initialize	(	)
 	*/
 	m_welcome_status   = "Get as close to 21 without going over.";
 	m_application_name = "Black Jack";
-	Application::Initialize();
 	
-	m_main_window      = new BlackJack( 3 );
-	
+	m_main_window = new BlackJack( 3 );
 }
 
 // First Time application is run - load resources etc.
 int		BlackJackApp::onCreate(	)	
 {
 	int retval = Application::onCreate();
-	printf("BlackJackApp::onCreate(	)	\n");
-	
-    //((BlackJack*)m_main_window)->onPlace();
+	printf("BlackJackApp::onCreate(	)	\n");		
     return retval;
 }
 
