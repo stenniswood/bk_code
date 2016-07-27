@@ -55,6 +55,10 @@ struct eyes_ipc_memory_map
 	char	 ServerEvent   [255];
     long int ServerAcknowledgedCounter;				// Incremented on change to any of below:
 
+	struct Coordinate	location_stream1[100];		// Use this for streaming face detect or other locations; (for instance left eye)
+	struct Coordinate	location_stream2[100];		// Use this for streaming face detect or other locations; (for instance right eye)
+	struct Coordinate	location_stream3[100];		// Use this for streaming face detect or other locations; (for instance face center)	
+	
     // Some miscellaneous parameters may also be passed, but these must
     // be converted to ascii and passed in the text.    
 };
@@ -86,8 +90,8 @@ void  eyes_detach_memory           ( );
 void  eyes_dump_ipc                ( );
 unsigned long eyes_get_segment_size( );
 void  eyes_fill_memory             ( );
-void  eyes_save_segment_id         (char* mFilename);
-int   eyes_read_segment_id         (char* mFilename);
+void  eyes_save_segment_id         ( char* mFilename );
+int   eyes_read_segment_id         ( char* mFilename );
 
 void  delete_all_shm				 ( );
 

@@ -16,8 +16,11 @@
 #include <errno.h>
 #include <math.h>
 #include <unistd.h>
+#include <errno.h>
+
 #include "serial.hpp"
 #include "bk_system_defs.h"
+
 
 #define Debug 0 
 
@@ -30,7 +33,7 @@ SerialInterface::SerialInterface()
 }
 SerialInterface::~SerialInterface()
 {
-	close ( _fd );
+	close( _fd );
 }
 
 void SerialInterface::Initialize()
@@ -70,7 +73,6 @@ void SerialInterface::Initialize()
 	_write_count = 0;
 	_read_count  = 0;
 	_error_count = 0;
-
 }
 
 static void print_args(int argc, char *argv[])
@@ -190,7 +192,7 @@ int SerialInterface::get_baud(int baud)
 	}
 }
 
-void SerialInterface::process_options(int argc, char * argv[])
+void SerialInterface::process_options(int argc, char ** argv)
 {
 	for (;;) {
 		int option_index = 0;
@@ -245,7 +247,7 @@ void SerialInterface::process_options(int argc, char * argv[])
 			break;
 		case 'R':
 			_cl_rx_dump = 1;
-			printf("LOADCELL : READ DUMP \n");
+			printf("Serial : (\"-r\") READ DUMP Requested\n");
 			_cl_rx_dump_ascii = !strcmp(optarg, "ascii");		
 			break;
 		case 'T':
@@ -320,7 +322,7 @@ void SerialInterface::process_read_data()
 	unsigned char rb[1024];
 	memset(rb, 0, 1024);
 	
-	int c = read(_fd, (void*)&rb, sizeof(rb));		// Non blocking
+	int c = ::read(_fd, (void*)&rb, sizeof(rb));		// Non blocking
 	if (c > 0) {
 		if (_cl_rx_dump) {			// User "-R" option.
 			if (_cl_rx_dump_ascii)
@@ -360,7 +362,7 @@ void SerialInterface::parse_ascii_data()
 	// Look for version:
 }
 
-void SerialInterface::my_write(char* mBuffer, int mSize)
+int SerialInterface::my_write(char* mBuffer, int mSize)
 {
 	current_write_size = mSize;
 	if (current_write_size > _write_size)
@@ -368,15 +370,16 @@ void SerialInterface::my_write(char* mBuffer, int mSize)
 	memcpy(_write_data, mBuffer, current_write_size);
 }
 
-/*unsigned char SerialInterface::read( )
+unsigned char SerialInterface::read( )
 {
 	unsigned char one_byte = accum_buff[0];
+	// Shift Data by one byte :
 	memcpy( &(accum_buff[0]), &(accum_buff[1]), _read_count-1 );
 	_read_count--;
 	return one_byte;
-}*/
+}
 
-void 	SerialInterface::my_write		(char mByte)
+int SerialInterface::my_write( char mByte )
 {
 	my_write( &mByte, 1 );
 }
@@ -415,15 +418,17 @@ void SerialInterface::process_write_data()
 		printf("wrote %zd bytes\n", count);
 }
 
-void SerialInterface::setup_serial_port(int baud)
+void SerialInterface::setup_serial_port( int baud )
 {
 	struct termios newtio;
 	_fd = open(_cl_port, O_RDWR | O_NONBLOCK);
 
 	if (_fd < 0) {
+
+		perror("Error opening serial port");
 		printf("Error opening serial port: %s \n",_cl_port);
 		free(_cl_port);
-		//exit(1);
+		exit(1);
 		_cl_port = NULL;
 	}
 	bzero(&newtio, sizeof(newtio)); /* clear struct for new port settings */
@@ -494,24 +499,26 @@ int SerialInterface::serial_main(int argc, char * argv[])
 	dprintf("Linux Loadcell serial app\n");
 	if (!_cl_port) { 
 		printf("ERROR: Port argument required\n");
-		//display_help();
 	}
+	// ESTABLISH BAUD RATE:
 	int baud = B9600;
-
 	if (_cl_baud)
 		baud = get_baud(_cl_baud);
+	if (baud<=0)
+		baud = B38400;
 
+	// SETUP PORT :
+	setup_serial_port(baud);
 	if (baud <= 0) {
 		printf("NOTE: non standard baud rate, trying custom divisor\n");
-		baud = B38400;
-		setup_serial_port(B38400);
 		set_baud_divisor(_cl_baud);
-	} else {
-		setup_serial_port(baud);
 	}
+
+	// Specify with the "-p" option.  Should refer to "/dev/ttyUSB0" or other.
 	if (_cl_port==NULL)
 		return -1;
 
+	// WRITE 1 or 2 BYTES (stored in _cl_single_byte & _cl_another_byte) :
 	if (_cl_single_byte >= 0) {
 		unsigned char data[2];
 		data[0] = (unsigned char)_cl_single_byte;
@@ -524,13 +531,14 @@ int SerialInterface::serial_main(int argc, char * argv[])
 		return 0;
 	}
 
+	// ALLOCATE MEMORY FOR THE WRITE BUFFER SIZE :
 	_write_size = (_cl_tx_bytes == 0) ? 1024 : _cl_tx_bytes;
-
 	_write_data = (unsigned char*)malloc(_write_size);
 	if (_write_data == NULL) {
 		printf("ERROR: Memory allocation failed\n");
 	}
 
+	// ESTABLISH THE POLL Flags based on user, "-r" and "-t" options
 	struct pollfd serial_poll;
 	serial_poll.fd = _fd;
 	if (!_cl_no_rx) {
@@ -538,32 +546,33 @@ int SerialInterface::serial_main(int argc, char * argv[])
 	} else {
 		serial_poll.events &= ~POLLIN;
 	}
-
 	if (!_cl_no_tx) {
 		serial_poll.events |= POLLOUT;
 	} else {
 		serial_poll.events &= ~POLLOUT;
 	}
 
+	// SETUP TIMESTAMPS:
 	struct timespec start_time, last_stat;
 	//struct timespec last_read  = { .tv_sec = 0, .tv_nsec = 0 };
 	//struct timespec last_write = { .tv_sec = 0, .tv_nsec = 0 };
 	struct timespec last_read  = { 0, 0 };
 	struct timespec last_write = { 0, 0 };
-
 	clock_gettime(CLOCK_MONOTONIC, &start_time);
 	last_stat = start_time;
 
+
 	// while either User option: "-r" and "-t"
 	while (!(_cl_no_rx && _cl_no_tx)) 
-	{		
+	{	
 		int retval = poll(&serial_poll, 1, 1000);
-
 		if (retval == -1) {
 			perror("poll()");
 		} else if (retval) {
-			if (serial_poll.revents & POLLIN) {
-				if (_cl_rx_delay) {
+			// Received Data : 
+			if (serial_poll.revents & POLLIN) { /* Recieve */
+				// 
+				if (_cl_rx_delay) { 
 					// only read if it has been rx-delay ms
 					// since the last read
 					struct timespec current;
@@ -577,6 +586,7 @@ int SerialInterface::serial_main(int argc, char * argv[])
 				}
 			}
 
+			// Transmit Buffer Empty : 
 			if (serial_poll.revents & POLLOUT) {
 
 				if (_cl_tx_delay) {
@@ -634,6 +644,7 @@ int SerialInterface::serial_main(int argc, char * argv[])
 	tcflush(_fd, TCIOFLUSH);
 	free(_cl_port);
 
+	printf("serial_main()  Thread Terminated.\n");
 	int result = abs(_write_count - _read_count) + _error_count;
 	return (result > 255) ? 255 : result;
 }

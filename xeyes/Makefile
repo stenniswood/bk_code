@@ -26,10 +26,14 @@ INC	       = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core
 CFLAGS = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) \
 	     -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
 LDFLAGS = -lilclient -L$(SDKSTAGE)/opt/vc/lib/ -lGLESv2 -lEGL -lopenmaxil -lbcm_host \
-			-lvcos -lvchiq_arm -lpthread -lrt -L./vgfont
-LIBFLAGS= -L../core/libs/ilclient/ -L/opt/vc/lib -L../core/libs/vgfont/  \
-			-ljpeg -lshapes -lwiringPi -lm $(SQL_LIB)
-OBJ       = mouse.o serial.o x_eyes.o x_eyes_main.o
+		-lvcos -lvchiq_arm -lpthread -lrt -L./vgfont
+LIBFLAGS= -L../core/libs/ilclient/ -L/usr/local/lib -L/opt/vc/lib -L../core/libs/vgfont/  \
+	 -lshapes -lwiringPi -lm $(SQL_LIB)
+OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lopencv_face \
+	-lopencv_objdetect -l opencv_ml -lopencv_calib3d -lopencv_imgproc -lopencv_highgui \
+	-lopencv_core
+OBJ       = mouse.o serial.o x_eyes.o x_eyes_main.o roboclaw.o findEyeCenter.o findEyeCorner.o \
+	helpers.o face_detect.o
 IPC_OBJS  = vision_memory.o
 
 
@@ -40,7 +44,7 @@ IPC_OBJS  = vision_memory.o
 
 xeyes: $(OBJ)	\
 	$(addprefix ../core/ipc/, $(IPC_OBJS))
-	g++ -o $@ $^ $(CFLAGS) $(LIBFLAGS) $(LDFLAGS)
+	g++ -o $@ $^ $(CFLAGS) $(LIBFLAGS) $(LDFLAGS) $(OPENCV_LIBS)
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.bak 

@@ -5,6 +5,14 @@
 
 const int WORKING_LENGTH=80;
 
+/* This class can be used 2 ways:
+		Can create a thread and call the serial_main() function
+		this will continually read & write.  To send data, just put
+		it into the buffer by calling my_write();
+		
+	The other way is like a file and a thread is not necessary.
+	
+*/
 class SerialInterface 
 {
 public:
@@ -13,21 +21,21 @@ public:
 
 	void	Initialize();
 
-	//unsigned char read();
-	void 	my_write	  (char mByte);
-	void 	my_write	  (char* mBuffer, int size);	
+	unsigned char read();
+	int 	my_write	  (char mByte);
+	int 	my_write	  (char* mBuffer, int size);	
 	bool	available 	  ();
 
-	int	 	peek ();
+	int	 	peek ()		{ return accum_buff[0];  };
 	void 	begin();
-	void 	flush();
+	void 	flush()		{ /* Not sure here */    };
 	
 	void 	parse_ascii_data	( );	
 	void 	dump_data			( unsigned char * b, int count);
 	void	dump_data_ascii		( unsigned char * b, int count);
 	void 	set_baud_divisor	( int speed);
 	int	 	get_baud			( int baud );
-	void 	process_options		( int argc, char * argv[]);
+	void 	process_options		( int argc, char ** argv);
 	void 	dump_serial_port_stats();
 	void 	process_read_data	( );
 	void 	process_write_data	( );
@@ -35,9 +43,9 @@ public:
 	int  	diff_ms				( const struct timespec *t1, const struct timespec *t2);	
 	int  	serial_main			( int argc, char * argv[] );
 
-	char accum_buff  [WORKING_LENGTH];
-	char working_buff[WORKING_LENGTH];
-	char* last_pos;
+	char 	accum_buff  [WORKING_LENGTH];
+	char 	working_buff[WORKING_LENGTH];
+	char* 	last_pos;
 
 	// command line args
 	int _cl_baud;
@@ -64,16 +72,16 @@ public:
 	// Module variables
 	unsigned char _write_count_value;
 	unsigned char _read_count_value;
-	int _fd;
+	int 		  _fd;
+	
 	unsigned char * _write_data;
-	ssize_t _write_size;			// buffer size
-	ssize_t	current_write_size;
+	ssize_t 		_write_size;			// buffer size
+	ssize_t			current_write_size;
 
 	// keep our own counts for cases where the driver stats don't work
 	int _write_count;
 	int _read_count ;
 	int _error_count;
-
 };
 
 

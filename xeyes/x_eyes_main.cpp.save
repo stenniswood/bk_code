@@ -1,14 +1,9 @@
 #include <cstdio>
 #include <string.h>
 #include <pthread.h>
-#include <unistd.h>
-
 #include "x_eyes.hpp"
 #include "serial.hpp"
 #include "mouse.h"
-#include "vision_memory.h"
-#include "roboclaw.h"
-#include "face_detect.hpp"
 
 
 void* serial_setup(void*)				// serial port used for arduino connections & GPS.
@@ -42,75 +37,26 @@ void* serial_setup(void*)				// serial port used for arduino connections & GPS.
 	return NULL;
 }
 
+pthread_t serial_thread_id=0;
 
-SerialInterface claw_si;
-RoboClaw claw1( &claw_si, 1000 );		// 1ms timeout
-	
-const unsigned char address = 0x80;
-char opt1[] = "./xeyes";
-char opt2[] = "-R ascii";
-char opt3[] = "-w 1";
-char opt4[] = "-p /dev/ttyACM0";
-char opt5[] = "-t";
-char opt6[] = "-r";
-
-//const char[] opt6 = "./xeyes";
-
-void* setup_roboclaw_comms(void*) 
-{
-	char* options[6];
-	options[0] = opt1;
-	options[1] = opt2;
-	options[2] = opt3;
-	options[3] = opt4;
-	options[4] = opt5;
-	options[5] = opt6;
-
-	claw_si.process_options( 6, (char**)options );
-	claw_si.serial_main    ( 6, (char**)options );
-}
-
-void roboclaw()
-{
-	claw1.ForwardM1( address, 64 );	
-	for (int i=0; i<5; i++)  
-		usleep( 1000000 );
-	claw1.ForwardM1( address, 0 );	
-	while (1) {};
-}
-
-pthread_t serial_thread_id   = 0;
-pthread_t roboclaw_thread_id = 0;
 void create_thread()
 {
-/*	int iret1 = pthread_create( &serial_thread_id, NULL, serial_setup, (void*) NULL);
+	int iret1 = pthread_create( &serial_thread_id, NULL, serial_setup, (void*) NULL);
 	if (iret1)
 	{
-		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret1);
+		fprintf(stderr,"Error - Could not create right_foot thread. return code: %d\n",iret1);
 		//exit(EXIT_FAILURE);
-	}*/
-	
-	int iret2 = pthread_create( &roboclaw_thread_id, NULL, setup_roboclaw_comms, (void*) NULL);
-	if (iret2)
-	{
-		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret2);
-	}	
+	}
 }
 
 int main()
 {
-	//setup_roboclaw_comms();
-	create_thread();	
-	roboclaw();
-	
     float left_angle;
     float right_angle;
-
-	int ipc_mem = eyes_connect_shared_memory ( 1 );
-
 	int r = mouse_init( 1080, 720 );	
 	create_thread();
 	char* ptr;
+	
 	
     while (1)
     {
