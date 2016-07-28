@@ -4,7 +4,7 @@
 #include <vector>
 #include "vector.hpp"
 
-#define IPC_KEY_EYES           0x04D2        // 1234 in decimal!
+#define IPC_KEY_EYES           0x04D3        // 1235 in decimal!
 #define MAX_CLIENT_ARRAY_SIZE 2048
 
 extern char* 	eyes_shared_memory;
@@ -55,9 +55,9 @@ struct eyes_ipc_memory_map
 	char	 ServerEvent   [255];
     long int ServerAcknowledgedCounter;				// Incremented on change to any of below:
 
-	struct Coordinate	location_stream1[100];		// Use this for streaming face detect or other locations; (for instance left eye)
-	struct Coordinate	location_stream2[100];		// Use this for streaming face detect or other locations; (for instance right eye)
-	struct Coordinate	location_stream3[100];		// Use this for streaming face detect or other locations; (for instance face center)	
+	struct Coordinate	location_stream1[50];		// Use this for streaming face detect or other locations; (for instance left eye)
+	struct Coordinate	location_stream2[50];		// Use this for streaming face detect or other locations; (for instance right eye)
+	struct Coordinate	location_stream3[50];		// Use this for streaming face detect or other locations; (for instance face center)	
 	
     // Some miscellaneous parameters may also be passed, but these must
     // be converted to ascii and passed in the text.    

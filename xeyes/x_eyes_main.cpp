@@ -38,7 +38,7 @@ void* serial_setup(void*)				// serial port used for arduino connections & GPS.
 	char * argv[] = { app_name, read_r, read_, no_write_w, no_write_, device_p, device_ }; 
 	
 	si.process_options( 7, argv );	
-	si.serial_main( 7, argv );
+	si.serial_main    ( );
 	return NULL;
 }
 
@@ -54,8 +54,6 @@ char opt4[] = "-p /dev/ttyACM0";
 char opt5[] = "-t";
 char opt6[] = "-r";
 
-//const char[] opt6 = "./xeyes";
-
 void* setup_roboclaw_comms(void*) 
 {
 	char* options[6];
@@ -67,7 +65,7 @@ void* setup_roboclaw_comms(void*)
 	options[5] = opt6;
 
 	claw_si.process_options( 6, (char**)options );
-	claw_si.serial_main    ( 6, (char**)options );
+	claw_si.serial_main    (  );
 }
 
 void roboclaw()
@@ -81,35 +79,40 @@ void roboclaw()
 
 pthread_t serial_thread_id   = 0;
 pthread_t roboclaw_thread_id = 0;
+
 void create_thread()
 {
-/*	int iret1 = pthread_create( &serial_thread_id, NULL, serial_setup, (void*) NULL);
+	int iret1 = pthread_create( &serial_thread_id, NULL, serial_setup, (void*) NULL);
 	if (iret1)
 	{
 		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret1);
 		//exit(EXIT_FAILURE);
-	}*/
-	
+	}
+
 	int iret2 = pthread_create( &roboclaw_thread_id, NULL, setup_roboclaw_comms, (void*) NULL);
 	if (iret2)
 	{
 		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret2);
-	}	
+	}
 }
 
+/* Components of this app:
+		Opencv - Face detector webcam
+		Serial comms to PWM board.
+		Serial comms to roboClaw board.
+		IPC Vision Shared Memory.		
+*/
 int main()
 {
-	//setup_roboclaw_comms();
 	create_thread();	
-	roboclaw();
+	//roboclaw(); 
 	
     float left_angle;
     float right_angle;
 
-	int ipc_mem = eyes_connect_shared_memory ( 1 );
+	int ipc_mem = eyes_connect_shared_memory( 1 );
 
 	int r = mouse_init( 1080, 720 );	
-	create_thread();
 	char* ptr;
 	
     while (1)
@@ -124,6 +127,7 @@ int main()
 		//printf("[%4.0f,%4.0f]  l=6.2f; r=6.2f;  s;\n", mouse.x, mouse.y ); 
 		//					   left_angle, right_angle, txt );
 		mouse_timeslice();
+		fd_timeslice   ();
     }
 	mouse_close( );
     return 1;

@@ -53,7 +53,7 @@ bool is_eyes_ipc_memory_available()
 {
     struct shmid_ds buf;			// shm data descriptor.
     
-    dprintf("Checking for eyesulator IPC memory... ");
+    dprintf("Checking for vision IPC memory... ");
     dprintf( "reading segment id: %s\n", eyes_segment_id_filename );
     
     // First see if the memory is already allocated:
@@ -182,18 +182,16 @@ void  eyes_wait_for_server      ( )
 int eyes_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct eyes_ipc_memory_map);
-    dprintf("eyes shared_seg_size=%d\n", shared_segment_size);
+    dprintf("eyes shared_seg_size=%d\n", shared_segment_size); 
 
 	/* Allocate a shared memory segment. */
 	eyes_segment_id = shmget( IPC_KEY_EYES, shared_segment_size, IPC_CREAT | 0666 );
-    int errsv = errno;
     if (errno>0)
-        //perror(sys_errlist[errsv]);
-        printf("%s\n", strerror(errsv));
+        perror("shmget ");
     
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	dprintf ("eyes3D shm segment_id=%d\n", eyes_segment_id );
-	printf ("eyes3D shm allocated %d bytes\n", shared_segment_size );
+	dprintf ("eyes3D shm segment_id=%d;  ", eyes_segment_id );
+	dprintf ("allocated %d bytes\n", shared_segment_size );
 	return eyes_segment_id;
 }
 
@@ -202,7 +200,6 @@ void eyes_deallocate_memory(int msegment_id)
 	/* Deallocate the shared memory segment. */ 
 	shmctl (msegment_id, IPC_RMID, 0);
 }
-
 
 long eyes_attach_memory()
 {

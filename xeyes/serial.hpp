@@ -41,7 +41,7 @@ public:
 	void 	process_write_data	( );
 	void 	setup_serial_port	( int baud);
 	int  	diff_ms				( const struct timespec *t1, const struct timespec *t2);	
-	int  	serial_main			( int argc, char * argv[] );
+	int  	serial_main			(  );
 
 	char 	accum_buff  [WORKING_LENGTH];
 	char 	working_buff[WORKING_LENGTH];

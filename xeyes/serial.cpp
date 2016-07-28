@@ -194,6 +194,7 @@ int SerialInterface::get_baud(int baud)
 
 void SerialInterface::process_options(int argc, char ** argv)
 {
+	print_args(argc,argv);
 	for (;;) {
 		int option_index = 0;
 		static const char *short_options = "hb:p:d:R:TsSy:z:certq:l:a:w:o:i:";
@@ -240,14 +241,13 @@ void SerialInterface::process_options(int argc, char ** argv)
 			break;
 		case 'p':
 			_cl_port = strdup(optarg);
-			printf("-p    argv[6]=%s;  %s\n", argv[6], optarg );
 			break;
 		case 'd':
 			_cl_divisor = atoi(optarg);
 			break;
 		case 'R':
 			_cl_rx_dump = 1;
-			printf("Serial : (\"-r\") READ DUMP Requested\n");
+			//printf("Serial : (\"-r\") READ DUMP Requested\n");
 			_cl_rx_dump_ascii = !strcmp(optarg, "ascii");		
 			break;
 		case 'T':
@@ -424,11 +424,10 @@ void SerialInterface::setup_serial_port( int baud )
 	_fd = open(_cl_port, O_RDWR | O_NONBLOCK);
 
 	if (_fd < 0) {
-
-		perror("Error opening serial port");
-		printf("Error opening serial port: %s \n",_cl_port);
+		printf("\n%s\n",_cl_port);
+		perror("Error opening serial port ");
 		free(_cl_port);
-		exit(1);
+		//exit(1);
 		_cl_port = NULL;
 	}
 	bzero(&newtio, sizeof(newtio)); /* clear struct for new port settings */
@@ -494,12 +493,13 @@ int SerialInterface::diff_ms(const struct timespec *t1, const struct timespec *t
 		process_read_data()  	and
 		process_write_data()	
 */
-int SerialInterface::serial_main(int argc, char * argv[])
+int SerialInterface::serial_main( )
 {
 	dprintf("Linux Loadcell serial app\n");
 	if (!_cl_port) { 
-		printf("ERROR: Port argument required\n");
+		printf("serial_main() - ERROR: Port argument required\n");
 	}
+
 	// ESTABLISH BAUD RATE:
 	int baud = B9600;
 	if (_cl_baud)
@@ -508,7 +508,7 @@ int SerialInterface::serial_main(int argc, char * argv[])
 		baud = B38400;
 
 	// SETUP PORT :
-	setup_serial_port(baud);
+	setup_serial_port( baud );
 	if (baud <= 0) {
 		printf("NOTE: non standard baud rate, trying custom divisor\n");
 		set_baud_divisor(_cl_baud);

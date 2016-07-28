@@ -22,19 +22,21 @@ void detectAndDisplay( cv::Mat frame );
 //-- Note, either copy these two files from opencv/data/haarscascades to your current folder, or change these locations
 cv::String            face_cascade_name = "/home/pi/opencv-3.1.0/data/haarcascades/haarcascade_frontalface_alt.xml";
 cv::CascadeClassifier face_cascade;
-std::string main_window_name = "Capture - Face detection";
-std::string face_window_name = "Capture - Face";
-cv::RNG     rng(12345);
-cv::Mat     debugImage;
-cv::Mat     skinCrCbHist = cv::Mat::zeros(cv::Size(256, 256), CV_8UC1);
-cv::Mat faceROIc;
+std::string 	main_window_name = "Capture - Face detection";
+std::string 	face_window_name = "Capture - Face";
+cv::RNG     	rng(12345);
+cv::Mat     	debugImage;
+cv::Mat     	skinCrCbHist = cv::Mat::zeros(cv::Size(256, 256), CV_8UC1);
+cv::Mat 		faceROIc;
+
+cv::Mat frame;  
+cv::VideoCapture capture(-1);
 
 /**
  * @function main
  */
-int fd_main( int argc, const char** argv ) {
-  cv::Mat frame;
-
+int fd_init( ) 
+{
   // Load the cascades
   if( !face_cascade.load( face_cascade_name ) ){ 
 	printf("--(!)Error loading face cascade, please change face_cascade_name in source code.\n"); return -1; };
@@ -57,21 +59,19 @@ int fd_main( int argc, const char** argv ) {
   createCornerKernels();
   ellipse(skinCrCbHist, cv::Point(113, 155.6), cv::Size(23.4, 15.2),
           43.0, 0.0, 360.0, cv::Scalar(255, 255, 255), -1);
+    
+}
 
+void fd_timeslice() 
+{
   // I make an attempt at supporting both 2.x and 3.x OpenCV
-#if CV_MAJOR_VERSION < 3
-  CvCapture* capture = cvCaptureFromCAM( -1 );
-  if( capture ) {
-    while( true ) {
-      frame = cvQueryFrame( capture );
-#else
-  cv::VideoCapture capture(-1);
-//  capture.open("/Users/stephentenniswood/Movies/iMovie Library.imovielibrary/My Movie/Original Media/2016-07-24 15_47_08.mov");
-        //2016-07-24 15_45_46.mov
-  if( capture.isOpened() ) {
-    while( true ) {
+	//capture.open("/Users/stephentenniswood/Movies/iMovie Library.imovielibrary/My Movie/Original Media/2016-07-24 15_47_08.mov");
+    //2016-07-24 15_45_46.mov
+
+  if( capture.isOpened() ) 
+  {
       capture.read(frame);
-#endif
+
       // mirror it
       cv::flip(frame, frame, 1);
       frame.copyTo(debugImage);
@@ -82,24 +82,24 @@ int fd_main( int argc, const char** argv ) {
       }
       else {
         printf(" --(!) No captured frame -- Break!");
-        break;
+        return;
       }
 
       imshow(main_window_name,debugImage);
 
       int c = cv::waitKey(10);
-      if( (char)c == 'c' ) { break; }
+      if( (char)c == 'c' ) { return; }
       if( (char)c == 'f' ) {
         imwrite("frame.png",frame);
       }
-
     }
-  }
-
-  releaseCornerKernels();
-
-  return 0;
 }
+
+void fd_close() 
+{
+	releaseCornerKernels();
+}
+
 //#define annotatedFace debugFace
 #define annotatedFace faceROIc
       
@@ -235,3 +235,4 @@ void detectAndDisplay( cv::Mat frame ) {
     imshow(face_window_name, faceROIc);
   }
 }
+

@@ -39,20 +39,18 @@ void *eventThread(void *arg)
 				fprintf(stderr, "Error opening Mouse!\n");
 				quitState = 1;
 				return &quitState;
-			} else printf("Opened /dev/input/event2\n");
-		} else printf("Opened /dev/input/event1\n");
-	 } else printf("Opened /dev/input/event0\n");
+			} else printf("Opened Mouse /dev/input/event2\n");
+		} else printf("Opened Mouse /dev/input/event1\n");
+	 } else printf("Opened Mouse /dev/input/event0\n");
 	//} else printf("Opened /dev/input/mouse0\n");
-
 
 	mouse.x = mouse.max_x / 2;			   //Reset mouse
 	mouse.y = mouse.max_y / 2;
-	printf("mouse thread running...");
-
+	//printf("mouse thread running...");
 
 	while (1) {
-		read(mouse_fd, &mouse_ev, sizeof(struct input_event));
-		printf("[%4.0f,%4.0f]\r",mouse.x,mouse.y);
+		read	( mouse_fd, &mouse_ev, sizeof(struct input_event));
+		printf	( "[%4.0f,%4.0f]\r",mouse.x,mouse.y );
 
 		// Check events
 		//mouse.left = CUR_SIZ * 2;		   // Reset Mouse button states
