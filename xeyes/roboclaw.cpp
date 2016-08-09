@@ -1,19 +1,21 @@
 #include <sys/time.h>
+#include <stdlib.h>
+#include <cstdio>
 
-#include "serial.hpp"
+#include "serial_synchronous.hpp"
 #include "roboclaw.h"
 
 #define MAXRETRY 2
 #define SetDWORDval(arg) (uint8_t)(((uint32_t)arg)>>24),(uint8_t)(((uint32_t)arg)>>16),(uint8_t)(((uint32_t)arg)>>8),(uint8_t)arg
-#define SetWORDval(arg) (uint8_t)(((uint16_t)arg)>>8),(uint8_t)arg
+#define SetWORDval(arg)  (uint8_t)(((uint16_t)arg)>>8),(uint8_t)arg
 
 //
 // Constructor
 //
-RoboClaw::RoboClaw(SerialInterface *serial, uint32_t tout)
+RoboClaw::RoboClaw( uint32_t tout)
+:SSerialInterface( )
 {
 	timeout = tout;
-	hserial = serial;
 }
 
 //
@@ -25,10 +27,7 @@ RoboClaw::~RoboClaw()
 
 void RoboClaw::begin(long speed)
 {
-	if (hserial) {
-		//hserial->setup_serial_port( speed );
-		//hserial->begin(speed);
-	}
+	setup_serial_port( speed );
 }
 
 bool RoboClaw::listen()
@@ -38,7 +37,7 @@ bool RoboClaw::listen()
 
 bool RoboClaw::isListening()
 {
-	return (hserial->_cl_no_rx>0);
+	return (_cl_no_rx>0);	
 }
 
 bool RoboClaw::overflow()
@@ -46,60 +45,28 @@ bool RoboClaw::overflow()
 	return false;
 }
 
-int RoboClaw::peek()
+unsigned char RoboClaw::read(uint32_t timeout)
 {
-	if(hserial)
-		return hserial->peek();
+	uint32_t start = GetTimeStamp();
+	// Empty buffer? 
+	while(!available()) 
+	{
+	   if((GetTimeStamp()-start)>=timeout)
+		  return -1;
+	}
+	return SSerialInterface::read();
 }
 
 size_t RoboClaw::write(uint8_t byte)
 {
-	if(hserial)
-		return hserial->my_write(byte);
-}
-
-int RoboClaw::read()
-{
-	if(hserial)
-		return hserial->read();
-}
-
-int RoboClaw::available()
-{
-	if(hserial)
-		return hserial->available();
-}
-
-void RoboClaw::flush()
-{
-	if(hserial)
-		hserial->flush();
-}
-uint64_t GetTimeStamp() {
-    struct timeval tv;
-    gettimeofday(&tv,NULL);
-    return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
-}
-
-int RoboClaw::read(uint32_t timeout)
-{
-	if(hserial){
-		uint32_t start = GetTimeStamp();
-		// Empty buffer?
-		while(!hserial->available()){
-		   if((GetTimeStamp()-start)>=timeout)
-		      return -1;
-		}
-		return hserial->read();
-	}
+	printf  ("%2x ", byte );
+	my_write(byte);
 }
 
 void RoboClaw::clear()
 {
-	if(hserial){
-		while(hserial->available())
-			hserial->read();
-	}
+	while(available())
+		SSerialInterface::read();
 }
 
 void RoboClaw::crc_clear()
@@ -125,17 +92,16 @@ uint16_t RoboClaw::crc_get()
 	return crc;
 }
 
-/*
-	
+/*  
 */
 bool RoboClaw::write_n(uint8_t cnt, ... )
 {
 	uint8_t trys=MAXRETRY;
 	do{
-		crc_clear();	//send data with crc
+		crc_clear();	// send data with crc
 		va_list marker;
 		va_start( marker, cnt );     /* Initialize variable arguments. */
-		for(uint8_t index=0;index<cnt;index++){
+		for(uint8_t index=0; index<cnt; index++) {
 			uint8_t data = va_arg(marker, int);
 			crc_update(data);
 			write(data);
@@ -143,21 +109,24 @@ bool RoboClaw::write_n(uint8_t cnt, ... )
 		va_end( marker );            /* Reset variable arguments.      */
 		uint16_t crc = crc_get();
 		write(crc>>8);
-		write(crc);
-		if(read(timeout)==0xFF)
-			return true;
-	}while(trys--);
+		write(crc   );
+		unsigned char* rd = my_read(1);
+		if (rd)
+			if(rd[0]==0xFF)
+				return true;
+	} while(trys--);
+	printf("\n");
 	return false;
 }
 
-bool RoboClaw::read_n(uint8_t cnt,uint8_t address,uint8_t cmd,...)
+bool RoboClaw::read_n(uint8_t cnt, uint8_t address, uint8_t cmd,...)
 {
 	uint32_t value=0;
 	uint8_t trys=MAXRETRY;
 	int16_t data;
 	do{
 		flush();
-		
+
 		data=0;
 		crc_clear();
 		write(address);
@@ -168,18 +137,17 @@ bool RoboClaw::read_n(uint8_t cnt,uint8_t address,uint8_t cmd,...)
 		//send data with crc
 		va_list marker;
 		va_start( marker, cmd );     /* Initialize variable arguments. */
-		for(uint8_t index=0;index<cnt;index++){
+		for(uint8_t index=0;index<cnt;index++) {
 			uint32_t *ptr = va_arg(marker, uint32_t *);
-
 			if(data!=-1){
 				data = read(timeout);
-				crc_update(data);
+				crc_update (data);
 				value=(uint32_t)data<<24;
 			}
 			else{
 				break;
 			}
-			
+
 			if(data!=-1){
 				data = read(timeout);
 				crc_update(data);
@@ -445,7 +413,8 @@ uint32_t RoboClaw::Read4_1(uint8_t address, uint8_t cmd, uint8_t *status, bool *
 	return false;
 }
 
-bool RoboClaw::ForwardM1(uint8_t address, uint8_t speed){
+bool RoboClaw::ForwardM1(uint8_t address, uint8_t speed) {
+//	return write_n(6, 0x40, 0x73, 0x9e, 0x40, 0x8c, 0x6b );
 	return write_n(3,address,M1FORWARD,speed);
 }
 

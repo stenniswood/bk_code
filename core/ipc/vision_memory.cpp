@@ -35,7 +35,7 @@ AUTHOR	:  Stephen Tenniswood
 #include "vision_memory.h"
 
 
-#define Debug 0
+#define Debug 1
 
 char* 	eyes_shared_memory;
 int 	eyes_segment_id;
@@ -52,22 +52,23 @@ char eyes_segment_id_filename[] = "/home/steve/bk_code/client/eyes_shared_memseg
 bool is_eyes_ipc_memory_available()
 {
     struct shmid_ds buf;			// shm data descriptor.
-    
-    dprintf("Checking for vision IPC memory... ");
-    dprintf( "reading segment id: %s\n", eyes_segment_id_filename );
+    dprintf("Checking for vision IPC memory... segment id: %s\n", eyes_segment_id_filename );
     
     // First see if the memory is already allocated:
     eyes_segment_id = eyes_read_segment_id( eyes_segment_id_filename );
+
     int retval = shmctl(eyes_segment_id, IPC_STAT, &buf);
     if (retval==-1) {
-        dprintf("Error: %s\n", strerror(errno) );
+		perror("shmctl() Error");
+        //dprintf("Error: %s\n", strerror(errno) );
         return false;
     }
-    dprintf( " Found segment, size=%ld and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+    dprintf( " Found segment %d, size=%ld and %d attachments.\n", eyes_segment_id, buf.shm_segsz, buf.shm_nattch );
     
     if ((buf.shm_segsz > 0)			// segment size > 0
-        && (buf.shm_nattch >= 1))	// number of attachments.
+        && (buf.shm_nattch >= 0))	// number of attachments.
         return true;
+    
     return false;
 }
 
@@ -152,7 +153,6 @@ FORMAT:
 	INT 		ID
 	char[255] 	Buffer
 */
-//void eyes_write_server_event( char* mSentence )
 void  eyes_write_server_event( std::string mCommand )
 {
 	//long length = strlen(mSentence);
@@ -164,7 +164,7 @@ void  eyes_write_server_event( std::string mCommand )
 	ipc_memory_eyes->ServerCounter++;
 
 	strcpy(ipc_memory_eyes->ServerEvent, mCommand.c_str() );
-	printf("|%s|\n", ipc_memory_eyes->ServerEvent );
+	//dprintf("|%s|\n", ipc_memory_eyes->ServerEvent );
 }
 
 void  eyes_acknowledge_server   ( )
@@ -287,3 +287,23 @@ char* eyes_compose_coordinate     ( MathVector& mNewVelocity )
 
 }
 
+bool  eyes_is_valid_pointer( )
+{
+	if ((ipc_memory_eyes==NULL) || (ipc_memory_eyes==(struct eyes_ipc_memory_map*)-1))
+		return false;
+	return true;
+}
+
+void eyes_compose_coordinate_xy   ( int mx, int my )
+{
+	if (eyes_is_valid_pointer()==false)
+	{ 	printf("Invalid Pointer eyes_memory\n");  return; };
+	
+	int index = ipc_memory_eyes->stream1_index;
+	ipc_memory_eyes->location_stream1[index].x = mx;
+	ipc_memory_eyes->location_stream1[index].x = my;
+	ipc_memory_eyes->location_stream1[index].z = 0.0;
+	ipc_memory_eyes->stream1_index++;
+	if (ipc_memory_eyes->stream1_index > MAX_STREAM_SIZE)
+		ipc_memory_eyes->stream1_index = 0;
+}

@@ -11,26 +11,25 @@
 #include "findEyeCenter.h"
 #include "findEyeCorner.h"
 
-
 /** Constants **/
-
+int num_faces_present;
 
 /** Function Headers */
-void detectAndDisplay( cv::Mat frame );
+int detectAndDisplay( cv::Mat frame );
 
 /** Global variables */
 //-- Note, either copy these two files from opencv/data/haarscascades to your current folder, or change these locations
 cv::String            face_cascade_name = "/home/pi/opencv-3.1.0/data/haarcascades/haarcascade_frontalface_alt.xml";
 cv::CascadeClassifier face_cascade;
-std::string 	main_window_name = "Capture - Face detection";
-std::string 	face_window_name = "Capture - Face";
-cv::RNG     	rng(12345);
-cv::Mat     	debugImage;
-cv::Mat     	skinCrCbHist = cv::Mat::zeros(cv::Size(256, 256), CV_8UC1);
-cv::Mat 		faceROIc;
-
-cv::Mat frame;  
-cv::VideoCapture capture(-1);
+std::string 		  main_window_name = "Capture - Face detection";
+std::string 		  face_window_name = "Capture - Face";
+cv::RNG     		  rng(12345);
+cv::Mat     		  debugImage;
+cv::Mat     		  skinCrCbHist = cv::Mat::zeros(cv::Size(256, 256), CV_8UC1);
+cv::Mat 			  faceROIc;
+std::vector<cv::Rect> faces;
+cv::Mat 			  frame;
+cv::VideoCapture 	  capture(-1);
 
 /**
  * @function main
@@ -49,10 +48,10 @@ int fd_init( )
   cv::moveWindow("Right Eye", 10, 600);
   cv::namedWindow("Left Eye",CV_WINDOW_NORMAL);
   cv::moveWindow("Left Eye", 10, 800);
-  cv::namedWindow("aa",CV_WINDOW_NORMAL);
-  cv::moveWindow("aa", 10, 800);
-  cv::namedWindow("aaa",CV_WINDOW_NORMAL);
-  cv::moveWindow("aaa", 10, 800);
+  //cv::namedWindow("aa",CV_WINDOW_NORMAL);
+  //cv::moveWindow("aa", 10, 800);
+  //cv::namedWindow("aaa",CV_WINDOW_NORMAL);
+  //cv::moveWindow("aaa", 10, 800);
 
   printf("MAIN	\n");
 
@@ -78,7 +77,7 @@ void fd_timeslice()
 
       // Apply the classifier to the frame
       if( !frame.empty() ) {
-        detectAndDisplay( frame );
+        num_faces_present = detectAndDisplay( frame );
       }
       else {
         printf(" --(!) No captured frame -- Break!");
@@ -88,10 +87,6 @@ void fd_timeslice()
       imshow(main_window_name,debugImage);
 
       int c = cv::waitKey(10);
-      if( (char)c == 'c' ) { return; }
-      if( (char)c == 'f' ) {
-        imwrite("frame.png",frame);
-      }
     }
 }
 
@@ -208,10 +203,9 @@ cv::Mat findSkin (cv::Mat &frame) {
       
 /**
  * @function detectAndDisplay
+Return:		Number Faces found
  */
-void detectAndDisplay( cv::Mat frame ) {
-  std::vector<cv::Rect> faces;
-  //cv::Mat frame_gray;
+int detectAndDisplay( cv::Mat frame ) {
 
   std::vector<cv::Mat> rgbChannels(3);
   cv::split(frame, rgbChannels);
@@ -234,5 +228,6 @@ void detectAndDisplay( cv::Mat frame ) {
     findEyes(frame_gray, faces[0]);
     imshow(face_window_name, faceROIc);
   }
+   return faces.size();
 }
 

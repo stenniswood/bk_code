@@ -17,11 +17,11 @@ HARDWARE_PATH = ./hardware/mac/
 endif
 
 cc      =g++
-OPTIONS	   = -std=c99
+OPTIONS	   = -std=c99 -g 
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
-		 	 -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
+	     -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
 SQL_INC    = -I/usr/include/mysql
-INC	       = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/
+INC	   = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/
 
 CFLAGS = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) \
 	     -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
@@ -33,7 +33,7 @@ OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lo
 	-lopencv_objdetect -l opencv_ml -lopencv_calib3d -lopencv_imgproc -lopencv_highgui \
 	-lopencv_core
 OBJ       = mouse.o serial.o x_eyes.o x_eyes_main.o roboclaw.o findEyeCenter.o findEyeCorner.o \
-	helpers.o face_detect.o
+	helpers.o face_detect.o face_recog.o serial_synchronous.o
 IPC_OBJS  = vision_memory.o
 
 

@@ -3,33 +3,21 @@
 
 #include <stdarg.h>
 #include <inttypes.h>
-//#include <Stream.h>
-//#include <HardwareSerial.h>
-//#include <SoftwareSerial.h>
-#include "serial.hpp"
+#include "serial_synchronous.hpp"
 #include <cstddef>
-
 
 /******************************************************************************
 * Definitions
 ******************************************************************************/
 
-#define _RC_VERSION 10 // software version of this library
-#ifndef GCC_VERSION
-#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-#endif
-
 #define _SS_VERSION 16
 
-class RoboClaw //: public Stream
+class RoboClaw : public SSerialInterface
 {
 	uint16_t crc;
 	uint32_t timeout;
-	
-/*  Adapted for RPI (roboclaw_serial.hpp)	*/
-	class SerialInterface* hserial;
-	//Roboclaw_SerialInterface *hserial;
 
+/*  Adapted for RPI (roboclaw_serial.hpp)	*/
 	enum {M1FORWARD = 0,
 			M1BACKWARD = 1,
 			SETMINMB = 2,
@@ -124,7 +112,7 @@ class RoboClaw //: public Stream
 			FLAGBOOTLOADER = 255};	//Only available via USB communications
 public:
 	// public methods
-	RoboClaw(SerialInterface *hserial, uint32_t tout);
+	RoboClaw( uint32_t tout);
 	~RoboClaw();
 
 	bool ForwardM1				 (uint8_t address, uint8_t speed);
@@ -228,16 +216,15 @@ public:
 
 	static int16_t library_version() { return _SS_VERSION; }
 
-	virtual int 	available	( );
 	void 			begin		( long speed);
 	bool 			isListening	( );
 	bool 			overflow	( );
 	int 			peek		( );
-	virtual int 	read		( );
-	int 			read		( uint32_t timeout);
-	bool 			listen		( );
+
+	virtual unsigned char read	( uint32_t timeout);
 	virtual size_t  write		( uint8_t byte);
-	virtual void 	flush		( );
+	
+	bool 			listen		( );
 	void 		 	clear		( );
 
 private:

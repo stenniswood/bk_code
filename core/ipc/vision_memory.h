@@ -6,9 +6,9 @@
 
 #define IPC_KEY_EYES           0x04D3        // 1235 in decimal!
 #define MAX_CLIENT_ARRAY_SIZE 2048
-
+#define MAX_STREAM_SIZE		50
 extern char* 	eyes_shared_memory;
-extern int 		eyes_segment_id;
+extern int 	eyes_segment_id;
 extern struct   eyes_ipc_memory_map*  ipc_memory_eyes;
 
 struct Coordinate
@@ -32,7 +32,7 @@ struct Coordinate
   anymore."
   
  This allows NLP commands to create, place, query and view
- new scenarios.  
+ new scenarios.
  ******************** 3D SIMULATOR CLIENT MEMORY MAP *****************/
 struct eyes_ipc_memory_map
 {
@@ -46,18 +46,22 @@ struct eyes_ipc_memory_map
 	//  Perhaps another for object recognition (scissors, remote control, plate, etc)
 
 	// Client Command : 
-    long int CommandCounter;    
-    char	 client_command[255];		// for finding an object by name.
-    long int AcknowledgeCounter;
+    	long int CommandCounter;    
+    	char	 client_command[255];		// for finding an object by name.
+    	long int AcknowledgeCounter;
 
 	// Machine Vision Initiated/Response to Client Command:        
-    long int ServerCounter;							// Incremented on change to any of below:
+	long int ServerCounter;							// Incremented on change to any of below:
 	char	 ServerEvent   [255];
-    long int ServerAcknowledgedCounter;				// Incremented on change to any of below:
+    	long int ServerAcknowledgedCounter;				// Incremented on change to any of below:
 
-	struct Coordinate	location_stream1[50];		// Use this for streaming face detect or other locations; (for instance left eye)
-	struct Coordinate	location_stream2[50];		// Use this for streaming face detect or other locations; (for instance right eye)
-	struct Coordinate	location_stream3[50];		// Use this for streaming face detect or other locations; (for instance face center)	
+
+	struct Coordinate	location_stream1[MAX_STREAM_SIZE];		// Use this for streaming face detect or other locations; (for instance left eye)
+	struct Coordinate	location_stream2[MAX_STREAM_SIZE];		// Use this for streaming face detect or other locations; (for instance right eye)
+	struct Coordinate	location_stream3[MAX_STREAM_SIZE];		// Use this for streaming face detect or other locations; (for instance face center)	
+	int	stream1_index;
+	int	stream2_index;
+	int	stream3_index;
 	
     // Some miscellaneous parameters may also be passed, but these must
     // be converted to ascii and passed in the text.    
@@ -96,7 +100,9 @@ int   eyes_read_segment_id         ( char* mFilename );
 void  delete_all_shm				 ( );
 
 // UTILITY FUNCTIONS (to assist composing the server event string)
+bool  eyes_is_valid_pointer		  ( );
 char* eyes_compose_coordinate     ( MathVector& mNewVelocity );
+void  eyes_compose_coordinate_xy  ( int mx, int my );
 
     
 #endif

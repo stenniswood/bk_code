@@ -18,43 +18,50 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "serial.hpp"
+#include "serial_synchronous.hpp"
 #include "bk_system_defs.h"
 
-
 #define Debug 0 
+struct timespec start_time, last_stat;
+struct pollfd 	serial_poll;
+struct timespec last_read;
+struct timespec last_write;
 
-class SerialInterface si;
+uint64_t GetTimeStamp() 
+{
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
+}
 
-
-SerialInterface::SerialInterface()
+SSerialInterface::SSerialInterface()
 {
 	Initialize();
 }
-SerialInterface::~SerialInterface()
+SSerialInterface::~SSerialInterface()
 {
 	close( _fd );
 }
 
-void SerialInterface::Initialize()
+void SSerialInterface::Initialize()
 {
 	last_pos = accum_buff;
 
 	// command line args
-	_cl_baud 	= 0;
-	_cl_port 	= NULL;
-	_cl_divisor 	= 0;
-	_cl_rx_dump 	= 0;
-	_cl_rx_dump_ascii = 0;
+	_cl_baud 		 = 0;
+	_cl_port 		 = NULL;
+	_cl_divisor 	 = 0;
+	_cl_rx_dump 	 = 0;
+	_cl_rx_dump_ascii= 0;
 	_cl_tx_detailed  = 0;
-	_cl_stats 	 = 0;
+	_cl_stats 	 	 = 0;
 	_cl_stop_on_error= 0;
 	_cl_single_byte  = -1;
 	_cl_another_byte = -1;
-	_cl_rts_cts 	= 0;
-	_cl_dump_err 	= 0;
-	_cl_no_rx 	= 0;
-	_cl_no_tx 	= 0;
+	_cl_rts_cts 	 = 0;
+	_cl_dump_err 	 = 0;
+	_cl_no_rx 		 = 0;
+	_cl_no_tx 		 = 0;
 	_cl_rx_delay 	= 0;
 	_cl_tx_delay 	= 0;
 	_cl_tx_bytes 	= 0;
@@ -85,7 +92,7 @@ static void print_args(int argc, char *argv[])
 	printf("\n");
 }
 
-void SerialInterface::dump_data(unsigned char * b, int count) {
+void SSerialInterface::dump_data(unsigned char * b, int count) {
 	printf("%i bytes: ", count);
 	int i;
 	for (i=0; i < count; i++) {
@@ -94,7 +101,7 @@ void SerialInterface::dump_data(unsigned char * b, int count) {
 	printf("\n");
 }
 
-void SerialInterface::dump_data_ascii(unsigned char * b, int count)
+void SSerialInterface::dump_data_ascii(unsigned char * b, int count)
 {
 	printf("%i bytes: ", count);
 	int i;
@@ -104,7 +111,7 @@ void SerialInterface::dump_data_ascii(unsigned char * b, int count)
 	printf("\n");
 }
 
-void SerialInterface::dump_serial_port_stats()
+void SSerialInterface::dump_serial_port_stats()
 {
 	struct serial_icounter_struct icount = { 0 };
 	printf("%s: count for this session: rx=%i, tx=%i, rx err=%i\n", _cl_port, _read_count, _write_count, _error_count);
@@ -117,11 +124,10 @@ void SerialInterface::dump_serial_port_stats()
 	}
 }
 
-
 /* In other words set the baudrate for the serial /dev/tty* device driver.
 	Raspberry Pi Linux (not the device)
   */
-void SerialInterface::set_baud_divisor(int speed)
+void SSerialInterface::set_baud_divisor(int speed)
 {
 	// default baud was not found, so try to set a custom divisor
 	struct serial_struct ss;
@@ -148,7 +154,7 @@ void SerialInterface::set_baud_divisor(int speed)
 }
 
 // converts integer baud to Linux define
-int SerialInterface::get_baud(int baud)
+int SSerialInterface::get_baud(int baud)
 {
 	switch (baud) {
 	case 9600:
@@ -188,11 +194,56 @@ int SerialInterface::get_baud(int baud)
 	case 4000000:
 		return B4000000;
 	default: 
-		return -1;
+		return B38400;
+		//return -1;
 	}
 }
 
-void SerialInterface::process_options(int argc, char ** argv)
+void SSerialInterface::general_setup()
+{
+	// ALLOCATE MEMORY FOR THE WRITE BUFFER SIZE :
+	_write_size = (_cl_tx_bytes == 0) ? 1024 : _cl_tx_bytes;
+	_write_data = (unsigned char*)malloc(_write_size);
+	if (_write_data == NULL) {
+		printf("ERROR: Memory allocation failed\n");
+	}
+
+	// SETUP TIMESTAMPS:
+	struct timespec last_read  = { 0, 0 };
+	struct timespec last_write = { 0, 0 };
+	clock_gettime(CLOCK_MONOTONIC, &start_time);
+	last_stat = start_time;
+
+	// ESTABLISH BAUD RATE : 
+	int baud = B9600;
+	if (_cl_baud)
+		baud = get_baud(_cl_baud);
+
+	// SETUP PORT :
+	setup_serial_port( baud );
+	if (baud <= 0) {
+		printf("NOTE: non standard baud rate, trying custom divisor\n");
+		set_baud_divisor(_cl_baud);
+	}
+
+	// ESTABLISH THE POLL Flags based on user, "-r" and "-t" options
+	serial_poll.fd = _fd;
+	if (!_cl_no_rx) {		
+		serial_poll.events |= POLLIN;
+		printf("POLLIN SET!  POLLIN=%x;  POLLOUT=%x;  POLLRDNORM=%x; POLLRDBAND=%x \n", POLLIN, POLLOUT, POLLRDNORM, POLLRDBAND );
+	} else {
+		printf("POLLIN RESET!\n");
+		serial_poll.events &= ~POLLIN;
+	}
+	if (!_cl_no_tx) {
+		serial_poll.events |= POLLOUT;
+	} else {
+		serial_poll.events &= ~POLLOUT;
+	}
+
+}
+
+void SSerialInterface::process_options(int argc, char ** argv)
 {
 	print_args(argc,argv);
 	for (;;) {
@@ -209,7 +260,7 @@ void SerialInterface::process_options(int argc, char ** argv)
 			{"stop-on-err", no_argument, 0, 'S'},
 			{"single-byte", no_argument, 0, 'y'},
 			{"second-byte", no_argument, 0, 'z'},
-			{"rts-cts", no_argument, 0, 'c'},
+			{"rts-cts",  no_argument, 0, 'c'},
 			{"dump-err", no_argument, 0, 'e'},
 			{"no-rx", no_argument, 0, 'r'},
 			{"no-tx", no_argument, 0, 't'},
@@ -221,13 +272,15 @@ void SerialInterface::process_options(int argc, char ** argv)
 			{"rx-time", required_argument, 0, 'i'},
 			{0,0,0,0},
 		};
-
+		
 		int c = getopt_long(argc, argv, short_options,
 				long_options, &option_index);
 
 		if (c == EOF) {
 			break;
 		}
+		printf("Serial Cmd Line Option:  (%c) : \n", 
+				 c);
 
 		switch (c) {
 		case 0:
@@ -313,11 +366,46 @@ void SerialInterface::process_options(int argc, char ** argv)
 		}
 		}
 	}
+	printf("calling general_setup()\n");
+	general_setup();
+	printf("Exited process_options()\n");
+}
+
+unsigned char* SSerialInterface::my_read( int mBytesExpected )		// 1 byte from hardware
+{
+	static unsigned char rb[1024];
+	memset(rb, 0, 1024);
+	int c;
+	int timeout = 5000;		// 2 seconds 
+
+	uint32_t start = GetTimeStamp();
+	int retval     = poll(&serial_poll, 1, 1000);
+	
+	while( (serial_poll.revents & POLLIN)==0 )
+	{
+		if((GetTimeStamp()-start) >= timeout)
+		{ printf("timeout\n");	return NULL;	};
+		
+		retval = poll(&serial_poll, 1, 1000);
+	}
+
+	if (retval > 0)
+	{
+		//printf("poll returned: %d %x %x;\n", retval, serial_poll.events, serial_poll.revents );
+		if (serial_poll.revents & POLLIN)
+		{
+			c = ::read(_fd, (void*)&rb, mBytesExpected);
+			//printf("read data %d bytes: %x\n", mBytesExpected, rb[0] );
+			//for (int x=0; x<c; x++)
+			//	printf("%2x ", rb[x] );
+		}
+	}
+	return rb;
 }
 
 /* Non blocking read from serial device  - accumulates data : 
 */
-void SerialInterface::process_read_data()
+void SSerialInterface::process_read_data()
 {
 	unsigned char rb[1024];
 	memset(rb, 0, 1024);
@@ -350,7 +438,7 @@ void SerialInterface::process_read_data()
 }
 
 /* Incoming Received Text */
-void SerialInterface::parse_ascii_data()
+void SSerialInterface::parse_ascii_data()
 {	
 	static int counter = 0;
 	
@@ -364,18 +452,20 @@ void SerialInterface::parse_ascii_data()
 	// Look for version:
 }
 
-int SerialInterface::my_write(char* mBuffer, int mSize)
+int SSerialInterface::my_write(char* mBuffer, int mSize)
 {
 	if ((current_write_size+mSize) > _write_size)
 		mSize = _write_size-current_write_size;
 
 	memcpy( &(_write_data[current_write_size]), mBuffer, mSize );
 	current_write_size += mSize;
+	// doing it synchronously now so have to send it!
+	process_write_data();
 }
 
-/* 
+/* Get char from buffer (no hardware interface occurs)
 */
-unsigned char SerialInterface::read( )
+unsigned char SSerialInterface::read( )
 {
 	if (_read_count>0)
 	{
@@ -388,19 +478,19 @@ unsigned char SerialInterface::read( )
 	return 0;
 }
 
-int SerialInterface::my_write( char mByte )
+int SSerialInterface::my_write( char mByte )
 {
 	my_write( &mByte, 1 );
 }
-bool	SerialInterface::available	( )
+bool SSerialInterface::available( )
 {
-	return (_read_count > 0) ? true:false;
+	return (_read_count > 0) ? true : false;
 }
 
 /*
 	
 */
-void SerialInterface::process_write_data()
+void SSerialInterface::process_write_data()
 {
 	ssize_t count = 0;
 	int repeat = (_cl_tx_bytes == 0);		// User option "-w"	
@@ -409,18 +499,17 @@ void SerialInterface::process_write_data()
 		ssize_t i;
 		if (current_write_size) {
 			ssize_t c = write(_fd, _write_data, current_write_size);
-			printf("\nprocess_write_data(%d)", current_write_size );
-			for (int s=0; s<current_write_size; s++)
-				printf("%2x ", _write_data[s] );
+			//printf("\nprocess_write_data(%d)", current_write_size );
+			//for (int s=0; s<current_write_size; s++)
+			//	printf("%2x ", _write_data[s] );
+			//printf("\n");
 			current_write_size=0;
-			printf("\n");
-			
+
 			if (c < 0) {
 				dprintf("write failed (%d)\n", errno);
 				c = 0;
 			}
 			count += c;
-
 			if (c < _write_size) {
 				_write_count_value -= _write_size - c;
 				repeat = 0;
@@ -436,13 +525,13 @@ void SerialInterface::process_write_data()
 	}
 }
 
-void SerialInterface::setup_serial_port( int baud )
+void SSerialInterface::setup_serial_port( int baud )
 {
 	struct termios newtio;
-	_fd = open(_cl_port, O_RDWR | O_NONBLOCK);
+	_fd = open(_cl_port, O_RDWR );	// | O_NONBLOCK
 
 	if (_fd < 0) {
-		printf("\n%s\n",_cl_port);
+		printf("\nSSerialInterface::setup_serial_port() %s\n",_cl_port);
 		perror("Error opening serial port ");
 		free(_cl_port);
 		//exit(1);
@@ -486,7 +575,7 @@ void SerialInterface::setup_serial_port( int baud )
 	}
 }
 
-int SerialInterface::diff_ms(const struct timespec *t1, const struct timespec *t2)
+int SSerialInterface::diff_ms(const struct timespec *t1, const struct timespec *t2)
 {
 	struct timespec diff;
 
@@ -511,25 +600,11 @@ int SerialInterface::diff_ms(const struct timespec *t1, const struct timespec *t
 		process_read_data()  	and
 		process_write_data()	
 */
-int SerialInterface::serial_main( )
+int SSerialInterface::serial_main( )
 {
 	dprintf("Linux Loadcell serial app\n");
 	if (!_cl_port) { 
 		printf("serial_main() - ERROR: Port argument required\n");
-	}
-
-	// ESTABLISH BAUD RATE:
-	int baud = B9600;
-	if (_cl_baud)
-		baud = get_baud(_cl_baud);
-	if (baud<=0)
-		baud = B38400;
-
-	// SETUP PORT :
-	setup_serial_port( baud );
-	if (baud <= 0) {
-		printf("NOTE: non standard baud rate, trying custom divisor\n");
-		set_baud_divisor(_cl_baud);
 	}
 
 	// Specify with the "-p" option.  Should refer to "/dev/ttyUSB0" or other.
@@ -549,42 +624,11 @@ int SerialInterface::serial_main( )
 		return 0;
 	}
 
-	// ALLOCATE MEMORY FOR THE WRITE BUFFER SIZE :
-	_write_size = (_cl_tx_bytes == 0) ? 1024 : _cl_tx_bytes;
-	_write_data = (unsigned char*)malloc(_write_size);
-	if (_write_data == NULL) {
-		printf("ERROR: Memory allocation failed\n");
-	}
-
-	// ESTABLISH THE POLL Flags based on user, "-r" and "-t" options
-	struct pollfd serial_poll;
-	serial_poll.fd = _fd;
-	if (!_cl_no_rx) {
-		serial_poll.events |= POLLIN;
-	} else {
-		serial_poll.events &= ~POLLIN;
-	}
-	if (!_cl_no_tx) {
-		serial_poll.events |= POLLOUT;
-	} else {
-		serial_poll.events &= ~POLLOUT;
-	}
-
-	// SETUP TIMESTAMPS:
-	struct timespec start_time, last_stat;
-	//struct timespec last_read  = { .tv_sec = 0, .tv_nsec = 0 };
-	//struct timespec last_write = { .tv_sec = 0, .tv_nsec = 0 };
-	struct timespec last_read  = { 0, 0 };
-	struct timespec last_write = { 0, 0 };
-	clock_gettime(CLOCK_MONOTONIC, &start_time);
-	last_stat = start_time;
-
 	// while either User option: "-r" and "-t"
 	printf("Entering serial_main while () loop\n");
 	while (!(_cl_no_rx && _cl_no_tx)) 
-	{	
-		//printf("Inside serial_main while () loop\n");
-		int retval = poll(&serial_poll, 1, 1000);
+	{
+		int retval = poll( &serial_poll, 1, 1000 );
 		if (retval == -1) {
 			perror("poll()");
 		} else if (retval) {
