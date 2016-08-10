@@ -1,5 +1,11 @@
 
 
+
+
+void* serial_setup(void*);
+void update_eye_positions(int x, int y, float mWidth, float mHeight);
+
+
 float calc_left_right_angle( float mX, float mPWMin, float mPWMax,
 							 float mScreenMin, float mScreenMax );
 
@@ -17,6 +23,8 @@ void set_left_eye_up_angle	( char* mBuffer, float mDegrees );
 void set_right_eye_up_angle	( char* mBuffer, float mDegrees );
 
 
+extern float PW_Left_up_center_offset  ;
+extern float PW_Right_up_center_offset ;
 
 
 extern char txt[];

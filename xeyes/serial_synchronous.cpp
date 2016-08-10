@@ -82,12 +82,12 @@ void SSerialInterface::Initialize()
 	_error_count = 0;
 }
 
-static void print_args(int argc, char *argv[])
+static void print_args(int margc, char *margv[])
 {
-	printf("ARGS: %d", argc);
-	for (int i=0; i< argc; i++)
+	printf("ARGS: %d", margc);
+	for (int i=0; i< margc; i++)
 	{
-		printf(" %s ", argv[i] );
+		printf(" %s ", margv[i] );
 	}
 	printf("\n");
 }
@@ -243,44 +243,49 @@ void SSerialInterface::general_setup()
 
 }
 
-void SSerialInterface::process_options(int argc, char ** argv)
+void SSerialInterface::process_options(int margc, char ** margv)
 {
-	print_args(argc,argv);
+	print_args(margc,margv);
+	printf("SSerialInterface::process_options()\n");
 	for (;;) {
 		int option_index = 0;
 		static const char *short_options = "hb:p:d:R:TsSy:z:certq:l:a:w:o:i:";
 		static const struct option long_options[] = {
-			{"help", no_argument, 0, 0},
-			{"baud", required_argument, 0, 'b'},
-			{"port", required_argument, 0, 'p'},
-			{"divisor", required_argument, 0, 'd'},
-			{"rx_dump", required_argument, 0, 'R'},
+			{"help", 		no_argument, 0, 0},
+			{"baud", 		required_argument, 0, 'b'},
+			{"port", 		required_argument, 0, 'p'},
+			{"divisor", 	required_argument, 0, 'd'},
+			{"rx_dump", 	required_argument, 0, 'R'},
 			{"detailed_tx", no_argument, 0, 'T'},
-			{"stats", no_argument, 0, 's'},
+			{"stats", 		no_argument, 0, 's'},
 			{"stop-on-err", no_argument, 0, 'S'},
 			{"single-byte", no_argument, 0, 'y'},
 			{"second-byte", no_argument, 0, 'z'},
 			{"rts-cts",  no_argument, 0, 'c'},
 			{"dump-err", no_argument, 0, 'e'},
-			{"no-rx", no_argument, 0, 'r'},
-			{"no-tx", no_argument, 0, 't'},
+			{"no-rx", 	 no_argument, 0, 'r'},
+			{"no-tx", 	 no_argument, 0, 't'},
 			{"rx-delay", required_argument, 0, 'l'},
 			{"tx-delay", required_argument, 0, 'a'},
 			{"tx-bytes", required_argument, 0, 'w'},
-			{"rs485", required_argument, 0, 'q'},
+			{"rs485", 	 required_argument, 0, 'q'},
 			{"tx-time", required_argument, 0, 'o'},
 			{"rx-time", required_argument, 0, 'i'},
 			{0,0,0,0},
 		};
-		
-		int c = getopt_long(argc, argv, short_options,
-				long_options, &option_index);
+		printf("SSerialInterface::calling getopt_long()\n");
+		printf("%d: \n", margc );
+		for (int i=0; i<margc; i++)
+			printf("argv[%d]=%s\n", i, margv[i] );
 
+		int c = getopt_long(margc, margv, short_options, 
+							long_options, &option_index );
+		printf("c=(%c) : \n",  c);
+				
 		if (c == EOF) {
 			break;
 		}
-		printf("Serial Cmd Line Option:  (%c) : \n", 
-				 c);
+		printf("Serial Cmd Line Option:  (%c) : \n",  c);
 
 		switch (c) {
 		case 0:
@@ -380,12 +385,11 @@ unsigned char* SSerialInterface::my_read( int mBytesExpected )		// 1 byte from h
 
 	uint32_t start = GetTimeStamp();
 	int retval     = poll(&serial_poll, 1, 1000);
-	
+
 	while( (serial_poll.revents & POLLIN)==0 )
 	{
 		if((GetTimeStamp()-start) >= timeout)
-		{ printf("timeout\n");	return NULL;	};
-		
+		{ printf("timeout\n");	return NULL;	};		
 		retval = poll(&serial_poll, 1, 1000);
 	}
 
@@ -600,6 +604,7 @@ int SSerialInterface::diff_ms(const struct timespec *t1, const struct timespec *
 		process_read_data()  	and
 		process_write_data()	
 */
+
 int SSerialInterface::serial_main( )
 {
 	dprintf("Linux Loadcell serial app\n");

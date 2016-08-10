@@ -25,12 +25,17 @@ extern std::string model_basepath        ;
 extern std::string face_db_basepath      ;
 extern std::string face_test_db_basepath ;
 extern std::string FaceRecogModelName    ;
+extern std::map<int, std::string>& known_people;
 
-bool does_model_exist();
-void open_model ( std::string model_filename );
-void train_model( std::string mfn_csv );
 
-void test_model ( std::string mfn_csv );
+bool 	does_model_exist	( );
+void 	open_model 			( std::string model_filename );
+void 	train_model			( std::string mfn_csv );
+cv::Mat 		  prep_detected_face	  ( cv::Mat& mFace );
+std::vector<int>& recognize_detected_faces( cv::Mat& frame, std::vector<cv::Rect>& faces );
+std::string& 	  face_recongition_tasks  ( bool& mcapture_frame );
+
+void 	test_model 			( std::string mfn_csv );
 
 
 #endif /* face_recog_hpp */

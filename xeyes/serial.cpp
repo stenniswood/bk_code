@@ -409,11 +409,11 @@ void SerialInterface::process_write_data()
 		ssize_t i;
 		if (current_write_size) {
 			ssize_t c = write(_fd, _write_data, current_write_size);
-			printf("\nprocess_write_data(%d)", current_write_size );
+/*			printf("\nprocess_write_data(%d)", current_write_size );
 			for (int s=0; s<current_write_size; s++)
-				printf("%2x ", _write_data[s] );
+				printf("%2x ", _write_data[s] ); 	*/
 			current_write_size=0;
-			printf("\n");
+//			printf("\n");
 			
 			if (c < 0) {
 				dprintf("write failed (%d)\n", errno);

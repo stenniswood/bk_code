@@ -19,10 +19,10 @@
 #include "mouse.h"
 
 
-static int 		mouse_fd;
+static int 			mouse_fd;
 struct input_event 	mouse_ev;		// info read from driver.
+struct mouse_t 		mouse;			// global mouse state
 
-struct mouse_t 	mouse;					// global mouse state
 int 		left_count = 0;
 int 		quitState = 0;
 #define    	CUR_SIZ  16				// cursor size, pixels beyond centre dot
@@ -33,15 +33,15 @@ void *eventThread(void *arg)
 {
 	// Open mouse driver
 	//if ((mouse_fd = open("/dev/input/mouse0", O_RDONLY)) < 0) {	
-	 if ((mouse_fd = open("/dev/input/event0", O_RDONLY)) < 0) {	
+	 if ((mouse_fd = open("/dev/input/event2", O_RDONLY)) < 0) {	
 		if ((mouse_fd = open("/dev/input/event1", O_RDONLY)) < 0) {	
-			if ((mouse_fd = open("/dev/input/event2", O_RDONLY)) < 0) {
+			if ((mouse_fd = open("/dev/input/event0", O_RDONLY)) < 0) {
 				fprintf(stderr, "Error opening Mouse!\n");
 				quitState = 1;
 				return &quitState;
-			} else printf("Opened Mouse /dev/input/event2\n");
+			} else printf("Opened Mouse /dev/input/event0\n");
 		} else printf("Opened Mouse /dev/input/event1\n");
-	 } else printf("Opened Mouse /dev/input/event0\n");
+	 } else printf("Opened Mouse /dev/input/event2\n");
 	//} else printf("Opened /dev/input/mouse0\n");
 
 	mouse.x = mouse.max_x / 2;			   //Reset mouse

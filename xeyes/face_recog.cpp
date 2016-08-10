@@ -6,6 +6,8 @@
 //  Copyright © 2016 Stephen Tenniswood. All rights reserved.
 //
 #include "face_recog.hpp"
+#include "face_detect.hpp"
+
 /*
  * Copyright (c) 2011. Philipp Wagner <bytefish[at]gmx[dot]de>.
  * Released to public domain under terms of the BSD Simplified license.
@@ -24,7 +26,6 @@
  *   See <http://www.opensource.org/licenses/bsd-license>
  */
 #include <unistd.h>
-
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
@@ -46,6 +47,8 @@ string model_basepath        = "/home/pi/Pictures/face_recog/";
 string face_db_basepath      = "/home/pi/Pictures/face_recog/";
 string face_test_db_basepath = "/home/pi/Pictures/face_recog/att_test/";
 string FaceRecogModelName    = model_basepath + "face-rec-model.txt";
+
+std::map<int, std::string>& known_people;
 
 /* This loads the csv file and each image specified in it.
  Each line can specify a filename, or a directory name.
@@ -123,7 +126,7 @@ void train_model(string mfn_csv)
     vector<Mat>           images;
     vector<int>           labels;
     std::map<int, string> labelsInfo;
-    
+
     // Read in the data. This can fail if no valid
     // input filename is given.
     try {
@@ -206,6 +209,67 @@ void test_model( string mfn_csv )
             cout << format("%d-th label's info: %s", predictedLabel, model->getLabelInfo(predictedLabel).c_str()) << endl;
     }
     testSample = timages[timages.size()-1];
+}
+
+const int trained_width  = 130;
+const int trained_height = 130;
+
+/* Prepare a detected face for recognition
+	ie.  
+ */
+cv::Mat prep_detected_face( cv::Mat& mFace )
+{
+	// Use frame image : 
+	// convert to gray
+	// scale to required size:
+	int x=10;
+	int y=10;
+	//cv::Rect myROI( x, y, x+trained_width, y+trained_height );
+	
+	//cv::Mat  scaled_face = frame(myROI);
+}
+
+/*  Goes thru each detected face, and predicts who it might be.
+	Return is a vector of face labels 
+*/
+std::vector<int>& recognize_detected_faces( cv::Mat& frame, std::vector<cv::Rect>& faces )
+{
+	cv::Mat face;
+	cv::Mat prepared_face;
+	static std::vector<int> predictedLabels;
+	for (int i=0; i<faces.size(); i++)
+	{
+		face 		   = frame( faces[i] );			 // Get Face color Sub image.
+		prepared_face  = prep_detected_face( face ); // 
+		//int label = model->predict    ( prepared_face  );
+		//predictedLabels.push_back	  ( label );
+		
+	}
+	return predictedLabels;
+}
+
+std::string& face_recongition_tasks( bool& mcapture_frame )
+{
+	static std::string message;
+	std::vector<int> predictions = recognize_detected_faces( frame, faces );
+	if (predictions.size())
+	{
+		// if any new face   : 
+		// Inform the client : 
+		message = "hello ";
+		message += known_people[predictions[0]];
+		
+		// or if any faces which left the scene - log in database :				
+		//eyes_write_server_event( message );
+						
+		// Inform Client of Presence : 
+		//message = "face detected";
+	
+	} else {
+		// Unrecognized face :
+		mcapture_frame = true;
+	}
+	return message;
 }
 
 int fr_main(int argc, char **argv)

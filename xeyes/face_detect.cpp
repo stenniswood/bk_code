@@ -41,24 +41,19 @@ int fd_init( )
 	printf("--(!)Error loading face cascade, please change face_cascade_name in source code.\n"); return -1; };
 
   cv::namedWindow(main_window_name,CV_WINDOW_NORMAL);
-  cv::moveWindow(main_window_name, 400, 100);
+  cv::moveWindow (main_window_name, 400, 100);
   cv::namedWindow(face_window_name,CV_WINDOW_NORMAL);
-  cv::moveWindow(face_window_name, 10, 100);
+  cv::moveWindow (face_window_name, 10, 100);
   cv::namedWindow("Right Eye",CV_WINDOW_NORMAL);
-  cv::moveWindow("Right Eye", 10, 600);
+  cv::moveWindow ("Right Eye", 10, 600);
   cv::namedWindow("Left Eye",CV_WINDOW_NORMAL);
-  cv::moveWindow("Left Eye", 10, 800);
-  //cv::namedWindow("aa",CV_WINDOW_NORMAL);
-  //cv::moveWindow("aa", 10, 800);
-  //cv::namedWindow("aaa",CV_WINDOW_NORMAL);
-  //cv::moveWindow("aaa", 10, 800);
+  cv::moveWindow ("Left Eye", 10, 800);
 
   printf("MAIN	\n");
 
   createCornerKernels();
   ellipse(skinCrCbHist, cv::Point(113, 155.6), cv::Size(23.4, 15.2),
           43.0, 0.0, 360.0, cv::Scalar(255, 255, 255), -1);
-    
 }
 
 void fd_timeslice() 
@@ -84,9 +79,7 @@ void fd_timeslice()
         return;
       }
 
-      imshow(main_window_name,debugImage);
-
-      int c = cv::waitKey(10);
+      imshow(main_window_name,debugImage);      
     }
 }
 
@@ -208,7 +201,7 @@ Return:		Number Faces found
 int detectAndDisplay( cv::Mat frame ) {
 
   std::vector<cv::Mat> rgbChannels(3);
-  cv::split(frame, rgbChannels);
+  cv::split            (frame, rgbChannels);
   cv::Mat frame_gray = rgbChannels[2];
 
   //cvtColor( frame, frame_gray, CV_BGR2GRAY );
@@ -231,3 +224,7 @@ int detectAndDisplay( cv::Mat frame ) {
    return faces.size();
 }
 
+  //cv::namedWindow("aa",CV_WINDOW_NORMAL);
+  //cv::moveWindow("aa", 10, 800);
+  //cv::namedWindow("aaa",CV_WINDOW_NORMAL);
+  //cv::moveWindow("aaa", 10, 800);
