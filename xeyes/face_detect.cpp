@@ -49,11 +49,10 @@ int fd_init( )
   cv::namedWindow("Left Eye",CV_WINDOW_NORMAL);
   cv::moveWindow ("Left Eye", 10, 800);
 
-  printf("MAIN	\n");
-
   createCornerKernels();
   ellipse(skinCrCbHist, cv::Point(113, 155.6), cv::Size(23.4, 15.2),
           43.0, 0.0, 360.0, cv::Scalar(255, 255, 255), -1);
+	printf("fd_init() done \n" );
 }
 
 void fd_timeslice() 
@@ -62,8 +61,8 @@ void fd_timeslice()
 	//capture.open("/Users/stephentenniswood/Movies/iMovie Library.imovielibrary/My Movie/Original Media/2016-07-24 15_47_08.mov");
     //2016-07-24 15_45_46.mov
 
-  if( capture.isOpened() ) 
-  {
+	if( capture.isOpened() ) 
+	{
       capture.read(frame);
 
       // mirror it
@@ -80,7 +79,9 @@ void fd_timeslice()
       }
 
       imshow(main_window_name,debugImage);      
-    }
+	} else {
+	  printf("Warning: Camera is not on!\n");
+	}
 }
 
 void fd_close() 
@@ -205,7 +206,7 @@ int detectAndDisplay( cv::Mat frame ) {
   cv::Mat frame_gray = rgbChannels[2];
 
   //cvtColor( frame, frame_gray, CV_BGR2GRAY );
-  //equalizeHist( frame_gray, frame_gray );
+  //equalizeHist( frame_gray, frame_gray  );
   //cv::pow(frame_gray, CV_64F, frame_gray);
   //-- Detect faces
   face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(150, 150) );

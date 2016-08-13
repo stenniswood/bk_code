@@ -92,21 +92,15 @@ static void print_args(int margc, char *margv[])
 	printf("\n");
 }
 
-void SSerialInterface::dump_data(unsigned char * b, int count) {
-	printf("%i bytes: ", count);
-	int i;
-	for (i=0; i < count; i++) {
-		printf("%02x ", b[i]);
-	}
-	printf("\n");
-}
-
-void SSerialInterface::dump_data_ascii(unsigned char * b, int count)
+void SSerialInterface::dump_data(unsigned char * b, int count, bool mHex)
 {
 	printf("%i bytes: ", count);
 	int i;
 	for (i=0; i < count; i++) {
-		printf("%c ", b[i]);
+		if (mHex)
+			printf("%02x ", b[i]);
+		else 
+			printf("%c ", b[i]);
 	}
 	printf("\n");
 }
@@ -376,6 +370,22 @@ void SSerialInterface::process_options(int margc, char ** margv)
 	printf("Exited process_options()\n");
 }
 
+/* Get char from buffer (no hardware interface occurs)
+*/
+unsigned char SSerialInterface::read( )
+{
+	if (_read_count>0)
+	{
+		unsigned char one_byte = accum_buff[0];
+		// Shift Data by one byte : 
+		memcpy( &(accum_buff[0]), &(accum_buff[1]), _read_count-1 );
+		_read_count--;
+		return one_byte;
+	}
+	return 0;
+}
+
+/* Poll with timeout and read from serial hardware port  */
 unsigned char* SSerialInterface::my_read( int mBytesExpected )		// 1 byte from hardware
 {
 	static unsigned char rb[1024];
@@ -420,9 +430,9 @@ void SSerialInterface::process_read_data()
 		printf("read=%d:%2x", c, rb[0] );
 		if (_cl_rx_dump) {			// User "-R" option.
 			if (_cl_rx_dump_ascii)
-				dump_data_ascii(rb, c);
+				dump_data(rb, c, false);
 			else
-				dump_data(rb, c);
+				dump_data(rb, c, true);
 		}
 
 		// verify read count is incrementing
@@ -467,20 +477,6 @@ int SSerialInterface::my_write(char* mBuffer, int mSize)
 	process_write_data();
 }
 
-/* Get char from buffer (no hardware interface occurs)
-*/
-unsigned char SSerialInterface::read( )
-{
-	if (_read_count>0)
-	{
-		unsigned char one_byte = accum_buff[0];
-		// Shift Data by one byte : 
-		memcpy( &(accum_buff[0]), &(accum_buff[1]), _read_count-1 );
-		_read_count--;
-		return one_byte;
-	}
-	return 0;
-}
 
 int SSerialInterface::my_write( char mByte )
 {

@@ -1,6 +1,7 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <cstdio>
+#include <string.h>
 
 #include "serial_synchronous.hpp"
 #include "roboclaw.h"
@@ -9,13 +10,18 @@
 #define SetDWORDval(arg) (uint8_t)(((uint32_t)arg)>>24),(uint8_t)(((uint32_t)arg)>>16),(uint8_t)(((uint32_t)arg)>>8),(uint8_t)arg
 #define SetWORDval(arg)  (uint8_t)(((uint16_t)arg)>>8),(uint8_t)arg
 
-//
-// Constructor
-//
-RoboClaw::RoboClaw( uint32_t tout)
+/*	Constructor:
+	mPortName : for instance "/dev/ttyACM0"	
+*/
+RoboClaw::RoboClaw( char* mPortName, uint32_t time_out )
 :SSerialInterface( )
 {
-	timeout = tout;
+	_cl_tx_bytes    = 50;
+	_cl_port 		= strdup(mPortName);
+	_cl_baud 		= 9600;
+	_cl_tx_detailed = 1;
+	timeout = time_out;
+	printf("RoboClaw:: port=%s\n", _cl_port );
 }
 
 //

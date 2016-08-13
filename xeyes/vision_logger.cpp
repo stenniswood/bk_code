@@ -43,9 +43,9 @@ void Event_SQL_Logger::connect_to_logger_db()
         fprintf(stderr, "init %s\n", mysql_error(logger_db));
         exit(1);
     }
-    
+
     if (mysql_real_connect(logger_db, "localhost", "root", "password",
-                           "bk_useraccounts", 0, NULL, 0) == NULL)
+                           "robot_local", 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(logger_db));
         mysql_close(logger_db);

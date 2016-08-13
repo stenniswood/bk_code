@@ -16,7 +16,7 @@ ifeq ($(PLATFORM), $(Mac))
 HARDWARE_PATH = ./hardware/mac/
 endif
 
-cc      =g++
+cc         = g++
 OPTIONS	   = -std=c99 -g 
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 	         -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
@@ -37,7 +37,7 @@ OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lo
 	-lopencv_core
 OBJ       = mouse.o serial.o x_eyes.o x_eyes_main.o roboclaw.o findEyeCenter.o findEyeCorner.o \
 	    	helpers.o face_detect.o face_recog.o serial_synchronous.o vision_logger.o \
-	    	neck_thread.o
+	    	neck_thread.o cal_screen.o
 IPC_OBJS  = vision_memory.o
 
 

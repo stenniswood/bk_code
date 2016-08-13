@@ -26,7 +26,7 @@ CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 			 ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \
 			 ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
 APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/ \
-			./apps/file_editer/ ./apps/video/ ./apps/finder/ ./apps/gallery/
+			 ./apps/file_editer/ ./apps/video/ ./apps/finder/ ./apps/gallery/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 SQL_INC    = -I/usr/include/mysql
 INC		   = $(CORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
@@ -54,16 +54,16 @@ CFLAGS = -g -Wall -DPLATFORM=$(PLATFORM) -DRPI=$(RPI) -Dlinux_desktop=$(linux_de
 
 LDFLAGS += -lilclient -L$(SDKSTAGE)/opt/vc/lib/ -lGLESv2 -lEGL -lopenmaxil -lbcm_host \
 			-lvcos -lvchiq_arm -lpthread -lrt -L./vgfont 
-DEPS   	   = 
+DEPS   	 = 
 
 # OBJECT LISTS : 
 CAN_OBJS    = can_id_list.o can_eid.o 
 #CAN_Interface.o can_instance.o can_buff.o can_txbuff.o bk_system_defs.o 
 MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
 # ipc_mem_bkinstant.o
-//MSG_OBJS    =  parser_tilt.o packer_motor.o
+//MSG_OBJS  =  parser_tilt.o packer_motor.o
 MISC_OBJS   = vector_math.o ini_file.o fft.o
-HARDWARE_OBJS = AUDIO_device.o sinewave.o tone_generator.o
+HARDWARE_OBJS= AUDIO_device.o sinewave.o tone_generator.o
 FUSE_OBJS   = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o 
 VG_OBJS     = libshapes.o oglinit.o 
 AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \

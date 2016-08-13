@@ -30,30 +30,30 @@ public:
 	int 	my_write	  			( char* mBuffer, int size);
 	virtual bool	available 	  	( );
 
-	void	general_setup			();
-	int	 	peek 		 			()	{ return accum_buff[0];  };
-	virtual void 	flush			()	{ /* Not sure here */    };
+	void	general_setup			( );
+	int	 	peek 		 			( )	{ return accum_buff[0];  };
+	virtual void 	flush			( )	{ /* Not sure here */    };
 
-	void 	parse_ascii_data	( );	
-	void 	dump_data			( unsigned char * b, int count);
-	void	dump_data_ascii		( unsigned char * b, int count);
-	void 	set_baud_divisor	( int speed);
-	int	 	get_baud			( int baud );
-	void 	process_options		( int argc, char ** argv);
-	void 	dump_serial_port_stats();
-	void 	process_read_data	( );
-	void 	process_write_data	( );
-	void 	setup_serial_port	( int baud);
-	int  	diff_ms				( const struct timespec *t1, const struct timespec *t2);	
+	void 	parse_ascii_data		( );	
+	void 	dump_data				( unsigned char * b, int count, bool mHex=false);
+	void 	dump_serial_port_stats	( );
+	void 	set_baud_divisor		( int speed);
+	int	 	get_baud				( int baud );
+	void 	process_options			( int argc, char ** argv);
+
+	void 	process_read_data		( );
+	void 	process_write_data		( );
+	void 	setup_serial_port		( int baud );
+	int  	diff_ms					( const struct timespec *t1, const struct timespec *t2);	
 	
-	int  	serial_main			(  );
+	int  	serial_main				( );
 
 	char 	accum_buff  [SS_WORKING_LENGTH];
 	char 	working_buff[SS_WORKING_LENGTH];
 	char* 	last_pos;
 
 	// command line args
-	int _cl_baud;
+	int   _cl_baud;
 	char *_cl_port;
 	int _cl_divisor;
 	int _cl_rx_dump;

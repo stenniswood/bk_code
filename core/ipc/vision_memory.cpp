@@ -35,7 +35,7 @@ AUTHOR	:  Stephen Tenniswood
 #include "vision_memory.h"
 
 
-#define Debug 1
+#define Debug 0
 
 char* 	eyes_shared_memory;
 int 	eyes_segment_id;
@@ -59,11 +59,11 @@ bool is_eyes_ipc_memory_available()
 
     int retval = shmctl(eyes_segment_id, IPC_STAT, &buf);
     if (retval==-1) {
-		perror("shmctl() Error");
+		perror("Vision Memory : shmctl() Error");
         //dprintf("Error: %s\n", strerror(errno) );
         return false;
     }
-    dprintf( " Found segment %d, size=%ld and %d attachments.\n", eyes_segment_id, buf.shm_segsz, buf.shm_nattch );
+    printf( "Vision_memory:  Found segment %d, size=%ld and %d attachments.\n", eyes_segment_id, buf.shm_segsz, buf.shm_nattch );
     
     if ((buf.shm_segsz > 0)			// segment size > 0
         && (buf.shm_nattch >= 0))	// number of attachments.
@@ -83,7 +83,7 @@ void eyes_ipc_write_connection_status( char* mStatus )
 
 	//printf("%d:Copying %d bytes to shared mem.\n", StatusCounter, length );
 	strcpy( ipc_memory_eyes->ConnectionStatus, mStatus);
-	printf( "|%s|\n", ipc_memory_eyes->ConnectionStatus );
+	dprintf( "|%s|\n", ipc_memory_eyes->ConnectionStatus );
 }
 
 /* 
@@ -103,7 +103,7 @@ int eyes_connect_shared_memory( char mAllocate )
         }
         eyes_attach_memory( );
         eyes_fill_memory  ( );
-        
+
         dprintf("Saving segment id: ");
         eyes_save_segment_id( eyes_segment_id_filename );
         if ((ipc_memory_eyes!=(struct eyes_ipc_memory_map*)-1) && (ipc_memory_eyes != NULL))
@@ -191,14 +191,14 @@ int eyes_allocate_memory( )
     
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
 	dprintf ("eyes3D shm segment_id=%d;  ", eyes_segment_id );
-	dprintf ("allocated %d bytes\n", shared_segment_size );
+	printf ("Vision memory: allocated %d bytes\n", shared_segment_size );
 	return eyes_segment_id;
 }
 
-void eyes_deallocate_memory(int msegment_id)
+void eyes_deallocate_memory()
 {
 	/* Deallocate the shared memory segment. */ 
-	shmctl (msegment_id, IPC_RMID, 0);
+	shmctl (eyes_segment_id, IPC_RMID, 0);
 }
 
 long eyes_attach_memory()

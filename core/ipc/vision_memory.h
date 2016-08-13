@@ -86,7 +86,7 @@ void  eyes_wait_for_server       	( );		// called by server
 
 // ALLOCATION & ATTACHMENT : 
 int   eyes_allocate_memory         ( );
-void  eyes_deallocate_memory       ( int msegment_id );
+void  eyes_deallocate_memory       ( );
 long  eyes_attach_memory           ( );
 void  eyes_reattach_memory         ( );
 void  eyes_detach_memory           ( );
