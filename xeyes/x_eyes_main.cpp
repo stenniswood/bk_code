@@ -185,8 +185,8 @@ int main(int argc, char ** argv)
     {
 		mouse_timeslice( );
 		fd_timeslice   ( );
-		int c = cv::waitKey(10);
-		
+		int c = cv::waitKey( 10 );
+
 		/*if (num_faces_present)
 		{
 			//message = face_recongition_tasks(capture_frame);
@@ -205,7 +205,7 @@ int main(int argc, char ** argv)
 			if (!MOVE_TO_MOUSE)
 				neck_duty = 0;
 		}
-
+*/
 		if (MOVE_TO_MOUSE) {
 			mover_x = trunc( mouse.x );
 			mover_y = trunc( mouse.y );
@@ -213,8 +213,8 @@ int main(int argc, char ** argv)
 		}
 
 		printf("mover x,y= %d,%d\r", mover_x, mover_y );
-		//update_eye_positions( mover_x, (ScreenHeight-mover_y), ScreenWidth, ScreenHeight );
-*/
+		update_eye_positions( mover_x, (ScreenHeight-mover_y), ScreenWidth, ScreenHeight );
+
 		handle_key_controls(c);
 
 		/* Several Events can trigger an image write (unknown face_detect 
