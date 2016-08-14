@@ -75,11 +75,12 @@ void update_neck_angle( int x, int width )
 
 void* neck_thread(void*)
 {
-	for (int i=0; i<1; i++)  
-		usleep( 1000000 );
+	usleep( 1000000 );
+		
 	setup_roboclaw_comms();
 	claw1.general_setup();
-	
+	claw1.open_block();
+
 	printf("Neck_thread running\n");
 	int last_speed = 0;	
 	printf("roboclaw()\n");

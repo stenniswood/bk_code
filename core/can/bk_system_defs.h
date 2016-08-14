@@ -27,7 +27,7 @@ extern "C" {
 //#include <avr/sfr_defs.h>
 //#include <avr/common.h>
 //#include <inttypes.h>
-#include "global.h"
+//#include "global.h"
 
 #define BOARD_MODEL 11
 #define SerialNumber 0x12345678

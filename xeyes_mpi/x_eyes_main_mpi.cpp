@@ -4,10 +4,11 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
-#include <sys/stat.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
+
+#include <mpi.h>
 
 #include "x_eyes.hpp"
 #include "serial.hpp"
@@ -25,7 +26,6 @@ const int ScreenWidth  = 1280;
 const int ScreenHeight = 1080;
 pthread_t serial_thread_id   = 0;
 pthread_t roboclaw_thread_id = 0;
-const int Offset_Increment   = 10;
 #define   MOVE_TO_MOUSE 1
 
 
@@ -46,37 +46,6 @@ void create_thread()
 		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret2);
 	}
 }
-
-void init()
-{
-	mkdir("/home/pi/Pictures/face_recog", 	S_IRWXU);
-	mkdir("/home/pi/Pictures/robot", 		S_IRWXU);
-	mkdir("/home/pi/Pictures/robot/detected_faces", S_IRWXU);
-	
-	// Initialize Vision Shared Memory (to abkInstant)
-	int ipc_mem = eyes_connect_shared_memory( 1 );
-
-	// FACE RECOGNITION INIT (load model or train):
-    bool needs_training = (does_model_exist()==false);
-    if (needs_training)
-    {
-	    string fn_csv = "train.csv";
-	    printf("Training Face Recognition model...\n");
-        train_model( fn_csv );
-    } else {
-	    printf("Loading Face Recognition model...\n");
-        //open_model ( FaceRecogModelName );
-    }
-
-	create_thread();
-	
-	int   face_okay   = fd_init();
-	int   r 		  = mouse_init( ScreenWidth, ScreenHeight );	
-	printf("init() done\n");
-	
-	//sql_logger.connect_to_logger_db();
-}
-
 
 void find_center( int& x, int &y, cv::Rect mrect)
 {
@@ -108,41 +77,31 @@ char* get_new_frame_captured_filename()
 	return frame_name;
 }
 
-void shutdown()
-{
-	eyes_detach_memory();
-	eyes_deallocate_memory();
-	exit(EXIT_SUCCESS);
-}
+const int Offset_Increment = 10;
 
 void print_key_controls()
 {
 	printf("Press the following keys :\n");
 	printf("v - Turn neck left :\n");
 	printf("b - Turn neck Right :\n\n");
-
-	printf("s - Show calibrate screen.\n");	
+	
 	printf("r - Calibrate Left eye up.\n");
 	printf("f - Calibrate Left eye up.\n\n");
 	
 	printf("t - Calibrate Left eye up.\n");
 	printf("g - Calibrate Left eye up.\n\n");
+		
 }
-
 void handle_key_controls(char c)
 {
 	int tmp=0;
-	if ((c==-1) || (c==255)) return;		/* no key */ 	
-	//printf("waitKey=%c\n", c);
-
 	// Key controls override all : 
+	printf("handle_key_controls()\n");
 	switch(c)
 	{
 		case 'h' : print_key_controls();	break;
-		case ' ' :  neck_duty = 0; 			
-					close_cal_screen();
-					break;
-		case 'v' : neck_duty = -25; 		break;
+		case ' ' : neck_duty = 0; 			break;
+		case 'v' : neck_duty = -25; 	printf("V Pressed\n");	break;
 		case 'b' : neck_duty = +25; 		break;
 
 		// Left Eye Up/Down Calibration : 
@@ -155,12 +114,37 @@ void handle_key_controls(char c)
 //					if ((tmp % (Offset_Increment*5))==0)
 //						printf("LEFT CAL: %d\n", PW_Left_up_center_offset );
 					break;
+
 		case 't' : PW_Right_up_center_offset += 5;	break;
 		case 'g' : PW_Right_up_center_offset -= 5;	break;
-		case 's' : draw_cal_screen();				break;
-		case 'q' : shutdown();						break;		
-		default : break;
+
+		default : printf("Unknown key=%d\n", c); break;
 	}
+}
+
+void init()
+{
+	// Initialize Vision Shared Memory (to abkInstant)
+	int ipc_mem = eyes_connect_shared_memory( 1 );
+
+	// FACE RECOGNITION INIT (load model or train):
+    bool needs_training = (does_model_exist()==false);
+    if (needs_training)
+    {
+	    string fn_csv = "train.csv";
+	    printf("Training Face Recognition model...\n");
+        train_model( fn_csv );
+    } else {
+	    printf("Loading Face Recognition model...\n");
+        //open_model ( FaceRecogModelName );
+    }
+
+	//create_thread();
+	
+	int   face_okay   = fd_init();
+	int   r 		  = mouse_init( ScreenWidth, ScreenHeight );	
+	
+	//sql_logger.connect_to_logger_db();
 }
 
 /* Components of this app:
@@ -181,25 +165,40 @@ int main(int argc, char ** argv)
 	int   face_x, face_y;
 	init();
 
-    while (1)
+	int mpi_id, p;
+	int ierr = MPI_Init ( &argc, &argv );
+	ierr = MPI_Comm_rank( MPI_COMM_WORLD, &mpi_id );
+	ierr = MPI_Comm_size( MPI_COMM_WORLD, &p );
+
+	int c;
+	//draw_cal_screen();
+	printf("Entering main loop.\n");
+    while (1) 
     {
-		mouse_timeslice( );
-		fd_timeslice   ( );
-		int c = cv::waitKey(10);
-		
-		/*if (num_faces_present)
+		//mouse_timeslice( );
+		if (mpi_id==0) {
+			fd_timeslice   ( );
+			int c = cv::waitKey(10);
+			printf("waitKey=%d\n", c);
+		} else if (mpi_id==1) {
+			//optical_flow();
+		} else if (mpi_id==2) {
+ 			//detect_body_and_cars();
+		} else if (mpi_id==3) { 
+			//map_scanning();
+		} else if (mpi_id==4) {
+ 			//find_place_on_map();
+		} if (num_faces_present)
 		{
 			//message = face_recongition_tasks(capture_frame);
-
 			// Inform Client of Presence : 
-			*message = "face detected";
+			/*message = "face detected";
 			if (!MOVE_TO_MOUSE) {
 				find_center( mover_x, mover_y, faces[0] );
 				update_neck_angle( mover_x, frame.cols );
 			}
-			eyes_compose_coordinate_xy( mover_x, mover_y );*
-		}
-		else {
+			eyes_compose_coordinate_xy( mover_x, mover_y );*/
+		} else {
 			// No Faces detected:
 			message = "face gone";
 			if (!MOVE_TO_MOUSE)
@@ -211,10 +210,10 @@ int main(int argc, char ** argv)
 			mover_y = trunc( mouse.y );
 			//update_neck_angle( mover_x, ScreenWidth );
 		}
-
+		
 		printf("mover x,y= %d,%d\r", mover_x, mover_y );
 		//update_eye_positions( mover_x, (ScreenHeight-mover_y), ScreenWidth, ScreenHeight );
-*/
+
 		handle_key_controls(c);
 
 		/* Several Events can trigger an image write (unknown face_detect 

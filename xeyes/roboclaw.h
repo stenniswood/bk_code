@@ -112,7 +112,7 @@ class RoboClaw : public SSerialInterface
 			FLAGBOOTLOADER = 255};	//Only available via USB communications
 public:
 	// public methods
-	RoboClaw( char* mPortName, uint32_t time_out );
+	RoboClaw( const char* mPortName, uint32_t time_out );
 	~RoboClaw();
 
 	bool ForwardM1				 (uint8_t address, uint8_t speed);

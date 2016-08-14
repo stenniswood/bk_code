@@ -1,3 +1,12 @@
+/************************************************************
+	Neck thread - 
+		neck_thread.cpp, roboclaw.cpp, serial_synchronous.cpp
+
+	The thread looks for any change in neck_duty compared to last send.
+		And sends the data over serial port to Roboclaw.
+		
+		Use void* neck_thread(void*) as thread function.
+ ************************************************************/
 #include <cstdio>
 #include <string.h>
 #include <pthread.h>
@@ -20,7 +29,7 @@
 const unsigned char address = 0x80;
 
 float   	neck_duty = 0;
-RoboClaw 	claw1( 1000 );		// 1ms timeout
+RoboClaw 	claw1( "/dev/ttyACM0", 1000 );		// 1ms timeout
 
 void roboclaw_test()
 {
@@ -47,35 +56,6 @@ void setup_roboclaw_comms(void)
 	claw1._cl_tx_detailed = 1;	
 }
 
-void roboclaw()
-{
-	int last_speed = 0;	
-	printf("roboclaw()\n");
-	while (1)  
-	{
-		if (last_speed != neck_duty)
-		{
-			printf("Neck duty = %d\n", neck_duty );
-			if (neck_duty > 0)
-				claw1.ForwardM1  ( address, neck_duty );
-			else 
-				claw1.BackwardM1 ( address, fabs(neck_duty) );
-			last_speed = neck_duty;
-		}
-	}
-}
-
-void* neck_thread(void*)
-{
-	for (int i=0; i<1; i++)  
-		usleep( 1000000 );
-	setup_roboclaw_comms();
-	printf("neck_thread\n");
-	for (int i=0; i<2; i++)  
-		usleep( 1000000 );	
-	roboclaw();
-}
-
 void update_neck_angle( int x, int width )
 {
 	//printf("Neck: x=%d;  %d < %d < %d\r", x, width/4, width, 3*width/4 );
@@ -93,18 +73,27 @@ void update_neck_angle( int x, int width )
 		neck_duty = 0;	
 }
 
+void* neck_thread(void*)
+{
+	usleep( 1000000 );
+		
+	setup_roboclaw_comms();
+	claw1.general_setup();
+	claw1.open_block();
 
-/*char opt1[] = "./xeyes";
-char opt2[] = "-Rascii";
-char opt3[] = "-w50";
-char opt4[] = "-p/dev/ttyACM0";
-char opt5[] = "-b9600";
-char opt6[] = "-T";		// show TX details
-//char opt7[] = "-r";	// means NO Rx
-char* options[5];
-	options[0] = opt1;
-	options[1] = opt3;
-	options[2] = opt4;
-	options[3] = opt5;
-	options[4] = opt6;
-	claw1.process_options( 5, (char**)options );	*/
+	printf("Neck_thread running\n");
+	int last_speed = 0;	
+	printf("roboclaw()\n");
+	while (1)  
+	{
+		if (last_speed != neck_duty)
+		{
+			printf("Neck duty = %6.1f\n", neck_duty );
+			if (neck_duty > 0)
+				claw1.ForwardM1  ( address, neck_duty );
+			else 
+				claw1.BackwardM1 ( address, fabs(neck_duty) );
+			last_speed = neck_duty;
+		}
+	}
+}

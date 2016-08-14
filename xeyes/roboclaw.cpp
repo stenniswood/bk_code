@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <cstdio>
 #include <string.h>
+#include <stdint.h>
 
+#include "bk_system_defs.h"
 #include "serial_synchronous.hpp"
 #include "roboclaw.h"
 
@@ -10,10 +12,12 @@
 #define SetDWORDval(arg) (uint8_t)(((uint32_t)arg)>>24),(uint8_t)(((uint32_t)arg)>>16),(uint8_t)(((uint32_t)arg)>>8),(uint8_t)arg
 #define SetWORDval(arg)  (uint8_t)(((uint16_t)arg)>>8),(uint8_t)arg
 
+#define Debug 0
+
 /*	Constructor:
 	mPortName : for instance "/dev/ttyACM0"	
 */
-RoboClaw::RoboClaw( char* mPortName, uint32_t time_out )
+RoboClaw::RoboClaw( const char* mPortName, uint32_t time_out )
 :SSerialInterface( )
 {
 	_cl_tx_bytes    = 50;
@@ -21,7 +25,7 @@ RoboClaw::RoboClaw( char* mPortName, uint32_t time_out )
 	_cl_baud 		= 9600;
 	_cl_tx_detailed = 1;
 	timeout = time_out;
-	printf("RoboClaw:: port=%s\n", _cl_port );
+	dprintf("RoboClaw:: port=%s\n", _cl_port );
 }
 
 //
@@ -33,7 +37,7 @@ RoboClaw::~RoboClaw()
 
 void RoboClaw::begin(long speed)
 {
-	setup_serial_port( speed );
+	setup_serial_port( );
 }
 
 bool RoboClaw::listen()
@@ -65,7 +69,7 @@ unsigned char RoboClaw::read(uint32_t timeout)
 
 size_t RoboClaw::write(uint8_t byte)
 {
-	printf  ("%2x ", byte );
+	dprintf  ("%2x ", byte );
 	my_write(byte);
 }
 
@@ -121,7 +125,7 @@ bool RoboClaw::write_n(uint8_t cnt, ... )
 			if(rd[0]==0xFF)
 				return true;
 	} while(trys--);
-	printf("\n");
+	dprintf("\n");
 	return false;
 }
 
@@ -420,7 +424,6 @@ uint32_t RoboClaw::Read4_1(uint8_t address, uint8_t cmd, uint8_t *status, bool *
 }
 
 bool RoboClaw::ForwardM1(uint8_t address, uint8_t speed) {
-//	return write_n(6, 0x40, 0x73, 0x9e, 0x40, 0x8c, 0x6b );
 	return write_n(3,address,M1FORWARD,speed);
 }
 

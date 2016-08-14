@@ -64,5 +64,10 @@ int draw_cal_screen()
     //Circle(width / 2, 0, width);            // The "world"
 	//Fill(255, 255, 255, 1);                 // White text
     //TextMid(width / 2, height / 2, "hello, world", SerifTypeface, width / 10);  // Greetings 
-    End();                                  // End the picture
+    End();                                  // End the picture    
+}
+
+void close_cal_screen()
+{
+	finish();
 }

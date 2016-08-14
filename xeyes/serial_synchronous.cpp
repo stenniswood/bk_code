@@ -82,6 +82,17 @@ void SSerialInterface::Initialize()
 	_error_count = 0;
 }
 
+void SSerialInterface::open_block( )
+{
+	// OPEN SERIAL PORT : 
+	do {
+		_fd = open( _cl_port, O_RDWR );	// | O_NONBLOCK
+		usleep(10000);		// 10ms
+	} while ( _fd<0 );	
+	serial_poll.fd = _fd;
+	setup_serial_port( );
+}
+
 static void print_args(int margc, char *margv[])
 {
 	printf("ARGS: %d", margc);
@@ -208,20 +219,6 @@ void SSerialInterface::general_setup()
 	clock_gettime(CLOCK_MONOTONIC, &start_time);
 	last_stat = start_time;
 
-	// ESTABLISH BAUD RATE : 
-	int baud = B9600;
-	if (_cl_baud)
-		baud = get_baud(_cl_baud);
-
-	// SETUP PORT :
-	setup_serial_port( baud );
-	if (baud <= 0) {
-		printf("NOTE: non standard baud rate, trying custom divisor\n");
-		set_baud_divisor(_cl_baud);
-	}
-
-	// ESTABLISH THE POLL Flags based on user, "-r" and "-t" options
-	serial_poll.fd = _fd;
 	if (!_cl_no_rx) {		
 		serial_poll.events |= POLLIN;
 		printf("POLLIN SET!  POLLIN=%x;  POLLOUT=%x;  POLLRDNORM=%x; POLLRDBAND=%x \n", POLLIN, POLLOUT, POLLRDNORM, POLLRDBAND );
@@ -234,8 +231,8 @@ void SSerialInterface::general_setup()
 	} else {
 		serial_poll.events &= ~POLLOUT;
 	}
-
 }
+
 
 void SSerialInterface::process_options(int margc, char ** margv)
 {
@@ -525,18 +522,19 @@ void SSerialInterface::process_write_data()
 	}
 }
 
-void SSerialInterface::setup_serial_port( int baud )
+// open serial port prior to calling this!
+void SSerialInterface::setup_serial_port( )
 {
-	struct termios newtio;
-	_fd = open(_cl_port, O_RDWR );	// | O_NONBLOCK
-
-	if (_fd < 0) {
-		printf("\nSSerialInterface::setup_serial_port() %s\n",_cl_port);
-		perror("Error opening serial port ");
-		free(_cl_port);
-		//exit(1);
-		_cl_port = NULL;
+	// ESTABLISH BAUD RATE : 
+	int baud = B9600;
+	if (_cl_baud)
+		baud = get_baud(_cl_baud);
+	if (baud <= 0) {
+		printf("NOTE: non standard baud rate, trying custom divisor\n");
+		set_baud_divisor(_cl_baud);
 	}
+
+	struct termios newtio;
 	bzero(&newtio, sizeof(newtio)); /* clear struct for new port settings */
 
 	/* man termios get more info on below settings */
