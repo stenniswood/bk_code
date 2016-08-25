@@ -1,15 +1,21 @@
-#include <opencv2/objdetect/objdetect.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-
+#include <sys/time.h>
+#include <string>
+#include <stdlib.h>
 #include <iostream>
 #include <queue>
 #include <stdio.h>
 #include <math.h>
 
+#include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
 #include "constants.h"
 #include "findEyeCenter.h"
 #include "findEyeCorner.h"
+#include "face_detect.hpp"
+
+using namespace std;
 
 /** Constants **/
 int num_faces_present;
@@ -28,8 +34,27 @@ cv::Mat     		  debugImage;
 cv::Mat     		  skinCrCbHist = cv::Mat::zeros(cv::Size(256, 256), CV_8UC1);
 cv::Mat 			  faceROIc;
 std::vector<cv::Rect> faces;
-cv::Mat 			  frame;
-cv::VideoCapture 	  capture(-1);
+
+const int trained_width  = 92;
+const int trained_height = 112;
+
+
+struct timeval GetTimeStamp()
+{
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+//    uint64_t t = tv.tv_sec*(uint64_t)1000000 + tv.tv_usec;
+//    printf("GetTimeStamp()  %ld  %ld  = %ld\n", tv.tv_sec, tv.tv_usec, t );
+    return tv;
+} 
+uint64_t GetTimeStamp2() 
+{
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    uint64_t t = tv.tv_sec*(uint64_t)1000000 + tv.tv_usec;
+    //printf("GetTimeStamp()  %ld  %ld  = %ld\n", tv.tv_sec, tv.tv_usec, t );
+    return t;
+}
 
 /**
  * @function main
@@ -55,34 +80,35 @@ int fd_init( )
 	printf("fd_init() done \n" );
 }
 
-void fd_timeslice() 
+void fd_timeslice( cv::Mat& frame_gray, cv::Mat& original, bool mFindEyes )
 {
-  // I make an attempt at supporting both 2.x and 3.x OpenCV
-	//capture.open("/Users/stephentenniswood/Movies/iMovie Library.imovielibrary/My Movie/Original Media/2016-07-24 15_47_08.mov");
-    //2016-07-24 15_45_46.mov
+	frame_gray.copyTo(debugImage);
 
-	if( capture.isOpened() ) 
+	//equalizeHist( frame_gray, frame_gray  );
+	//cv::pow(frame_gray, CV_64F, frame_gray);
+	uint64_t  start = GetTimeStamp2();
+	face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(150, 150) );
+	//  findSkin(debugImage);
+	uint64_t end = GetTimeStamp2();
+	//printf("FaceDetect() Duration = %6.2f\n", (float)(end-start)/1000000. );
+	num_faces_present = faces.size();
+		
+	// extract Face : 
+	if (num_faces_present) 
 	{
-      capture.read(frame);
-
-      // mirror it
-      cv::flip(frame, frame, 1);
-      frame.copyTo(debugImage);
-
-      // Apply the classifier to the frame
-      if( !frame.empty() ) {
-        num_faces_present = detectAndDisplay( frame );
-      }
-      else {
-        printf(" --(!) No captured frame -- Break!");
-        return;
-      }
-
-      imshow(main_window_name,debugImage);      
-	} else {
-	  printf("Warning: Camera is not on!\n");
+		//cv::flip(frame_gray, frame_gray, 1);
+		  start = GetTimeStamp2();
+		faceROIc = original(faces[0]);
+		if (mFindEyes)
+			findEyes( frame_gray, faces[0] );
+		  end = GetTimeStamp2();
+		printf("FindEyes() Duration = %6.2f\n", (float)(end-start)/1000000. );
+		imshow(face_window_name, faceROIc);
 	}
+
+	annotate_faces( original );
 }
+
 
 void fd_close() 
 {
@@ -92,10 +118,11 @@ void fd_close()
 //#define annotatedFace debugFace
 #define annotatedFace faceROIc
       
-void findEyes(cv::Mat frame_gray, cv::Rect face) {
-  cv::Mat faceROI = frame_gray(face);
+void findEyes(cv::Mat frame_gray, cv::Rect face) 
+{
+  cv::Mat faceROI   = frame_gray(face);
   cv::Mat debugFace = faceROI;
-
+		
   if (kSmoothFaceImage) {
     double sigma = kSmoothFaceFactor * face.width;
     GaussianBlur( faceROI, faceROI, cv::Size( 0, 0 ), sigma);
@@ -112,6 +139,7 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   //-- Find Eye Centers
   cv::Point leftPupil = findEyeCenter(faceROI, faceROIc, leftEyeRegion,"Left Eye");
   cv::Point rightPupil = findEyeCenter(faceROI,faceROIc, rightEyeRegion,"Right Eye");
+
   // get corner regions
   cv::Rect leftRightCornerRegion(leftEyeRegion);
   leftRightCornerRegion.width -= leftPupil.x;
@@ -131,7 +159,7 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   rightRightCornerRegion.x += rightPupil.x;
   rightRightCornerRegion.height /= 2;
   rightRightCornerRegion.y += rightRightCornerRegion.height / 2;
-    
+
   rectangle(annotatedFace,leftRightCornerRegion,200);        // was debugFace
   rectangle(annotatedFace,leftLeftCornerRegion,200);
   rectangle(annotatedFace,rightLeftCornerRegion,200);
@@ -172,7 +200,8 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
 }
 
 
-cv::Mat findSkin (cv::Mat &frame) {
+cv::Mat findSkin (cv::Mat &frame) 
+{
   cv::Mat input;
   cv::Mat output = cv::Mat(frame.rows,frame.cols, CV_8U);
 
@@ -193,39 +222,69 @@ cv::Mat findSkin (cv::Mat &frame) {
   return output;
 }
 
+void single_channel_gray( cv::Mat& frame, cv::Mat& output_gray )
+{
+	//cvtColor( frame, gray_frame, CV_BGR2GRAY );		This leaves more than 1 channel however!
+	std::vector<cv::Mat> rgbChannels(3);
+	cv::split            (frame, rgbChannels);
+	output_gray = rgbChannels[2];
+}     
 
-      
-/**
- * @function detectAndDisplay
-Return:		Number Faces found
- */
-int detectAndDisplay( cv::Mat frame ) {
-
-  std::vector<cv::Mat> rgbChannels(3);
-  cv::split            (frame, rgbChannels);
-  cv::Mat frame_gray = rgbChannels[2];
-
-  //cvtColor( frame, frame_gray, CV_BGR2GRAY );
-  //equalizeHist( frame_gray, frame_gray  );
-  //cv::pow(frame_gray, CV_64F, frame_gray);
-  //-- Detect faces
-  face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(150, 150) );
-//  findSkin(debugImage);
-
-  for( int i = 0; i < faces.size(); i++ )
+void annotate_faces( cv::Mat& mOriginal )
+{
+  if (faces.size() > 0) 
   {
-    rectangle(debugImage, faces[i], 1234);
+	for( int i = 0; i < faces.size(); i++ )
+		rectangle(mOriginal, faces[i], 1234);
   }
-  //-- Show what you got
-  if (faces.size() > 0) {
-    faceROIc = frame(faces[0]);
-    findEyes(frame_gray, faces[0]);
-    imshow(face_window_name, faceROIc);
-  }
-   return faces.size();
 }
 
-  //cv::namedWindow("aa",CV_WINDOW_NORMAL);
-  //cv::moveWindow("aa", 10, 800);
-  //cv::namedWindow("aaa",CV_WINDOW_NORMAL);
-  //cv::moveWindow("aaa", 10, 800);
+const char* base_path = "/home/pi/Pictures/robot/detected_faces/";
+char* get_new_frame_captured_filename()
+{
+	static char frame_name[128];
+	char timestamp_str    [128];
+
+	time_t t;
+	time(&t);
+	char* time_str = ctime(&t);
+	for (int c=0; c<strlen(time_str); c++)
+		if (time_str[c]==' ')
+			time_str[c] = '_';
+		else if (time_str[c]=='\n')
+			time_str[c] = '_';
+
+	//strcpy( frame_name, base_path );
+	strcpy( frame_name, "frame_" );
+	strcat( frame_name, time_str );
+	strcat( frame_name, ".png"   );
+	//printf("FRAME NAME: %s\n", frame_name );
+	return frame_name;
+}
+
+/* Saves all detected faces */
+void save_faces( cv::Mat& mOriginal, std::vector<int>& predictedLabels )
+{
+	string  Path = "/home/pi/Pictures/face_recog/unknown/";
+	string  filename,timestamp;	
+	cv::Mat sav_image;
+	char    ending[16];
+	static  int count=0;
+	timestamp = get_new_frame_captured_filename();
+	for( int i=0; i<faces.size(); i++ )
+	{
+		if (predictedLabels[i] == -1) 	// If Unknown person : 
+		{
+			sprintf(ending, "_%d_", count++ );
+			filename = Path + ending + timestamp;
+			printf("FRAME NAME: %s\n", filename.c_str() );
+			sav_image = mOriginal( faces[i] );
+			imwrite( filename.c_str(), sav_image );
+		}
+	}	
+}
+
+//cv::namedWindow("aa",CV_WINDOW_NORMAL);
+//cv::moveWindow("aa", 10, 800);
+//cv::namedWindow("aaa",CV_WINDOW_NORMAL);
+//cv::moveWindow("aaa", 10, 800);

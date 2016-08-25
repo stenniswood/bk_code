@@ -8,7 +8,7 @@
 
 const int SS_WORKING_LENGTH=80;
 
-extern uint64_t GetTimeStamp();
+//extern uint64_t GetTimeStamp2();
 
 /* This class can be used 2 ways:
 		Can create a thread and call the serial_main() function

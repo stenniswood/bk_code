@@ -17,6 +17,7 @@
 #include <math.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdint.h>
 
 #include "serial.hpp"
 #include "bk_system_defs.h"
@@ -75,7 +76,7 @@ void SerialInterface::Initialize()
 	_error_count = 0;
 }
 
-static void print_args(int argc, char *argv[])
+void print_args(int argc, char *argv[])
 {
 	printf("ARGS: %d", argc);
 	for (int i=0; i< argc; i++)

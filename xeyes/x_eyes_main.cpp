@@ -19,15 +19,20 @@
 #include "neck_thread.hpp"
 #include "vision_logger.hpp"
 #include "cal_screen.hpp"
+#include "optical_flow.hpp"
+#include "misc_detect.hpp"
+#include "key_config.hpp"
 
 
-const int ScreenWidth  = 1280;
-const int ScreenHeight = 1080;
+
+const int ScreenWidth  		 = 1280;
+const int ScreenHeight 		 = 1080;
 pthread_t serial_thread_id   = 0;
 pthread_t roboclaw_thread_id = 0;
-const int Offset_Increment   = 10;
-#define   MOVE_TO_MOUSE 1
 
+bool   MOVE_TO_MOUSE = false;
+cv::VideoCapture 	  capture(-1);
+cv::Mat frame, gray_frame, prev_frame, prev_gray_frame, flow, original;
 
 void create_thread()
 {
@@ -61,22 +66,24 @@ void init()
     if (needs_training)
     {
 	    string fn_csv = "train.csv";
-	    printf("Training Face Recognition model...\n");
-        train_model( fn_csv );
+	    //printf("Training Face Recognition model...\n");
+        //train_model( fn_csv );
     } else {
-	    printf("Loading Face Recognition model...\n");
+	    //printf("Loading Face Recognition model...\n");
         //open_model ( FaceRecogModelName );
     }
 
+	//capture.open("/Users/stephentenniswood/Movies/iMovie Library.imovielibrary/My Movie/Original Media/2016-07-24 15_47_08.mov");
+    //2016-07-24 15_45_46.mov
+
 	create_thread();
-	
 	int   face_okay   = fd_init();
+	int   misc_okay   = misc_detect_init();
 	int   r 		  = mouse_init( ScreenWidth, ScreenHeight );	
 	printf("init() done\n");
 	
 	//sql_logger.connect_to_logger_db();
 }
-
 
 void find_center( int& x, int &y, cv::Rect mrect)
 {
@@ -84,82 +91,39 @@ void find_center( int& x, int &y, cv::Rect mrect)
 	y = mrect.y + (mrect.height/2);
 }
 
-const char* base_path = "/home/pi/Pictures/robot/detected_faces/";
+#include "frame_grabber.cpp"
 
-char* get_new_frame_captured_filename()
+
+void handle_arguments(int argc, char ** argv)
 {
-	static char frame_name[128];
-	char timestamp_str    [128];
-
-	time_t t;
-	time(&t);
-	char* time_str = ctime(&t);
-	for (int c=0; c<strlen(time_str); c++)
-		if (time_str[c]==' ')
-			time_str[c] = '_';
-		else if (time_str[c]=='\n')
-			time_str[c] = '_';
-
-	strcpy( frame_name, base_path );
-	strcat( frame_name, "frame_" );
-	strcat( frame_name, time_str );
-	strcat( frame_name, ".png"   );
-	printf("FRAME NAME: %s\n", frame_name );
-	return frame_name;
-}
-
-void shutdown()
-{
-	eyes_detach_memory();
-	eyes_deallocate_memory();
-	exit(EXIT_SUCCESS);
-}
-
-void print_key_controls()
-{
-	printf("Press the following keys :\n");
-	printf("v - Turn neck left :\n");
-	printf("b - Turn neck Right :\n\n");
-
-	printf("s - Show calibrate screen.\n");	
-	printf("r - Calibrate Left eye up.\n");
-	printf("f - Calibrate Left eye up.\n\n");
-	
-	printf("t - Calibrate Left eye up.\n");
-	printf("g - Calibrate Left eye up.\n\n");
-}
-
-void handle_key_controls(char c)
-{
-	int tmp=0;
-	if ((c==-1) || (c==255)) return;		/* no key */ 	
-	//printf("waitKey=%c\n", c);
-
-	// Key controls override all : 
-	switch(c)
-	{
-		case 'h' : print_key_controls();	break;
-		case ' ' :  neck_duty = 0; 			
-					close_cal_screen();
-					break;
-		case 'v' : neck_duty = -25; 		break;
-		case 'b' : neck_duty = +25; 		break;
-
-		// Left Eye Up/Down Calibration : 
-		case 'r' : PW_Left_up_center_offset += Offset_Increment;	
-					tmp = trunc(PW_Left_up_center_offset);
-//					if ((tmp % (Offset_Increment*5))==0)
-//						printf("LEFT CAL: %d\n", PW_Left_up_center_offset );
-					break;
-		case 'f' : PW_Left_up_center_offset -= Offset_Increment;	
-//					if ((tmp % (Offset_Increment*5))==0)
-//						printf("LEFT CAL: %d\n", PW_Left_up_center_offset );
-					break;
-		case 't' : PW_Right_up_center_offset += 5;	break;
-		case 'g' : PW_Right_up_center_offset -= 5;	break;
-		case 's' : draw_cal_screen();				break;
-		case 'q' : shutdown();						break;		
-		default : break;
+	string fn_csv = "train.csv";
+	string filename;
+	if ((strcmp(argv[1],"train")==0)) {
+		printf("Training Face Recognition model...\n");
+		train_model( fn_csv );
+		exit( EXIT_SUCCESS );
+	} else if ((strcmp(argv[1],"recog")==0)) {
+		bool needs_training = (does_model_exist()==false);
+		if (needs_training)
+			printf("Face Recognition model NEEDS TRAINING...\n");
+		else {
+			printf("Loading Face Recognition model...\n");
+			open_model ( FaceRecogModelName, fn_csv );
+		}
+	} else if ((strcmp(argv[1],"show")==0)) {
+		filename = "/home/pi/Pictures/face_recog/";
+		filename += argv[2];
+		filename += "/";
+		show_person_faces( filename.c_str() );
+		//result = show_person_faces("/home/pi/Pictures/face_recog/s10/");
+	} else if ((strcmp(argv[1],"mouse")==0)) {
+		MOVE_TO_MOUSE = 1;
+	} else if ((strcmp(argv[1],"shrink")==0)) {
+		filename = "/home/pi/Pictures/face_recog/";
+		filename += argv[2];
+		filename += "/";
+		make_training_size( filename );
+		exit( EXIT_SUCCESS );
 	}
 }
 
@@ -173,31 +137,58 @@ int main(int argc, char ** argv)
 {
 	int mover_x=0;
 	int mover_y=0;
-
+	int frame_count=0;
+	int result=0;
 	char* ptr;
 	std::string  message = "no event";
 	bool  unrecognized	 = false;
 	bool  capture_frame	 = false;
 	int   face_x, face_y;
+
+	if (argc>1) {
+		print_args( argc,argv );
+		handle_arguments(argc,argv);
+	}	
 	init();
 
+	text_to_speech_pico( "Welcome, my name is ronny.");
+	text_to_speech_festival( "Welcome, my name is ronny.");
+		
+	if( capture.isOpened()==false) 
+	{
+		printf("Warning: Camera is not on!\n");
+		exit(1);
+	}
+
     while (1)
-    {
-		mouse_timeslice( );
-		fd_timeslice   ( );
-		int c = cv::waitKey( 10 );
+    {    
+		mouse_timeslice( );		
+		frame_grabs    ( );
 
-		/*if (num_faces_present)
-		{
-			//message = face_recongition_tasks(capture_frame);
+		if (frame_count++) { 
+			//optic_flow( prev_gray_frame, gray_frame, flow, frame );
+			//update_face_region_flow_based( flow, faces[0] );
+			//imshow( "optical flow", frame );
+		}
+ 
+		fd_timeslice( gray_frame, original, false );
+		//misc_detect_timeslice( original, gray_frame );
 
+		if (num_faces_present)
+		{			
+			std::vector<int> predictedLabels;
+			if (model) {
+				message = face_recongition_tasks( gray_frame, faces, predictedLabels, capture_frame );
+				save_faces(frame, predictedLabels);
+			}
+			
 			// Inform Client of Presence : 
-			*message = "face detected";
+			message = "face detected";
 			if (!MOVE_TO_MOUSE) {
 				find_center( mover_x, mover_y, faces[0] );
-				update_neck_angle( mover_x, frame.cols );
+				update_neck_angle( mover_x, frame.cols  );
 			}
-			eyes_compose_coordinate_xy( mover_x, mover_y );*
+			eyes_compose_coordinate_xy( mover_x, mover_y );
 		}
 		else {
 			// No Faces detected:
@@ -205,7 +196,7 @@ int main(int argc, char ** argv)
 			if (!MOVE_TO_MOUSE)
 				neck_duty = 0;
 		}
-*/
+
 		if (MOVE_TO_MOUSE) {
 			mover_x = trunc( mouse.x );
 			mover_y = trunc( mouse.y );
@@ -215,7 +206,7 @@ int main(int argc, char ** argv)
 		printf("mover x,y= %d,%d\r", mover_x, mover_y );
 		update_eye_positions( mover_x, (ScreenHeight-mover_y), ScreenWidth, ScreenHeight );
 
-		handle_key_controls(c);
+      	imshow( main_window_name, original );
 
 		/* Several Events can trigger an image write (unknown face_detect 
 		   for several frames, or a motion detect, etc)  		   */
@@ -224,6 +215,9 @@ int main(int argc, char ** argv)
 			char* fn = get_new_frame_captured_filename();
 			imwrite(fn, frame /* see face_detect.cpp */ );
 		}
+
+		int c = cv::waitKey( 10 );
+		handle_key_controls( c  );
 
 		// Inform the client :
 		//eyes_write_server_event( message );

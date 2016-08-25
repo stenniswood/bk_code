@@ -37,7 +37,7 @@ OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lo
 	-lopencv_core
 OBJ       = mouse.o serial.o x_eyes.o x_eyes_main.o roboclaw.o findEyeCenter.o findEyeCorner.o \
 	    	helpers.o face_detect.o face_recog.o serial_synchronous.o vision_logger.o \
-	    	neck_thread.o cal_screen.o
+	    	neck_thread.o cal_screen.o optical_flow.o misc_detect.o key_config.o 
 IPC_OBJS  = vision_memory.o
 
 

@@ -7,6 +7,7 @@
 #include <time.h>
 #include <my_global.h>
 #include <mysql.h>
+#include <stdint.h>
 #include "bk_system_defs.h"
 //#include "calendar.hpp"
 //#include "calendar_entry.hpp"

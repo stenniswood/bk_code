@@ -54,14 +54,15 @@ bool RoboClaw::overflow()
 {
 	return false;
 }
+extern uint64_t 	   GetTimeStamp2();
 
 unsigned char RoboClaw::read(uint32_t timeout)
 {
-	uint32_t start = GetTimeStamp();
+	uint32_t start = GetTimeStamp2();
 	// Empty buffer? 
 	while(!available()) 
 	{
-	   if((GetTimeStamp()-start)>=timeout)
+	   if((GetTimeStamp2()-start)>=timeout)
 		  return -1;
 	}
 	return SSerialInterface::read();

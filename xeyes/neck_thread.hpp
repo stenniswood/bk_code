@@ -1,6 +1,8 @@
 
 
-#define NECK_SPEED 8
+#define NECK_SPEED -12
+
+#include "roboclaw.h"
 
 
 extern RoboClaw 	claw1;		// 1ms timeout

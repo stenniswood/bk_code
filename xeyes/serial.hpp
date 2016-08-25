@@ -4,6 +4,7 @@
 #include <sys/types.h>
 
 const int WORKING_LENGTH=80;
+void print_args(int argc, char *argv[]);
 
 /* This class can be used 2 ways:
 		Can create a thread and call the serial_main() function

@@ -5,8 +5,10 @@
 //  Created by Stephen Tenniswood on 7/29/16.
 //  Copyright © 2016 Stephen Tenniswood. All rights reserved.
 //
+#include <string>
 #include "face_recog.hpp"
 #include "face_detect.hpp"
+#include "cal_screen.hpp"
 
 /*
  * Copyright (c) 2011. Philipp Wagner <bytefish[at]gmx[dot]de>.
@@ -48,7 +50,7 @@ string face_db_basepath      = "/home/pi/Pictures/face_recog/";
 string face_test_db_basepath = "/home/pi/Pictures/face_recog/att_test/";
 string FaceRecogModelName    = model_basepath + "face-rec-model.txt";
 
-std::map<int, std::string>& known_people;
+std::map<int, std::string> known_people;
 
 /* This loads the csv file and each image specified in it.
  Each line can specify a filename, or a directory name.
@@ -62,7 +64,8 @@ std::map<int, std::string>& known_people;
  ./people/martha/;5;
  */
 static void read_csv(const string& basepath, const string& filename,
-                     vector<Mat>& images, vector<int>& labels, std::map<int, string>& labelsInfo,
+                     vector<Mat>& images, vector<int>& labels, 
+                     std::map<int, string>& labelsInfo,
                      char separator = ';')
 {
     //char * dir = getcwd(NULL, 0); // Platform-dependent, see reference link below
@@ -111,6 +114,41 @@ static void read_csv(const string& basepath, const string& filename,
     }
 }
 
+static void load_csv_lookups(
+					 const string& basepath, const string& filename,                     
+                     std::map<int, string>& labelsInfo,
+                     char separator = ';')
+{    
+    string fullfilename = basepath + filename;
+    cout << "load_csv_lookups() " << fullfilename << " " << endl;
+                
+    ifstream csv(fullfilename.c_str());
+    if (!csv)
+        CV_Error(Error::StsBadArg, "No valid input file was given, please check the given filename.");
+    
+    //labelsInfo.clear();
+    string line, path, classlabel, info;
+            cout << "Starting read" << endl;
+    while (getline(csv, line))
+    {
+        stringstream liness(line);
+        cout << line << endl;
+        path.clear(); classlabel.clear(); info.clear();
+        getline(liness, path,       separator);
+        getline(liness, classlabel, separator);
+        getline(liness, info,       separator);
+        if(!path.empty() && !classlabel.empty() && !info.empty())
+        {
+            cout << "Processing " << path << " " << classlabel << " " << info << " " << endl;
+            int label = atoi(classlabel.c_str());
+			cout << label << endl;
+      //      labelsInfo[label] = info;
+			known_people.insert ( std::pair<int,string>(label,info) );            
+            //labelsInfo.insert( std::make_pair(label, info) );
+        }
+    }
+}
+
 bool does_model_exist()
 {
     ifstream model_file( FaceRecogModelName.c_str() );
@@ -125,12 +163,12 @@ void train_model(string mfn_csv)
     // These vectors hold the images and corresponding labels.
     vector<Mat>           images;
     vector<int>           labels;
-    std::map<int, string> labelsInfo;
+    //std::map<int, string> labelsInfo;
 
     // Read in the data. This can fail if no valid
     // input filename is given.
     try {
-        read_csv( face_db_basepath, mfn_csv, images, labels, labelsInfo );
+        read_csv( face_db_basepath, mfn_csv, images, labels, known_people );
     } catch (cv::Exception& e) {
         cerr << "Error opening file \"" << mfn_csv << "\". Reason: " << e.msg << endl;
         exit(1);
@@ -160,17 +198,26 @@ void train_model(string mfn_csv)
     //
     model = createEigenFaceRecognizer();
     for( int i = 0; i < nlabels; i++ )
-        model->setLabelInfo(i, labelsInfo[i]);
+        model->setLabelInfo(i, known_people[i]);
     model->train( images, labels );
     
     cout << "Saving the trained model to " << FaceRecogModelName << endl;
     model->save (FaceRecogModelName);
 }
 
-void open_model( string model_filename )
+void open_model( string  model_filename, string mcsv_fn )
 {
+	load_csv_lookups( face_db_basepath, mcsv_fn, known_people );
+	
+    cout << "Loading the trained model from " << model_filename << endl;
     model = createEigenFaceRecognizer();
     model->load( model_filename );
+    
+    string testSample = "/home/pi/Pictures/face_recog/s10/5.pgm";
+    cv::Mat test = imread(testSample, 0 );
+    printf("Test Image: %d,%d, chn=%d \n", test.cols, test.rows, test.channels() );    
+    int predictedLabel = model->predict( test );
+    printf("Test Image: %d\n", predictedLabel);
 }
 
 Mat testSample;
@@ -184,7 +231,7 @@ void test_model( string mfn_csv )
     // Read in the data.
     // This can fail if no valid input filename is given.
     try {
-        read_csv( face_test_db_basepath, mfn_csv, timages, labels, labelsInfo );
+        read_csv( face_test_db_basepath, mfn_csv, timages, labels, known_people );
     } catch (cv::Exception& e) {
         cerr << "Error opening file \"" << mfn_csv << "\". Reason: " << e.msg << endl;
         exit(1);
@@ -211,78 +258,62 @@ void test_model( string mfn_csv )
     testSample = timages[timages.size()-1];
 }
 
-const int trained_width  = 130;
-const int trained_height = 130;
+const int trained_width  = 92;
+const int trained_height = 112;
 
 /* Prepare a detected face for recognition
-	ie.  
  */
-cv::Mat prep_detected_face( cv::Mat& mFace )
+cv::Mat& prep_detected_face( cv::Mat mIn )
 {
-	// Use frame image : 
-	// convert to gray
+	static cv::Mat mOut;
 	// scale to required size:
-	int x=10;
-	int y=10;
-	//cv::Rect myROI( x, y, x+trained_width, y+trained_height );
-	
-	//cv::Mat  scaled_face = frame(myROI);
+	Size final_size(trained_width,trained_height);
+	cv::resize( mIn, mOut, final_size );
+	return mOut;
 }
 
-/*  Goes thru each detected face, and predicts who it might be.
+/*  
+    Goes thru each detected face, and predicts who it might be.
 	Return is a vector of face labels 
 */
-std::vector<int>& recognize_detected_faces( cv::Mat& frame, std::vector<cv::Rect>& faces )
+std::string& face_recongition_tasks( cv::Mat&               mGray_frame, 
+									 std::vector<cv::Rect>& faces, 
+									 std::vector<int>&      predictedLabels, 
+									 bool& 					mcapture_frame   )
 {
-	cv::Mat face;
-	cv::Mat prepared_face;
-	static std::vector<int> predictedLabels;
+	cv::Mat  face, prepared_face;
+	static std::string message;
+	int 	label;
+	double 	confidence;
+
 	for (int i=0; i<faces.size(); i++)
 	{
-		face 		   = frame( faces[i] );			 // Get Face color Sub image.
-		prepared_face  = prep_detected_face( face ); // 
-		//int label = model->predict    ( prepared_face  );
-		//predictedLabels.push_back	  ( label );
-		
+		face 		   = mGray_frame       ( faces[i] );	 // Get Face color Sub image
+		prepared_face  = prep_detected_face( face     );
+		model->predict    ( prepared_face, label, confidence );
+		printf("DONE Predicting...%d  %6.2f\n", label, confidence );
+		predictedLabels.push_back( label );
 	}
-	return predictedLabels;
-}
 
-std::string& face_recongition_tasks( bool& mcapture_frame )
-{
-	static std::string message;
-	std::vector<int> predictions = recognize_detected_faces( frame, faces );
-	if (predictions.size())
+	if (predictedLabels.size())
 	{
-		// if any new face   : 
-		// Inform the client : 
-		message = "hello ";
-		message += known_people[predictions[0]];
-		
-		// or if any faces which left the scene - log in database :				
+		// Welcome with voice greeting : 
+		for (int i=0; i<predictedLabels.size(); i++) {
+			message = "hello ";
+			message += known_people[predictedLabels[i]];
+			printf("%s\n", message.c_str());
+			text_to_speech_pico( message.c_str() );			
+			//message += known_people[ predictedLabels[0] ];
+		}
+		// or if any faces which left the scene - log in database :
 		//eyes_write_server_event( message );
-						
-		// Inform Client of Presence : 
+
+		// Inform Client of Presence :
 		//message = "face detected";
-	
 	} else {
-		// Unrecognized face :
-		mcapture_frame = true;
+		// Unrecognized face:
 	}
 	return message;
-}
-
-int fr_main(int argc, char **argv)
-{
-    // Get the path to your CSV:
-    string fn_csv       = "train.csv";
-    string test_fn_csv  = "test.csv";
-    
-    train_model(  fn_csv      );
-    test_model (  test_fn_csv );
-    
-    //if(argc>2)  advanced_stuff();
-    return 0;
 }
 
 void advanced_stuff()
@@ -336,6 +367,3 @@ void advanced_stuff()
  << endl;
  exit(1);
  }*/
-
-
-

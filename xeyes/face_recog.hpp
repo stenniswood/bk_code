@@ -5,7 +5,6 @@
 //  Created by Stephen Tenniswood on 7/29/16.
 //  Copyright © 2016 Stephen Tenniswood. All rights reserved.
 //
-
 #ifndef face_recog_hpp
 #define face_recog_hpp
 
@@ -21,21 +20,19 @@
 
 extern cv::Ptr<cv::face::BasicFaceRecognizer> model;
 
-extern std::string model_basepath        ;
-extern std::string face_db_basepath      ;
-extern std::string face_test_db_basepath ;
-extern std::string FaceRecogModelName    ;
-extern std::map<int, std::string>& known_people;
+extern std::string 	model_basepath        ;
+extern std::string 	face_db_basepath      ;
+extern std::string 	face_test_db_basepath ;
+extern std::string 	FaceRecogModelName    ;
+extern std::map<int, std::string> known_people;
 
 
 bool 	does_model_exist	( );
-void 	open_model 			( std::string model_filename );
+void 	open_model			( std::string  model_filename, std::string mcsv_fn );
 void 	train_model			( std::string mfn_csv );
-cv::Mat 		  prep_detected_face	  ( cv::Mat& mFace );
-std::vector<int>& recognize_detected_faces( cv::Mat& frame, std::vector<cv::Rect>& faces );
-std::string& 	  face_recongition_tasks  ( bool& mcapture_frame );
-
-void 	test_model 			( std::string mfn_csv );
+cv::Mat 	 prep_detected_face	( cv::Mat mIn, cv::Mat& mOut );
+std::string& face_recongition_tasks( cv::Mat& mGray_frame, std::vector<cv::Rect>& faces, std::vector<int>& predictedLabels, bool& mcapture_frame );
+void 		 test_model 		( std::string mfn_csv );
 
 
 #endif /* face_recog_hpp */

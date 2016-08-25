@@ -27,12 +27,8 @@ struct pollfd 	serial_poll;
 struct timespec last_read;
 struct timespec last_write;
 
-uint64_t GetTimeStamp() 
-{
-    struct timeval tv;
-    gettimeofday(&tv,NULL);
-    return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
-}
+extern uint64_t GetTimeStamp2();
+
 
 SSerialInterface::SSerialInterface()
 {
@@ -390,12 +386,12 @@ unsigned char* SSerialInterface::my_read( int mBytesExpected )		// 1 byte from h
 	int c;
 	int timeout = 5000;		// 2 seconds 
 
-	uint32_t start = GetTimeStamp();
+	uint32_t start = GetTimeStamp2();
 	int retval     = poll(&serial_poll, 1, 1000);
 
 	while( (serial_poll.revents & POLLIN)==0 )
 	{
-		if((GetTimeStamp()-start) >= timeout)
+		if((GetTimeStamp2()-start) >= timeout)
 		{ printf("timeout\n");	return NULL;	};		
 		retval = poll(&serial_poll, 1, 1000);
 	}
