@@ -1,6 +1,6 @@
 
 
-void frame_grab_init ();
-void frame_grabs	 ();
-void frame_grab_close();
+void frame_grab_init ( int mDeviceNumber );
+void frame_grabs	 ( );
+void frame_grab_close( );
 

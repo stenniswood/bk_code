@@ -6,7 +6,7 @@
 const int MIN_SERVO_PW = 553;
 const int MAX_SERVO_PW = 2300;
 
-char txt[120];
+char txt [120];
 char txtR[120];
 float yScale = 11.0;
 float xScale = 22.0;

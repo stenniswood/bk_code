@@ -5,9 +5,9 @@
 uint8_t *depth_mid, *depth_front;
 uint8_t *rgb_back, *rgb_mid, *rgb_front;
 
-GLuint gl_depth_tex;
-GLuint gl_rgb_tex;
-GLfloat camera_angle = 0.0;
+uint gl_depth_tex;
+uint gl_rgb_tex;
+float camera_angle = 0.0;
 int camera_rotate = 0;
 int tilt_changed = 0;
 
@@ -25,7 +25,7 @@ int got_depth = 0;
 
 
 
-void frame_grab_init()
+void frame_grab_init(int mDeviceNumber )
 {
 	depth_mid 	= (uint8_t*)malloc(640*480*3);
 	depth_front = (uint8_t*)malloc(640*480*3);
@@ -35,7 +35,7 @@ void frame_grab_init()
 	
 	if (freenect_init(&f_ctx, NULL) < 0) {
 		printf("freenect_init() failed\n");
-		return 1;
+		return ;
 	}
 	freenect_set_log_level    (f_ctx, FREENECT_LOG_DEBUG);
 	freenect_select_subdevices(f_ctx, (freenect_device_flags)(FREENECT_DEVICE_MOTOR | FREENECT_DEVICE_CAMERA));
@@ -43,20 +43,18 @@ void frame_grab_init()
 	printf ("Number of devices found: %d\n", nr_devices);
 
 	int user_device_number = 0;
-	if (argc > 1)
-		user_device_number = atoi(argv[1]);
+	user_device_number = mDeviceNumber;
 
 	if (nr_devices < 1) {
 		freenect_shutdown(f_ctx);
-		return 1;
+		return ;
 	}
 
 	if (freenect_open_device(f_ctx, &f_dev, user_device_number) < 0) {
 		printf("Could not open device\n");
 		freenect_shutdown(f_ctx);
-		return 1;
-	}
-	
+		return ;
+	}	
 }
 
 void frame_grabs()

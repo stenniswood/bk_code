@@ -1,4 +1,3 @@
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include <math.h>
@@ -16,8 +15,8 @@
 
 using namespace cv;
 using namespace std;
-
 #include "cal_screen.hpp"
+
 const int CAL_POINT_RADIUS = 20;
 int screen_width  = 1280;
 int screen_height = 720;
@@ -218,3 +217,4 @@ void text_to_speech_festival( const char* mText )
 	sprintf( cmd, "echo \"%s\" | festival --tts ", mText );
 	system ( cmd );
 }
+

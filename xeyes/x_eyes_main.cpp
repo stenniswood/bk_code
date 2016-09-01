@@ -22,9 +22,9 @@
 #include "optical_flow.hpp"
 #include "misc_detect.hpp"
 #include "key_config.hpp"
+#include "frame_grabber.hpp"
 
-
-
+int   device_number;
 const int ScreenWidth  		 = 1280;
 const int ScreenHeight 		 = 1080;
 pthread_t serial_thread_id   = 0;
@@ -80,8 +80,10 @@ void init()
 	int   face_okay   = fd_init();
 	int   misc_okay   = misc_detect_init();
 	int   r 		  = mouse_init( ScreenWidth, ScreenHeight );	
-	printf("init() done\n");
-	
+
+	frame_grab_init( device_number );
+
+	printf("init() done\n");	
 	//sql_logger.connect_to_logger_db();
 }
 
@@ -124,7 +126,10 @@ void handle_arguments(int argc, char ** argv)
 		filename += "/";
 		make_training_size( filename );
 		exit( EXIT_SUCCESS );
+	} else if ((strcmp(argv[1],"cam")==0)) {
+		device_number = atoi( argv[2] );
 	}
+
 }
 
 /* Components of this app:
@@ -147,7 +152,7 @@ int main(int argc, char ** argv)
 
 	if (argc>1) {
 		print_args( argc,argv );
-		handle_arguments(argc,argv);
+		handle_arguments(argc,argv);		
 	}	
 	init();
 
