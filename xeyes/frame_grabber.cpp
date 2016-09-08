@@ -1,12 +1,23 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string>
+
 #include <assert.h>
 #include "libfreenect.h"
+#include "bk_system_defs.h"
+#include "frame_grabber.hpp"
+#include "face_detect.hpp"
 
+
+cv::VideoCapture 	  capture(-1);
+cv::Mat frame, gray_frame, prev_frame, prev_gray_frame, flow, original;
 
 uint8_t *depth_mid, *depth_front;
 uint8_t *rgb_back, *rgb_mid, *rgb_front;
 
-uint gl_depth_tex;
-uint gl_rgb_tex;
+unsigned int gl_depth_tex;
+unsigned int gl_rgb_tex;
 float camera_angle = 0.0;
 int camera_rotate = 0;
 int tilt_changed = 0;
@@ -22,7 +33,6 @@ freenect_video_format current_format = FREENECT_VIDEO_RGB;
 pthread_cond_t gl_frame_cond = PTHREAD_COND_INITIALIZER;
 int got_rgb   = 0;
 int got_depth = 0;
-
 
 
 void frame_grab_init(int mDeviceNumber )
@@ -76,4 +86,3 @@ void frame_grab_close()
 {
 
 }
-

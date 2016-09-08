@@ -23,22 +23,51 @@
 #include "misc_detect.hpp"
 #include "key_config.hpp"
 #include "frame_grabber.hpp"
+#include "face_summary.hpp"
+#include "nlp_thread.hpp"
 
-int   device_number;
+#include "frame_grabber.hpp"
+
+  
+int   	  device_number;
 const int ScreenWidth  		 = 1280;
 const int ScreenHeight 		 = 1080;
-pthread_t serial_thread_id   = 0;
-pthread_t roboclaw_thread_id = 0;
+pthread_t serial_thread_id   = 1;
+pthread_t nlp_thread_id   	 = 3;
+pthread_t roboclaw_thread_id = 2;
 
 bool   MOVE_TO_MOUSE = false;
-cv::VideoCapture 	  capture(-1);
-cv::Mat frame, gray_frame, prev_frame, prev_gray_frame, flow, original;
+
+bool CameraAvailable = false;
+bool EyeServoBoardAvailable = false;
+bool NeckServoBoardAvailable = false;
+
+
+#include <signal.h>
+
+static volatile int keepRunning = 1;
+
+void app_close_handler(int dummy) 
+{
+    keepRunning = 0;
+    sql_logger.sql_add_system_deactivated();
+    mouse_close( );
+	fd_close   ( );
+}
 
 void create_thread()
 {
 	// PWM Board:
 	int iret1 = pthread_create( &serial_thread_id, NULL, serial_setup, (void*) NULL);
 	if (iret1)
+	{
+		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret1);
+		//exit(EXIT_FAILURE);
+	}
+
+	// NLP Task:
+	int iret3 = pthread_create( &nlp_thread_id, NULL, nlp_handler, (void*) NULL);
+	if (iret3)
 	{
 		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret1);
 		//exit(EXIT_FAILURE);
@@ -52,11 +81,14 @@ void create_thread()
 	}
 }
 
+
 void init()
 {
 	mkdir("/home/pi/Pictures/face_recog", 	S_IRWXU);
 	mkdir("/home/pi/Pictures/robot", 		S_IRWXU);
 	mkdir("/home/pi/Pictures/robot/detected_faces", S_IRWXU);
+	
+	eye_init();
 	
 	// Initialize Vision Shared Memory (to abkInstant)
 	int ipc_mem = eyes_connect_shared_memory( 1 );
@@ -80,7 +112,6 @@ void init()
 	int   face_okay   = fd_init();
 	int   misc_okay   = misc_detect_init();
 	int   r 		  = mouse_init( ScreenWidth, ScreenHeight );	
-
 	frame_grab_init( device_number );
 
 	printf("init() done\n");	
@@ -93,7 +124,7 @@ void find_center( int& x, int &y, cv::Rect mrect)
 	y = mrect.y + (mrect.height/2);
 }
 
-#include "frame_grabber.cpp"
+
 
 
 void handle_arguments(int argc, char ** argv)
@@ -154,11 +185,41 @@ int main(int argc, char ** argv)
 		print_args( argc,argv );
 		handle_arguments(argc,argv);		
 	}	
-	init();
+	//init();
+	signal(SIGINT, app_close_handler );
 
-	text_to_speech_pico( "Welcome, my name is ronny.");
+	text_to_speech_pico	   ( "Welcome, my name is ronny.");
 	text_to_speech_festival( "Welcome, my name is ronny.");
 		
+	sql_logger.connect_to_logger_db();	
+	sql_logger.create_events_table();	
+	sql_logger.sql_add_system_activated( CameraAvailable, EyeServoBoardAvailable, NeckServoBoardAvailable);	
+	test_face_summary();
+		
+/*	sql_logger.sql_add_event("Stephen", "face detected");
+	sql_logger.sql_add_event("Stephen", "face left"  );
+	sql_logger.sql_add_event("David",   "face detected"  );
+	sleep(10);
+	sql_logger.sql_add_event("David",   "face left"  );
+
+	//sql_logger.sql_query_event("David", "face detected");	
+	time_t 		rawtime,rawtime2;
+	time (&rawtime);
+	rawtime2 = rawtime;
+	rawtime -= (3600 * 4);		// 4 hours ago.	
+	struct tm start_time_bd = *(localtime( &rawtime ));
+	struct tm end_time_bd   =*(localtime( &rawtime2 ));
+	sql_logger.sql_query_time( "David", "face detected", start_time_bd, end_time_bd );
+	sql_logger.print_results();  
+
+	string Response;
+	sql_logger.form_response__last_time_i_saw( "Stephen", Response ); 
+	printf("%s\n", Response.c_str() );
+	sql_logger.form_response__last_time_i_saw( "Johnathon", Response ); 
+	printf("%s\n", Response.c_str() );
+*/
+	exit(1);
+
 	if( capture.isOpened()==false) 
 	{
 		printf("Warning: Camera is not on!\n");
@@ -227,7 +288,7 @@ int main(int argc, char ** argv)
 		// Inform the client :
 		//eyes_write_server_event( message );
     }
-	mouse_close( );
-	fd_close   ( );
+	
+	app_close_handler(1);
     return 1;
 }

@@ -2,19 +2,22 @@
 #include <string.h>
 #include <math.h>
 #include "serial.hpp"
+#include "x_eyes.hpp"
 
 const int MIN_SERVO_PW = 553;
 const int MAX_SERVO_PW = 2300;
 
-char txt [120];
-char txtR[120];
+struct stServo_info Servo_info[6];
+
+char  txt [120];
+char  txtR[120];
 float yScale = 11.0;
 float xScale = 22.0;
 
 // SERVO DEFINES : 
 const int MIN_PW = 500;
 const int MAX_PW = 2500;
-int PW_range = (MAX_PW - MIN_PW);
+int       PW_range = (MAX_PW - MIN_PW);
 
 // EYE SERVO DEFINES : 
 float X_LeftEye_coordinate = xScale/2.0 - 2.125/2.0;				// inches
@@ -43,17 +46,58 @@ float RightEyeUpAngle   = +90;
 float RightEyeDownAngle = -90;
 float PW_Right_up_center_offset = 0.0;
 
+
+void eye_init()
+{	
+	Servo_info[LEFT_UD].min_pw = 553;
+	Servo_info[LEFT_UD].max_pw = 2300;
+	Servo_info[LEFT_UD].zero_pw = 0;
+	Servo_info[LEFT_UD].reverse_direction = false;			
+
+	Servo_info[LEFT_LR].min_pw = 553;
+	Servo_info[LEFT_LR].max_pw = 2300;
+	Servo_info[LEFT_LR].zero_pw = 0;
+	Servo_info[LEFT_LR].reverse_direction = false;			
+
+	Servo_info[RIGHT_UD].min_pw = 553;
+	Servo_info[RIGHT_UD].max_pw = 2300;
+	Servo_info[RIGHT_UD].zero_pw = 0;
+	Servo_info[RIGHT_UD].reverse_direction = true;			
+
+	Servo_info[RIGHT_LR].min_pw = 553;
+	Servo_info[RIGHT_LR].max_pw = 2300;
+	Servo_info[RIGHT_LR].zero_pw = 0;
+	Servo_info[RIGHT_LR].reverse_direction = true;
+
+	// 
+	Servo_info[LEFT_EYELID].min_pw = 553;
+	Servo_info[LEFT_EYELID].max_pw = 2300;
+	Servo_info[LEFT_EYELID].zero_pw = 0;
+	Servo_info[LEFT_EYELID].reverse_direction = false;			
+
+	Servo_info[RIGHT_EYELID].min_pw = 553;
+	Servo_info[RIGHT_EYELID].max_pw = 2300;
+	Servo_info[RIGHT_EYELID].zero_pw = 0;
+	Servo_info[RIGHT_EYELID].reverse_direction = false;
+}
+
+/*  PW for left to right movement.  Works for both eyes.
+	Return : PW (Pulse Width)
+ */
 float calc_left_right_angle( float mX,
-								float mPWMin, float mPWMax,
-								float mScreenMin, float mScreenMax )
+							 struct stServo_info& si,
+							 float mScreenMin, float mScreenMax )
 {
-	float multiplier = (mPWMax - mPWMin) / (mScreenMax - mScreenMin);
-	//printf("lr_angle: multiplier=%6.2f;  PWMin=%6.2f;  xdelta=%6.2f\n",
-	//			multiplier, mPWMin, mX-mScreenMin );
-	float PW = mPWMin + (mX - mScreenMin)*multiplier;
+	float multiplier = (si.max_pw - si.min_pw) / (mScreenMax - mScreenMin);
+	float PW;
+	if (si.reverse_direction)
+		PW = si.zero_pw + si.max_pw - (mX - mScreenMin)*multiplier;
+	else
+		PW = si.zero_pw + si.min_pw + (mX - mScreenMin)*multiplier;
 	return PW;
 }
 
+/* Not going to deal with actual angles right now! */
 float calc_left_eye_angle( float mMouseX, float mMouseY )
 {
 	float x = mMouseX/540*xScale;
@@ -73,24 +117,20 @@ float calc_right_eye_angle( float mMouseX, float mMouseY )
 	return angle;
 }
 
-float set_LeftEye_angle	( char* mBuffer, float mAngle )
+// Places into mBuffer.
+float set_LeftEye_angle	( char* mBuffer, float PW )
 {
 //    Angle			    PW
 //  -----------  =  -----------
 //  Angle Range		 PW Range
-	float PW = mAngle;
 	//float PW = (((mAngle)*PW_range) / LeftEye_Range) + LeftEye_CenterCount;
 	int   PWi  = trunc(PW);
 	sprintf(mBuffer, "#0P%d", PWi);
 	return PW;
 }
-float set_RightEye_angle( char* mBuffer, float mAngle )
+// Places into mBuffer.
+float set_RightEye_angle( char* mBuffer, float PW )
 {
-//    Angle			    PW
-//  -----------  =  -----------
-//  Angle Range		 PW Range
-	float PW = mAngle;
-	//float PW = (((mAngle)*PW_range) / RightEye_Range) + RightEye_CenterCount;
 	int PWi  = trunc(PW);
 	sprintf(mBuffer, "#1P%d", PWi);
 	return PW;
@@ -100,16 +140,24 @@ float set_RightEye_angle( char* mBuffer, float mAngle )
 /* Return : Pulse width in ms.
  */
 float calc_eye_up_down_angle (  float mX,
-								float mPWMin, float mPWMax,
+								struct stServo_info& si,
 								float mXMin, float mXMax  )
 {
-	float multiplier = (mPWMax - mPWMin) / (mXMax - mXMin);
-	float PW = mPWMin + (mX - mXMin)*multiplier;
+	float PW;
+	float multiplier = (si.max_pw - si.min_pw) / (mXMax - mXMin);
+	if (si.reverse_direction)
+	{
+		PW = si.zero_pw + si.max_pw - (mX - mXMin)*multiplier;
+	} else 
+		PW = si.zero_pw + si.min_pw + (mX - mXMin)*multiplier;
 	return PW;
 }
 
 void set_left_eye_up_angle( char* mBuffer, float mPulseWidth )
 {
+	if (REVERSE_LEFT_EYE_UPDOWN)
+	{
+	}
 	int pw = trunc(mPulseWidth);
 	sprintf(mBuffer, "#2P%d", pw );
 }
@@ -156,21 +204,23 @@ void update_eye_positions(int x, int y, float mWidth, float mHeight)
 {
     float left_angle;
     float right_angle;
-    float up_down_angle;
+    float l_up_down_angle, r_up_down_angle;
 
-	// Send Left/Right :
-	right_angle   = left_angle = calc_left_right_angle( x, MIN_SERVO_PW, MAX_SERVO_PW, 0, mWidth );
-	up_down_angle = calc_eye_up_down_angle            ( mHeight-y, MIN_SERVO_PW, MAX_SERVO_PW, 0, mHeight );
-	
-	set_LeftEye_angle ( txt, left_angle ); 
-	char* ptr     = txt + strlen( txt ); 
-	set_RightEye_angle( ptr, right_angle ); 
+	// Send Left/Right :	
+	left_angle      = calc_left_right_angle ( x, Servo_info[LEFT_LR], 0, mWidth  );
+	right_angle     = calc_left_right_angle ( x, Servo_info[RIGHT_LR], 0, mWidth );	
+	l_up_down_angle = calc_eye_up_down_angle( mHeight-y, Servo_info[LEFT_UD], 0, mHeight  );
+	r_up_down_angle = calc_eye_up_down_angle( mHeight-y, Servo_info[RIGHT_UD], 0, mHeight );
+
+	set_LeftEye_angle ( txt, left_angle );
+	char* ptr = txt + strlen( txt );
+	set_RightEye_angle( ptr, right_angle );
 
 	// Now Send Up/Down :
 	ptr += strlen( ptr );
-	set_left_eye_up_angle ( ptr, up_down_angle + PW_Left_up_center_offset );
+	set_left_eye_up_angle ( ptr, l_up_down_angle + PW_Left_up_center_offset );
 	ptr += strlen( ptr );
-	set_right_eye_up_angle( ptr, up_down_angle + PW_Right_up_center_offset );
+	set_right_eye_up_angle( ptr, r_up_down_angle + PW_Right_up_center_offset );
 
 	strcat(txt, "\r");
 	si.my_write( txt, strlen(txt)   );
