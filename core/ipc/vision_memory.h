@@ -4,11 +4,11 @@
 #include <vector>
 #include "vector.hpp"
 
-#define IPC_KEY_EYES           0x04D3        // 1235 in decimal!
-#define MAX_CLIENT_ARRAY_SIZE 2048
-#define MAX_STREAM_SIZE		50
+#define IPC_KEY_EYES			0x04D3        // 1235 in decimal!
+#define MAX_CLIENT_ARRAY_SIZE	2048
+#define MAX_STREAM_SIZE			5
 extern char* 	eyes_shared_memory;
-extern int 	eyes_segment_id;
+extern int		eyes_segment_id;
 extern struct   eyes_ipc_memory_map*  ipc_memory_eyes;
 
 struct Coordinate
@@ -46,15 +46,14 @@ struct eyes_ipc_memory_map
 	//  Perhaps another for object recognition (scissors, remote control, plate, etc)
 
 	// Client Command : 
-    	long int CommandCounter;    
-    	char	 client_command[255];		// for finding an object by name.
-    	long int AcknowledgeCounter;
+    long int CommandCounter;    
+    char	 client_command[255];		// for finding an object by name.
+    long int AcknowledgeCounter;
 
 	// Machine Vision Initiated/Response to Client Command:        
 	long int ServerCounter;							// Incremented on change to any of below:
-	char	 ServerEvent   [255];
-    	long int ServerAcknowledgedCounter;				// Incremented on change to any of below:
-
+	char	 ServerEvent[255];
+    long int ServerAcknowledgedCounter;				// Incremented on change to any of below:
 
 	struct Coordinate	location_stream1[MAX_STREAM_SIZE];		// Use this for streaming face detect or other locations; (for instance left eye)
 	struct Coordinate	location_stream2[MAX_STREAM_SIZE];		// Use this for streaming face detect or other locations; (for instance right eye)

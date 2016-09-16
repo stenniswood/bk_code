@@ -30,7 +30,7 @@ public:
 	int 	my_write	  			( char* mBuffer, int size);
 	virtual bool	available 	  	( );
 
-	void	open_block				( );
+	bool	open_block				( );
 	void	general_setup			( );
 	int	 	peek 		 			( )	{ return accum_buff[0];  };
 	virtual void 	flush			( )	{ /* Not sure here */    };
@@ -44,7 +44,7 @@ public:
 
 	void 	process_read_data		( );
 	void 	process_write_data		( );
-	void 	setup_serial_port		( );
+	bool 	setup_serial_port		( );
 	int  	diff_ms					( const struct timespec *t1, const struct timespec *t2);	
 	
 	int  	serial_main				( );

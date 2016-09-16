@@ -11,8 +11,10 @@
 #define	true	1
 #define	false	0
 
-#define	True	1
-#define	False	0
+#ifndef TRUE
+#define	TRUE	1
+#define	FALSE	0
+#endif
 
 #ifndef int8_t
 typedef signed char int8_t;
@@ -21,7 +23,7 @@ typedef signed char int8_t;
 typedef unsigned char uint8_t;
 #endif
 #ifndef uint16_t
-#define unsigned short uint16_t;
+typedef unsigned short uint16_t;
 #endif
 #ifndef byte
 #define byte uint8_t

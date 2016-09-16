@@ -7,17 +7,11 @@
 //
 #include <stdlib.h>
 #include <string>
-//#include "bk_system_defs.h"
 #include "nlp_sentence.hpp"
-//#include "string_util.h"
-//#include "prefilter.hpp"
-//#include "nlp_extraction.hpp"
-
 
 #define Debug 0
 
-
-// Common to all Protocols :
+//Common to all Protocols :
 //WordGroup 	preposition_list;
 
 Sentence::Sentence()
@@ -87,11 +81,10 @@ void Sentence::set( const char*  mNew )
 {
     // COPY THE RAW Sentence :
     size_t length   = strlen(mNew)+1;
-    m_raw_sentence  = new char[length];
-    
+    m_raw_sentence  = new char[length];         
     strcpy(m_raw_sentence, mNew );
     m_sentence      = m_raw_sentence;
-    
+
     // Prefilter:
     bool okay = prefilter_text();
     if (okay) {
@@ -100,15 +93,27 @@ void Sentence::set( const char*  mNew )
     }
     m_reduced_sentence = m_sentence;
     m_reduced_sentence.split(' ');
+    //printf("Sentence::set() m_sentence=%s \n", m_reduced_sentence.c_str() );
 }
 
 /*  Remove words from the m_reduced_sentence :
 INPUT  :  vector<int>     indices into the m_reduced_sentence.
 RETRUN :  m_reduced_sentence is modified.
  */
-void Sentence::reduce_sentence( vector<int> mWordIndices )
+void Sentence::reduce_sentence( )
 {
-    m_reduced_sentence.reduce_string(mWordIndices);
+    m_reduced_sentence.reduce_string(remove_wi);
+}
+
+int Sentence::regex_find( string  mRegexpression )
+{
+    int retval = m_reduced_sentence.regex_find(mRegexpression, &answers, &remove_wi );
+    printf("remove_wi %d:\t", remove_wi.size());
+	for (int i=0; i<remove_wi.size(); i++)
+		printf(" %d  ", remove_wi[i] );
+    printf("\n");		
+	reduce_sentence();
+	return retval;
 }
 
 /*
@@ -128,7 +133,7 @@ int Sentence::is_found_in_sentence( const char* mSearchWord, bool mOrItsPlural )
     int match_count = m_reduced_sentence.is_found_in_sentence( mSearchWord, 0, &remove_wi, mOrItsPlural );
     if (match_count>0) {
         set_word_pointer( remove_wi[0]);
-        reduce_sentence ( remove_wi );
+        m_reduced_sentence.reduce_string( remove_wi );
     }
     return match_count;
 }
@@ -162,7 +167,7 @@ int Sentence::are_found_in_sentence( SuperString& Tsearches, bool mOrItsPlural )
     if(match_count>0)
     {
         set_word_pointer( remove_wi[0] );
-        reduce_sentence(remove_wi);
+        m_reduced_sentence.reduce_string ( remove_wi );
     }
     return match_count;
 }
@@ -172,7 +177,7 @@ int Sentence::are_found_in_sentence( SuperString& Tsearches, bool mOrItsPlural )
  
  return:   0 =>  Not found
            number of matched words (Note this is a change!)
-                                        //otherwise 1 indexed value of the first occurence of the word
+        //otherwise 1 indexed value of the first occurence of the word
  ************************************************************************/
 int Sentence::are_exactly_found_in_sentence( SuperString& Tsearches, bool mOrItsPlural )
 {
@@ -184,7 +189,7 @@ int Sentence::are_exactly_found_in_sentence( SuperString& Tsearches, bool mOrIts
     if (match_count>0)
     {
         set_word_pointer(remove_wi[0]);
-        reduce_sentence(remove_wi);
+        m_reduced_sentence.reduce_string(remove_wi);
     }
     return match_count;
 }
@@ -194,10 +199,10 @@ int Sentence::are_exactly_found_in_sentence( SuperString& Tsearches, bool mOrIts
 int  Sentence::any_one_word_found_in_sentence( SuperString& mWordList )
 {
     vector<int> removals;
-    int match_count = m_sentence.any_one_word_found_in_sentence( mWordList, 0, &removals );
+    int match_count = m_reduced_sentence.any_one_word_found_in_sentence( mWordList, 0, &removals );
     if (match_count) {
         set_word_pointer( removals[0] );
-        reduce_sentence ( removals    );
+        m_reduced_sentence.reduce_string ( removals    );
     }
     return match_count;
 }

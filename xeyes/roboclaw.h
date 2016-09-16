@@ -223,7 +223,7 @@ public:
 
 	virtual unsigned char read	( uint32_t timeout);
 	virtual size_t  write		( uint8_t byte);
-	
+
 	bool 			listen		( );
 	void 		 	clear		( );
 

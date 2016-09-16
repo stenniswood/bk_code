@@ -21,23 +21,11 @@
 #include <vector>
 #include <sys/ioctl.h>
 #include "bk_system_defs.h"
-#include "CAN_base.h"
-#include "CAN_memory.h"
-#include "CAN_util.h"
-#include "AUDIO_interface.hpp"
-#include "protocol.h"
-
 #include "serverthread.hpp"
-#include "GENERAL_protocol.hpp"
-#include "CAN_protocol.hpp"
-#include "HMI_protocol.hpp"
-#include "GPIO_protocol.hpp"
-#include "FILE_protocol.hpp"
-#include "AUDIO_protocol.hpp"
-#include "CAMERA_protocol.hpp"
 #include "visual_memory.h"
 #include "bk_system_defs.h"
-#include "client_memory.hpp"
+#include "vision_memory.h"
+#include "nlp_vision_general_protocol.hpp"
 
 using namespace std;
 
@@ -51,13 +39,14 @@ void update_ipc_status( struct sockaddr_in* sa )
     strcpy(client_ip, inet_ntoa( sa->sin_addr ) );
     strcpy(msg, "Connected to : ");
     strcat(msg, client_ip);
-    cli_ipc_write_connection_status( msg );
+    eyes_ipc_write_connection_status( msg );
 }
+
 void update_ipc_status_no_connection( )
 {
     static char msg[80];
     strcpy(msg, " Not Connected!");
-    cli_ipc_write_connection_status( msg );
+    eyes_ipc_write_connection_status( msg );
 }
 
 ServerHandler::ServerHandler()
@@ -73,10 +62,6 @@ ServerHandler::ServerHandler()
     keep_open       = FALSE;
 }
 
-//void* connection_handler( void* mconnfd );
-//void ServerHandler::SendTelegram( BYTE* mBuffer, int mSize );
-//void ServerHandler::close_connection();
-
 void ServerHandler::SendTelegram( unsigned char* mBuffer, int mSize)
 {
     write(connfd, mBuffer, mSize );
@@ -84,8 +69,6 @@ void ServerHandler::SendTelegram( unsigned char* mBuffer, int mSize)
 void ServerHandler::close_connection()
 {
     close(connfd);
-    //connection_established = FALSE;
-    //done = TRUE;
 }
 
 void ServerHandler::form_response(const char* mTextToSend)
@@ -108,13 +91,11 @@ void ServerHandler::Send_Reply()
     bytes_txd = write( connfd, NLP_Response.c_str(), (int)NLP_Response.length() );
     if (keep_open==FALSE)
         close_connection();
-    
     printf("Reply sent.\n");
 }
 
 void ServerHandler::print_response(  )
 {
-    //printf( "VR:");
     printf("%s\t\n\n", NLP_Response.c_str() );
 }
 
@@ -172,7 +153,7 @@ void* connection_handler( void* mconnfd )
                     printf( ":  NextString = %s\n", next_telegram_ptr );
                 }
                 printf(" Start parsing. buff_index=%ld of bytes_rxd=%ld; \n", buff_index, h->bytes_rxd);
-                next_telegram_ptr   = Parse_Statement( next_telegram_ptr, h );
+                next_telegram_ptr   = Parse_Statement( (char*)next_telegram_ptr, h );
                 // next the problem of split packages - which will occur!
             }
             printf("Done parsing. %d\n", h->connfd);
@@ -190,16 +171,15 @@ void* connection_handler( void* mconnfd )
     
     // SEND Timestamp:
     h->ticks = time(NULL);
-    strcpy(NLP_Response, "Closing this connection.");
+    h->NLP_Response = "Closing this connection.";    
     h->Send_Reply( );
-    printf( " %s\n", NLP_Response );
+    printf( " %s\n", h->NLP_Response.c_str() );
     
     close(h->connfd);
     sleep(0.25);
     delete h;
     h=NULL;
-    return NULL;
-    
+    return NULL;    
 }  // Terminate thread, wait for another connect.
 
 void video_interface()
@@ -208,12 +188,19 @@ void video_interface()
 void sequence_interface()
 {
 }
+
 // Any and all outgoing data!
 void transmit_queued_entities(ServerHandler* mh)
 {
-    can_interface  (mh);				// Send CAN data if waiting...
-    audio_interface(mh);				// Send audio if enabled and data avail
+    //can_interface  (mh);				// Send CAN data if waiting...
+    //audio_interface(mh);				// Send audio if enabled and data avail
     video_interface();				// Send audio if enabled and data avail
     sequence_interface();			// Send audio if enabled and data avail
 }
 
+
+//void* connection_handler( void* mconnfd );
+//void ServerHandler::SendTelegram( BYTE* mBuffer, int mSize );
+//void ServerHandler::close_connection();
+//connection_established = FALSE;
+//done = TRUE;

@@ -116,11 +116,11 @@ void *eventThread(void *arg)
 			//      mouse_ev.time.tv_usec,mouse_ev.type,mouse_ev.code,mouse_ev.value);
 			if (mouse_ev.code == BTN_LEFT) {
 				mouse.left = UNHANDLED_EVENT | (mouse_ev.value & 0x01);
-				printf("Left button: evalue=%d\n", mouse_ev.value );
+				//printf("Left button: evalue=%d\n", mouse_ev.value );
 			}
 			if (mouse_ev.code == BTN_RIGHT) {
 				mouse.right = UNHANDLED_EVENT | (mouse_ev.value & 0x01);
-				printf("Right button: value=%d\n", mouse_ev.value);
+				//printf("Right button: value=%d\n", mouse_ev.value);
 			}
 		}
 	}

@@ -28,12 +28,13 @@
 
 const unsigned char address = 0x80;
 
+#define DEV_NAME "/dev/ttyACM0"
 float   	neck_duty = 0;
-RoboClaw 	claw1( "/dev/ttyACM0", 1000 );		// 1ms timeout
+RoboClaw 	claw1( DEV_NAME, 1000 );		// 1ms timeout
 
 void roboclaw_test()
 {
-	for (int i=0; i<5; i++)  
+	for (int i=0; i<5; i++)
 		usleep( 1000000 );
 	while (1) {
 		printf("roboclaw1:");
@@ -75,13 +76,26 @@ void update_neck_angle( int x, int width )
 
 void* neck_thread(void*)
 {
-	usleep( 1000000 );
-		
-	setup_roboclaw_comms();
-	claw1.general_setup();
-	claw1.open_block();
+	usleep				( 1000000 );
+	printf("Neck_thread()  %s Starting \n", DEV_NAME);
 
-	printf("Neck_thread running\n");
+	setup_roboclaw_comms( );
+	claw1.general_setup ( );
+	
+	const int MAX_TRIES = 100; 
+	bool result = false;
+	int Tries = 0;
+	do {
+		result = claw1.open_block( );
+		usleep(500000);		// 100ms
+		Tries++;
+	} while (( result==false ) && (Tries<MAX_TRIES));
+	if (result==false) {
+		printf("Warning Connection to Neck Roboclaw cannot be established.\n");
+		printf("Neck Thread Terminated.\n");		
+		return NULL;
+	} else 
+		printf("Neck_thread running\n");
 	int last_speed = 0;	
 	printf("roboclaw()\n");
 	while (1)  

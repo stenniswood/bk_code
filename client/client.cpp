@@ -2,7 +2,7 @@
 This establishes a connection to another bkInstant media center. via the 
 nlp port.  This allows sending voice commands to a "robot".  
 
-In test right now is:
+In test right now is : 
 incoming file for you from 192.168.1.144:
 *************************************************************************/
 #include <sys/socket.h>
@@ -13,10 +13,17 @@ incoming file for you from 192.168.1.144:
 #include <string.h>
 #include <string>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <errno.h>
 #include <arpa/inet.h> 
-#include "bk_system_defs.h"
+
+#define BOOL unsigned char
+#define byte unsigned char
+#define TRUE 1
+#define FALSE 0
+
+//#include "bk_system_defs.h"
 #include "package_commands.h"
 #include "client.h"
 

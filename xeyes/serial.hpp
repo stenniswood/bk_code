@@ -40,7 +40,7 @@ public:
 	void 	dump_serial_port_stats();
 	void 	process_read_data	( );
 	void 	process_write_data	( );
-	void 	setup_serial_port	( int baud);
+	bool 	setup_serial_port	( int baud);
 	int  	diff_ms				( const struct timespec *t1, const struct timespec *t2);	
 	int  	serial_main			(  );
 

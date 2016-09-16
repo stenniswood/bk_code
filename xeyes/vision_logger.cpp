@@ -13,11 +13,10 @@
 #include "sequencer_memory.hpp"
 
 
-//extern MYSQL *logger_db;
-MYSQL 		 *logger_db = NULL;
-#define Debug 0
-
+#define Debug 1
+MYSQL 		 	*logger_db = NULL;
 Event_SQL_Logger sql_logger;
+
 
 static void object_finish_with_error( )
 {
@@ -85,6 +84,12 @@ bool Event_SQL_Logger::events_table_exists( )
 	return (result_count>0);
 }
 
+int	Event_SQL_Logger::get_number_columns()
+{
+	unsigned int cols = mysql_num_fields( m_result );
+	return cols;
+}
+
 int  Event_SQL_Logger::query( bool mRetrieving )
 {
   dprintf("%s\n", query_string.c_str() );	
@@ -92,7 +97,6 @@ int  Event_SQL_Logger::query( bool mRetrieving )
   {
       fprintf(stderr, "Object: %s\n", mysql_error(logger_db));
   }
-  int row_count=0;
   // Question : what happens when no results?
   //   Answer : if  mysql_store_result returns a non-zero value
   if (mRetrieving) {
@@ -101,17 +105,16 @@ int  Event_SQL_Logger::query( bool mRetrieving )
 		  dprintf("query Error result==null!\n");
 		  return 0; 
 	  }
-	  row_count = mysql_num_rows(m_result);
+	  m_row_count = mysql_num_rows( m_result );
   }    
-  dprintf("row_count=%d\n", row_count);
-  return row_count;
+  dprintf("row_count=%d\n", m_row_count);
+  return m_row_count;
 }
 
 int	Event_SQL_Logger::get_number_results()
 {
 	return mysql_num_rows(m_result);
 }
-
 
 char* form_date_string( struct tm& time_bd )
 {
@@ -121,6 +124,7 @@ char* form_date_string( struct tm& time_bd )
 								time_bd.tm_mday );
 	return tmp;
 }
+
 char* form_time_string( struct tm time_bd )
 {
 	static char tmp[32];
@@ -186,10 +190,13 @@ int	Event_SQL_Logger::sql_query_event( string mPersonName, string mDescription )
 {
 	struct tm start_time_bd;
 	struct tm end_time_bd;
-	query_string =  "SELECT * FROM robot_local.vision_events WHERE ";
-	query_string += "robot_local.vision_events.people_names LIKE '%";
-	query_string += mPersonName;
-	query_string += "%' AND event_description LIKE '%";
+	query_string =  "SELECT *,UNIX_TIMESTAMP(timestamp) FROM robot_local.vision_events WHERE ";
+	if (mPersonName.length()) {
+		query_string += "robot_local.vision_events.people_names LIKE '%";
+		query_string += mPersonName;
+		query_string += "%' AND ";
+	}
+	query_string += "event_description LIKE '%";
 	query_string += mDescription;
 	query_string += "%' ORDER BY timestamp DESC;";
 	//printf("\n%s\n", query_string.c_str() );
@@ -199,23 +206,27 @@ int	Event_SQL_Logger::sql_query_event( string mPersonName, string mDescription )
 int	Event_SQL_Logger::sql_query_time( string mPersonName, string mDescription, 
 									   struct tm start_time_bd, struct tm end_time_bd  )		// including "unknown"
 {
-	query_string =  "SELECT * FROM robot_local.vision_events WHERE ";
+	query_string =  "SELECT *,UNIX_TIMESTAMP(timestamp) FROM robot_local.vision_events WHERE ";
 	query_string += "robot_local.vision_events.timestamp BETWEEN '";
 	query_string += form_date_time_string(start_time_bd);
-	query_string += "' AND '";		
+	query_string += "' AND '";
 	query_string += form_date_time_string( end_time_bd );
-	query_string += "' AND people_names='";	
-	query_string += mPersonName;
 	query_string += "' ";
+	if (mPersonName.length())
+	{
+		query_string += "AND people_names='";
+		query_string += mPersonName;
+		query_string += "' ";
+	}
 	if (mDescription.length())
 	{
 		query_string += "AND event_description LIKE '%";
 		query_string += mDescription;
-		query_string += "'";
+		query_string += "%'";
 	}
-	query_string += ";";
-	printf("\n%s\n", query_string.c_str() );	
-	query(true);	
+	query_string += " ORDER BY timestamp DESC;";
+	//printf("\n%s\n", query_string.c_str() );
+	query(true);
 }
 
 void Event_SQL_Logger::print_row( )
@@ -243,32 +254,50 @@ int	Event_SQL_Logger::sql_query_time_qualitative( string mDateTime)	// such as "
 
 }
 
-void Event_SQL_Logger::form_response__how_many_times( struct tm start_time_bd, struct tm end_time_bd )
-{
-	sql_query_event( "David", "face detected" );
-	print_results();
+int Event_SQL_Logger::form_response__how_many_times( string mNames, string mDescription, 
+										struct tm start_time_bd, struct tm end_time_bd )
+{	
+	sql_query_time( mNames, mDescription, start_time_bd, end_time_bd );
+	int retval = get_number_results();
+	return retval;
 }
 
-void Event_SQL_Logger::form_response__last_time_i_saw( string mPerson, string& mResponse)
+int Event_SQL_Logger::form_response__last_time_i_saw( string mPerson, time_t& mTime )
 {
+	int last_col = get_number_columns();
 	sql_query_event( mPerson, "face detected" );
-	m_row = mysql_fetch_row( m_result );
+	m_row    = mysql_fetch_row( m_result );
 	int rows = get_number_results();
-	if (rows==0)
-		mResponse = "According to my database, I have never met " + mPerson;
-	else {
-		mResponse  = "The last time I saw " + mPerson;
-		mResponse += " was ";
-		mResponse += m_row[1];
-		mResponse += "\n";
-	}
-	//printf("%s\n", mResponse.c_str() );		
+	int cols = get_number_columns();
+	//printf("m_row[%d]=%s;  %d\n", cols, m_row[cols-1], mTime );
+	mTime    = atoi( m_row[cols-1] );		
+	return rows;
 }
 
 void Event_SQL_Logger::form_response__during_that_time_i_saw( struct tm start_time_bd, 
 						struct tm end_time_bd, string& mResponse)
 {
+	
+}
 
+int Event_SQL_Logger::form_response__last_time_i_activated( time_t& mTime)
+{
+	sql_query_event( "", "System Activated" );
+	m_row = mysql_fetch_row( m_result );
+	int rows = get_number_results();
+	int cols = get_number_columns();
+	mTime = atoi( m_row[cols-1] );		
+	return rows;
+}
+
+int Event_SQL_Logger::form_response__last_time_i_deactivated( time_t& mTime)
+{
+	sql_query_event( "", "System De-activated" );
+	m_row = mysql_fetch_row( m_result );
+	int rows = get_number_results();
+	int cols = get_number_columns();
+	mTime = atoi( m_row[cols-1] );		
+	return rows;
 }
 
 char* append_float( float mFloat )

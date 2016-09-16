@@ -8,6 +8,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
+#include <signal.h>
 
 #include "x_eyes.hpp"
 #include "serial.hpp"
@@ -25,7 +26,6 @@
 #include "frame_grabber.hpp"
 #include "face_summary.hpp"
 #include "nlp_thread.hpp"
-
 #include "frame_grabber.hpp"
 
   
@@ -42,9 +42,6 @@ bool CameraAvailable = false;
 bool EyeServoBoardAvailable = false;
 bool NeckServoBoardAvailable = false;
 
-
-#include <signal.h>
-
 static volatile int keepRunning = 1;
 
 void app_close_handler(int dummy) 
@@ -53,6 +50,8 @@ void app_close_handler(int dummy)
     sql_logger.sql_add_system_deactivated();
     mouse_close( );
 	fd_close   ( );
+	frame_grab_close();
+	exit(1);
 }
 
 void create_thread()
@@ -62,22 +61,20 @@ void create_thread()
 	if (iret1)
 	{
 		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret1);
-		//exit(EXIT_FAILURE);
 	}
 
 	// NLP Task:
 	int iret3 = pthread_create( &nlp_thread_id, NULL, nlp_handler, (void*) NULL);
 	if (iret3)
 	{
-		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret1);
-		//exit(EXIT_FAILURE);
+		fprintf(stderr,"Error - Could not create NLP handler thread. return code: %d\n",iret1);
 	}
 
 	// RoboClaw board:
 	int iret2 = pthread_create( &roboclaw_thread_id, NULL, neck_thread, (void*) NULL);
 	if (iret2)
 	{
-		fprintf(stderr,"Error - Could not create Servo PWM Interface thread. return code: %d\n",iret2);
+		fprintf(stderr,"Error - Could not create RoboClaw Interface thread. return code: %d\n",iret2);
 	}
 }
 
@@ -86,10 +83,13 @@ void init()
 {
 	mkdir("/home/pi/Pictures/face_recog", 	S_IRWXU);
 	mkdir("/home/pi/Pictures/robot", 		S_IRWXU);
-	mkdir("/home/pi/Pictures/robot/detected_faces", S_IRWXU);
-	
+	mkdir("/home/pi/Pictures/robot/detected_faces", S_IRWXU);	
 	eye_init();
 	
+	sql_logger.connect_to_logger_db();	
+	sql_logger.create_events_table();	
+	sql_logger.sql_add_system_activated( CameraAvailable, EyeServoBoardAvailable, NeckServoBoardAvailable);	
+
 	// Initialize Vision Shared Memory (to abkInstant)
 	int ipc_mem = eyes_connect_shared_memory( 1 );
 
@@ -124,9 +124,6 @@ void find_center( int& x, int &y, cv::Rect mrect)
 	y = mrect.y + (mrect.height/2);
 }
 
-
-
-
 void handle_arguments(int argc, char ** argv)
 {
 	string fn_csv = "train.csv";
@@ -160,7 +157,6 @@ void handle_arguments(int argc, char ** argv)
 	} else if ((strcmp(argv[1],"cam")==0)) {
 		device_number = atoi( argv[2] );
 	}
-
 }
 
 /* Components of this app:
@@ -171,10 +167,10 @@ void handle_arguments(int argc, char ** argv)
 */             
 int main(int argc, char ** argv)
 {
-	int mover_x=0;
-	int mover_y=0;
-	int frame_count=0;
-	int result=0;
+	int   mover_x=0;
+	int   mover_y=0;
+	int   frame_count=0;
+	int   result=0;
 	char* ptr;
 	std::string  message = "no event";
 	bool  unrecognized	 = false;
@@ -185,49 +181,27 @@ int main(int argc, char ** argv)
 		print_args( argc,argv );
 		handle_arguments(argc,argv);		
 	}	
-	//init();
+//	delete_all_shm();
+
+	init();
 	signal(SIGINT, app_close_handler );
-
+	
 	text_to_speech_pico	   ( "Welcome, my name is ronny.");
-	text_to_speech_festival( "Welcome, my name is ronny.");
-		
-	sql_logger.connect_to_logger_db();	
-	sql_logger.create_events_table();	
-	sql_logger.sql_add_system_activated( CameraAvailable, EyeServoBoardAvailable, NeckServoBoardAvailable);	
-	test_face_summary();
-		
-/*	sql_logger.sql_add_event("Stephen", "face detected");
-	sql_logger.sql_add_event("Stephen", "face left"  );
-	sql_logger.sql_add_event("David",   "face detected"  );
-	sleep(10);
-	sql_logger.sql_add_event("David",   "face left"  );
+	//text_to_speech_festival( "Welcome, my name is ronny.");
 
-	//sql_logger.sql_query_event("David", "face detected");	
-	time_t 		rawtime,rawtime2;
-	time (&rawtime);
-	rawtime2 = rawtime;
-	rawtime -= (3600 * 4);		// 4 hours ago.	
-	struct tm start_time_bd = *(localtime( &rawtime ));
-	struct tm end_time_bd   =*(localtime( &rawtime2 ));
-	sql_logger.sql_query_time( "David", "face detected", start_time_bd, end_time_bd );
-	sql_logger.print_results();  
-
-	string Response;
-	sql_logger.form_response__last_time_i_saw( "Stephen", Response ); 
-	printf("%s\n", Response.c_str() );
-	sql_logger.form_response__last_time_i_saw( "Johnathon", Response ); 
-	printf("%s\n", Response.c_str() );
-*/
-	exit(1);
-
-	if( capture.isOpened()==false) 
-	{
-		printf("Warning: Camera is not on!\n");
-		exit(1);
-	}
+	// Add some samples rows : 
+/*	sql_logger.sql_add_event("Lynn",   "Face Detected" );
+	sql_logger.sql_add_event("Stephen", "Face Detected");
+	sql_logger.sql_add_event("Stephen", "Face Left"    );
+	sql_logger.sql_add_event("David",   "Face Detected" );
+	sql_logger.sql_add_event("David",   "Face Left"  	);
+	sql_logger.sql_add_event("Lynn",   "Face Left"  	);*/
+	
+	//test_face_summary();		
+	//exit(1);
 
     while (1)
-    {    
+    {   
 		mouse_timeslice( );		
 		frame_grabs    ( );
 
@@ -237,17 +211,17 @@ int main(int argc, char ** argv)
 			//imshow( "optical flow", frame );
 		}
  
-		fd_timeslice( gray_frame, original, false );
+		//fd_timeslice( gray_frame, original, false );
 		//misc_detect_timeslice( original, gray_frame );
 
 		if (num_faces_present)
-		{			
+		{	
 			std::vector<int> predictedLabels;
 			if (model) {
 				message = face_recongition_tasks( gray_frame, faces, predictedLabels, capture_frame );
 				save_faces(frame, predictedLabels);
 			}
-			
+
 			// Inform Client of Presence : 
 			message = "face detected";
 			if (!MOVE_TO_MOUSE) {
@@ -273,7 +247,7 @@ int main(int argc, char ** argv)
 		update_eye_positions( mover_x, (ScreenHeight-mover_y), ScreenWidth, ScreenHeight );
 
       	imshow( main_window_name, original );
-
+		
 		/* Several Events can trigger an image write (unknown face_detect 
 		   for several frames, or a motion detect, etc)  		   */
 		if (capture_frame)
@@ -289,6 +263,5 @@ int main(int argc, char ** argv)
 		//eyes_write_server_event( message );
     }
 	
-	app_close_handler(1);
     return 1;
 }

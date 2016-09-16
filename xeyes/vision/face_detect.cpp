@@ -5,7 +5,6 @@
 #include <queue>
 #include <stdio.h>
 #include <math.h>
-
 #include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -14,6 +13,8 @@
 #include "findEyeCenter.h"
 #include "findEyeCorner.h"
 #include "face_detect.hpp"
+
+
 
 using namespace std;
 
@@ -69,10 +70,12 @@ int fd_init( )
   cv::moveWindow (main_window_name, 400, 100);
   cv::namedWindow(face_window_name,CV_WINDOW_NORMAL);
   cv::moveWindow (face_window_name, 10, 100);
+#ifdef SHOW_EYES
   cv::namedWindow("Right Eye",CV_WINDOW_NORMAL);
   cv::moveWindow ("Right Eye", 10, 600);
   cv::namedWindow("Left Eye",CV_WINDOW_NORMAL);
   cv::moveWindow ("Left Eye", 10, 800);
+#endif
 
   createCornerKernels();
   ellipse(skinCrCbHist, cv::Point(113, 155.6), cv::Size(23.4, 15.2),

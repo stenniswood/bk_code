@@ -16,10 +16,9 @@
 
 std::string create_color_regex( );
 
-
-void   init_color_map		( );
-int    Parse_color_statement( Sentence& mSentence, std::string& mReponse );
-Color  Get_Spoken_color		( int index);
+void   init_color_map			( );
+int    Parse_color_statement	( Sentence& mSentence, std::string& mReponse );
+Color  Get_Spoken_color			( int index );
 
 
 #endif /* color_protocol_hpp */

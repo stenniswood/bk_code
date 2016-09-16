@@ -53,7 +53,7 @@ bool is_eyes_ipc_memory_available()
 {
     struct shmid_ds buf;			// shm data descriptor.
     dprintf("Checking for vision IPC memory... segment id: %s\n", eyes_segment_id_filename );
-    
+
     // First see if the memory is already allocated:
     eyes_segment_id = eyes_read_segment_id( eyes_segment_id_filename );
 
@@ -120,6 +120,8 @@ int eyes_connect_shared_memory( char mAllocate )
 
 bool eyes_new_command_available( )
 {
+//	printf("eyes_new_command_available()  %d %d \n", ipc_memory_eyes->CommandCounter, 
+//													ipc_memory_eyes->AcknowledgeCounter);
     bool retval = (ipc_memory_eyes->CommandCounter > ipc_memory_eyes->AcknowledgeCounter);
     return retval;
 }
@@ -129,6 +131,9 @@ bool eyes_new_command_available( )
 void eyes_acknowledge_command( )
 {
     ipc_memory_eyes->AcknowledgeCounter = ipc_memory_eyes->CommandCounter;
+	//printf("eyes_acknowledge_command()  %d %d \n", ipc_memory_eyes->CommandCounter, 
+	//												ipc_memory_eyes->AcknowledgeCounter);
+
 }
 
 void eyes_wait_for_acknowledgement( )
@@ -143,8 +148,22 @@ void eyes_wait_for_acknowledgement( )
 /************* REPONSE WRAPPERS ****************/
 bool eyes_new_server_event_available( )
 {	
+	//printf("server avail:  %d > %d ?\n", ipc_memory_eyes->ServerCounter,ipc_memory_eyes->ServerAcknowledgedCounter );
+
     bool   retval = (ipc_memory_eyes->ServerCounter > ipc_memory_eyes->ServerAcknowledgedCounter);
     return retval;
+}
+
+void  eyes_write_client_command   	( std::string mCommand )
+{
+	//long length = strlen(mSentence);
+	long length = mCommand.length();	
+	int MaxAllowedLength = sizeof(ipc_memory_eyes->client_command);
+	if (length>MaxAllowedLength)
+		length = MaxAllowedLength;
+		
+	ipc_memory_eyes->CommandCounter++;
+	strcpy(ipc_memory_eyes->client_command, mCommand.c_str() );
 }
 
 /* WRITE IMPLIES TO SHARED MEMORY.  And since we are the abkInstant task,
@@ -155,16 +174,13 @@ FORMAT:
 */
 void  eyes_write_server_event( std::string mCommand )
 {
-	//long length = strlen(mSentence);
 	long length = mCommand.length();	
 	int MaxAllowedLength = sizeof(ipc_memory_eyes->ServerEvent);
 	if (length>MaxAllowedLength)
 		length = MaxAllowedLength;
-		
 	ipc_memory_eyes->ServerCounter++;
 
 	strcpy(ipc_memory_eyes->ServerEvent, mCommand.c_str() );
-	//dprintf("|%s|\n", ipc_memory_eyes->ServerEvent );
 }
 
 void  eyes_acknowledge_server   ( )
@@ -181,8 +197,8 @@ void  eyes_wait_for_server      ( )
 
 int eyes_allocate_memory( )
 {
-	const int 	shared_segment_size = sizeof(struct eyes_ipc_memory_map);
-    dprintf("eyes shared_seg_size=%d\n", shared_segment_size); 
+	const int shared_segment_size = sizeof(struct eyes_ipc_memory_map);
+    dprintf("eyes shared_seg_size=%d\n", shared_segment_size);
 
 	/* Allocate a shared memory segment. */
 	eyes_segment_id = shmget( IPC_KEY_EYES, shared_segment_size, IPC_CREAT | 0666 );
@@ -241,13 +257,15 @@ unsigned long eyes_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (eyes_segment_id, IPC_STAT, &shmbuffer);
 	unsigned long segment_size = shmbuffer.shm_segsz;
-	dprintf ("eyes3D segment size: %lu\n", segment_size);
+	dprintf ("eyes3D segment size: %lu %lu \n", segment_size, sizeof(struct eyes_ipc_memory_map) );
 	return segment_size;
 }
 
 void eyes_fill_memory()
-{
+{ 
+	printf("eyes_fill_memory()\n");
     long size = eyes_get_segment_size();
+	printf("\n eyes_fill_memory() size=%d\n\n ", size);
 	memset(eyes_shared_memory, 0, size);
 
 //    for (int i=0; i<size; i++)
@@ -307,3 +325,4 @@ void eyes_compose_coordinate_xy   ( int mx, int my )
 	if (ipc_memory_eyes->stream1_index > MAX_STREAM_SIZE)
 		ipc_memory_eyes->stream1_index = 0;
 }
+

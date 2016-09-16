@@ -14,40 +14,26 @@
 #include <vector>
 #include <pthread.h>
 #include "pican_defines.h"
-#include "CAN_Interface.hpp"
-#include "packer_lcd.h"
-#include "packer_motor.h"
-#include "can_txbuff.h"
-#include "packer.h"
-#include "can_id_list.h"
+//#include "CAN_Interface.hpp"
+//#include "packer_lcd.h"
+//#include "packer_motor.h"
+//#include "can_txbuff.h"
+//#include "packer.h"
+//#include "can_id_list.h"
 
 #include "buttons.h"
-#include "leds.h"
-#include "vector_math.h"
-#include "parser_tilt.h"
-#include "catagorization.h"
-#include "can_rxbuff.h"
-#include "sway_memory.h"
-#include "picamscan_memory.h"
 #include "client_memory.hpp"
-//#include "client.h"
-
-//#include "udp_transponder.hpp"
-//#include "thread_control.h"
-
+#include "vision_memory.h"
 
 // Right now this is user settable.  Need to detect:
-BOOL	PiCAN_Present=FALSE;
-
-struct sCAN MMsg;
-byte count = 0;
+bool	server_is_vision = false;
+unsigned int 	count = 0;
 int  	fd;
 long  	SerialNumber_ = 0x56789CD;
 #define Debug 0
 pthread_t udp_tx_thread_id;
 pthread_t udp_rx_thread_id;
 pthread_t server_thread_id;
-  
 
 #define USE_AVISUAL 1
 #define USE_SWAY	1
@@ -59,13 +45,29 @@ pthread_t server_thread_id;
 */
 void establish_ipc()
 {
-	int result = connect_shared_client_memory( FALSE );
-	if (result<=0) {
-		//printf("\n\nError:  Cannot attach to abkInstant.  No shared memory established.\n");
-		printf("\n    You must start the Instant server first!\n\n");
-		exit(1);
-	}	 
-	cli_print_clients();
+	int result=0;
+	if (server_is_vision==false)
+	{
+		result = connect_shared_client_memory( 0 );
+		if (result<=0) {
+			printf("\n    You must start the Instant server first!\n\n");
+			exit(1);
+		}	 
+		cli_print_clients();
+	} else {	
+		if (server_is_vision)
+		{
+			if (is_eyes_ipc_memory_available())
+			{
+				//eyes_fill_memory();
+				result = eyes_connect_shared_memory( 0 );
+				if (result<=0)  {
+					printf("\n    You must start the xeyes server first!\n\n");
+					exit(1);
+				}			
+			}	
+		}
+	}
 }
   
 void help()
@@ -105,6 +107,29 @@ void parse_send_cmds( char* mArgv[], int mArgc )
 
 char working_buffer[127];
 
+void cli_write_sentence(char* mText )
+{
+	cli_ipc_write_sentence( mText );
+	printf("Client Request:|%s|\n", ipc_memory_client->Sentence );	
+	printf("waiting for acknowledge; count=%d, ack=%d\n",ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter  );		
+	cli_wait_for_ack_update();
+	printf("waiting for response...\n");
+	cli_wait_for_response();		
+	cli_ack_response();		
+	printf("RESPONSE:  %s\n", cli_get_sentence() );
+}
+
+void vision_write_sentence(char* mText)
+{
+	eyes_write_client_command( mText );
+	printf("Client Request:|%s|\n", ipc_memory_eyes->client_command );	
+	//printf("waiting for acknowledge; count=%d, ack=%d\n",ipc_memory_eyes->CommandCounter, ipc_memory_eyes->AcknowledgeCounter );
+	eyes_wait_for_acknowledgement();
+	//printf("Acknowledged.  waiting for response...\n");
+	eyes_wait_for_server();		
+	eyes_acknowledge_server();		
+	printf("RESPONSE:  %s\n", ipc_memory_eyes->ServerEvent  );
+}
 
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
@@ -112,7 +137,7 @@ char working_buffer[127];
 int main( int argc, char *argv[] )
 {
 	print_args( argc, argv );
-	printf("=======================Beyond Kinetics ========================\n");		
+	printf("======================= Beyond Kinetics ========================\n");		
 	int first_param = 1;
 	int value    	= 0;
 	if (argc>1)
@@ -122,22 +147,26 @@ int main( int argc, char *argv[] )
 			help();
 			return 0;
 		}
+		if ((strcmp(argv[first_param], "avisual") == 0))
+		{
+			server_is_vision = false;
+		}
+		if ((strcmp(argv[first_param], "xeyes") == 0))
+		{
+			server_is_vision = true;
+		}
 	}
 	establish_ipc();
 
 	// PARSE ARGUMENTS : 
 	if (argc>1)
 	{
-		cli_ipc_write_sentence( argv[1] );
-		printf("Client Request:|%s|\n", ipc_memory_client->Sentence );
-		
-		printf("waiting for acknowledge; count=%d, ack=%d\n",ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter  );		
-		cli_wait_for_ack_update();
-		printf("waiting for response...\n");
-		cli_wait_for_response();		
-		cli_ack_response();		
-		printf("RESPONSE:  %s\n", cli_get_sentence() );
+		if (server_is_vision)
+			vision_write_sentence( argv[first_param+1] );	// xeyes
+		else
+			cli_write_sentence   ( argv[first_param+1] );	// avisual
 	}
+	
 	printf("================= DONE ========================\n");
 }
 

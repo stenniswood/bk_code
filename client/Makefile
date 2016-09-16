@@ -15,8 +15,8 @@ endif
 
 CC		   = g++
 OPTIONS	   = -fpermissive -Wwrite-strings -Wno-deprecated -w
-INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/  \
-			   ../core/libs/ilclient/ 
+INC		   =  ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/ ../core/kinetic \
+			   ../core/libs/ilclient/  
 
 SELF_INC   = ../../abkInstant/ ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
@@ -45,7 +45,8 @@ MISC_OBJS  =  buttons.o leds.o vector_math.o ini_file.o
 FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 VG_OBJS    =  libshapes.o oglinit.o
 APP_CPP_OBJS= client_main.o client.o package_commands.o 
-IPC_OBJS    = picamscan_memory.o client_memory.o
+#picamscan_memory.o 
+IPC_OBJS    = client_memory.o vision_memory.o
 THREAD_OBJS = audio_thread.o video_thread.o can_thread.o file_thread.o \
 			  file_tx_thread.o hmi_thread.o thread_control.o serverthread.o 
 HARDWARE_OBJS = AUDIO_device.o 

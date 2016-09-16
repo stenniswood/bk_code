@@ -22,8 +22,6 @@ extern "C" {
 #define KWHT  "\x1B[37m"
 // printf("%sred\n", KRED);
 // printf("%snormal\n", KNRM);
-
-
 //#include <avr/sfr_defs.h>
 //#include <avr/common.h>
 //#include <inttypes.h>
@@ -38,18 +36,14 @@ extern "C" {
 #ifndef BOOL
 #define BOOL byte
 #endif
-#define TRUE  1
-#define FALSE 0
-
-#ifndef NULL
-#define NULL  0
-#endif
 
 //#define cli()  __asm__ __volatile__ ("cli" ::)
 //#define sei()  __asm__ __volatile__ ("sei" ::)
 
+#ifndef min
 #define min(a,b) (((a)<(b))?(a):(b))
 #define max(a,b) (((a)>(b))?(a):(b))
+#endif
 
 #define CRYSTAL_FREQ 16000000
 #define F_CPU CRYSTAL_FREQ

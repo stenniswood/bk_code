@@ -36,6 +36,7 @@ public:
     bool            remove_verbage_question_words( );       //
 
     int             are_exactly_found_in_sentence( SuperString& Tsearches, bool mOrItsPlural );    
+	int				regex_find				( string  mRegexpression );
     int             is_found_in_sentence    ( const char* mSearchWord, bool mOrItsPlural = false ); // returns word index of first occurence.
     int             are_found_in_sentence   ( const char* Tsearches,   bool mOrItsPlural = false ); // returns word index of first occurence.
     int             are_found_in_sentence   ( SuperString& Tsearches,   bool mOrItsPlural = false ); // returns word index of first occurence.
@@ -53,7 +54,7 @@ public:
     float           get_nth_word_as_a_number( int mIndex );
     bool            prefilter_text          ( );
     void            restore_reduced         ( );
-    void            reduce_sentence         ( vector<int> mWordIndices );
+    void            reduce_sentence         ( );
 
     char*         m_raw_sentence;
     SuperString   m_sentence;
@@ -65,6 +66,9 @@ public:
 
     int*        m_tag;
     int         m_last_search_found_index;  // private var used for next word matches
+
+    vector<int> answers;
+    vector<int> remove_wi;    
 };
 
 

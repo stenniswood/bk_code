@@ -437,19 +437,21 @@ void SerialInterface::process_write_data()
 	}
 }
 
-void SerialInterface::setup_serial_port( int baud )
+/* Return:  True - Success
+*/
+bool SerialInterface::setup_serial_port( int baud )
 {
 	struct termios newtio;
-	_fd = open(_cl_port, O_RDWR | O_NONBLOCK);
+	_fd   = open(_cl_port, O_RDWR | O_NONBLOCK);
 
 	if (_fd < 0) {
-		printf("\n%s\n",_cl_port);
+		printf("\n%s\t",_cl_port);
 		perror("Error opening serial port ");
 		free(_cl_port);
-		//exit(1);
 		_cl_port = NULL;
+		return false;
 	}
-	bzero(&newtio, sizeof(newtio)); /* clear struct for new port settings */
+	bzero(&newtio, sizeof(newtio)); 	/* clear struct for new port settings */
 
 	/* man termios get more info on below settings */
 	newtio.c_cflag = baud | CS8 | CLOCAL | CREAD;
@@ -485,6 +487,7 @@ void SerialInterface::setup_serial_port( int baud )
 			}
 		}
 	}
+	return true;
 }
 
 int SerialInterface::diff_ms(const struct timespec *t1, const struct timespec *t2)

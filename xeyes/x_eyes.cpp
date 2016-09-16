@@ -183,11 +183,10 @@ void* serial_setup(void*)				// serial port used for arduino connections & GPS.
 	sprintf(read_r,     "-R");
 	sprintf(no_write_w, "-w");
 	sprintf(device_p,   "-p");
-
 	sprintf(read_,     "ascii");
 	sprintf(no_write_, "0");
-
 	sprintf(device_,   "/dev/ttyUSB0");
+	
 	si._cl_rx_dump = 1;
 	si._cl_rx_dump_ascii = 1;		
 	si._cl_port = strdup("/dev/ttyUSB0");

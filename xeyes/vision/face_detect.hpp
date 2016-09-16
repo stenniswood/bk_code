@@ -1,17 +1,20 @@
 #ifndef _FACE_DETECT_HPP_
 #define _FACE_DETECT_HPP_
 
+
+#define SHOW_EYES 0
+
+
 //int 	fd_main(int argc, char* argv[]);
+
 extern std::string 		  main_window_name;
 extern std::string 		  face_window_name;
-
 
 extern  cv::Mat 	frame;
 extern  cv::Mat 	faceROIc;
 
-extern int num_faces_present;
+extern int 	num_faces_present;
 extern std::vector<cv::Rect> faces;
-
 
 struct timeval GetTimeStamp ();
 uint64_t 	   GetTimeStamp2();

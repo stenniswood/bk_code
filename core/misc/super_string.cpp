@@ -14,7 +14,7 @@
 #include "super_string.hpp"
 
 
-#define Debug 0
+#define Debug 1
 
 
 SuperString& SuperString::operator=(const SuperString& mOp)
@@ -325,12 +325,22 @@ int SuperString::regex_find( string&  mRegexpression, vector<int>* answers, vect
     m_regex = mRegexpression;
     regex regex  ( m_regex );
     regex_search ( *this, regex_matches, regex );
- 
+
     if (Debug) {
-    //    for (auto x:regex_matches)
-    //        std::cout<< x <<" "<<std::endl;
+        for (auto x:regex_matches)
+            std::cout << x <<" "<< std::endl;
     }
     return (int)regex_matches.size();
+}
+
+/* After performing a regex_find() with an expression that has "()" in it.  */
+int SuperString::print_matches(  )
+{
+    size_t   valid_responses = regex_matches.size();
+	printf("%d Matches \n", valid_responses);
+    for (int i=0; i<valid_responses; i++)
+        printf( " %s \n", regex_matches[i] );
+    return (int)valid_responses;
 }
 
 /* After performing a regex_find() with an expression that has "()" in it.  */

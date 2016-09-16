@@ -29,7 +29,6 @@ public:
     SuperString& append_float      (float mOp   );
     void    replace_all            ( char mChar, char mDest );
 
-
     // HELPER FUNCTIONS:
     void    trim_trail_space       (  );
     void    trim_leading_space     (  );
@@ -57,34 +56,34 @@ public:
     void    reduce_string               ( vector<int> mWordIndices );
 
     // Return for these is:         
-    int  compare_wordlist        ( SuperString  mWord, int& mSelectedWord, int start_word=0,  vector<int>* remove_wi=NULL     );
-    int  is_found_in_sentence    ( const char*  mWord, int start_word=0, vector<int>* remove_wi=NULL, bool mOrItsPlural=false );
+    int  	compare_wordlist        ( SuperString  mWord, int& mSelectedWord, int start_word=0,  vector<int>* remove_wi=NULL     );
+    int  	is_found_in_sentence    ( const char*  mWord, int start_word=0, vector<int>* remove_wi=NULL, bool mOrItsPlural=false );
 
     // REGULAR EXPRESSIONS :
-    int  regex_find              ( string&  mRegexpression, vector<int>* answers=NULL, vector<int>* remove_wi=NULL  );
-    int  extract_wordlist_results(  );
-    SuperString extract_results  (  );
-    int  count_wordlists         (  );
+    int  	regex_find              ( string&  mRegexpression, vector<int>* answers=NULL, vector<int>* remove_wi=NULL  );
+	int 	print_matches			(  );
+    int  	extract_wordlist_results(  );
+    SuperString extract_results  	(  );
+    int  	count_wordlists         (  );
 
-    
-    int  regex_found_in_sentence( SuperString  mWord, int start_word=0, vector<int>* answers=NULL, vector<int>* remove_wi=NULL );
-    int  any_one_word_found_in_sentence          ( SuperString& mWordList, int start_word=0, vector<int>* remove_wi=NULL );
+    int  	regex_found_in_sentence( SuperString  mWord, int start_word=0, vector<int>* answers=NULL, vector<int>* remove_wi=NULL );
+    int 	any_one_word_found_in_sentence          ( SuperString& mWordList, int start_word=0, vector<int>* remove_wi=NULL );
     // all words, any order.
-    int  all_words_found_in_sentence_any_order   ( SuperString& mWordList, int start_word=0, vector<int>* remove_wi=NULL );
+    int  	all_words_found_in_sentence_any_order   ( SuperString& mWordList, int start_word=0, vector<int>* remove_wi=NULL );
     // all words, in-order, fill words(in sentence) allowed
-    int  all_words_sequentially_found_in_sentence( SuperString& mWordList, int start_word=0, vector<int>* remove_wi=NULL );
+    int  	all_words_sequentially_found_in_sentence( SuperString& mWordList, int start_word=0, vector<int>* remove_wi=NULL );
     // all words, in-order, no-fill words allowed.
-    int  all_words_exact_match                   ( const char*  mWordList, int start_word=0, vector<int>* remove_wi=NULL );
-    int  all_words_exact_match                   ( SuperString& mWordList, int start_word=0, vector<int>* remove_wi=NULL );
+    int  	all_words_exact_match                   ( const char*  mWordList, int start_word=0, vector<int>* remove_wi=NULL );
+    int  	all_words_exact_match                   ( SuperString& mWordList, int start_word=0, vector<int>* remove_wi=NULL );
 
     void    print();
 
     string              m_regex;
     std::smatch         regex_matches;
-    vector<int>         m_wordlist_choices;         // For any & all word lists.
-    
+    vector<int>         m_wordlist_choices;        		 // For any & all word lists.
+
     //void format       ( char* mFormatter, ...);
-    vector<int>          m_split_words_original_index;      // starting char index
+    vector<int>          m_split_words_original_index;  	// starting char index
     vector<SuperString>  m_split_words;
 };
 

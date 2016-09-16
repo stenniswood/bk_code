@@ -15,7 +15,6 @@
 #include "vision_logger.hpp"
 #include "face_recog.hpp"
 
-
 #define LEFT_TEXT "face left"
 const int X_THRESHOLD = 10;
 const int Y_THRESHOLD = 10;
@@ -189,7 +188,7 @@ void process_detected_faces( vector<Rect>& faces, vector<int>& mIDs )
 	vector<bool> NewFaces;
 	bool match   = false;
 	bool use_ids = true;
-	//printf("process_detected_faces()\n");
+	printf("process_detected_faces()\n");
 
 	if (faces.size() != mIDs.size())
 		use_ids = false;
@@ -324,3 +323,27 @@ void 	test_face_summary()
 		
 	//printf("test_face_summary() done");	
 }
+
+
+/*	sql_logger.sql_add_event("Stephen", "face detected");
+	sql_logger.sql_add_event("Stephen", "face left"  );
+	sql_logger.sql_add_event("David",   "face detected"  );
+	sleep(10);
+	sql_logger.sql_add_event("David",   "face left"  );
+
+	//sql_logger.sql_query_event("David", "face detected");	
+	time_t 		rawtime,rawtime2;
+	time (&rawtime);
+	rawtime2 = rawtime;
+	rawtime -= (3600 * 4);		// 4 hours ago.	
+	struct tm start_time_bd = *(localtime( &rawtime ));
+	struct tm end_time_bd   =*(localtime( &rawtime2 ));
+	sql_logger.sql_query_time( "David", "face detected", start_time_bd, end_time_bd );
+	sql_logger.print_results();  
+
+	string Response;
+	sql_logger.form_response__last_time_i_saw( "Stephen", Response ); 
+	printf("%s\n", Response.c_str() );
+	sql_logger.form_response__last_time_i_saw( "Johnathon", Response ); 
+	printf("%s\n", Response.c_str() );
+*/

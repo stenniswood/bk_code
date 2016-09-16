@@ -78,15 +78,16 @@ void SSerialInterface::Initialize()
 	_error_count = 0;
 }
 
-void SSerialInterface::open_block( )
+// Returns true => Success
+bool SSerialInterface::open_block( )
 {
 	// OPEN SERIAL PORT : 
-	do {
-		_fd = open( _cl_port, O_RDWR );	// | O_NONBLOCK
-		usleep(10000);		// 10ms
-	} while ( _fd<0 );	
+
+	_fd = open( _cl_port, O_RDWR );	// | O_NONBLOCK
 	serial_poll.fd = _fd;
-	setup_serial_port( );
+	bool result = setup_serial_port( );
+	result &= (serial_poll.fd > 0);
+	return result;
 }
 
 static void print_args(int margc, char *margv[])
@@ -519,7 +520,7 @@ void SSerialInterface::process_write_data()
 }
 
 // open serial port prior to calling this!
-void SSerialInterface::setup_serial_port( )
+bool SSerialInterface::setup_serial_port( )
 {
 	// ESTABLISH BAUD RATE : 
 	int baud = B9600;
@@ -558,15 +559,18 @@ void SSerialInterface::setup_serial_port( )
 		struct serial_rs485 rs485;
 		if(ioctl(_fd, TIOCGRS485, &rs485) < 0) {
 			printf("Error getting rs485 mode\n");
+			return false;
 		} else {
 			rs485.flags |= SER_RS485_ENABLED | SER_RS485_RTS_ON_SEND | SER_RS485_RTS_AFTER_SEND;
 			rs485.delay_rts_after_send = _cl_rs485_delay;
 			rs485.delay_rts_before_send = 0;
 			if(ioctl(_fd, TIOCSRS485, &rs485) < 0) {
 				printf("Error setting rs485 mode\n");
+				return false;				
 			}
 		}
 	}
+	return true;
 }
 
 int SSerialInterface::diff_ms(const struct timespec *t1, const struct timespec *t2)

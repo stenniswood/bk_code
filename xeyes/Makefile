@@ -24,7 +24,7 @@ VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 	         -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
 SQL_INC    = -I/usr/include/mysql 
 INC	   	   = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/ \
-	         /usr/local/include/libfreenect/ ../abkInstant/threads/
+	         /usr/local/include/libfreenect/ ../abkInstant/threads/ ./vision/ ./nlp/ ./control/
 ALL_INCLUSIVE = $(addprefix -I,$(INC)) $(SQL_INC) $(VG_INCLUDE)
 
 CFLAGS = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) -std=gnu++11 \
@@ -41,27 +41,35 @@ OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lo
 	-lopencv_core
 
 # MAIN DIRECTORY OBJECTS:
-NLP_OBJ = nlp_thread.o nlp_vision_general_protocol.o color_protocol.o super_string.o \
-		  qualitative_time.o
-OBJ       = mouse.o serial.o x_eyes.o x_eyes_main.o roboclaw.o findEyeCenter.o findEyeCorner.o \
-	    	helpers.o face_detect.o face_recog.o serial_synchronous.o vision_logger.o \
-	    	neck_thread.o cal_screen.o optical_flow.o misc_detect.o key_config.o face_summary.o \
-	    	frame_grabber.o 
+MISC_OBJS = super_string.o
+OBJ       = mouse.o serial.o x_eyes.o x_eyes_main.o roboclaw.o  \
+	    	helpers.o serial_synchronous.o vision_logger.o \
+	    	neck_thread.o cal_screen.o key_config.o \
+	    	frame_grabber.o serverthread.o
+VISION_OBJS = findEyeCenter.o findEyeCorner.o face_detect.o face_recog.o face_summary.o optical_flow.o misc_detect.o 
+NLP_OBJ = nlp_thread.o  nlp_vision_general_protocol.o color_protocol.o  \
+		  qualitative_time.o nlp_sentence.o tk_colors.o
 IPC_OBJS  = vision_memory.o
 KINETIC_OBJS  = vector.o 
-INSTANT_OBJS  = serverthread.o
+INSTANT_OBJS  = 
 
 %.o: %.cpp $(DEPS)
-	$(CC) $(ALL_INCLUSIVE) -c -o $@ $<  $(CFLAGS)
+	$(CC) $(ALL_INCLUSIVE) -c -o $@ $< -g  $(CFLAGS)
 %.o: %.c $(DEPS)
 	$(CC) $(ALL_INCLUSIVE) -c -o $@ $< $(OPTIONS) $(CFLAGS)
 
-xeyes: $(OBJ) $(NLP_OBJ)	\
-	$(addprefix ../core/ipc/, $(IPC_OBJS))	\
+xeyes: $(OBJ) \
+	$(addprefix ./nlp/, $(NLP_OBJ)) \
+	$(addprefix ./vision/, $(VISION_OBJS)) \
+	$(addprefix ../core/misc/, $(MISC_OBJS)) \
+	$(addprefix ../core/ipc/,  $(IPC_OBJS))	\
 	$(addprefix ../abkInstant/threads/, $(INSTANT_OBJS)) \
 	$(addprefix ../core/kinetic/, $(KINETIC_OBJS))
 	g++ -o $@ $^ $(CFLAGS) $(LIBFLAGS) $(LDFLAGS) $(OPENCV_LIBS)
 
 clean:
+	rm ./vision/*.o
+	rm ./nlp/*.o
+	rm ./control/*.o
 	rm -rf *.o $(PRG).elf *.eps *.bak 
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
