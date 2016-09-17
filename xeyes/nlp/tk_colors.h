@@ -19,6 +19,7 @@ typedef unsigned char		byte;
 class Color
 {
 public:
+	Color		();
     Color		(byte Red, byte Green, byte Blue);
     long int	get_color(				);
     float		get_alpha(				) { return (float)m_alpha / 255.;  };

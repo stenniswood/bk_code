@@ -5,15 +5,12 @@
 //  Created by Stephen Tenniswood on 8/16/15.
 //  Copyright (c) 2015 Stephen Tenniswood. All rights reserved.
 //
-
-
-
-
 // Steve Tenniswood
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+
 //#include "VG/openvg.h"
 //#include "VG/vgu.h"
 //#include <shapes.h>
@@ -21,6 +18,17 @@
 #include "tk_colors.h"
 //#include "tk_colors.hpp"
 
+Color::Color( )
+{
+    combo = 0xFF000000;
+    combo |= (0xFF0000<<16);
+    combo |= (0x00FF00<<8);
+    combo |= (0x0000FF);
+    m_red   = 0x7F;
+    m_green = 0x7F;
+    m_blue  = 0x7F;
+    m_alpha = 0xFF;	
+}
 
 Color::Color(byte Red, byte Green, byte Blue)
 {

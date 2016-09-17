@@ -15,7 +15,6 @@
 #include "face_detect.hpp"
 
 
-
 using namespace std;
 
 /** Constants **/

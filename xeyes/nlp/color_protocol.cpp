@@ -8,7 +8,6 @@
 #include <string>
 #include <map>
 #include <vector>
-
 #include "super_string.hpp"
 #include "color_protocol.hpp"
 #include "nlp_sentence.hpp"
@@ -26,8 +25,7 @@ void init_color_map()
     colors.split( '|' );
     for (int i=0; i < colors.m_split_words.size(); i++)
         color[colors.m_split_words[i]] =
-        
-        
+             
     color["alice_blue"]    = &alice_blue;
     color["AliceBlue" ]     = &AliceBlue;
     color["antique_white"] = &antique_white;

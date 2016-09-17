@@ -39,6 +39,7 @@ Follow/Track Janet. Do what she asks.
 //#include "bk_system_defs.h"
 #include "nlp_vision_general_protocol.hpp"
 #include "color_protocol.hpp"
+
 #define FALSE 0
 #define TRUE  1
 #define BOOL unsigned char
@@ -47,6 +48,7 @@ Follow/Track Janet. Do what she asks.
 #include "nlp_sentence.hpp"
 #include "vision_logger.hpp"
 #include "qualitative_time.hpp"
+#include "nlp_vision_thing_protocol.hpp"
 
 
 extern int connfd;
@@ -140,7 +142,7 @@ int Get_Statement_symantic_id( Sentence& theSentence )
 	Process response to question about user face detection.
 
 */
-void process_person_query(int mquestion_id)
+void process_person_query( Sentence& theSentence, int mquestion_id )
 {
 	int    	rows;
 	time_t 	time;
@@ -151,7 +153,8 @@ void process_person_query(int mquestion_id)
     int 	num_sightings  =0;
     bool 	prior_activation;    
 	string 	time_str;
-
+	int 	result=0;
+	
     switch(mquestion_id)
     {
 		case 101 : /* When did you last see David? */
@@ -305,7 +308,7 @@ int Get_Future_Statement_symantic_id(Sentence& theSentence)
 	return retval;
 }
 
-void process_future_person_query(int future_action_request)
+int process_future_person_query(int future_action_request)
 {
 	int result = -1;
     switch (future_action_request)
@@ -362,7 +365,7 @@ char* Parse_Statement( char*  mSentence, ServerHandler* mh )
     int result2 = parse_qualitative_2_time( theSentence, start_time_bd, end_time_bd );    
 
     int question_id = Get_Statement_symantic_id(theSentence);
-    process_person_query(question_id);
+    process_person_query(theSentence, question_id);
     
     int future_action_request = Get_Future_Statement_symantic_id(theSentence);
 	process_future_person_query(future_action_request);
@@ -370,7 +373,7 @@ char* Parse_Statement( char*  mSentence, ServerHandler* mh )
 	if (result==-1)
 		result = Parse_color_statement( theSentence, NLP_Response_str );
 
-	char* end_ptr = Parse_vision_things_Statement( char*  mSentence, ServerHandler* mh );
+	char* end_ptr = Parse_vision_things_Statement( theSentence, mh );
 	
 		
 	// Not handled:

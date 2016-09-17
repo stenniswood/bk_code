@@ -43,11 +43,12 @@ OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lo
 # MAIN DIRECTORY OBJECTS:
 MISC_OBJS = super_string.o
 OBJ       = mouse.o serial.o x_eyes.o x_eyes_main.o roboclaw.o  \
-	    	helpers.o serial_synchronous.o vision_logger.o \
+	    	helpers.o serial_synchronous.o vision_logger.o viki_logger.o \
 	    	neck_thread.o cal_screen.o key_config.o \
 	    	frame_grabber.o serverthread.o
-VISION_OBJS = findEyeCenter.o findEyeCorner.o face_detect.o face_recog.o face_summary.o optical_flow.o misc_detect.o 
-NLP_OBJ = nlp_thread.o  nlp_vision_general_protocol.o color_protocol.o  \
+VISION_OBJS = findEyeCenter.o findEyeCorner.o face_detect.o face_recog.o face_summary.o \
+			optical_flow.o misc_detect.o  image_proc_misc.o
+NLP_OBJ = nlp_thread.o  nlp_vision_general_protocol.o nlp_vision_thing_protocol.o color_protocol.o  \
 		  qualitative_time.o nlp_sentence.o tk_colors.o
 IPC_OBJS  = vision_memory.o
 KINETIC_OBJS  = vector.o 
