@@ -17,6 +17,7 @@
 #include "roboclaw.h"
 #include "face_detect.hpp"
 #include "face_recog.hpp"
+#include "face_summary.hpp"
 #include "neck_thread.hpp"
 #include "vision_logger.hpp"
 #include "cal_screen.hpp"
@@ -24,9 +25,12 @@
 #include "misc_detect.hpp"
 #include "key_config.hpp"
 #include "frame_grabber.hpp"
-#include "face_summary.hpp"
+
 #include "nlp_thread.hpp"
-#include "frame_grabber.hpp"
+#include "tk_colors.h"
+#include "image_proc_misc.hpp"
+#include "vision_logger.hpp"
+#include "viki_logger.hpp"
 
   
 int   	  device_number;
@@ -85,6 +89,7 @@ void init()
 	mkdir("/home/pi/Pictures/robot", 		S_IRWXU);
 	mkdir("/home/pi/Pictures/robot/detected_faces", S_IRWXU);	
 	eye_init();
+	init_gpio();
 	
 	sql_logger.connect_to_logger_db();	
 	sql_logger.create_events_table();	
@@ -118,11 +123,6 @@ void init()
 	//sql_logger.connect_to_logger_db();
 }
 
-void find_center( int& x, int &y, cv::Rect mrect)
-{
-	x = mrect.x + (mrect.width/2);
-	y = mrect.y + (mrect.height/2);
-}
 
 void handle_arguments(int argc, char ** argv)
 {
@@ -167,99 +167,59 @@ void handle_arguments(int argc, char ** argv)
 */             
 int main(int argc, char ** argv)
 {
-	int   mover_x=0;
-	int   mover_y=0;
-	int   frame_count=0;
 	int   result=0;
 	char* ptr;
-	std::string  message = "no event";
 	bool  unrecognized	 = false;
-	bool  capture_frame	 = false;
-	int   face_x, face_y;
 
 	if (argc>1) {
 		print_args( argc,argv );
 		handle_arguments(argc,argv);		
-	}	
+	}
 //	delete_all_shm();
+
+	//nlp_test();
+	//test_viki_logger();	
+	//test_face_summary();		
+	//exit(1);
 
 	init();
 	signal(SIGINT, app_close_handler );
 	
-	text_to_speech_pico	   ( "Welcome, my name is ronny.");
+	text_to_speech_pico( "Welcome, my name is ronny.");
 	//text_to_speech_festival( "Welcome, my name is ronny.");
-
-	// Add some samples rows : 
-/*	sql_logger.sql_add_event("Lynn",   "Face Detected" );
-	sql_logger.sql_add_event("Stephen", "Face Detected");
-	sql_logger.sql_add_event("Stephen", "Face Left"    );
-	sql_logger.sql_add_event("David",   "Face Detected" );
-	sql_logger.sql_add_event("David",   "Face Left"  	);
-	sql_logger.sql_add_event("Lynn",   "Face Left"  	);*/
-	
-	//test_face_summary();		
-	//exit(1);
 
     while (1)
     {   
 		mouse_timeslice( );		
 		frame_grabs    ( );
-
-		if (frame_count++) { 
-			//optic_flow( prev_gray_frame, gray_frame, flow, frame );
-			//update_face_region_flow_based( flow, faces[0] );
-			//imshow( "optical flow", frame );
-		}
- 
-		//fd_timeslice( gray_frame, original, false );
-		//misc_detect_timeslice( original, gray_frame );
-
-		if (num_faces_present)
-		{	
-			std::vector<int> predictedLabels;
-			if (model) {
-				message = face_recongition_tasks( gray_frame, faces, predictedLabels, capture_frame );
-				save_faces(frame, predictedLabels);
-			}
-
-			// Inform Client of Presence : 
-			message = "face detected";
-			if (!MOVE_TO_MOUSE) {
-				find_center( mover_x, mover_y, faces[0] );
-				update_neck_angle( mover_x, frame.cols  );
-			}
-			eyes_compose_coordinate_xy( mover_x, mover_y );
-		}
-		else {
-			// No Faces detected:
-			message = "face gone";
-			if (!MOVE_TO_MOUSE)
-				neck_duty = 0;
-		}
-
-		if (MOVE_TO_MOUSE) {
-			mover_x = trunc( mouse.x );
-			mover_y = trunc( mouse.y );
-			//update_neck_angle( mover_x, ScreenWidth );
-		}
-
-		printf("mover x,y= %d,%d\r", mover_x, mover_y );
-		update_eye_positions( mover_x, (ScreenHeight-mover_y), ScreenWidth, ScreenHeight );
-
-      	imshow( main_window_name, original );
+		process_frames ( );
 		
+		if (MOVE_TO_MOUSE) {
+			mover_x = trunc( mouse.x );		// Overwrite values assign in process_frames()
+			mover_y = trunc( mouse.y );
+			mover_width = ScreenWidth;			
+		}
+
+		// CONTROL : 
+		printf("mover x,y= %d,%d\r", mover_x, mover_y );
+		update_neck_angle   ( mover_x, mover_width, num_faces_present );
+		update_eye_positions( mover_x, (mover_height-mover_y), mover_width, mover_height );
+
+		// SHOW & CAPTURE : 
 		/* Several Events can trigger an image write (unknown face_detect 
 		   for several frames, or a motion detect, etc)  		   */
-		if (capture_frame)
+		if (capture_frame)		// Save image to disk.
 		{
 			char* fn = get_new_frame_captured_filename();
 			imwrite(fn, frame /* see face_detect.cpp */ );
 		}
+      	imshow	( main_window_name, original );
 
+      	// USER CONTROL : 
 		int c = cv::waitKey( 10 );
 		handle_key_controls( c  );
 
-		// Inform the client :
+		// Signal NLP (any events) :
 		//eyes_write_server_event( message );
     }
 	

@@ -13,6 +13,7 @@ int  show_person_faces		 ( std::string person_folder_name );
 
 void make_training_size		( std::string mPath );
 
+void init_gpio				( );
 void text_to_speech_pico	( const char* mText );
 void text_to_speech_festival( const char* mText );
 

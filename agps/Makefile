@@ -4,7 +4,7 @@ INC		= ./core/
 CFLAGS 	= -lwiringPi -lm
 DEPS   	= 
 OBJ     = CAN_Interface_.o gpio.o  \
-			gps_test.o 
+			gps_test2.o 
 CORE_OBJS = can.o can_instance.o can_eid.o can_board_msg.o can_buff.o can_txbuff.o \
 		    bk_system_defs.o  configuration.o leds.o can_id_list.o  
 

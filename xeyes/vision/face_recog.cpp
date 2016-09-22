@@ -51,6 +51,7 @@ string face_test_db_basepath = "/home/pi/Pictures/face_recog/att_test/";
 string FaceRecogModelName    = model_basepath + "face-rec-model.txt";
 
 std::map<int, std::string> known_people;
+std::string  message = "no event";
 
 /* This loads the csv file and each image specified in it.
  Each line can specify a filename, or a directory name.
@@ -282,7 +283,7 @@ std::string& face_recongition_tasks( cv::Mat&               mGray_frame,
 									 bool& 					mcapture_frame   )
 {
 	cv::Mat  face, prepared_face;
-	static std::string message;
+	
 	int 	label;
 	double 	confidence;
 

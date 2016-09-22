@@ -95,17 +95,25 @@ int Get_Statement_symantic_id( Sentence& theSentence )
 	
 	// Saw a person?
 	exp = "was the (last)? time";
-	int last_time = S.regex_find( exp, &answers, &remove_wi );
-		
+	int last_time = theSentence.regex_find( exp );
+
 	exp = "(did )?you (last )?see";	  
 	exp2 = "have you seen";
     int did_see = ( theSentence.regex_find(exp) || theSentence.regex_find(exp2) );
+    int how_long = (theSentence.regex_find("how long"));
+    int how_much_time = (theSentence.regex_find("how long")||theSentence.regex_find("how many hours")||
+    					theSentence.regex_find("how much time"));
     
-    bool foundS = when && (did_see || (theSentence.is_found_in_sentence( "saw" ) && last_time));
+    bool foundS = (when||how_long) && (did_see || (theSentence.is_found_in_sentence( "saw" ) && last_time));
 	if (foundS) {
-		printf("REDUCED: %s\n", theSentence.m_reduced_sentence.c_str() );
+		//printf("REDUCED: %s\n", theSentence.m_reduced_sentence.c_str() );
 		retval = 101;
 	}
+	int around = theSentence.regex_find("(was (he|she))|(were they) around");
+    foundS = (how_long && (did_see || around) );
+	if (foundS && (theSentence.is_found_in_sentence("ago")==FALSE)) 
+		retval = 99;
+
 	if (num_times && did_see) 
 		retval = 111;
 
@@ -131,9 +139,17 @@ int Get_Statement_symantic_id( Sentence& theSentence )
 		else 
 			retval = 105;			
 	}
-    bool found = theSentence.are_found_in_sentence( "are you going to deactivate me" );
+    bool found = theSentence.regex_find( "(shutdown|reboot) " );
 	if (found) 
-		retval = 200;
+		retval = 900;
+
+/*  How long were you active.
+	How many hours were you active.
+	How much time were you active.
+	How long have you been active.
+*/
+	if (how_much_time && (were_active||theSentence.regex_find("have you been active"))&& parsed_qualitative_time )
+		retval = 210;
 
 	printf("Person question id = %d\n", retval );
 	return retval;
@@ -154,13 +170,23 @@ void process_person_query( Sentence& theSentence, int mquestion_id )
     bool 	prior_activation;    
 	string 	time_str;
 	int 	result=0;
+	char*   ptr=NULL;
+	float 	hours=0;
+	char	str[16];
 	
     switch(mquestion_id)
     {
+    	case 99 : 
+    			name = "Stephen";
+				rows = sql_logger.form_response__saw_for_duration( name, time);
+				NLP_Response_str = name + " was around for ";
+				compose_time_qualitative_duration( time, time_str );
+				NLP_Response_str += time_str;
+    			break;
 		case 101 : /* When did you last see David? */
 				name = "Stephen";
-				printf("REDUCED: %s\n", theSentence.m_reduced_sentence.c_str() );
 				rows = sql_logger.form_response__last_time_i_saw( name, time );
+				printf("REDUCED: %s;  %d\n", theSentence.m_reduced_sentence.c_str(), rows );
 				if (rows==0)
 					NLP_Response_str = "According to my database, I have never met " + name;
 				else {
@@ -277,15 +303,58 @@ void process_person_query( Sentence& theSentence, int mquestion_id )
 				result = 0;				
 				break;
 		case 200 : 	/* Show me the picture ____?  (particular person at a particular time) */
-		
+				NLP_Response_str = "Do you have to deactivate me?";
+				
+				
 				result=0;
 				break;
 		case 201 : 	/* Who did you meet today?  */
 		
 				result=0;
 				break;
+		case 202 : 	/* Did you see anyone you didn't know?  Did you find any unknown faces?
+					Any unknown people?  Anyone you didn't recognize? */
+				description = "Face Detected";
+				name = "Unrecognized";
+				num_sightings = sql_logger.form_response__how_many_times( 
+								name, description, start_time_bd, end_time_bd );
+				compose_time_period_qualitative( &start_time_bd, &end_time_bd, NLP_Response_str );
+				if (num_sightings==0) {
+					NLP_Response_str += ", I did not see anyone I didn't know.";				
+				} else {
+					NLP_Response_str += ", I saw ";
+					NLP_Response_str += std::to_string(num_sightings);
+					NLP_Response_str += " people I didn't recognize.\n";
+				}
+				result=0;
+				break;
+		case 203 : 	/* Who was with Steve?  */
+				description = "Face Detected";
+				name = "Stephen";
+				rows = sql_logger.form_response__last_time_i_saw( name, time );				
+				compose_time_period_qualitative( &start_time_bd, &end_time_bd, NLP_Response_str );
+				ptr = strchr(sql_logger.m_row[3], ',');
+				if (ptr==NULL) {
+					NLP_Response_str += ", no one was with "+name+".";
+				} else {
+					NLP_Response_str += sql_logger.m_row[3];
+					NLP_Response_str += " were all together.\n";
+				}
+				result=0;
+				break;
 
-		case 202 : 	/* shutdown */
+		case 210 : /* Hours active */
+				description = "Vision System De-activated";
+				num_activations  = sql_logger.form_response__hours_active( description, time,
+											   start_time_bd, end_time_bd );
+				compose_time_period_qualitative( &start_time_bd, &end_time_bd, NLP_Response_str );
+				NLP_Response_str += ", I was activated ";
+				hours = time/3600.;
+				sprintf(str,"%6.1f hours.\n", hours);
+				NLP_Response_str += str;
+				result = 0;
+				break;
+		case 900 : 	/* shutdown */
 			result=0;
 				break;
 				
@@ -363,18 +432,19 @@ char* Parse_Statement( char*  mSentence, ServerHandler* mh )
 
     struct tm Time;
     int result2 = parse_qualitative_2_time( theSentence, start_time_bd, end_time_bd );    
+	//printf("Returned from parse_qualitative_2_time() \n");
 
     int question_id = Get_Statement_symantic_id(theSentence);
     process_person_query(theSentence, question_id);
-    
+	//printf("Returned from process_person_query() \n");
+	    
     int future_action_request = Get_Future_Statement_symantic_id(theSentence);
 	process_future_person_query(future_action_request);
-
+	
 	if (result==-1)
 		result = Parse_color_statement( theSentence, NLP_Response_str );
 
 	char* end_ptr = Parse_vision_things_Statement( theSentence, mh );
-	
 		
 	// Not handled:
 	if (result==-1)

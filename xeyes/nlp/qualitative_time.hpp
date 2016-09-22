@@ -19,6 +19,11 @@ using namespace std;
 extern bool parsed_qualitative_time;		// True if any qualitative time is stated : 
 extern bool parsed_qualitative_duration;	// True if any qualitative time is stated : 
 
+
+void compose_time_qualitative_absolute( time_t  mAbsTime, string& mTimeString );
+void compose_time_qualitative		  ( time_t deltaTime, string& mTimeString );
+void compose_time_qualitative_duration( time_t deltaTime, string& mTimeString );
+
 //void convert_to_time_t( m_row[1], &tmp );
 void compose_time_qualitative		( time_t mTime, std::string& mTimeString );
 void compose_time_period_qualitative( struct tm* sTime, struct tm* eTime, std::string& mTimeString );

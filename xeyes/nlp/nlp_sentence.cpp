@@ -108,10 +108,10 @@ void Sentence::reduce_sentence( )
 int Sentence::regex_find( string  mRegexpression )
 {
     int retval = m_reduced_sentence.regex_find(mRegexpression, &answers, &remove_wi );
-    printf("remove_wi %d:\t", remove_wi.size());
-	for (int i=0; i<remove_wi.size(); i++)
-		printf(" %d  ", remove_wi[i] );
-    printf("\n");		
+//    printf("remove_wi %d:\t", remove_wi.size());
+//	for (int i=0; i<remove_wi.size(); i++)
+//		printf(" %d  ", remove_wi[i] );
+//    printf("\n");		
 	reduce_sentence();
 	return retval;
 }

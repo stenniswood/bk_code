@@ -1,3 +1,24 @@
+a) NLP perfected.
+	i) last time you saw, when they are present.
+	ii)  
+b) 
+c)
+
+
+============================================
+What do we want face detection for?
+	Robot to Know if someone is present.
+			and to put a person in the simulator scene.
+	To look at me - let's me know that it knows i am here.
+
+What do we want eye tracking for?
+	To know if I am looking at it.
+	Hopefully it could tell what object i am looking at.
+
+What do we want face recognition for?
+	Tell me who did you meet today?
+	
+============================================
 Add openvg
 Create a screen with calibration points
 Add Face recognition

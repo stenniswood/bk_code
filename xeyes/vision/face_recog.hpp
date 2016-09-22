@@ -25,7 +25,7 @@ extern std::string 	face_db_basepath      ;
 extern std::string 	face_test_db_basepath ;
 extern std::string 	FaceRecogModelName    ;
 extern std::map<int, std::string> known_people;
-
+extern std::string message;
 
 bool 	does_model_exist	( );
 void 	open_model			( std::string  model_filename, std::string mcsv_fn );

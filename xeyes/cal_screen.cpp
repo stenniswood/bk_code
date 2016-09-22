@@ -7,15 +7,21 @@
 #include <vector>
 #include <sys/types.h>
 #include <dirent.h>
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <wiringPi.h>
+#include "cal_screen.hpp"
+
 
 using namespace cv;
 using namespace std;
-#include "cal_screen.hpp"
+
+#define VOICE_LED_1 0	// Pi Header Pin 11
+#define VOICE_LED_2 1	// Pi Header Pin 12
+#define VOICE_LED_3 2	// Pi Header Pin 13
+
 
 const int CAL_POINT_RADIUS = 20;
 int screen_width  = 1280;
@@ -202,19 +208,34 @@ void make_training_size( string mPath )
 	}
 }
 
+
+void init_gpio()
+{
+	int result = wiringPiSetup();
+	
+	pinMode( VOICE_LED_1, OUTPUT);
+	pinMode( VOICE_LED_2, OUTPUT);
+	digitalWrite( VOICE_LED_1, 0 );
+	digitalWrite( VOICE_LED_2, 0 );
+}
+
 /* blocks until done speaking */
 void text_to_speech_pico( const char* mText )
 {
+	digitalWrite( VOICE_LED_1, 1);	
 	char cmd[512];
 	sprintf( cmd, "/usr/bin/pico2wave -w /tmp/tmp.wav \"%s\" && aplay /tmp/tmp.wav", mText );
 	system ( cmd );
+	digitalWrite( VOICE_LED_1, 0);
 }
 
 /* blocks until done speaking */
 void text_to_speech_festival( const char* mText )
 {
 	char cmd[512];
+	digitalWrite( VOICE_LED_1, 1);	
 	sprintf( cmd, "echo \"%s\" | festival --tts ", mText );
 	system ( cmd );
+	digitalWrite( VOICE_LED_1, 0);
 }
 

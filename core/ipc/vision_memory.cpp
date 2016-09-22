@@ -31,7 +31,7 @@ AUTHOR	:  Stephen Tenniswood
 #include <string>
 #include <assert.h>
 #include "global.h"
-#include "bk_system_defs.h"
+//#include "bk_system_defs.h"
 #include "vision_memory.h"
 
 
@@ -52,7 +52,7 @@ char eyes_segment_id_filename[] = "/home/steve/bk_code/client/eyes_shared_memseg
 bool is_eyes_ipc_memory_available()
 {
     struct shmid_ds buf;			// shm data descriptor.
-    dprintf("Checking for vision IPC memory... segment id: %s\n", eyes_segment_id_filename );
+    Dprintf("Checking for vision IPC memory... segment id: %s\n", eyes_segment_id_filename );
 
     // First see if the memory is already allocated:
     eyes_segment_id = eyes_read_segment_id( eyes_segment_id_filename );
@@ -60,7 +60,7 @@ bool is_eyes_ipc_memory_available()
     int retval = shmctl(eyes_segment_id, IPC_STAT, &buf);
     if (retval==-1) {
 		perror("Vision Memory : shmctl() Error");
-        //dprintf("Error: %s\n", strerror(errno) );
+        //Dprintf("Error: %s\n", strerror(errno) );
         return false;
     }
     printf( "Vision_memory:  Found segment %d, size=%ld and %d attachments.\n", eyes_segment_id, buf.shm_segsz, buf.shm_nattch );
@@ -83,7 +83,7 @@ void eyes_ipc_write_connection_status( char* mStatus )
 
 	//printf("%d:Copying %d bytes to shared mem.\n", StatusCounter, length );
 	strcpy( ipc_memory_eyes->ConnectionStatus, mStatus);
-	dprintf( "|%s|\n", ipc_memory_eyes->ConnectionStatus );
+	Dprintf( "|%s|\n", ipc_memory_eyes->ConnectionStatus );
 }
 
 /* 
@@ -104,7 +104,7 @@ int eyes_connect_shared_memory( char mAllocate )
         eyes_attach_memory( );
         eyes_fill_memory  ( );
 
-        dprintf("Saving segment id: ");
+        Dprintf("Saving segment id: ");
         eyes_save_segment_id( eyes_segment_id_filename );
         if ((ipc_memory_eyes!=(struct eyes_ipc_memory_map*)-1) && (ipc_memory_eyes != NULL))
             return 1;
@@ -198,7 +198,7 @@ void  eyes_wait_for_server      ( )
 int eyes_allocate_memory( )
 {
 	const int shared_segment_size = sizeof(struct eyes_ipc_memory_map);
-    dprintf("eyes shared_seg_size=%d\n", shared_segment_size);
+    Dprintf("eyes shared_seg_size=%d\n", shared_segment_size);
 
 	/* Allocate a shared memory segment. */
 	eyes_segment_id = shmget( IPC_KEY_EYES, shared_segment_size, IPC_CREAT | 0666 );
@@ -206,7 +206,7 @@ int eyes_allocate_memory( )
         perror("shmget ");
     
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	dprintf ("eyes3D shm segment_id=%d;  ", eyes_segment_id );
+	Dprintf ("eyes3D shm segment_id=%d;  ", eyes_segment_id );
 	printf ("Vision memory: allocated %d bytes\n", shared_segment_size );
 	return eyes_segment_id;
 }
@@ -222,7 +222,7 @@ long eyes_attach_memory()
 	/* Attach the shared memory segment. */
 	eyes_shared_memory = (char*) shmat (eyes_segment_id, 0, 0);
 	ipc_memory_eyes			= (struct eyes_ipc_memory_map*)eyes_shared_memory;
-	dprintf ("eyes3D shm attached at address %p\n\n", eyes_shared_memory);
+	Dprintf ("eyes3D shm attached at address %p\n\n", eyes_shared_memory);
     return (long)eyes_shared_memory;
 }
 
@@ -231,7 +231,7 @@ void eyes_reattach_memory()
 	/* Reattach the shared memory segment, at a different address. */ 
 	eyes_shared_memory = (char*) shmat (eyes_segment_id, (void*) 0x5000000, 0); 
 	ipc_memory_eyes			= (struct eyes_ipc_memory_map*)eyes_shared_memory;
-	dprintf ("eyes3D shm reattached at address %p\n", eyes_shared_memory);
+	Dprintf ("eyes3D shm reattached at address %p\n", eyes_shared_memory);
 }
 
 void eyes_detach_memory()
@@ -257,7 +257,7 @@ unsigned long eyes_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (eyes_segment_id, IPC_STAT, &shmbuffer);
 	unsigned long segment_size = shmbuffer.shm_segsz;
-	dprintf ("eyes3D segment size: %lu %lu \n", segment_size, sizeof(struct eyes_ipc_memory_map) );
+	Dprintf ("eyes3D segment size: %lu %lu \n", segment_size, sizeof(struct eyes_ipc_memory_map) );
 	return segment_size;
 }
 
@@ -276,7 +276,7 @@ void eyes_save_segment_id(char* mFilename)
 {
 	FILE* fd = fopen(mFilename, "w");
 	//FILE* fd = fopen("eyesulator_shared_memseg_id.cfg", "w");
-	dprintf("Segment_id=%d\n", eyes_segment_id );
+	Dprintf("Segment_id=%d\n", eyes_segment_id );
 	fprintf( fd, "%d", eyes_segment_id );
 	fclose( fd );
 }

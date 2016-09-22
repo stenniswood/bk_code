@@ -33,17 +33,65 @@ void update_now_time()
     bd_now    = *localtime(&now);
 }
 
-void compose_time_qualitative( time_t mTime, string& mTimeString )
+// Compared to now.
+void compose_time_qualitative_duration( time_t deltaTime, string& mTimeString )
 {
     int mins,hours,days,weeks;
-    time_t 	deltaTime;
-
-	update_now_time();
-    struct tm* bd_Time = localtime(&mTime);
-    deltaTime = difftime( now, mTime );
     char str[20];
-    //printf( "deltaTime= %d\n", deltaTime );
-    
+
+    if (deltaTime < 60 )
+        mTimeString = std::to_string(deltaTime) + " seconds";
+    else if (deltaTime < 1800 )     // less than 1/2 hour.
+    {
+        mins = round(deltaTime / 60);
+        if (mins==1)
+            mTimeString = "1 minute";
+        else {
+            mTimeString = std::to_string(mins);
+            mTimeString += " minutes";
+        }
+    }
+    else if ((deltaTime >= HOUR_IN_SECONDS) && (deltaTime < (HOUR_IN_SECONDS*24) ))
+    {
+        hours = round(deltaTime / HOUR_IN_SECONDS);
+        if (hours==1)
+            mTimeString = "1 hour";
+        else {
+            mTimeString = std::to_string(hours);
+            mTimeString += " hours";
+        }
+    }
+    else if ((deltaTime >= DAY_IN_SECONDS) && (deltaTime < DAY_IN_SECONDS*7 ))
+    {
+        days = round(deltaTime / DAY_IN_SECONDS);
+        if (days==1)
+            mTimeString = "1 day"; // "1 day ago";
+        else {
+			// Compare 
+			mTimeString = std::to_string(days);
+			mTimeString += " days";
+        }
+    }
+    else if ((deltaTime >= WEEK_IN_SECONDS) && (deltaTime < WEEK_IN_SECONDS*3) )
+    {
+        weeks = round(deltaTime / WEEK_IN_SECONDS);
+        if (weeks==1)
+            mTimeString = "1 week ";
+        else {
+            mTimeString = std::to_string(hours);
+            mTimeString += " weeks ";
+        }
+    }
+}
+
+void compose_time_qualitative( time_t mAbsTime, string& mTimeString )
+{
+    int mins,hours,days,weeks;
+    char str[20];
+	update_now_time();
+    struct tm* bd_Time = localtime(&mAbsTime);
+    time_t deltaTime = difftime( now, mAbsTime );
+
     if (deltaTime < 60 )
         mTimeString = "Just now";
     else if (deltaTime < 1800 )     // less than 1/2 hour.
@@ -93,12 +141,79 @@ void compose_time_qualitative( time_t mTime, string& mTimeString )
         }
     }
 }
+
+void compose_time_qualitative_future( time_t mAbsTime, string& mTimeString )
+{
+    int mins,hours,days,weeks;
+    char str[20];
+	update_now_time();
+    struct tm* bd_Time = localtime(&mAbsTime);
+    time_t deltaTime   = difftime(now, mAbsTime);
+
+    if (deltaTime < 60 )
+        mTimeString = "in " + std::to_string(deltaTime) + " seconds";
+    else if (deltaTime < 1800 )     // less than 1/2 hour.
+    {
+        mins = round(deltaTime / 60);
+        if (mins==1)
+            mTimeString = "1 minute from now";
+        else {
+            mTimeString = std::to_string(mins);
+            mTimeString += " minutes from now";
+        }
+    }
+    else if ((deltaTime >= HOUR_IN_SECONDS) && (deltaTime < (HOUR_IN_SECONDS*24) ))
+    {
+        hours = round(deltaTime / HOUR_IN_SECONDS);
+        if (hours==1)
+            mTimeString = "1 hour from now";
+        else {
+            mTimeString = std::to_string(hours);
+            mTimeString += " hours from now";
+        }
+    }
+    else if ((deltaTime >= DAY_IN_SECONDS) && (deltaTime < DAY_IN_SECONDS*7 ))
+    {
+        days = round(deltaTime / DAY_IN_SECONDS);
+        if (days==1)
+            mTimeString = "tomorrow"; // "1 day ago";
+        else {
+			// Compare 
+			if (days < bd_now.tm_wday) {
+				strftime( str, 20, "on %A", bd_Time );
+				mTimeString = str; 
+			} else {
+	            mTimeString = std::to_string(days);
+   	         	mTimeString += " days from now";
+        	}
+        }
+    }
+    else if ((deltaTime >= WEEK_IN_SECONDS) && (deltaTime < WEEK_IN_SECONDS*3) )
+    {
+        weeks = round(deltaTime / WEEK_IN_SECONDS);
+        if (weeks==1)
+            mTimeString = "1 week from now";
+        else {
+            mTimeString = std::to_string(hours);
+            mTimeString += " weeks from now";
+        }
+    }
+}
+
+
 void mk_startofday(struct tm& sTime)
 {
 	sTime.tm_hour = 0;
 	sTime.tm_min  = 0;
 	sTime.tm_sec  = 0;
 }
+void mk_endofday(struct tm& eTime)
+{
+	eTime.tm_hour = 23;
+	eTime.tm_min  = 59;
+	eTime.tm_sec  = 59;
+}
+
 void mk_yesterday(struct tm& sTime)
 {
 	sTime.tm_mday--;
@@ -106,7 +221,6 @@ void mk_yesterday(struct tm& sTime)
 	time_t tmp = mktime(&sTime);
 	sTime = *localtime( &tmp );
 }
-
 bool is_yesterday(struct tm sTime)
 {
 	struct tm  yesterday = bd_now;
@@ -150,7 +264,7 @@ void compose_time_period_qualitative( struct tm* sTime, struct tm* eTime, std::s
 	int s_morning = is_morning(*sTime);
 	int e_morning = is_morning(*eTime);	
 	//printf("today s,e=%d,%d; morn: %d,%d \n", s_today, e_today, s_morning, e_morning );
-		
+
 	if (s_today)
 	{
 		if (e_morning)
@@ -329,7 +443,7 @@ int dow_is_found( Sentence& mSentence )
     if (retval)  {
 		string val = mSentence.m_sentence.regex_matches[0];
     	int d= atoi(val.c_str());
-      	return bd_now.tm_mday+d;
+      	return bd_now.tm_mday-d;
     }
     for (int d=0; d<7; d++)
         if (mSentence.is_found_in_sentence(days_of_week[d].c_str()))
@@ -338,7 +452,7 @@ int dow_is_found( Sentence& mSentence )
 }
 
 int parse_qualitative_1_time( Sentence& mSentence, time_t& sTime )
-{		
+{
 	// Parse Qualitative time:
 	parsed_qualitative_duration = mSentence.are_found_in_sentence( "in the last %d (day|days|hour|hours|minute|minutes|seconds)" ) || 
 								  mSentence.are_found_in_sentence( "between" );	// hour, day, 5 hours, 5 minutes.
@@ -405,13 +519,23 @@ int parse_qualitative_2_time( Sentence& mSentence, struct tm& sTime, struct tm& 
 		retval = 1;
 	}	
 
-    result = mSentence.regex_find("(\\d+ )days ago");
-    mSentence.m_sentence.print_matches();
+	// 
+    result = mSentence.regex_find("(\\d+) days ago");
     if (result)  {
-		string val = mSentence.m_sentence.regex_matches[0];
-    	int    d   = atoi(val.c_str());
-	    printf("days ago: result=%d\n", d );
-      	retval = bd_now.tm_mday-d;
+		SuperString val( mSentence.m_reduced_sentence.regex_matches[0] );		
+		string num  = "\\d+";
+		int result2 = val.regex_find(num);
+		num = val.regex_matches[0];
+    	int    d = atoi( num.c_str() );
+	    //printf("days ago: %s  result=%d\n\n", num.c_str(), d );
+		parsed_qualitative_time = true;
+		parsed_qualitative_duration = true;
+		eTime = bd_now;
+		eTime.tm_mday = bd_now.tm_mday-d;					
+		sTime = eTime;
+		mk_startofday(sTime);
+		mk_endofday  (eTime);
+      	retval = 1; 
     }
     for (int d=0; d<7; d++)
         if (mSentence.is_found_in_sentence(days_of_week[d].c_str()))

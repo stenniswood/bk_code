@@ -1,13 +1,6 @@
 #ifndef _BK_SYSTEM_H_
 #define _BK_SYSTEM_H_
 
-/*#ifdef  __cplusplus
-extern "C" {
-#endif */
-
-#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-#define dprintf if (Debug) printf("%s ", __FILENAME__); if (Debug) printf
-
 #define radians(arg) (3.1415*arg/180.0)
 #define degrees(arg) (arg*180.0/3.1415)
 
@@ -22,8 +15,6 @@ extern "C" {
 #define KWHT  "\x1B[37m"
 // printf("%sred\n", KRED);
 // printf("%snormal\n", KNRM);
-//#include <avr/sfr_defs.h>
-//#include <avr/common.h>
 //#include <inttypes.h>
 //#include "global.h"
 
@@ -62,11 +53,6 @@ union float_array
 #define one_second 400000
 #define STROBE_SPEED 10
 
-//void delay( long int mdelay );
 void chip_init(void);
-
-/*#ifdef  __cplusplus
-}
-#endif */
 
 #endif

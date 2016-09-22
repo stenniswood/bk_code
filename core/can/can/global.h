@@ -7,6 +7,10 @@
 #define 	loop_until_bit_is_set(sfr, bit)   do { } while (bit_is_clear(sfr, bit))
 #define 	loop_until_bit_is_clear(sfr, bit)   do { } while (bit_is_set(sfr, bit))
 
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define Dprintf if (Debug) printf("%s ", __FILENAME__); if (Debug) printf
+
+
 // ----------------------------------------------------------------------------
 #define	true	1
 #define	false	0

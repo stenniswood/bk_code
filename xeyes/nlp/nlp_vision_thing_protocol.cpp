@@ -134,7 +134,7 @@ int process_thing_request( Sentence& theSentence, int question_id, string& Respo
 				break;
 		case 110 : // show color
 				Parse_color_statement( theSentence, Response );
-				filter_color         ( Image, mMin, mMax );		
+				//filter_color         ( Image, mMin, mMax );		
 				break;				
 		case 111 : // how many on table?
 				break;

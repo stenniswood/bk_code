@@ -7,13 +7,16 @@
 #define 	loop_until_bit_is_set(sfr, bit)   do { } while (bit_is_clear(sfr, bit))
 #define 	loop_until_bit_is_clear(sfr, bit)   do { } while (bit_is_set(sfr, bit))
 
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define Dprintf if (Debug) printf("%s ", __FILENAME__); if (Debug) printf
+
 // ----------------------------------------------------------------------------
 #define	true	1
 #define	false	0
 
 #ifndef TRUE
-#define	TRUE	1
-#define	FALSE	0
+#define	TRUE	(1)
+#define	FALSE	(0)
 #endif
 
 #ifndef int8_t
@@ -29,8 +32,6 @@ typedef unsigned short uint16_t;
 #define byte uint8_t
 #endif
 
-#define	TRUE	1
-#define	FALSE	0
 
 #define BOOL unsigned char
 #define BYTE unsigned char

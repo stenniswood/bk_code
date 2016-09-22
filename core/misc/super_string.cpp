@@ -10,11 +10,11 @@
 #include <math.h>
 #include <regex>
 #include <iostream>
-#include "bk_system_defs.h"
+
 #include "super_string.hpp"
+#include "global.h"
 
-
-#define Debug 1
+#define Debug 0
 
 
 SuperString& SuperString::operator=(const SuperString& mOp)
@@ -22,7 +22,7 @@ SuperString& SuperString::operator=(const SuperString& mOp)
     string::operator=( *(string*)(&mOp) );
     m_regex             = mOp.m_regex;
     regex_matches       = mOp.regex_matches;
-    m_wordlist_choices  = mOp.m_wordlist_choices;         // For any & all word lists.
+    m_wordlist_choices  = mOp.m_wordlist_choices;   // For any & all word lists
 
     m_split_words                = mOp.m_split_words;
     m_split_words_original_index = mOp.m_split_words_original_index;
@@ -167,7 +167,7 @@ bool SuperString::is_nth_word_a_number( int mIndex )
 {
     if (mIndex>=m_split_words.size()) return false;
     if (m_split_words[mIndex].length()==0) return false;
-    dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
+    Dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str() );
     
     size_t length = m_split_words[mIndex].length();
     for (int i=0; i<length; i++)
@@ -185,7 +185,7 @@ bool SuperString::is_nth_word_a_number_nd    ( int mIndex )
 {
     if (mIndex>=m_split_words.size()) return false;
     
-    dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
+    Dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
     
     size_t length = m_split_words[mIndex].length();
     for (int i=0; i<length; i++)
@@ -327,8 +327,8 @@ int SuperString::regex_find( string&  mRegexpression, vector<int>* answers, vect
     regex_search ( *this, regex_matches, regex );
 
     if (Debug) {
-        for (auto x:regex_matches)
-            std::cout << x <<" "<< std::endl;
+//        for (auto x:regex_matches)
+//            std::cout << x.position <<" "<< x << std::endl;
     }
     return (int)regex_matches.size();
 }
@@ -337,9 +337,9 @@ int SuperString::regex_find( string&  mRegexpression, vector<int>* answers, vect
 int SuperString::print_matches(  )
 {
     size_t   valid_responses = regex_matches.size();
-	printf("%d Matches \n", valid_responses);
+	printf("%d Matches \n", valid_responses );
     for (int i=0; i<valid_responses; i++)
-        printf( " %s \n", regex_matches[i] );
+        printf( "%d, %s\n", i, regex_matches[i] );
     return (int)valid_responses;
 }
 
