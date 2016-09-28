@@ -38,6 +38,7 @@ typedef unsigned short uint16_t;
 #define WORD unsigned short
 #define DWORD unsigned long
 
+#define word unsigned short
 //typedef	_Bool bool;
 //typedef	boolean Bool;
 

@@ -4,81 +4,89 @@
 #include "serial.hpp"
 #include "x_eyes.hpp"
 
+
 const int MIN_SERVO_PW = 553;
 const int MAX_SERVO_PW = 2300;
 
 struct stServo_info Servo_info[6];
-
 char  txt [120];
 char  txtR[120];
 float yScale = 11.0;
 float xScale = 22.0;
 
-// SERVO DEFINES : 
-const int MIN_PW = 500;
-const int MAX_PW = 2500;
-int       PW_range = (MAX_PW - MIN_PW);
 
 // EYE SERVO DEFINES : 
-float X_LeftEye_coordinate = xScale/2.0 - 2.125/2.0;				// inches
+float X_LeftEye_coordinate = xScale/2.0 - 2.125/2.0;			// inches
 float Y_LeftEye_coordinate = 0.0;	// inch distance away from eyes to the origin (tip of nose)
 float LeftEye_MinAngle 	   = -90.0;
 float LeftEye_MaxAngle 	   = +90.0;
 float LeftEye_Range    	   = (LeftEye_MaxAngle-LeftEye_MinAngle);
-int   LeftEye_CenterCount  = MIN_PW + PW_range/2.0;
 
 float X_RightEye_coordinate = xScale/2.0 + 2.125/2.0;			// inches
 float Y_RightEye_coordinate = 0.0;	// inch distance away from eyes to the origin (tip of nose)
 float RightEye_MinAngle = -90.0;
 float RightEye_MaxAngle = +90.0;
-float RightEye_Range    = (RightEye_MaxAngle-RightEye_MinAngle);
-int   RightEye_CenterCount  = MIN_PW + PW_range/2.0;
+float RightEye_Range    = (RightEye_MaxAngle-(-90));
 
-float LeftEyeUpMax 		= 2500;
-float LeftEyeUpMin 		=  500;
-float LeftEyeUpAngle    = +90;
-float LeftEyeDownAngle  = -90;
-float PW_Left_up_center_offset = 0.0;
 
-float RightEyeUpMax 	= 2500;
-float RightEyeUpMin 	=  500;
-float RightEyeUpAngle   = +90;
-float RightEyeDownAngle = -90;
-float PW_Right_up_center_offset = 0.0;
-
+void adjust_eye_center( int mEyeIndex, int mRelativeOffset )
+{
+	Servo_info[mEyeIndex].zero_pw  +=  mRelativeOffset;	
+}
 
 void eye_init()
 {	
-	Servo_info[LEFT_UD].min_pw = 553;
-	Servo_info[LEFT_UD].max_pw = 2300;
+	Servo_info[LEFT_UD].min_pw = MIN_SERVO_PW;
+	Servo_info[LEFT_UD].max_pw = 2500;
 	Servo_info[LEFT_UD].zero_pw = 0;
 	Servo_info[LEFT_UD].reverse_direction = false;			
 
-	Servo_info[LEFT_LR].min_pw = 553;
-	Servo_info[LEFT_LR].max_pw = 2300;
+	Servo_info[LEFT_LR].min_pw = MIN_SERVO_PW;
+	Servo_info[LEFT_LR].max_pw = MAX_SERVO_PW;
 	Servo_info[LEFT_LR].zero_pw = 0;
 	Servo_info[LEFT_LR].reverse_direction = false;			
 
-	Servo_info[RIGHT_UD].min_pw = 553;
-	Servo_info[RIGHT_UD].max_pw = 2300;
+	Servo_info[RIGHT_UD].min_pw = MIN_SERVO_PW;
+	Servo_info[RIGHT_UD].max_pw = 2500;
 	Servo_info[RIGHT_UD].zero_pw = 0;
 	Servo_info[RIGHT_UD].reverse_direction = true;			
 
-	Servo_info[RIGHT_LR].min_pw = 553;
-	Servo_info[RIGHT_LR].max_pw = 2300;
+	Servo_info[RIGHT_LR].min_pw = MIN_SERVO_PW;
+	Servo_info[RIGHT_LR].max_pw = MAX_SERVO_PW;
 	Servo_info[RIGHT_LR].zero_pw = 0;
 	Servo_info[RIGHT_LR].reverse_direction = true;
 
 	// 
-	Servo_info[LEFT_EYELID].min_pw = 553;
-	Servo_info[LEFT_EYELID].max_pw = 2300;
+	Servo_info[LEFT_EYELID].min_pw = MIN_SERVO_PW;
+	Servo_info[LEFT_EYELID].max_pw = MAX_SERVO_PW;
 	Servo_info[LEFT_EYELID].zero_pw = 0;
 	Servo_info[LEFT_EYELID].reverse_direction = false;			
 
-	Servo_info[RIGHT_EYELID].min_pw = 553;
-	Servo_info[RIGHT_EYELID].max_pw = 2300;
+	Servo_info[RIGHT_EYELID].min_pw = MIN_SERVO_PW;
+	Servo_info[RIGHT_EYELID].max_pw = MAX_SERVO_PW;
 	Servo_info[RIGHT_EYELID].zero_pw = 0;
 	Servo_info[RIGHT_EYELID].reverse_direction = false;
+	
+	for (int i=0; i<6; i++)
+		Servo_info[i].PW_range = (Servo_info[i].max_pw - Servo_info[i].min_pw);
+	for (int i=0; i<6; i++)
+		Servo_info[i].zero_pw = Servo_info[i].min_pw + (Servo_info[i].PW_range/2);
+}
+
+/*  PW for left to right movement.  Works for both eyes.
+	Return : PW (Pulse Width)
+ */
+float calc_proportion( float mX, float mXMin, float mXMax,
+						struct stServo_info& si )
+{
+	float PW;
+	float Xcenter = (mXMax - mXMin)/2.0 + mXMin;
+	float multiplier = (si.max_pw - si.min_pw) / (mXMax - mXMin);
+	if (si.reverse_direction)
+		PW = si.zero_pw - (mX - Xcenter)*multiplier;
+	else
+		PW = si.zero_pw + (mX - Xcenter)*multiplier;
+	return PW;
 }
 
 /*  PW for left to right movement.  Works for both eyes.
@@ -217,13 +225,43 @@ void update_eye_positions(int x, int y, float mWidth, float mHeight)
 
 	// Now Send Up/Down :
 	ptr += strlen( ptr );
-	set_left_eye_up_angle ( ptr, l_up_down_angle + PW_Left_up_center_offset );
+	set_left_eye_up_angle( ptr, l_up_down_angle + Servo_info[LEFT_UD].zero_pw );
 	ptr += strlen( ptr );
-	set_right_eye_up_angle( ptr, r_up_down_angle + PW_Right_up_center_offset );
+	set_right_eye_up_angle( ptr, r_up_down_angle + Servo_info[RIGHT_UD].zero_pw );
 
 	strcat(txt, "\r");
 	si.my_write( txt, strlen(txt)   );
-//	printf("%d,%d : %s\n", x,y, txt );
-//	printf("%d,%d : \n", x,y );
+}
+
+/* Angle should be 0 to 90. */
+int set_left_eyelid_angle	( char* mBuffer, float mAngle )
+{
+	float PW  = calc_proportion( mAngle, 0, 90, Servo_info[LEFT_EYELID] );
+	int   PWi = trunc(PW);
+	sprintf(mBuffer, "#4P%d", PWi);
+	return PWi;	
+}
+int set_right_eyelid_angle	( char* mBuffer, float mAngle )
+{
+	float PW  = calc_proportion( mAngle, 0, 90, Servo_info[RIGHT_EYELID] );
+	int   PWi = trunc(PW);
+	sprintf(mBuffer, "#5P%d", PWi);
+	return PWi;
+}
+void set_eyelids_angle		( float mAngle )
+{
+	set_left_eyelid_angle	( txt, mAngle );
+	char* ptr = txt + strlen( txt );
+	set_right_eyelid_angle	( ptr,  mAngle );
+	strcat(txt, "\r");
+	si.my_write( txt, strlen(txt)   );	
+}
+void open_eyelids 			( )
+{
+	set_eyelids_angle( 0.0 );
+}
+void close_eyelids			( )
+{
+	set_eyelids_angle( 90.0 );
 }
 
