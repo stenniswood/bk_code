@@ -21,15 +21,15 @@ OPTIONS	   = -Wwrite-strings -fpermissive -Wreturn-type -Wformat
 # 
 # INCLUDE PATHS:
 CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
-	 		 ../core/misc/ ../core/msg/    ../core/wifi/     ../core/ipc/    	\
-	 		 ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
-			 ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \
-			 ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
+	     ../core/dbase/ ../core/misc/ ../core/msg/    ../core/wifi/     ../core/ipc/    	\
+	     ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
+	     ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \
+	     ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
 APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/ \
-			 ./apps/file_editer/ ./apps/video/ ./apps/finder/ ./apps/gallery/
+	     ./apps/file_editer/ ./apps/video/ ./apps/finder/ ./apps/gallery/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 SQL_INC    = -I/usr/include/mysql
-INC		   = $(CORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
+INC	   = $(CORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
 
 
 SELF_INC   = ../../avisual/ ./ ../ 
@@ -69,7 +69,7 @@ VG_OBJS     = libshapes.o oglinit.o
 AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
 			   test_layouts.o test_combo_layouts.o client_list_control.o \
 			   test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
-			   power.o home_screen.o datalog_graph.o can_sql_logger.o \
+			   power.o home_screen.o datalog_graph.o \
 			   motor_gui.o serial_loadcell.o CAN_dispatcher.o robot_moves_1_sequencer.o
 
 APPS_OBJS      = 
@@ -117,7 +117,7 @@ ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o calendar_entry.o
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o legend.o
 KINETIC_OBJS = balance.o 
-
+DBASE_OBJS = can_sql_logger.o
 # APP CODE
 VOICE_OBJS 	= 
 
