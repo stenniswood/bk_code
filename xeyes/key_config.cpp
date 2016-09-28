@@ -15,7 +15,7 @@
 #include "vision_memory.h"
 
 
-const int Offset_Increment = 10;
+const int Offset_Increment = 5;
 
 void shutdown()
 {
@@ -58,17 +58,11 @@ void handle_key_controls(char c)
 		case 'b' : neck_duty = +25; 		break;
 
 		// Left Eye Up/Down Calibration : 
-		case 'r' : PW_Left_up_center_offset += Offset_Increment;
-					tmp = trunc(PW_Left_up_center_offset);
-//					if ((tmp % (Offset_Increment*5))==0)
-//						printf("LEFT CAL: %d\n", PW_Left_up_center_offset );
-					break;
-		case 'f' : PW_Left_up_center_offset -= Offset_Increment;	
-//					if ((tmp % (Offset_Increment*5))==0)
-//						printf("LEFT CAL: %d\n", PW_Left_up_center_offset );
-					break;
-		case 't' : PW_Right_up_center_offset += 5;	break;
-		case 'g' : PW_Right_up_center_offset -= 5;	break;
+		case 'r' : adjust_eye_center( LEFT_UD, 	 Offset_Increment );	break;
+		case 'f' : adjust_eye_center( LEFT_UD,  -Offset_Increment );	break;
+		case 't' : adjust_eye_center( RIGHT_UD,  Offset_Increment);		break;
+		case 'g' : adjust_eye_center( RIGHT_UD, -Offset_Increment);		break;
+		
 		case 's' : draw_cal_screen();				break;
 		case 'q' : shutdown();						break;		
 //		case 'z' : capture_face();					break;		
