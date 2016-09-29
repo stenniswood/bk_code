@@ -1,17 +1,19 @@
 #ifndef _LEG_H_
 #define _LEG_H_
 
-#include "Container.hpp"
-#include <string>
+/* So far we've not had any reference to the weight, lengths, or inertia's of 
+   the parts of the leg.  This will be added in a derived Leg class.
+*/
 
-//#include "motor.hpp"
-//#include "pendulumn.hpp"
+
+//#include "vector_file.hpp"
+#include <string>
+#include "roboclaw.h"
 
 #define HIP_MOTOR		  0
 #define HIP_SWIVEL_MOTOR  1
 #define KNEE_MOTOR		  2
 #define ANKLE_MOTOR		  3
-
 
 #define LEG_LOCATION_NONE 0
 #define LEG_LOCATION_TOE  1
@@ -53,16 +55,21 @@ static friction/gravity.
 class Leg 
 {
 public:
-	Leg( char* mDevHip, char* mDevKneeAnkle);
+	Leg   			( char* mDevHip, char* mDevKneeAnkle );
+	~Leg			();
+	
 	void			Init();
 	void 			SetMainVoltageThresholds ( float mMinVoltage=10.0, float mMaxVoltage=25.0 );
-	void 			SetLogicVoltageThresholds( float mMinVoltage,      float mMaxVoltage );
-	float 			GetMainVoltage			();
-	float 			GetLogicVoltage			();
+	void 			SetLogicVoltageThresholds( float mMinVoltage,      float mMaxVoltage 	  );
+	float 			GetMainVoltage			( );
+	float 			GetLogicVoltage			( );
 	void 			SetMaxCurrents			( int mMotorIndex, float mMaxCurrent );
-	uint16_t 		read_hip_status			();	// See Roboclaw Error codes!
-	uint16_t 		read_knee_status		(); // See Roboclaw Error codes!
+	uint16_t 		read_hip_status			( );	// See Roboclaw Error codes!
+	uint16_t 		read_knee_status		( ); 	// See Roboclaw Error codes!
 		
+	void			stop_all_motors			();
+	int				get_num_motors()	{ return 4; };
+	
 	// ACCESSOR FUNCTIONS:
 	float 			get_hip_angle			();
 	float 			get_hip_swivel			();	
@@ -74,10 +81,10 @@ public:
 	float 			get_knee_angular_speed	();
 	float 			get_ankle_angular_speed	();
 
-	bool 			set_hip_duty			(tDUTY_TYPE mSpeed);
-	bool 			set_hip_swivel_duty		(tDUTY_TYPE mSpeed);
-	bool 			set_knee_angle_duty		(tDUTY_TYPE mSpeed);
-	bool 			set_ankle_duty			(tDUTY_TYPE mSpeed);
+	bool 			set_hip_duty			(float mFraction);
+	bool 			set_hip_swivel_duty		(float mFraction);
+	bool 			set_knee_duty			(float mFraction);
+	bool 			set_ankle_duty			(float mFraction);
 	
 /* Not implemented yet, b/c what to do with the duties under variable loads 
 	void 			set_hip_angle			(float mAngle);
@@ -89,44 +96,17 @@ public:
  	void			set_to_stance_leg		();
  	void			set_to_standing_leg		();
 
-	OneVector*		get_robot_coordinate_leg_attachment_position();
-	void 			set_robot_coordinate_leg_attachment_position(OneVector* mAttachementPosition );
-
-	// This can be used to specify "toe to <x,y,z>" or "heel to <xyz>" or even "knee to <xyz>"
-	void 			inverse_kinematic( OneVector* mPosition, byte mLegLocation 	   );
-	OneVector*		getKneePosition();
-	OneVector*		getHeelPosition();
-	OneVector*		getToePosition ();
-
-	virtual void	SavePreferences		( Preferences* mpref			   );		// stops and ...
-	virtual void	LoadPreferences		( Preferences* mpref, BOOL mConstructObjects = TRUE	);	
-
-	/* the parameters come from the vector file.  They are based on requested values */
-	void			update_pendulumn_parameters();	
-	virtual OneVector* calculate_duties ( OneVector* mPos, OneVector* mVelocity, OneVector* mAcceleration );
-	void 			   apply_vector		( VectorSequence* mvs );
+//	virtual void	SavePreferences		( Preferences* mpref			   );		// stops and ...
+//	virtual void	LoadPreferences		( Preferences* mpref, BOOL mConstructObjects = TRUE	);	
 	
 private:
-	OneVector*	leg_attachment_position;	// used for finding knee and toe positions, etc.
-	
 	RoboClaw	m_board_hip;		// hip rotate and swing.
 	RoboClaw	m_board_knee;		// knee and ankle.
 	std::string	m_name;
-	
-	float		ankle_height;		// distance from heel to ankle.	
-	byte		leg_mode;			// swing, stance, or shared (both legs bearing weight)
+	uint8_t		leg_mode;			// swing, stance, or shared (both legs bearing weight)
 };
  
 #endif
 
 
 
-/* So far we've not had any reference to the weight, lengths, or inertia's of 
-   the parts of the leg.
-   These should be stored into a config file.  Or they could be determined 
-   algorithmically by trial runs of how leg responds to a duty.   
-*/
-
-/*	Pendulum	upper_leg;
-	Pendulum	lower_leg;
-	Pendulum	foot;		*/

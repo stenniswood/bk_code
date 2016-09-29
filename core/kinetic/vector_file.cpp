@@ -31,9 +31,7 @@ will share same timeslice
 if an anatomical part is missing for a timeslice, then it's previous vector will
 be duplicated.
 
-
 This is a sample of the vector file :
-
 	A) malloc entire array
 	B) malloc 1 vectors worth;  
 		add to an array of pointers
@@ -52,27 +50,12 @@ This is a sample of the vector file :
 #include <wiringPi.h>
 #include <signal.h>
 #include <time.h>
-#include "mcp2515.h"
-#include "pican_defines.h"
-//#include "CAN_Interface.h"
-#include <wiringPi.h>
 #include <string.h>
-#include "bk_system_defs.h"
-#include "can_eid.h"
-//#include "CAN_Interface.h"
-//#include "can_instance.h"
-#include "can_board_msg.h"
-#include "pican_defines.h"
-#include "leds.h"
-#include "can_id_list.h"
-#include "system_msgs_callback.h"
-//#include "board_list_oop.hpp"
-#include "packer_motor.h"
-//#include "motor_vector.h"
-//#include "config_file.h"
+
+#include "global.h"
 #include "vector_file.hpp"
 #include "string_util.h"
-#include "robot.hpp"
+#include "robot_claw.hpp"
 
 /* 
 The robot will need multiple lists, not just 1 head/tail pointer list!
@@ -188,34 +171,34 @@ VectorSequence::VectorSequence(int mDimension)
 
 VectorSequence::~VectorSequence()
 {
-
+	m_data.clear();
 }
 
-void VectorSequence::set_mode( int mMode  )
+void VectorSequence::set_mode( int mMode )
 {
 	Mode = mMode;
 }
 
 OneVector* VectorSequence::get_vector( )
 {
-	//printf("get_vector:CurrIndex=%d\n", CurrentIndex );
-	if (CurrentIndex >= getNumItems())
+	if (CurrentIndex >= m_data.size())
 	{
 		switch (Mode)
 		{
-		case MODE_ONCE_THRU: return NULL;  
-		case MODE_LOOP	   : 
-							CurrentIndex = 0;
-							break;	
-		default: break;
+		case MODE_ONCE_THRU : return NULL;
+		case MODE_LOOP	    : CurrentIndex = 0;
+							  break;
+		default				: break;
 		}
 	}
-	return (OneVector*)(getItem( CurrentIndex )->getData());
+	return (OneVector*)&(m_data[CurrentIndex]);
 }
 
-OneVector* VectorSequence::get_ivector ( int mIndex ) 
+OneVector* VectorSequence::get_ivector( int mIndex )
 {
-	return (OneVector*)( getItem(mIndex)->getData() );
+	if (CurrentIndex >= m_data.size())
+		return NULL;
+	return (OneVector*) &(m_data[mIndex]);
 }
 
 /* Gives the speed expected at the instant of the position. 
@@ -225,10 +208,10 @@ OneVector* VectorSequence::get_ivector ( int mIndex )
 OneVector* VectorSequence::get_ivelocity_vector( int mIndex )
 {
 	if (mIndex==-1) mIndex = CurrentIndex;
-	if (mIndex==0) return NULL;
-	
-	OneVector* prevPos =  (OneVector*)( getItem(mIndex-1)->getData() );
-	OneVector* currPos =  (OneVector*)( getItem(mIndex  )->getData() );	
+	if (mIndex==0)  return NULL;
+
+	OneVector* prevPos =  (OneVector*) &(m_data[mIndex-1] );
+	OneVector* currPos =  (OneVector*) &(m_data[mIndex] );
 	OneVector* speed = new OneVector(currPos);	
 	*speed -= prevPos;
 	return speed;
@@ -240,8 +223,8 @@ OneVector* VectorSequence::get_ivelocity_vector( int mIndex )
 */
 OneVector* VectorSequence::get_iaccel_vector( int mIndex )
 {
-	if (mIndex==-1) mIndex = CurrentIndex;
-	if (mIndex <= 1) 	  return NULL;
+	if (mIndex==-1) 	mIndex = CurrentIndex;
+	if (mIndex <= 1) 	return NULL;
 	
 	OneVector* prevVel =  get_ivelocity_vector( mIndex-1 );
 	OneVector* currVel =  get_ivelocity_vector( mIndex );
@@ -252,27 +235,19 @@ OneVector* VectorSequence::get_iaccel_vector( int mIndex )
 
 OneVector* VectorSequence::new_vector()
 {
-	return new OneVector(Dimension); 
+	OneVector* ptr = new OneVector(Dimension); 
+	m_data.push_back( ptr );
+	return ptr;
 }
 
-Item* VectorSequence::add_vector( OneVector* mVector )
+void VectorSequence::add_vector( OneVector* mVector )
 {
-	Item* newItem = new Item();
-	newItem->setData( mVector );
-	Add( newItem );
-	return newItem;
-}
-
-OneVector* VectorSequence::new_add_vector( )
-{
-	OneVector* nvector = new_vector();
-	add_vector( nvector );
-	return nvector;
+	m_data.push_back( *mVector );
 }
 
 BOOL VectorSequence::move_to( int mIndex )
 {
-	if (mIndex > getNumItems())
+	if (mIndex > m_data.size())
 		return FALSE;
 
 	CurrentIndex = mIndex;
@@ -289,33 +264,50 @@ VectorGroupSequence::VectorGroupSequence()
 	playback_period_ms = 50.0;
 }
 
-void VectorGroupSequence::add_new_vector_sequence( int dimension )
+void VectorGroupSequence::add_vector_sequence( VectorSequence* mSequence )
 {
-	VectorSequence* tmp_vs   = new VectorSequence( dimension );
-	Item*			tmp_item = new Item( );
-	tmp_item->setData( tmp_vs );	
-	Add( tmp_item );
+	if (m_seqs.size()==0)
+		return;
+	if (mSequence->m_data.size() != m_seqs[0].m_data.size())
+		return;
+	m_seqs.push_back( *mSequence );
 }
 
 void VectorGroupSequence::copy_robot_structure(Robot *mRobot)
 {
-	// Create a VectorSequence for each limb.	
+	// Create a VectorSequence for each limb : 
 	VectorSequence* tmp;
-	int dimension = 0;
-	int num = mRobot->get_number_limbs();
+	int num = 4;
 	printf("copy_robot_structure: allocating for %d limbs\n", num);
-	for (int i=0; i<num; i++)
-	{
-		dimension = ((MotorPack*)mRobot->get_limb(i))->getNumItems();
-		printf("adding VectorSequence(dimension=%d)\n", dimension);
-		add_new_vector_sequence(dimension);			
+
+	int dimension_l = mRobot->left_leg.get_num_motors();
+	int dimension_r = mRobot->right_leg.get_num_motors();
+	if (dimension_l != dimension_r) {
+		printf("Left Leg & Right Leg have different number of Actuators\n");
+		return ;
 	}
+
+	tmp       = new VectorSequence(dimension_l);
+	add_vector_sequence(tmp);		// Left Leg
+	add_vector_sequence(tmp);		// Right Leg		
+
+	dimension_r = mRobot->right_arm.get_num_motors();
+	dimension_l = mRobot->right_arm.get_num_motors();
+	if (dimension_l != dimension_r) {
+		printf("Left Leg & Right Arm have different number of actuators\n");
+		free(tmp);
+		return ;
+	}
+	
+	add_vector_sequence(tmp);		// Right Arm
+	add_vector_sequence(tmp);		// Right Arm
+	free(tmp);
 	//printf("vector group : copying %d limbs\n", getNumItems() );
 }
 
 VectorGroupSequence::~VectorGroupSequence()
 {
-	FreeList();
+	m_seqs.clear();
 /*	Item* item = NULL;
 	VectorSequence* tmp;
 	int num = getNumItems();
@@ -328,18 +320,16 @@ VectorGroupSequence::~VectorGroupSequence()
 	}		*/
 }
 
-
 void VectorGroupSequence::set_data_type_all_lists( byte mType, word mSpeed )
 {
-	VectorSequence* tmp;
-	for (int i=0; i<getNumItems(); i++)
+	// For each sequence group : 	
+	for (int i=0; i<m_seqs.size(); i++)
 	{
-		tmp = (VectorSequence*)(getItem(i)->getData());
-		tmp->data_type = mType;			// INT or FLOAT
+		m_seqs[i].data_type = mType;			// INT or FLOAT
 		if (mSpeed)
-			tmp->data_type |= SPEED_VECTORS;
+			m_seqs[i].data_type |= SPEED_VECTORS;
 		else 
-			tmp->data_type |= POSITION_VECTORS;
+			m_seqs[i].data_type |= POSITION_VECTORS;
 	}
 }
 
@@ -362,14 +352,14 @@ void VectorGroupSequence::read_header( )
 	char  data[255];
 
 	// TIME SLICE Period (rate of vector playback)	
-	getLine_nb(fd, data);
+	getLine_nb((FILE*)fd, (char*)data);
 
 	int playback_period_ms = atoi(data);
 	//	set_playback_period_all_lists( playback_period_ms  );
 	printf("playback_period = %d\n", playback_period_ms );
 
 	// DATA TYPE = "float" or "int" 
-	getLine_nb(fd, data);	
+	getLine_nb((FILE*)fd, data);	
 	printf("data type = %s\n", data);
 	if (strcasecmp(data,"float")==0)
 		data_type = FLOAT;
@@ -377,7 +367,7 @@ void VectorGroupSequence::read_header( )
 		data_type = INT;
 
 	// RADIANS or DEGREES:
-	getLine_nb(fd, data );
+	getLine_nb((FILE*)fd, data );
 	
 	if (strcasecmp(data,"radians")==0)
 	{	data_is_radians = TRUE;		
@@ -389,7 +379,7 @@ void VectorGroupSequence::read_header( )
 	}
 
 	// POSITION OR SPEED VECTORS:
-	getLine_nb(fd, data);	
+	getLine_nb((FILE*)fd, data);	
 	printf("data type = %s\n", data);
 	if (strcasecmp(data,"position")==0)
 		data_type = FLOAT;
@@ -399,8 +389,8 @@ void VectorGroupSequence::read_header( )
 
 void VectorGroupSequence::set_mode( int mMode  )
 {
-	MotorPack* mp  = NULL;
-	int num_groups = getNumItems();
+	//MotorPack* mp  = NULL;
+	int num_groups = m_seqs.size();
 	VectorSequence* vs;
 
 	// Go thru each limb:
@@ -412,14 +402,14 @@ void VectorGroupSequence::set_mode( int mMode  )
 }
 VectorSequence*	VectorGroupSequence::get_limb_sequence( byte mIndex )
 {
-	return (VectorSequence*)(getItem(mIndex)->getData());
+	return (VectorSequence*)&(m_seqs[mIndex]);
 }
 
 /*   */
 OneVector*	VectorGroupSequence::get_vector_deg( int mLimbIndex )
 {
 	VectorSequence* vs = get_limb_sequence( mLimbIndex );
-	if (vs)
+	if (vs) 
 	{
 		OneVector* ov     = vs->get_vector();
 		OneVector* deg_ov = new OneVector( ov );
@@ -435,15 +425,13 @@ OneVector*	VectorGroupSequence::get_vector_deg( int mLimbIndex )
 void	VectorGroupSequence::next_vector( )
 {
 	VectorSequence* vs;
-	int num_groups = getNumItems();
+	int num_groups = m_seqs.size();
 	for (int i=0; i<num_groups; i++)
 	{
 		vs = get_limb_sequence(i);
 		vs->next_vector( );
 	}
-	return NULL;
 }
-
 
 /* The caller must delete the returned object after done of memory leaks will occurr!! */
 OneVector*	VectorGroupSequence::get_vector_rad( int mLimbIndex )
@@ -497,13 +485,13 @@ OneVector* VectorGroupSequence::read_line( byte mDataType )
 	int    dimension  = atoi( array[1] );
 	//printf("Vector: Limb[%d] dimen=%d\n", limb_index, dimension );
 
-	// GET Limb Dimension:
-	Item* limb_item    = getItem(limb_index);
-	VectorSequence* vs = (VectorSequence*)(limb_item->getData());
+	// GET Limb Dimension:	
+	VectorSequence* vs = (VectorSequence*)&(m_seqs[limb_index]);
 	int num_motors=0;
 	if (vs)
 		num_motors = vs->get_dimension();
-	OneVector* v = vs->new_add_vector();
+	OneVector* v = new OneVector(num_motors);
+	vs->add_vector( v );
 
 	// INCOMING VECTOR HAS TO MATCH SIZE OF THE LIMB:
 	if (dimension < num_motors )
@@ -562,12 +550,11 @@ void VectorGroupSequence::read_vector_file( char* mFilename )
 		result = read_line( data_type );
 	}
 	
-	// 
-	for (int i=0; i<getNumItems(); i++)
+	// For Each limb:
+	for (int i=0; i<m_seqs.size(); i++)
 	{
-		Item* item = getItem(i);
-		VectorSequence* vs = (VectorSequence*)item->getData();
-		num_vectors = vs->getNumItems();
+		VectorSequence* vs = (VectorSequence*)&(m_seqs[i]);
+		num_vectors = vs->m_data.size();
 		printf("Limb %d, read %d vectors\n", i, num_vectors);
 	}
     printf("========= End of Motion Vector file =========\n");

@@ -9,11 +9,12 @@
 #include <errno.h>
 #include <termios.h>
 
-//#include "bk_system_defs.h"
 #include "global.h"
 #include "roboclaw.h"
-#include "vector_file.hpp"
-#include "ini_file.hpp"
+//#include "vector_file.hpp"
+//#include "ini_file.hpp"
+//#include "preferences.hpp"
+
 #include "leg_claw.hpp"
 
 
@@ -24,6 +25,12 @@ Leg::Leg( char* mDevHip, char* mDevKneeAnkle)
 	Init();
 }
 
+Leg::~Leg( )
+{
+	m_board_hip.close();
+	m_board_knee.close();
+}
+	
 void Leg::Init()
 {
 	m_board_hip.open			(  );
@@ -99,7 +106,7 @@ uint16_t Leg::read_knee_status()
 	return res1;	
 }
 
-void Leg::SavePreferences( Preferences* mpref )
+/*void Leg::SavePreferences( Preferences* mpref )
 {
 	char str[255];
 	sprintf(str, "\nLimb_type=Leg\n");	
@@ -117,14 +124,13 @@ void Leg::SavePreferences( Preferences* mpref )
 void Leg::LoadPreferences( Preferences* mpref, BOOL mConstructObjects	)
 {
 	char str[255];
-
 	//upper_leg.LoadPreferences( mpref );
 	//lower_leg.LoadPreferences( mpref );
 	//foot.LoadPreferences	 ( mpref );
 
 	// READ LIMB LENGTHS:
 	//MotorPack::LoadPreferences( mpref );		
-}
+} */
 
 /***************** GET POSITIONS FROM ROBOCLAW BOARD **********************/
 float Leg::get_hip_angle			()
@@ -203,29 +209,41 @@ float Leg::get_ankle_angular_speed	()
 	return result;
 }
 
-/***************** SET DUTIES VIA ROBOCLAW BOARD **********************/
-bool Leg::set_hip_duty				(tDUTY_TYPE mSpeed)
+void Leg::stop_all_motors			()
 {
-	bool result = m_board_hip.DutyM1(0x80,  mSpeed);
+	m_board_hip.ForwardM1(0x80, 0);
+	m_board_hip.ForwardM2(0x80, 0);
+	
+	m_board_knee.ForwardM1(0x80, 0);
+	m_board_knee.ForwardM2(0x80, 0);	
+}
+
+/***************** SET DUTIES VIA ROBOCLAW BOARD **********************/
+bool Leg::set_hip_duty				(float mFraction)
+{
+	uint32_t duty = mFraction * 32767;
+	bool result = m_board_hip.DutyM1(0x80,  duty);
 	//bool result = m_board_hip.ForwardM1(0x80, speed);
 	return result;
 }
-bool Leg::set_hip_swivel_duty		(tDUTY_TYPE mSpeed)
+bool Leg::set_hip_swivel_duty		(float mFraction)
 {
-	bool result = m_board_hip.DutyM2(0x80,  mSpeed);
+	uint32_t duty = mFraction * 32767;
+	bool result = m_board_hip.DutyM2(0x80,  duty);
 	//bool result = m_board_hip.ForwardM2(0x80, speed);
 	return result;
-
 }
-bool Leg::set_knee_angle_duty		(tDUTY_TYPE mSpeed)
+bool Leg::set_knee_duty				(float mFraction)
 {
-	bool result = m_board_hip.DutyM1(0x80,  mSpeed);
+	uint32_t duty = mFraction * 32767;
+	bool result = m_board_hip.DutyM1(0x80,  duty);
 	//bool result = m_board_knee.ForwardM1(0x80, speed);
 	return result;
 }
-bool Leg::set_ankle_duty			(tDUTY_TYPE mSpeed)
+bool Leg::set_ankle_duty			(float mFraction)
 {
-	bool result = m_board_hip.DutyM2(0x80,  mSpeed);
+	uint32_t duty = mFraction * 32767;
+	bool result = m_board_hip.DutyM2(0x80,  duty);
 	//bool result = m_board_knee.ForwardM2(0x80, speed);
 	return result;
 }
@@ -254,94 +272,18 @@ void Leg::set_ankle_angle	( float mAngleDeg )
 }
 */
 
-void Leg::inverse_kinematic( OneVector* mPosition, byte mLegLocation )
-{
-	float angle=0.;
-	switch(mLegLocation)
-	{
-	case LEG_LOCATION_TOE:
-			
-			break;
-	case LEG_LOCATION_HEEL:
-			// 					
-			//set_hip_angle ( angle );
-			//set_knee_angle( angle );
-			break;
-	case LEG_LOCATION_KNEE:
-			// extract the yz angle - if the distance isn't right, set the angle anyway.
-			//*mPosition -= leg_attachment_position;
-			//angle = asin( (*mPosition)[1] / upper_leg.length) * (180.0 / M_PI);
-			//set_hip_angle( angle );
-			break;
-	default:
-			break;
-	}
-}
-
-OneVector*	Leg::getKneePosition()
-{
-	//OneVector* retval = new OneVector(leg_attachment_position);
-	//float hip = get_hip_angle();
-	
-	//retval[1] = sin(hip)*upper_leg.length;
-	//retval[2] = - cos(hip)*upper_leg.length;
-	// z is lower near the ground.
-	//return retval;
-}
-
-OneVector*	Leg::getHeelPosition()
-{
-	OneVector* retval = getKneePosition();
-	float tmp = get_knee_angle();	
-	//retval[1] = sin(tmp)*lower_leg.length;
-	//retval[2] = - cos(tmp)*lower_leg.length;
-	// z is lower near the ground.
-
-	// need to add small distance from ankle to heel:
-	tmp = get_ankle_angle();
-	//retval[1] = sin(tmp)*lower_leg.length;
-	//retval[2] = - cos(tmp)*lower_leg.length;
-	return retval;
-}
-
-OneVector*	Leg::getToePosition()
-{
-	OneVector* retval = getHeelPosition();
-	float tmp = get_ankle_angle();	
-	
-	//retval[1] = cos(tmp)*foot.length;
-	//retval[2] = sin(tmp)*foot.length;
-	return retval;	
-}
 
 /* Retrieve real measured angles & velocities and put into the Pendulumn "calculator" 
    objects.
 */
-void Leg::update_pendulumn_parameters()
-{
-/*	upper_leg.angle = get_hip_angle();
-	lower_leg.angle = get_knee_angle();
-	foot.angle 		= get_ankle_angle();	
-	
-	upper_leg.angular_velocity = get_hip_angular_speed();
-	lower_leg.angular_velocity = get_knee_angular_speed();
-	foot.angular_velocity 	   = get_ankle_angular_speed(); */
-}
-	
 void	Leg::set_to_swing_leg		()		
 {
 	leg_mode = SWING_LEG;  		
-/*	upper_leg.set_to_swing_leg();
-	lower_leg.set_to_swing_leg();
-	foot.set_to_swing_leg(); */
 };
 
 void	Leg::set_to_stance_leg		()		
 {
 	leg_mode = STANCE_LEG;  		
-/*	upper_leg.set_to_stance_leg();
-	lower_leg.set_to_stance_leg();
-	foot.set_to_stance_leg();	*/
 };
 void	Leg::set_to_standing_leg	()		
 {
@@ -356,31 +298,6 @@ void	Leg::set_to_standing_leg	()
 	amount needed to overcome torques of other joints:  d * (combined torques)
 	
 */
-OneVector* Leg::calculate_duties ( OneVector* mPos, OneVector* mVelocity, OneVector* mAcceleration )
-{
-/*	OneVector* duty = new OneVector( numItems );
-	if (leg_mode == SWING_LEG)
-	{
-		* we start assuming each pendulumn is independant.  *
-		float torque = upper_leg.find_motor_torque( (*mVelocity)[0] );
-		duty->set_element( get_motor(0)->getDuty( torque ), 0 );
-		
-		torque = lower_leg.find_motor_torque( (*mVelocity)[1] );
-		duty->set_element( get_motor(0)->getDuty( torque ), 1 );
-
-		torque = foot.find_motor_torque( (*mVelocity)[2] );
-		duty->set_element( get_motor(0)->getDuty( torque ), 2 );
-		return duty;
-	}
-	else if (leg_mode == STANCE_LEG)
-	{
-	}
-	else 
-	{
-	}	
-	*/
-	return mPos;
-}
 
 /* For now, let's have each sequence start at <0,0,0>.  So we can assume there's no
 	huge catchup that has to be done on the position.  The first position will be a reasonable
@@ -388,9 +305,3 @@ OneVector* Leg::calculate_duties ( OneVector* mPos, OneVector* mVelocity, OneVec
 	the 2nd position.
 
 */
-void Leg::apply_vector	( VectorSequence* mvs )
-{
-	//update_pendulumn_parameters();
-	//OneVector* duties = calculate_duties( mvs->get_vector(), mvs->get_ivelocity_vector(), mvs->get_iaccel_vector() );
-	//set_duty_vector( duties->get_data(), duties->get_dimension() );	
-};

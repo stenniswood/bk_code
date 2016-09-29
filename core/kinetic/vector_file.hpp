@@ -1,9 +1,11 @@
 #ifndef _VECTOR_FILE_H_
 #define _VECTOR_FILE_H_
 
-#include "Container.hpp"
+#include "global.h"
+//#include "Container.hpp"
 //#include "board_list_oop.hpp" 
 //#include "robot.hpp"
+#include <vector>
 
 class Robot;
 
@@ -60,15 +62,14 @@ VectorGroupSequence - holds a group of VectorSequence's.  1 for each limb.
 #define MODE_LOOP 	   1
 #define MODE_INVERSE   2					// not implemented
 
-class VectorSequence : public Container		// was  struct sVectorList
+class VectorSequence 
 {
 public:
-	VectorSequence(int mDimension);
-	~VectorSequence();
+	VectorSequence ( int mDimension );
+	~VectorSequence( );
 	
 	OneVector* new_vector	 ( );
-	Item* 	   add_vector	 ( OneVector* mVector );
-	OneVector* new_add_vector( );
+	void 	   add_vector	 ( OneVector* mVector );
 
 	void	   set_mode	 	 ( int mMode  );
 	BOOL	   move_to	 	 ( int mIndex );
@@ -82,15 +83,18 @@ public:
 
 	int		   get_dimension ( 			  ) { return Dimension; 	 };
 	byte	   data_type;
-
+	std::vector<OneVector>	m_data;
+	
 private:
-	// use getNumItems() in Container base class
+
+
 	byte 	Mode;
 	int 	CurrentIndex;
-	int		Dimension;
+	int		Dimension;		// All vectors must share this dimension.
 };
 
-class VectorGroupSequence : public Container
+/* A group of sequences.  ie. a Sequence for each limb of the robot */
+class VectorGroupSequence 
 {
 public:
 	// uses Robot to know num_limbs and dimension of each
@@ -101,7 +105,7 @@ public:
 	void				set_mode				( int mMode 			);
 	void 				set_data_type_all_lists	( byte mType, word mSpeed );
 	void 				copy_robot_structure	( Robot *mRobot			);
-	void 				add_new_vector_sequence	( int dimension 		);
+	void 				add_vector_sequence		( VectorSequence* mSequence );
 	VectorSequence*		get_limb_sequence		( byte mIndex 			);
 
 	// FILE ACCESS:	
@@ -117,6 +121,7 @@ protected:
 	void 				read_header				(                 		);
 	OneVector*  		read_line				( byte mDataType  		);
 	void		  		read_one_vector			( byte mDataType  		);
+	std::vector<VectorSequence>	m_seqs;
 
 private:
 	FILE*	fd;
@@ -124,20 +129,17 @@ private:
 	int		num_vectors;
 	int		current_index;
 	BOOL	data_is_radians;
-	
 	int 	playback_period_ms;
 };
 
-class ListOfMoves : public Container
+class ListOfMoves
 {
 public:
 	ListOfMoves();
 	~ListOfMoves();
 
-	VectorGroupSequence*	add_move		( int mIndex );	
-	VectorGroupSequence*	get_move		( int mIndex );
-	VectorGroupSequence*	get_number_of_moves( );	
-
+	std::vector<VectorGroupSequence>		m_moves;
+	
 private:
 	
 };
