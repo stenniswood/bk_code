@@ -1,14 +1,10 @@
 #ifndef _ROBOT_H_
 #define _ROBOT_H_
 
-//#include "vector_file.hpp"
-//#include "ini_file.hpp"
-//#include "preferences.hpp"
 #include "tilt_sensor.hpp"
 #include "leg_claw.hpp"
 #include "arm_claw.hpp"
 #include "serial_loadcell.hpp"
-
 
 class VectorGroupSequence;
 
@@ -17,6 +13,8 @@ class VectorGroupSequence;
 #define SLEEP_MODE    	0x03
 #define LOGIC_ONLY_MODE	0x04
 #define RESERVED_MODE 	0x05
+
+void init_duties();
 
 
 /*******************************************
@@ -35,9 +33,12 @@ public:
 	void 	enterLogicOnlyMode	( );
 	void 	enterSleepMode		( );
 
-	// Sequencer:
-//	void	applyVector			( VectorGroupSequence* vgs 	);
-//	void	timeslice			( VectorGroupSequence* vgs 	);
+	void	stop_all_motors		();
+	void	Sit					();
+	void	Stand_up			();
+
+	void 	Put_leg_forward1	();
+	void 	Put_leg_forward2	();	
 
 	// Dispatches received CAN msgs to all objects;
 	int  	distribute_CAN_msg	( struct sCAN* mMsg );	
@@ -46,20 +47,16 @@ public:
 
 	// Save/Load to/from a .ini configuration file on the Raspberry Pi.
 	void	InitializeModel		(  					);
-//	void	SavePreferences		( 					);
-//	void	LoadPreferences		( BOOL Construct = FALSE );
 	void	SendStops			( );
 
-	void	stop_all_motors		();
-	void	Sit					();
-	void	Stand_up			();
-	
+	// Sequencer:
+
 	//TiltSensor	tilt;
-	Arm			left_arm;
-	Arm			right_arm;
-	Leg			left_leg;
-	Leg			right_leg;
-	
+	//Arm			left_arm  ;
+	//Arm			right_arm ;
+	Leg			left_leg  ;
+	Leg			right_leg ;
+
 	LoadCell_SerialInterface left_foot;
 	LoadCell_SerialInterface right_foot;
 	
@@ -69,12 +66,19 @@ protected:
 	
 	int			Mode;
 	char*		PersonalName;	// Frank, harry, etc.
-	//BoardList* 	board_list;
+
 	/*	ServoPack Head;	*/
 };
 
 extern Preferences 			robotPref;
-extern Robot 				Onesimus;
+//extern Robot 				Onesimus;
 extern VectorGroupSequence 	vgs;
  
 #endif
+
+//	void	SavePreferences		( 					);
+//	void	LoadPreferences		( BOOL Construct = FALSE );
+	//BoardList* 	board_list;
+//	void	applyVector			( VectorGroupSequence* vgs 	);
+//	void	timeslice			( VectorGroupSequence* vgs 	);
+	

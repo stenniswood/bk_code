@@ -13,20 +13,22 @@
 #include <ctime>
 #include <sys/time.h>
 #include <pthread.h>
+#include "global.h"
 #include "roboclaw.h"
+#include "robot_claw.hpp"
 #include "leg_claw.hpp"
 #include "serial_loadcell.hpp"
 
 
-uint8_t address = 0x80;
 struct tm time_stamp;
 
 char	  dev1[25] = "/dev/ttyACM0";
 char	  dev2[25] = "/dev/ttyACM1";
 char	  dev3[25] = "/dev/ttyACM2";
 char	  dev4[25] = "/dev/ttyACM3";
-Leg		LeftLeg (dev1, dev2);
-Leg		RightLeg(dev3, dev4);
+//Leg		LeftLeg (dev1, dev2);
+//Leg		RightLeg(dev3, dev4);
+Robot robot;
 
 pthread_t serial_leftfoot_thread_id;
 pthread_t serial_rightfoot_thread_id;
@@ -106,11 +108,9 @@ void create_threads()
 	}
 }
 
-
 int main( int argc, char *argv[] )
 {
 	print_args(argc,argv);
-	
 	bool stop=false;
 	if (argc>1) {
 
@@ -118,38 +118,49 @@ int main( int argc, char *argv[] )
 			stop = true;
 			printf("Stop!");
 		}
-	}
+		if (strcmp(argv[1], "status")==0) {
+			robot.left_leg.read_status();
+			robot.right_leg.read_status();
+			printf("Read Status!");
+			exit(1);
+		}
+		if (strcmp(argv[1], "version")==0) {
+			printf("Reading versions:\n");
+			robot.left_leg.read_versions();
+			//robot.right_leg.read_versions();
+			printf("Read Status!");
+			exit(1);			
+		}
+		if (strcmp(argv[1], "battery")==0) {
+			printf("Reading Battery:\n");
+			robot.left_leg.GetMainVoltage();
+			robot.left_leg.GetLogicVoltage();
+			//robot.right_leg.read_versions();
+			printf("Read Status!");
+			exit(1);			
+		}
 
-	
+	}	
 	time_t t;
 	time(&t);
 	time_stamp = *(localtime(&t));
+	init_duties();
 	printf("====================== CLAW =========================\n");
-
+	
 	if (stop) {
-		LeftLeg.stop_all_motors();
-		RightLeg.stop_all_motors();
+		robot.stop_all_motors();
 		exit(1);
 	}
 
-//	while (1)
-	{				
-		printf("\nBackward:\n");
-		LeftLeg.set_knee_duty( 0.10 );
-		LeftLeg.set_knee_duty( 0.10 );
-		LeftLeg.set_hip_duty( -0.10 );
-		LeftLeg.set_hip_duty( -0.10 );
-
-		RightLeg.set_knee_duty( 0.10  );
-		RightLeg.set_knee_duty( 0.10  );
-		RightLeg.set_hip_duty ( -0.10 );
-		RightLeg.set_hip_duty ( -0.10 );		
-	}	
-//	while (1)
-	{	
-		usleep(2000000);	// 0.1 sec	
-		LeftLeg.stop_all_motors();
-		RightLeg.stop_all_motors();		
-	}
-
+	robot.left_leg.read_currents();	
+	printf("\nLEGS - SIT:\n");
+	robot.Sit();
+	usleep(200000);	
+	
+	printf("\nLEGS - STAND:\n");
+	robot.Stand_up();
+	
+	printf("\nStopping motors...\n");
+	robot.stop_all_motors();
+	usleep(100000);	
 }

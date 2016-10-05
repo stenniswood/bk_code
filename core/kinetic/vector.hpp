@@ -1,5 +1,5 @@
-#ifndef _VECTOR_
-#define _VECTOR_
+#ifndef _VECTOR_HPP_
+#define _VECTOR_HPP_
 
 #include <list>
 #include <vector>

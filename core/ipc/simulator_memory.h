@@ -1,9 +1,7 @@
-#ifndef _SIM_MEMORY_
-#define _SIM_MEMORY_
 
 #include <vector>
 #include "vector.hpp"
-#include "sequencer_memory.hpp"
+#include "Sim3D_defines.h"
 
 
 #define IPC_KEY_SIM           0x04D2        // 1234 in decimal!
@@ -13,6 +11,17 @@ extern char* 	simulator_shared_memory;
 extern int 		simulator_segment_id;
 extern struct   simulator_ipc_memory_map*  ipc_memory_sim;
 
+extern class IPC_Exception IPC_Error;
+
+class IPC_Exception : public std::exception
+{
+public:
+    virtual const char* what() const throw()
+    {
+        return "Simulator Memory is not available.";
+    }
+};
+
 struct Coordinate
 {
     float x;
@@ -21,7 +30,10 @@ struct Coordinate
 };
     
 #define COMMAND_MOVE_OBJECT          0x101       // Move an item in the 3D space
+#define COMMAND_WHERE_IS             0x102       // name room/location where an object is in 3D space
+#define COMMAND_WHAT_IS_IN           0x106       // list objects contained in a rectangle
 #define COMMAND_NEW_OBJECT           0x103       // Create a new item in 3D space
+#define COMMAND_ROBOT_STOP           0x104       // Pick up specified object
 #define COMMAND_ROBOT_MOVE_OBJECT    0x105       // Pick up specified object
 #define COMMAND_ROBOT_MOVE           0x107       // Relocate (walk) to an XYZ
 #define COMMAND_ROBOT_ANGLE          0x109       // Move the robot to specified angles
@@ -120,7 +132,7 @@ enum eObjectTypes {
     PAPER,
     STAIRWAY,
     TEXTURE_CONTAINER,
-    ROUTE,
+    ROUTE,                  // 10
     FULL_WALL,
     CHAIR,
     TABLE_4LEGS,
@@ -130,7 +142,7 @@ enum eObjectTypes {
     BARRICADE,
     BOOKCASE,
     BRICK,
-    SPHERE,
+    SPHERE,                 // 20
     PICNIC_TABLE,
     CABINET,
     COUNTER,
@@ -140,21 +152,20 @@ enum eObjectTypes {
     RAFTER,
     LIGHTSWITCH,
     HINGE,
-    ROAD,
+    ROAD,                   // 30
     TERRAIN,
     PAINTING,
-    BASKETBALL,
-    SOCCERBALL_5,
-    SOCCERBALL_4,
-    BASEBALL,
+    BASKETBALL,             // 33
+    SOCCERBALL_5,           // 34
+    SOCCERBALL_4,           // 35
+    BASEBALL,               // 36
     ROBOT_LEG,
     ROBOT_ARM,
     ROBOT,
     STREET_SIGN,
     BASKETBALL_ARENA,
-    
-    
-    SKETCHUP_IMPORT
+    SKETCHUP_IMPORT,
+    WINDOW
 };
 
 /* this doesn't belong here, but for now it works quite well. */
@@ -178,7 +189,6 @@ union uGlobalVars
  new scenarios. 
  
  ******************** 3D SIMULATOR CLIENT MEMORY MAP *****************/
-
 struct simulator_ipc_memory_map
 {
 	long int StatusCounter;
@@ -186,11 +196,16 @@ struct simulator_ipc_memory_map
 
     long int AcknowledgeCounter;    //
     long int CommandCounter;        //
-
+    
+    /*  */
+    char	 Sentence[255];								// verbal commands (NLP) activate connection requests.
+    long int UpdateCounter;								// Incremented on change to any of below:
+    long int AcknowledgedCounter;
+    
+    char	 Response[255];								// verbal commands (NLP) activate connection requests.
     long int ResponseCounter;							// Incremented on change to any of below:
     long int ResponseAcknowledgedCounter;				// Incremented on change to any of below:
-    //char   ResponderName[100];                        // "instant", "simulator", etc
-    
+        
     long     Command;               // move object
     long     object_id;             //
     long     robot_id;              //
@@ -207,51 +222,55 @@ struct simulator_ipc_memory_map
     int      num_valid_ids;
     long     new_object_ids[MAX_IDS];
     
-	char	 Response        [128];
 };
 
 /******************** CLIENT MEMORY MAP *****************/
 /*********************************************************/
 
-void  delete_all_shm();
+void  sim_delete_all_shm();
 
 bool  sim_new_command_available   ( );
 void  sim_acknowledge_command     ( );
-void  sim_wait_for_acknowledgement( );
+int   sim_wait_for_acknowledgement( );
 
 bool  sim_new_response_available ( );
 void  sim_acknowledge_response   ( );
-void  sim_wait_for_response      ( );
-
+int   sim_wait_for_response      ( );
 
 void  sim_dump_ipc               ( );
 void  sim_save_segment_id        (char* mFilename);
 int   sim_read_segment_id        (char* mFilename);
 
-bool  is_sim_ipc_memory_available();
+bool  is_sim_ipc_memory_available( );
 int   connect_shared_simulator_memory( char mAllocate );
 int   sim_allocate_memory        ( );
-void  sim_deallocate_memory      (int msegment_id);
-long  sim_attach_memory         ( );
-void  sim_reattach_memory       ( );
-void  sim_detach_memory         ( );
+void  sim_deallocate_memory      ( int msegment_id);
+long  sim_attach_memory          ( );
+void  sim_reattach_memory        ( );
+void  sim_detach_memory          ( );
 
 unsigned long sim_get_segment_size( );
 void sim_fill_memory            ( );
     
 void sim_ipc_write_connection_status( char* mStatus   );
 void sim_ipc_write_response         ( char* mSentence );
+void sim_ipc_write_sentence         ( const char* mSentence );
 
 // WRITE COMMANDS TO IPC MEM:
-void sim_new_object             ( long mObject_type, int mQuantity                                  );
+void sim_what_is_in             ( long mRoom_id                      );
+void sim_where_is               ( long mObject_id                    );
+void sim_where_is               ( MathVector mNewLocation            );
+
+void sim_new_object             ( long mObject_type, int mQuantity, long mDatum2=0, long mDatum3=0 );
 void sim_delete_object          ( long mObject_id                                                   );
 void sim_move_object            ( long mObject_id, MathVector mNewLocation, MathVector mNewOrientation );
 void sim_robot_move_object      ( long mRobot_id,  long       mObject_id,   MathVector mNewLocation, MathVector mNewOrientation );
+void sim_stop_robot             ( long mRobot_id   );
 void sim_move_robot             ( long mRobot_id,  MathVector mDestination, MathVector mSource, bool mUseSource=false );
 void sim_robot_angle            ( long mRobot_id,  int mServo_index, float mNewAngles );
-void sim_robot_angles           ( long mRobot_id,  vector<int> mservo_indices, MathVector mNewAngles );
+void sim_robot_angles           ( long mRobot_id,  std::vector<int> mservo_indices, MathVector mNewAngles );
 void sim_robot_predefined       ( long mRobot_id,  int mMoveSequenceIndex, int repetitions           );
-void sim_write_object_ids       ( vector<long> mIDs );
+void sim_write_object_ids       ( std::vector<long> mIDs );
 void sim_change_visibility      ( long mObject_id,   int& mParameter1, int& mParameter2 );
 void sim_set_object_velocity    ( long mObject_id,   MathVector& mNewVelocity );
 
@@ -265,9 +284,8 @@ bool sim_read_move_robot        ( long& mRobot_id,    MathVector&  mSource,     
 void sim_read_robot_angle       ( long& mRobot_id,  int& mServo_index, float& mNewAngle );
 void sim_read_robot_angles      ( long& mRobot_id,    MathVector& mNewAngles );
 void sim_read_robot_predefined  ( long& mRobot_id,    int&         mMoveSequenceIndex,  int& repetitions    );
-void sim_read_object_ids        ( vector<long>& mIDs );
+void sim_read_object_ids        ( std::vector<long>& mIDs );
 void sim_read_visibility        ( long& mObject_id,   int& mParameter1, int& mParameter2 );
 void sim_read_object_velocity   ( long& mObject_id,   MathVector&   mNewVelocity );
 
     
-#endif

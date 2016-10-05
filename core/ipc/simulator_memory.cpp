@@ -28,21 +28,42 @@ AUTHOR	:  Stephen Tenniswood
 #include <unistd.h>
 #include <errno.h>
 #include <vector>
-#include <string>
 #include <assert.h>
-#include "global.h"
+#include <exception>
+#include <climits>
 
-#include "bk_system_defs.h"
+#include "global.h"
+//#include "bk_system_defs.h"
 #include "simulator_memory.h"
 
+
 #define Debug 0
+
+
+class IPC_Exception IPC_Error;
+const int timeout_ms   = 2;
 
 char* 	simulator_shared_memory;
 int 	simulator_segment_id;
 struct  simulator_ipc_memory_map* ipc_memory_sim=NULL;
 
+bool ipc_memory_valid_pointer()
+{
+    if ((ipc_memory_sim!=(struct simulator_ipc_memory_map*)-1) && (ipc_memory_sim != NULL))
+        return true;
+    return false;
+}
+
+/* 
+ Return:   true  => New command available.
+            false ==> Nothing new
+ */
 bool sim_new_command_available( )
 {
+    if (ipc_memory_valid_pointer()==false)
+       //throw IPC_Error;
+       return false;
+    
     bool retval = (ipc_memory_sim->CommandCounter > ipc_memory_sim->AcknowledgeCounter);
     /*    printf("%lu / %lu\n",  ipc_memory_sim->CommandCounter,
                                ipc_memory_sim->AcknowledgeCounter ); */
@@ -51,34 +72,72 @@ bool sim_new_command_available( )
 
 void sim_acknowledge_command( )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     ipc_memory_sim->AcknowledgeCounter = ipc_memory_sim->CommandCounter;
 }
 
-void sim_wait_for_acknowledgement( )
+int sim_wait_for_acknowledgement( )
 {
-    bool still_available=sim_new_command_available();
-    while( still_available )
+    time_t start     = time(NULL);
+    double time_diff = 0;
+    
+    bool available = sim_new_command_available();
+    while( available==false )
     {
-        still_available = sim_new_command_available();
+        available = sim_new_command_available();
+        if (available)
+            return TRUE;
+
+        time_diff = difftime( time(NULL), start );
+        if(time_diff > timeout_ms)
+            return FALSE;   /* timed out before getting an event */
+        usleep(100);
     }
+    return (available==true)?1:0;
 }
 
 /************* REPONSE WRAPPERS ****************/
 bool sim_new_response_available( )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     bool   retval = (ipc_memory_sim->ResponseCounter > ipc_memory_sim->ResponseAcknowledgedCounter);
     return retval;
 }
 void  sim_acknowledge_response   ( )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     ipc_memory_sim->ResponseAcknowledgedCounter++;
 }
-void  sim_wait_for_response      ( )
+
+/* Return : FALSE => TIMEOUT
+            TRUE  => VALID RESPONSE
+ */
+int  sim_wait_for_response( )
 {
+    time_t start     = time(NULL);
+    double time_diff = 0;
+
     bool   responded = sim_new_response_available();
     while( !responded )
+    {
         responded = sim_new_response_available();
+        if(responded)
+            return TRUE;
+        
+        time_diff = difftime( time(NULL), start );
+        if(time_diff > timeout_ms)
+            return FALSE;   /* timed out before getting an event */
+        usleep(100);
+    }
+    return FALSE;
 }
+
 /************* END REPONSE WRAPPERS ****************/
 
 void sim_dump_ipc()
@@ -96,10 +155,11 @@ void sim_save_segment_id(char* mFilename)
 {
 	FILE* fd = fopen(mFilename, "w");
 	//FILE* fd = fopen("simulator_shared_memseg_id.cfg", "w");
-	dprintf("Segment_id=%d\n", simulator_segment_id );
+	printf("Segment_id=%d\n", simulator_segment_id );
 	fprintf( fd, "%d", simulator_segment_id );
 	fclose( fd );
 }
+
 int sim_read_segment_id(char* mFilename)
 {
 	FILE* fd = fopen( mFilename, "r" );
@@ -111,29 +171,27 @@ int sim_read_segment_id(char* mFilename)
     }
 	return simulator_segment_id;
 }
-#define INT_MAX 0xFFFF
-void delete_all_shm()
+
+void sim_delete_all_shm()
 {
     for (int id=0; id < INT_MAX; id++)
         shmctl(id, IPC_RMID, NULL);
 }
-
 int sim_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct simulator_ipc_memory_map);
-    dprintf("sim shared_seg_size=%d\n", shared_segment_size);
+    printf("sim shared_seg_size=%d\n", shared_segment_size);
 
 	/* Allocate a shared memory segment. */
 	simulator_segment_id = shmget( IPC_KEY_SIM, shared_segment_size, IPC_CREAT | 0666 );
     int errsv = errno;
     if (errno>0)
-        //perror(sys_errlist[errsv]);
-        printf("%s\n", strerror(errsv));
+        perror("shmget - simulator");
+        //printf("%s\n", sys_errlist[errsv]); 
     
 	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	dprintf ("Sim3D shm segment_id=%d\n", simulator_segment_id );
-	printf ("Sim3D shm allocated %d bytes\n", shared_segment_size );
-	return simulator_segment_id;
+	printf ("Sim3D shm segment_id=%d\n", simulator_segment_id );
+	return simulator_segment_id;	
 }
 
 long sim_attach_memory()
@@ -141,7 +199,7 @@ long sim_attach_memory()
 	/* Attach the shared memory segment. */
 	simulator_shared_memory = (char*) shmat (simulator_segment_id, 0, 0);
 	ipc_memory_sim			= (struct simulator_ipc_memory_map*)simulator_shared_memory;
-	dprintf ("Sim3D shm attached at address %p\n\n", simulator_shared_memory);
+	printf ("Sim3D shm attached at address %p\n\n", simulator_shared_memory);
     return (long)simulator_shared_memory;
 }
 
@@ -150,7 +208,7 @@ void sim_reattach_memory()
 	/* Reattach the shared memory segment, at a different address. */ 
 	simulator_shared_memory = (char*) shmat (simulator_segment_id, (void*) 0x5000000, 0); 
 	ipc_memory_sim			= (struct simulator_ipc_memory_map*)simulator_shared_memory;
-	dprintf ("Sim3D shm reattached at address %p\n", simulator_shared_memory);
+	printf ("Sim3D shm reattached at address %p\n", simulator_shared_memory);
 }
 
 void sim_detach_memory()
@@ -169,7 +227,6 @@ char sim_segment_id_filename[] = "/home/steve/bk_code/client/sim_shared_memseg_i
 
 //char sim_segment_id_filename[] = "seq_segment_id.cfg";
 
-
 bool is_sim_ipc_memory_available()
 {
     struct shmid_ds buf;			// shm data descriptor.
@@ -177,11 +234,11 @@ bool is_sim_ipc_memory_available()
     dprintf("Checking for simulator IPC memory... ");
     dprintf( "reading segment id: %s\n", sim_segment_id_filename );
     
-    // First see if the memory is already allocated:
+    // First see if the memory is already allocated :
     simulator_segment_id = sim_read_segment_id( sim_segment_id_filename );
     int retval = shmctl(simulator_segment_id, IPC_STAT, &buf);
     if (retval==-1) {
-        dprintf("Error: %s\n", strerror(errno) );
+        dprintf("Sim memory not found. %s\n", strerror(errno) );
         return false;
     }
     dprintf( " Found segment, size=%ld and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
@@ -192,7 +249,7 @@ bool is_sim_ipc_memory_available()
     return false;
 }
 
-/* 
+/*
 Return :
     1 => Attached to memory successfully.
     0 => No connection.
@@ -210,18 +267,19 @@ int connect_shared_simulator_memory( char mAllocate )
         sim_attach_memory( );
         sim_fill_memory  ( );
         
-        dprintf("Saving segment id: ");
+        printf("Saving segment id: ");
         sim_save_segment_id( sim_segment_id_filename );
         if ((ipc_memory_sim!=(struct simulator_ipc_memory_map*)-1) && (ipc_memory_sim != NULL))
             return 1;
     }
-    else
+    else if (available)
     {
-        sim_attach_memory();
+        sim_attach_memory( );
+        sim_fill_memory  ( );
         if ((ipc_memory_sim!=(struct simulator_ipc_memory_map*)-1) && (ipc_memory_sim != NULL))
             return 1;			
     }
-    return 0;	
+    return 0;
 }
 
 
@@ -231,7 +289,7 @@ unsigned long sim_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (simulator_segment_id, IPC_STAT, &shmbuffer);
 	unsigned long segment_size = shmbuffer.shm_segsz;
-	dprintf ("Sim3D segment size: %lu\n", segment_size);
+	printf ("Sim3D segment size: %lu\n", segment_size);
 	return segment_size;
 }
 
@@ -258,11 +316,15 @@ FORMAT:
 */
 void ipc_write_response( char* mSentence )
 {
-	long length = strlen(mSentence);
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
+    long length = strlen(mSentence);
 	int MaxAllowedLength = sizeof(ipc_memory_sim->Response);
 	if (length>MaxAllowedLength)
 		length = MaxAllowedLength;
 		
+    
 	ipc_memory_sim->ResponseCounter++;
 
 	//printf("%d:Copying %d bytes to shared mem.\n", SentenceCounter, length);
@@ -272,6 +334,9 @@ void ipc_write_response( char* mSentence )
 
 void sim_ipc_write_connection_status( char* mStatus )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
 	long length = strlen(mStatus);
 	int MaxAllowedLength = sizeof(ipc_memory_sim->ConnectionStatus);
 	if (length > MaxAllowedLength)
@@ -294,8 +359,42 @@ void sim_ipc_write_active_page( short NewActivePage )
 /**************************************/
 /* WRITE TO SHARED MEMORY - COMMANDS  */
 /**************************************/
+void sim_what_is_in             ( long mRoom_id                      )
+{
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
+    ipc_memory_sim->Command = COMMAND_WHAT_IS_IN;
+    ipc_memory_sim->object_type   = 0;
+    ipc_memory_sim->object_id   = mRoom_id;
+    ipc_memory_sim->CommandCounter++;
+}
+
+void sim_where_is               ( long mObject_id                      )
+{
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    ipc_memory_sim->Command = COMMAND_WHERE_IS;
+    ipc_memory_sim->object_type   = 0;
+    ipc_memory_sim->object_id   = mObject_id;
+    ipc_memory_sim->CommandCounter++;
+}
+void sim_where_is               ( MathVector mNewLocation             )
+{
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    ipc_memory_sim->Command = COMMAND_WHERE_IS;
+    ipc_memory_sim->object_type   = 1;
+    ipc_memory_sim->Location1.x = mNewLocation[0];
+    ipc_memory_sim->Location1.y = mNewLocation[1];
+    ipc_memory_sim->Location1.z = mNewLocation[2];
+    ipc_memory_sim->CommandCounter++;
+}
+
 void sim_move_object( long mObject_id, MathVector mNewLocation, MathVector mNewOrientation )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
     ipc_memory_sim->Command = COMMAND_MOVE_OBJECT;
 
     ipc_memory_sim->object_datum1 = 0x0003;         // means move & rotate!
@@ -309,16 +408,26 @@ void sim_move_object( long mObject_id, MathVector mNewLocation, MathVector mNewO
     ipc_memory_sim->Location2.z = mNewOrientation[2];
     ipc_memory_sim->CommandCounter++;
 }
-void sim_new_object( long mObject_type, int mQuantity )
+
+void sim_new_object( long mObject_type, int mQuantity, long mDatum2, long mDatum3 )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     ipc_memory_sim->Command = COMMAND_NEW_OBJECT;
 
     ipc_memory_sim->object_type   = mObject_type;
-    ipc_memory_sim->object_datum1 = mQuantity;      //
+    ipc_memory_sim->object_datum1 = mQuantity;
+    ipc_memory_sim->object_datum2 = mDatum2;
+    ipc_memory_sim->object_datum3 = mDatum3;
     ipc_memory_sim->CommandCounter++;
 }
+
 void sim_delete_object( long mObject_id )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     ipc_memory_sim->Command = COMMAND_DELETE_OBJECT;
     ipc_memory_sim->object_id = mObject_id;
     ipc_memory_sim->CommandCounter++;
@@ -326,6 +435,9 @@ void sim_delete_object( long mObject_id )
 
 void sim_robot_move_object( long mRobot_id, long mObject_id, MathVector mNewLocation, MathVector mNewOrientation )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     ipc_memory_sim->Command = COMMAND_ROBOT_MOVE_OBJECT;
     ipc_memory_sim->object_id     = mObject_id;
     ipc_memory_sim->robot_id      = mRobot_id;
@@ -339,12 +451,23 @@ void sim_robot_move_object( long mRobot_id, long mObject_id, MathVector mNewLoca
     
     ipc_memory_sim->CommandCounter++;
 }
-
+void sim_stop_robot             ( long mRobot_id   )
+{
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
+    ipc_memory_sim->Command  = COMMAND_ROBOT_STOP;
+    ipc_memory_sim->robot_id = mRobot_id;
+    ipc_memory_sim->CommandCounter++;
+}
 /* UserSource means the path will start at the specified location.  ie the Robot will hyper space to a new XYZ, then walk to destination.
  Source: XYZ to start the path at.
  Destination; XYZ to end up at. */
 void sim_move_robot( long mRobot_id, MathVector mDestination, MathVector mSource, bool mUseSource )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     ipc_memory_sim->Command  = COMMAND_ROBOT_MOVE;
     ipc_memory_sim->robot_id = mRobot_id;
     ipc_memory_sim->object_datum1 = 1;
@@ -363,14 +486,24 @@ void sim_move_robot( long mRobot_id, MathVector mDestination, MathVector mSource
 
 void sim_robot_angle( long mRobot_id, int mServo_index, float mNewAngle )
 {
-    ipc_memory_sim->Command         = COMMAND_ROBOT_ANGLE;
-    ipc_memory_sim->robot_id        = mRobot_id;
-    ipc_memory_sim->object_datum1   = mServo_index;
-    ipc_memory_sim->servo_angles[mServo_index] = mNewAngle;
-    ipc_memory_sim->CommandCounter++;
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
+    if (ipc_memory_valid_pointer())
+    {
+        ipc_memory_sim->Command         = COMMAND_ROBOT_ANGLE;
+        ipc_memory_sim->robot_id        = mRobot_id;
+        ipc_memory_sim->object_datum1   = mServo_index;
+        ipc_memory_sim->servo_angles[mServo_index] = mNewAngle;
+        ipc_memory_sim->CommandCounter++;
+        sim_wait_for_acknowledgement();
+    }
 }
 void sim_read_robot_angle( long& mRobot_id,  int& mServo_index, float& mNewAngle )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     assert( ipc_memory_sim->Command == COMMAND_ROBOT_ANGLE );
 
     mServo_index = (int)ipc_memory_sim->object_datum1;
@@ -381,23 +514,31 @@ void sim_read_robot_angle( long& mRobot_id,  int& mServo_index, float& mNewAngle
 /* The NewAngles must be in order as designated by struct stBodyPosition in robot.hpp */
 void sim_robot_angles( long mRobot_id, MathVector mNewAngles )
 {
-    ipc_memory_sim->Command = COMMAND_ROBOT_ANGLES;
-    ipc_memory_sim->robot_id = mRobot_id;    
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
     
-    // Dimension :
-    long size = mNewAngles.m_elements.size();
-    if (size>MAX_SERVOS) size = MAX_SERVOS;
-    ipc_memory_sim->object_datum1 = size;
+    if (ipc_memory_valid_pointer()) {
+        ipc_memory_sim->Command = COMMAND_ROBOT_ANGLES;
+        ipc_memory_sim->robot_id = mRobot_id;    
+        
+        // Dimension :
+        long size = mNewAngles.m_elements.size();
+        if (size>MAX_SERVOS) size = MAX_SERVOS;
+        ipc_memory_sim->object_datum1 = size;
 
-    // FILL the Angles :
-    for (int i=0; i<size; i++)
-        ipc_memory_sim->servo_angles[i] = mNewAngles[i];
-    
-    ipc_memory_sim->CommandCounter++;
+        // FILL the Angles :
+        for (int i=0; i<size; i++)
+            ipc_memory_sim->servo_angles[i] = mNewAngles[i];
+        
+        ipc_memory_sim->CommandCounter++;
+    }
 }
 
 void sim_read_robot_angles( long& mRobot_id, MathVector& mNewAngles )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     if (ipc_memory_sim->Command == COMMAND_ROBOT_ANGLES)
     {
         mRobot_id     =   ipc_memory_sim->robot_id;
@@ -416,6 +557,9 @@ void sim_read_robot_angles( long& mRobot_id, MathVector& mNewAngles )
 
 void sim_robot_predefined( long mRobot_id, int mMoveSequenceIndex, int mRepetitions )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     ipc_memory_sim->Command = COMMAND_ROBOT_PREDEFINED_SEQ;
     ipc_memory_sim->robot_id      = mRobot_id;
     ipc_memory_sim->object_datum1 = mMoveSequenceIndex;
@@ -424,6 +568,9 @@ void sim_robot_predefined( long mRobot_id, int mMoveSequenceIndex, int mRepetiti
 }
 void sim_read_robot_predefined( long& mRobot_id, int& mMoveSequenceIndex, int& repetitions )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     if (ipc_memory_sim->Command == COMMAND_ROBOT_PREDEFINED_SEQ)
     {
         mRobot_id       =   ipc_memory_sim->robot_id;
@@ -433,8 +580,11 @@ void sim_read_robot_predefined( long& mRobot_id, int& mMoveSequenceIndex, int& r
 }
 
 /* Considered a response! */
-void sim_write_object_ids( vector<long> mIDs )
+void sim_write_object_ids( std::vector<long> mIDs )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     long size = mIDs.size();
     if (size>MAX_IDS) size = MAX_IDS;
     
@@ -451,6 +601,9 @@ void sim_write_object_ids( vector<long> mIDs )
 /***********************************************************/
 void sim_read_command( long& mObject_id, long& mObject_type, MathVector& mNewLocation, MathVector& mNewOrientation )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     long Acknowledges = ipc_memory_sim->AcknowledgeCounter;
     int  Quantity        =0;
     long Robot_id        =0;
@@ -494,6 +647,9 @@ void sim_read_command( long& mObject_id, long& mObject_type, MathVector& mNewLoc
 }
 void sim_read_move_object( long& mObject_id, MathVector& mNewLocation, MathVector& mNewOrientation )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     if (ipc_memory_sim->Command == COMMAND_MOVE_OBJECT)
     {
         mObject_id      =   ipc_memory_sim->object_id;
@@ -507,6 +663,9 @@ void sim_read_move_object( long& mObject_id, MathVector& mNewLocation, MathVecto
 }
 void sim_read_delete_object( long& mObject_id )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     if (ipc_memory_sim->Command == COMMAND_DELETE_OBJECT)
     {
         mObject_id = ipc_memory_sim->object_id;
@@ -514,6 +673,9 @@ void sim_read_delete_object( long& mObject_id )
 }
 void sim_read_new_object     ( long& mObject_type, int& mQuantity )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     if (ipc_memory_sim->Command == COMMAND_NEW_OBJECT)
     {
         mObject_type = ipc_memory_sim->object_type;
@@ -523,6 +685,9 @@ void sim_read_new_object     ( long& mObject_type, int& mQuantity )
 
 void sim_read_robot_move_object( long& mRobot_id, long& mObject_id, MathVector& mNewLocation )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     if (ipc_memory_sim->Command == COMMAND_ROBOT_MOVE_OBJECT)
     {
         mRobot_id       =   ipc_memory_sim->robot_id;
@@ -535,6 +700,9 @@ void sim_read_robot_move_object( long& mRobot_id, long& mObject_id, MathVector& 
 
 bool sim_read_move_robot( long& mRobot_id, MathVector&  mSource, MathVector&  mDestination )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     if (ipc_memory_sim->Command == COMMAND_ROBOT_MOVE)
     {
         mRobot_id  =   ipc_memory_sim->robot_id;
@@ -568,8 +736,11 @@ bool sim_read_move_robot( long& mRobot_id, MathVector&  mSource, MathVector&  mD
 } */
 
 
-void sim_read_object_ids( vector<long>& mIDs )
+void sim_read_object_ids( std::vector<long>& mIDs )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     int size = ipc_memory_sim->num_valid_ids;
     if (size > MAX_IDS) size = MAX_IDS;
     for (int i=0; i<size; i++)
@@ -578,6 +749,9 @@ void sim_read_object_ids( vector<long>& mIDs )
 
 void sim_change_visibility      ( long mObject_id,   int& mParameter1, int& mParameter2 )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     ipc_memory_sim->Command       = COMMAND_CHANGE_VISIBILITY;
     ipc_memory_sim->object_id     = mObject_id;
     ipc_memory_sim->object_datum1 = mParameter1;
@@ -586,6 +760,9 @@ void sim_change_visibility      ( long mObject_id,   int& mParameter1, int& mPar
 }
 void sim_set_object_velocity    ( long mObject_id,   MathVector& mNewVelocity )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     ipc_memory_sim->Command     = COMMAND_SET_VELOCITY;
     ipc_memory_sim->object_id   = mObject_id;
     ipc_memory_sim->Location1.x = mNewVelocity[0];
@@ -596,6 +773,9 @@ void sim_set_object_velocity    ( long mObject_id,   MathVector& mNewVelocity )
 
 void sim_read_visibility        ( long& mObject_id,   int& mParameter1, int& mParameter2 )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     if (ipc_memory_sim->Command == COMMAND_CHANGE_VISIBILITY)
     {
         mObject_id      = ipc_memory_sim->object_id;
@@ -605,6 +785,9 @@ void sim_read_visibility        ( long& mObject_id,   int& mParameter1, int& mPa
 }
 void sim_read_object_velocity   ( long& mObject_id,   MathVector&   mNewVelocity )
 {
+    if (ipc_memory_valid_pointer()==false)
+        throw IPC_Error;
+    
     if (ipc_memory_sim->Command == COMMAND_SET_VELOCITY)
     {
         mObject_id      = ipc_memory_sim->object_id;
@@ -613,3 +796,47 @@ void sim_read_object_velocity   ( long& mObject_id,   MathVector&   mNewVelocity
         mNewVelocity[2] = ipc_memory_sim->Location1.z;
     }
 }
+/* The New method for NLP of the 3D simulator (Creator) is to send the 
+    sentence text to Simulator over IPC.  Then do the parsing and processing 
+    on that side of the shared memory.
+ 
+    This same convention will be used for the avisual client memory.
+ 
+    This is better because then we don't have to package up the data. 
+    and re-cast.  And be concerned about if they get out of sync.
+ 
+ */
+
+/* WRITE IMPLIES TO SHARED MEMORY.  And since we are the abkInstant task,
+	the writes will be transfer to avisual
+ FORMAT:
+	INT 		ID
+	char[255] 	Buffer
+ */
+void sim_ipc_write_sentence( const char* mSentence )
+{
+    size_t length = strlen(mSentence);
+    int MaxAllowedLength = sizeof(ipc_memory_sim->Sentence);
+    if (length>MaxAllowedLength) {
+        length = MaxAllowedLength;
+    }
+    strncpy(ipc_memory_sim->Sentence, mSentence, length+1 );
+    
+    printf("|%s|\n", ipc_memory_sim->Sentence );
+    ipc_memory_sim->CommandCounter++;
+    printf("CommandCount=%ld; AcknowledgedCounter=%ld\n", ipc_memory_sim->CommandCounter, ipc_memory_sim->AcknowledgedCounter );
+}
+
+void sim_ipc_write_response( const char* mSentence, const char* mResponderName )
+{
+    size_t length = strlen(mSentence);
+    int MaxAllowedLength = sizeof(ipc_memory_sim->Sentence);
+    if (length>MaxAllowedLength) {
+        length = MaxAllowedLength;
+    }
+    strncpy(ipc_memory_sim->Sentence,      mSentence, length );
+    //strcpy (ipc_memory_sim->ResponderName, mResponderName    );
+    ipc_memory_sim->Sentence[length] = 0;
+    ipc_memory_sim->ResponseCounter++;
+}
+

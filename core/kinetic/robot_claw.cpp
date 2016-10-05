@@ -7,6 +7,7 @@
 #include "global.h"
 #include "CAN_Interface.hpp"
 #include "can_id_list.h"
+#include "vector.hpp"
 #include "vector_math.h"
 #include "buttons.h"
 #include "robot_claw.hpp"
@@ -18,31 +19,37 @@ using namespace std;
 
 // Preferences has to be constructed before Robot!!
 Preferences robotPref("robot.ini");
-Robot 		Onesimus("Ronny");
 VectorGroupSequence vgs;
+//Robot 		Onesimus("Ronny");
 
-Robot::Robot( const char* mName )
-: left_leg("/dev/ttyACM0","/dev/ttyACM1"), right_leg("/dev/ttyACM2","/dev/ttyACM3"),
-left_arm(), right_arm()
+
+MathVector	sit1(4);
+MathVector	sit2(4);
+MathVector	stand1(4);
+MathVector	stand2(4);
+MathVector	leg_forward1(4);
+MathVector	leg_forward2(4);
+
+void init_duties()
 {
-	//board_list   = &bl;
-	Mode 		 = CALIBRATE_MODE;
-	PersonalName = strdup(mName);	
+	printf("init_duties()\n");
+	sit1[0] = 0.0;	sit1[1] = -0.5;	sit1[2] = 0.5;	sit1[3] = 0.2;
+	sit2[0] = 0.0;	sit2[1] = -0.5;	sit2[2] = 0.5;	sit2[3] = 0.2;
+
+	stand1[0] = 0.0;	stand1[1] = 0.5;	stand1[2] = -0.5;	stand1[3] = -0.2;
+	stand2[0] = 0.0;	stand2[1] = 0.5;	stand2[2] = -0.5;	stand2[3] = -0.2;
+
+	leg_forward1[0] = 0.0;	leg_forward1[1] = 0.5;	leg_forward1[2] = 0.3;	leg_forward1[3] = -0.2;
+	leg_forward2[0] = 0.0;	leg_forward2[1] = 0.5;	leg_forward2[2] = 0.3;	leg_forward2[3] = -0.2;	
+	
 }
 
-
-// Dispatches received CAN msgs to all objects;
-int  	Robot::distribute_CAN_msg	( struct sCAN* mMsg )
-{	
-	//board_list->process_CAN_msg( mMsg );
-	//tilt.process_CAN_msg	   ( mMsg );
-	
-/*	left_arm.distribute_CAN_msg ( mMsg );
-	right_arm.distribute_CAN_msg( mMsg );
-	left_leg.distribute_CAN_msg ( mMsg );
-	right_leg.distribute_CAN_msg( mMsg );
-	head.distribute_CAN_msg( mMsg );
-*/	
+Robot::Robot( const char* mName )
+: left_leg("/dev/ttyACM0","/dev/ttyACM1"), right_leg("/dev/ttyACM2","/dev/ttyACM3")
+//left_arm(), right_arm()
+{
+	Mode 		 = CALIBRATE_MODE;
+	PersonalName = strdup(mName);	
 }
 
 void Robot::query_devices(  )
@@ -246,23 +253,71 @@ void	Robot::InitializeModel(  )
 	}
 }
 
+// Dispatches received CAN msgs to all objects;
+int  	Robot::distribute_CAN_msg	( struct sCAN* mMsg )
+{	
+	//board_list->process_CAN_msg( mMsg );
+	//tilt.process_CAN_msg	   ( mMsg );
+/*	left_arm.distribute_CAN_msg ( mMsg );
+	right_arm.distribute_CAN_msg( mMsg );
+	left_leg.distribute_CAN_msg ( mMsg );
+	right_leg.distribute_CAN_msg( mMsg );
+	head.distribute_CAN_msg( mMsg );  */
+}
+
 void Robot::stop_all_motors	()
 {
+	printf("stop_all_motors	()\n");
+	
 	left_leg.stop_all_motors();
 	right_leg.stop_all_motors();	
 
-	left_leg.stop_all_motors();
-	right_leg.stop_all_motors();	
-	
+//	left_arm.stop_all_motors();
+//	right_arm.stop_all_motors();
 }
 
-void Robot::Sit				()
+
+void Robot::Sit		()
 {
-	left_leg.set_knee_duty( 500 );
-	right_leg.set_knee_duty( 500 );
+	left_leg.set_duty_vector (sit1);
+	right_leg.set_duty_vector(sit1);
+	usleep(200000);
+	left_leg.read_currents();
+	left_leg.read_status();	
+	usleep(1000000);
+	
+	left_leg.set_duty_vector (sit2);
+	right_leg.set_duty_vector(sit2);
+	usleep(200000);
+	left_leg.read_currents();
+	left_leg.read_status();	
+	usleep(500000);
 	
 }
+
+// From sitting:
 void Robot::Stand_up		()
+{
+	left_leg.set_duty_vector (stand1);
+	right_leg.set_duty_vector(stand1);
+	usleep(100000);
+	left_leg.read_currents();
+	left_leg.read_status();	
+	usleep(100000);
+	
+	left_leg.set_duty_vector (stand2);
+	right_leg.set_duty_vector(stand2);
+	usleep(100000);
+	left_leg.read_currents();
+	left_leg.read_status();	
+	usleep(100000);
+}
+
+void Robot::Put_leg_forward1	()
+{
+	
+}
+void Robot::Put_leg_forward2	()
 {
 
 }

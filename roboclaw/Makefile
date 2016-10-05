@@ -3,7 +3,7 @@ OPTIONS	= -std=c99 -lm
 INC	= ./ ../core/can/ ../core/dbase/ ../core/kinetic/ ../core/misc/ ../core/hardware/
 CFLAGS 	= -lwiringPi -lm
 DEPS   	= 
-KINETIC_OBJ = leg_claw.o arm_claw.o robot_claw.o vector_file.o 
+KINETIC_OBJ = leg_claw.o arm_claw.o robot_claw.o vector_file.o vector.o 
 MISC_OBJ = preferences.o string_util.o 
 OBJ     =  gpio.o claw_main2.o sserial.o roboclaw.o serial_loadcell.o 
 DBASE_OBJS = can_sql_logger.o 

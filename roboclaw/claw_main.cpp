@@ -28,13 +28,13 @@ char	  dev4[25] = "/dev/ttyACM3";
 pthread_t serial_leftfoot_thread_id;
 pthread_t serial_rightfoot_thread_id;
 
-LoadCell_SerialInterface left_foot;
-LoadCell_SerialInterface right_foot;
+//LoadCell_SerialInterface left_foot;
+//LoadCell_SerialInterface right_foot;
 
-RoboClaw  claw(dev1,1000);
-RoboClaw  claw2(dev2,1000);
+RoboClaw  claw (dev1,10000);
+/*RoboClaw  claw2(dev2,1000);
 RoboClaw  claw3(dev3,1000);
-RoboClaw  claw4(dev4,1000);
+RoboClaw  claw4(dev4,1000); */
 
 uint64_t GetTimeStamp2() 
 {
@@ -55,7 +55,7 @@ void print_args(int argc, char *argv[])
 	printf("\n");
 }
 
-
+/*
 void* serial_interface(void* mParam)				// serial port used for arduino connections & GPS.
 {
 	LoadCell_SerialInterface* mFoot = (LoadCell_SerialInterface*) mParam;
@@ -97,34 +97,90 @@ void* serial_interface(void* mParam)				// serial port used for arduino connecti
 	mFoot->serial_loadcell_main( 7, argv );	
 	return NULL;
 }
+*/
+void read_main_battery()
+{
+	claw.SetMainVoltages ( address, 100, 250 );	
+	claw.SetLogicVoltages( address, 100, 250 );
 
+	uint16_t volts1 = claw.ReadMainBatteryVoltage( 0x80 );
+	printf("\nMain Battery board #1 = %6.1f volts\n", (float)volts1/10. );
+	volts1 = claw.ReadLogicBatteryVoltage( 0x80 );
+	printf("\nLogic Battery board #1 = %6.1f volts\n", (float)volts1/10. );
+
+	//claw.SetM1MaxCurrent(0x80, 20.0);
+	//claw.SetM2MaxCurrent(0x80, 20.0);	
+}
+
+void setup_encoders()
+{
+	uint8_t M1mode = 0x81;
+	uint8_t M2mode = 0x81;
+	uint8_t address= 0x80;
+	bool result = claw.SetM1EncoderMode( address, M1mode );
+	result = claw.SetM2EncoderMode( address, M2mode );
+
+	result = claw.ReadEncoderModes( address, M1mode, M2mode );
+	printf("Read EncoderModes m1,m2 = %x, %x\n", M1mode, M2mode );
+}
+void read_encoders()
+{
+	uint32_t enc1;
+	uint32_t enc2;
+	
+	uint8_t status;
+	bool valid= false;
+	enc1 = claw.ReadEncM1(address, &status, &valid);
+	enc2 = claw.ReadEncM2(address, &status, &valid);
+	printf("Encoders m1,m2= %6.2f, %6.2f \n", 2.0*enc1/2047., 2.0*enc2/2047. );
+	
+	bool result = claw.ReadEncoders( address, enc1, enc2);
+	printf("Encoders m1,m2= %6.2f, %6.2f \n", 2.0*enc1/2047., 2.0*enc2/2047. );
+	//result = claw.ReadISpeeds( address,      uint32_t &ispeed1,uint32_t &ispeed2);	
+}
 void init_claws()
 {
+	int maxCurrent = 20;
 	claw.open			(dev1);
 	claw.set_baud		( B38400 );	
-	claw.SetMainVoltages( address, 100, 250 );	
+	read_main_battery();
 
-	claw2.open			(dev2);
+	uint16_t  config = 0x0067;
+	claw.SetConfig(address, config );
+	usleep(1000000);	// 0.1 sec
+	
+	config = 0;
+	bool result = claw.GetConfig( address, config );
+	printf("Config=%4x\n", config);	
+
+	bool valid=false;
+	uint16_t error = claw.ReadError(address, &valid);
+	printf("hip ErrorStatus = %4x  %d\n\n", error, valid);
+	
+	setup_encoders();
+	read_encoders();
+
+/*	claw2.open			(dev2);
 	claw2.set_baud		( B38400 );	
 	claw2.SetMainVoltages( address, 100, 250 );
-
+	claw.SetM1MaxCurrent(0x80, maxCurrent*100);
+	
 	claw3.open			(dev3);
 	claw3.set_baud		( B38400 );	
 	claw3.SetMainVoltages( address, 100, 250 );
 
 	claw4.open			(dev4);
 	claw4.set_baud		( B38400 );	
-	claw4.SetMainVoltages( address, 100, 250 );
+	claw4.SetMainVoltages( address, 100, 250 ); */
 }
-
 void create_threads()
 {
-	int iret1 = pthread_create( &serial_leftfoot_thread_id, NULL, serial_interface, (void*) &left_foot);
+/*	int iret1 = pthread_create( &serial_leftfoot_thread_id, NULL, serial_interface, (void*) &left_foot);
 	if (iret1)
 	{
 		fprintf(stderr,"Error - Could not create right_foot thread. return code: %d\n",iret1);
 		exit(EXIT_FAILURE);
-	}
+	} */
 }
 
 
@@ -147,41 +203,40 @@ int main( int argc, char *argv[] )
 	time_stamp = *(localtime(&t));
 	printf("====================== GPS =======================HELLO==\n");
 	printf("==== WARNING: This sets the baud rate.\n");
-	//printf("==== USE: stty -F %s 9600 \n", dev );
 
 	char text[80];
 	bool result = claw.ReadVersion( address, text );
 	printf("\ntext=%s\n", text); 
-	result = claw2.ReadVersion( address, text );	
-	printf("\ntext=%s\n", text); 
 //	exit(1);
 	 
 	if (stop) {
-		claw.ForwardM1(address, 0);
-		claw.ForwardM2(address, 0);		
-		claw2.ForwardM1(address, 0);
+		claw.ForwardM1 (address, 0);
+		claw.ForwardM2 (address, 0);		
+/*		claw2.ForwardM1(address, 0);
 		claw2.ForwardM2(address, 0);		
-
+		claw3.ForwardM1(address, 0);
+		claw3.ForwardM2(address, 0);
+		claw4.ForwardM1(address, 0);
+		claw4.ForwardM2(address, 0); */
 		exit(1);
 	}
 	while (1)
 	{				
 		printf("\nForward:\n");
-		claw.ForwardM1(address, 127);
-		claw.ForwardM2(address, 127);		
-
-		claw2.ForwardM1(address, 127);
-		claw2.ForwardM2(address, 127);		
-		usleep(2000000);	// 0.1 sec
+		claw.ForwardM1(address, 64);
+		claw.ForwardM2(address, 64);		
+/*		claw2.ForwardM1(address, 64);
+		claw2.ForwardM2(address, 64);		*/
 		usleep(1000000);	// 0.1 sec
+		usleep(1000000);	// 0.1 sec
+		//read_main_battery();
 		
 		printf("\nBackward:\n");		
-		claw.BackwardM1(address, 127);
-		claw.BackwardM2(address, 127);
-
-		claw2.BackwardM1(address, 127);
-		claw2.BackwardM2(address, 127);
-		usleep(2000000);	// 0.1 sec		
+		claw.BackwardM1(address, 64);
+		claw.BackwardM2(address, 64);
+/*		claw2.BackwardM1(address, 64);
+		claw2.BackwardM2(address, 64); */
+		usleep(1000000);	// 0.1 sec		
 		usleep(1000000);	// 0.1 sec		
 	
 	}	

@@ -9,6 +9,7 @@
 /******************************************************************************
 * Definitions
 ******************************************************************************/
+char* get_error_string( uint32_t mStatus );
 
 #define _SS_VERSION 16
 
@@ -177,8 +178,8 @@ public:
 	bool DutyAccelM1M2			(uint8_t address, uint16_t duty1, uint32_t accel1, uint16_t duty2, uint32_t accel2);
 	bool ReadM1VelocityPID		(uint8_t address,float &Kp_fp,float &Ki_fp,float &Kd_fp,uint32_t &qpps);
 	bool ReadM2VelocityPID		(uint8_t address,float &Kp_fp,float &Ki_fp,float &Kd_fp,uint32_t &qpps);
-	bool SetMainVoltages		(uint8_t address,uint16_t min,uint16_t max);
-	bool SetLogicVoltages		(uint8_t address,uint16_t min,uint16_t max);
+	bool SetMainVoltages		(uint8_t address,float mMin, float mMax);
+	bool SetLogicVoltages		(uint8_t address,float mMin,float mMax);
 	bool ReadMinMaxMainVoltages	(uint8_t address,uint16_t &min,uint16_t &max);
 	bool ReadMinMaxLogicVoltages(uint8_t address,uint16_t &min,uint16_t &max);
 	bool SetM1PositionPID		(uint8_t address,float kp,float ki,float kd,uint32_t kiMax,uint32_t deadzone,uint32_t min,uint32_t max);
@@ -207,8 +208,8 @@ public:
 	bool ReadNVM				(uint8_t address);
 	bool SetConfig				(uint8_t address, uint16_t config);
 	bool GetConfig				(uint8_t address, uint16_t &config);
-	bool SetM1MaxCurrent		(uint8_t address,uint32_t max);
-	bool SetM2MaxCurrent		(uint8_t address,uint32_t max);
+	bool SetM1MaxCurrent		(uint8_t address,float mMax);
+	bool SetM2MaxCurrent		(uint8_t address,float mMax);
 	bool ReadM1MaxCurrent		(uint8_t address,uint32_t &max);
 	bool ReadM2MaxCurrent		(uint8_t address,uint32_t &max);
 	bool SetPWMMode				(uint8_t address, uint8_t mode);
@@ -221,13 +222,14 @@ public:
 	bool 			overflow	( );
 	int 			peek		( );
 
-	virtual size_t  read		( uint32_t timeout );	// result in rx_buffer;
+	virtual char	read		( uint32_t timeout );	// result in rx_buffer;
 	virtual size_t  write2		( uint8_t byte     );
 
 	bool 			listen		( );
 	void 		 	clear		( );
 
 private:
+
 	void 	 crc_clear	();
 	void 	 crc_update (uint8_t data);
 	uint16_t crc_get	();

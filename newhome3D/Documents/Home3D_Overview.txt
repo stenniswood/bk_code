@@ -1,0 +1,48 @@
+HOME 3D OVER VIEW
+
+
+Major Pieces:
+
+A)  NLP - responds to user commands and questions.
+        I.  Introduce new objects into the sim
+            a) specify their location and orientation.
+
+        II. Robot commands
+            a) Body movements
+            b) Go to room, location.
+            c) Assume poses or 'dance' moves.
+        III.
+
+        top_level_protocol_sim is the root for NLP.  It branches into the various other
+            NLP queries.
+
+B)  SQL - database stores locations of all objects present (in the house)
+            Also locations & structure of the house (wall locations).
+
+C) Buildings - class for each:
+    Hampton apartment
+    629 Quarter
+    Basketball Arena
+    room of tables
+
+D) Building Structures -
+    abstract wall
+    brick wall
+    doors + handles
+    Dwelling level - parent for any home 1 level floor plan.  ie. holds all the walls, doors, windows for that level.
+    Many other miscellaneous objects.
+
+E) Large Objects -
+    Street
+    Terrain
+
+F) Robot
+
+G) Molecules
+
+H) Atoms
+
+I) System Code -
+    asset importer - import cad files from sketchup etc.
+    init_samples
+

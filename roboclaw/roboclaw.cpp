@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 
 #include "sserial.hpp"
 #include "roboclaw.h"
@@ -12,7 +13,7 @@
 #define SetDWORDval(arg) (uint8_t)(((uint32_t)arg)>>24),(uint8_t)(((uint32_t)arg)>>16),(uint8_t)(((uint32_t)arg)>>8),(uint8_t)arg
 #define SetWORDval(arg)  (uint8_t)(((uint16_t)arg)>>8),(uint8_t)arg
 
-#define Debug 0
+#define Debug 1
 
 /*	Constructor:
 	mPortName : for instance "/dev/ttyACM0"	
@@ -20,12 +21,13 @@
 RoboClaw::RoboClaw( const char* mPortName, uint32_t time_out )
 :SSerial( )
 {
+	connected = false;
 	_cl_tx_bytes    = 50;
 	_cl_port 		= strdup(mPortName);
 	_cl_baud 		= 9600;
 	_cl_tx_detailed = 1;
 	timeout = time_out;
-	Dprintf("RoboClaw:: port=%s\n", _cl_port );
+	//Dprintf("RoboClaw::ctor() port=%s\n", _cl_port );
 }
 
 //
@@ -56,13 +58,16 @@ bool RoboClaw::overflow()
 }
 extern uint64_t 	   GetTimeStamp2();
 
-size_t RoboClaw::read( uint32_t timeout )
+char RoboClaw::read( uint32_t timeout )
 {
 	uint32_t start = GetTimeStamp2();
-	while(!available()) 
+	while(!available())
 	{
 	   if((GetTimeStamp2()-start)>=timeout)
+		{	
+		  //printf("RoboClaw::read timeout!\n");
 		  return -1;
+		}
 	}
 	return SSerial::read();
 } 
@@ -100,27 +105,36 @@ uint16_t RoboClaw::crc_get()
 */
 bool RoboClaw::write_n(uint8_t cnt, ... )
 {
+	printf( "write_n() %s: ", _cl_port );
 	uint8_t trys=MAXRETRY;
 	do{
-		crc_clear();	// send data with crc
+		crc_clear();				 // send data with crc
 		va_list marker;
 		va_start( marker, cnt );     /* Initialize variable arguments. */
 		for(uint8_t index=0; index<cnt; index++) {
 			uint8_t data = va_arg(marker, int);
 			crc_update(data);
-			write(data);
 		}
 		va_end( marker );            /* Reset variable arguments.      */
+		va_start( marker, cnt );     /* Initialize variable arguments. */
+		for(uint8_t index=0; index<cnt; index++) {
+			uint8_t data = va_arg(marker, int);
+			write(data);		// SSerial::write(char)
+		}
+		va_end( marker );            /* Reset variable arguments.      */				
 		uint16_t crc = crc_get();
 		write(crc>>8);
 		write(crc   );
-		size_t len = read(1);
-		if (len)  {
-			if(rx_buffer[0]==0xFF)
-				return true;
+		//printf("crc=|%4x|\n", crc);
+		//size_t len = read(1);
+		//response = rx_buffer[0]
+		char response = serialGetchar();		
+		if(response==0xFF) {
+			printf("\n");
+			return true;
 		}
 	} while(trys--);
-	Dprintf("\n");
+	printf("\n");
 	return false;
 }
 
@@ -134,10 +148,10 @@ bool RoboClaw::read_n(uint8_t cnt, uint8_t address, uint8_t cmd,...)
 
 		data=0;
 		crc_clear();
-		write(address);
 		crc_update(address);
-		write(cmd);
 		crc_update(cmd);
+		write(address);
+		write(cmd);
 
 		//send data with crc
 		va_list marker;
@@ -266,7 +280,7 @@ uint16_t RoboClaw::Read2(uint8_t address,uint8_t cmd,bool *valid){
 		value=(uint16_t)data<<8;
 		
 		if(data!=-1){
-			data = read(timeout);
+			data = (uint8_t)read(timeout);
 			crc_update(data);
 			value|=(uint16_t)data;
 		}
@@ -280,7 +294,8 @@ uint16_t RoboClaw::Read2(uint8_t address,uint8_t cmd,bool *valid){
 				if(data!=-1){
 					ccrc |= data;
 					if(crc_get()==ccrc){
-						*valid = true;
+						if (valid)
+							*valid = true;
 						return value;
 					}
 				}
@@ -494,31 +509,35 @@ bool RoboClaw::ResetEncoders(uint8_t address){
 	return write_n(2,address,RESETENC);
 }
 
-bool RoboClaw::ReadVersion(uint8_t address,char *version){
+bool RoboClaw::ReadVersion(uint8_t address, char *version) 
+{
 	uint8_t data;
 	uint8_t trys=MAXRETRY;
+	printf(" %s: ", _cl_port );
 	do{
 		flush();
-		data = 0;
-		
+		data = 0;		
 		crc_clear();
-		write(address);
 		crc_update(address);
-		write(GETVERSION);
 		crc_update(GETVERSION);
-	
+		printf(" %x %x \n", address, GETVERSION );
+		
+		write(address);
+		write(GETVERSION);
+
 		uint8_t i;
 		for(i=0;i<48;i++){
 			if(data!=-1){
-				data=read(timeout);
+				data=serialGetchar(); // read(timeout);
+				if (data==(uint8_t)-1) { printf("timeout\n"); i=48; break; }
 				version[i] = data;
 				crc_update(version[i]);
-				if(version[i]==0){
+				if(version[i]==0) {
 					uint16_t ccrc;
-					data = read(timeout);
+					data = serialGetchar(); // read(timeout);
 					if(data!=-1){
 						ccrc = data << 8;
-						data = read(timeout);
+						data = serialGetchar(); // read(timeout);
 						if(data!=-1){
 							ccrc |= data;
 							return crc_get()==ccrc;
@@ -709,11 +728,15 @@ bool RoboClaw::ReadM2VelocityPID(uint8_t address,float &Kp_fp,float &Ki_fp,float
 	return valid;
 }
 
-bool RoboClaw::SetMainVoltages(uint8_t address,uint16_t min,uint16_t max){
+bool RoboClaw::SetMainVoltages(uint8_t address,float mMin, float mMax) {
+	uint16_t min = trunc(mMin * 10);
+	uint16_t max = trunc(mMax * 10);
 	return write_n(6,address,SETMAINVOLTAGES,SetWORDval(min),SetWORDval(max));
 }
 
-bool RoboClaw::SetLogicVoltages(uint8_t address,uint16_t min,uint16_t max){
+bool RoboClaw::SetLogicVoltages(uint8_t address,float mMin,float mMax) {
+	uint16_t min = trunc(mMin * 10.0);
+	uint16_t max = trunc(mMax * 10.0);
 	return write_n(6,address,SETLOGICVOLTAGES,SetWORDval(min),SetWORDval(max));
 }
 
@@ -803,10 +826,10 @@ bool RoboClaw::GetPinFunctions(uint8_t address, uint8_t &S3mode, uint8_t &S4mode
 		flush();
 
 		crc_clear();
-		write(address);
 		crc_update(address);
-		write(GETPINFUNCTIONS);
 		crc_update(GETPINFUNCTIONS);
+		write(address);
+		write(GETPINFUNCTIONS);
 	
 		data = read(timeout);
 		crc_update(data);
@@ -917,7 +940,7 @@ bool RoboClaw::ReadNVM(uint8_t address){
 }
 
 bool RoboClaw::SetConfig(uint8_t address, uint16_t config){
-	return write_n(4,address,SETCONFIG,SetWORDval(config));
+	return write_n(4, address, SETCONFIG, SetWORDval(config));
 }
 
 bool RoboClaw::GetConfig(uint8_t address, uint16_t &config){
@@ -929,19 +952,21 @@ bool RoboClaw::GetConfig(uint8_t address, uint16_t &config){
 	return valid;
 }
 
-bool RoboClaw::SetM1MaxCurrent(uint8_t address,uint32_t max){
-	return write_n(10,address,SETM1MAXCURRENT,SetDWORDval(max),SetDWORDval(0));
+bool RoboClaw::SetM1MaxCurrent(uint8_t address,float mMax) {
+	uint32_t maxc = trunc(mMax*100.0);	
+	return write_n(10,address,SETM1MAXCURRENT,SetDWORDval(maxc),SetDWORDval(0));
 }
 
-bool RoboClaw::SetM2MaxCurrent(uint8_t address,uint32_t max){
-	return write_n(10,address,SETM2MAXCURRENT,SetDWORDval(max),SetDWORDval(0));
+bool RoboClaw::SetM2MaxCurrent(uint8_t address,float mMax){
+	uint32_t maxc = trunc(mMax*100.0);	
+	return write_n(10,address,SETM2MAXCURRENT,SetDWORDval(maxc),SetDWORDval(0));
 }
 
-bool RoboClaw::ReadM1MaxCurrent(uint8_t address,uint32_t &max){
+bool RoboClaw::ReadM1MaxCurrent(uint8_t address,uint32_t &mMax){
 	uint32_t tmax,dummy;
 	bool valid = read_n(2,address,GETM1MAXCURRENT,&tmax,&dummy);
 	if(valid)
-		max = tmax;
+		mMax = tmax;
 	return valid;
 }
 
@@ -972,4 +997,36 @@ size_t RoboClaw::write2(uint8_t byte)
 {
 	Dprintf  ("%2x ", byte );
 	return 0;
+}
+
+
+char* get_error_string( uint32_t mStatus )
+{
+	static char Text[255];
+	memset(Text, 0, 254);
+	if (mStatus == 0x0000) 	{
+		strcat(Text, "Normal Working");
+		return Text;
+	}
+	if (mStatus & 0x0001) 	strcat(Text, "M1 OverCurrent Warning;");
+	if (mStatus & 0x0002) 	strcat(Text, "M2 OverCurrent Warning;");
+	if (mStatus & 0x0004) 	strcat(Text, "E-Stop;");
+	if (mStatus & 0x0008) 	strcat(Text, "Temperature Error;");
+	
+	if (mStatus & 0x0010) 	strcat(Text, "Temperature2 Error;");
+	if (mStatus & 0x0020) 	strcat(Text, "Main Battery High Error;");
+	if (mStatus & 0x0040) 	strcat(Text, "Logic Battery High Error;");
+	if (mStatus & 0x0080) 	strcat(Text, "Logic Battery Low Error;");
+	
+	if (mStatus & 0x0100) 	strcat(Text, "M1 Driver Fault;");
+	if (mStatus & 0x0200) 	strcat(Text, "M2 Driver Fault;");
+	if (mStatus & 0x0400) 	strcat(Text, "Main Battery High Warning;");
+	if (mStatus & 0x0800) 	strcat(Text, "Main Battery Low Warning;");
+	
+	if (mStatus & 0x1000) 	strcat(Text, "Temperature Warning;");
+	if (mStatus & 0x2000) 	strcat(Text, "Temperature2 Warning;");
+	if (mStatus & 0x4000) 	strcat(Text, "M1 Home;");
+	if (mStatus & 0x8000) 	strcat(Text, "M2 Home;");
+
+	return Text;
 }

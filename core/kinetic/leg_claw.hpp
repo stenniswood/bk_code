@@ -5,10 +5,10 @@
    the parts of the leg.  This will be added in a derived Leg class.
 */
 
-
 //#include "vector_file.hpp"
 #include <string>
 #include "roboclaw.h"
+#include "vector.hpp"
 
 #define HIP_MOTOR		  0
 #define HIP_SWIVEL_MOTOR  1
@@ -45,6 +45,29 @@ const int16_t Temperature2_Warning		= 0x2000;
 const int16_t M1_Home					= 0x4000;
 const int16_t M2_Home					= 0x8000;
 
+/* The Pots are 300 degrees per 2v */
+const float degs_per_volt = 300.0 / 2.0;
+const float volts_per_deg = 1.0 / degs_per_volt;
+
+
+class MotorCalibration
+{
+public:
+	MotorCalibration();
+
+	float		get_min_angle		();		// based on calibrated value.
+	float		get_max_angle		();		// based on calibrated value.
+
+	float		get_angle			();
+	float		get_voltage			( float mAngleDegrees );
+	void		set_calibrate_angle ( float mAngleDegrees );
+	
+	uint32_t	measured_voltage;
+	uint32_t	zeroDegreeVoltage;		// Assuming Pot encoders - the voltage corresponding to 0 degs.
+};
+
+void read_main_battery(RoboClaw& m_hip, RoboClaw& m_knee);
+void read_version(RoboClaw& m_hip, RoboClaw& m_knee);
 
 /*******************************************
 A Leg is a Motor Pack that handles computations of torques.
@@ -59,17 +82,28 @@ public:
 	~Leg			();
 	
 	void			Init();
+	void			configure_boards();
+	void			verify_working_status();	
+	void			setup_encoders();	
+	void			read_encoders();
+	
+	void			read_versions();
+	
 	void 			SetMainVoltageThresholds ( float mMinVoltage=10.0, float mMaxVoltage=25.0 );
-	void 			SetLogicVoltageThresholds( float mMinVoltage,      float mMaxVoltage 	  );
+	void 			SetLogicVoltageThresholds( float mMinVoltage=10.0, float mMaxVoltage=25.0 );
+	
 	float 			GetMainVoltage			( );
 	float 			GetLogicVoltage			( );
 	void 			SetMaxCurrents			( int mMotorIndex, float mMaxCurrent );
 	uint16_t 		read_hip_status			( );	// See Roboclaw Error codes!
 	uint16_t 		read_knee_status		( ); 	// See Roboclaw Error codes!
-		
+
+	void	 		read_currents			( ); 	
+	void	 		read_status				( ); 		
+
 	void			stop_all_motors			();
-	int				get_num_motors()	{ return 4; };
-	
+	int				get_num_motors			()	{ return 4; };
+
 	// ACCESSOR FUNCTIONS:
 	float 			get_hip_angle			();
 	float 			get_hip_swivel			();	
@@ -85,25 +119,35 @@ public:
 	bool 			set_hip_swivel_duty		(float mFraction);
 	bool 			set_knee_duty			(float mFraction);
 	bool 			set_ankle_duty			(float mFraction);
+//	bool 			set_duty_vector			(vector<float>& mFractions);
+	bool 			set_duty_vector			(MathVector& mFractions);
 	
 /* Not implemented yet, b/c what to do with the duties under variable loads 
 	void 			set_hip_angle			(float mAngle);
 	void 			set_hip_swivel_angle	(float mAngle);
 	void 			set_knee_angle			(float mAngle);
 	void 			set_ankle_angle			(float mAngle); */
+//	virtual void	SavePreferences		( Preferences* mpref			   );		// stops and ...
+//	virtual void	LoadPreferences		( Preferences* mpref, BOOL mConstructObjects = TRUE	);	
 
 	void			set_to_swing_leg		();
  	void			set_to_stance_leg		();
  	void			set_to_standing_leg		();
-
-//	virtual void	SavePreferences		( Preferences* mpref			   );		// stops and ...
-//	virtual void	LoadPreferences		( Preferences* mpref, BOOL mConstructObjects = TRUE	);	
 	
 private:
+	MotorCalibration cals[4];
+	
 	RoboClaw	m_board_hip;		// hip rotate and swing.
 	RoboClaw	m_board_knee;		// knee and ankle.
 	std::string	m_name;
 	uint8_t		leg_mode;			// swing, stance, or shared (both legs bearing weight)
+
+	float		m_battery_voltage;
+	float 		m_currents[4];
+	uint32_t 	m_hip_enc;
+	uint32_t 	m_hip_swivel_enc;
+	uint32_t 	m_knee_enc;
+	uint32_t 	m_ankle_enc;	
 };
  
 #endif

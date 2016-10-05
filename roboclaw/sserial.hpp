@@ -16,11 +16,11 @@ public:
 	~SSerial();
 	
 	void	open			( const char* mDeviceName=NULL );
-	void	close			(  );
-	int		available		(  );
-	char	serialGetchar	(  );
-	
-	size_t	read			( );
+	void	close			( );
+	int		available		( );
+	char	serialGetchar	( );
+
+	char	read			( );
 	size_t	write			( char* mBuffer, int mLength );
 	size_t	write			( char mBuffer );
 	
@@ -29,7 +29,7 @@ public:
 	void	set_baud_divisor(int speed);
 
 	void 	flush();		// stub
-			
+
 	int    			fd;
 	int    			valid_location_lock;
 	struct 	pollfd 	serial_poll;
@@ -40,10 +40,10 @@ public:
 
 	int		rx_bytes;		 // rx data bytes in buffer
 	int 	_cl_tx_bytes;
-	char*	_cl_port;
 	int		_cl_baud;
 	int		_cl_tx_detailed;
-	
+	bool    connected;
+	char*	_cl_port;
 };
 
 
