@@ -25,7 +25,7 @@ ALTERNATIVELY:
 #include <vector>
 #include "gl_misc.h"
 #include "vector.hpp"
-#include "multi_path_route.h"
+//#include "multi_path_route.h"
 
 using namespace std;
 
@@ -55,7 +55,8 @@ public:
     void 			 add_way_point2         ( MathVector    mPoint );
     void             add_sample             ( MathVector   mPoint  );
 
-    virtual void     create_from_multi      ( glMultiRoute& mMulti );
+// Instead put this in Multiroute and do an extract which gives a glRoute.
+//    virtual void     create_from_multi      ( glMultiRoute& mMulti );
     void             show_direct_path       ( bool mDraw = true );
     
     float 			 get_angle_degrees      ( int mIndex );

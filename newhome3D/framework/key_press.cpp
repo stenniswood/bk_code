@@ -14,19 +14,18 @@
 
 extern GLdouble centerAngle ;
 extern GLdouble angle_increment;
-void rotate( );
-extern glArm*  selected_arm ;          // 0=left; 1=right;
-extern glLeg*  selected_leg ;          // 0=left; 1=right;
-extern bool  last_select_leg;
+void 			rotate( );
+extern glArm*	selected_arm ;          // 0=left; 1=right;
+extern glLeg*	selected_leg ;          // 0=left; 1=right;
+extern bool  	last_select_leg;
 extern GLdouble centerX,centerY,centerZ;
 extern GLdouble eyeX, eyeY, eyeZ;
-void assume_robot_view();
+void 			assume_robot_view();
 extern union uGlobalVars theGlobals;
-#define eye_follows_robots theGlobals.raw_array[1]
-extern GLdouble centerX,centerY,centerZ;
-void move_forward( float mAmount );
-void move_sideways( float mAmount );
-extern bool pauser;
+#define 		eye_follows_robots theGlobals.raw_array[1]
+void 			move_forward( float mAmount );
+void 			move_sideways( float mAmount );
+extern bool 	pauser;
 
 
 void handleKeypress(unsigned char key, int x, int y)
@@ -36,7 +35,6 @@ void handleKeypress(unsigned char key, int x, int y)
     static bool result = false;
     static float lift_height=0.0;
     float tmp;
-    printf("handleKeypress(%c)\n",key);
     
     switch (key) {
         case 'v':   //show_tree = !show_tree;
@@ -105,7 +103,7 @@ void handleKeypress(unsigned char key, int x, int y)
         case '*': tmp = KitchenSinkCounter.m_cabinets[3].m_drawer.m_fraction_open -= 0.05;
             KitchenSinkCounter.m_cabinets[3].m_drawer.open( tmp );
             break;
-        case 'd': centerAngle -= angle_increment; rotate(); printf("got d\n"); break;
+        case 'd': centerAngle -= angle_increment; rotate(); break;
         case 'a': centerAngle += angle_increment; rotate(); break;
         case ' ': robot.start_walking();
             printf("Angle=%6.2f; centerX=%6.2f; centerY=%6.2f; centerZ=%6.2f;\n", centerAngle,
@@ -233,13 +231,13 @@ void handleKeypress(unsigned char key, int x, int y)
         case 'G': selected_leg->increase_knee_angle  (-2.); 		 break;
         case 'B': selected_leg->increase_ankle_angle (-2.); 		 break;
             
-        case 'w': centerY += 5.; printf("w"); break;		// look up.
-        case 'x': centerY -= 5.; printf("w"); break;
+        case 'w': centerY += 5.; break;		// look up.
+        case 'x': centerY -= 5.; break;
         case 'q': eyeY -= 5.; centerY -= 5.; break;
         case 'r': eyeY += 5.; centerY += 5.; break;
             
-        case 'c': move_forward (  5.);  break;
-        case 'e': move_forward ( -5.); 	break;
+        case 'c': move_forward (  10.);  break;
+        case 'e': move_forward ( -10.); 	break;
         case 's': move_sideways(  2.);	break;
         case 'f': move_sideways( -2.); 	break;
             
@@ -248,7 +246,6 @@ void handleKeypress(unsigned char key, int x, int y)
     }
     robot.m_right_leg.make_foot_level();
     robot.m_left_leg.make_foot_level();
-    
     glutPostRedisplay();
 }
 

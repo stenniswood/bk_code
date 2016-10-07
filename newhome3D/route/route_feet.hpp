@@ -41,7 +41,8 @@ public:
     void            reset_foot_prints          ( );
     void 			compute_angle              ( struct stFootPosition& mfoot );
     void 			compute_angles             ( );
-    virtual void    create_from_multi          ( glMultiRoute& mMulti );
+    
+    //virtual void    create_from_multi          ( glMultiRoute& mMulti );
     void 			colorize_center            ( int mVertexIndex );
 
     void			generate_steps_vertices	   ( );

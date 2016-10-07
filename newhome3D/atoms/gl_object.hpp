@@ -69,7 +69,8 @@ public:
     
     virtual void 	setup           ( );
     virtual void 	create          ( );
-	virtual void	relocate        ( double mX, double mY, double mZ );
+	//virtual void	relocate        ( double mX, double mY, double mZ );
+	virtual void	relocate        ( float mX, float mY, float mZ );
     virtual void    relocate        ( MathVector& mNewLocation );
 
     virtual void 	set_color       ( Color mColor      );

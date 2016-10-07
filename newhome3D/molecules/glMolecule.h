@@ -23,7 +23,6 @@ public:
     ~glMolecule( );
 
     void            Initialize       ( );
-    virtual void    relocate         ( float mX, float mY, float mZ );
     
     void        set_acceleration();         // transfers into all atoms/sub-molecules.
     void        set_veloctiy();             // transfers into all atoms/sub-molecules.

@@ -47,7 +47,7 @@ vector<MathVector>   Sources;
 int DestinationIndex = 0;
 int SourceIndex      = 0;
 
-
+    glStairway stairs;
 StreetSign          street_signs[10];
 glRoad              road;
 /*************** OBJECTS ***********************/
@@ -278,7 +278,7 @@ void init_sports_balls()
     sphere1.set_color( 0xFF7F7F00);
     sphere1.load_texture("textures/basketball_texture.jpg" );
     sphere1.create  (  );
-    sphere1.m_velocity[0] = 40;
+    sphere1.m_velocity[0] =  40;
     sphere1.m_velocity[2] = -10;
     sphere1.relocate( 65, 70, 110 );
     
@@ -313,7 +313,76 @@ void init_sports_balls()
     sphere4.m_velocity[2] = 20;
     sphere4.relocate( 60, 70, 110 );
 }
+void init_robots()
+{
+    robot.m_show_paths = false;
+    robot.m_glide_over_path_mode = false;
+    robot.create();
+    robot.relocate( 20, 50, 20 );
+    robot.hands_on_hip();
+    printf("\nROBOT_ID = %ld\n",robot.m_object_id );
+}
+void init_dwellings()
+{
+    roof.m_house_length = 50*12;
+    roof.m_house_width  = 25*12;
+    roof.create();
+    roof.relocate( -800, 25*12, 0 );
 
+    house.create();
+    house.relocate( -800, 0, 0 );
+    //init_rooms();
+
+    //Hcomplex.create();
+   // init_sample_paths();    
+    printf("========= CREATING APARTMENT ====================\n");
+    apartment.create          ( );
+/*    apartment.update_line_info( );
+    apartment.create_map(map2D);
+    map2D.create_2D_drawing();      // creates the opengl vertices.	//map2D.scale_drawing(0.125);
+    map2D.print_2D_info();
+    map2D.gl_register( );
+    map2D.m_z_angle = 0.0;
+    map2D.m_y       = 0.0;
+    //apartment.find_all_possibilies( 2*12, 60*M_PI/180., 3*12 );
+    select_route( );
+*/    
+    printf("\nApartment Create\n\n");
+    apartment2.setup();
+    apartment2.mirror_image_x();
+    apartment2.gl_register   ();
+    apartment2.relocate( 0, 0, 300);
+
+    // Sample door handle path :
+    //    (exact same method should be available for drawers, light switches)
+    glDoor* selected_door = (glDoor*)apartment.m_fwalls[1]->m_doors[0];
+    selected_door->create_handle_path( door_path );
+
+    door_path.map_vertices( apartment.m_fwalls[1]->get_body_matrix() );
+    door_path.gl_register();
+
+    string searchname     = "master bedroom";
+    string searchtypename = "door";
+    //VerbalObject* ptr = apartment.find_component(searchname, searchtypename);
+    
+    //KitchenSinkCounter.set_number_of_cabinets(4);
+    //KitchenSinkCounter.create();
+    //KitchenSinkCounter.relocate( 144., 0., 160.+36.+95. );
+}
+
+void init_terrain()
+{
+	//terra.load_image( "textures/stucco-texture.jpg" );
+	terra.load_image( "textures/Ireland.jpg"     );
+    terra.set_stretch( 10, 10 );
+    terra.m_y_scale = 1.0;
+    //terra.load_image( "textures/heightmap6.jpg"  );
+//    terra.add_omission(&apartment);
+//    terra.add_omission(&apartment2);
+    //terra.add_omission(&bball_court);
+    //terra.load_image( "textures/heightmap_P.png" );
+    terra.create();
+}
 void init_objects()
 {
     ground.width = 5000;
@@ -324,20 +393,59 @@ void init_objects()
     ground.m_repetitions_y = 300;
     ground.create();
 
-   // init_sample_paths();
+    init_street_scene();
+    init_dwellings();
+    init_robots();
+	//init_terrain();
     
-    roof.m_house_length = 50*12;
-    roof.m_house_width  = 25*12;
-    roof.create();
-    roof.relocate( -800, 25*12, 0 );
-    return;
+    bball_arena.create();
+    bball_arena.relocate( -40*12, 2, -94*12 );
+    bball_arena.create_cam_routes();
     
- /*   house.create();
-    house.relocate( -800, 0, 0 );
-    //backboard->relocate( 0, 75, -50 );
-    //init_street_scene();
+    table.create();
+    table.relocate  ( 90.+24, 0, 291.-42.);
+    tableCP.create();
+    tableCP.relocate( 144.+24, 0, 91.-22.);
     
+    window.set_params  (50, 48, 48, 1.5 );
+    window.create      (  );
+    window.relocate	   ( 40, 0, 40 );
+
+    txt_cylinder.m_radius = 15.;
+    txt_cylinder.m_extrusion_length = 20.;
+    txt_cylinder.m_extrusion_axis = 1;
+    txt_cylinder.setup();
+    txt_cylinder.gl_register();
+ 
+    //picnic.create();
+
+// init_sports_balls();
+//    sphere.load_texture("textures/me_in_car.bmp");
+
+   // brick_wall.set_length_height  ( 15*12, 8*12 );
+   // brick_wall.create_components  ( );
+   // brick_wall.relocate           ( 0. , 0., -150.  );
+/*    
+    theGlobals.gv.CameraOn = 0;
+    /*    float scale = 6.0;
+     paper.load_texture    ( "textures/me_in_car.bmp" );
+     paper.set_width_height( 10*scale, 10*scale       );
+     paper.create          (                          );
+     paper.relocate        ( 40., 22.*4., 5.0 );
+     paper.m_x_angle       = 90.;
+     paper.m_y_angle       = 90.; */
     
+    /*    if (theGlobals.gv.CameraOn  ) {
+     screen.set_width_height( 1280/10, 700/10 );
+     ((CameraTexture*)screen.m_texture)->generate_PBO();
+     // ((CameraTexture*)screen.m_texture)->
+     // ((CameraTexture*)(screen.m_texture))->timeslice();
+     screen.create          (                      );
+     screen.relocate        ( 10., 22.*4., 9.0     );
+     screen.m_x_angle       = 180.;
+     }
+*/   
+ /*   //	  backboard->relocate( 0, 75, -50 );
     cubeR.width = 10;
     cubeR.depth = 10;
     cubeR.height = 20.0;
@@ -357,133 +465,20 @@ void init_objects()
     //cube.apply_right(txt2);
     /*Texture* txt3 = cube.load_image("textures/door_carmelle.jpg",FACE_FRONT_ID);        // 0 = top
      cube.apply_front(txt3,1);
-     cube.apply_back (txt3,1); */
+     cube.apply_back (txt3,1); 
     cube.m_R_velocity[1] = 25;
     cube.is_participating = true;
     //cube.create();
     cube.relocate( 50, 90, 50 );
     
-    
     //loadAsset();
     //init_construction_objects();
-    
-    struct stFootPosition LHeel;
-    struct stFootPosition RHeel;
-    
-    robot.m_show_paths = true;
-    robot.create();
-    robot.m_glide_over_path_mode = false;
-    robot.get_left_foot_location ( &LHeel );
-    robot.get_right_foot_location( &RHeel );
-    robot.relocate( 20, 50, 20 );
-    robot.goto_start_of_path();
-    robot.hands_on_hip();
-    printf("\nROBOT_ID = %ld\n",robot.m_object_id );
-    
-    //sphere.load_texture("textures/me_in_car.bmp");
-    
-/*    bball_arena.create();
-    bball_arena.relocate( -40*12, 2, -94*12 );
-    bball_arena.create_cam_routes();
-    //init_sports_balls();
-  */  
-    
-    table.create();
-    table.relocate  ( 90.+24, 0, 291.-42.);
-    tableCP.create();
-    tableCP.relocate( 144.+24, 0, 91.-22.);
-    
-    //    brick_wall.set_length_height(15*12, 8*12);
-    //    brick_wall.create  ( );
-    //    brick_wall.relocate( 0. , 0., -150.  );
-    
-    
-    theGlobals.gv.CameraOn = 0;
-    /*    float scale = 6.0;
-     paper.load_texture    ( "textures/me_in_car.bmp" );
-     paper.set_width_height( 10*scale, 10*scale       );
-     paper.create          (                          );
-     paper.relocate        ( 40., 22.*4., 5.0 );
-     paper.m_x_angle       = 90.;
-     paper.m_y_angle       = 90.; */
-    
-    /*    if (theGlobals.gv.CameraOn  ) {
-     screen.set_width_height( 1280/10, 700/10 );
-     ((CameraTexture*)screen.m_texture)->generate_PBO();
-     // ((CameraTexture*)screen.m_texture)->
-     // ((CameraTexture*)(screen.m_texture))->timeslice();
-     screen.create          (                      );
-     screen.relocate        ( 10., 22.*4., 9.0     );
-     screen.m_x_angle       = 180.;
-     }
-     */
-    
-    window.set_params  (50, 48, 48, 1.5 );
-    //    window.create      (  );
-    //    window.relocate( 40, 0, 40 );
-    
-    //init_rooms();
-    printf("\nApartment Create\n\n");
-    apartment2.setup();
-    apartment2.mirror_image_x();
-    apartment2.gl_register   ();
-    apartment2.relocate( 0, 0, 300);
-    
-    //Hcomplex.create();
-    
-    string searchname     = "master bedroom";
-    string searchtypename = "door";
-    apartment.create          ( );
-    //VerbalObject* ptr = apartment.find_component(searchname, searchtypename);
-    
-    printf("========= CREATING APARTMENT ====================\n");
-    apartment.update_line_info( );
-    apartment.create_map(map2D);
-    map2D.create_2D_drawing();      // creates the opengl vertices.	//map2D.scale_drawing(0.125);
-    map2D.print_2D_info();
-    map2D.gl_register( );
-    map2D.m_z_angle = 0.0;
-    map2D.m_y       = 0.0;
-    //apartment.find_all_possibilies( 2*12, 60*M_PI/180., 3*12 );
-    
-    select_route( );
-    
-    //  terra.load_image( "textures/stucco-texture.jpg" );
-    //  terra.load_image( "textures/Ireland.jpg"     );
-/*    terra.set_stretch( 10, 10 );
-    terra.m_y_scale = 1.0 ;
-    //terra.load_image( "textures/heightmap6.jpg"  );
-    terra.add_omission(&apartment);
-   //    terra.add_omission(&apartment2);
-    //terra.add_omission(&bball_court);
-    //terra.load_image( "textures/heightmap_P.png" );
-    //terra.create();
-    
-    // Sample door handle path :
-    //    (exact same method should be available for drawers, light switches)
-    glDoor* selected_door = (glDoor*)apartment.m_fwalls[1]->m_doors[0];
-    selected_door->create_handle_path( door_path );
-    
-    door_path.map_vertices( apartment.m_fwalls[1]->get_body_matrix() );
-    door_path.gl_register();
-    
-    /* This causes some objects to disappear!  Mostly the glBox objects created prior to this call!  */
+*/
+	/* This causes some objects to disappear!  Mostly the glBox objects created prior to this call!  */
     //    theWorld.release_vertex_memories();
-
- /*   txt_cylinder.m_radius = 15.;
-    txt_cylinder.m_extrusion_length = 20.;
-    txt_cylinder.m_extrusion_axis = 1;
-    txt_cylinder.setup();
-    txt_cylinder.gl_register();
-   */ 
-    //KitchenSinkCounter.set_number_of_cabinets(4);
-    //KitchenSinkCounter.create();
-    //KitchenSinkCounter.relocate( 144., 0., 160.+36.+95. );
-    //    picnic.create();
-    /*
-     stairs.m_extrusion_length = 25*12;
+/*     stairs.m_extrusion_length = 25*12;
      stairs.set_color( 0xFF0000FF);
      stairs.create();
      stairs.m_y_angle = 0.;
-     stairs.relocate( 100, 10., -25*12 ); */
+     stairs.relocate( 100, 10., -25*12 );  */
 }

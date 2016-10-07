@@ -58,7 +58,7 @@ void glObject::create          ( )
     gl_register();
 }
 
-void glObject::relocate( double mX, double mY, double mZ )
+void glObject::relocate( float mX, float mY, float mZ )
 {
 	m_x = mX;
 	m_y = mY;

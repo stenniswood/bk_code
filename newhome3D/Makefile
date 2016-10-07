@@ -34,8 +34,9 @@ ALL_INCLUSIVE = $(addprefix -I,$(INC)) $(addprefix -I,$(SQL_INC)) $(addprefix -I
 
 # LIBRARY PATHS : -lfreenect 
 SQL_LIB = -L/usr/lib/arm-linux-gnueabihf -lmysqlclient -lz -ldl
-LDFLAGS = -L/opt/vc/lib/ -lGLESv2 -lEGL -lopenmaxil -lbcm_host -lassimp \
-          -lvcos -lvchiq_arm -lpthread -lrt -L./vgfont -L../core/libs/ilclient/ -lilclient -lglut -lGL -lGLU 
+LDFLAGS = -L/opt/vc/lib/  -lopenmaxil -lbcm_host -lassimp \
+          -lvcos -lvchiq_arm -lpthread -lrt -L./vgfont -L../core/libs/ilclient/ -lilclient \
+          -lglut -lGL -lGLU  
 LIBFLAGS= -L/usr/local/lib -L../core/libs/vgfont/ \
 	      -lshapes -lwiringPi -lm $(SQL_LIB)
 OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lopencv_face \
@@ -43,7 +44,7 @@ OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lo
 	-lopencv_core
 
 # MAIN DIRECTORY OBJECTS:
-OBJ     = main.o t_object.o
+OBJ     = main.o t_object.o mouse_nav.o cursor_nav.o 
 NLP_OBJ = color_protocol.o parameter.o robot_legs_protocol.o \
  create_object_nlp.o positioner_2d.o robot_protocol.o ThreeD_object_protocol.o \
  it.o positioner_3d.o scene_nlp.o top_level_protocol_sim.o \

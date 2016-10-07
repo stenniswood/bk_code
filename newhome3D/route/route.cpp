@@ -151,7 +151,7 @@ void glRoute::add_sample( MathVector   mPoint )
 }
 
 
-void glRoute::create_from_multi( glMultiRoute& mMulti )
+/*void glRoute::create_from_multi( glMultiRoute& mMulti )
 {
     // Generate Final Path (Walking Route)
     reset           ( );
@@ -169,7 +169,7 @@ void glRoute::create_from_multi( glMultiRoute& mMulti )
     // call gl_register after this.
     // Not done here because virtual function.  derived classes may add more vertices (foot steps)
     // Need to call from the caller of this function.    
-}
+}*/
 
 
 /* We only compute the rise and run! */

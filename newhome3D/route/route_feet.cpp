@@ -67,12 +67,12 @@ void glRouteWithFeet::reset_foot_prints( )
     m_indices.clear();
 }
 
-void glRouteWithFeet::create_from_multi( glMultiRoute& mMulti )
+/*void glRouteWithFeet::create_from_multi( glMultiRoute& mMulti )
 {
     glRoute::create_from_multi( mMulti );
     compute_angles         ( );
     generate_steps_vertices( );
-}
+}*/
 
 /* Prints the heel to toe coordinates & vector. */
 void glRouteWithFeet::print_step( int mIndex, bool mLeft )

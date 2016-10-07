@@ -33,7 +33,7 @@ class glBrickWall : public glMolecule, public glBareWall
 public:
 	glBrickWall					( int mBrickType = CEMENT_BLOCK_ID );
     ~glBrickWall                ( );
-    
+
     void            select_brick_type( int mType );
     void            set_length_height   ( float mLength, float mHeight );       // this or set_params()
     void            set_params          ( int mNumBricks, int mNumRows );
@@ -42,15 +42,14 @@ public:
 	void            create_one_row		( int mNumberBlocks, bool mOffset, float mHeight );
     virtual void	create_components   ( );
 
-	float	get_brick_length 	( );
-	float	get_brick_height 	( );
-    float	get_brick_depth     ( );    
+	float			get_brick_length 	( );
+	float			get_brick_height 	( );
+    float			get_brick_depth     ( );    
 
-    float   m_brick_length;
-    float   m_brick_height;
-    float   m_brick_depth;
-    
-    
+    float 	  		m_brick_length;
+    float 	  		m_brick_height;
+    float 	  		m_brick_depth;
+
 	int		m_number_of_rows;		// height
 	float	m_wall_length;			// in inches
 	int 	m_brick_type;			// bricks or cylinder blocks (for size & texture purposes)	

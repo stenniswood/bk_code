@@ -28,13 +28,6 @@ void glMolecule::Initialize	( )
     m_object_class  = 16;    
 }
 
-void glMolecule::relocate	( float mX, float mY, float mZ )
-{
-    m_x = mX;
-    m_y = mY;
-    m_z = mZ;
-}
-
 void glMolecule::set_acceleration()         // transfers into all atoms/sub-molecules.
 {
     int size = (int)m_components.size();

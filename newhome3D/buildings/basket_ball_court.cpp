@@ -147,7 +147,7 @@ void  glBasketballCourt::select_floor( int mIndex )
     {
         case 0 :  m_floor->m_cover[0]->load_image("textures/basket_ball_court.jpg");
             break;
-        case 1 :  m_floor->m_cover[0]->load_image("textures/pistons.bmp");
+        case 1 :  m_floor->m_cover[0]->load_image("textures/Pistons.bmp");
             break;
         default:
             break;
