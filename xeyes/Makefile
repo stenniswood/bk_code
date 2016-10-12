@@ -27,7 +27,7 @@ VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 SQL_INC    = -I/usr/include/mysql 
 INC	   	   = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/ \
 	         /usr/local/include/libfreenect/ ../abkInstant/threads/ ./vision/ ./nlp/ \
-	         ./control/ ../core/dbase/
+	         ./control/ ../core/dbase/ ../core/vision/
 ALL_INCLUSIVE = $(addprefix -I,$(INC)) $(SQL_INC) $(VG_INCLUDE)
 
 # LIBRARY PATHS : 
@@ -47,7 +47,8 @@ NLP_OBJ = nlp_thread.o  nlp_vision_general_protocol.o nlp_vision_thing_protocol.
 		  qualitative_time.o nlp_sentence.o tk_colors.o serverthread.o
 CONTROL_OBJS = serial.o serial_synchronous.o roboclaw.o x_eyes.o neck_thread.o
 VISION_OBJS  = findEyeCenter.o findEyeCorner.o face_detect.o face_recog.o face_summary.o \
-			  optical_flow.o misc_detect.o  image_proc_misc.o helpers.o frame_grabber.o 
+			   misc_detect.o  helpers.o
+CORE_VISION_OBJS = optical_flow.o image_proc_misc.o frame_grabber.o
 DBASE_OBJS    = viki_logger.o vision_logger.o
 MISC_OBJS     = super_string.o
 IPC_OBJS      = vision_memory.o
@@ -63,6 +64,7 @@ xeyes: $(OBJ) \
 	$(addprefix ./nlp/,     $(NLP_OBJ)) 	 \
 	$(addprefix ./control/, $(CONTROL_OBJS)) \
 	$(addprefix ./vision/, $(VISION_OBJS))   \
+	$(addprefix ../core/vision/, $(CORE_VISION_OBJS)) \
     $(addprefix ../core/dbase/, $(DBASE_OBJS)) \
 	$(addprefix ../core/misc/, $(MISC_OBJS)) \
 	$(addprefix ../core/ipc/,  $(IPC_OBJS))	 \

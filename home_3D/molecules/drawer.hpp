@@ -12,6 +12,8 @@
 #define _DRAWER_H_
 
 #include <vector>
+#include "verbal_object.h"
+
 using namespace std;
 
 
@@ -23,9 +25,8 @@ The drawer positioning code could go either on the drawer, or on the cabinet.
 
 The Drawer Origin is located:
 
-
 */
-class glDrawer : public glObject
+class glDrawer : public glMolecule
 {
 public:
 	glDrawer(  );
@@ -45,13 +46,13 @@ public:
 
 	void 			setup		( );
 	void			create		( );	// create vertices,indices,VBO/IBO/TBO's
-	virtual void	draw_body	( );	// 
-
-	glContainer 		m_bottom;
-	glContainer 		m_left_side;	
-	glContainer 		m_right_side;		
-	glContainer 		m_facePlate;	
-	glContainer 		m_back;	
+    virtual void    draw_body   ( );
+    
+	glBox 		m_bottom;
+	glBox 		m_left_side;	
+	glBox 		m_right_side;		
+	glBox 		m_facePlate;	
+	glBox 		m_back;	
 	//glHandle	 		m_handle;	
 	
 	float				m_fraction_open;

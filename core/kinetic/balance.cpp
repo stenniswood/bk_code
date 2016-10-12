@@ -25,7 +25,8 @@
 
 #include "display.h"
 #include "load_cell_view.hpp"
-#include "bk_system_defs.h"
+#include "global.h"
+//#include "bk_system_defs.h"
 #include "fuse_accel.h"
 #include "vector_base.h"
 #include "test_layouts.hpp"

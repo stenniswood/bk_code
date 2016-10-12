@@ -2,9 +2,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
 #include <OpenGL/glext.h>
+#else
+#include <GL/glut.h>
+#include <GL/glu.h>
+#endif
+
 #include "all_objects.h"
 
 
@@ -20,13 +26,17 @@
 glIbeam::glIbeam( float mExtrusionLength )
 :glExtrusion()
 {
-	m_extrusion_length = mExtrusionLength;
-	m_layer_one_indices	= 0;
+    m_object_type_name = "i beam";
+    m_object_class  = 6;
+	m_layer_one_indices	= 0;    
+    set_la( mExtrusionLength, 2);
 }
 
-void	glIbeam::generate_layer_vertices( )
+void	glIbeam::generate_vertices( )
 {
 	struct Vertex v;
+    // We set it to m_color (which presumably has already been set!):
+    set_vertex_color(v);
 	
 	// Go along bottom first:
 	v.position[0] =  0.0;
@@ -98,7 +108,7 @@ void	glIbeam::generate_layer_vertices( )
 	//printf("Ibeam vertices=%lu\n", m_vertices.size() );
 }
 
-GLuint 	glIbeam::generate_disc_indices( GLuint mStartVertexIndex )
+size_t 	glIbeam::generate_disc_indices( GLuint mStartVertexIndex )
 {
 	m_indices.push_back(0 +mStartVertexIndex);	m_indices.push_back(1+mStartVertexIndex);
 	m_indices.push_back(11+mStartVertexIndex);	m_indices.push_back(2+mStartVertexIndex);	
@@ -107,13 +117,11 @@ GLuint 	glIbeam::generate_disc_indices( GLuint mStartVertexIndex )
 	m_indices.push_back(8 +mStartVertexIndex);	m_indices.push_back(5+mStartVertexIndex);	
 	m_indices.push_back(7 +mStartVertexIndex);	m_indices.push_back(6+mStartVertexIndex);
 	m_layer_one_indices	= m_indices.size();
-	//printf("Ibeam indices=%lu\n", m_indices.size() );
 	return m_layer_one_indices;
 }
 
 void glIbeam::draw_body( )
 {
-//	printf("iBEAM draw_body()\n");
 	glExtrusion::draw_body();
 }
 

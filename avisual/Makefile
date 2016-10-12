@@ -82,6 +82,7 @@ CAN_APP_OBJS   = can_app.o gyro_window.o analog_board_app.o filter_select.o msg_
 AUDIO_APP_OBJS = audio_app.o audio_app_menu.o 
 ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot_performance.o \
 			robot_vision.o
+DBASE_OBJS    = viki_logger.o vision_logger.o
 
 #ipc_can_rxbuff.o 
 IPC_OBJS   = CAN_memory.o client_memory.o visual_memory.o audio_memory.o 
@@ -141,6 +142,7 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ../core/msg/,			$(MSG_OBJS))  			\
 		$(addprefix ../core/can/,			$(CAN_OBJS))			\
 		$(addprefix ../core/ipc/,			$(IPC_OBJS))			\
+	    $(addprefix ../core/dbase/, 		$(DBASE_OBJS)) 			\
 		$(addprefix ./apps/,				$(APPS_OBJS))			\
 		$(addprefix ./apps/file_editer/,	$(FILE_EDIT_OBJS))		\
 		$(addprefix ./apps/finder/,			$(FINDER_OBJS))			\

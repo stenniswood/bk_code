@@ -9,6 +9,9 @@
 
 #include "txt_container.hpp"
 #include <vector>
+#include "glMolecule.h"
+#include "wall.hpp"
+
 using namespace std;
 
 //  most common cement block nominal size is 16 × 8 × 8 in
@@ -20,35 +23,39 @@ const float FACE_BRICK_LENGTH    = 7.625; 		// inch
 const float FACE_BRICK_THICKNESS = 3.625;
 const float FACE_BRICK_HEIGHT    = 2.125; 
 
-const int CEMENT_BLOCK_ID  = 1;
-const int FACE_BRICK_ID = 2;
+const int   CEMENT_BLOCK_ID  = 1;
+const int   FACE_BRICK_ID    = 2;
+const float MORTOR_THICKNESS = 0.625;
 
-class glBrickWall
+
+class glBrickWall : public glMolecule, public glBareWall
 {
 public:
-	glBrickWall( int mBrickType = CEMENT_BLOCK_ID );
+	glBrickWall					( int mBrickType = CEMENT_BLOCK_ID );
+    ~glBrickWall                ( );
 
-	void	Initialize	( );
-	void	Relocate	( float mX, float mY, float mZ );
+    void            select_brick_type( int mType );
+    void            set_length_height   ( float mLength, float mHeight );       // this or set_params()
+    void            set_params          ( int mNumBricks, int mNumRows );
+    
+	txtContainer*	create_one_brick	( bool mHalf );
+	void            create_one_row		( int mNumberBlocks, bool mOffset, float mHeight );
+    virtual void	create_components   ( );
 
-	glContainer* create_one_brick( bool mHalf );
-	void	create_one_row( int mNumberBlocks, bool mOffset, float mHeight );
-	float	create		  ( float mLength, int  mRows);
+	float			get_brick_length 	( );
+	float			get_brick_height 	( );
+    float			get_brick_depth     ( );    
 
-	float	get_brick_length ( );
-	float	get_brick_height ( );
-	void	generate_vertices( );
-	void	draw(); 
+    float 	  		m_brick_length;
+    float 	  		m_brick_height;
+    float 	  		m_brick_depth;
 
 	int		m_number_of_rows;		// height
 	float	m_wall_length;			// in inches
 	int 	m_brick_type;			// bricks or cylinder blocks (for size & texture purposes)	
 	
-	vector<glContainer>	m_bricks;	
-
-	float	m_x;
-	float	m_y;
-	float	m_z;	
+    Texture* m_one_brick_texture;
+	vector<txtContainer*>	m_bricks;
 };
 
 

@@ -136,7 +136,7 @@ void init_can_memory()
 	ipc_memory_can->TxHead=0;
 	ipc_memory_can->TxHeadLap=0;
 	ipc_memory_can->TxOverFlow=FALSE;		// indicator if trying to send too quickly.	
-	dprintf ("init_CAN_memory() \n" );	
+	Dprintf ("init_CAN_memory() \n" );	
 }
 
 /* return:  0=> error;  greater than 0 segment_ic */
@@ -314,7 +314,7 @@ void shm_add_can_tx_message( struct sCAN* mMsg )
 		ipc_memory_can->TxHead = 0;
 		ipc_memory_can->TxHeadLap++;
 	}
-	//dprintf("TxHead=%d\n", ipc_memory_can->TxHead );
+	//Dprintf("TxHead=%d\n", ipc_memory_can->TxHead );
 	copy_can_msg( &(ipc_memory_can->Transmit[ipc_memory_can->TxHead++]), mMsg );	
 }
 BOOL shm_isTxMessageAvailable( int* mTail, int* mTailLaps  )
@@ -441,7 +441,7 @@ int can_connect_shared_memory(char mAllocate)
 	} 
 	// Not Available:
 	if (mAllocate) {
-		dprintf("can_connect_shared_memory() allocating.\n");
+		Dprintf("can_connect_shared_memory() allocating.\n");
 		// Now Allocate : 
 		int result = can_allocate_memory();
 		if (!result) 

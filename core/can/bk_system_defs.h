@@ -1,8 +1,6 @@
 #ifndef _BK_SYSTEM_H_
 #define _BK_SYSTEM_H_
 
-#define radians(arg) (3.1415*arg/180.0)
-#define degrees(arg) (arg*180.0/3.1415)
 
 // USE THESE FOR COLOR CODING THE PRINTF's!
 #define KNRM  "\x1B[0m"
@@ -16,17 +14,17 @@
 // printf("%sred\n", KRED);
 // printf("%snormal\n", KNRM);
 //#include <inttypes.h>
-//#include "global.h"
+#include "global.h"
 
 #define BOARD_MODEL 11
 #define SerialNumber 0x12345678
 
 //#define byte unsigned char
 //#define uint32_t unsigned long
-#define word unsigned short
+/*#define word unsigned short
 #ifndef BOOL
 #define BOOL byte
-#endif
+#endif */
 
 //#define cli()  __asm__ __volatile__ ("cli" ::)
 //#define sei()  __asm__ __volatile__ ("sei" ::)

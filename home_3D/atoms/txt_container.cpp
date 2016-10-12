@@ -2,11 +2,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
 #include <OpenGL/glext.h>
-#include "gl_container.hpp"
-#include "txt_container.hpp"
+#else
+#include <GL/glut.h>
+#include <GL/glu.h>
+#endif
+
+#include "all_objects.h"
 
 // Include OpenCV here for the imread function!
 #include <stdio.h>
@@ -22,133 +27,169 @@ using namespace std;
 
 
 txtContainer::txtContainer(  )
-:glContainer()
+:glBox()
 {
-	//m_image		= NULL;
-	m_TBO			= 0;
+    for (int i=0; i<6; i++)
+        m_side[i] = NULL;
+    
+    m_object_type_name = "textured box";    
+    m_object_class  = 9;
 	m_side_applied	= TOP_SIDE_ID;
 }
 
-void txtContainer::load_image( string mFilename )
+Texture* txtContainer::load_image( string mFilename, int mSide, int mXReps, int mYReps )
 {
-	printf("txtContainer::load_image( %s )\n", mFilename.c_str() );
-	m_src = imread(mFilename);
-	//cvtColor( src, m_src, CV_BGR2RGB );	
-	// Data goes:  BGR
-	//imshow( "Display Image", m_src );	
-}
-
-GLuint txtContainer::generate_TBO() 
-{
-//	if (m_image)
-	{
-		uint8_t* pixelPtr   = (uint8_t*)m_src.data;
-		int channels        = m_src.channels();
-		int bytes_per_pixel = m_src.elemSize();
-		int format,format2,type;
-		printf("txtContainer: channels=%d; bytes_per_pixel=%d\n", channels, bytes_per_pixel);
-		switch(channels) {
-		case 1: break;
-		case 2: break;
-		case 3: format = 3;	type =  GL_UNSIGNED_BYTE;
-				format2 = GL_BGR;
-				break;
-		case 4: format = GL_RGBA;	type = GL_UNSIGNED_INT_8_8_8_8;
-				format2 = GL_RGB;
-				break;
-		default: break;
-		}
-		printf("txtContainer: rows=%d; cols=%d\n", m_src.rows, m_src.cols);
-		glEnable(GL_TEXTURE_2D);
-		glGenTextures(1, &m_TBO );
-		glBindTexture(GL_TEXTURE_2D, m_TBO);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);		
-		glTexImage2D(GL_TEXTURE_2D,
-				 0,
-				 format,
-				 m_src.cols, m_src.rows,
-				 0,
-				 format2,	 type,
-			 	 pixelPtr );
-		printf("txtContainer: m_TBO=%d\n", m_TBO);
-	}
-	return m_TBO;
-}
-
-
-GLuint txtContainer::generate_texture_coords( )
-{
-	// Texture coords [0.0..1.0]   1.0 represents the far edge of the image.
-	// Pretty sure we need 1 coordinate for each vertex.
-	//   So if we're just doing 1 face.  It should mean just 4 text coords.
-	//m_NumTexCoords = 8;
-	const float fs = 1.0;
+	Texture* txt  = new Texture();
+	txt->load_image(mFilename);
 	
-	m_TexCoords.push_back( 0.0 );			m_TexCoords.push_back( 0.0 );
-	m_TexCoords.push_back( 0.0 );			m_TexCoords.push_back( fs );	
-	m_TexCoords.push_back( fs );			m_TexCoords.push_back( fs );
-	m_TexCoords.push_back( fs );			m_TexCoords.push_back( 0.0 );
-
-	m_TexCoords.push_back( 0.0 );			m_TexCoords.push_back( 0.0 );
-	m_TexCoords.push_back( 0.0 );			m_TexCoords.push_back( fs );
-	m_TexCoords.push_back( fs );			m_TexCoords.push_back( fs );
-	m_TexCoords.push_back( fs );			m_TexCoords.push_back( 0.0 );
-
-	return m_TexCoords.size()/2;
+    m_side[mSide] = txt;    
+	m_side[mSide]->m_repetitions_x = mXReps;
+	m_side[mSide]->m_repetitions_y = mYReps;
+    return m_side[mSide];
 }
 
-void txtContainer::generate_VBOTexCoords()
+/*
+4  5
+7  6
+*/
+void txtContainer::apply_top( Texture* mTexture, int mXReps, int mYReps )     // Show the texture just on 1 side ()
 {
-	// Generate And Bind The Texture Coordinate Buffer 
-    glGenBuffers( 1, &m_VBOTexCoords );                 	// Get A Valid Name
-    glBindBuffer( GL_ARRAY_BUFFER, m_VBOTexCoords );        // Bind The Buffer
-    // Load The Data
-    glBufferData( GL_ARRAY_BUFFER, m_TexCoords.size()*sizeof(float), 
-    				 m_TexCoords.data(), GL_STATIC_DRAW );
+    m_side[TOP_SIDE_ID] = mTexture;
+	m_side[TOP_SIDE_ID]->m_repetitions_x = mXReps;
+	m_side[TOP_SIDE_ID]->m_repetitions_y = mYReps;
+}
+void txtContainer::apply_bottom( Texture* mTexture, int mXReps, int mYReps )
+{
+    m_side[BOTTOM_SIDE_ID] = mTexture;
+	m_side[BOTTOM_SIDE_ID]->m_repetitions_x = mXReps;
+	m_side[BOTTOM_SIDE_ID]->m_repetitions_y = mYReps;
+}
+void txtContainer::apply_front( Texture* mTexture, int mXReps, int mYReps )
+{
+    m_side[FRONT_SIDE_ID] = mTexture;
+	m_side[FRONT_SIDE_ID]->m_repetitions_x = mXReps;
+	m_side[FRONT_SIDE_ID]->m_repetitions_y = mYReps;
+}
+void txtContainer::apply_back( Texture* mTexture, int mXReps, int mYReps )
+{
+    m_side[BACK_SIDE_ID] = mTexture;
+	m_side[BACK_SIDE_ID]->m_repetitions_x = mXReps;
+	m_side[BACK_SIDE_ID]->m_repetitions_y = mYReps;
+}
+void txtContainer::apply_left( Texture* mTexture, int mXReps, int mYReps )
+{
+    m_side[LEFT_SIDE_ID] = mTexture;
+	m_side[LEFT_SIDE_ID]->m_repetitions_x = mXReps;
+	m_side[LEFT_SIDE_ID]->m_repetitions_y = mYReps;
+}
+void txtContainer::apply_right( Texture* mTexture, int mXReps, int mYReps )
+{
+    m_side[RIGHT_SIDE_ID] = mTexture;
+	m_side[RIGHT_SIDE_ID]->m_repetitions_x = mXReps;
+	m_side[RIGHT_SIDE_ID]->m_repetitions_y = mYReps;
 }
 
-void txtContainer::draw()
+// Show the texture just on 1 side ()
+void txtContainer::wrap_3_sides( )
 {
-	glTranslatef(m_x, m_y, m_z);
-	//glColor3f (1.0f, 1.0f, 1.0f);
-		
+}
+void txtContainer::wrap_4_sides( )
+{   
+}
+void txtContainer::wrap_5_sides( )
+{   
+}
+void txtContainer::wrap_6_sides()
+{   
+}
+
+void txtContainer::gl_register(  )
+{
+    glAtom::gl_register();       // Base class
+
+    for (int s=0; s<6; s++)
+        if (m_side[s])
+        {
+            m_side[s]->generate_TBO();
+            m_side[s]->generate_texture_coords(1);
+            m_side[s]->generate_VBOTexCoords();
+        }
+    //generate_texture_coords_4_side_stretch();
+}
+
+/* 
+    Top, front, bottom, back sides.
+ */
+GLuint txtContainer::generate_texture_coords_4_side_stretch( )
+{
+	float hdh = 1.0/(height+depth+height+depth);
+	float hwh = 1.0/(width);
+    const float fs = 1.0;
+    struct stTextCoord tc;
+    
+	// U                                            V
+    tc.u = hwh*height;          tc.v = hdh*height;            m_texture->m_TexCoords.push_back( tc );
+    tc.u = hwh*height;          tc.v = hdh*(height+depth);    m_texture->m_TexCoords.push_back( tc );
+    tc.u = hwh*(height+width);  tc.v = hdh*(height+depth);    m_texture->m_TexCoords.push_back( tc );
+    tc.u = hwh*(height+width);  tc.v =hdh*height ;            m_texture->m_TexCoords.push_back( tc );
+
+    tc.u = 0.0;                 tc.v = 0.0;         m_texture->m_TexCoords.push_back( tc );
+    tc.u = 0.0;                 tc.v = fs;          m_texture->m_TexCoords.push_back( tc );
+    tc.u = fs;                  tc.v = fs;          m_texture->m_TexCoords.push_back( tc );
+    tc.u = fs;                  tc.v = 0.0;         m_texture->m_TexCoords.push_back( tc );
+	return m_texture->m_TexCoords.size()/2.;
+}
+
+
+void txtContainer::draw_body()
+{
 	//Make the new VBO active. Repeat here incase changed since initialisation
-	glBindBuffer(GL_ARRAY_BUFFER, 		  m_VBO	);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO );
+	glBindBuffer    (GL_ARRAY_BUFFER, 		  m_VBO	);
+	glBindBuffer    (GL_ELEMENT_ARRAY_BUFFER, m_IBO );
 
-	glVertexPointer(3, GL_FLOAT, 		 sizeof(struct Vertex), NULL);
-	glColorPointer (4, GL_UNSIGNED_BYTE, sizeof(struct Vertex), (GLvoid*)(offsetof(struct Vertex,color)));
+	glVertexPointer (3, GL_FLOAT, 		  sizeof(struct Vertex), NULL );
+	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(struct Vertex), (GLvoid*)(offsetof(struct Vertex,color)));
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState( GL_VERTEX_ARRAY );
+	glEnableClientState( GL_COLOR_ARRAY );
 	
-	if (m_is_closed)	// GL_QUADS
+	if (m_is_closed)                        // GL_QUADS
 	{
-		glEnable		(GL_TEXTURE_2D);
-		glActiveTexture(m_TBO);
-		glBindBuffer	(GL_TEXTURE_2D, m_TBO );	
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindBuffer	(GL_ARRAY_BUFFER, m_VBOTexCoords );	
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer  (2, GL_FLOAT,   0, NULL); 
-
-//		glDrawElements(GL_QUAD_STRIP, NUMBER_OF_CUBE_INDICES, GL_UNSIGNED_BYTE, 
-//				(GLvoid*)((char*)NULL));
-		glDrawElements(GL_QUADS, 8, GL_UNSIGNED_BYTE, (GLvoid*)((char*)NULL));
-
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);					
-		glDisable	(GL_TEXTURE_2D);	
+        int offset = 0;
+        for (int s=0; s<6; s++)
+        {
+            if (m_side[s])
+            {
+                m_side[s]->pre_draw();
+                glDrawElements(GL_POLYGON,(int)4, GL_UNSIGNED_INT,
+                               (GLvoid*)(offset*sizeof(GL_UNSIGNED_INT)));
+                m_side[s]->after_draw();
+            }
+            else
+                glDrawElements(GL_QUADS, (int)4, GL_UNSIGNED_INT,
+                               (GLvoid*)(offset*sizeof(GL_UNSIGNED_INT)));             // 0
+            offset += 4;
+        }
 	}
-
-	// glDrawArrays(GL_TRIANGLE_STRIP, 0, m_number_of_vertices );
-	glTranslatef(-m_x, -m_y, -m_z);
 }
 
+/* The problem with putting different images on each face:
+    a) Every vertex has to have a corresponding TexCoord.
+    the order of vertices must match the order of the TexCoords.
+ 
+    However, the order of the vertices wont match the order needed by GL_QUADS.
+        the IBO fixes this
+ 
+    When doing the front (for instance),  we are using vertex (0,1,5,4)
+    And the TexCoords are (0,1,2,3, 4,5,6,7)
+ 
+    so 0=<0,0>;   1=<1,0>;  2=<1,1>;  3=<1,0>
+ 
+    How do we fix this, b/c loading the texture, it would not know the set (0,1,5,4).
+ 
+    Best way really is to store duplicates of the vertices for all 6 faces.
+    This would allow normals for all faces too.
+ */
 void txtContainer::print_info()
 {
 	printf("txtContainer()  <x,y,z> = <%6.3f %6.3f %6.3f> \n", 
@@ -157,21 +198,28 @@ void txtContainer::print_info()
 			width, height, depth );
 }
 
-
-/*GLuint txtContainer::generate_TBOi() 
+/* this does a 
+GLuint txtContainer::generate_texture_coords( int mSide )
 {
-	if (m_image==NULL) return 0;
-	
-		glEnable(GL_TEXTURE_2D);
-		glGenTextures(1, &m_TBO );
-		glBindTexture(GL_TEXTURE_2D, m_TBO);
-		glTexImage2D(GL_TEXTURE_2D,
-				 0,
-				 m_image->format,
-				 m_image->width, m_image->height,
-				 0,
-				 m_image->format,
-				 m_image->type,
-				 m_image->pixels );
-	return m_TBO;
+    // Texture coords [0.0..1.0]   1.0 represents the far edge of the image.
+    // Pretty sure we need 1 coordinate for each vertex.
+    //   So if we're just doing 1 face.  It should mean just 4 text coords.
+    //m_NumTexCoords = 8;
+    /*	const float fsx = m_repetitions_x;
+     const float fsy = m_repetitions_y;
+     
+     // U									V
+     struct stTextCoord tc;
+     tc.u = 0.0;   tc.v = 0.0;    	m_side[mSide]->m_TexCoords.push_back ( tc );     // 4 vertices Bottom
+     tc.u = 0.0;   tc.v = fsy;       m_side[mSide]->m_TexCoords.push_back ( tc );
+     tc.u = fsx;   tc.v = fsy;     	m_side[mSide]->m_TexCoords.push_back ( tc );
+     tc.u = fsx;   tc.v = 0.0;       m_side[mSide]->m_TexCoords.push_back ( tc );
+     
+     tc.u = 0.0;   tc.v = 0.0;    	m_side[mSide]->m_TexCoords.push_back ( tc );     // 4 vertices Top
+     tc.u = 0.0;   tc.v = fsy;       m_side[mSide]->m_TexCoords.push_back ( tc );
+     tc.u = fsx;   tc.v = fsy;     	m_side[mSide]->m_TexCoords.push_back ( tc );
+     tc.u = fsx;   tc.v = 0.0;       m_side[mSide]->m_TexCoords.push_back ( tc );
+     return m_side[mSide]->m_TexCoords.size()/2.; 
+    return 0;
 }*/
+// glDrawElements(GL_QUADS, (int)m_indices.size(), GL_UNSIGNED_INT, (GLvoid*)(NULL));             // 0

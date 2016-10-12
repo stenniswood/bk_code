@@ -1,64 +1,46 @@
-/* This class will generate OpenGL Vertex data
-	for a box of given width, height, depth. 
+/* This class will generate OpenGL Vertex data for
+
+	a   Box   of given width, height, depth.
 */
-#ifndef _GL_CONTAINER_
-#define _GL_CONTAINER_
+#ifndef _GL_BOX_
+#define _GL_BOX_
 
-struct Vertex
-{
-  float position[3];
-  //GLfloat normal[3];
-  GLubyte color[4];
-};
-
-extern const int NUMBER_OF_CUBE_INDICES;   
-extern const int NUMBER_OF_QUAD_INDICES;
-const  int number_of_vertices = 10;
+#include "gl_atom.hpp"
+#include "glSphere.h"
+#include "glMolecule.h"
 
 
-class glContainer
+extern GLubyte q_Indices[];
+
+#define  BUFFER_OFFSET(i) ((GLuint*)NULL + (i))
+
+class glBox : public glAtom
 {
 public:
-	glContainer();
+	glBox();
 
-	void 	Relocate( float mX, float mY, float mZ );
-	void 	create  			( );
+	virtual void 	setup  		( );
+	virtual void 	create 		( );
+	void            generate_vertices	( );
 
-	void 	change_color	   	( long mColor );
-	void	change_top_color   	( long mColor );	
-	void	change_bottom_color	( long mColor );
-	void 	generate_IBO		(	);
-	void 	generate_VBO		(	);
-	
-	void	generate_vertices	(	);
+    int             get_largest_axis    ( );
+	void            change_top_color   	( long mColor );
+	void            change_bottom_color	( long mColor );
+    void            compute_inertia     ( float mTotalMass );
+    
+    // two Boxes in close proximity.  Join the sides, so that they operate as a unit.
+    // ie creates a parent molecule of which both this and Neighbor are components.
+    glMolecule*     join_closest_sides( glBox* mNeighbor );
+    
+	virtual void	draw_body   ( );
+	void            print_info  ( );
 
-	void	grab_top			( 	);
-	void	grab_bottom			( 	);
-	void	grab_left			( 	);
-	void	grab_right			( 	);
-	void	grab_front			( 	);
-	void	grab_back			( 	);
-
-	void	add_offset( float mX, float mY, float mZ ); // to all vertices.
-	void	draw(); 
-	void	print_info();
-
-	float 	width;
-	float 	height;
-	float 	depth;
-
-	float	m_x;
-	float	m_y;
-	float	m_z;
-
+    bool            evaluate_collision( glSphere* mOther );
+    
+	float 	width;          // X axis
+	float 	height;         // Y axis
+	float 	depth;          // Z axis
 	bool	m_is_closed;
-	unsigned long int m_color;
-
-	GLuint	m_VBO;
-	GLuint	m_IBO;
-
-	int   	m_number_of_vertices;
-	Vertex  vertices[number_of_vertices];
 };
 
 

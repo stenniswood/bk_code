@@ -6,33 +6,31 @@
 */
 #include "txt_container.hpp"
 #include <vector>
+#include "cylinder.hpp"
+
 using namespace std;
 
+#ifndef _TABLE_H_
+#define _TABLE_H_
 
-class glTable
+class glTable : public glMolecule
 {
 public:
 	glTable(  );
+    ~glTable(  );
 
 	void	Initialize	( );
-	void	relocate	( float mX, float mY, float mZ );
+    void	create_components();
 
-	void	create();
-	void	draw(); 
 
 	txtContainer 		m_table_top;
-	vector<glCylinder>	m_table_legs;	
+	vector<glCylinder*>	m_table_legs;
 	
 	float	m_table_length;		// Length along 1 side.
 	float	m_table_width;		// Distance across the table.
 	float	m_table_height;		// how high off ground.
 
-	GLuint	m_VBO;
-	GLuint	m_IBO;
-
-	float	m_x;
-	float	m_y;
-	float	m_z;	
 };
 
 
+#endif

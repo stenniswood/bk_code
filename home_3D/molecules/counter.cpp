@@ -2,15 +2,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
 #include <OpenGL/glext.h>
+#else
+#include <GL/glut.h>
+#include <GL/glu.h>
+#endif
 
 #include "all_objects.h"
 
 
 glCounter::glCounter( float mLength, float mWidth, float mHeightOffFloor )
 {
+    m_object_class  = 19;
+    m_object_type_name = "counter";
+    
 	// Counter top:
 	m_counter_top.width  = mLength;
 	m_counter_top.height =  1.;			// thickness
@@ -25,14 +33,14 @@ void glCounter::set_number_of_cabinets( int mNumber )
 {
 	glCabinet cab;
 	cab.create( );
-
+	
 	// We'll line them up along the m_x axis.
 	float x_position = cab.m_width;	
 	// because of the 180 rotation, 
 	// we have to allow the first cabinet to be shifted.
 
 	for (int c=0; c<mNumber; c++)
-	{
+	{		
 		cab.relocate( x_position, 0., 0. );
 		cab.m_y_angel = 180.;
 		m_cabinets.push_back( cab );
@@ -52,9 +60,6 @@ void glCounter::create( )
 	// right now it's centering them 
 	m_counter_top.generate_VBO();
 	m_counter_top.generate_IBO();
-
-	for (int c=0; c<m_cabinets.size(); c++)
-		m_cabinets[c].create();
 }
 
 void glCounter::open( int mIndex, float mFraction )
@@ -66,15 +71,15 @@ void glCounter::open( int mIndex, float mFraction )
 void 	glCounter::generate_IBO( )
 {
 	m_counter_top.generate_IBO();
-	for (int i=0; i<m_cabinets.size(); i++)
-		m_cabinets[i].generate_IBO();
+//	for (int i=0; i<m_cabinets.size(); i++)
+//		m_cabinets[i].generate_IBO();
 }
 
 void 	glCounter::generate_VBO( )
 {
 	m_counter_top.generate_VBO();
-	for (int i=0; i<m_cabinets.size(); i++)
-		m_cabinets[i].generate_VBO();
+//	for (int i=0; i<m_cabinets.size(); i++)
+//		m_cabinets[i].generate_VBO();
 }
 
 void	glCounter::draw_body()
@@ -83,7 +88,6 @@ void	glCounter::draw_body()
 	for (int i=0; i<m_cabinets.size(); i++)
 		m_cabinets[i].draw();
 }
-
 
 void glCounter::Initialize( )
 {

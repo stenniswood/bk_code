@@ -2,9 +2,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <math.h>
+#ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
 #include <OpenGL/glext.h>
+#else
+#include <GL/glut.h>
+#include <GL/glu.h>
+#endif
+
+#include "Texture.hpp"
+#include "paper.hpp"
 #include "all_objects.h"
 
 // Include OpenCV here for the imread function!  
@@ -22,73 +31,107 @@ using namespace std;
 
 glPaper::glPaper( int mSamples_per_inch )
 {
-	m_TBO 		   = 0;
-	m_VBOTexCoords = 0;
-
-	m_samples_per_inch = mSamples_per_inch;
-	m_Xsamples = 0;
-	m_Ysamples = 0;
-	printf("samples_per_inch=%d\n", m_samples_per_inch );
+    m_object_type_name  = "paper";
+    m_samples_per_inch  = mSamples_per_inch;
+    Initialize( 10, 10.0);
 }
 
-void glPaper::load_texture( const char* mFilename )
+void glPaper::Initialize( float mWidthInches, float mHeightInches )
 {
-	printf("glPaper::load_image( %s )\n", mFilename );
-	m_src = imread(mFilename);
+    //printf("samples_per_inch=%d\n", m_samples_per_inch );
+    m_object_class  = 8;
+    m_width    = mWidthInches;
+    m_height   = mHeightInches;
+    m_Xsamples = m_samples_per_inch * mWidthInches ;
+    m_Ysamples = m_samples_per_inch * mHeightInches;
+    //printf("samps_per_inch=%d\n",           m_samples_per_inch      );
+    //printf("xsamples=%d;  ysamples=%d  \n", m_Xsamples, m_Ysamples  );
+    //printf("mWidth=%6.1f; mHeight=%6.1f\n", mWidthInches, mHeightInches );
 }
 
-void glPaper::Initialize( float mWidth, float mHeight )
+void glPaper::set_width_height( float mWidth, float mHeight )
 {
-	m_Xsamples = m_samples_per_inch * mWidth;
-	m_Ysamples = m_samples_per_inch * mHeight;
-	float Xincrement = mWidth / m_Xsamples;
-	float Yincrement = mHeight/ m_Ysamples;
-	struct Vertex v;
-	float  xpos,ypos;
-	printf("xsamples=%d;  ysamples=%d  \n", m_Xsamples, m_Ysamples );
-	printf("mWidth=%6.1f; mHeight=%6.1f\n", mWidth, mHeight );
-		
-	// Create a grid of vertices : 
-	for (int y=0; y<m_Ysamples; y++)
-	{
-		ypos = y*Yincrement;
-		for (int x=0; x<m_Xsamples; x++)
-		{
-			xpos = x * Xincrement;
-			v.position[0] = xpos;
-			v.position[1] = 0.0;
-			v.position[2] = ypos;
-			m_vertices.push_back(v);
-		}
-	}
-	
-	// Create a grid of TexCoordinates:
-	struct stTexCoord tc;
-	Xincrement = 1.0 / m_Xsamples;
-	Yincrement = 1.0 / m_Ysamples;
-	for (int y=0; y<m_Ysamples; y++)	
-	{
-		ypos = y * Yincrement;
-		for (int x=0; x<m_Xsamples; x++)
-		{
-			xpos = x * Xincrement;
-			tc.v = xpos;
-			tc.u = ypos;
-			m_TexCoords.push_back( tc );
-		}
-	}
+    Initialize( mWidth, mHeight );
+}
+
+void glPaper::print_texCoords( )
+{
+    for (int i=0; i<m_texture->m_TexCoords.size(); i++)
+        printf(" TexCoord[%d] =  %6.3f, %6.3f  \n", i, m_texture->m_TexCoords[i].u, m_texture->m_TexCoords[i].v );
+}
+
+void glPaper::wave_it( float mAmplitude, float mWavelengths, float mPhase )
+{
+    int index = 0;
+    float period = mWavelengths * 2.*M_PI / (float)m_Xsamples;
+    float argument = 0;
+    for (int y=0; y<m_Ysamples; y++)
+    {
+        for (int x=0; x<m_Xsamples; x++)
+        {
+            argument = ((float)x) * period + mPhase;
+            m_vertices[index].position[1] = mAmplitude * sin ( argument );
+            //m_vertices[index].position[1] = mAmplitude * x;
+            index++;
+        }
+    }
+}
+void glPaper::fold_it( int mLeadingFoldSamples, float mSlope1, float mSlope2 )
+{
+    int index      = 0;
+    float distance = 0;
+    int   x=0;
+    for (int y=0; y<m_Ysamples; y++)
+    {
+        for (x=0; x<mLeadingFoldSamples; x++)
+        {
+            distance = mSlope1 * x;
+            m_vertices[index].position[1] = distance;
+            index++;
+        }
+        for ( ; x<m_Xsamples; x++)
+        {
+            m_vertices[index].position[1] = distance - mSlope2 * x;
+            index++;
+        }
+    }
+}
+
+void glPaper::generate_vertices( )
+{
+    float Xincrement = m_width / m_Xsamples;
+    float Yincrement = m_height/ m_Ysamples;
+    struct Vertex v;
+    v.color[0] = 0xFF; v.color[1] = 0x7F;   v.color[2] = 0x7F; v.color[3] = 0xFF;
+    float  xpos,ypos;
+    printf("samps_per_inch=%d\n",           m_samples_per_inch      );
+    printf("xsamples=%d;  ysamples=%d  \n", m_Xsamples, m_Ysamples  );
+    
+    // Create a grid of vertices :
+    for (int y=0; y<m_Ysamples; y++)
+    {
+        ypos = y*Yincrement;
+        for (int x=0; x<m_Xsamples; x++)
+        {
+            xpos = x*Xincrement;
+            v.position[0] = xpos;
+            v.position[1] = ypos;
+            v.position[2] = 0.0;
+            m_vertices.push_back(v);
+        }
+    }
+    printf("m_vertices.size = %lu\n", m_vertices.size() );
 }
 
 void glPaper::generate_indices( )
 {
-	int number_of_quads = (m_Xsamples-1)*(m_Ysamples-1);
 	int index,index2;
 	m_indices.clear();
 	for (int y=0; y<m_Ysamples-1; y++)
 	{
 		index  = y * m_Xsamples;
-		index2 = index + m_Xsamples;
-		for (int x=0; x<m_Xsamples; x++)
+		index2 = index + m_Xsamples;        // line above
+		for (int x=0; x<(m_Xsamples-1); x++)
 		{
 			m_indices.push_back( index + x+0 );
 			m_indices.push_back( index + x+1 );
@@ -98,88 +141,109 @@ void glPaper::generate_indices( )
 	}
 }
 
-
-GLuint glPaper::generate_TBO() 
+void glPaper::setup( )
 {
-	uint8_t* pixelPtr   = (uint8_t*)m_src.data;
-	int channels        = m_src.channels();
-	int bytes_per_pixel = m_src.elemSize();
-	int format,format2,type;
-	printf("glPaper: channels=%d; bytes_per_pixel=%d\n", channels, bytes_per_pixel);
-	switch(channels) {
-	case 1: break;
-	case 2: break;
-	case 3: format = 3;		format2 = GL_BGR;	type=GL_UNSIGNED_BYTE;
-			break;
-	case 4: format = GL_RGBA;	type = GL_UNSIGNED_INT_8_8_8_8;
-			format2 = GL_RGB;
-			break;
-	default: break;
-	}
-	printf("glPaper: rows=%d; cols=%d\n", m_src.rows, m_src.cols);
-	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &m_TBO );
-	glBindTexture(GL_TEXTURE_2D, m_TBO);
-	glTexImage2D(GL_TEXTURE_2D,
-			 0,
-			 format,
-			 m_src.cols, m_src.rows,
-			 0,
-			 format2,	 type,
-			 pixelPtr );
-	printf("glPaper: m_TBO=%d\n", m_TBO);
-	imshow( "Display Image", m_src );
-	return m_TBO;
-}
-
-void glPaper::generate_VBOTexCoords()
-{
-	// Generate And Bind The Texture Coordinate Buffer 
-    glGenBuffers( 1, &m_VBOTexCoords );                 	// Get A Valid Name
-    glBindBuffer( GL_ARRAY_BUFFER, m_VBOTexCoords );        // Bind The Buffer
-    // Load The Data
-    glBufferData( GL_ARRAY_BUFFER, m_TexCoords.size()*sizeof(float), 
-    				 m_TexCoords.data(), GL_STATIC_DRAW );
+    if (m_texture==NULL)
+        m_texture = new Texture();
+    
+    generate_vertices( );
+    generate_indices ( );
+    //wave_it( 10, 2, 0.0 );
+    glObject::setup();		// update body matrix
+    
+    m_texture->generate_grid_coords( m_Xsamples, m_Ysamples);
+    m_texture->generate_TBO( );
+    m_texture->generate_VBOTexCoords();
 }
 
 void glPaper::create( )
 {
-	generate_TBO		 ( );
-	change_color( 0xFFFFFF00 );
-	generate_indices	 ( );		//print_indices();	
-	generate_VBO		 ( );
-	generate_IBO		 ( );
+    setup();
+    gl_register ( );
+}
 
-	generate_VBOTexCoords( );
+void glPaper::half_circle( float mRadius, int mStartXindex )
+{
+	// will go in y,z plane:
+	int yindex;
+	int samps_per_circle = mRadius * M_PI / m_samples_per_inch;
+	float angle;
+	float bottom_length  = 0.;	
+	float xpos,ypos;
+	
+	// Create a grid of vertices : 
+	for (int y=0; y<m_Ysamples; y++)
+	{
+		yindex = y*m_Xsamples;
+		angle = -M_PI/2.0;
+		for (int x=mStartXindex; x<mStartXindex+samps_per_circle; x++)
+		{
+			xpos = mRadius * cos(angle) + bottom_length;
+			ypos = mRadius * sin(angle) + mRadius;	// start at y=0 until y=2*mRadius
+			
+			m_vertices[yindex+x].position[1] = ypos;
+			m_vertices[yindex+x].position[2] = xpos;
+		}
+	}	
+}
+
+void glPaper::pull_back_to( float mDistanceFromLeft, float mDistanceFromPage )
+{
+	// Create a line plus half circle (to simulate pulling the page back)
+	float radius = mDistanceFromPage / 2.;
+	float half_circumference = radius * M_PI;
+	float top_length = 0.0;
+	float bottom_length = 0.0;
+//	float DistanceFromRight = m_width - mDistanceFromLeft;
+	if (mDistanceFromLeft>0.0)
+	{
+		/* For firm crease fold, We know:  
+					top_length + bottom_length = m_width
+		   For rolled fold, we know:
+		   	1) top_length + bottom_length + half_circumference = m_width
+		   	   top_length + bottom_length = m_width - half_circumference
+		   	2) mDistanceFromLeft + top_length = bottom_length
+		   	
+				mDistanceFromLeft + top_length = (m_width-half_circumference) - top_length
+				2*top_length = (m_width-half_circumference-mDistanceFromLeft)
+		   	So to find top_length = 
+		*/		
+		top_length = (m_width-half_circumference-mDistanceFromLeft) / 2.0;
+		bottom_length = top_length + mDistanceFromLeft;
+
+	} else {
+		/* For firm crease fold, We know:  
+					top_length + bottom_length = m_width
+		   For rolled fold, we know:
+		   	1) top_length + bottom_length + half_circumference = m_width
+		   	   top_length + bottom_length = m_width - half_circumference
+		   	2) mDistanceFromLeft + top_length = bottom_length
+		   	
+				mDistanceFromLeft + top_length = (m_width-half_circumference) - top_length
+				2*top_length = (m_width-half_circumference-mDistanceFromLeft)
+		   	So to find top_length = 
+		*/		
+		top_length = (m_width-half_circumference-mDistanceFromLeft) / 2.0;
+		bottom_length = top_length + mDistanceFromLeft;
+	}
 }
 
 void glPaper::draw_body	( )
 {
-	glBindBuffer(GL_ARRAY_BUFFER, 		  m_VBO	);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO );
-
-	glVertexPointer	   (3, GL_FLOAT, 		 sizeof(struct Vertex), NULL);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glColorPointer 	   (4, GL_UNSIGNED_BYTE, sizeof(struct Vertex), (GLvoid*)(offsetof(struct Vertex,color)));
-	glEnableClientState(GL_COLOR_ARRAY);
-	
-	//glDrawArrays(GL_LINE_LOOP, 0, m_vertices.size() );
-	//glDrawElements(GL_QUADS, m_indices.size(), GL_UNSIGNED_INT, (GLvoid*)((char*)NULL));
-	glEnable		(GL_TEXTURE_2D);
-	glBindBuffer	(GL_TEXTURE_2D, m_TBO );	
-	//printf(" paper TBO = %d\n", m_TBO);
-	glTexEnvi		(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);		
-	glTexParameteri	(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri	(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glBindBuffer	(GL_ARRAY_BUFFER, m_VBOTexCoords );
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glTexCoordPointer  (2, GL_FLOAT,   0, NULL);
-
-	glDrawElements(GL_QUADS, m_indices.size(), GL_UNSIGNED_INT, (GLvoid*)((char*)NULL));
-
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);					
-//	glDisable	(GL_TEXTURE_2D);
-
+    glAtom::draw_body();
 }
+
+void glPaper::draw_primitive( )
+{
+    glDrawElements(GL_QUADS, (int)m_indices.size(), GL_UNSIGNED_INT, 0 );
+//    glAtom::draw_primitive();
+}
+
+void glPaper::load_texture( const char* mFilename )
+{
+    if (m_texture==NULL)
+        m_texture = new Texture();
+     m_texture->load_image( mFilename );
+     //printf("glPaper::load_image( %s )\n", mFilename );
+}
+

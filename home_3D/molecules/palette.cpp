@@ -2,15 +2,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
 #include <OpenGL/glext.h>
+#else
+#include <GL/glut.h>
+#include <GL/glu.h>
+#endif
+
 #include "all_objects.h"
 
 
-const float DEFAULT_PALETTE_LENGTH = 0;
+/*const float DEFAULT_PALETTE_LENGTH = 0;
 const float DEFAULT_PALETTE_WIDTH  = 0;
-const float DEFAULT_PALETTE_ROWS   = 0;
+const float DEFAULT_PALETTE_ROWS   = 0;*/
 
 
 Palette::Palette( int mBrickType )
@@ -20,19 +26,14 @@ Palette::Palette( int mBrickType )
 	Initialize();
 }
 void	Palette::Initialize			 ( )
-{ 
-}
-void Palette::Relocate( float mX, float mY, float mZ )
 {
-	m_x = mX;
-	m_y = mY;
-	m_z = mZ;
-	
+      m_object_type_name = "palette";
+  //  m_object_class  = 17;
 }
 
-glContainer* Palette::create_one_brick( bool mHalf 	)
+glBox* Palette::create_one_brick( bool mHalf 	)
 { 
-	static glContainer	b;
+	static glBox	b;
 	if (m_brick_type==CEMENT_BLOCK_ID)
 	{
 		b.width  = CEMENT_BLOCK_LENGTH;
@@ -50,12 +51,13 @@ glContainer* Palette::create_one_brick( bool mHalf 	)
 	}
 	b.m_color = 0xFF00FF00;
 	b.create();
+    m_components.push_back(&b);
 	return &b;
 }
 
 void Palette::create_one_layer( int mCols, float mRows, float mHeight )
 { 
-	glContainer *b = create_one_brick(false);		// make a brick later.
+	glBox *b = create_one_brick(false);		// make a brick later.
 	float x,y;
 	int count=0;
 	for (int l=0; l<mRows; l++)
@@ -65,7 +67,7 @@ void Palette::create_one_layer( int mCols, float mRows, float mHeight )
 			y = w*b->depth*1.05;
 			b->grab_bottom();
 			b->grab_left  ();
-			b->Relocate( x, mHeight, y );			
+			b->relocate( x, mHeight, y );			
 			m_bricks.push_back(*b);
 			count++;
 		}
@@ -74,12 +76,14 @@ void Palette::create_one_layer( int mCols, float mRows, float mHeight )
 
 void	Palette::create( int mCols, int  mRows, int mLayers )
 { 
-	glContainer* b = create_one_brick( false );
+	glBox* b = create_one_brick( false );
 	m_length = b->depth * mCols; 
 	m_width  = b->width * mRows;
 	
 	for (int h=0; h<mLayers; h++)
-		create_one_layer( mCols, mRows, h*b->height );	
+		create_one_layer( mCols, mRows, h*b->height );
+    //gl_register();
+    
 }
 
 float	Palette::get_brick_length ( )
@@ -91,14 +95,11 @@ float	Palette::get_brick_height ( )
 	return m_bricks[0].height;
 }
 
-void	Palette::generate_vertices( )
-{ 
-
-}
-void	Palette::draw()
+/*void	Palette::draw()
 { 
 	glTranslatef(m_x,    m_y,  m_z);
 	for (int i=0; i<m_bricks.size(); i++)
 		m_bricks[i].draw();
 	glTranslatef( -m_x, -m_y, -m_z);
-} 
+} */
+

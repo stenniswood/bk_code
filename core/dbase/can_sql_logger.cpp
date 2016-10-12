@@ -55,7 +55,7 @@ void SQL_Logger::connect_to_logger_db()
 
 int  SQL_Logger::query( bool mRetrieving )
 {
-	dprintf("%s\n", query_string.c_str() );
+	Dprintf("%s\n", query_string.c_str() );
 	
   if (mysql_query(logger_db, query_string.c_str() ))
   {
@@ -67,12 +67,12 @@ int  SQL_Logger::query( bool mRetrieving )
   if (mRetrieving) {
 	  m_result = mysql_store_result(logger_db);
 	  if (m_result == NULL)  {
-		  dprintf("query Error result==null!\n");
+		  Dprintf("query Error result==null!\n");
 		  return 0; 
 	  }
 	  row_count = mysql_num_rows(m_result);
   }    
-  dprintf("row_count=%d\n", row_count);
+  Dprintf("row_count=%d\n", row_count);
   return row_count;
 }
 
@@ -172,7 +172,7 @@ void SQL_Logger::find_reading( string mDataType, struct tm start_time_bd,
 	query_string += "' ;";		
 	printf("   query_string=%s\n", query_string.c_str() );
 	query(true);
-	dprintf("Num Results=%d\n", get_number_results() );
+	Dprintf("Num Results=%d\n", get_number_results() );
 }
 
 char* append_float( float mFloat )

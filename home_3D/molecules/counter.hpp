@@ -4,12 +4,19 @@
 
 	This makes a simple counter top.  ie. multiple cabinets	
 */
+#ifndef _COUNTER_H_
+#define _COUNTER_H_
 
 #include <vector>
+#include "verbal_object.h"
+
 using namespace std;
 
 
-class glCounter : public glObject
+class glCabinet;
+
+
+class glCounter : public VerbalObject
 {
 public:
 	glCounter( float mLength, float mWidth, float mHeightOffFloor );
@@ -23,7 +30,7 @@ public:
 	void 	generate_VBO( );		
 	virtual void	draw_body( );	// Override this with open gl commands
 
-	glContainer 		m_counter_top;
+	glBox               m_counter_top;
 	vector<glCabinet> 	m_cabinets;
 	
 	void 	open(int mIndex, float mFraction );
@@ -42,3 +49,4 @@ public:
 };
 
 
+#endif

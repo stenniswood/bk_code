@@ -2,10 +2,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+
+#ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
 #include <OpenGL/glext.h>
-#include "all_objects.h"
+#else
+#include <GL/glut.h>
+#include <GL/glu.h>
+#include <GL/gl.h>
+#include <GL/glext.h>
+#endif
+
+#include "extrusion.hpp"
+//#include "all_objects.h"
 
 
 
@@ -18,6 +29,8 @@
 
 glExtrusion::glExtrusion( )
 {
+    m_object_type_name = "extrusion";    
+    m_object_class  = 3;
 	m_color 	 	= 0xFFFFFFFF;
 	m_ends_color 	= 0xFF0020FF;
 	m_is_closed  	= true;
@@ -25,11 +38,11 @@ glExtrusion::glExtrusion( )
 	m_layer_one_indices  = 0;
 	m_number_side_indices= 0;
 	m_extrusion_length = 10.0;
-	m_extrusion_axis = -1;
+	m_extrusion_axis   = -1;
 }
 
 /* Override this function to generate the polygon. */
-void glExtrusion::generate_layer_vertices()
+void glExtrusion::generate_vertices()
 {
 	struct Vertex v;
 	v.position[0] =  0.0;
@@ -55,16 +68,19 @@ void glExtrusion::extrude_vertices( float mExtrusionLength, int mLoftAxis )
 {	
 	if ((mLoftAxis>=0) && (mLoftAxis<=2))
 		m_extrusion_axis = mLoftAxis;
-	if (m_extrusion_axis==-1) return;
-	
-	struct Vertex v;
-	
+	if (m_extrusion_axis==-1)
+    {
+        printf("BAD EXTRUSION: glExtrusion::extrude_vertices() - no axis specified!");
+        return;
+    }
+	struct Vertex_pnc v;
+
 	// CEILING (DUPLICATE & SET HEIGHT)
 	// Duplicate all Floor points with ceiling height.	
 	//m_layer_one_vertices = m_vertices.size();
 	for (int i=0; i<m_layer_one_vertices; i++)
 	{
-		memcpy ( &v, &(m_vertices[i]), sizeof (struct Vertex) );
+		memcpy ( &v, &(m_vertices[i]), sizeof (struct Vertex_pnc) );
 		v.position[m_extrusion_axis] = mExtrusionLength;
 		m_vertices.push_back( v );
 	}
@@ -89,17 +105,15 @@ void glExtrusion::change_vertices_colors()
 	}
 }
 
-void glExtrusion::generate_vertices()
-{
-	generate_layer_vertices();
-}
 
 //======================= INDICES =======================================
-GLuint glExtrusion::generate_disc_indices( GLuint mStartingVertexIndex )
+size_t glExtrusion::generate_disc_indices( GLuint mStartingVertexIndex )
 {
+    //assert(m_layer_one_indices>0);
+    
 	// FOR A CONVEX POLYGON: 
 	int vi;
-	for (vi=0; vi<(m_layer_one_indices-CLOSE_OUT); vi++)
+	for (vi=0; vi<(m_layer_one_vertices-CLOSE_OUT); vi++)
 	{
 		m_indices.push_back( vi+mStartingVertexIndex );
 	}
@@ -107,7 +121,8 @@ GLuint glExtrusion::generate_disc_indices( GLuint mStartingVertexIndex )
 	{
 		m_indices.push_back( mStartingVertexIndex );
 	}
-	return m_indices.size();
+    m_layer_one_indices = m_indices.size();
+	return m_layer_one_indices;
 }
 
 void glExtrusion::generate_side_indices(  )
@@ -116,12 +131,12 @@ void glExtrusion::generate_side_indices(  )
 	for (int i=0; i<m_layer_one_vertices; i++)
 	{
 		// These are the index into vertices[] array : 
-		m_indices.push_back( i );		
-		m_indices.push_back( i+m_layer_one_vertices );		
+		m_indices.push_back( i );
+		m_indices.push_back( (int)(i+m_layer_one_vertices) );
 	}
 	if (CLOSE_OUT) {
 		m_indices.push_back( 0 );
-		m_indices.push_back( m_layer_one_vertices );
+		m_indices.push_back( (int)m_layer_one_vertices );
 	}
 	//printf("# side indices=%d \n", m_number_side_indices );
 }
@@ -150,20 +165,20 @@ void glExtrusion::generate_indices( )
 }
 
 //======================= END OF INDICES ================================
-void glExtrusion::create( float mLength, int mAxis )
+void glExtrusion::set_la(float mLength, int mAxis)
 {
-	if (mLength>0)
-		m_extrusion_length = mLength;
-
-	generate_vertices();
-	extrude_vertices( m_extrusion_length, mAxis );
-	change_vertices_colors();
-
-	generate_indices ();
-	change_vertices_colors();
-	
-	generate_VBO();
-	generate_IBO();
+    if (mLength>0)
+        m_extrusion_length = mLength;
+    if (mAxis>0)
+        m_extrusion_axis   = mAxis;
+}
+void glExtrusion::setup( )
+{
+    generate_vertices( );
+    extrude_vertices ( m_extrusion_length, m_extrusion_axis );
+    //change_vertices_colors( );
+    generate_indices ( );
+    glObject::setup();
 }
 
 void glExtrusion::draw_body()
@@ -177,19 +192,19 @@ void glExtrusion::draw_body()
 
 	//Establish array contains m_vertices (not normals, colours, texture coords etc)
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY ); 
+	glEnableClientState(GL_COLOR_ARRAY );
 
 	// Draw Bottom : 
-	glDrawElements(GL_QUAD_STRIP, m_layer_one_indices, GL_UNSIGNED_INT, 0 );
+	glDrawElements(GL_QUAD_STRIP, (int)m_layer_one_indices, GL_UNSIGNED_INT, 0 );
 
 	// Draw the sides:
-	glDrawElements(GL_QUAD_STRIP, m_number_side_indices, GL_UNSIGNED_INT, 
+	glDrawElements(GL_QUAD_STRIP, (int)m_number_side_indices, GL_UNSIGNED_INT,
 				   (GLvoid*)BUFFER_OFFSET( m_layer_one_indices ) );
 
 	// Draw Top: 
 	if (m_is_closed)
 	{  
-		glDrawElements(GL_QUAD_STRIP, m_layer_one_indices, GL_UNSIGNED_INT, 
+		glDrawElements(GL_QUAD_STRIP, (int)m_layer_one_indices, GL_UNSIGNED_INT,
 	                  (GLvoid*)BUFFER_OFFSET(m_layer_one_indices + m_number_side_indices) );
 	}
 }

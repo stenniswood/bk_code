@@ -4,17 +4,21 @@
 	
 	A counter top is a collection of cabinets.
 */
-//#include "all_objects.h"
+#ifndef _CABINET_HPP_
+#define _CABINET_HPP_
 
+#include "all_objects.h"
 #include <vector>
 using namespace std;
+
 
 class glCabinetEndPiece : public glExtrusion
 {
 public:
 	glCabinetEndPiece( float mDepth, float mWidth, float mHeight );
 	virtual void	generate_vertices( );
-	virtual GLuint 	generate_disc_indices( GLuint mStartingVertexIndex );	
+	virtual size_t 	generate_disc_indices( GLuint mStartingVertexIndex );
+    
 	float 	m_height;
 	float	m_depth;
 	float	m_Thick;
@@ -24,23 +28,16 @@ public:
 };
 
 
-class glCabinet : public glExtrusion
+class glCabinet : public glMolecule
 {
 public:
 	glCabinet(  );
 
 	void	Initialize	( );
-
-	virtual void	generate_vertices();
-	void  	generate_cabinet_side_vertices( );
-	void  	generate_cabinet_side_IBO( GLubyte* iptr );
-
+    virtual void 	setup  		( );
 	void 	colorize	( );
 	void	create		( );
-	void 	generate_IBO( );
-	void 	generate_VBO( );
-	void	draw		( );
-
+    
 	void	open_drawer ( float mFractionOpen ) {
 		m_drawer.open(mFractionOpen);
 	};
@@ -48,15 +45,15 @@ public:
 		m_door.open (mFractionOpen);
 	};
 	
-	glCabinetEndPiece	m_end1;
-	glCabinetEndPiece	m_end2;
-
-	glContainer 		m_separator;
-	glContainer 		m_drawer_top_bar;	
-	glContainer 		m_below_door;
-	glContainer 		m_shelf;		
 	
-	glContainer 		m_body;
+    glCabinetEndPiece	m_end1;
+	glCabinetEndPiece	m_end2;
+	glBox               m_separator;
+	glBox               m_drawer_top_bar;
+	glBox               m_below_door;
+	glBox               m_shelf;
+	
+	glBox               m_body;
 	glDrawer	 		m_drawer;
 	glDoor 				m_door;
 
@@ -68,3 +65,4 @@ public:
 };
 
 
+#endif

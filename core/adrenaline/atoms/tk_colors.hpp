@@ -3,7 +3,8 @@
 
 // See:  http://wiki.tcl.tk/16166 
 // For some samples 
-#include "bk_system_defs.h"
+#include "global.h"
+//#include "bk_system_defs.h"
 
 
 class Color

@@ -28,10 +28,10 @@ typedef unsigned char uint8_t;
 #ifndef uint16_t
 typedef unsigned short uint16_t;
 #endif
+
 #ifndef byte
 #define byte uint8_t
 #endif
-
 
 #define BOOL unsigned char
 #define BYTE unsigned char
@@ -39,6 +39,9 @@ typedef unsigned short uint16_t;
 #define DWORD unsigned long
 
 #define word unsigned short
+
+#define radians(arg) (3.1415*arg/180.0)
+#define degrees(arg) (arg*180.0/3.1415)
 
 //typedef	_Bool bool;
 //typedef	boolean Bool;

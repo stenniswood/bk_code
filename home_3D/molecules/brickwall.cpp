@@ -2,122 +2,132 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <GLUT/glut.h>
 #include <OpenGL/glext.h>
+#else
+#include <GL/glut.h>
+#include <GL/glu.h>
+#endif
+
 #include "all_objects.h"
-
 #include "brickwall.hpp"
-
-
 
 #define Debug 0
 
 
 glBrickWall::glBrickWall( int mBrickType )
-{ 
-	m_brick_type = mBrickType;
-	Initialize();
-}
-void	glBrickWall::Initialize	( )
-{ 
-}
-
-void glBrickWall::Relocate( float mX, float mY, float mZ )
 {
-	m_x = mX;
-	m_y = mY;
-	m_z = mZ;
+    //glBareWall.m_object_type_name = "brick wall";
+    m_brick_type = mBrickType;
 }
 
-glContainer* glBrickWall::create_one_brick( bool mHalf )
+glBrickWall::~glBrickWall( )
 {
-	static glContainer	b;
-	if (m_brick_type==CEMENT_BLOCK_ID)
-	{
-		b.width  = CEMENT_BLOCK_LENGTH;
-		b.depth  = CEMENT_BLOCK_THICKNESS;
-		b.height = CEMENT_BLOCK_HEIGHT;
-	}	
-	else if (m_brick_type==FACE_BRICK_ID)
-	{
-		b.width  = FACE_BRICK_LENGTH;
-		b.depth  = FACE_BRICK_THICKNESS;
-		b.height = FACE_BRICK_HEIGHT;	
-	}
-	if (mHalf) {
-		b.width /= 2.;		// just the length of it changes!
-	}
-	b.m_color = 0xFF7FFF7F;
-	b.create();
-	return &b;
+    delete m_one_brick_texture;
+    for (int i=0; i<m_bricks.size(); i++)
+        delete m_bricks[i];
 }
 
-float	glBrickWall::get_brick_length( )
+
+void glBrickWall::select_brick_type( int mType )
 {
-	if (m_brick_type==CEMENT_BLOCK_ID)
-		return CEMENT_BLOCK_LENGTH;
-	else if (m_brick_type==FACE_BRICK_ID)
-		return FACE_BRICK_LENGTH;
-	return 0;
+    switch( mType)
+    {
+    case CEMENT_BLOCK_ID:                   // cynder blocks
+            m_brick_length = CEMENT_BLOCK_LENGTH;
+            m_brick_height = CEMENT_BLOCK_HEIGHT;
+            m_brick_depth  = CEMENT_BLOCK_THICKNESS;
+        break;
+    case FACE_BRICK_ID :
+            m_brick_length = FACE_BRICK_LENGTH;
+            m_brick_height = FACE_BRICK_HEIGHT;
+            m_brick_depth  = FACE_BRICK_THICKNESS;
+        break;
+    default:
+        break;
+    }
+    
 }
-float	glBrickWall::get_brick_height( )
+
+void glBrickWall::set_length_height   ( float mLength, float mHeight )       // this or set_params()
 {
-	if (m_brick_type==CEMENT_BLOCK_ID)
-		return CEMENT_BLOCK_HEIGHT;
-	else if (m_brick_type==FACE_BRICK_ID)
-		return FACE_BRICK_HEIGHT;
-	return 0;		
+    m_wall_length    = mLength;
+    m_number_of_rows = mHeight / m_brick_height;
 }
 
-const float MORTOR_THICKNESS = 0.625;
+void glBrickWall::set_params          ( int mNumBricks, int mNumRows )
+{
+    m_wall_length    = mNumBricks * m_brick_length;
+    m_number_of_rows = mNumRows;
+}
 
-void	glBrickWall::create_one_row( int mNumberBlocks, bool mOffset, float mHeight)
+txtContainer* glBrickWall::create_one_brick( bool mHalf )
+{
+    txtContainer*  mb   = new txtContainer();
+    
+    mb->width  = m_brick_length;
+    mb->height = m_brick_height;
+    mb->depth  = m_brick_depth;
+    if (mHalf)
+		mb->width /= 2.;		// just the length of it changes!
+
+	mb->set_color( 0xFF7FFF7F );
+	mb->setup();
+    
+    mb->m_texture = m_one_brick_texture;
+    mb->grab_bottom();
+	mb->grab_left();
+    return mb;
+}
+
+void glBrickWall::create_one_row( int mNumberBlocks, bool mOffset, float mHeight)
 {
 	// The wall will go from offset to mLength:
-	glContainer* tmpB;
+    txtContainer* ptr=NULL;
 	float PositionX = 0;
 	if (mOffset)
 		if (Debug) printf("Create_one_row() starts with half!\n" );	
+	//printf("half brick:w=%6.2f; full:w=%6.2f\n", halfB.width, tmpB.width );
+    //if (i==0) printf("Starting Brickwall with FULL brick.  w=%6.2f\n", tmpB.width);
+
 	for (int i=0; i<mNumberBlocks; i++)
 	{
-		if ((mOffset) && (i==0))
-			tmpB = create_one_brick(true);
-		else 		
-			tmpB = create_one_brick(false);
-		tmpB->grab_bottom();
-		tmpB->grab_left();
-		tmpB->Relocate( PositionX, mHeight, 0.0 );
-		m_bricks.push_back( *tmpB );
-		PositionX += tmpB->width + MORTOR_THICKNESS;
-	}	
-	if (Debug) printf("Create_one_row() bricks=%lu\n", m_bricks.size() );	
+		if ((i==0) && (mOffset))
+		{			
+            ptr = create_one_brick(true);
+		} else
+            ptr = create_one_brick(false);
+		
+        ptr->relocate( PositionX, mHeight, 0.0 );
+        m_bricks.push_back    ( ptr );
+        m_components.push_back( ptr );
+        PositionX += ptr->width + MORTOR_THICKNESS;
+    }
+	//if (Debug) printf("Create_one_row() bricks=%lu\n", m_bricks.size() );
 }
 /*
 Return:	 the actual length
+         float mLength, int  mRows
 */
-float	glBrickWall::create( float mLength, int  mRows)
-{ 
-	float h = get_brick_height()+MORTOR_THICKNESS;
-	float l = get_brick_length()/2.;
+void glBrickWall::create_components()
+{
+    m_one_brick_texture = new Texture();
+    m_one_brick_texture->load_image("textures/cinder-block-texture.jpg");
+    
+	float h = m_brick_height+MORTOR_THICKNESS;
+	float l = m_brick_length;
 
-	glContainer* b = create_one_brick( false );
-	float number_needed = mLength / b->width;
-	
-	if (Debug) printf("Create_one_row() Length=%6.1f / width=%6.1f  ; number bricks needed =%5.2f\n", mLength, b->width, number_needed );
+	float number_needed = m_wall_length / l;
+	//if (Debug) printf("Create_one_row() Length=%6.1f / width=%6.1f  ; number bricks needed =%5.2f\n", mLength, l, number_needed );
 
 	bool offset = false;
-	for (int r=0; r<mRows; r++)
+	for (int r=0; r<m_number_of_rows; r++)
 	{
 		create_one_row( number_needed, offset, r*h );
 		offset = !offset;
 	}
-	return number_needed*b->width;
 }
-void	glBrickWall::draw()
-{
-	for (int b=0; b<m_bricks.size(); b++)
-		m_bricks[b].draw();
-} 
 
 

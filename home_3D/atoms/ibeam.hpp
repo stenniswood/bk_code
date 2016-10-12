@@ -26,8 +26,8 @@ class glIbeam : public glExtrusion
 public:
 	glIbeam( float mExtrusionLength );
 
-	virtual void	generate_layer_vertices( );
-	virtual GLuint 	generate_disc_indices  ( GLuint mStartingVertexIndex );
+	virtual void	generate_vertices( );
+	virtual size_t 	generate_disc_indices  ( GLuint mStartingVertexIndex );
 	virtual void	draw_body			   ( );
 	
 };

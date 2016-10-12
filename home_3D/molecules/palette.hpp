@@ -28,33 +28,29 @@ const int   PALETTE_NUMBER_OF_BLOCKS = 112;
 /*
  Simple palette.  All bricks lined up the same way. 
 */
-class Palette
+class Palette : public glMolecule
 {
 public:
 	Palette( int mBrickType = CEMENT_BLOCK_ID );
 
 	void	Initialize			 ( );
-	void	Relocate			 ( float mX, float mY, float mZ );
 	
-	glContainer* create_one_brick( bool mHalf 					);
+	glBox* create_one_brick( bool mHalf 					);
 	void	create_one_layer	 ( int mCols, float mRows,   float mHeight );
 	void	create		 		 ( int mCols=7, int  mRows=4, int layers=4 );
 
 	float	get_brick_length ( );
 	float	get_brick_height ( );
-	void	generate_vertices( );
-	void	draw(); 
+	//void	generate_vertices( );
+	//void	draw();
 
 	int		m_number_of_rows;		// height
 	float	m_length;				// in inches
 	float	m_width;				// in inches	
 	int 	m_brick_type;			// bricks or cylinder blocks (for size & texture purposes)	
 	
-	vector<glContainer>	m_bricks;	
+	vector<glBox>	m_bricks;
 
-	float	m_x;
-	float	m_y;
-	float	m_z;	
 };
 
 

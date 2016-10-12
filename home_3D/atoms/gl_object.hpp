@@ -2,7 +2,50 @@
 #define _OBJECT_H_
 
 #include <vector>
+
+
 using namespace std;
+
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#include <GLUT/glut.h>
+#include <OpenGL/glext.h>
+#else
+#include <GL/glut.h>
+#include <GL/glu.h>
+#endif
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "vector.hpp"
+#include "moving_object.h"
+#include "tk_colors.h"
+
+
+struct Vertex_p
+{
+    float position[3];
+};
+struct Vertex_pn
+{
+    float position[3];
+    GLfloat normal[3];
+};
+struct Vertex_pnc
+{
+    float position[3];
+    GLubyte color[4];
+    GLfloat normal[3];
+};
+struct Vertex_pc
+{
+    float position[3];
+    GLubyte color[4];
+};
+
+#define Vertex Vertex_pnc
 
 /* 
     This class serves as a base OpenGL Vertex data
@@ -18,27 +61,56 @@ using namespace std;
 	after a valid opengl context has been initialized.
 */
 
-class glObject
+class glObject : public glMovingObject 
 {
 public:
-	glObject( );
+	glObject ( );
+	~glObject( );
+    
+    virtual void 	setup           ( );
+    virtual void 	create          ( );
+	//virtual void	relocate        ( double mX, double mY, double mZ );
+	virtual void	relocate        ( float mX, float mY, float mZ );
+    virtual void    relocate        ( MathVector& mNewLocation );
 
-	void			relocate( float mX, float mY, float mZ );
-	void 			change_color	( long mColor );
+    virtual void 	set_color       ( Color mColor      );
+	virtual void 	set_color       ( long mColor       );
+    void            stamp_color     ( struct Vertex& mV );
+
+    virtual void	gl_register     (  );
+    virtual void    gl_unregister   (  );
+    
+    virtual void    release_memory  (  ) { };
+
+    // Returns a matrix with translate and rotations (same as drawn) for compute purposes.
+    // mOne,mTwo,mThree - selects the ordering of the rotations.
+    void	        update_body_matrix      (  );
+    glm::mat4       get_body_matrix         ( int mOne=0, int mTwo=1, int mThree=2 );
+    glm::mat4       get_body_matrix_inverse ( int mOne=2, int mTwo=1, int mThree=0 );
+    glm::vec4       get_position            ( );
+
+    MathVector      map_coords              ( MathVector mObjectCoordinate );
+    MathVector      map_to_object_coords    ( MathVector mParentCoordinate );
+    glm::vec4       map_coords              ( glm::vec4 mObjectCoordinate  );
+    glm::vec4       map_to_object_coords    ( glm::vec4 mParentCoordinate  );
+    
 
 	virtual void	draw_body		( );	// Override this with open gl commands.
-	void			draw			( );	// provides translation and rotation.
+	void            draw			( );	// provides translation and rotation.
+	void			print_location  ( );
 
-	float	m_x;
-	float	m_y;
-	float	m_z;
+    long            m_object_id;            // uniquely identifies this atom.
+    long            m_object_class;         // each derived class has it's own identifier
+    bool            m_registered;
 
-	float	m_x_angle;
-	float	m_y_angle;
-	float	m_z_angle;
-
+	glm::mat4		body_matrix;
 	unsigned long int m_color;
 };
 
 
+
+glObject*   find_object_id( long mID );
+void        list_object_ids(  );
+
 #endif
+
