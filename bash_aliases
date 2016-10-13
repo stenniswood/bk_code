@@ -1,6 +1,12 @@
 alias s='sudo'
+alias grepr='grep -r'
 alias ac='sudo ~/bk_code/aconf/aconf'
 alias rsync_bk='rsync --verbose --progress --stats --rsh=/usr/bin/ssh --recursive --times --perms --links --exclude "*bak" --exclude "*~"'
 alias amon='sudo ~/bk_code/amonitor/amon'
 alias ll='ls -l'
-
+alias ls='ls --color=auto'
+alias la='ls -al'
+alias cdbh='cd ~/bk_code/home_3D'
+alias cdbi='cd ~/bk_code/abkInstant/'
+alias cdbv='cd ~/bk_code/avisual/'
+alias cdb='cd ~/bk_code/'

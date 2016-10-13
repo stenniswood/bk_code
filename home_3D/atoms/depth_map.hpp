@@ -10,20 +10,21 @@
 
 #include <stdio.h>
 
+
 class glDepthMap : public glAtom
 {
 public:
     glDepthMap ();
     ~glDepthMap();
 
-	float	compute_depth(int x, int y);
+	uint16_t		compute_depth(int x, int y);
 	
-    void    set_demo  ( );
-    void    set_image ( char* mImage, int width, int height );
-    void    load_image( Mat* mLevel );    
+    void    		set_demo  			( );
+    void    		set_image 			( char* mImage, int width, int height );
+    void    		load_image			( Mat* mLevel );    
     
-    virtual void   generate_vertices( );
-    
+    virtual void	generate_vertices( );
+    void 			draw_body		 ( );    
         
 	int 	m_height;
 	int 	m_width;

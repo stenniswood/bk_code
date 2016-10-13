@@ -51,19 +51,20 @@
 #include "gl_window.h"
 #include "verbal_object.h"
 
-
 #include "truss.h"
 #include "rafter.h"
 #include "hinge.h"
 #include "road.h"
 #include "sign.h"
 #include "basketball_arena.h"
+#include "depth_map.hpp"
 
 
 // FOLLOWING ARE DEFINED IN main.cpp :
 extern list<glAtom*>    m_scene;
 void                    change_route( MathVector mSource, MathVector mDestination );
 extern glWalkingRobot   robot;           // Used in proc_client_commands()
+
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define dprintf if (Debug) printf("%s ", __FILENAME__); if (Debug) printf

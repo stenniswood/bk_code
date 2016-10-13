@@ -690,11 +690,11 @@ void	glRobot::place_right_toe_at( struct Vertex mHeel )
 void glRobot::test()
 {
     glm::vec4 RobotCoordinate( 1.0, 2.0, 3.0, 1.0 );
-    printf("\n%s\n", to_string(RobotCoordinate).c_str());
+    printf("\n%s\n", glm::to_string(RobotCoordinate).c_str());
     
     glm::vec4 tmp = map_coords(RobotCoordinate);
-    printf("%s\n", to_string(tmp).c_str());
+    printf("%s\n", glm::to_string(tmp).c_str());
     
     glm::vec4 tmp2 = map_to_object_coords(tmp);
-    printf("%s\n", to_string(tmp2).c_str());        // should be same as starting
+    printf("%s\n", glm::to_string(tmp2).c_str());        // should be same as starting
 }

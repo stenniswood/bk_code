@@ -116,7 +116,7 @@ void glBox::setup( )
 
 void glBox::create( )
 {
-	setup      ();
+	setup();
     switch(m_grab_at)
     {
         case GRAB_top   : grab_top();               break;

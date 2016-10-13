@@ -40,12 +40,9 @@ typedef unsigned short uint16_t;
 
 #define word unsigned short
 
-#define radians(arg) (3.1415*arg/180.0)
-#define degrees(arg) (arg*180.0/3.1415)
 
 //typedef	_Bool bool;
 //typedef	boolean Bool;
-
 // ----------------------------------------------------------------------------
 
 #define	RESET(x)		_XRS(x)

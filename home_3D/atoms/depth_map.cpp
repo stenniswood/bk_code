@@ -13,8 +13,8 @@
 #include "all_objects.h"
 #include "depth_map.hpp"
 
-int i_width  = 50;
-int i_height = 50;
+int i_width  = 100;
+int i_height = 100;
 uint16_t depth[50*50];
 
 
@@ -38,9 +38,9 @@ void glDepthMap::set_demo( )
 	for (int x=0; x<i_width; x++)
 		for (int y=0; y<i_height; y++)
 		{
-			get_depth( x,y ) = 10 +2*x + 2*y;
+			float sqr = (y-25)*(y-25);
+			get_depth( x,y ) = 10 +2*x + trunc(sqr);
 		}
-
 }
 
 void glDepthMap::set_image( char* mImage, int width, int height )
@@ -61,13 +61,13 @@ uint16_t glDepthMap::compute_depth(int x, int y)
 void glDepthMap::generate_vertices( )
 {
 	struct Vertex_pnc v;
-	for (int x=0; x<width; x++)
-		for (int y=0; y<height; y++)
+	for (int x=0; x<i_width; x++)
+		for (int y=0; y<i_height; y++)
 		{
-			float depth = compute_depth( x,y );
+			uint16_t depth = compute_depth( x,y );
 			v.position[0] = x;
-			v.position[1] = y;
-			v.position[2] = depth;
+			v.position[1] = depth;
+			v.position[2] = y;
 			m_vertices.push_back( v );						
 		}
 }
@@ -89,11 +89,13 @@ void glDepthMap::draw_body()
 	// We draw the top and bottoms as GL_POLYGON and the sides as GL_QUAD_STRIP.
 	// Both sets of indices stored in GL_INDEX_ARRAY.  With a known offset for each 
 	// of the 3 sets.
-
+	glPointSize( 5.0f );
+	
 	// Draw Bottom : 
-	glDrawElements(GL_POLYGON, (int)m_layer_one_indices, GL_UNSIGNED_INT, 0 );
+	glDrawArrays (GL_POINTS, (int)0, m_vertices.size() );
+	//glDrawElements(GL_POINTS, (int)m_vertices.size(), GL_UNSIGNED_INT, 0 );
  
 	// Draw the sides: m_number_side_indices
-	glDrawElements(GL_QUAD_STRIP, m_layer_one_vertices*2., GL_UNSIGNED_INT,
-				   (GLvoid*)BUFFER_OFFSET( m_layer_one_indices ) );
+//	glDrawElements(GL_QUAD_STRIP, m_layer_one_vertices*2., GL_UNSIGNED_INT,
+//				   (GLvoid*)BUFFER_OFFSET( m_layer_one_indices ) );
 }

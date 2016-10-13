@@ -18,7 +18,7 @@ endif
 
 CC         = g++
 OPTIONS	   = -std=c99 -g  
-CFLAGS = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) -std=gnu++11 \
+CFLAGS = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) -std=gnu++11 -DGLM_FORCE_RADIANS=1 \
 	     -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac) -DGL_GLEXT_PROTOTYPES=1
 
 #***** INCLUDE PATHS : 
@@ -53,7 +53,7 @@ ATOMS_OBJ = abstract_wall.o extrusion.o gl_object.o moving_object.o sign.o txt_c
   camera_screen.o face_box.o glSphere.o painting.o stairway.o \
   cylinder.o gl_atom.o ibeam.o paper.o Texture.o wall.o \
   door.o gl_container.o light_switch.o rectangle.o txt_container.o \
-  door_handle.o gl_misc.o Map2D.o ring.o touch_depth.o
+  door_handle.o gl_misc.o Map2D.o ring.o depth_map.o
 MOLECULES_OBJ = construction_barricade.o frame.o hinge.o table.o \
   counter.o full_wall.o palette.o table_pole.o \
   bookcase.o drawer.o glComputableWall.o picnic_table.o truss.o \

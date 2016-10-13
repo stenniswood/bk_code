@@ -45,7 +45,7 @@ vector<MathVector>   Sources;
 int DestinationIndex = 0;
 int SourceIndex      = 0;
 
-glStairway stairs;
+glStairway 			stairs;
 StreetSign          street_signs[10];
 glRoad              road;
 glRoof              roof;
@@ -318,6 +318,7 @@ void init_robots()
     robot.hands_on_hip();
     printf("\nROBOT_ID = %ld\n",robot.m_object_id );
 }
+
 void init_dwellings()
 {
 /*  roof.m_house_length = 50*12;
@@ -379,6 +380,11 @@ void init_terrain()
     //terra.load_image( "textures/heightmap_P.png" );
     terra.create(); */
 }
+
+void init_ground()
+{
+}
+
 void init_objects()
 {
     ground.width = 2000;
@@ -386,20 +392,23 @@ void init_objects()
     ground.height=  0.5;
     int reps_x = trunc(ground.width/300.);
     int reps_y = trunc(ground.depth/200.);
-    Texture* txt = new Texture();
-    txt->load_image("textures/grass2.jpg");
+//    Texture* txt = new Texture();
+//    txt->load_image("textures/grass2.jpg");
     //Texture* txt = ground.load_image("textures/grass2.jpg",TOP_SIDE_ID);
-    ground.apply_top   ( txt, reps_x, reps_y );
-    ground.apply_bottom( txt, reps_x, reps_y );
-    ground.m_y = -2.0;
+//    ground.apply_top   ( txt, reps_x, reps_y );
+//    ground.apply_bottom( txt, reps_x, reps_y );
+//    ground.m_y = -2.0;
+//    ground.update_body_matrix();
     ground.create(); 
 
-    //init_street_scene();
-    //init_dwellings();
+	//init_ground();
+    init_street_scene();
+    init_dwellings();
     init_robots();
-	//init_terrain();
-	dmap.create();
-	dmap.relocate(0, 100, 0);
+	//init_terrain(); 
+
+	dmap.create(); 
+	dmap.relocate(0, 150, 0);
 	
 /*  bball_arena.create();
     bball_arena.relocate( -40*12, 2, -94*12 );
@@ -409,8 +418,7 @@ void init_objects()
     table.relocate  ( 90.+24, 0, 291.-42.);
     tableCP.create();
     tableCP.relocate( 144.+24, 0, 91.-22.);
-
-	    
+  
     window.set_params  (50, 48, 48, 1.5 );
     window.create      (  );
     window.relocate	   ( 40, 0, 40 );
@@ -421,8 +429,8 @@ void init_objects()
     txt_cylinder.m_y = 12*0;
     txt_cylinder.setup();
     txt_cylinder.gl_register();
-
 	return; 
+	
     // picnic.create();
 	// init_sports_balls();
 	// sphere.load_texture("textures/me_in_car.bmp");

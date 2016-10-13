@@ -53,10 +53,10 @@ void glBareWall::Initialize()
     m_windows_index_start = 0;
     m_color               = 0xFFCFCF8F;
     m_extrusion_length = m_wall_thickness;
-    m_extrusion_axis   = 2;
-    
+    m_extrusion_axis   = 2; 
     clear();
 }
+
 void glBareWall::clear()
 {
 	m_vertices.clear();
@@ -79,8 +79,7 @@ float glBareWall::get_visible_height(   )
         return m_wall_height;
 }
 
-
-void	glBareWall::generate_vertices( )
+void glBareWall::generate_vertices( )
 {
     generate_wall_vertices	( );
     generate_door_vertices	( );

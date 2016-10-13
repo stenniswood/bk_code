@@ -571,11 +571,10 @@ glOurHouse::~glOurHouse( )
 }
 void glOurHouse::create_components( )
 {
-/*    bm = new glBasement();
+    bm = new glBasement();
     bm->setup   ( );
     bm->relocate( 0,0,0 );
-    add_level   ( bm ); */
-//    bm->create_floor();
+    add_level   ( bm );
 
 /*    sw = new glStairway();
     sw->relocate( 60+26.375+88+6+sw->m_extrusion_length+1, 0, 0);
@@ -584,10 +583,9 @@ void glOurHouse::create_components( )
     m_components.push_back(sw);*/
 
     up = new glUpstairs();
-    up->setup   ( );
-    up->relocate(0,0,0);
-    add_level   ( up );
-    //return;
+    up->setup   	(      );
+    up->relocate	( 0,0,0);
+    add_level   	( up   );
     
 /*    sw->compute_min_max();
     float length = sw->m_z + sw->m_max.position[0];

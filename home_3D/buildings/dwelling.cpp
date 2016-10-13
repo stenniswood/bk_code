@@ -5,7 +5,6 @@
 //  Created by Stephen Tenniswood on 7/7/15.
 //  Copyright (c) 2015 Stephen Tenniswood. All rights reserved.
 //
-
 #include "dwelling.h"
 #include "all_objects.h"
 #include "roof.h"
@@ -25,6 +24,7 @@ glDwelling::~glDwelling()
 void glDwelling::add_level( glDwellingLevel* mLevel )
 {
     mLevel->m_y = m_level_height;
+    mLevel->update_body_matrix();
     m_components.push_back( mLevel );
     m_levels.push_back(mLevel);
 
@@ -41,6 +41,7 @@ void glDwelling::add_roof()
     m_roof->relocate( 0, 0, 0 );
     m_components.push_back(m_roof);
 }
+
 
 /*glDoor* glDwelling::get_door( string mName   )
 {
