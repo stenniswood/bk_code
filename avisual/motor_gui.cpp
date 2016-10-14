@@ -8,10 +8,10 @@
 #include <fontinfo.h>
 #include "control.hpp"
 
-
 #include <string>
 #include <string.h>
 #include <math.h>
+#include "bk_system_defs.h"
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "/home/pi/openvg/fontinfo.h"
@@ -22,6 +22,7 @@
 #include "motor_gui.hpp"
 
 
+using namespace std;
 
 MotorGuiBaseControl::MotorGuiBaseControl()
 {

@@ -178,7 +178,7 @@ void setup_histogram(string read_type, Rectangle* rect)
 
 void okay_callback( void* mPtr )
 {
-	dprintf("okay_callback() \n" ); 
+	Dprintf("okay_callback() \n" ); 
 	reset_all_data();
 	// grab the info:
 	// Which radio button selected?
@@ -187,7 +187,7 @@ void okay_callback( void* mPtr )
 
 	RadioButton* selected = rb_gyro.get_selected();			// traverses the whole group
 	string read_type = selected->get_text();
-	dprintf(" %s\n", read_type.c_str()); 
+	Dprintf(" %s\n", read_type.c_str()); 
 		
 	// Start date?
 	// end date?
@@ -217,13 +217,13 @@ void okay_callback( void* mPtr )
 	default:
 			break;	
 	}
-	dprintf("okay_callback() done\n");
+	Dprintf("okay_callback() done\n");
 }
 
 void cancel_callback( void* mPtr )
 {
 	init_home_screen();
-	dprintf("cancel_callback():\n");
+	Dprintf("cancel_callback():\n");
 }
 
 void init_datalog_graph()
@@ -288,11 +288,11 @@ void init_datalog_graph()
 		Cancel.move_to ( rect->get_left()+10, rect->get_bottom()+10 );
 		Okay.move_to ( rect->get_right()-Okay.get_width()-20, rect->get_bottom()+10 );		
 	}
-	dprintf( "graph_info_dialogbox()\n\n" );
+	Dprintf( "graph_info_dialogbox()\n\n" );
 	
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &dlg );
-	dprintf( "graph_info_dialogbox() DONE.\n\n" );
+	Dprintf( "graph_info_dialogbox() DONE.\n\n" );
 }
 
 

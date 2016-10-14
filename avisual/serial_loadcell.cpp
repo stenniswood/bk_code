@@ -141,7 +141,7 @@ void LoadCell_SerialInterface::parse_ascii_data()
 		sql_data.sensor[si+3] = sensor_v[3];
 		if (!left_foot) {
 			if ((counter++ % 100)==0)  {				
-				dprintf("sql logging\n");
+				Dprintf("sql logging\n");
 				sql_logger.add_loadcell( sql_data ); 
 			}
 		}						
@@ -160,11 +160,11 @@ void LoadCell_SerialInterface::dump_data_ascii(unsigned char * b, int count)
 	b[count] = 0;		// need a null terminator for strstr function below.
 
 	for (i=0; i < count; i++) {
-		dprintf("%c", b[i]);
+		Dprintf("%c", b[i]);
 		if (b[i]=='\n') {
 			*last_pos = 0;
 			last_pos = accum_buff;		// start over!
-			//if (left_foot) dprintf("L:"); else dprintf("R:");
+			//if (left_foot) Dprintf("L:"); else Dprintf("R:");
 			//printf( "accum_buff=%s\n", accum_buff );
 			// NOW PARSE BUFFER:
 			parse_ascii_data();
@@ -467,7 +467,7 @@ void LoadCell_SerialInterface::process_write_data()
 		ssize_t c = write(_fd, _write_data, _write_size);
 
 		if (c < 0) {
-			dprintf("write failed (%d)\n", errno);
+			Dprintf("write failed (%d)\n", errno);
 			c = 0;
 		}
 
@@ -562,7 +562,7 @@ static void print_args(int argc, char *argv[])
 
 int LoadCell_SerialInterface::serial_loadcell_main(int argc, char * argv[])
 {
-	dprintf("Linux Loadcell serial app\n");
+	Dprintf("Linux Loadcell serial app\n");
 	//print_args( argc, argv );	
 	//process_options(argc, argv);	
 

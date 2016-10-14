@@ -137,10 +137,10 @@ void tilt_sensor_update_gui()
 {
 	if (0) {
 //	if (gyro_view) {
-		dprintf("setting pitch,roll to <%6.2f,%6.2f>\n", AccelAngularPosition.rx, AccelAngularPosition.ry );
+		Dprintf("setting pitch,roll to <%6.2f,%6.2f>\n", AccelAngularPosition.rx, AccelAngularPosition.ry );
 		gyro_view->set_pitch_angle_deg( AccelAngularPosition.rx );
 		gyro_view->set_roll_angle_deg ( AccelAngularPosition.ry );
-		dprintf("setting heading to <%6.2f>\n", MagnetAngularPosition.rz );
+		Dprintf("setting heading to <%6.2f>\n", MagnetAngularPosition.rz );
 		gyro_view->set_heading_angle_deg( MagnetAngularPosition.rz );
 		magnet_x.set_level( RawxyzMagnet.x );
 		magnet_y.set_level( RawxyzMagnet.y );

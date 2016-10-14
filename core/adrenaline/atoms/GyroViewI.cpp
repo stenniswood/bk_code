@@ -10,6 +10,9 @@
 #include <string>
 #include <string.h>
 #include <math.h>
+#include "bk_system_defs.h"
+//#include "global.h"
+
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "/home/pi/openvg/fontinfo.h"

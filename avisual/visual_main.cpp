@@ -188,14 +188,14 @@ void gui_interface()
 	{
 		//if (left_mouse_button_prev == 0)
 		{
-			dprintf(" Left button clicked!  mousexy=(%d,%d)\n", x,y );
+			Dprintf(" Left button clicked!  mousexy=(%d,%d)\n", x,y );
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
 			{ 
-				dprintf("clicked an object %s %p!\n", object_clicked->class_name, object_clicked);
+				Dprintf("clicked an object %s %p!\n", object_clicked->class_name, object_clicked);
 				int num = object_clicked->onClick( x, y );
 				//UpdateDisplaySemaphore=1;
-				dprintf("clicked an object - called onClick() DONE\n");				
+				Dprintf("clicked an object - called onClick() DONE\n");				
 			}  
 			left_mouse_button_prev = result;
 		}

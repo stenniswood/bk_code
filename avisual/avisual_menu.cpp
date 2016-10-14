@@ -68,7 +68,7 @@ int show_view_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 
 void init_view_menu()
 {
-	dprintf("init_view_menu()\n");
+	Dprintf("init_view_menu()\n");
 	view.add_simple_command( "Data log graph"		);
 	view.add_simple_command( "ListBox demo" 		);
 	view.add_simple_command( "Tabular ListBox demo"	);

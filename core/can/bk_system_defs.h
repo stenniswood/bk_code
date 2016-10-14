@@ -1,7 +1,6 @@
 #ifndef _BK_SYSTEM_H_
 #define _BK_SYSTEM_H_
 
-
 // USE THESE FOR COLOR CODING THE PRINTF's!
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -11,13 +10,18 @@
 #define KMAG  "\x1B[35m"
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
+
 // printf("%sred\n", KRED);
 // printf("%snormal\n", KNRM);
 //#include <inttypes.h>
-#include "global.h"
 
+#include "global.h"
+#define dprintf Dprintf
+
+#ifndef radians
 #define radians(arg) (arg*3.1415/180.0)
 #define degrees(arg) (arg*180.0/3.1415)
+#endif
 
 #define BOARD_MODEL 11
 #define SerialNumber 0x12345678
@@ -33,8 +37,11 @@
 //#define sei()  __asm__ __volatile__ ("sei" ::)
 
 #ifndef min
-#define min(a,b) (((a)<(b))?(a):(b))
-#define max(a,b) (((a)>(b))?(a):(b))
+#define min(a,b) ((a)<(b)?(a):(b))
+#endif
+
+#ifndef max
+#define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
 #define CRYSTAL_FREQ 16000000

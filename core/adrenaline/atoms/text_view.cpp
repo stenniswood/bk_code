@@ -214,10 +214,13 @@ int TextView::count_num_lines_present(  )
 	
 	do {
 		eol = get_end_of_line( ptr );
-		char remember = *eol;	// eol
-		*eol = 0;
-		dprintf("length_from_start=%d; eol_length=%d;|%s|\n", (eol-text), (eol-ptr), ptr );
-		*eol = remember;		// restore
+		char remember = 0;
+		if (eol) {
+			remember = *eol;	// eol
+			*eol = 0;
+			dprintf("length_from_start=%d; eol_length=%d;|%s|\n", (eol-text), (eol-ptr), ptr );
+			*eol = remember;		// restore
+		}
 		Lines++;				// Count it!
 		ptr = eol+1;
 	} while ( (eol-text) < total_length );
