@@ -11,9 +11,24 @@
 
 #include <stdio.h>
 #include "nlp_sentence.hpp"
+#include "serverthread.hpp"
+
+class Object3D
+{
+public:
+    Object3D();
+    ~Object3D();
+    
+    int     parse( string& mSentence );
+    
+    string  m_regexp;
+    string  m_parameters;
+};
 
 void Init_ThreeD_Protocol  ( );
-int  Parse_ThreeD_Statement( Sentence& mSentence );
+int  Parse_ThreeD_Statement( Sentence& mSentence, ServerHandler* mh );
 
 
 #endif /* ThreeD_object_protocol_hpp */
+
+

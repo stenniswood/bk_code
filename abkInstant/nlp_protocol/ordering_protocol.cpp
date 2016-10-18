@@ -5,21 +5,21 @@
 //  Created by Stephen Tenniswood on 3/15/16.
 //  Copyright © 2016 Stephen Tenniswood. All rights reserved.
 //
-#include <my_global.h>
-#include <mysql.h>
 
 #include "ordering_protocol.hpp"
 #include "GENERAL_protocol.hpp"
 #include "specific_restaurants.hpp"
 
+#include <my_global.h>
+#include <mysql.h>
 
 /********************************* SQL FUNCTIONS *********************************************/
-MYSQL           *menus_db;
-string          query_string;
-MYSQL_RES*		result;
-MYSQL_ROW       row;
-string          known_restaurants;
-int  has_verbal_focus = 0;                 // Verbal focus - ie next statements are likely to be handled here until the order is comlete.
+static MYSQL           *menus_db;
+extern string          query_string;
+static MYSQL_RES*		result;
+static MYSQL_ROW       row;
+static string          known_restaurants;
+static int  has_verbal_focus = 0;                 // Verbal focus - ie next statements are likely to be handled here until the order is comlete.
 RestaurantOrder  my_order;
 
 
@@ -112,7 +112,7 @@ void Topping::load_size_options(int mSize_id)
     mysql_free_result( result );
 }
 
-void Topping::list_toppings ( )
+void Topping::list_toppings( )
 {
     int size =name.m_split_words.size();
     if (size==0)   return;
@@ -122,24 +122,25 @@ void Topping::list_toppings ( )
         list += name.m_split_words[i];
         list += ", ";
     }
-    append_response( list.c_str() );
+    // Put back in!
+    //append_response( list.c_str() );
 }
 void  Topping::ask_toppings        ( )
 {
     if (name.m_split_words.size()==0)   return;
-    
-    append_response("What toppings would you like on it?");
+    // Put back in!    
+    //append_response("What toppings would you like on it?");
 }
 
 void  Topping::parse_toppings      ( Sentence& mSentence )
 {
     int top_index = 0;
     int pos = 0;
-    while ((pos = mSentence.m_sentence.any_one_word_found_in_sentence(name, top_index, pos )) < mSentence.m_sentence.m_split_words.size())
+    while ((pos = mSentence.m_sentence.any_one_word_found_in_sentence(name, top_index, pos )) 
+    			< mSentence.m_sentence.m_split_words.size())
     {
         requested_indices.push_back(top_index);
     }
-    
 }
 
 
@@ -210,7 +211,7 @@ void MenuItem::ask_size( )
     }
     my_order.q_to_user_pending = true;
     my_order.q_item_pending = *this;
-    form_response( question.c_str() );
+    //form_response( question.c_str() );
 }
 
 
@@ -234,18 +235,14 @@ int MenuItem::parse_size_response( Sentence& mSentence )
 /**************************************************************************************
  class Menu
  **************************************************************************************/
-
 Menu::Menu()
-{
-    
+{   
 }
 Menu::~Menu()
-{
-    
+{   
 }
 
-
-/* This is the final item (after size and all options have been determined. */
+/* This is the final item (after size and all options have been determined. 
 void RestaurantOrder::add_to_order        ( MenuItem mItem )
 {
     static char response[128];
@@ -255,7 +252,7 @@ void RestaurantOrder::add_to_order        ( MenuItem mItem )
     } else
         sprintf(response, "Okay %s has been added to your order", mItem.name.c_str());
     form_response(response);
-}
+}*/
 
 int Menu::Parse_Menu( Sentence& mSentence, bool mAddToCart )      // scan all catagories.
 {
@@ -269,7 +266,7 @@ int Menu::Parse_Menu( Sentence& mSentence, bool mAddToCart )      // scan all ca
         found = mSentence.is_found_in_sentence( iter->name.c_str() );
         if ((found) && (mAddToCart)) {
             if (iter->sizes.names.size()==0) {
-                my_order.add_to_order(*iter);
+               // Put back in :  my_order.add_to_order(*iter);
 
             } else {
                 iter->ask_size(  );
@@ -295,10 +292,6 @@ int Menu::Parse_Menu( Sentence& mSentence, bool mAddToCart )      // scan all ca
  return retval;
 
  */
-/**************************************************************************************
- class Restaurant
- **************************************************************************************/
-
 
 /*****************************************************************
  Do the work of the Telegram :
@@ -307,173 +300,9 @@ int Menu::Parse_Menu( Sentence& mSentence, bool mAddToCart )      // scan all ca
  - besides strlen(mSentence)!
  *****************************************************************/
 
-Restaurant::Restaurant ()
-{
-    has_verbal_focus = 0;    
-}
-Restaurant::~Restaurant()
-{
-
-}
-void Restaurant::retrieve_menu( )
-{
-    query_string = "SELECT * FROM bk_advertisements.restaurant_menu_items WHERE restaurant='";
-    query_string += m_restaurant_name;
-    query_string += "';";
-    query(true);
-    
-    MenuItem tmpItem;
-    tmpItem.user_selected_size = 0;
-    MYSQL_ROW row;
-    while ((row = mysql_fetch_row(result)) )
-    {
-        if (row[1]) tmpItem.name     = row[1];
-        if (row[2]) tmpItem.price    = atof(row[2]);
-        if (row[3]) tmpItem.catagory = row[3];
-        if (row[5]) // number of sizes
-        {
-            size_t size_id;
-            if (row[6])
-                size_id = atoi(row[6]);
-            // not great programming practice.  but we'll temporarily store the size_id in user_selected_size until properly loaded below.
-            tmpItem.user_selected_size = size_id;
-        }
-        if (row[7]) {
-            tmpItem.topping_ids = row[7];
-            tmpItem.topping_ids.split(',');
-            tmpItem.topping_ids.trim_spaces_in_splits();
-        }
-        tmpItem.name.trim_spaces();
-        tmpItem.catagory.trim_spaces();
-        m_menu.m_items.push_back( tmpItem );
-    }
-    mysql_free_result( result );
-    
-    // Now load all the sizes:
-    vector<MenuItem>::iterator iter = m_menu.m_items.begin();
-    while ( iter != m_menu.m_items.end() )
-    {
-        if (iter->user_selected_size)
-            iter->load_size_options( iter->user_selected_size );
-        int tops = iter->topping_ids.m_split_words.size();
-        Topping tmpTop;
-        if (tops)
-            for(int t=0; t<tops; t++)
-            {
-                int top_id = atoi(iter->topping_ids.m_split_words[t].c_str());
-                tmpTop.load_size_options( top_id );
-                iter->m_toppings.push_back(tmpTop);
-            }
-        iter++;
-    }
-    
-}
-
-void Restaurant::what_kind_of__do_you_have( string mcatagory )
-{
-    // select all in catagory
-}
-void Restaurant::how_much_is              ( Sentence& mSentence, string mcatagory )
-{
-    int result=0;
-    result = m_menu.Parse_Menu( mSentence, false );
-    //form_response("item %s is $%6.2f", item.name.c_str(), item.price );
-    
-    
-}
-void Restaurant::extract_result          ( )
-{
-    m_id = atoi(row[0]);
-    m_offical_name = row[1];
-    if (row[2]) m_restaurant_name = row[2];
-    if (row[3]) m_website      = row[3];
-    // store locator url
-    if (row[5]) m_frequency    = atof(row[5]);
-    if (row[6]) m_welcome_text = row[6];
-    if (row[7]) m_order_url = row[7];
-    
-    bool standard_welcome = m_welcome_text.compare("standard")==0;
-    if (standard_welcome) {
-        m_welcome_text  = "Welcome ";
-        m_welcome_text += m_restaurant_name;
-        m_welcome_text += " will be happy to take your order.  How may we begin? ";
-    }
-    
-}
-void Restaurant::sql_load                 ( string mRestaurantOfficialName )
-{
-    query_string = "SELECT * FROM bk_advertisements.restaurants WHERE official_name='";
-    query_string += mRestaurantOfficialName;
-    query_string += "';";
-    query(true);
-    
-    //size_t row_count = mysql_num_rows(result);
-        
-    if ((row = mysql_fetch_row(result)) )
-    {
-        extract_result();
-    }
-    mysql_free_result( result );
-}
-
-int Restaurant::Parse_order_statement( Sentence& mSentence )
-{
-    int retval=-1;
-    int handled=0;
-    
-    bool foundS =   mSentence.is_found_in_sentence( "place" ) &&
-                    mSentence.is_found_in_sentence( "order" );
-    bool found_Rest = mSentence.is_found_in_sentence( m_restaurant_name.c_str() );
-    if ((foundS) && (found_Rest)) {
-        m_verbal_focus = this;
-        has_verbal_focus = 1;
-        my_order.reset();
-        form_response( m_welcome_text.c_str() );
-        retval = 0;
-    }
-    
-    if (m_verbal_focus == this) {
-        if (my_order.q_to_user_pending) {
-            if (my_order.q_item_pending.parse_size_response(mSentence)) {
-                my_order.add_to_order( my_order.q_item_pending );
-                my_order.q_to_user_pending = false;
-                retval = 0;
-            }
-        }
-//        handled  = my_order.cancel_order( mSentence );
-        handled  = my_order.cancel_item( mSentence );
-        
-        if (handled==0)
-            handled = m_menu.Parse_Menu( mSentence );
-    
-        if (handled==0)
-        {
-            handled = my_order.is_order_complete( mSentence );
-            if (handled)
-                if (my_order.just_read_back)
-                {
-                    form_response("Okay, placing order");
-                } else
-                    my_order.read_back_order();
-        }
-        if (handled==0)
-        {
-            handled = my_order.is_request_order_readback( mSentence );
-            if (handled)
-                my_order.print_order();
-        }
-    }
-    if (retval)     printf( "Parse_restaurants_order_Statement done\n" );
-    if (handled)
-        return 0;
-    else
-        return retval;
-}
-
 /**************************************************************************************
  class RestaurantCluster
- **************************************************************************************/
-
+ **************************************************************************************
 RestaurantCluster::RestaurantCluster ()
 {
     m_focus_index = -1;
@@ -551,7 +380,6 @@ int RestaurantCluster::Parse_order_statement    ( Sentence& mSentence )
     if (my_order.q_to_user_pending)
         my_order.q_item_pending.parse_size_response(mSentence);
 
-    
     if (my_order.orderFoundComplete)
         m_focus_index = -1;
     return retval;
@@ -561,155 +389,11 @@ void    RestaurantCluster::list_voice_enabled_restaurants( )
     string reply = "I know of these restaurants: ";
     reply += known_restaurants;
     reply += " and can place an order for you via the internet.";
-    form_response( reply.c_str() );
-    
+    form_response( reply.c_str() );    
 }
 void    RestaurantCluster::what_kind_of__do_you_have( string mcatagory )
-{   /* ie. list all items in a catagory */
-    
-}
+{   * ie. list all items in a catagory *  }
+
 void    RestaurantCluster::how_much_is              ( Sentence& mSentence, string mcatagory )
-{
-
-}
-
-
-/**************************************************************************************
-     class RestaurantOrder
- **************************************************************************************/
-RestaurantOrder::RestaurantOrder()
-{
-    q_to_user_pending = false;
-    orderFoundComplete = false;
-    just_read_back = 0;
-}
-RestaurantOrder::~RestaurantOrder()
-{
-    
-}
-void RestaurantOrder::reset()
-{
-    m_order.clear();
-    orderFoundComplete = false;
-    just_read_back = 0;
-}
-
-void RestaurantOrder::anything_else( )
-{
-    append_response("Will there be any thing else?");
-}
-
-int RestaurantOrder::is_order_complete( Sentence& mSentence )
-{
-    orderFoundComplete = mSentence.is_found_in_sentence( "no more" ) ||
-    mSentence.is_found_in_sentence( "that's it" ) ||
-    mSentence.is_found_in_sentence( "that's all" ) ||
-    mSentence.is_found_in_sentence( "no" );
-    
-    if (orderFoundComplete) has_verbal_focus = 0;
-    if (orderFoundComplete)
-        return 1;
-    else
-        return 0;
-}
-int RestaurantOrder::is_request_order_readback( Sentence& mSentence )
-{
-    bool proceed = mSentence.is_found_in_sentence( "repeat" ) || mSentence.is_found_in_sentence( "say again" ) ||
-    mSentence.is_found_in_sentence( "so far" )     || mSentence.is_found_in_sentence( "tell me" );
-    
-    if (proceed) { read_back_order();  anything_else(); };
-    if (proceed)
-        return 1;
-    else
-        return 0;
-}
-
-
-void RestaurantOrder::remove_item_in_order( string mItem )
-{
-    vector<MenuItem>::iterator  iter = m_order.begin();
-    while (iter != m_order.end())
-    {
-        iter++;
-        if (iter->name.compare( mItem )==0)
-            m_order.erase( iter );
-    }
-}
-
-vector<MenuItem>::iterator* RestaurantOrder::find_order_item_in_sentence( Sentence& mSentence)
-{
-    static vector<MenuItem>::iterator  iter = m_order.begin();
-    while (iter != m_order.end())
-    {
-        int result = mSentence.is_found_in_sentence( iter->name.c_str() );
-        if (result)
-            return &iter;
-        iter++;
-    }
-    return NULL;
-}
-
-int RestaurantOrder::cancel_item( Sentence& mSentence )
-{
-    bool proceed = mSentence.is_found_in_sentence( "forget" ) || mSentence.is_found_in_sentence( "cancel" ) ||
-    mSentence.is_found_in_sentence( "drop" );
-    
-    if (proceed) {
-        vector<MenuItem>::iterator* iter = find_order_item_in_sentence( mSentence );
-        if (iter)
-        {
-            m_order.erase( *iter );
-            form_response("okay removed. ");
-        }
-        //anything_else();
-    }
-    if (proceed)
-        return 1;
-    else
-        return 0;
-}
-
-void RestaurantOrder::read_back_order(  )
-{
-    static string full_order;
-    full_order = "Okay, your order is : ";
-    float SumTotal = 0.0;
-    int count =0;
-    vector<MenuItem>::iterator iter = m_order.begin();
-    while (iter != m_order.end())
-    {
-        full_order += (iter)->get_name();
-        full_order += ", ";
-        //printf("%3d :%s \n", count++,  );
-        SumTotal += (iter)->price;
-        iter++;
-    }
-    full_order += ".  And your total is ";
-    char total[12];
-    sprintf(total, "$%6.2f. ", SumTotal);
-    full_order += total;
-    form_response(full_order.c_str());
-    just_read_back = 1;
-}
-
-void RestaurantOrder::print_order( )
-{
-    float SumTotal = 0.0;
-    
-    int count =0;
-    printf("Your Order:");
-    vector<MenuItem>::iterator iter = m_order.begin();
-    while (iter != m_order.end())
-    {
-        printf("%3d :%s \n", count++, (iter)->name.c_str() );
-        SumTotal += (iter)->price;
-        iter++;
-    }
-    printf("Total: $%6.2f", SumTotal);
-}
-
-
-
-
-
-
+{ }
+*/

@@ -24,7 +24,7 @@
 #include <string>
 #include <string.h>
 
-#include "gl_container.hpp"
+#include "gl_box.hpp"
 #include "gl_object.hpp"
 #include "asset_importer.hpp"
 #include "Texture.hpp"

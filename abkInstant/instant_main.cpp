@@ -16,6 +16,7 @@
 #include "ilclient.h"
 #endif
 
+#include "listen_thread.hpp"
 #include "pican_defines.h"
 #include "CAN_Interface.hpp"
 #include "can_id_list.h"
@@ -77,7 +78,7 @@ void create_threads()
 	}
 
 	// ETHERNET SERVER PROTOCOL:
-	int iret3 = pthread_create( &server_thread_id, NULL, server_thread, (void*) message1);
+	int iret3 = pthread_create( &server_thread_id, NULL, listen_thread, (void*) message1);
 	if (iret3)
 	{
 		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret3);
@@ -93,7 +94,7 @@ void create_another_client_thread()		// really serverthread which initiates conn
 	// TBD!!!	
 	const char *message1 = "client blah";
 	// ETHERNET SERVER PROTOCOL:
-	int iret2 = pthread_create( &server_thread_id, NULL, server_thread, (void*) message1);
+	int iret2 = pthread_create( &server_thread_id, NULL, listen_thread, (void*) message1);
 	if (iret2)
 	{
 		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
@@ -221,18 +222,27 @@ void print_args(int argc, char *argv[])
 	printf("\n");
 }
 
+ServerHandler cli_app_sh;
 
-/* Client request shared memory.  */
+/* Client request shared memory.  
+
+	Two Different ways of connecting to Instant:
+		a) Client app (uses cli shared member)
+		b) TCP/IP client connect 
+*/
 void scan_client()
 {
 	// CHECK CLIENT MEMORY FOR REQUEST:
+	if (is_client_ipc_memory_available())
 	if (cli_is_new_update())
 	{
 		printf("is new update.\n");
-		handle_client_request();
+		handle_client_request(&cli_app_sh);
+		cli_ipc_write_response( cli_app_sh.NLP_Response.c_str(), "Instant Server" );
+
 		// Now wait until our response is taken.  Don't want to reprocess it on 
 		// next pass thru here!
-		//cli_wait_for_ack_update();		// should be a timeout on this though.
+		//cli_wait_for_ack_update();		// should be a timeout on this though
 	}	
 }
 		

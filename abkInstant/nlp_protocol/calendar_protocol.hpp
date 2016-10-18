@@ -11,10 +11,12 @@
 
 #include <stdio.h>
 #include "nlp_sentence.hpp"
+#include "serverthread.hpp"
 
 
 void Init_Calendar_Protocol  ( );
-int  Parse_Calendar_Statement( Sentence& mSentence );
+
+int  Parse_Calendar_Statement( Sentence& mSentence, ServerHandler* mh );
 
 
 

@@ -5,9 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <string.h>
 #include <list>
-#include <vector>
 #include <string.h>
 #include <string>
 #include <sys/types.h>
@@ -68,22 +66,18 @@ static void init_subject_list()
     subject_list.add_word("what is");
 	subject_list.add_word("what does");
 	subject_list.add_word("how much");
-    int siez = subject_list.m_Words->size();
-
     
 	// sentence must contain 2 or more numbers too.
 }
 
 static void init_verb_list()
 {
-    Word mult("times, multiplied by, multiply" );   // this should work
     Word divide,plus,minus;
+    //Word mult("times, multiplied by, multiply" );   // this should work
 
-    //
-	mult.add_new("times");
+	/*mult.add_new("times");
 	mult.add_new("multiplied by");
-    mult.add_new("multiply");
-    
+    mult.add_new("multiply");  */
 
 	divide.add_new("divided by");
 	divide.add_new("divide");
@@ -99,7 +93,7 @@ static void init_verb_list()
 	minus.add_new("subtract");			
 	minus.add_new("subtracted");	
 		
-	verb_list.add_new(mult  );
+	//verb_list.add_new(mult  );
 	verb_list.add_new(divide);
 	verb_list.add_new(plus  );
 	verb_list.add_new(minus );
@@ -138,7 +132,7 @@ void Init_Math_Protocol()
 bool contains_two_or_more_numbers( Sentence& mSentence )
 {
     int count=0;
-    for(int i=0; i<mSentence.m_num_words; i++)
+    for(int i=0; i<mSentence.get_number_words(); i++)
         if (mSentence.is_nth_word_a_number(i))
             count++;
     if (count>=2)
@@ -151,7 +145,7 @@ bool contains_two_or_more_numbers( Sentence& mSentence )
 float extract_number( Sentence& mSentence, int mOrdinal )
 {
     int count=1;
-    for(int i=0; i<mSentence.m_num_words; i++)
+    for(int i=0; i<mSentence.get_number_words(); i++)
         if (mSentence.is_nth_word_a_number(i))
         {
             if (count==mOrdinal)
@@ -165,8 +159,6 @@ float extract_number( Sentence& mSentence, int mOrdinal )
 // mFoundWord will be gauranteed to be part of the sentence (b/c it was from evaluate_sentence() )
 int Parse_One_Statement( Sentence& mSentence, Word& mFoundOperatingWord, float first_number, float second_number )
 {
-	int retval=-1;
-
 	float final_answer=0.0;
     
 	bool found = mFoundOperatingWord.is_synonym( "multiply" );	// will find any matching multiply Word too.
@@ -185,7 +177,7 @@ int Parse_One_Statement( Sentence& mSentence, Word& mFoundOperatingWord, float f
 	if ((found) && (second_number!=0.0))
 		final_answer = first_number / second_number;
 
-	return final_answer;
+    return found?1:0;
 }
 
 int Parse_Unit_Conversion_Statement( Sentence& mSentence )
@@ -198,29 +190,28 @@ int Parse_Unit_Conversion_Statement( Sentence& mSentence )
     int foundA = mSentence.is_found_in_sentence( "miles per hour" );
     int foundB = mSentence.is_found_in_sentence( "kilometers per hour" );
     if (foundA && foundB)
-        final_answer = first_number * second_number;
+    {    final_answer = first_number * second_number;   retval = 0; }
     
     foundA = mSentence.is_found_in_sentence( "pounds" );
     foundB = mSentence.is_found_in_sentence( "kilograms" );
     if (foundA && foundB)
-        final_answer = first_number + second_number;
+    {    final_answer = first_number + second_number;    retval = 0; }
 
     foundA = mSentence.is_found_in_sentence( "ounces" );
     foundB = mSentence.is_found_in_sentence( "grams" );
     if (foundA && foundB)
-        final_answer = first_number - second_number;
+    {    final_answer = first_number - second_number;   retval = 0; }
     
     foundA = mSentence.is_found_in_sentence( "inches" );
     foundB = mSentence.is_found_in_sentence( "centimeters" );
     if (foundA && foundB)
-        final_answer = first_number / second_number;
+    {    final_answer = first_number / second_number;   retval = 0; }
 
     foundA = mSentence.is_found_in_sentence( "feet" );
     foundB = mSentence.is_found_in_sentence( "meters" );
     if (foundA && foundB)
-        final_answer = first_number / second_number;
-    
-    return final_answer;
+    {    final_answer = first_number / second_number;   retval = 0; }
+    return retval;
 }
 
 void form_verbal_answer(Sentence& mSentence, float final_answer)
@@ -228,11 +219,11 @@ void form_verbal_answer(Sentence& mSentence, float final_answer)
     float remainder = final_answer - trunc(final_answer);
     int integer = trunc(final_answer);
     if (remainder<0.001)
-        sprintf ( NLP_Response, "%s is %d", mSentence.m_sentence, integer );
+        sprintf ( NLP_Response, "%s is %d", mSentence.m_sentence.c_str(), integer );
     else if (remainder<0.099)
-        sprintf ( NLP_Response, "%s is %6.3f", mSentence.m_sentence, final_answer );
+        sprintf ( NLP_Response, "%s is %6.3f", mSentence.m_sentence.c_str(), final_answer );
     else
-        sprintf ( NLP_Response, "%s is %6.1f", mSentence.m_sentence, final_answer );
+        sprintf ( NLP_Response, "%s is %6.1f", mSentence.m_sentence.c_str(), final_answer );
     CLIENT_Response =  NLP_Response;
     ClientRequestPending = true;
     nlp_reply_formulated=TRUE;
@@ -244,12 +235,12 @@ return  -1	=> Not handled
 		else number of extra bytes extracted from the mSentence buffer.
 			- besides strlen(mSentence)! 
 *****************************************************************/
-int Parse_Math_Statement( Sentence& mSentence )
+int Parse_Math_Statement( Sentence& mSentence, ServerHandler* mh )
 {
 	int retval=-1;
+    mSentence.restore_reduced();
     
-	int subject_count	= subject_list.evaluate_sentence( mSentence.m_sentence );
-	int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence );
+	int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence.c_str() );
 	bool two_or_more_numbers = contains_two_or_more_numbers( mSentence );
 	
 	if (!two_or_more_numbers)       // must have!
@@ -258,9 +249,6 @@ int Parse_Math_Statement( Sentence& mSentence )
 			return retval;
 
 	printf("Parse_Math_Statement\n");
-	string* object 		= extract_word( mSentence.m_sentence, &object_list  	  );
-	string* adjective	= extract_word( mSentence.m_sentence, &adjective_list    );
-    //diagram_sentence		( subject, verb, adjective, object, preposition );
 
     int operation_count=0;
     float first_number  = extract_number(mSentence, operation_count+1);

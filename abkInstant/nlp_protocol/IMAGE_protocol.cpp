@@ -66,7 +66,7 @@ static void init_verb_list()
 }
 
 
-static void init_adjective_list()
+/*static void init_adjective_list()
 { 
 	adjective_list.push_back( "highest" );
 	adjective_list.push_back( "my" 		);
@@ -76,7 +76,7 @@ static void init_adjective_list()
 	adjective_list.push_back( "best" 	);
 	adjective_list.push_back( "quality" );
 	adjective_list.push_back( "stereo"  );
-}
+}*/
 
 static void init_object_list()
 {   // Object might be a numerical value preceded by a preposition.
@@ -110,7 +110,7 @@ void Init_IMAGE_Protocol()
 }
 
 
-BOOL Parse_IMAGE_Statement(char* mSentence)
+BOOL Parse_IMAGE_Statement(char* mSentence, ServerHandler* mh)
 {
     int retval = -1;
     
@@ -120,7 +120,7 @@ BOOL Parse_IMAGE_Statement(char* mSentence)
 
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 );
 	std::string* object 	= extract_word( mSentence, &object_list  );
-	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
+	//std::string* adjective	= extract_word( mSentence, &adjective_list  );
 
 	if ((compare_word( subject, "picture")==0) ||
 		(compare_word( subject, "image")==0) ||

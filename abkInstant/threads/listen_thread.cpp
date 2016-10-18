@@ -41,9 +41,15 @@
 #include "client_memory.hpp"
 
 
+static int 	 listenfd = 0;
+fd_set rfds;
+
+
 #define Debug 0
 
 static char 	ip_addr[16]; 			// for user feedback
+
+std::vector<ServerHandler*>  server_handlers;
 
 /********************************************************************
 Init - 
@@ -93,16 +99,22 @@ static void get_ip_address()
 }
 
 
-void establish_connection()
+
+
+/* Loop infinitely - 
+		each client which connects we generate a ServerHandler and start a connection thread.
+		
+*/
+void*  listen_thread(void* )
 {
 	/****************************
 	   loop on select() or poll().  These will inform when a connection is pending,
 	   then we call accept().  Since select()/Poll() are nonblocking, we can
-	   also check for connect_to_robot() client initiated request.
-	*/
+	   also check for connect_to_robot() client initiated request.	*****/
+
 	dprintf("establish_connection()\n");	
-    socklen_t size = (socklen_t)sizeof(client_addr);	
-    memset(&client_addr, '0', sizeof(socklen_t) );
+    //socklen_t size = (socklen_t)sizeof(client_addr);
+    //memset(&client_addr, '0', sizeof(socklen_t) );
 	
 	struct timeval tv;
 	tv.tv_sec = 10;		// want immediate return
@@ -112,13 +124,13 @@ void establish_connection()
 	//int max_fds = max( listenfd, connfd )+1;
 	int max_fds = listenfd+1;
 
-	while (!connection_established)
+	while (1) 		// (!connection_established)
 	{
 		FD_ZERO(&rfds);		
 		FD_SET(listenfd, &rfds);
-
+		
 		tv.tv_sec  = 0;		// want immediate return
-		tv.tv_usec = 0;		
+		tv.tv_usec = 0;
 		
 		// CHECK FOR AN INCOMING CONNECTION TO ACCEPT:
 		int number_active = select( max_fds, &rfds, NULL, NULL, &tv );
@@ -130,23 +142,24 @@ void establish_connection()
 			printf("select() = %d; pending=%d\n", number_active, connection_pending);
 
 		if (connection_pending) {
-			connfd = accept(listenfd, (struct sockaddr*)&client_addr, &size ); 
-			printf("connection accepted!\n");
-			connection_established = TRUE;
-
-				// For Client Status purpose, let them know we are connected.
-				//strcpy (NLP_Response, "Connected, welcome.");
-				//printf("RESPONSE: %s\n", NLP_Response );
-				//Send_Reply();
+			ServerHandler* sh = new ServerHandler();
+			sh->accept( listenfd );		
+			server_handlers.push_back( sh );
+			
+			int iret1 = pthread_create( &(sh->server_thread_id), NULL, connection_handler, (void*) sh);
+			if (iret1)
+			{
+				fprintf(stderr,"Error - pthread_create() return code: %d\n", iret1 );
+				delete sh;
+				exit(EXIT_FAILURE);
+			}
 		}
-		else 
+/*		else 
 			// ALTERNATELY:  Client memory requested we be the client, initiate connection : 
 			if (REQUEST_client_connect_to_robot)
 			{
 				connection_established = !(connect_to_robot( REQUESTED_client_ip ));
-				REQUEST_client_connect_to_robot = FALSE;
-				
-			}
+				REQUEST_client_connect_to_robot = FALSE;				
+			}*/
 	}
-	//dprintf("Connection established \n");
 }

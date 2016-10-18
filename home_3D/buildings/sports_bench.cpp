@@ -7,7 +7,7 @@
 //
 
 #include "sports_bench.h"
-#include "gl_container.hpp"
+#include "gl_box.hpp"
 #include "cylinder.hpp"
 #include "face_box.h"
 

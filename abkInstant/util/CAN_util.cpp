@@ -106,7 +106,7 @@ void can_interface()
 			// PACK IT!
 			int dataSize = pack_CAN_msg( tmpCAN, buff, bufSize );
 			// SHIP IT!
-			SendTelegram( buff, dataSize );
+			//SendTelegram( buff, dataSize );
 		}
 	}
 	// the other direction is be done in serverthread Parse_CAN_Statement()!

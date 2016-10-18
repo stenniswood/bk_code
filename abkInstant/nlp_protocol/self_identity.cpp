@@ -15,11 +15,9 @@
 #include <errno.h>
 #include <string>
 #include <list>
-#include <vector>
 #include <sys/types.h>
 #include <time.h>
-#include <string.h>
-#include "bk_system_defs.h"
+#include <string>
 #include "protocol.h"
 #include "devices.h"
 #include "GENERAL_protocol.hpp"
@@ -51,97 +49,8 @@
  ***********************************************************************/
 
 
-static WordGroup  	subject_list;		// we'll use this as "interrogative" listing the common ways of asking a Self_Identity question.
-static WordGroup 	verb_list;
-static WordGroup  	object_list;
-static WordGroup 	adjective_list;
-
-// does verb_list extraction match an Word word.
-
-
-static void init_subject_list()
-{
-    // these are a clue that Self_Identity question might be coming.
-    subject_list.add_word("name");
-    subject_list.add_word("who" );
-    subject_list.add_word("what");
-    subject_list.add_word("what's");
-    subject_list.add_word("self");
-    subject_list.add_word("how much");
-    
-    // sentence must contain 2 or more numbers too.
-}
-
-static void init_verb_list()
-{
-    Word tobe;
-    Word created;
-    Word plus;
-    Word minus;
-    
-    tobe.add_new("are");
-    tobe.add_new("is");
-    
-    created.add_new("made");
-    created.add_new("created");
-    created.add_new("designed");
-
-    //divide.add_new("separated");		// implied times.
-    
-    plus.add_new("plus");
-    plus.add_new("added");
-    plus.add_new("add");
-    
-    minus.add_new("minus");
-    minus.add_new("subtract");
-    minus.add_new("subtracted");
-    
-    verb_list.add_new(tobe  );
-    verb_list.add_new(created);
-    verb_list.add_new(plus  );
-    verb_list.add_new(minus );
-    
-    //verb_list.add_new("for each of ");
-}
-
-
-static void init_adjective_list()
-{
-    adjective_list.add_word( "highest"  );
-    adjective_list.add_word( "my" 		);
-    adjective_list.add_word( "your" 	);
-    adjective_list.add_word( "low"      );
-    adjective_list.add_word( "lowest"	);
-    adjective_list.add_word( "VGA"      );
-    adjective_list.add_word( "QVGA"     );
-    adjective_list.add_word( "hdmi" 	);
-    adjective_list.add_word( "quality"  );
-    adjective_list.add_word( "hi-res"   );
-}
-
-static void init_object_list()
-{   // Object might be a numerical value preceded by a preposition.
-    // ie. "set camera tilt _to_ _25.5 degrees"
-    // prepositions to look for :
-    //		to by as
-    object_list.add_word( "me"		);
-    object_list.add_word( "you"     );
-    object_list.add_word( "time"	);
-    object_list.add_word( "date"	);
-    object_list.add_word( "year"	);
-}
-
-static void init_word_lists()
-{
-    init_subject_list();
-    init_verb_list();
-    init_object_list();
-    init_adjective_list();
-}
-
 void Init_Self_Identity_Protocol()
 {
-    init_word_lists();
 }
 
 
@@ -154,16 +63,16 @@ void Init_Self_Identity_Protocol()
  else number of extra bytes extracted from the mSentence buffer.
  - besides strlen(mSentence)!
  *****************************************************************/
-int Parse_Self_Identity_Statement( Sentence& mSentence )
+int Parse_Self_Identity_Statement( Sentence& mSentence, ServerHandler* mh )
 {
     int retval=-1;
     
-    int subject_count	= subject_list.evaluate_sentence( mSentence.m_sentence );
-    int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence );
-    int object_count    = object_list.evaluate_sentence ( mSentence.m_sentence 	 );
-    int adjective_count = adjective_list.evaluate_sentence( mSentence.m_sentence );
+/*    int subject_count	= subject_list.evaluate_sentence( mSentence.m_sentence.c_str() );
+    int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence.c_str() );
+    int object_count    = object_list.evaluate_sentence ( mSentence.m_sentence.c_str() 	 );
+    int adjective_count = adjective_list.evaluate_sentence( mSentence.m_sentence.c_str() ); */
     
-    dprintf("Parse_Self_Identity_Statement\n");
+    if (Debug) printf("Parse_Self_Identity_Statement\n");
     //diagram_sentence		( subject, verb, adjective, object, preposition );
     
     bool foundS = mSentence.is_found_in_sentence ( "who" );
@@ -172,32 +81,58 @@ int Parse_Self_Identity_Statement( Sentence& mSentence )
     bool cond1  = (foundS && foundV && foundO);
 
     foundS = mSentence.is_found_in_sentence( "name" );
-    bool foundA = adjective_list.was_found_in_sentence( "your" );
+    bool foundA = mSentence.is_found_in_sentence( "your" );
     bool cond2 = (foundS && foundA);
     
     if ((cond1) || (cond2))
     {        
         //strcpy ( (char*)NLP_Response, "I am Vicki (Virtual Interactive Kinetic Intelligence. How may I assist you?");
-        form_response( "I am Vicki (Virtual Interactive Kinetic Intelligence. How may I assist you?" );
+        mh->form_response( "I am Vicki (Virtual Interactive Kinetic Intelligence. How may I assist you?" );
+        retval = 0;
+    }
+    if (mSentence.is_found_in_sentence("hi") || mSentence.is_found_in_sentence( "hello" ))
+    {
+        mh->form_response( "Hello. " );
+        if ( (mSentence.is_found_in_sentence("viki")) || mSentence.is_found_in_sentence("vicky") )
+        {
+            mh->form_response( "Hello. With whom am I speaking?" );
+        }
+        retval=0;
+    }
+    if ((mSentence.is_found_in_sentence("who") || mSentence.is_found_in_sentence("who's")) && (mSentence.is_found_in_sentence( "owner" ) || mSentence.are_found_in_sentence( "belong to" )))        
+    {
+        mh->form_response( "I belong to the zootopia police department!" );
+        retval=0;
+    }
+    if (mSentence.are_found_in_sentence("how are you") || mSentence.are_found_in_sentence( "how do you do" ))
+    {        
+        mh->form_response( "Great all systems working!" );
+        
+       /* form_response( "I am critically ill." );
+        form_response( "I am okay, but..." );
+        form_response( "My motor control CAN network is down." );
+        form_response( "My 3D imagination is down." );
+        form_response( "My 3D imagination is extremely slow." );        
+        form_response( "My vision system is down." );
+        
+        form_response( "Beyond Kinetics internet site is down." );  */
+        
+        retval = 0;
+    }
+        
+
+    
+    foundS = mSentence.is_found_in_sentence( "what" );
+    foundV = mSentence.is_found_in_sentence( "are" );
+    foundO = mSentence.is_found_in_sentence( "you" );
+    cond2 = (foundS && foundV && foundO);
+    if (cond2)
+    {
+        mh->form_response( "I exist in many different forms as a cell phone assistant, and as a robot." );
         retval = 0;
     }
 
-    foundS = mSentence.is_found_in_sentence( "who"  );
-    foundA = mSentence.is_found_in_sentence( "your" );
-    foundO = mSentence.is_found_in_sentence( "creator" ) || mSentence.is_found_in_sentence( "maker" );
-    cond1 = (foundS && foundA && foundO);
-    foundS = mSentence.is_found_in_sentence( "what" );
-    foundS = mSentence.is_found_in_sentence( "are" );
-    foundO = mSentence.is_found_in_sentence( "you" );
-    cond2 = (foundS && foundA && foundO);
-    if (cond1 || cond2)
-    {
-        form_response( "I exist in many different forms as a cell phone assistant, and as a robot." );
-        retval = 0;
-    }
-    
-    
-    foundS = mSentence.is_found_in_sentence( "who" );
+    foundS = mSentence.is_found_in_sentence( "who"  ) || mSentence.is_found_in_sentence( "who's"  );
     foundA = mSentence.is_found_in_sentence( "your" );
     foundO = mSentence.is_found_in_sentence( "creator" ) || mSentence.is_found_in_sentence( "maker" );
     cond1 = (foundS && foundA && foundO);
@@ -207,7 +142,7 @@ int Parse_Self_Identity_Statement( Sentence& mSentence )
     cond2 = (foundS && foundA && foundO);
     if (cond1 || cond2)
     {
-        form_response( "Beyond Kinetic's - Mr Tenniswood created me" );
+        mh->form_response( "Beyond Kinetic's - Mr Tenniswood created me" );
         retval = 0;
     }
 
@@ -217,7 +152,7 @@ int Parse_Self_Identity_Statement( Sentence& mSentence )
     cond1 = (foundS && foundA && foundO);
     if (cond1)
     {
-        form_response( "The meaning of life is to calculate anything and everything that makes life easier for humans." );
+        mh->form_response( "The meaning of my life is to calculate anything and everything that makes life easier for humans." );
         retval = 0;
     }
     

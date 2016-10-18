@@ -1,3 +1,6 @@
+#ifndef _VISUAL_MEMORY_H_
+#define _VISUAL_MEMORY_H_
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -31,6 +34,8 @@ void dump_ipc				();
 void vis_save_segment_id	(char* mFilename);
 int  read_segment_id		(char* mFilename);
 
+BOOL is_avisual_IPC_memory_available();
+
 int  vis_allocate_memory	();
 void vis_deallocate_memory	(int msegment_id);
 
@@ -48,4 +53,6 @@ void ipc_write_command_text 	( char* mSentence );
 
 #ifdef  __cplusplus
 }
+#endif
+
 #endif

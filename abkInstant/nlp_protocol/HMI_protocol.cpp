@@ -21,7 +21,6 @@
 //#include "hmi_thread.h"
 #include "nlp_extraction.hpp"
 
-
 #define Debug 0
 
 /* Sample Sentences:
@@ -69,7 +68,7 @@ static void init_verb_list()
 }
 
 
-static void init_adjective_list()
+/*static void init_adjective_list()
 { 
 	adjective_list.push_back( "highest" );
 	adjective_list.push_back( "my" 		);
@@ -79,7 +78,7 @@ static void init_adjective_list()
 	adjective_list.push_back( "best" 	);
 	adjective_list.push_back( "quality" );
 	adjective_list.push_back( "stereo"  );
-}
+}*/
 
 static void init_object_list()
 {   // Object might be a numerical value preceded by a preposition.
@@ -120,7 +119,7 @@ Do the work of the Telegram :
 return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
 *****************************************************************/
-int Parse_HMI_Statement(char* mSentence)
+int Parse_HMI_Statement(const char* mSentence, ServerHandler* mh)
 {
 	dprintf("Parse_HMI_Statement\n");
 	int retval = -1;	
@@ -128,7 +127,7 @@ int Parse_HMI_Statement(char* mSentence)
 	std::string* subject  	= extract_word( mSentence, &subject_list );
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 );
 	std::string* object 	= extract_word( mSentence, &object_list  );
-	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
+	//std::string* adjective	= extract_word( mSentence, &adjective_list  );
 
 	if ((compare_word(subject, "mouse")==0) ||
 		(compare_word(subject, "touch")==0) ||

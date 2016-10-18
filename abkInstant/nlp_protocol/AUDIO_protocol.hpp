@@ -1,6 +1,11 @@
-#ifndef _AUDIO_PROTOCOL_
-#define _AUDIO_PROTOCOL_
+#ifndef _AUDIO_PROTOCOL_H_
+#define _AUDIO_PROTOCOL_H_
 
+#ifdef  __cplusplus
+//extern "C" {
+#endif
+
+#include "serverthread.hpp"
 
 /* Note - Sometimes the Raspberry Pi doesn't play over HDMI anyway.
 		  and doing "raspi-config" doesn't help.
@@ -29,8 +34,11 @@ void audio_cancel	( );
 
 void 	DumpBuffer( BYTE* mbuff, int mlength);
 void 	Init_Audio_Protocol();
-int 	Parse_Audio_Statement( char* mSentence );
+int 	Parse_Audio_Statement( const char* mSentence, ServerHandler* mh );
 
 
+#ifdef  __cplusplus
+//}
+#endif
 
 #endif

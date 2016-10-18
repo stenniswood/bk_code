@@ -7,12 +7,12 @@
 #include <errno.h>
 #include <string.h>
 #include <list>
-#include <vector>
 #include <string.h>
 #include <string>
 #include <sys/types.h>
 #include <time.h> 
 #include <string>
+#include "bk_system_defs.h"
 #include "protocol.h"
 #include "devices.h"
 #include "GENERAL_protocol.hpp"
@@ -22,7 +22,6 @@
 #include "nlp_extraction.hpp"
 #include "client_memory.hpp"
 #include "nlp_sentence.hpp"
-
 
 
 #define Debug 0
@@ -163,8 +162,7 @@ void send_camera()
 	// later on.  Not necessary now!
 	//printf( "Sending my camera over tcpip...\n");
 
-	// Fill in later...!  WaveHeader struct
-	char* header=NULL;
+	// Fill in later...!  WaveHeader struct	
 	CAMERA_tcpip_SendingOn = TRUE;
 
 	nlp_reply_formulated=TRUE;
@@ -188,7 +186,7 @@ void camera_two_way()
 	//printf( "Opening 2 way camera...\n");
 
 	// Fill in with WaveHeader struct !
-	char* header=NULL;
+	//char* header=NULL;
 	CAMERA_tcpip_SendingOn  = TRUE;
 	CAMERA_tcpip_WatchingOn = TRUE;
 	
@@ -215,7 +213,7 @@ return  -1	=> Not handled
 		else number of extra bytes extracted from the mSentence buffer.
 			- besides strlen(mSentence)! 
 *****************************************************************/
-int Parse_Camera_Statement( char* mSentence )							
+int Parse_Camera_Statement( const char* mSentence, ServerHandler* mh )
 {
 	int retval=-1;
 

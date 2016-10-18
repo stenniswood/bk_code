@@ -20,8 +20,6 @@
 //#include "thread_control.h"
 #include "nlp_extraction.hpp"
 
-
-
 #define Debug 0
 
 /***********************************************************************
@@ -110,14 +108,14 @@ Do the work of the Telegram :
 return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
 *****************************************************************/
-int Parse_File_Statement(char* mSentence)			
+int Parse_File_Statement(const char* mSentence, ServerHandler* mh)
 {
 	int retval = -1;
 	dprintf("Parse_FILE_Statement\n");
 	
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
-	std::string* object 	= extract_word( mSentence, &object_list  	);
+	//std::string* object 	= extract_word( mSentence, &object_list  	);
 	//std::string* adjective	= extract_word( mSentence, &adjective_list  );	
 	//int prepos_index      	= get_preposition_index( mSentence );
 

@@ -11,7 +11,7 @@ Tenniswood - 2014
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <string>
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
@@ -21,23 +21,14 @@ Tenniswood - 2014
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
-
-#if (PLATFORM==RPI)
-#include "bcm_host.h"
-#include "ilclient.h"
-#endif
-
 #include "bk_system_defs.h"
-
-//#include "utilities.h"
+#include "utilities.h"
 #include "audio_memory.h"
 #include "AUDIO_device.hpp"
 #include "AUDIO_protocol.hpp"
-
-//#define WORD unsigned short
-
 #include "AUDIO_file_util.h"
 #include "serverthread.hpp"
+
 
 
 #define MAX_USERS     10
@@ -49,7 +40,7 @@ Tenniswood - 2014
 // short or byte?!  byte since deals with header ptr data. 
 static byte 	buffer[AUDIO_OUTPUT_BUFFER_SIZE];		// 4 byte token + 4 byte length
 byte			audio_socket_buffer[AUDIO_OUTPUT_BUFFER_SIZE+100];
-//static int 	 	bytes_rxd=0;
+
 
 struct wav_header wave_header;						// first packet
 BOOL 		start_new_file = TRUE;
@@ -57,8 +48,8 @@ BOOL  		header_received = FALSE;
 char* 		header_position = (char*)&wave_header;	// start at the top
 BOOL		play_started = FALSE;
 
-
-BOOL handle_audio_header( )
+/* We received an audio header over TCP/IP.  Process it. */
+BOOL handle_audio_header( int bytes_rxd )
 {
 	// for some reason sizeof below was giving 2 bytes extra!
 	long int header_length = 38; //sizeof(struct wav_header);
@@ -72,7 +63,7 @@ BOOL handle_audio_header( )
 	{
 		header_received = TRUE;
 		// shift left overs:
-		int shift = (header_position-end_of_header);
+		long shift = (header_position-end_of_header);
 		memcpy(buffer, buffer+shift, bytes_rxd-shift);
 		print_audio_header( &wave_header );
 		
@@ -90,7 +81,9 @@ BOOL handle_audio_header( )
 }
 
 /******************************************************
-* Process 
+* Audio buffer received over tcp/ip - process as requested
+*  (save to file, put into IPC memory, and play on speaker)
+*
 * return true 	- The telegram was handled.
 *        false  - Not known token
 ******************************************************/
@@ -109,7 +102,6 @@ BOOL handle_audio_data( BYTE* mAudioData, int mLength )
 			OpenAudioFile( fn );
 			start_new_file = FALSE;
 		} else {
-			//AppendAudioData( buffer, bytes_rxd );
 			AppendAudioData( (char*)mAudioData, mLength );
 		}
 	}
@@ -117,14 +109,13 @@ BOOL handle_audio_data( BYTE* mAudioData, int mLength )
 	// Put into audio_memory (for avisual or other app)
 	if (ipc_memory_aud)
 	{
-		printf(".");	
-		//audio_ipc_write_buffer( (short*)buffer, bytes_rxd>>1 );
+		printf(".");
 		audio_ipc_write_buffer( (short*)mAudioData, mLength>>1 );
 	}
 
 	if (AUDIO_tcpip_ListeningOn)
 	{
-		int audio_dest = 0;
+		//int audio_dest = 0;
 		header_received = TRUE;
 		play_started	= TRUE;
 		if ((header_received) && (play_started==FALSE))		
@@ -188,31 +179,25 @@ int FIR_length=255;
 	delete nlp_message;	
 
 */
-void send_audio_message( short* mAudioData, int mLength )
+void send_audio_message( ServerHandler* mh, short* mAudioData, int mLength )
 {
 	static long int total_bytes_transmitted = 0;
 	
 	char nlp_message[40];
 	sprintf( nlp_message, "new audio_buffer %6d", mLength*2 );
-	SendTelegram( (unsigned char*)nlp_message, strlen(nlp_message)+1 );
-		
-	SendTelegram( (unsigned char*)mAudioData, mLength*2 );
+    size_t len =strlen(nlp_message)+1;
+	mh->SendTelegram( (unsigned char*)nlp_message, (int)len );
+	mh->SendTelegram( (unsigned char*)mAudioData, mLength*2 );
+    
 	total_bytes_transmitted += mLength*2;
 	printf("total_bytes_transmitted=%ld\n", total_bytes_transmitted );
 }
 
-/* 	Called from server_thread, when there is no incoming data.
-	This function is polled to send audio data when available and
-	the data is requested.
+/* 	Called from server_thread (transmit_queued_entities() ), when there is no incoming data.
+	This function is polled to send audio data when available and the data is requested.
 */
-void audio_interface( )
+void audio_interface( ServerHandler* mh )
 {
-	struct sCAN* tmpCAN = NULL;
-	int    bufSize = 255;
-	unsigned char  buff[255];
-	static long int	counter =0;
-
-				
 	if (AUDIO_tcpip_SendingOn)
 	{
 	    //printf("Audio_SendingOn is ON!\n");	
@@ -230,14 +215,14 @@ void audio_interface( )
 	    	} */
 	    }
 	    //else
-        if (sending_audio_file_fd)
+        if (sending_audio_file_fd)  /* Reading a .wav file and transmitting over tcp/ip. */
 	    {
 			// file position will be maintained automatically as long as the file descriptor is
 			// not destroyed.
 			read_chunk     ( audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE );
 			if ( AUDIO_tcpip_SendingMuted )
 				MuteBuffer( (byte*)audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE/2 );
-			SendTelegram( audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE );
+			mh->SendTelegram( audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE );
 	    }
 	    else
 	    {
@@ -256,7 +241,7 @@ void audio_interface( )
 					else if ((AUDIO_tcpip_ListeningOn) && (use_fir))
 						audio_subtract( (short*)audio_socket_buffer, (short*)buffer, AUDIO_OUTPUT_BUFFER_SIZE/2 ,
 										FIR, FIR_length);	
-					SendTelegram( audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE );
+					mh->SendTelegram( audio_socket_buffer, AUDIO_OUTPUT_BUFFER_SIZE );
 				}
 			}
 		}

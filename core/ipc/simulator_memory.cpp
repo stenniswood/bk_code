@@ -231,17 +231,17 @@ bool is_sim_ipc_memory_available()
 {
     struct shmid_ds buf;			// shm data descriptor.
     
-    dprintf("Checking for simulator IPC memory... ");
-    dprintf( "reading segment id: %s\n", sim_segment_id_filename );
+    Dprintf("Checking for simulator IPC memory... ");
+    Dprintf( "reading segment id: %s\n", sim_segment_id_filename );
     
     // First see if the memory is already allocated :
     simulator_segment_id = sim_read_segment_id( sim_segment_id_filename );
     int retval = shmctl(simulator_segment_id, IPC_STAT, &buf);
     if (retval==-1) {
-        dprintf("Sim memory not found. %s\n", strerror(errno) );
+        Dprintf("Sim memory not found. %s\n", strerror(errno) );
         return false;
     }
-    dprintf( " Found segment, size=%ld and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+    Dprintf( " Found segment, size=%ld and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
     
     if ((buf.shm_segsz > 0)			// segment size > 0
         && (buf.shm_nattch >= 1))	// number of attachments.

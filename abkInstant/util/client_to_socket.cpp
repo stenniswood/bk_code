@@ -31,19 +31,20 @@
 #include "CAN_protocol.hpp"
 #include "AUDIO_protocol.hpp"
 #include "CAMERA_protocol.hpp"
-#include "math_protocol.hpp"
+#include "math_protocol2.hpp"
 #include "self_identity.hpp"
 
 #include "nlp_extraction.hpp"
 #include "prefilter.hpp"
+//#include "client.hpp"
 
 
 using namespace std;
 
 //#define NLP_DEBUG 1
-
-bool ClientRequestPending = false;
-char* CLIENT_Response=NULL;
+bool connection_established = false; // replace this with ServerHandler info.
+bool ClientRequestPending   = false;
+char* CLIENT_Response       = NULL;
 
 // These should be classes with synonyms:
 static std::list<std::string>  	subject_list;
@@ -151,21 +152,11 @@ static std::string* object  = NULL;
 static std::string* adjective=NULL;
 static std::string* preposition=NULL;
 
-static BOOL extract_nlp_words()
-{
-    
-/*    subject   = extract_word( mSentence, &subject_list    );
-    verb 	  = extract_word( mSentence, &verb_list 	  );
-    object    = extract_word( mSentence, &object_list     );
-    adjective = extract_word( mSentence, &adjective_list  );
-    diagram_sentence		( subject, verb, adjective, object );  */
-    return TRUE;
-}
-
 void disconnect_from_robot()
 {
     connection_established = false;
-    close(connfd);
+    // Put back in when way to pass connfd is worked out.
+    //close(connfd);
 }
 
 /* Note the client can do any of these:
@@ -176,13 +167,12 @@ void disconnect_from_robot()
 	HMI							
 	CAN							
 */
-extern int start_amon();	// extern from instant_main.cpp
-void handle_client_request()
+void handle_client_request(ServerHandler* mh)
 {
     char  relay_buffer[255];
-    int   length=0;
+    size_t   length=0;
 
-	printf("handle_client_request() - \n");
+	printf("handle_client_request() - ");
 	if (ipc_memory_client==NULL)	return;
 	ClientRequestPending = true;
     char* sentence = ipc_memory_client->Sentence;
@@ -191,8 +181,8 @@ void handle_client_request()
     Sentence theSentence(sentence);
     if (theSentence.is_voice_response())  return ;      // no action!
     
-    Parse_Statement( sentence );        // GENERAL Protocol.
-
+    // Sjt Put back in when way of passing bytes_rxd,socket_buffer is available!
+    //Parse_Statement( sentence, bytes_rxd, socket_buffer );        // GENERAL Protocol
     
     bool found = theSentence.is_found_in_sentence( "text" );
 	//result = compare_word(subject, "text");
@@ -201,14 +191,14 @@ void handle_client_request()
 		// Pass the request to the other end:
 		strcpy (relay_buffer, ipc_memory_client->Sentence );
 		length = strlen(relay_buffer);
-		SendTelegram( (BYTE*)relay_buffer, length);
+		mh->SendTelegram( (BYTE*)relay_buffer, (int)length);
 	}
 
    found= theSentence.is_found_in_sentence( "disconnect" );
 //	result = compare_word(verb, "disconnect");
     if (found) {
 		disconnect_from_robot( );
-        form_response("okay, disconnected");
+        mh->form_response("okay, disconnected");
     }
    found= theSentence.is_found_in_sentence( "sequencer" );
 	if ( found )
@@ -216,7 +206,7 @@ void handle_client_request()
 		// Pass the request to the other end:
 		strcpy (relay_buffer, ipc_memory_client->Sentence );
 		length = strlen(relay_buffer);
-		SendTelegram( (BYTE*)relay_buffer, length);
+		mh->SendTelegram( (BYTE*)relay_buffer, (int)length);
 	}
     
    found= theSentence.is_found_in_sentence( "connect" );
@@ -238,11 +228,11 @@ void handle_client_request()
 		{
 			// we can't get to it
 			ClientRequestPending = false;	// don't want to wait for a response from other end.
-			CLIENT_Response= "No connection established!";
+			CLIENT_Response      = "No connection established!";
 			// Positive response will come from the other end, in General_Protocol.
 		} else {
 			ClientRequestPending = false;	// don't want to wait for a response from other end.
-			CLIENT_Response= "Connected Welcome!";		
+			CLIENT_Response      = "Connected Welcome!";
 		}
 	}
    found= theSentence.is_found_in_sentence( "receive" );
@@ -265,14 +255,16 @@ void handle_client_request()
 		    {
 				// No amon at this end.
 				int attached = can_connect_shared_memory(TRUE);	// allocate if not already.
-				CAN_ListeningOn   = TRUE;
-				set_tcp_receiving_flag_ipc_can();
-	
-				printf("Requesting data... (ie. 'send can')\n");
-				
-				strcpy (relay_buffer, "send CAN");
-				int length = strlen(relay_buffer);
-				SendTelegram( (BYTE*)relay_buffer, length);
+                if (attached) {
+                    CAN_ListeningOn   = TRUE;
+                    set_tcp_receiving_flag_ipc_can();
+        
+                    printf("Requesting data... (ie. 'send can')\n");
+                    
+                    strcpy (relay_buffer, "send CAN");
+                    size_t length = strlen( relay_buffer );
+                    mh->SendTelegram( (BYTE*)relay_buffer, (int)length );
+                }
 			}
 			found = theSentence.is_found_in_sentence( "audio" );
 //			result = compare_word(subject, "audio");
@@ -285,7 +277,7 @@ void handle_client_request()
 				strcpy (relay_buffer, "send audio to me");
 				printf("Relaying: %s\n", relay_buffer);
 				length = strlen(relay_buffer);
-				SendTelegram( (BYTE*)relay_buffer, length);
+				mh->SendTelegram( (BYTE*)relay_buffer, length);
 					
 			}
 			found = theSentence.is_found_in_sentence( "camera" );
@@ -298,7 +290,7 @@ void handle_client_request()
 				// Pass the request to the other end:
 				strcpy (relay_buffer, "send camera to me");
 				length = strlen(relay_buffer);
-				SendTelegram( (BYTE*)relay_buffer, length);
+				mh->SendTelegram( (BYTE*)relay_buffer, length);
 			
 		    }
            found= theSentence.is_found_in_sentence( "file" );
@@ -309,7 +301,7 @@ void handle_client_request()
 				strcpy (relay_buffer, "send file:  ");
 				strcat (relay_buffer, "filename");
 				length = strlen(relay_buffer);
-				SendTelegram( (BYTE*)relay_buffer, length);
+				mh->SendTelegram( (BYTE*)relay_buffer, length);
 		    }
 		}
 	}
@@ -345,13 +337,13 @@ void handle_client_request()
 				send_camera();
 				strcpy (relay_buffer, "sending camera to you.");
 				length = strlen(relay_buffer);
-				SendTelegram( (BYTE*)relay_buffer, length);				    
+				mh->SendTelegram( (BYTE*)relay_buffer, length);
 			}
 			else if (cond_2)
 			{
 				strcpy 	   (relay_buffer, "send camera to me.");
 				length = strlen(relay_buffer);
-				SendTelegram( (BYTE*)relay_buffer, length);
+				mh->SendTelegram( (BYTE*)relay_buffer, length);
 			}
 		}
 	}
@@ -366,7 +358,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, ipc_memory_client->Sentence);
 			length = strlen(relay_buffer);
-			SendTelegram( (BYTE*)relay_buffer, length);
+			mh->SendTelegram( (BYTE*)relay_buffer, length);
 		}
 	}
 	// 
@@ -379,7 +371,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, ipc_memory_client->Sentence);
 			length = strlen(relay_buffer);
-			SendTelegram( (BYTE*)relay_buffer, length);
+			mh->SendTelegram( (BYTE*)relay_buffer, length);
 		}
 	}
 	
@@ -406,8 +398,8 @@ void handle_client_request()
 			// this is the "token" to indicate can messages are coming.
 
             strcpy (relay_buffer, "receive CAN");
-            int length = strlen(relay_buffer);
-            SendTelegram( (BYTE*)relay_buffer, length);
+            size_t length = strlen(relay_buffer);
+            mh->SendTelegram( (BYTE*)relay_buffer, (int)length);
             //Cmd_client_CAN_Start();		// in core/wifi/client.c
 		}
 		result = compare_word(subject, "audio");
@@ -417,7 +409,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "receive audio ");
 			length = strlen(relay_buffer);
-			SendTelegram( (BYTE*)relay_buffer, length);
+			mh->SendTelegram( (BYTE*)relay_buffer, length);
 		    
 		}
 		result = compare_word(subject, "camera");			
@@ -428,7 +420,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "receive camera ");
 			length = strlen(relay_buffer);
-			SendTelegram( (BYTE*)relay_buffer, length);
+			mh->SendTelegram( (BYTE*)relay_buffer, length);
 		}
 		result = compare_word(subject, "file");			
 		if (result==0)
@@ -437,7 +429,7 @@ void handle_client_request()
 				strcpy (relay_buffer, "send file:  ");
 				strcat (relay_buffer, "filename");
 				length = strlen(relay_buffer);
-				SendTelegram( (BYTE*)relay_buffer, length);
+				mh->SendTelegram( (BYTE*)relay_buffer, length);
 
 		}
 		result = compare_word(subject, "mouse");			
@@ -462,7 +454,7 @@ void handle_client_request()
 			//char coBuff[127];
 			strcpy ((char*)relay_buffer, "stop CAN");
 			length = strlen( (char*)relay_buffer );
-			SendTelegram( (BYTE*)relay_buffer, length);
+			mh->SendTelegram( (BYTE*)relay_buffer, length);
 			CAN_SendingOn = FALSE;
 			CAN_ListeningOn = FALSE;			
 			clear_tcp_transmitting_flag_ipc_can();
@@ -475,7 +467,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "stop audio ");
 			length = strlen(relay_buffer);
-			SendTelegram( (BYTE*)relay_buffer, length);
+			mh->SendTelegram( (BYTE*)relay_buffer, length);
 		    
 		}
 		result = compare_word(subject, "camera");			
@@ -487,7 +479,7 @@ void handle_client_request()
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "stop camera ");
 			length = strlen(relay_buffer);
-			SendTelegram( (BYTE*)relay_buffer, length);		    
+			mh->SendTelegram( (BYTE*)relay_buffer, length);
 		}
 		result = compare_word(subject, "file");			
 		if (result==0)

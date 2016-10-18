@@ -1,7 +1,7 @@
 
 #include <vector>
 #include "vector.hpp"
-#include "Sim3D_defines.h"
+#include "sequencer_memory.hpp"
 
 
 #define IPC_KEY_SIM           0x04D2        // 1234 in decimal!
@@ -22,12 +22,16 @@ public:
     }
 };
 
+#ifndef STCOORDINATE
+#define STCOORDINATE 1
 struct Coordinate
 {
     float x;
     float y;
     float z;
 };
+#endif
+
     
 #define COMMAND_MOVE_OBJECT          0x101       // Move an item in the 3D space
 #define COMMAND_WHERE_IS             0x102       // name room/location where an object is in 3D space

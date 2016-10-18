@@ -7,7 +7,7 @@
 #ifndef _TXT_CONTAINER_
 #define _TXT_CONTAINER_
 
-#include "gl_container.hpp"
+#include "gl_box.hpp"
 #include <string>
 #include "imageloader.h"
 #include <opencv/cv.h>

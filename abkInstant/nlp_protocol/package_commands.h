@@ -37,7 +37,7 @@ int Req_CAN_mask( BYTE* mBuffer, BYTE mPin, boolean mHigh				 );
 int Req_Picture ( BYTE* mBuffer, BYTE* mImage, int mWidth, int mHeight 	 );
 int Req_Audio   ( BYTE* mBuffer, short* mData, int mChannels, int mLength);
 int Req_Text_Msg( BYTE* mBuffer, char*  mMessage						 );
-//void SendTelegram( BYTE* mBuffer, int mSize );
+void SendTelegram( BYTE* mBuffer, int mSize );
 
 
 #ifdef  __cplusplus

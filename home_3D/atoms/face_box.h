@@ -10,7 +10,7 @@
 #define __home3D__face_box__
 
 #include <stdio.h>
-#include "gl_container.hpp"
+#include "gl_box.hpp"
 #include <string>
 #include "imageloader.h"
 #include <opencv/cv.h>

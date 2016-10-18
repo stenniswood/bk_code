@@ -2,7 +2,6 @@
 #include <list>
 #include <string.h>
 #include <string>
-#include <vector>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -20,12 +19,6 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "nlp_extraction.hpp"
-#include "prefilter.hpp"
-#include "client_to_socket.hpp"
-#include "client_memory.hpp"
-#include "nlp_sentence.hpp"
-
 #include "serverthread.hpp"
 #include "GENERAL_protocol.hpp"
 #include "AUDIO_protocol.hpp"
@@ -41,9 +34,21 @@
 #include "self_identity.hpp"
 #include "ThreeD_object_protocol.hpp"
 #include "easter_eggs_protocol.hpp"
+#include "adrenaline_protocol.h"
 
+#include "nlp_extraction.hpp"
+#include "prefilter.hpp"
+#include "client_to_socket.hpp"
+#include "client_memory.hpp"
+#include "nlp_sentence.hpp"
 
+#include "simulator_memory.h"
+#include "vision_memory.h"
+#include "visual_memory.h"
+#include "client_memory.hpp"
 
+#include "family_relationships.hpp"
+#include "specific_restaurants.hpp"
 
  
 
@@ -102,7 +107,7 @@ return  TRUE = GPIO Telegram was Handled by this routine
 //static std::list<struct vsObject*>  subject_list;
 static std::list<std::string> 		verb_list;
 //static std::list<struct vsObject*>  object_list;
-
+void*      m_verbal_focus=0;
 
 void Init_General_Protocol( )
 {
@@ -113,16 +118,23 @@ void Init_General_Protocol( )
     Init_HMI_Protocol();
     Init_Math_Protocol();
     
-    Init_Robot_Legs_Protocol();
+    //Init_Robot_Legs_Protocol();
     Init_Self_Identity_Protocol();
-    Init_Robot_Legs_Protocol();
     Init_Sequencer_Protocol();
+    Init_Calendar_Protocol();
     
+    Init_Family_Protocol();
+    Init_Restaurants_Order_Protocol();
     init_preposition_list();
+    Init_Adrenaline_Protocol();
+
 }
 
-
 extern int connfd;
+/*void form_response(std::string& mStringToSend)
+{
+    form_response( mStringToSend.c_str() );
+}
 void form_response(const char* mTextToSend)
 {
     strcpy( NLP_Response, mTextToSend);
@@ -130,7 +142,56 @@ void form_response(const char* mTextToSend)
     ClientRequestPending = true;
     nlp_reply_formulated = TRUE;
 }
+void append_response(const char* mTextToAdd)
+{
+    size_t len    = strlen(NLP_Response);
+    size_t len_in = strlen( mTextToAdd );
+    if ((len+len_in) < sizeof(NLP_Response))
+        strcat( NLP_Response, mTextToAdd );
+    CLIENT_Response      = NLP_Response;
+    ClientRequestPending = true;
+    nlp_reply_formulated = TRUE;
+} */
 
+int pass_to_aux_apps( Sentence& theSentence, ServerHandler* mh )
+{
+	int result=0;
+    // Pass to Simulator : 
+    if ( is_sim_ipc_memory_available() )
+    {
+        /* New method is to pass the string into the shared memory.  Simulator
+           software app will process the NLP and return a string.               
+           Yes this means home3D will need files:
+                    ThreeD_object_protocol,
+                    nlp_sentence,
+                    super_string,
+                    (maybe more)
+         */
+        sim_ipc_write_sentence( theSentence.m_sentence.c_str() );
+        result = sim_wait_for_response();
+        if (result)
+			return theSentence.m_sentence.length();
+    }
+    
+    // Pass to "xeyes"    
+    if (is_eyes_ipc_memory_available() )
+    {
+    	eyes_write_client_command( theSentence.m_sentence.c_str() );
+    	eyes_wait_for_acknowledgement();
+    	//result = eyes_wait_for_response();    	    	
+		return theSentence.m_sentence.length();
+    }
+    
+    // Pass to "avisual"
+    if ( is_avisual_IPC_memory_available() )
+    {
+    	ipc_write_command_text 	( theSentence.m_sentence.c_str() );
+    	// ipc_write_wait_for_response();    	
+   		//result = Parse_adrenaline_statement( theSentence, mh );
+	    return (theSentence.m_sentence.length());
+	}
+
+}
 
 /*****************************************************************
 Do the work of the Telegram :
@@ -138,18 +199,19 @@ PARAMS :
 	mSentence 		- pointer to a buffer which begins with text (data may follow end of string).
 	mbegin_index	- index within the mSentence buffer (up to 5MB)
 
-return  TRUE = GPIO Telegram was Handled by this routine
+Return :   Pointer to next part of the telegram (mSentence).
+ 
+//return  TRUE = GPIO Telegram was Handled by this routine
 		FALSE= GPIO Telegram not Handled by this routine
 *****************************************************************/
-char* Parse_Statement(char*  mSentence)
+const char* Parse_Statement(const char* mSentence, ServerHandler* mh )
 {	
 	if (mSentence==NULL) return mSentence; 
 	printf( "Sentence:|%s|\n", mSentence );
-
     Sentence theSentence( mSentence );
-    
+
     bool vr = theSentence.is_voice_response();
- 	char* end_of_telegram = mSentence + strlen(mSentence) +1/*nullterminator*/;
+ 	const char* end_of_telegram = mSentence + strlen(mSentence) +1 /*nullterminator*/;
 	int result =-1;	
 	if (vr)
 	{
@@ -160,70 +222,75 @@ char* Parse_Statement(char*  mSentence)
 			cli_ipc_write_response( mSentence, "instant" );	
 			ClientRequestPending = false;
 		}
-		nlp_reply_formulated = false;
 		return end_of_telegram;
 	}
 
 	if (strcmp(mSentence, "I don't understand. Ignoring.")==0)
 		return end_of_telegram;
     
-    result = Parse_Calendar_Statement( theSentence );
+    result = Parse_Calendar_Statement( theSentence, mh );
     if (result>=0)          return (end_of_telegram + result);
 
-    result = Parse_Math_Statement( theSentence );
+    result = Parse_Math_Statement  ( theSentence, mh );
 	if (result>=0)          return (end_of_telegram + result);
 
-    result = Parse_Self_Identity_Statement( theSentence );
+    result = Parse_Self_Identity_Statement( theSentence, mh );
     if (result>=0)          return (end_of_telegram + result);
 
-    result = Parse_Robot_Legs_Statement( theSentence );
-    if (result>=0)          return (end_of_telegram + result);
+//    result = Parse_Robot_Legs_Statement( theSentence, mh  );
+//    if (result>=0)          return (end_of_telegram + result);
 
-    result = Parse_Robot_Arms_Statement( theSentence );
-    if (result>=0)          return (end_of_telegram + result);
+//    result = Parse_Robot_Arms_Statement( theSentence, mh );
+//    if (result>=0)          return (end_of_telegram + result);
 
-    result = Parse_EasterEggs_Statement( theSentence );
-    if (result>=0)          return (end_of_telegram + result);
-
-    result = Parse_ThreeD_Statement( theSentence );
+    result = Parse_EasterEggs_Statement( theSentence, mh );
     if (result>=0)          return (end_of_telegram + result);
     
-    result = Parse_Sequencer_Statement( theSentence );
+    result = Parse_Sequencer_Statement( theSentence, mh );
     if (result>=0)          return (end_of_telegram + result);
-    
     
 	// AUDIO:
-	result = Parse_Audio_Statement( mSentence );
+	result = Parse_Audio_Statement( mSentence, mh );
 	if (result>=0)          return (end_of_telegram + result);
 
-	result = Parse_Camera_Statement( mSentence );
+	result = Parse_Camera_Statement( mSentence, mh );
 	if (result>=0)			return (end_of_telegram + result);
 
-	result = Parse_CAN_Statement( theSentence ); 
+	result = Parse_CAN_Statement( mSentence, mh );
 	if (result>=0)			return (end_of_telegram + result);
 	
-	result = Parse_File_Statement  ( mSentence );	/* ie. File transfer, directory, backup, etc. */		
+	result = Parse_File_Statement  ( mSentence, mh );	/* ie. File transfer, directory, backup, etc. */
 	if (result>=0)			return (end_of_telegram + result);
 		
-	result = Parse_HMI_Statement   ( mSentence ); 	/* ie mouse, keyboard, PS3 controller, etc. */	
+	result = Parse_HMI_Statement   ( mSentence, mh ); 	/* ie mouse, keyboard, PS3 controller, etc. */
 	if (result>=0)          return (end_of_telegram + result);
     
-/*
-	result = Parse_IMAGE_Statement   ( mSentence ); 	
+    result = Parse_Family_Statement( theSentence, mh );
+    if (result>=0)          return (end_of_telegram + result);
+
+    result = restaurants.Parse_order_statement( theSentence, mh );
+    if (result>=0)          return (end_of_telegram + result);
+
+// REMOVED B/C IS IN SIMULATOR AND NOT INHERENT FEATURE OF INSTANT.  
+//    result = Parse_ThreeD_Statement( theSentence, mh );
+//    if (result>=0)          return ( end_of_telegram + result);
+
+    // Pass to "avisual"
+    //result = Parse_adrenaline_statement( theSentence, mh );
+    //if (result>=0)          return (end_of_telegram + result);
+    
+    pass_to_aux_apps( theSentence, mh );
+
+/*  result = Parse_IMAGE_Statement   ( mSentence );
 	if (result>=0)	
 		return (end_of_telegram + result);
 	result = Parse_GPIO_Statement   ( mSentence ); 	
 	if (result>=0)	
 		return (end_of_telegram + result);
-
 */
 
 	// Not handled:
-	nlp_reply_formulated = TRUE;
-	strcpy (NLP_Response, "I don't understand. Ignoring.");		
+    mh->form_response("I don't understand. Ignoring.");
 	return end_of_telegram;
 }
-
-
-
 

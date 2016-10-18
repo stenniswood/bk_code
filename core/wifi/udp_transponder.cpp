@@ -144,7 +144,7 @@ void* udp_transponder_function(void* msg)
   server_addr.sin_port   = htons(PORT_NUM);           // Port num to use
 //server_addr.sin_addr.s_addr = inet_addr("255.255.255.255"); // Need this for Broadcast
   server_addr.sin_addr.s_addr = inet_addr("192.168.2.255"); // Need this for Broadcast
-  printf ("Broadcast Address=%s\n", broadcast_addr );
+  //printf ("Broadcast Address=%s\n", broadcast_addr );
   
   // Set socket to use MAC-level broadcast
   iOptVal = 1;

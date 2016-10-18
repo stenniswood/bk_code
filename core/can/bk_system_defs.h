@@ -36,13 +36,13 @@
 //#define cli()  __asm__ __volatile__ ("cli" ::)
 //#define sei()  __asm__ __volatile__ ("sei" ::)
 
-#ifndef min
+/*#ifndef min
 #define min(a,b) ((a)<(b)?(a):(b))
 #endif
 
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
-#endif
+#endif */
 
 #define CRYSTAL_FREQ 16000000
 #define F_CPU CRYSTAL_FREQ

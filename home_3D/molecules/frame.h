@@ -10,7 +10,7 @@
 #define __home3D__frame__
 
 #include <stdio.h>
-#include "gl_container.hpp"
+#include "gl_box.hpp"
 #include "glMolecule.h"
 
 

@@ -11,9 +11,10 @@
 
 #include <stdio.h>
 #include "nlp_sentence.hpp"
+#include "serverthread.hpp"
 
 void Init_EasterEggs_Protocol  ( );
-int  Parse_EasterEggs_Statement( Sentence& mSentence );
+int  Parse_EasterEggs_Statement( Sentence& mSentence, ServerHandler* mh );
 
 
 #endif /* easter_eggs_protocol_hpp */

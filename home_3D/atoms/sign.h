@@ -13,7 +13,7 @@
 #include <string>
 #include "gl_atom.hpp"
 #include "Texture.hpp"
-#include "gl_container.hpp"
+#include "gl_box.hpp"
 #include "glMolecule.h"
 #include "face_box.h"
 

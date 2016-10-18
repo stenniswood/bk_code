@@ -11,9 +11,10 @@
 
 #include <stdio.h>
 #include "nlp_sentence.hpp"
+#include "serverthread.hpp"
 
 void Init_Self_Identity_Protocol  ( );
-int  Parse_Self_Identity_Statement( Sentence& mSentence );
+int  Parse_Self_Identity_Statement( Sentence& mSentence, ServerHandler* mh );
 
 
 

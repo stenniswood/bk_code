@@ -13,7 +13,7 @@
 #include "cylinder.hpp"
 #include "txt_cylinder.h"
 #include "extrusion.hpp"
-#include "gl_container.hpp"
+#include "gl_box.hpp"
 #include "paper.hpp"
 #include "painting.h"
 #include "sign.h"

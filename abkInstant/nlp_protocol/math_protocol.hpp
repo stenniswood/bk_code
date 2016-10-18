@@ -1,12 +1,11 @@
-#ifndef _MATH_PROTOCOL_HPP
-#define _MATH_PROTOCOL_HPP
+
 
 #include "nlp_sentence.hpp"
+#include "serverthread.hpp"
 
 
 void Init_Math_Protocol  ( );
-int  Parse_Math_Statement( Sentence& mSentence );
+int  Parse_Math_Statement( Sentence& mSentence, ServerHandler* mh );
 
 
 
-#endif

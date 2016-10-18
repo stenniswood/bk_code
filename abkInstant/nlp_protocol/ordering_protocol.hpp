@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+
+#include "super_string.hpp"
 #include "nlp_sentence.hpp"
 
 
@@ -66,7 +68,6 @@ public:
     int     user_selected_size;
     SuperString topping_ids;        // ',' separated lists of id's into the size_options table.
     vector<Topping> m_toppings;     // may have multiple rows in the size_options table.
-    
     // toppings will be MenuItem objects.
 };
 
@@ -77,69 +78,13 @@ public:
     ~Menu();
         
     void    ask_size            ( MenuItem& mItem );
-    void    parse_size_response ( MenuItem& mItem, Sentence& mSentence  );
-    
-    int Parse_Menu( Sentence& mSentence, bool mAddToCart = true );      // scan all catagories.
+    void    parse_size_response ( MenuItem& mItem, Sentence& mSentence  );    
+    int		Parse_Menu( Sentence& mSentence, bool mAddToCart = true );      // scan all catagories.
     
     vector<MenuItem>   m_items;
 };
 
-class Restaurant                /* Everything Restaurant */
-{
-public:
-    Restaurant ();
-    ~Restaurant();
-    
-    void    extract_result           (  );
-    void    sql_load                 ( string mRestaurantOfficialName );
-    void    retrieve_menu            (  );
-    int     Parse_order_statement    ( Sentence& mSentence );
-    void    what_kind_of__do_you_have( string mcatagory );
-    void    how_much_is              ( Sentence& mSentence, string mcatagory );
-    
-    int                     m_id;
-    std::string             m_offical_name;
-    std::string             m_restaurant_name;
-    std::string             m_website;
-    std::string             m_order_url;
-    float                   m_frequency;
-    std::string             m_welcome_text;
-    Menu                    m_menu;
-    vector<std::string>     m_locations;
-    //int                     m_has_verbal_focus;
-};
-
-
-/* will be my_order object! */
-class RestaurantOrder
-{
-public:
-    RestaurantOrder();
-    ~RestaurantOrder();
-    
-    void    reset();
-    void    anything_else( );
-    int     is_order_complete        ( Sentence& mSentence );
-    int     is_request_order_readback( Sentence& mSentence );
-
-    vector<MenuItem>::iterator* find_order_item_in_sentence( Sentence& mSentence);
-    void        add_to_order        ( MenuItem mItem );
-    void        remove_item_in_order( string mItem );
-    int         cancel_item         ( Sentence& mSentence );
-    void        read_back_order     (  );
-    void        print_order         (  );
-    
-    vector<MenuItem>  m_order;
-    bool    q_to_user_pending;
-    MenuItem    q_item_pending;
-    
-    bool    orderFoundComplete;
-    int     just_read_back;
-};
-
-
-
-class RestaurantCluster                /* Everything Restaurant */
+/*class RestaurantCluster                * Everything Restaurant *
 {
 public:
     RestaurantCluster ();
@@ -152,16 +97,15 @@ public:
     void    list_voice_enabled_restaurants( );
     void    what_kind_of__do_you_have( string mcatagory );
     void    how_much_is              ( Sentence& mSentence, string mcatagory );
-    
-    
+
     vector<Restaurant>      m_restaurants;
     int     m_focus_index;
-};
+}; */
 
 
 void    connect_menus_db        ();
-string  find_known_restaurants  ();
-void    retrieve_menu           ( Restaurant& mRest, char* mRestaurant);
+//string  find_known_restaurants  ();
+//void    retrieve_menu           ( Restaurant& mRest, char* mRestaurant);
 
 
 

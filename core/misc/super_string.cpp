@@ -10,9 +10,9 @@
 #include <math.h>
 #include <regex>
 #include <iostream>
-
+#include "bk_system_defs.h"
 #include "super_string.hpp"
-#include "global.h"
+
 
 #define Debug 0
 
@@ -22,7 +22,7 @@ SuperString& SuperString::operator=(const SuperString& mOp)
     string::operator=( *(string*)(&mOp) );
     m_regex             = mOp.m_regex;
     regex_matches       = mOp.regex_matches;
-    m_wordlist_choices  = mOp.m_wordlist_choices;   // For any & all word lists
+    m_wordlist_choices  = mOp.m_wordlist_choices;         // For any & all word lists.
 
     m_split_words                = mOp.m_split_words;
     m_split_words_original_index = mOp.m_split_words_original_index;
@@ -167,7 +167,7 @@ bool SuperString::is_nth_word_a_number( int mIndex )
 {
     if (mIndex>=m_split_words.size()) return false;
     if (m_split_words[mIndex].length()==0) return false;
-    Dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str() );
+    dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
     
     size_t length = m_split_words[mIndex].length();
     for (int i=0; i<length; i++)
@@ -185,7 +185,7 @@ bool SuperString::is_nth_word_a_number_nd    ( int mIndex )
 {
     if (mIndex>=m_split_words.size()) return false;
     
-    Dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
+    dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
     
     size_t length = m_split_words[mIndex].length();
     for (int i=0; i<length; i++)
@@ -310,9 +310,7 @@ int SuperString::compare_wordlist( SuperString mWord, int& mSelectedWord, int st
 
 void SuperString::replace_all( char mChar, char mDest )
 {
-	char text[255];
-	strcpy (text, c_str() );
-    char* ptr = strchr( text, mChar );
+    char* ptr = (char*)strchr( (char*)c_str(), mChar );
     while (ptr)
     {
         *ptr = mDest;
@@ -320,27 +318,30 @@ void SuperString::replace_all( char mChar, char mDest )
     }
 }
 
+int SuperString::regex_reduce()
+{
+    string tmp = regex_matches[0];
+    size_t len = tmp.length();
+
+    size_t pos = find( tmp );
+    if (pos != string::npos)
+    {
+        erase( pos, len );
+        return 1;
+    }
+    return 0;
+}
 int SuperString::regex_find( string&  mRegexpression, vector<int>* answers, vector<int>* remove_wi )
 {
     m_regex = mRegexpression;
     regex regex  ( m_regex );
     regex_search ( *this, regex_matches, regex );
-
+ 
     if (Debug) {
-//        for (auto x:regex_matches)
-//            std::cout << x.position <<" "<< x << std::endl;
+    //    for (auto x:regex_matches)
+    //        std::cout<< x <<" "<<std::endl;
     }
     return (int)regex_matches.size();
-}
-
-/* After performing a regex_find() with an expression that has "()" in it.  */
-int SuperString::print_matches(  )
-{
-    size_t   valid_responses = regex_matches.size();
-	printf("%d Matches \n", valid_responses );
-    for (int i=0; i<valid_responses; i++)
-        printf( "%d, %s\n", i, regex_matches[i] );
-    return (int)valid_responses;
 }
 
 /* After performing a regex_find() with an expression that has "()" in it.  */

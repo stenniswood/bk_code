@@ -5,10 +5,7 @@
 #ifndef _AUDIO_DEVICE_H_
 #define _AUDIO_DEVICE_H_
 
-/*#ifdef  __cplusplus
-extern "C" {
-#endif */
-
+#include "ilclient.h"
 
 #define N_WAVE          1024*8    /* dimension of Sinewave[] */
 #define BUFFER_SIZE_SAMPLES N_WAVE
@@ -25,8 +22,6 @@ struct WAVE_HEADER
 	short 	block_align;		
 	short 	bits_per_sample;		
 };
-
-
 
 typedef struct {
    sem_t 				sema;

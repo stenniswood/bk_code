@@ -1,15 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include <semaphore.h>
-//#include "bcm_host.h"
-//#include "ilclient.h"
-
+#include <string>
 #include "bk_system_defs.h"
 #include "protocol.h"
 //#include "devices.h"
-
-
 #include "AUDIO_interface.hpp"
 #include "AUDIO_protocol.hpp"
 #include "AUDIO_device.hpp"
@@ -67,7 +61,7 @@ BOOL OpenAudioFile( char* mFilename )
 	char wave[] = "WAVE";
 	char fmt[]  = "fmt ";
 	char data[] = "data";
-	int  file_length     = 0x21212121;
+	//int  file_length     = 0x21212121;
 	int  fmt_chunk_size  = 16;
 
 	//	FILE* wave_file;
@@ -113,7 +107,7 @@ BOOL OpenAudioFileRead( char* mFilename )
 	char wave[] = "WAVE";
 	char fmt[]  = "fmt ";
 	char data[] = "data";
-	int  file_length     = 0x21212121;
+	//int  file_length     = 0x21212121;
 	int  fmt_chunk_size  = 16;
 
 	//	FILE* wave_file;
@@ -179,9 +173,9 @@ can compute the chunk sizes and update the file
 void UpdateChunkSizes( int mDataChunkSize )
 {
 	int mRIFFChunkSize = 36 + mDataChunkSize;
-	char qs[]   = "    ";
+	/*char qs[]   = "    ";
 	char ones[] = "1111";
-	char twos[] = "2222";
+	char twos[] = "2222"; */
 		
 	// RIFF CHUNK SIZE:
 	fseek ( wave_file, 4,  SEEK_SET );
@@ -209,7 +203,7 @@ void test_save()
 {
     printf("Test file save...\n");
 	char* fn = GetNewAudioFileName(FALSE);	
-	char fn2[] = "/Users/stephentenniswood/SocketServer/TEST.wav";	
+	//char fn2[] = "/Users/stephentenniswood/SocketServer/TEST.wav";
 	OpenAudioFile( fn );
 	CloseAudioFile( );
 }

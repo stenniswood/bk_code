@@ -11,12 +11,15 @@ extern char* 	eyes_shared_memory;
 extern int		eyes_segment_id;
 extern struct   eyes_ipc_memory_map*  ipc_memory_eyes;
 
+#ifndef STCOORDINATE
+#define STCOORDINATE 1
 struct Coordinate
 {
     float x;
     float y;
     float z;
 };
+#endif
 
 #define MAX_IDS 50
 /*******************  VISION SYSTEM CONNECTION  ************************
@@ -70,13 +73,13 @@ struct eyes_ipc_memory_map
 /*********************************************************/
 
 bool  is_eyes_ipc_memory_available	  ( );
-void  eyes_ipc_write_connection_status( char* mStatus   );
+void  eyes_ipc_write_connection_status( char* mStatus  );
 int   eyes_connect_shared_memory	  ( char mAllocate );
 
 bool  eyes_new_command_available    ( );
 void  eyes_write_client_command   	( std::string mCommand );
 void  eyes_acknowledge_command      ( );
-void  eyes_wait_for_acknowledgement ( );		// 
+void  eyes_wait_for_acknowledgement ( );
 
 bool  eyes_new_server_event_available( );		// called by client to query the server status.
 void  eyes_write_server_event   	( std::string mCommand );

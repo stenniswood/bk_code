@@ -21,7 +21,7 @@ return:
 *****************************************************************/
 byte extract_CAN_msg(struct sCAN* Msg, byte* DataPack)
 {
-	int retval = 0;
+	//int retval = 0;
 	// where is ID & instance?
     //	unpackage_short( mBuffer, 8, Msg->id.group.id );
     Msg->id.group.block	   = DataPack[0];
@@ -74,7 +74,7 @@ int pack_CAN_msg( struct sCAN* msg, BYTE* buffer, int bufSize )
 /* 	Interface between Command Central and CAN
 	Process and Transmit CAN messages 
 */
-void can_interface()
+void can_interface( ServerHandler* mh )
 {
 	static int tail    =0;
 	static int taillaps=0;
@@ -99,7 +99,7 @@ void can_interface()
 			// PACK IT!
 			int dataSize = pack_CAN_msg( tmpCAN, buff, bufSize );
 			// SHIP IT!
-			SendTelegram( buff, dataSize );
+			mh->SendTelegram( buff, dataSize );
 		}
 	}
 	// the other direction is be done in serverthread Parse_CAN_Statement()!

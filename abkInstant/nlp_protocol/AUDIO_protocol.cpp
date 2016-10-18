@@ -12,18 +12,11 @@
 #include <string.h>
 #include <sys/types.h>
 #include <time.h> 
+#include "bk_system_defs.h"
 #include "protocol.h"
 #include "devices.h"
-
-#if (PLATFORM==RPI)
-#include "bcm_host.h"
-#include "ilclient.h"
-#endif
-
-#include "bk_system_defs.h"
 #include "utilities.h"
-#include "global.h"
-
+#include "package_commands.h"
 #include "GENERAL_protocol.hpp"
 #include "AUDIO_protocol.hpp"
 #include "AUDIO_file_util.h"
@@ -35,9 +28,7 @@
 
 #include "AUDIO_device.hpp"
 
-
 #define Debug 0
-
 
 /* Suggested Statements:
 
@@ -203,20 +194,24 @@ void Init_Audio_Protocol()
 	// abkInstant will play over the sound card, however,
 	// for avisual display and other 3rd party analyzing...
 	int result = audio_connect_shared_memory( TRUE );
+    if (result)
+    {
+        
+    }
 }
 
-
+//#include "serverthread.h"
 
 /**** ACTION INITIATORS:    (4 possible actions) *****/
-void send_audio_file ( char* mFilename )
+void send_audio_file ( char* mFilename, ServerHandler* mh )
 {
     sending_audio_file_fd  = fopen( mFilename, "r" );
     if (sending_audio_file_fd == NULL)
     {
-		nlp_reply_formulated=TRUE;
-		sprintf ( NLP_Response, "Sorry, the audio file %s does not exist!", mFilename );
-		printf( NLP_Response );
-		return;
+        nlp_reply_formulated=TRUE;
+        sprintf ( NLP_Response, "Sorry, the audio file %s does not exist!", mFilename );
+        printf  ( NLP_Response );
+        return;
     }
     
     BOOL success = OpenAudioFileRead( mFilename );
@@ -227,12 +222,10 @@ void send_audio_file ( char* mFilename )
     }
     
     // Send the Header:
-    static char tmp[80];
-    int length = (int)strlen(tmp);
+    char tmp[80];
     sprintf(tmp, "new audio_header");
-
-    SendTelegram( (unsigned char*)tmp,       length );
-    SendTelegram( (unsigned char*)&audio_hdr, (int)sizeof(struct WAVE_HEADER));    
+    mh->SendTelegram( (BYTE*)&tmp,       strlen(tmp) );
+    mh->SendTelegram( (BYTE*)&audio_hdr, sizeof(struct WAVE_HEADER));
     
 	AUDIO_tcpip_SendingOn = TRUE;
 	nlp_reply_formulated=TRUE;
@@ -247,13 +240,14 @@ void send_audio()
 	// later on.  Not necessary now!
 	//printf( "Sending my incoming audio over tcpip...\n");
 	int32_t result = audio_setup( 1, 22050, 1, AUDIO_SAMPLE_SIZE );		// for record
+    if (result) {
+        // Fill in later...!  WaveHeader struct
+        //char* header=NULL;
+        AUDIO_tcpip_SendingOn = TRUE;
 
-	// Fill in later...!  WaveHeader struct
-	char* header=NULL;
-	AUDIO_tcpip_SendingOn = TRUE;
-
-	nlp_reply_formulated=TRUE;
-	strcpy(NLP_Response, "Okay, I will begin sending you my audio.");
+        nlp_reply_formulated=TRUE;
+        strcpy(NLP_Response, "Okay, I will begin sending you my audio.");
+    }
 }
 
 void audio_listen()
@@ -262,10 +256,11 @@ void audio_listen()
 	//play_api_test(22050, 16, 1, 0);
 	int destination = 1;	
 	int32_t result = audio_setup( destination, 22050, 1, AUDIO_SAMPLE_SIZE );
-
-    AUDIO_tcpip_ListeningOn = TRUE;
-	nlp_reply_formulated=TRUE;
-	strcpy(NLP_Response, "Okay, I'm listening for your audio");
+    if (result) {
+        AUDIO_tcpip_ListeningOn = TRUE;
+        nlp_reply_formulated=TRUE;
+        strcpy(NLP_Response, "Okay, I'm listening for your audio");
+    }
 }
 
 void audio_two_way()
@@ -274,7 +269,7 @@ void audio_two_way()
 	// add echo cancelation algorithm here.
 
 	// Fill in with WaveHeader struct !
-	char* header=NULL;
+	//char* header=NULL;
 	AUDIO_tcpip_SendingOn  = TRUE;
 	AUDIO_tcpip_ListeningOn = TRUE;
 	
@@ -302,11 +297,11 @@ Do the work of the Telegram :
 return  number of extra bytes extracted (ie. in addition to the strlen)
 		This number will be added to the char* ptr in the General_protocol()		
 *****************************************************************/
-int Parse_Audio_Statement( char* mSentence )	
+int Parse_Audio_Statement( const char* mSentence, ServerHandler* mh )
 {
 	int retval = -1;
 	
-	dprintf("Parse_Audio_Statement\n");	
+	dprintf("Parse_Audio_Statement\n");
 	std::string* subject  	= extract_word( mSentence, &subject_list );	
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 );
 	std::string* object     = extract_word( mSentence, &object_list  );
@@ -399,35 +394,39 @@ int Parse_Audio_Statement( char* mSentence )
 		    
 		    if (compare_word(object, "me") ==0)
 		    {
-			send_audio_file("test.wav");
-			retval=0;
+                send_audio_file("test.wav",mh);
+                retval=0;
 		    }
 		}	    
 	 }
     if ((compare_word( subject, "audio_header")==0) &&
         ( compare_word( adjective,  "new"  )==0))
     {
-        int hdr_bytes_rxd = read(connfd, &audio_hdr, sizeof(struct WAVE_HEADER) );
-        
+        size_t hdr_bytes_rxd = read(mh->connfd, &audio_hdr, sizeof(struct WAVE_HEADER) );
+        if (hdr_bytes_rxd)
+        { };
     }
     if ((compare_word( subject, "audio_buffer")==0) &&
 		( compare_word( adjective,  "new"  )==0))
 	{
-		int text_length = strlen(mSentence)+1;
+        // GET PTR to Audio buffer :
+		size_t text_length   = strlen(mSentence)+1;
 		BYTE* audio_data_ptr = (BYTE*)mSentence + text_length;
-		char* size_ptr = strrchr(mSentence, ' ') + 1;
+        // GET AUDIO BUFFER SIZE:
+        char* size_ptr       = strrchr(mSentence, ' ')+1;   // find last space in "new audio_buffer 32767"
 		int length = 0;
 		if (size_ptr)
 			length = atoi(size_ptr);
 		
 		//bytes_rxd = should have value from serverthread.
-		int index_within_buffer = (mSentence-socket_buffer);
-		int local_bytes_rxd = bytes_rxd - index_within_buffer - text_length;
+		int index_within_buffer = (mSentence - mh->socket_buffer);
+		int local_bytes_rxd     = mh->bytes_rxd - index_within_buffer - text_length;
 		//printf("init:  index=%d;  bytes_rxd=%d;  local_bytes_rxd=%d\n", index_within_buffer, bytes_rxd, local_bytes_rxd );
 
+        // Keep reading the rest of the audio buffer. (tcp/ip bundled it as more than 1 packet)
 		while (local_bytes_rxd < length)
 		{
-			local_bytes_rxd += read(connfd, audio_data_ptr+local_bytes_rxd, length);
+			local_bytes_rxd += read(mh->connfd, audio_data_ptr+local_bytes_rxd, length);
 			//printf("RXD AUDIO BUFFER:  length=%d;  bytes_rxd=%d\n", length, local_bytes_rxd );
 		}
 		// audio_data_ptr is within socket_buffer (large 5MB buffer)
@@ -436,7 +435,9 @@ int Parse_Audio_Statement( char* mSentence )
 		// restart at beginning of audio data:
 		audio_data_ptr = (BYTE*) mSentence + text_length;
 		BOOL handled   = handle_audio_data( audio_data_ptr, length );
-		retval = length;
+        if (handled)
+            retval = length;
+        
 	}
 	if (compare_word( subject, "music")==0 || compare_word( subject, "file")==0)
 	{	        	    
@@ -447,7 +448,7 @@ int Parse_Audio_Statement( char* mSentence )
 		    // Query for time/date,  filename, request list
 		    if (compare_word(object, "me") ==0)
 		    {
-			send_audio_file("test.mp3");
+			send_audio_file("test.mp3",mh);
 			retval=0;
 		    }
 		}

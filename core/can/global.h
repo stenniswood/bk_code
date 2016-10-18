@@ -30,15 +30,16 @@ typedef unsigned short uint16_t;
 #endif
 
 #ifndef byte
-#define byte uint8_t
+typedef unsigned char byte;
 #endif
 
-#define BOOL unsigned char
-#define BYTE unsigned char
-#define WORD unsigned short
+#define BOOL  unsigned char
+#define BYTE  unsigned char
+#define WORD  unsigned short
 #define DWORD unsigned long
 
-#define word unsigned short
+#define word  unsigned short
+#define sqr(num) num*num
 
 
 //typedef	_Bool bool;

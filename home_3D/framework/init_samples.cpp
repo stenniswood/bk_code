@@ -387,20 +387,20 @@ void init_ground()
 
 void init_objects()
 {
-    ground.width = 2000;
+/*  ground.width = 2000;
     ground.depth = 2000;
     ground.height=  0.5;
     int reps_x = trunc(ground.width/300.);
     int reps_y = trunc(ground.depth/200.);
-//    Texture* txt = new Texture();
-//    txt->load_image("textures/grass2.jpg");
+    Texture* txt = new Texture();
+    txt->load_image("textures/grass2.jpg");
     //Texture* txt = ground.load_image("textures/grass2.jpg",TOP_SIDE_ID);
-//    ground.apply_top   ( txt, reps_x, reps_y );
-//    ground.apply_bottom( txt, reps_x, reps_y );
-//    ground.m_y = -2.0;
+    ground.apply_top   ( txt, reps_x, reps_y );
+    ground.apply_bottom( txt, reps_x, reps_y );
+    ground.m_y = -2.0;
 //    ground.update_body_matrix();
     ground.create(); 
-
+*/
 	//init_ground();
     init_street_scene();
     init_dwellings();

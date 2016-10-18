@@ -14,20 +14,18 @@
 #include <errno.h>
 #include <string.h>
 #include <list>
-#include <vector>
 #include <string.h>
 #include <string>
 #include <sys/types.h>
 #include <time.h>
 #include <string>
-//#include "protocol.h"
-//#include "devices.h"
 #include "GENERAL_protocol.hpp"
 #include "nlp_extraction.hpp"
 #include "client_memory.hpp"
 #include "nlp_sentence.hpp"
 //#include "client_to_socket.hpp"
 #include "robot_arms_protocol.hpp"
+#include "simulator_memory.h"
 #include "alias.hpp"
 
 /* Suggested statements:
@@ -63,88 +61,235 @@ void Init_Robot_Arms_Protocol()
  else number of extra bytes extracted from the mSentence buffer.
  - besides strlen(mSentence)!
  *****************************************************************/
-int Parse_Robot_Arms_Statement( Sentence& mSentence )
+int servo_index;
+int Robot_id=0;
+enum eArmIndex {
+    LEFT,
+    RIGHT,
+    BOTH
+} selectedArm;
+enum eArmIndex which_arm( Sentence& mSentence )
+{
+    if (mSentence.is_found_in_sentence("right"))
+        return RIGHT;
+    else
+        return LEFT;
+}
+enum eArmJoint {
+    SHOULDER,
+    ELBOW,
+    WRIST,
+    THUMB,
+    FINGER_1,
+    FINGER_2,
+    FINGER_3,
+    NONE
+};
+enum eArmJoint which_joint( Sentence& mSentence )
+{
+    if (mSentence.is_found_in_sentence("elbow",true))
+        return ELBOW;
+    else if (mSentence.is_found_in_sentence("wrist",true))
+        return WRIST;
+    else if (mSentence.is_found_in_sentence("finger",true)) {
+        if (mSentence.is_found_in_sentence("index"))
+            return FINGER_1;
+        else if (mSentence.is_found_in_sentence("middle"))
+            return FINGER_2;
+        else if (mSentence.is_found_in_sentence("last") || mSentence.is_found_in_sentence("pinky"))
+            return FINGER_3;
+    } else if (mSentence.is_found_in_sentence("thumb"))
+        return THUMB;
+    return NONE;
+}
+
+float how_much( Sentence& mSentence, float mMaxAngle )
+{
+    float degrees_to_move=30;
+    if (mSentence.is_found_in_sentence("little",true))
+        return 5.0;
+    if (mSentence.is_found_in_sentence("lot",true))
+        return 10.0;
+    if ((mSentence.is_found_in_sentence("all the way",true)) || (mSentence.is_found_in_sentence("as far as possible",true)))
+        return mMaxAngle;
+    //if ((mSentence.is_found_in_sentence("match other limb",true)) || (mSentence.is_found_in_sentence("as far as possible",true)))
+    //    return 5.0;
+    //if ((mSentence.is_found_in_sentence("until touch nose",true))
+    //    return 5.0;
+    return degrees_to_move;
+}
+
+int Parse_arm_command( Sentence& mSentence, ServerHandler* mh, int mbase_servo_index )
+{
+    int retval = -1;
+    if (mSentence.is_found_in_sentence("raise") || mSentence.is_found_in_sentence( "lift"))
+    {
+        float raise_angle = -60;
+        if (mSentence.is_found_in_sentence( "all the way"))
+            raise_angle = -90;
+        if (mSentence.is_found_in_sentence( "over") && mSentence.is_found_in_sentence( "head"))
+            raise_angle = -180;
+        if (mSentence.is_found_in_sentence("sideways"))
+        {
+            sim_robot_angle( Robot_id,  mbase_servo_index+1, raise_angle );       // degrees
+        } else {
+            sim_robot_angle( Robot_id,  mbase_servo_index, raise_angle );       // degrees
+        }
+        mh->form_response("raising arms");
+        retval = 0;
+    }
+    
+    if (mSentence.is_found_in_sentence( "lower"))
+    {
+        if (mSentence.is_found_in_sentence( "all the way") || mSentence.is_found_in_sentence( "side"))
+        {
+            sim_robot_angle( Robot_id,  mbase_servo_index+1, 0.0 );       // degrees
+            sim_robot_angle( Robot_id,  mbase_servo_index+2, 0.0 );       // degrees
+        }
+        
+        sim_robot_angle( Robot_id,  mbase_servo_index, 0.0 );       // degrees
+        mh->form_response("lowering arms");
+        retval = 0;
+    }
+    
+    if (mSentence.is_found_in_sentence("straight") || mSentence.is_found_in_sentence("straighten"))
+    {
+        sim_robot_angle( Robot_id,  mbase_servo_index+3, 0.0 );
+        sim_robot_angle( Robot_id,  mbase_servo_index+4, 0.0 );
+        sim_robot_angle( Robot_id,  mbase_servo_index+5, 0.0 );
+        mh->form_response("arms straightened");
+    }
+    if (mSentence.is_found_in_sentence( "down"))
+    {
+        float angle = 0;
+        sim_robot_angle( Robot_id,  mbase_servo_index,   angle );       // degrees
+        sim_robot_angle( Robot_id,  mbase_servo_index+1, angle );       // degrees
+        sim_robot_angle( Robot_id,  mbase_servo_index+3, angle );       // degrees
+        mh->form_response  ("arms down");
+        retval = 0;
+    }
+    retval = 0;
+    return retval;
+}
+int Parse_elbow_command( Sentence& mSentence, ServerHandler* mh, int mbase_servo_index )
+{
+    int retval = -1;
+    if (mSentence.is_found_in_sentence( "bend" ))
+    {
+        sim_robot_angle( Robot_id,  mbase_servo_index, 90.0 );       // degrees
+        
+        mh->form_response("bending");
+        retval = 0;
+    }
+    if (mSentence.is_found_in_sentence( "straighten"))
+    {
+        sim_robot_angle( Robot_id,  mbase_servo_index, 0.0 );       // degrees
+        
+        mh->form_response("straightening");
+        retval = 0;
+    }
+    return retval;
+}
+int Parse_wrist_command( Sentence& mSentence, ServerHandler* mh, int mbase_servo_index )
+{
+    int retval = -1;
+    if (mSentence.is_found_in_sentence( "bend" ))
+    {
+        if (mSentence.is_found_in_sentence( "up" ))
+            sim_robot_angle( Robot_id,  mbase_servo_index, -45.0 );       // degrees
+        else if (mSentence.is_found_in_sentence( "down" ))
+            sim_robot_angle( Robot_id,  mbase_servo_index, 60.0 );       // degrees
+        mh->form_response("bending ");
+        retval = 0;
+    }
+    if (mSentence.is_found_in_sentence( "straight"))
+    {
+        sim_robot_angle( Robot_id,  mbase_servo_index, 0.0 );       // degrees
+        mh->form_response("straight ");
+        retval = 0;
+    }
+    return retval;
+}
+
+
+int Parse_Robot_Arms_Statement( Sentence& mSentence, ServerHandler* mh )
 {
     int retval=-1;
     
     if (Debug)  printf("Parse_Robot_arms_Statement\n");
+    mSentence.restore_reduced();
     
-    if (mSentence.is_found_in_sentence("arm",true))
-    {
-        if (mSentence.is_found_in_sentence( "raise"))
-        {
-            form_response("raising arms");
-            retval = 0;
-        }
-        
-        if (mSentence.is_found_in_sentence( "lower"))
-        {
-            form_response("lowering arm");
-            retval = 0;
+    selectedArm = which_arm(mSentence);
+    if (selectedArm==LEFT)
+        servo_index = LEFT_SHOULDER_ROTATE;     // Base Servo
+    else
+        servo_index = RIGHT_SHOULDER_ROTATE;    // Base Servo
+    
+    enum eArmJoint joint = which_joint(mSentence);
+    if (joint!=NONE){
+        switch(joint) {
+            case SHOULDER : servo_index += 0;
+                break;
+            case ELBOW :    servo_index += 3;
+                break;
+            case THUMB :    servo_index += 0;
+                break;
+            case WRIST :    servo_index += 4;
+                break;
+            case FINGER_1 : servo_index += 0;       /* save for a separate hand/gripper file */
+                break;
+            case FINGER_2:  servo_index += 0;
+                break;
+            case FINGER_3:  servo_index += 0;
+                break;
+            default:
+                break;
         }
     }
-    if (mSentence.is_found_in_sentence("elbow"))
+    if (mSentence.is_found_in_sentence("arm",false))
     {
-        if (mSentence.is_found_in_sentence( "bend" ))
-        {
-            form_response("bending elbow");
-            retval = 0;
-        }
-        if (mSentence.is_found_in_sentence( "straighten"))
-        {
-            form_response("straightening elbow");
-            retval = 0;
-        }
-    }
-    if (mSentence.is_found_in_sentence("foot"))
-    {
-        if (mSentence.is_found_in_sentence( "extend" ))
-        {
-            form_response("extending");
-            retval = 0;
-        }
-        if (mSentence.is_found_in_sentence( "pull"))
-        {
-            form_response("flexing");
-            retval = 0;
-        }
-        if (mSentence.is_found_in_sentence( "keep level"))
-        {
-            form_response("holding level");
-            retval = 0;
-        }
+        Parse_arm_command( mSentence, mh, servo_index );
     }
     
-    if (mSentence.is_found_in_sentence("step"))
+    if (mSentence.is_found_in_sentence("arms"))
     {
-        form_response("stepping");
-        retval = 0;
+        Parse_arm_command( mSentence, mh, servo_index );
+        servo_index  += (RIGHT_SHOULDER_ROTATE-LEFT_SHOULDER_ROTATE);
+        retval = Parse_arm_command( mSentence, mh, servo_index );
+    }
+
+    // ELBOW :
+    if (mSentence.is_found_in_sentence("elbow")) {
+        retval = Parse_elbow_command( mSentence, mh, servo_index );
+        mh->append_response(" elbow");
+    }
+    if (mSentence.is_found_in_sentence("elbows"))
+    {
+        Parse_elbow_command( mSentence, mh, servo_index );
+        servo_index  +=(RIGHT_SHOULDER_ROTATE-LEFT_SHOULDER_ROTATE);
+        retval = Parse_elbow_command( mSentence, mh, servo_index );
+        mh->append_response(" elbows");
+    }
+
+    // WRISTS :
+    if (mSentence.is_found_in_sentence("wrist")) {
+        retval = Parse_wrist_command( mSentence, mh, servo_index );
+        mh->append_response(" wrist");
+    }
+    if (mSentence.is_found_in_sentence("wrists"))
+    {
+        Parse_wrist_command( mSentence, mh, servo_index );
+        servo_index  +=(RIGHT_SHOULDER_ROTATE-LEFT_SHOULDER_ROTATE);
+        retval = Parse_wrist_command( mSentence, mh, servo_index );
+        mh->append_response(" wrists");
     }
     
-    if (mSentence.is_found_in_sentence("sit"))
-    {
-        form_response("don't mind if i do.");
-        retval = 0;
+    if (retval>-1)  {
+        printf( "Parse_Robot_arms_Statement done\n" );
+        bool simulator_available = is_sim_ipc_memory_available();
+        if (simulator_available==false)
+            mh->form_response("I am not a robot");
     }
-    if (mSentence.is_found_in_sentence("stand"))
-    {
-        form_response("standing");
-        retval = 0;
-    }
-    
-    if (mSentence.is_found_in_sentence("stop"))
-    {
-        form_response("Stopping by your command!");
-        retval = 0;
-    }
-    
-    if (mSentence.is_found_in_sentence("run sequence"))
-    {
-        form_response("sequence executing");
-        retval = 0;
-    }
-    
-    if (retval>-1)  printf( "Parse_Robot_arms_Statement done\n" );
     return retval;
 }
 

@@ -25,10 +25,10 @@ CFLAGS = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) -std=gnu++11 -DGLM_FORCE_RADIANS
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 	         -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
 SQL_INC    = /usr/include/mysql /usr/include/
-CORE_INC   = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/
+CORE_INC   = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/ ../core/nlp/
 LOCAL_INC  = ./sql/ ./street_signs/ ./robot/ ./route/ ./paintings/ ./physics/ \
-			./nlp/ ./molecules/ ./atoms/ ./Large/ ./framework/ ./buildings/
-LIB_INC	   =  ../abkInstant/threads/ ../core/dbase/ ../abkInstant/nlp_core/
+			 ./nlp/ ./molecules/ ./atoms/ ./Large/ ./framework/ ./buildings/
+LIB_INC	   = ../abkInstant/threads/ ../core/dbase/
 ALL_INCLUSIVE = $(addprefix -I,$(INC)) $(addprefix -I,$(SQL_INC)) $(addprefix -I,$(CORE_INC)) \
 			$(addprefix -I, $(LOCAL_INC)) $(addprefix -I,$(LIB_INC)) $(VG_INCLUDE)
 
@@ -44,35 +44,35 @@ OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lo
 	-lopencv_core
 
 # MAIN DIRECTORY OBJECTS:
-OBJ     = main.o t_object.o mouse_nav.o cursor_nav.o 
-NLP_OBJ = color_protocol.o parameter.o robot_legs_protocol.o \
+OBJ     = main.o t_object.o mouse_nav.o cursor_nav.o
+NLP_CORE_OBJ = color_protocol.o parameter.o nlp_sentence.o serverthread.o 
+NLP_OBJ = robot_legs_protocol.o \
   create_object_nlp.o positioner_2d.o robot_protocol.o ThreeD_object_protocol.o \
   it.o positioner_3d.o scene_nlp.o top_level_protocol_sim.o \
-  nlp_sentence.o robot_arms_protocol.o serverthread.o verbal_xyz.o
-ATOMS_OBJ = abstract_wall.o extrusion.o gl_object.o moving_object.o sign.o txt_cylinder.o \
-  camera_screen.o face_box.o glSphere.o painting.o stairway.o \
-  cylinder.o gl_atom.o ibeam.o paper.o Texture.o wall.o \
-  door.o gl_container.o light_switch.o rectangle.o txt_container.o \
-  door_handle.o gl_misc.o Map2D.o ring.o depth_map.o
+  robot_arms_protocol.o verbal_xyz.o
+ATOMS_OBJ = extrusion.o gl_object.o moving_object.o sign.o txt_cylinder.o \
+  camera_screen.o face_box.o glSphere.o painting.o \
+  cylinder.o gl_atom.o ibeam.o paper.o Texture.o \
+  gl_box.o light_switch.o rectangle.o txt_container.o \
+  gl_misc.o Map2D.o ring.o depth_map.o
 MOLECULES_OBJ = construction_barricade.o frame.o hinge.o table.o \
   counter.o full_wall.o palette.o table_pole.o \
   bookcase.o drawer.o glComputableWall.o picnic_table.o truss.o \
   brickwall.o  glMolecule.o vehicle.o \
   cabinet.o gl_window.o rafter.o verbal_molecule.o \
-  chair.o elevator.o roof.o walking_robot.o
+  chair.o elevator.o roof.o
 LARGE_OBJ   = road.o terrain.o
 PHYSICS_OBJ = physical_world.o
 ROBOT_OBJ = robot_arm.o robot_foot.o robot_head.o robot_leg_piece.o \
-  robot.o robot_gripper.o robot_interpolator.o robot_moves.o
+    robot.o robot_gripper.o robot_interpolator.o robot_moves.o walking_robot.o
 ROUTE_OBJ = multi_path_route.o route.o route_feet.o routing.o
 SQL_OBJ   = scene.o sql_load.o
-BUILDINGS_OBJ = apartment.o basket_ball_court.o floor.o room2.o sports_bench.o \
+BUILDINGS_OBJ = abstract_wall.o apartment.o basket_ball_court.o door.o floor.o room2.o sports_bench.o \
     dwelling2.o floor_plan.o room_of_tables.o dwelling.o dwelling_level.o \
-    quarter_629.o basketball_arena.o hampton_complex.o 
+    quarter_629.o basketball_arena.o hampton_complex.o stairway.o wall.o door_handle.o 
 FRAMEWORK_OBJ = asset_importer.o imageloader.o key_press.o sequencer_memory.o \
     ConFloat.o init_samples.o object_primitive_creator.o tk_colors.o \
     DecisionTree.o instant_ipc.o proc_client_cmds.o stats.o verbal_object.o
-
 
 CONTROL_OBJS = serial.o serial_synchronous.o roboclaw.o x_eyes.o neck_thread.o
 VISION_OBJS  = findEyeCenter.o findEyeCorner.o face_detect.o face_recog.o face_summary.o \
@@ -86,7 +86,6 @@ KINETIC_OBJS  = vector.o
 	$(CC) $(ALL_INCLUSIVE) -c -o $@ $< -g $(CFLAGS)
 %.o: %.c $(DEPS)
 	$(CC) $(ALL_INCLUSIVE) -c -o $@ $< $(OPTIONS) $(CFLAGS)
-
 
 #libs/libframework.a: $(addprefix framework/, $(FRAMEWORK_OBJ))
 #	ar rcs $@ $^
@@ -119,13 +118,13 @@ home3D: $(OBJ) $(addprefix ../core/kinetic/,$(KINETIC_OBJS)) \
 	$(addprefix ./robot/,  $(ROBOT_OBJ)) \
 	$(addprefix ./route/,  $(ROUTE_OBJ)) \
 	$(addprefix ./Large/,  $(LARGE_OBJ)) \
-	$(addprefix ./framework/,$(FRAMEWORK_OBJ)) \
-	$(addprefix ./buildings/,$(BUILDINGS_OBJ)) \
-	$(addprefix ./sql/,$(SQL_OBJ)) \
+	$(addprefix ./framework/,  $(FRAMEWORK_OBJ)) \
+	$(addprefix ./buildings/,  $(BUILDINGS_OBJ)) \
+	$(addprefix ./sql/,        $(SQL_OBJ)) \
+	$(addprefix ../core/nlp/,  $(NLP_CORE_OBJ)) \
     $(addprefix ../core/dbase/,$(DBASE_OBJS)) \
-	$(addprefix ../core/misc/,$(MISC_OBJS)) \
-	$(addprefix ../core/ipc/,$(IPC_OBJS)) \
-	$(addprefix ../abkInstant/threads/, $(INSTANT_OBJS))
+	$(addprefix ../core/misc/, $(MISC_OBJS)) \
+	$(addprefix ../core/ipc/,  $(IPC_OBJS))
 	g++ -o $@ $^ $(CFLAGS) $(LIBFLAGS) $(LDFLAGS) $(OPENCV_LIBS)
 
 //all: home3D libs/libframework.a libs/libatoms.a libs/libbuildings.a libs/libmolecules.a \
@@ -139,5 +138,3 @@ clean:
 	rm ../core/kinetic/*.o
 	rm -rf *.o $(PRG).elf *.eps *.bak
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
-
-

@@ -1,4 +1,3 @@
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -13,6 +12,7 @@
 #include <list>
 #include <vector>
 
+//#include "global.h"
 #include "protocol.h"
 #include "devices.h"
 #include "CAN_memory.h"
@@ -27,6 +27,7 @@
 #include "string_util.h"
 #include "nlp_sentence.hpp"
 
+#define Debug 0
 
 BOOL SEQ_ListeningOn;	// if true we will be receiving CAN Traffic.
 BOOL SEQ_SendingOn;		// if true we will be sending CAN Traffic.
@@ -38,7 +39,6 @@ static std::list<std::string> 	adjective_list;
 static std::list<std::string>  	object_list;
 
 //#define NLP_DEBUG 1
-#define Debug 0
 
 static void init_subject_list()
 {
@@ -136,7 +136,7 @@ void Init_Sequencer_Protocol()
 	init_word_lists();
 }
 
-
+//extern int start_amon();	// extern from instant_main.cpp
 #if (PLATFORM==Mac)
 static char amon_command[] = "~/bk_code/amonitor/amon";
 #elif (PLATFORM==RPI)
@@ -153,7 +153,21 @@ static char aseq_command[] = "sudo /home/pi/bk_code/aseq/seq";
 static char aseq_command[] = "";
 #endif
 
-
+int start_amon() 
+{
+    int pid;
+    switch (pid=fork()) {
+        case -1:
+			printf("fork() = -1 %s\n", strerror(errno) );
+            return 0;
+        case 0:
+            execvp(amon_command, NULL);
+            printf("returned from ececvp\n");
+        default:
+            return 0;
+    }
+    return 1;
+}
 int start_sequencer() 
 {
     int pid;
@@ -173,8 +187,8 @@ int start_sequencer()
 
 static std::string* subject  = NULL;
 static std::string* verb     = NULL;
-static std::string* object   = NULL;
-static std::string* adjective=NULL;
+//static std::string* object   = NULL;
+//static std::string* adjective=NULL;
 
 
 
@@ -188,17 +202,19 @@ return:	pointer to the next telegram (ie. after all our header and data bytes)
 		this will be null if end of the received buffer (terminator added in serverthread.c
 		by the number of bytes read).
 *****************************************************************/
-int Parse_Sequencer_Statement( Sentence& mSentence )
+int Parse_Sequencer_Statement( Sentence& mSentence, ServerHandler* mh )
 {
 	int retval = -1;
     if (ipc_memory_client==NULL)  return FALSE;
     
-	dprintf("Parse_Sequencer_Statement() ");	
-    int subject_count	= subject_list.evaluate_sentence( mSentence.m_sentence );
-    int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence );
+	if (Debug) printf("Parse_Sequencer_Statement() ");
+    mSentence.restore_reduced();
+    
+    //int subject_count	= subject_list.evaluate_sentence( mSentence.m_sentence.c_str() );
+    //int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence.c_str() );
 
-    string* object 		= extract_word( mSentence.m_sentence, &object_list  	  );
-    string* adjective	= extract_word( mSentence.m_sentence, &adjective_list    );
+    //string* object 		= extract_word( mSentence.m_sentence.c_str(), &object_list  	  );
+    string* adjective	= extract_word( mSentence.m_sentence.c_str(), &adjective_list    );
     //diagram_sentence		( subject, verb, adjective, object, preposition );
     
 	/* Main thing we want for starters is:
@@ -220,7 +236,7 @@ int Parse_Sequencer_Statement( Sentence& mSentence )
 			// Maybe want to verify the source IP address for security purposes
 			// later on.  Not necessary now!
 			printf( "Initiating robot sequence... (Watch for objects in path of limbs!)\n");
-			int action;
+			//int action;
 			int available = seq_connect_shared_sequencer_memory( TRUE );
 			if (!available)
 			{
@@ -261,7 +277,7 @@ int Parse_Sequencer_Statement( Sentence& mSentence )
 	else if (compare_word( subject, "sequencer")==0)
 	{
 	}
-	if (retval>-1)  printf("Parse_Sequencer_Statement() \n");
+	if (retval>-1)  printf("Parse_Sequencer_Statement() ");
 	return retval;
 }
 

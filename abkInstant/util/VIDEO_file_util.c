@@ -39,6 +39,7 @@ patents?
 *************************************************/
 WORD* CompressVideoData( WORD* mAudio )
 {
+    return 0;
 }
 /************************************************
 Uncompress Audio (by unknown means right now)  
@@ -47,6 +48,7 @@ patents?
 *************************************************/
 WORD* UncompressVideoData( WORD* mAudio )
 {
+    return 0;
 }
 
 /************************************************

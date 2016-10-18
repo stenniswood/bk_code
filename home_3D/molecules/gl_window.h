@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include "glMolecule.h"
-#include "gl_container.hpp"
+#include "gl_box.hpp"
 #include "frame.h"
 #include "wall.hpp"
 

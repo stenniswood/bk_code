@@ -10,9 +10,10 @@
 #define robot_arms_protocol_hpp
 
 #include <stdio.h>
+#include "serverthread.hpp"
 
 void Init_Robot_Arms_Protocol();
-int Parse_Robot_Arms_Statement( Sentence& mSentence );
+int Parse_Robot_Arms_Statement( Sentence& mSentence, ServerHandler* mh );
 
 
 #endif /* robot_arms_protocol_hpp */

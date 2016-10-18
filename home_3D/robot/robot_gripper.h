@@ -14,7 +14,7 @@
 //#include "all_objects.h"
 #include "gl_atom.hpp"
 #include "glMolecule.h"
-#include "gl_container.hpp"
+#include "gl_box.hpp"
 #include "cylinder.hpp"
 
 
