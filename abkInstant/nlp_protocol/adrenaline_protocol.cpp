@@ -1,5 +1,5 @@
 //
-//  ordering_protocol.cpp
+//  adrenaline_protocol.cpp
 //  abkInstant
 //
 //  Created by Stephen Tenniswood on 3/15/16.
@@ -38,7 +38,7 @@ void connect_creator_db()
     }
     
     if (mysql_real_connect(creator_db, "localhost", "root", "password",
-                           "bk_advertisements", 0, NULL, 0) == NULL)
+                           "robot_local", 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(creator_db));
         mysql_close(creator_db);
@@ -76,7 +76,7 @@ void Init_Adrenaline_Protocol( )
 
 void form_query_string( Sentence& mSentence )
 {
-    query_string = "SELECT * FROM `bk_advertisements`.`creator` WHERE \"";
+    query_string = "SELECT * FROM `robot_local`.`creator` WHERE \"";
     query_string += mSentence.m_reduced_sentence;
     
     query_string += "\" RLIKE element;";

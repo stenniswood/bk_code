@@ -47,6 +47,7 @@ fd_set rfds;
 
 #define Debug 0
 
+struct sockaddr_in serv_addr;   
 static char 	ip_addr[16]; 			// for user feedback
 
 std::vector<ServerHandler*>  server_handlers;
@@ -99,14 +100,28 @@ static void get_ip_address()
 }
 
 
-
-
 /* Loop infinitely - 
 		each client which connects we generate a ServerHandler and start a connection thread.
 		
 */
 void*  listen_thread(void* )
 {
+	get_ip_address( );		// Get "ip_addr" of this machine.
+
+    listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    memset(&serv_addr, '0', sizeof(serv_addr));
+    serv_addr.sin_family 		= AF_INET;
+    serv_addr.sin_addr.s_addr 	= htonl(INADDR_ANY);
+    serv_addr.sin_port 			= htons(BK_MEDIA_PORT);
+    int result = bind  (listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    if (result<0)
+    	perror("listen_thread:  Bind failed: \n");
+    	
+    listen(listenfd, 10);
+
+	char* ip_addr = inet_ntoa( serv_addr.sin_addr );
+	printf( "\n Welcome to BK Media Control  :  IP=%s:%d \n\n", ip_addr, BK_MEDIA_PORT );
+
 	/****************************
 	   loop on select() or poll().  These will inform when a connection is pending,
 	   then we call accept().  Since select()/Poll() are nonblocking, we can

@@ -87,6 +87,7 @@ int audio_allocate_memory( )
 	audio_segment_id = shmget( IPC_AUDIO_KEY, shared_segment_size, IPC_CREAT | 0666 );
 	int errsv = errno;
 	if (audio_segment_id==-1) {
+		printf(" AUDIO_KEY=%x, size=%ld  Segment already exists?\n", IPC_AUDIO_KEY, shared_segment_size );
 		printf("audio_allocate_memory - shmget ERROR: %s \n", strerror(errsv) );
 		return 0;
 	} else {
@@ -237,9 +238,11 @@ BOOL is_audio_ipc_memory_available()
 {
 	struct shmid_ds buf;			// shm data descriptor.
 
-	if (Debug) printf("Checking for audio IPC memory... ");
+	if (Debug) printf("Check audio IPC memory... ");
 	// First see if the memory is already allocated:
 	audio_segment_id = audio_read_segment_id( segment_id_filename );
+	printf("id=%x; fn=%s\n", audio_segment_id, segment_id_filename );
+	
 	int retval = shmctl(audio_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
 		if (Debug) printf("Error: %s\n", strerror(errno) );
@@ -257,6 +260,7 @@ BOOL is_audio_ipc_memory_available()
 int audio_connect_shared_memory(char mAllocate)
 {
 	BOOL available = is_audio_ipc_memory_available();
+	
 	if ((!available) && (mAllocate))  {
 		if (Debug) printf("audio_connect_shared_memory() allocating.\n");
 		int result = audio_allocate_memory();

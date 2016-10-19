@@ -400,6 +400,12 @@ char segment_id_filename[] = "/home/pi/bk_code/amonitor/acan_shared_memseg_id.cf
 char segment_id_filename[] = "/home/steve/bk_code/amonitor/acan_shared_memseg_id.cfg";
 #endif
 
+BOOL is_CAN_IPC_ptr_valid()
+{
+	if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+		return 0;
+	return 1;
+}
 
 BOOL is_CAN_IPC_memory_available()
 {
@@ -410,7 +416,8 @@ BOOL is_CAN_IPC_memory_available()
 	can_segment_id = CAN_read_segment_id( segment_id_filename );
 	int retval = shmctl(can_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
-		if (Debug) printf("Error: %s\n", strerror(errno) );
+		//if (Debug) printf("Error: shmctl %s\n", strerror(errno) );
+		if (Debug) printf("CAN IPC Memory : unavailable.\n" );
 		return FALSE;
 	}
 	if (Debug) printf( " Found segment, size=%d and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
@@ -435,7 +442,7 @@ int can_connect_shared_memory(char mAllocate)
 	BOOL available = is_CAN_IPC_memory_available();
 	if (available)  {
 		can_attach_memory();		
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+		if (is_CAN_IPC_ptr_valid()==FALSE)
 			return 0;
 		return 1;
 	} 
@@ -451,8 +458,7 @@ int can_connect_shared_memory(char mAllocate)
 		can_attach_memory();
 		can_fill_memory	 ();
 		CAN_save_segment_id(segment_id_filename);
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return 0;		
+		return is_CAN_IPC_ptr_valid();
 	}	
 	return 1;
 }

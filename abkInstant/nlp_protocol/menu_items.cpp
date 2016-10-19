@@ -22,7 +22,7 @@ string integer_e   = "(\d+ )";
 string real_e      = "([-+]?[0-9]*\\.?[0-9]+ )";
 
 /********************************* SQL FUNCTIONS *********************************************/
-MYSQL               *menus_db;
+MYSQL               *menus_db=NULL;
 string              query_string;
 MYSQL_RES*          result;
 MYSQL_ROW           row;
@@ -45,20 +45,26 @@ void connect_menus_db()
     if (menus_db == NULL)
     {
         fprintf(stderr, "init %s\n", mysql_error(menus_db));
-        exit(1);
+        printf("Cannot connect to mysql server!\n");
+        return;  // exit(1);
     }
     
     if (mysql_real_connect(menus_db, "localhost", "root", "password",
                            "bk_advertisements", 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(menus_db));
+        printf("Cannot connect to database bk_advertisements !\n" );
         mysql_close(menus_db);
-        exit(1);
+        menus_db = NULL;
+        return;  // exit(1);
     }
 }
+
 int query( bool mRetrieving )
 {
-    if (mysql_query(menus_db, query_string.c_str() ))
+	if (menus_db==NULL) return 0;
+	
+    if (mysql_query( menus_db, query_string.c_str() ))
     {
         fprintf(stderr, "Object: %s\n", mysql_error(menus_db));
     }

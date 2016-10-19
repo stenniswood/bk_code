@@ -103,9 +103,8 @@ void Restaurant::sql_load( string mRestaurantOfficialName )
     query_string += mRestaurantOfficialName;
     query_string += "';";
     query(true);
-    
-    //size_t row_count = mysql_num_rows(result);
-    
+
+    //size_t row_count = mysql_num_rows(result);    
     if ((row = mysql_fetch_row(result)) )
     {
         extract_result( row );
@@ -184,7 +183,8 @@ void    RestaurantCluster::sql_load                 (  )
 {
     Restaurant tmp_rest;
     query_string = "SELECT * FROM bk_advertisements.restaurants ;";
-    query(true);
+    int val = query(true);
+    if (val<=0) return;
     
     while ((row = mysql_fetch_row(result)) )
     {
