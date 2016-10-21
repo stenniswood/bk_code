@@ -1,5 +1,5 @@
-#ifndef	GLOBAL_H
-#define	GLOBAL_H
+//#ifndef	GLOBAL_H
+//#define	GLOBAL_H
 
 #define 	_BV(bit)   (1 << (bit))
 #define 	bit_is_set(sfr, bit)   (sfr & _BV(bit))
@@ -15,8 +15,9 @@
 #define	false	0
 
 #ifndef TRUE
-#define	TRUE	(1)
-#define	FALSE	(0)
+typedef enum boolean2 {FALSE=0,TRUE=1} boolean;
+#define	TRUE 1
+#define	FALSE 0
 #endif
 
 #ifndef int8_t
@@ -33,20 +34,23 @@ typedef unsigned short uint16_t;
 typedef unsigned char byte;
 #endif
 
-#define BOOL  unsigned char
-#define BYTE  unsigned char
-#define WORD  unsigned short
-#define DWORD unsigned long
 
-#define word  unsigned short
-#define sqr(num) num*num
+
+typedef unsigned int   UINT;
+typedef unsigned char  BOOL;
+typedef unsigned char  BYTE;
+typedef unsigned short WORD;
+typedef unsigned long  DWORD;
+typedef unsigned short word;
+
+#define sqr(num) (num)*(num)
 
 
 //typedef	_Bool bool;
 //typedef	boolean Bool;
 // ----------------------------------------------------------------------------
 
-#define	RESET(x)		_XRS(x)
+/*#define	RESET(x)		_XRS(x)
 #define	SET(x)			_XS(x)
 #define	TOGGLE(x)		_XT(x)
 #define	SET_OUTPUT(x)	_XSO(x)
@@ -69,6 +73,6 @@ typedef unsigned char byte;
 #define	_port2(x)	PORT ## x
 #define	_ddr2(x)	DDR ## x
 #define	_pin2(x)	PIN ## x
+*/
 
-
-#endif	// GLOBAL_H
+//#endif	// GLOBAL_H

@@ -19,44 +19,31 @@
 #define dprintf Dprintf
 
 #ifndef radians
-#define radians(arg) (arg*3.1415/180.0)
-#define degrees(arg) (arg*180.0/3.1415)
+#define radians(arg) ((arg)*3.1415/180.0)
+#define degrees(arg) ((arg)*180.0/3.1415)
 #endif
 
 #define BOARD_MODEL 11
 #define SerialNumber 0x12345678
 
-//#define byte unsigned char
-//#define uint32_t unsigned long
-/*#define word unsigned short
-#ifndef BOOL
-#define BOOL byte
-#endif */
-
 //#define cli()  __asm__ __volatile__ ("cli" ::)
 //#define sei()  __asm__ __volatile__ ("sei" ::)
-
-/*#ifndef min
-#define min(a,b) ((a)<(b)?(a):(b))
-#endif
-
-#ifndef max
-#define max(a,b) ((a)>(b)?(a):(b))
-#endif */
 
 #define CRYSTAL_FREQ 16000000
 #define F_CPU CRYSTAL_FREQ
 
-#define lo_word(one_long)	(one_long & 0x0000FFFF)
-#define hi_word(one_long)	((one_long & 0xFFFF0000) >> 16)
-#define lo(one_word) 		(one_word & 0x00FF)
-#define hi(one_word) 		((one_word & 0xFF00) >> 8)
+#define lo_word(one_long)	((one_long) & 0x0000FFFF)
+#define hi_word(one_long)	(((one_long) & 0xFFFF0000) >> 16)
+#define lo(one_word) 		((one_word) & 0x00FF)
+#define hi(one_word) 		(((one_word) & 0xFF00) >> 8)
+
 
 union float_array
 {
 	float value;
 	uint8_t array[sizeof(float)];
 };
+
 
 #define one_second 400000
 #define STROBE_SPEED 10

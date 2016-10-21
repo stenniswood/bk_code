@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 
+//#include "global.h"
+typedef unsigned short word;
+
 // CAN 2.0B 29 bit Identifier
 // Note: this is not a union!!  Should be, but can't because the byte boundaries are
 // not even. 

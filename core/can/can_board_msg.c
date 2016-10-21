@@ -34,6 +34,7 @@ AUTHOR	:  Stephen Tenniswood
 #include "can_eid.h"
 #include "can_board_msg.h"
 #include "leds.h"
+#include "global_funcs.h"
 
 
 /**************** TYPE DEFS *************************************/

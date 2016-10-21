@@ -171,8 +171,10 @@ int IconView::draw()
 
 	VGfloat l = left+left_margin;
 	VGfloat b = bottom+bottom_margin;
-	int min_w = min(ImageInfo.width, width);
-	int min_h = min(ImageInfo.height, height);
+	unsigned int w = width;
+	unsigned int h = height;
+	int min_w = std::min(ImageInfo.width, w);
+	int min_h = std::min(ImageInfo.height, h);
 	if (image != 0)
 		vgSetPixels(l, b, image, 0, 0, min_w, min_h);
 }
@@ -272,7 +274,7 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 	img = vgCreateImage(rgbaFormat, II->width, II->height, VG_IMAGE_QUALITY_BETTER);
 	if (Debug) printf("read jpeg, %d w=%d; h=%d\n", img, II->width, II->height);
 	vgImageSubData(img, data, II->dstride, rgbaFormat, 0, 0, II->width, II->height);
-	if (Debug) printf("read jpeg, %d w=%d; h=%d\n", img, data, II->width, II->height);
+	if (Debug) printf("read jpeg, %d %p w=%d; h=%d\n", img, data, II->width, II->height);
 
 	// Cleanup
 	jpeg_destroy_decompress(&jdc);

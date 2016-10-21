@@ -3,9 +3,11 @@
 extern "C" {
 #endif
 
-#define BYTE unsigned char
+#include "global.h"
+
+/*#define BYTE unsigned char
 #define WORD unsigned short
-#define boolean BYTE
+#define boolean BYTE*/
 
 
 /* defined in devices.h

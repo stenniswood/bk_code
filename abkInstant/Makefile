@@ -49,7 +49,8 @@ CFLAGS+=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POS
 
 KINETIC_OBJS = vector.o
 CAN_OBJS   =  can_eid.o bk_system_defs.o can_id_list.o
-MSG_OBJS   =  packer_lcd.o packer_motor.o packer.o parser_tilt.o
+MSG_OBJS   =  packer_lcd.o packer_motor.o packer.o
+#parser_tilt.o
 MISC_OBJS  =  vector_math.o ini_file.o super_string.o string_util.o
 FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 APP_CPP_OBJS	= instant_main.o 

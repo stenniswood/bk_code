@@ -3,10 +3,12 @@
 extern "C" {
 #endif
 
-#define BYTE unsigned char
+#include "global.h"
+
+/*#define BYTE unsigned char
 #define WORD unsigned short
 #define boolean BYTE
-
+*/
 
 /* defined in devices.h
 struct WAVE_HEADER
@@ -18,6 +20,7 @@ struct WAVE_HEADER
 	short 	block_align;		
 	short 	bits_per_sample;		
 };*/
+#include <stdbool.h>
 
 // Commands:
 int Cmd_GPIO    ( BYTE* mBuffer, BYTE mPin, boolean mHigh				);

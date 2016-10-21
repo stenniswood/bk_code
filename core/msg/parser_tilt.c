@@ -17,7 +17,8 @@
 #include "leds.h"
 #include "vector_math.h"
 #include "parser_tilt.h"
-//#include "CAN_Interface.h"
+
+#include "CAN_Interface.hpp"
 
 
 struct fXYZ RawxyzAccel;
@@ -45,7 +46,7 @@ void swap_bytes( struct tXYZ* mXYZ )
 	mXYZ->z = hi(tmp) + (lo(tmp)<<8);
 }
 
-uint8_t print_message(struct sCAN* msg)
+/*uint8_t print_message(struct sCAN* msg)
 {	
 	printf(" ID=%2X:%4X:%d; ", msg->id.group.block, 
 			 msg->id.group.id, msg->id.group.instance );
@@ -64,7 +65,7 @@ uint8_t print_message(struct sCAN* msg)
 		printf("\tRTR\n");
 	else
 		printf("\tDF\n");
-}
+}*/
 
 /* Observations of Accelerometer Scale :
 change sensitivity with: sudo ./aconf config 9 3 0x03 [0..3]

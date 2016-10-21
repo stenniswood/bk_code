@@ -104,7 +104,7 @@ TIMER0_COMPA_vect
 TIMER0_COMPB_vect
 TIMER0_OVF_vect
 ******************************************************************************/
-int ISR( TIMER0_COMPA_vect )
+int ISR( int TIMER0_COMPA_vect )
 {
 	// the OCF0A flag is automatically cleared by executing this ISR.
 	

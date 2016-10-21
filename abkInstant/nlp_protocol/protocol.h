@@ -11,13 +11,15 @@ OVERALL STRUCTURE:
 		F000	SYSTEM   ("SYS")
 *********************************************************************/
 
-#define BYTE unsigned char
+#include "global.h"
+
+/*#define BYTE unsigned char
 #define WORD unsigned short
 #define UINT unsigned int
 #ifndef BOOL
 #define BOOL BYTE
 #endif
-
+*/
 extern char AUDIO_PATH[];
 extern char IMAGE_PATH[];
 extern char VIDEO_PATH[];

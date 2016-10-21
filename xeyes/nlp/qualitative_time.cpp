@@ -406,7 +406,7 @@ int month_is_found( Sentence& mSentence )
     retval = mSentence.regex_find("(\\d+) months ago");
     if (retval) 
     {
-    	mSentence.m_sentence.print_matches();
+    	//mSentence.m_sentence.print_matches();
     	string val = mSentence.m_sentence.regex_matches[0];
     	int m = atoi(val.c_str());
     	retval = bd_now.tm_mon-m;
@@ -415,7 +415,7 @@ int month_is_found( Sentence& mSentence )
     retval = mSentence.regex_find("(\\d+) months from now");
     if (retval) 
     {
-    	mSentence.m_sentence.print_matches();    
+    	//mSentence.m_sentence.print_matches();    
     	string val = mSentence.m_sentence.regex_matches[0];
     	int m = atoi( val.c_str() );
     	retval = bd_now.tm_mon+m;

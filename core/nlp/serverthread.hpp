@@ -2,17 +2,11 @@
 #define _SERVER_THREAD_H_
 
 #include <netinet/in.h>
-
-#define MAX_SENTENCE_LENGTH 5*1024*1024
-
-#define UINT unsigned int
-#define WORD unsigned short
-#define BYTE unsigned char
-//#define BOOL unsigned char
-
 #include <time.h>
 #include <string> 
+#include "global.h"
 
+#define MAX_SENTENCE_LENGTH 5*1024*1024
 extern char* REQUESTED_client_ip;
 extern BYTE  REQUEST_client_connect_to_robot;
 void* connection_handler( void* mh );
