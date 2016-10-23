@@ -43,7 +43,7 @@ void	FrameWindow::Initialize		 (   )
 	m_size_state = NORMAL;
 	
 	calc_metrics();
-	dprintf("\t\tFrameWindow::Initialize() done\n");
+	Dprintf("\t\tFrameWindow::Initialize() done\n");
 }
 void FrameWindow::calc_metrics(  	)
 {
@@ -104,7 +104,7 @@ int   	FrameWindow::draw_close ( bool mHovering )
 		// Draw x
 		float center_x   = (close_button_coords[RIGHT]-close_button_coords[LEFT])/2.0+close_button_coords[LEFT];
 		float center_y   = (title_height)/2.0+close_button_coords[BOTTOM];
-		//dprintf("Close button:  %6.1f, %6.1f, %6.1f, %6.1f \n", close_button_coords[0],
+		//Dprintf("Close button:  %6.1f, %6.1f, %6.1f, %6.1f \n", close_button_coords[0],
 		//		close_button_coords[1], close_button_coords[2], close_button_coords[3] );
 				
 		float angle_rad  = 45.0*M_PI/180.0;
@@ -128,7 +128,7 @@ int FrameWindow::draw_min(	bool mHovering )
 		float center_x = (min_button_coords[1]-min_button_coords[0])/2.0+min_button_coords[0];
 		float center_y = (min_button_coords[2]-min_button_coords[3])/2.0+min_button_coords[3];
 		
-		//dprintf("Min button:  %6.1f, %6.1f, %6.1f, %6.1f \n", min_button_coords[0],
+		//Dprintf("Min button:  %6.1f, %6.1f, %6.1f, %6.1f \n", min_button_coords[0],
 		//		min_button_coords[1], min_button_coords[2], min_button_coords[3] );
 
 		Circle( center_x, center_y, m_buttons_radius );

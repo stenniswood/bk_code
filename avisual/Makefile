@@ -57,7 +57,7 @@ LDFLAGS += -lilclient -L$(SDKSTAGE)/opt/vc/lib/ -lGLESv2 -lEGL -lopenmaxil -lbcm
 DEPS   	 = 
 
 # OBJECT LISTS : 
-CAN_OBJS    = can_id_list.o can_eid.o 
+CAN_OBJS    = can_id_list.o can_eid.o CAN_Interface.o
 #CAN_Interface.o can_instance.o can_buff.o can_txbuff.o bk_system_defs.o 
 MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
 # ipc_mem_bkinstant.o
@@ -85,7 +85,7 @@ ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot
 DBASE_OBJS    = viki_logger.o vision_logger.o
 
 #ipc_can_rxbuff.o 
-IPC_OBJS   = CAN_memory.o client_memory.o visual_memory.o audio_memory.o 
+IPC_OBJS   = CAN_memory.o client_memory.o visual_memory.o audio_memory.o ipc_can_rxbuff.o
 ILCLIENT_OBJS = ilclient.o ilcore.o
 
 REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o \
@@ -117,7 +117,7 @@ ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o calendar_entry.o
 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o legend.o
-KINETIC_OBJS = balance.o 
+KINETIC_OBJS = balance.o vector_file.o
 DBASE_OBJS = can_sql_logger.o
 # APP CODE
 VOICE_OBJS 	= 

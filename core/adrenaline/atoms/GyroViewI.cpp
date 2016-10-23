@@ -10,18 +10,19 @@
 #include <string>
 #include <string.h>
 #include <math.h>
-#include "bk_system_defs.h"
-//#include "global.h"
 
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "/home/pi/openvg/fontinfo.h"
 #include "/home/pi/openvg/shapes.h"
+#include "vector_math.h"
+
 #include "control.hpp"
 #include "display.h"
-#include "GyroViewI.hpp"
-#include "vector_math.h"
+#include "global.h"
+#include "global_funcs.h"
 #include "fuse_accel.h"
+#include "GyroViewI.hpp"
 
 GyroView::GyroView( )
 {  
@@ -247,7 +248,7 @@ void 	GyroView::draw_heading(  )
 
 int GyroView::handle_incoming_msg( struct sCAN* msg )
 {
-	
+	return 0;
 }
 
 int   	GyroView::draw   	(  )

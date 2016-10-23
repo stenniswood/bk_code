@@ -18,7 +18,10 @@
 #include "control.hpp"
 #include "display.h"
 #include "load_cell_view.hpp"
-#include "bk_system_defs.h"
+//#include "bk_system_defs.h"
+#include "global.h"
+#include "global_funcs.h"
+
 
 #define Debug 0
 
@@ -115,7 +118,7 @@ int   	LoadCellView::draw   			(  )
 	float TotalWeight = 0.0;
 	Stroke_l ( 0xFF00FF00 );
 	Fill_l   ( 0xFF00003F );	
-	dprintf(" loadcell width=%6.1f; h=%6.2f;\n", m_sensor_width, m_sensor_height );
+	Dprintf(" loadcell width=%6.1f; h=%6.2f;\n", m_sensor_width, m_sensor_height );
 	
 	for (int i=0; i<4; i++)  {
 		// change color to m_sensor_values[i] mapped color.
@@ -127,7 +130,7 @@ int   	LoadCellView::draw   			(  )
 			box_color |= (scaled_reading);		
 		else
 			box_color |= (scaled_reading<<16);		
-		dprintf("Box color= %lx;  l=%6.2f; b=%6.2f\n", box_color, m_sensor_left[i], m_sensor_bottom[i] );
+		Dprintf("Box color= %lx;  l=%6.2f; b=%6.2f\n", box_color, m_sensor_left[i], m_sensor_bottom[i] );
 		Stroke_l ( 0xFF00FF00 );
 		Fill_l   ( box_color );
 		Roundrect(  m_sensor_left[i], m_sensor_bottom[i], 
@@ -145,7 +148,7 @@ int   	LoadCellView::draw   			(  )
 	TextMid( center_x, bottom+0.9*height, m_name, SerifTypeface, text_size );	
 	
 	// Print Toe Fraction:	
-	sprintf(title, "%3.0f %\n", m_toe_fraction*100 );
+	sprintf(title, "%3.0f \%\n", m_toe_fraction*100 );
 	Text( left+5, bottom+0.7*height, title, SerifTypeface, 10 );	
 	
 	bool left_foot = (strcmp(m_name, "left" )==0);	
@@ -162,6 +165,7 @@ int   	LoadCellView::draw   			(  )
 	TextMid( 0, 0, title, SerifTypeface, text_size );
 	Rotate( -90.0 );	
 	Translate( -x, -center_y );
+	return 1;
 }	
 
 

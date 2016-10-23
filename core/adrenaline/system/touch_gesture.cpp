@@ -13,7 +13,9 @@
 
 #include "VG/openvg.h"
 #include "VG/vgu.h"
-#include "bk_system_defs.h"
+
+#include "global.h"
+#include "global_funcs.h"
 #include "Graphbase.hpp"
 #include "control.hpp"
 #include "button.hpp"
@@ -265,7 +267,7 @@ bool DraggerGesture::recognize_three_up_down( )
 	float fractional_threshold = 0.2;
 	bool  vertical = true;
 	float average_vertical = 0;
-	struct mouse_t mouse2;
+	//struct mouse_t mouse2;
 	
 	static int state = 1;
 	switch(state)
@@ -376,7 +378,7 @@ bool DraggerGesture::flinger_one_finger( )
 { 
 	float dx = 0;
 	float dy = 0;
-	float sum = 0;
+	//float sum = 0;
 	static int DirectionCount = 0;	// number of times in current direction Latches in that dir.
 	static int Direction=0;
 	static int state = 1;

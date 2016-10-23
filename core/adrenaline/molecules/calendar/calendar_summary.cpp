@@ -51,18 +51,18 @@ void 	CalendarSummary::Initialize(	)
 }
 
 /* The user wants to see the specified month and day */
-int		CalendarSummary::show_date	( int mMonth, int mDay )
+void		CalendarSummary::show_date	( int mMonth, int mDay )
 { 
 	ce.m_scheduled_time_bd.tm_mon = mMonth;
 	ce.m_scheduled_time_bd.tm_mday = mDay;	
 	ce.find_date(2);
 	int number_entries = ce.get_number_results();
-	dprintf("CalendarSummary::show_date() %d entries found for this date\n", number_entries );
+	Dprintf("CalendarSummary::show_date() %d entries found for this date\n", number_entries );
 }
 
 int   	CalendarSummary::onCreate			(	)
 { 
-	dprintf("CalendarSummary::onCreate()\n");
+	Dprintf("CalendarSummary::onCreate()\n");
 	int retval = Control::onCreate();
 	m_left_margin = left+10;	
 	return retval;
@@ -103,6 +103,7 @@ void  	CalendarSummary::draw_entry_details 	( int mRow_index )
 
 int		CalendarSummary::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
 { 
+	return 0;
 }
 
 int		CalendarSummary::onClick		(int x, int y, bool mouse_is_down)

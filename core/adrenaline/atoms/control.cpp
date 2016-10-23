@@ -118,7 +118,7 @@ void Control::print_positions( )
 
 void Control::print_color_info( )
 {
-	printf("Control:  border_color=%6x; text_color=%6x; background_color=%6x; \n", 
+	printf("Control:  border_color=%6lx; text_color=%6lx; background_color=%6lx; \n", 
 					  border_color,     text_color,     background_color );
 }
 
@@ -137,7 +137,7 @@ int	Control::onCreate(  )
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
 	{
-		if (Debug) printf("Control::onCreate() Child Create: %d %x\n", count++, *iter );
+		if (Debug) printf("Control::onCreate() Child Create: %d %p\n", count++, *iter );
 		(*iter)->onCreate();
 		iter++; 
 	}	
@@ -264,7 +264,6 @@ void  Control::move_to( float Left, float Bottom )
 	left   = Left;
 	bottom = Bottom;	
 
-	Control* retval = NULL;
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
 	{
@@ -284,7 +283,7 @@ void Control::load_resources( )
 
 bool Z_compare (Control* i,Control* j) 
 {
- 	if (Debug)  printf("%d %d ", i, i->z_order); 
+ 	if (Debug)  printf("%p %ld ", i, i->z_order); 
 	return (i->z_order < j->z_order); 
 }
 
@@ -308,6 +307,8 @@ void Control::sort_z_order()
 	std::sort( m_child_controls.begin(), m_child_controls.end(), Z_compare );
 }
 
+/* Return :  0  Not drawn (for any reason)
+		     1  drawn		*/
 int Control::draw() 
 {
 	if (Visible==false)	 return 0;
@@ -330,7 +331,7 @@ int Control::draw()
 	return TRUE;
 }
 
-int Control::erase()
+void Control::erase()
 {
 	/* Erase background of the control */
 	Stroke_l ( 0x00000000 );
@@ -345,6 +346,7 @@ int Control::draw_border()
 	Stroke_l ( border_color );
 	Fill_l   ( background_color );
 	Roundrect( left, bottom, width, height, 15.0, 15.0);
+	return 1;
 }
 
 Control* Control::ChildrenHitTest( int x, int y )
@@ -359,7 +361,7 @@ Control* Control::ChildrenHitTest( int x, int y )
 	{
 		retval = (*iter)->HitTest( x,y );		
 		if (retval) {
-			if (Debug) printf("Hit: %s %s\t", (*iter)->class_name, retval);
+			if (Debug) printf("Hit: %s %p\t", (*iter)->class_name, retval);
 			if (Debug) (*iter)->print_positions();
 			hit_objects.push_back( retval );
 		}
@@ -372,14 +374,14 @@ Control* Control::FindHighestZOrder( std::vector<Control*> &mObjects )
 {
 	Control* highest_control = NULL;
 	long int highest = -1;
-	for (int i=0; i<mObjects.size(); i++)
+	for (size_t i=0; i<mObjects.size(); i++)
 		if (mObjects[i]->z_order > highest)
 		{
 			highest = mObjects[i]->z_order;
 			highest_control = mObjects[i];
 		}
 	if (highest_control)
-		if (Debug) printf("overlapping objects=%d, highest Z order: %x \n", mObjects.size(), highest_control );
+		if (Debug) printf("overlapping objects=%d, highest Z order: %p \n", mObjects.size(), highest_control );
 	return highest_control;
 }
 
@@ -448,7 +450,7 @@ void Control::print_children( )
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )  
 	{ 
-		if (Debug) printf(" Children:  %x \t", *iter ); 
+		if (Debug) printf(" Children:  %p \t", *iter ); 
 		(*iter)->print_positions();
 		iter++; 
 	};		
@@ -456,13 +458,13 @@ void Control::print_children( )
 
 void Control::unregister_child	( Control* mNewChild )
 {
-	if (Debug) printf("\t\tControl::unregister_child( %x )\n", mNewChild );	
+	if (Debug) printf("\t\tControl::unregister_child( %p )\n", mNewChild );	
 
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while (( *iter != mNewChild ) && (iter != m_child_controls.end()))
 	{ iter++; };
 
-	if (Debug) printf("Unregistering_child( %x )\n", *iter );
+	if (Debug) printf("Unregistering_child( %p )\n", *iter );
 	m_child_controls.erase( iter );
 }
 

@@ -167,8 +167,14 @@ int gps_sample()
 	return 0;
 }
 
+#include "../core/misc/fuzzy.hpp"
+#include "../core/misc/fuzzy_signal.hpp"
+
 int main( int argc, char *argv[] )
 {
+	//test_fuzzy();
+	test_fuzzy_signal();
+	
 	char 			write_buff[255];
 	char 			read_buff [255];
 	char	dev[25] = "/dev/ttyUSB0";

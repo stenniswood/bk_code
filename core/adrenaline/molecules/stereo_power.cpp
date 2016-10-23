@@ -13,12 +13,12 @@
 #include "display.h"
 #include "power_level.hpp"
 #include "stereo_power.hpp"
+#include "global_funcs.h"
 
 
 #define margin_percent 0.07
 
 #define Debug 0
-#define dprintf if (Debug) printf
 
 
 
@@ -77,7 +77,7 @@ StereoPowerLevels::~StereoPowerLevels()
 int StereoPowerLevels::draw( )
 {
 	Control::draw();
-	dprintf("StereoPowerLevels::draw()\n");
+	Dprintf("StereoPowerLevels::draw()\n");
 	left_ch.draw();
 	right_ch.draw();		
 }

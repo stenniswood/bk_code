@@ -12,6 +12,7 @@
 #include "string_util.h"
 #include "prefilter.hpp"
 #include "nlp_extraction.hpp"
+#include "global_funcs.h"
 
 
 #define Debug 0
@@ -67,7 +68,7 @@ bool Sentence::prefilter_text(  )
         m_sentence[m_sentence_length-1] = 0;
         m_sentence_length--;
     }*/
-    dprintf ("Prefiltered sentence:|%s|\n", m_sentence.c_str() );
+    Dprintf ("Prefiltered sentence:|%s|\n", m_sentence.c_str() );
     return true;
 }
 

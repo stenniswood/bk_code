@@ -38,6 +38,7 @@
 #include "visual_memory.h"
 #include "bk_system_defs.h"
 #include "client_memory.hpp"
+#include "global_funcs.h"
 
  
 #define Debug 0
@@ -190,7 +191,7 @@ void establish_connection()
 	   then we call accept().  Since select()/Poll() are nonblocking, we can
 	   also check for connect_to_robot() client initiated request.
 	*/
-	dprintf("establish_connection()\n");	
+	Dprintf("establish_connection()\n");	
     socklen_t size = (socklen_t)sizeof(client_addr);	
     memset(&client_addr, '0', sizeof(socklen_t) );
 	
@@ -238,7 +239,7 @@ void establish_connection()
 				
 			}
 	}
-	//dprintf("Connection established \n");
+	//Dprintf("Connection established \n");
 }
 
 /******************************************************

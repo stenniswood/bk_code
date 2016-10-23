@@ -12,12 +12,12 @@
 #include "control.hpp"
 #include "radiobutton.hpp"
 #include "display.h"
+#include "global_funcs.h"
 
 
 
 #define margin_percent 0.07
 #define Debug 1
-#define dprintf if (Debug) printf
 
 
 RadioButton::RadioButton(int Left, int Right, int Top, int Bottom )
@@ -252,7 +252,7 @@ void RadioButton::set_text( const char* NewText, bool mWrapContent )
 }*/
 int	RadioButton::onClick(int x, int y, bool mouse_is_down)
 {
-	dprintf("RadioButton::onClick() %s\n", text);
+	Dprintf("RadioButton::onClick() %s\n", text);
 //	checked = !checked;
 	select();
 //	draw();

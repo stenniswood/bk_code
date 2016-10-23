@@ -28,15 +28,15 @@ extern Mouse mouse;
 // eventThread reads from the mouse input file
 static void* eventThread(void *arg) 
 {
-	dprintf("eventThread(): \n");
+	Dprintf("eventThread(): \n");
 	char counter=0;
 	char dev_name[40];
 	
 	//Mouse* M = (Mouse*) arg;	
 	Mouse* M = (Mouse*) &mouse;
 	
-	dprintf("Mouse M=%p\n", M );
-	dprintf("Mouse mode=%d\n", M->mouse_mode );
+	Dprintf("Mouse M=%p\n", M );
+	Dprintf("Mouse mode=%d\n", M->mouse_mode );
 	
 	// Open mouse driver
 //	if ((mouse_fd = open("/dev/input/mouse0", O_RDONLY)) < 0) {	
@@ -47,7 +47,7 @@ static void* eventThread(void *arg)
 		//sprintf( dev_name, "/dev/input/mouse%d", counter );		
 		mouse_fd = open( dev_name, O_RDONLY );
 		if (mouse_fd >= 0) {
-			dprintf( "Opened Mouse:  %s\n", dev_name );
+			Dprintf( "Opened Mouse:  %s\n", dev_name );
 			//M->show_mouse();			
 			break;
 		} 
@@ -69,7 +69,7 @@ static void* eventThread(void *arg)
 		//M->hide_mouse();
 		M->handle_event();
 
-		dprintf("\n");
+		Dprintf("\n");
 	}
 }
 
@@ -85,7 +85,7 @@ void Mouse::print_event_info()
 		printf("EV_ABS:");	
 	if (mouse_ev.type == EV_KEY)
 		printf("EV_KEY:");
-	dprintf("t=%d, c=%d, v=%d\t", mouse_ev.type, mouse_ev.code, mouse_ev.value );
+	Dprintf("t=%d, c=%d, v=%d\t", mouse_ev.type, mouse_ev.code, mouse_ev.value );
 }
 
 void Mouse::handle_event()
@@ -191,7 +191,7 @@ void Mouse::extract_finger_info()
 
 Mouse::Mouse()
 {
-	dprintf("Mouse::Mouse()\n");
+	Dprintf("Mouse::Mouse()\n");
 }
 Mouse::~Mouse()
 {
@@ -225,7 +225,7 @@ void Mouse::Initialize()
 	CursorBuffer = vgCreateImage(VG_sABGR_8888, cbsize, cbsize, VG_IMAGE_QUALITY_BETTER);
 	init_fingers();  
 
-	dprintf("Mouse this=%p\n", this );
+	Dprintf("Mouse this=%p\n", this );
 	
 	// CREATE A THREAD TO READ FROM DEVICE:
 	int result = pthread_create( &inputThread_id, NULL, &eventThread, this );
@@ -347,7 +347,7 @@ void Mouse::close_fd()
 void Mouse::show_mouse()
 {
 	save_mouse();
-	dprintf("show_mouse:  mode=%d\n",mouse_mode);
+	Dprintf("show_mouse:  mode=%d\n",mouse_mode);
 	switch (mouse_mode)
 	{
 	//void draw_cursor(int curx, int cury, int width, int height, int s) 

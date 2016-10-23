@@ -68,7 +68,7 @@ public:
 		the fly".	*/
 	virtual int   	draw				(	);
 	int   			draw_border			(   );
-	int 			erase				(   );
+	void 			erase				(   );
 
 	void			Revalidate			( );
 	void			Invalidate			( )			{ invalidated = true; };

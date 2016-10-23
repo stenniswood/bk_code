@@ -17,6 +17,8 @@
 #include "display.h"
 #include "system_status.hpp"
 #include "keyboard.hpp"
+#include "global.h"
+#include "global_funcs.h"
 
 #define Debug 0
 
@@ -24,7 +26,7 @@
 void show_soft_keyboard( void* mSystemStatusBar )
 {
 	MainDisplay.show_keyboard();
-	printf("show_soft_keyboard :: SHOW KEYBOARD  %x  %x \n", mSystemStatusBar,((SystemStatusBar*)mSystemStatusBar)->m_power_button );
+	Dprintf("show_soft_keyboard :: SHOW KEYBOARD  %p  %p \n", mSystemStatusBar,((SystemStatusBar*)mSystemStatusBar)->m_power_button );
 //	if (((SystemStatusBar*)mSystemStatusBar)->invalidated)
 //		printf("INVALID!\n");		
 	//MainDisplay.m_keyboard.Invalidate();
@@ -37,7 +39,7 @@ void show_calendar( void* mSystemStatusBar )
 		MainDisplay.show_calendar();
 	else 
 		MainDisplay.hide_calendar();
-	dprintf("show_calendar :: SHOW CALENDAR\n");	
+	Dprintf("show_calendar :: SHOW CALENDAR\n");	
 }
 
 
@@ -82,6 +84,7 @@ int  SystemStatusBar::draw 			 (	 )
 	float x=left+margin;
 	float y=bottom+height-(text_size*1.5);	
 	Text( x,y, m_text.c_str(), SerifTypeface,  text_size ); */
+	return 1;
 }
 void SystemStatusBar::calc_metrics	 (   ) 
 { }

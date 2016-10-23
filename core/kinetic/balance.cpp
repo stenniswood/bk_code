@@ -109,7 +109,7 @@ bool fuzzy_equal( float mValue, float mAverage, float mStdDev )
 			true  has reached Avereage within tol.  or past it.		*/
 bool fuzzy_not_to_exceed( float mValue, float mAverage, float mStdDev )
 {											// +45
-	float upper = mAverage + mStdDev;		// +50
+	//float upper = mAverage + mStdDev;		// +50
 	float lower = mAverage - mStdDev;		// +40
 	if ((mValue > lower))
 		return true;
@@ -120,7 +120,7 @@ bool fuzzy_not_to_exceed( float mValue, float mAverage, float mStdDev )
 bool fuzzy_less_than_or_equal_to( float mValue, float mAverage, float mStdDev )
 {											// for -45 +- 5. = 
 	float upper = mAverage + mStdDev;		// -40
-	float lower = mAverage - mStdDev;		// -50
+	//float lower = mAverage - mStdDev;		// -50
 	if ((mValue < upper))
 		return true;
 	return false;
@@ -134,7 +134,7 @@ bool fuzzy_less_than_or_equal_to( float mValue, float mAverage, float mStdDev )
 bool fuzzy_dont_go_past( float mValue, float mOriginalValue, float mAverage, float mStdDev )
 {
 	float upper = mAverage + mStdDev;
-	float lower = mAverage - mStdDev;	
+	//float lower = mAverage - mStdDev;	
 	if ((mValue < upper))
 		return true;
 	return false;

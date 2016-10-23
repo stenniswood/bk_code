@@ -16,12 +16,12 @@
 //#include <inttypes.h>
 
 #include "global.h"
-#define dprintf Dprintf
 
-#ifndef radians
+
+/*#ifndef radians
 #define radians(arg) ((arg)*3.1415/180.0)
 #define degrees(arg) ((arg)*180.0/3.1415)
-#endif
+#endif */
 
 #define BOARD_MODEL 11
 #define SerialNumber 0x12345678

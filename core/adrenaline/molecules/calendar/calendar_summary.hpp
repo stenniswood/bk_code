@@ -20,7 +20,7 @@ public:
 	
 	virtual void 	Initialize(	);
 	
-	int				show_date	( int mMonth, int mDay );	// other than the current
+	void			show_date	( int mMonth, int mDay );	// other than the current
 
 
 	virtual int   	onCreate			(	);	

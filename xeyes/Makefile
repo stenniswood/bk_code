@@ -16,9 +16,9 @@ ifeq ($(PLATFORM), $(Mac))
 HARDWARE_PATH = ./hardware/mac/
 endif
 
-cc         = g++
-OPTIONS	   = -std=c99 -g  
-CFLAGS = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) -std=gnu++11 \
+cc      = g++
+OPTIONS	= -std=c99 -g  
+CFLAGS  = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) \
 	     -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
 
 # ***** INCLUDE PATHS : 
@@ -56,7 +56,7 @@ INSTANT_OBJS  =
 KINETIC_OBJS  = vector.o
 
 %.o: %.cpp $(DEPS)
-	$(CC) $(ALL_INCLUSIVE) -c -o $@ $< -g $(CFLAGS)
+	$(CC) $(ALL_INCLUSIVE) -c -o $@ $< -g $(CFLAGS) -std=gnu++11
 %.o: %.c $(DEPS)
 	$(CC) $(ALL_INCLUSIVE) -c -o $@ $< $(OPTIONS) -g $(CFLAGS)
 

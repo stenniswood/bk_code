@@ -192,7 +192,7 @@ void do_bow( )
 		}
 		break;
 	case 4 : 	/* stop */
-		printf("Stop Bow, at stand.\n", Hip_instanceL, duty );
+		printf("Stop Bow, at stand %d %6.1f\n", Hip_instanceL, duty );
 		duty = 0;
 		pack_move_speed			( &msg, Hip_instanceL, 0.0 );
 		shm_add_can_tx_message	( &msg );	

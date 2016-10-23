@@ -25,7 +25,7 @@
 #include "client.h"
 #endif
 
-
+//byte TransmissionInProgress = FALSE;	Must use another file to define.  ie.  core/ipc/ipc_can_rxbuff.o
 uint8_t ReadyToSendAnother = FALSE; 
 
 //int value;

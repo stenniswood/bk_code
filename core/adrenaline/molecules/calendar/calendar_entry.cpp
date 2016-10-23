@@ -13,13 +13,13 @@
 #include "bk_system_defs.h"
 //#include "calendar.hpp"
 #include "calendar_entry.hpp"
+#include "global_funcs.h"
 
 
 //extern MYSQL *calendar_db;
 MYSQL 		 *calendar_db = NULL;
 
 #define Debug 0
-//#define dprintf if (Debug) printf
 
 
 void object_finish_with_error( )
@@ -163,7 +163,7 @@ void CalendarEntry::find_date( int mUser_id )
 	query_string += "bk_useraccounts.calendar.date="; 
 	query_string += form_date_string( );
 	query_string += ";";	
-	dprintf("%s\n", query_string.c_str() );
+	Dprintf("%s\n", query_string.c_str() );
 	query(true);
 }
 void CalendarEntry::find_location		( string mLocation   )

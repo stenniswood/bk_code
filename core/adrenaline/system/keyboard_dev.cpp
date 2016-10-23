@@ -5,7 +5,6 @@
 #include <linux/input.h>
 #include <fcntl.h>
 #include <pthread.h>
-//#include <string.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -100,7 +99,7 @@ void *Keyboard_eventThread(void *arg)
 				else shift_down = true;
 			} else if (keyboard_ev.value>=1  && keyboard_ev.value<=2)
 			{
-					if (shift_down)  dprintf("shift down");
+					if (shift_down)  Dprintf("shift down");
 					
 					ch = map_key(keyboard_ev.code);
 					MainDisplay.relay_key( ch );					

@@ -55,7 +55,7 @@ MISC_OBJS  =  vector_math.o ini_file.o super_string.o string_util.o
 FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 APP_CPP_OBJS	= instant_main.o 
 IPC_OBJS    	= picamscan_memory.o sway_memory.o vision_memory.o visual_memory.o audio_memory.o \
-		  		  CAN_memory.o client_memory.o simulator_memory.o sequencer_memory.o  
+		  		  CAN_memory.o client_memory.o simulator_memory.o sequencer_memory.o
 THREAD_OBJS 	= video_thread.o can_thread.o file_thread.o listen_thread.o \
 				  file_tx_thread.o hmi_thread.o thread_control.o
 HARDWARE_OBJS = GPIO_device.o AUDIO_device.o IMAGE_device.o CAMERA_device.o

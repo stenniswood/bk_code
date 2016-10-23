@@ -11,17 +11,20 @@
 #include <string.h>
 #include <math.h>
 #include <vector>
-//#include "global.h"
-#include "bk_system_defs.h"
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "/home/pi/openvg/fontinfo.h"
 #include "/home/pi/openvg/shapes.h"
+#include "vector_math.h"
+
+//#include "bk_system_defs.h"
+#include "global.h"
+#include "global_funcs.h"
 
 #include "control.hpp"
 #include "display.h"
 #include "compass.hpp"
-#include "vector_math.h"
+
 #include "fuse_accel.h"
  
 
@@ -111,6 +114,7 @@ int		CompassView::onCreate	  (  )
 {
 	Control::onCreate();
 	load_resources();
+	return 1;
 }
 
 void CompassView::load_resources()
@@ -168,6 +172,7 @@ void 	CompassView::draw_info(  )
 
 int CompassView::handle_incoming_msg( struct sCAN* msg )
 {	
+	return 0;
 }
 
 int   	CompassView::draw   	(  )

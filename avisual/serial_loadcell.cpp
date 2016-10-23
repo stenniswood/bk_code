@@ -601,7 +601,7 @@ int LoadCell_SerialInterface::serial_loadcell_main(int argc, char * argv[])
 
 	_write_size = (_cl_tx_bytes == 0) ? 1024 : _cl_tx_bytes;
 
-	_write_data = malloc(_write_size);
+	_write_data = malloc( (unsigned char*)_write_size );
 	if (_write_data == NULL) {
 		printf("ERROR: Memory allocation failed\n");
 	}

@@ -167,7 +167,7 @@ bool SuperString::is_nth_word_a_number( int mIndex )
 {
     if (mIndex>=m_split_words.size()) return false;
     if (m_split_words[mIndex].length()==0) return false;
-    dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
+    Dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
     
     size_t length = m_split_words[mIndex].length();
     for (int i=0; i<length; i++)
@@ -185,7 +185,7 @@ bool SuperString::is_nth_word_a_number_nd    ( int mIndex )
 {
     if (mIndex>=m_split_words.size()) return false;
     
-    dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
+    Dprintf("%d nth word=[%s]\n", mIndex, m_split_words[mIndex].c_str()  );
     
     size_t length = m_split_words[mIndex].length();
     for (int i=0; i<length; i++)

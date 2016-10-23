@@ -12,7 +12,8 @@
 #include "/home/pi/openvg/shapes.h"
 #include "adrenaline_windows.h"
 #include "calendar.hpp"
-
+#include "global.h"
+#include "global_funcs.h"
 
 const 	float x_margin = 10.;
 
@@ -21,12 +22,12 @@ const int CALENDAR_DEFAULT_WIDTH  = 250;
 char days_of_week_1_letter[] = { 'S', 'M', 'T', 'W', 'T', 'F', 'S' };
 
 #define Debug 0
-//#define dprintf if (Debug) printf
+//#define Dprintf if (Debug) printf
 
 void prev_month_cb( void* mCalendar )
 {
 	Calendar* cal = (Calendar*) mCalendar;
-	dprintf("prev_month_cb!!  %d \n", cal->m_shown_month );
+	Dprintf("prev_month_cb!!  %d \n", cal->m_shown_month );
 	cal->previous_month();
 	cal->compute_date_info();
 	cal->Invalidate();
@@ -35,7 +36,7 @@ void prev_month_cb( void* mCalendar )
 void next_month_cb( void* mCalendar )
 {
 	Calendar* cal = (Calendar*) mCalendar;
-	dprintf("next_month_cb!!  %d \n", cal->m_shown_month );
+	Dprintf("next_month_cb!!  %d \n", cal->m_shown_month );
 	cal->next_month();
 	cal->compute_date_info();	
 	cal->Invalidate();
@@ -172,11 +173,11 @@ void Grid::hit_test(int mx, int my)
 
 void Grid::draw ()
 {	
-	for (int r=0; r<m_row_bottom_y.size(); r++)
+	for (uint16_t r=0; r<m_row_bottom_y.size(); r++)
 		Line( left, (m_row_bottom_y)[r], left+width, (m_row_bottom_y)[r] );
 
 	//printf("Grid: # Cols=%d\n", m_column_start_x.size() );
-	for (int c=0; c<m_column_start_x.size(); c++)
+	for (uint16_t c=0; c<m_column_start_x.size(); c++)
 		Line( (m_column_start_x)[c], bottom, (m_column_start_x)[c], bottom+height );	
 
 	// Draw Inverted square if clicked:		
@@ -231,7 +232,7 @@ void Calendar::Initialize(	)
 	m_shown_year  = m_local_time.tm_year+1900;
 	m_shown_day	  = m_local_time.tm_mday;
 	
-	//dprintf("%s (%d)\nBUTTONS: \n", days_of_week[m_local_time.tm_wday].c_str(), m_local_time.tm_wday );
+	//Dprintf("%s (%d)\nBUTTONS: \n", days_of_week[m_local_time.tm_wday].c_str(), m_local_time.tm_wday );
 	
 	background_color = 0xFFA0002C;
 	set_width_height( CALENDAR_DEFAULT_WIDTH, CALENDAR_DEFAULT_HEIGHT );
@@ -255,7 +256,7 @@ void Calendar::get_current_time(	)
 	if (Debug) {
 		char time[80];
 		strftime(time, 79, "Time=%r; Date=%A, %B %d, %Y;", &m_local_time );
-		//dprintf("%s\n", time );	
+		//Dprintf("%s\n", time );	
 	}
 }
 void	Calendar::show_date	( int mMonth, int mDay ) 
@@ -360,7 +361,7 @@ int Calendar::draw_1month_view_small(	)
 	sprintf(date_str, "%4d", m_shown_year );	
 	int text_width = TextWidth( date_str, SerifTypeface, text_size );
 	float year_x = left+width - m_next.get_left()-text_width;
-	//dprintf("Year is: %s; m_next.left=%d;  x=%6.1f; width=%d\n", date_str, m_next.get_left(), year_x, text_width );
+	//Dprintf("Year is: %s; m_next.left=%d;  x=%6.1f; width=%d\n", date_str, m_next.get_left(), year_x, text_width );
 	TextEnd(year_x, y, date_str, SerifTypeface, text_size );	// 
 	
 	// DRAW DAYS of the WEEK "M,T,W,T,F,S,S") : 
@@ -372,7 +373,7 @@ int Calendar::draw_1month_view_small(	)
 		sprintf(date, " %2c ", days_of_week_1_letter[i] );
 		strcat (date_str, date  );
 	}
-	//dprintf("Date Str (1week) %6.2f %6.2f : %s \n", x, y, date_str );
+	//Dprintf("Date Str (1week) %6.2f %6.2f : %s \n", x, y, date_str );
 	Text(x, y, date_str, SerifTypeface, text_size );
 
 	// get Current Day:		
@@ -443,7 +444,6 @@ void Calendar::fill_in_days_shown_array( int mStartDay /* prev month */ )
 		month_offset = 0;		// First day of this month is sunday.  so we are not showing any of previous month.
 	int c=0;
 	char date[8];	
-	bool done;
 	for (int w=0; (month_offset!=1); w++)		// week in month
 	{
 		for (int d=0; d<7; d++) 
@@ -457,9 +457,9 @@ void Calendar::fill_in_days_shown_array( int mStartDay /* prev month */ )
 			day++;
 			c++;
 		}	
-		dprintf("\n");	
+		Dprintf("\n");	
 	}	
-	dprintf("fill_in_days_shown_array() c=%d;\n",c);	
+	Dprintf("fill_in_days_shown_array() c=%d;\n",c);	
 //printf("this month_end=%d\n", m_this_month_end ); 
 }
 
@@ -478,8 +478,8 @@ void Calendar::compute_date_info()
 	som.tm_year = m_shown_year-1900;
 	som.tm_hour = 1; som.tm_min = 0; som.tm_sec = 0;
 	
-	time_t first_day_t = mktime( &som );			// fill in day of week.
-//	dprintf("First of the %s month is on %s %d \n", Months[som.tm_mon].c_str(), 
+//	time_t first_day_t = mktime( &som );			// fill in day of week.
+//	Dprintf("First of the %s month is on %s %d \n", Months[som.tm_mon].c_str(), 
 //					days_of_week[som.tm_wday].c_str(), som.tm_wday );
 	m_shown_weekday    = som.tm_wday;
 	
@@ -494,7 +494,7 @@ void Calendar::compute_date_info()
 	mktime( &som );
 	m_this_month_end = som.tm_mday;	
 
-//	dprintf("Last day of (Prev, this month) is  (%d, %d) \n", 
+//	Dprintf("Last day of (Prev, this month) is  (%d, %d) \n", 
 //					m_prev_month_end, m_this_month_end );
 	
 	// Now back off number of weekdays:
@@ -502,7 +502,7 @@ void Calendar::compute_date_info()
 	som.tm_year = m_shown_year-1900;
 	som.tm_mday = 1-m_shown_weekday;
 	mktime( &som );
-//	dprintf("Cal starts with %d (%d) month_end=%d\n", som.tm_mday, som.tm_mon, m_prev_month_end );
+//	Dprintf("Cal starts with %d (%d) month_end=%d\n", som.tm_mday, som.tm_mon, m_prev_month_end );
 	m_days_shown[0] = som.tm_mday;
 	
 	fill_in_days_shown_array( m_days_shown[0] );
@@ -532,7 +532,7 @@ void Calendar::find_date_clicked( )
 	
 	int month = m_shown_month + month_offset;
 	show_date( month, day );
-	dprintf("\tDate Clicked:  %s, %d\n", Months[month].c_str(), day );
+	Dprintf("\tDate Clicked:  %s, %d\n", Months[month].c_str(), day );
 	Invalidate();
 }
 

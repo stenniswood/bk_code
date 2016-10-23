@@ -20,11 +20,11 @@
 #include "button.hpp"
 #include "display.h"
 #include "text_view.hpp"
-
+#include "global_funcs.h"
 
 #define margin_percent 0.07
 #define Debug 0
-#define dprintf if (Debug) printf
+
 
 TextView::TextView(int Left, int Right, int Top, int Bottom )
 :ScrollControl(Left, Right, Top, Bottom)
@@ -83,11 +83,11 @@ void TextView::calc_margins( float fraction )
 void TextView::print_info(	)
 {
 	printf("TextView::  text_size =%6.1f;  \n", text_size );	
-	printf("line_height          \t=%d ", 		line_height );
+	printf("line_height          \t=%6.2f ",	line_height );
 	printf("num_visible_lines    \t=%d ", 		max_num_visible_lines );
 	printf("first_visible_line   \t=%d", 		first_visible_line );
-	printf("max_num_visible_lines\t=%6.1f;\n", 	max_num_visible_lines );
-	printf("num_lines_present    \t=%6.1f;\n",  num_lines_present );
+	printf("max_num_visible_lines\t=%d;\n", 	max_num_visible_lines );
+	printf("num_lines_present    \t=%d;\n", 	num_lines_present );
 }
 
 //	printf("calc_metrics:  text_size=%6.1f\n", text_size);
@@ -166,7 +166,7 @@ char* TextView::get_word_break( char* mString, int mMaxLength )
 /* Out of all the text, get one complete line */
 char* TextView::get_end_of_line	( char* mText )	// for eol 
 {
-	int   strLength   	   = strlen(mText);
+	//int   strLength   	   = strlen(mText);
 	char* pos 			   = strchr(mText, (int)'\n' );
 	if (pos==NULL)	   pos = strchr(mText, (int)'\r' );
 	
@@ -218,7 +218,7 @@ int TextView::count_num_lines_present(  )
 		if (eol) {
 			remember = *eol;	// eol
 			*eol = 0;
-			dprintf("length_from_start=%d; eol_length=%d;|%s|\n", (eol-text), (eol-ptr), ptr );
+			Dprintf("length_from_start=%d; eol_length=%d;|%s|\n", (eol-text), (eol-ptr), ptr );
 			*eol = remember;		// restore
 		}
 		Lines++;				// Count it!
@@ -285,8 +285,8 @@ int TextView::draw()
 {
 	ScrollControl::draw();
  
-	if (height==0) 	return 1;
-	if (text==NULL) return 1;
+	if (height==0) 	return 0;
+	if (text==NULL) return 0;
 
 	// 
 	Fill_l(text_color);					// 
@@ -315,6 +315,7 @@ int TextView::draw()
 		//printf("loop 1 completed\n");
 	} while ( (ptr-text) < total_length ); 
 	//printf("TextView::draw(): done! \n");	
+	return 1;
 }
 
 
@@ -322,7 +323,7 @@ void TextView::load_file( char* mFullFilename )
 {
 	struct stat buf;
 	FILE* fd = fopen( mFullFilename, "r" );
-	if (Debug) 	printf("load_file:: filename=%s;\t\tfd=%x\n", mFullFilename, fd);
+	if (Debug) 	printf("load_file:: filename=%s;\t\tfd=%p\n", mFullFilename, fd);
 	if (fd==NULL)
 	{
 		text = "File not found";
@@ -339,7 +340,7 @@ void TextView::load_file( char* mFullFilename )
 				
 		text = new char[FileSize];
 		int bytes_read=0;
-		char* ptr = text;
+		//char* ptr = text;
 		// need to allocate entire file at once.
 		bytes_read = fread( text, 1, FileSize, fd );
 		if (bytes_read != FileSize)

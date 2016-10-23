@@ -63,7 +63,7 @@ Keyboard::~Keyboard()
 
 void	Keyboard::initialize_keys()
 {
-	dprintf("Initilizing Keyboard\n");
+	Dprintf("Initilizing Keyboard\n");
 	struct stKey key;
 	key.width  = KEY_WIDTH;
 	key.height = KEY_HEIGHT;		// we'll adjust the height to match the 16:9 aspect ratio for which the data is intended.	
@@ -100,7 +100,7 @@ void	Keyboard::initialize_keys()
 	}
 
 	// ROW #2 : asdfghjkl
-	char array2[] = { 'A','S','D','F','G','H','J','K','L', '<=' };
+	char array2[] = { 'A','S','D','F','G','H','J','K','L', "<=" };
 	key.x  = 5+KEY_SPACING_COL/2;
 	key.y += (KEY_SPACING_ROW);
 	for (int col=0; col<10; col++)
@@ -128,7 +128,7 @@ void	Keyboard::initialize_keys()
 
 void	Keyboard::initialize_alt_keys()
 {
-	dprintf("Initilizing Symbol Keyboard\n");
+	Dprintf("Initilizing Symbol Keyboard\n");
 	struct stKey key;
 	key.width  = KEY_WIDTH;
 	key.height = KEY_HEIGHT;		// we'll adjust the height to match the 16:9 aspect ratio for which the data is intended.	
@@ -211,7 +211,7 @@ void Keyboard::Initialize()
 	memset(m_composition, 0, 127);
 	
 	register_child( &m_close );
-	dprintf("===Keyboard::Initialize()  Key_color = %x\n", key_color );	
+	Dprintf("===Keyboard::Initialize()  Key_color = %lx\n", key_color );	
 }
 
 void Keyboard::adjust_height()
@@ -288,13 +288,14 @@ int Keyboard::draw()
 	else 
 		draw_keys();
 
-	//dprintf("Keyboard::draw() done\n" );		
+	//Dprintf("Keyboard::draw() done\n" );		
+	return 1;
 }
 
 Control* Keyboard::HitTest( int x, int y )
 {
 	Control* retval = Window::HitTest(x,y);
-	//dprintf("Keyboard::HitTest()  %x\n", retval); 
+	//Dprintf("Keyboard::HitTest()  %x\n", retval); 
 	return retval;
 }
 
@@ -309,7 +310,7 @@ void Keyboard::append_character	(char mChar)
 	m_composition[m_index] 		= mChar;
 	m_composition[m_index+1]    = 0; 
 	m_index++;  
-	dprintf("append_character()  m_index=%d; %s \n", m_index, m_composition);
+	Dprintf("append_character()  m_index=%d; %s \n", m_index, m_composition);
 }
 
 int Keyboard::handle_special_keys( int mKeyIndex )
@@ -364,7 +365,7 @@ int Keyboard::find_min_distance( int x, int y )
 		{
 			min_distance = distance;
 			min_index    = i;
-			//dprintf("%d min_dist=%6.1f; %s\n", i, min_distance, m_keys[i].text );
+			//Dprintf("%d min_dist=%6.1f; %s\n", i, min_distance, m_keys[i].text );
 		}
 	}
 	return min_index;	
@@ -399,14 +400,14 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 	
 	char* key_name;
 	char key;
-	//dprintf("Keyboard::onClick()  x,y = %d,%d\n", x, y );
+	//Dprintf("Keyboard::onClick()  x,y = %d,%d\n", x, y );
 	//if ((Debug) && m_alt_down) printf("===== ALT KEYBOARD ACTIVE ===\n");
 	int closest_key = find_min_distance( x,y );
 
 	int key_index = closest_key;
 	key_name = get_key_text(closest_key);
 	key = key_name[0];
-	dprintf("Min Distance, closest key is %d = %s", closest_key, key_name );
+	Dprintf("Min Distance, closest key is %d = %s", closest_key, key_name );
 	
 	if (m_shift_down)	
 		m_shift_down = false;	// just 1 key! 
@@ -423,9 +424,9 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 	append_character ( key );
 	if (m_index>BUFFER_LENGTH)	m_index = BUFFER_LENGTH;
 	
-	dprintf(" Keyboard::xy=<%d,%d>; key_index=%d;  key:<%d,%d>  %c\n", x,y, key_index,
+	Dprintf(" Keyboard::xy=<%d,%d>; key_index=%d;  key:<%d,%d>  %c\n", x,y, key_index,
 					m_keys[key_index].x, m_keys[key_index].y, m_keys[key_index].text[0] );												 
-	dprintf(" Keyboard::%s\n", m_composition );
+	Dprintf(" Keyboard::%s\n", m_composition );
 
 	return TRUE;
 }

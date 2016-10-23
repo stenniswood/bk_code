@@ -55,7 +55,7 @@ This is a sample of the vector file :
 #include "global.h"
 #include "vector_file.hpp"
 #include "string_util.h"
-#include "robot_claw.hpp"
+//#include "robot_claw.hpp"
 
 /* 
 The robot will need multiple lists, not just 1 head/tail pointer list!

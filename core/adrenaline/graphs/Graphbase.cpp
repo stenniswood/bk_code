@@ -99,7 +99,6 @@ void Graphbase::draw_horizontal_lines(  )
 	StrokeWidth(2);
 
 	float divs 		= NumberHorizontalLines;
-	float alpha 	= 1.0;
 	float y_spacing = ((float)(height)) / (divs);	
 
 	// HORIZONTAL:
@@ -115,8 +114,6 @@ void Graphbase::draw_vertical_lines( )
 	Stroke(255, 128, 128, 0.5);
 	StrokeWidth(2);
 
-	int i;
-	VGfloat x;
 	VGfloat alpha = 1.0;				// start solid
 	VGfloat x_spacing = (width / NumberVerticalLines);
 
@@ -132,8 +129,8 @@ int Graphbase::draw_y_axis_label()
 {
 	if (yAxisLabel==NULL) return -1;
 	
-	VGfloat fade  	= (100.0 / (VGfloat) 1) / 100.0;
-	VGfloat alpha 	= 1.0;
+	//VGfloat fade  	= (100.0 / (VGfloat) 1) / 100.0;
+	//VGfloat alpha 	= 1.0;
 	int yrange 		= (height);
 	int tenpercent 	= (float)(width)*margin_percent;
 	int x 	= left-tenpercent;
@@ -152,12 +149,12 @@ int Graphbase::draw_x_axis_label()
 {
 	if (xAxisLabel==NULL) return -1;
 	
-	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
-	VGfloat alpha = 1.0;
+	//VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
+	//VGfloat alpha = 1.0;
 	int xrange = (width);
-	int yrange = (height);	
+	//int yrange = (height);	
 	int tenpercent = (float)(height)*margin_percent;
-	int size = xrange/strlen(xAxisLabel);
+	//int size = xrange/strlen(xAxisLabel);
 	
 	Fill_l(xlabel_color);
 	TextMid  ( left+xrange/2.0, bottom-tenpercent, xAxisLabel, 
@@ -169,7 +166,6 @@ int Graphbase::draw_title()
 {
 	if (title==NULL) return -1;
 
-	VGfloat alpha = 1.0;
 	float tenpercent = (float)(height*margin_percent);
 
 	Fill_l(title_color);
@@ -214,7 +210,7 @@ void Graphbase::remove_data_series( int mIndex )
 
 int Graphbase::draw() 
 {
-	dprintf("Graphbase::draw() \n");
+	Dprintf("Graphbase::draw() \n");
 	Control::draw();
 
 	Fill  (44, 77, 232, 1.0);				   // Big blue marble
@@ -249,7 +245,7 @@ int Graphbase::draw()
 void Graphbase::find_max()
 {
 	float tmp_max = -10000000.;
-	for(int s=0; s<data_series.size(); s++)
+	for(uint16_t s=0; s<data_series.size(); s++)
 	{
 		tmp_max = data_series[s]->get_max();
 		if (tmp_max > m_max)
@@ -261,7 +257,7 @@ void Graphbase::find_max()
 void Graphbase::find_min()
 {
 	float tmp_min = 0.;	
-	for(int s=0; s<data_series.size(); s++)
+	for(uint16_t s=0; s<data_series.size(); s++)
 	{
 		tmp_min = data_series[s]->get_min();
 		if (tmp_min > m_min)
@@ -277,10 +273,9 @@ int Graphbase::count_data_series()
 
 int Graphbase::draw_x_scale() 
 {
-	dprintf("Graphbase::draw_x_scale() \n");
+	Dprintf("Graphbase::draw_x_scale() \n");
 	Fill_l(xlabel_color);
 	float divs 		= NumberVerticalLines;
-	float alpha 	= 1.0;
 	VGfloat x_spacing;
 	if (NumberVerticalLines==0)	
 		divs =  1;
@@ -297,10 +292,9 @@ int Graphbase::draw_x_scale()
 
 int Graphbase::draw_y_scale() 
 {
-	dprintf("Graphbase::draw_y_scale() \n");
+	Dprintf("Graphbase::draw_y_scale() \n");
 	Fill_l(xlabel_color);
 	float divs 		= NumberHorizontalLines;
-	float alpha 	= 1.0;
 	if (NumberHorizontalLines==0) 
 		divs = 1;
 	float y_spacing = ((float)(height)) / (divs);	
