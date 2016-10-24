@@ -37,20 +37,20 @@ StatusList::StatusList(  )
 
 int	StatusList::populate_with_boards(	)
 {
-
+	return 0;
 }
 	
 int	StatusList::draw_board		( )
 {
-
+	return 0;
 }
 
 int	StatusList::draw_board_info	( )
 {
-
+	return 0;
 }
 
 int	StatusList::draw  	( )
 {
-
+	return 0;
 }

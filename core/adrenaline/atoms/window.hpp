@@ -80,7 +80,7 @@ public:
 	virtual Control* HitTest( int x, int y );
 	virtual int		 onClick( int x, int y, bool mouse_is_down=true );
 	virtual int		 onCreate	  (  );
-	virtual int		 place_views ( ) { return 1; };	
+	virtual void	 place_views ( ) {  };	
 	
 protected:
 	float			packer_vertical_position;		// Moves Top to bottom.

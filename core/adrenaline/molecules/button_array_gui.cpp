@@ -113,8 +113,8 @@ void ButtonArrayMot::MarkStop(byte StopNum)
 	// User input for the angle
 	// Store both here
 	// Package and send to BigMotor board.
-	float angle;
-	word value;
+	//float angle;
+	//word value;
 }
 
 #define CCW 0

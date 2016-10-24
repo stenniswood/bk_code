@@ -34,7 +34,7 @@
 #include "window_layouts.hpp"
 #include "callbacks.hpp"
 #include "motor.hpp"
-#include "robot.hpp"
+#include "e_robot.hpp"
 
 
 TiltSensor::TiltSensor( )

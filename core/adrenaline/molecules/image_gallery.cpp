@@ -145,11 +145,11 @@ void* image_load_function(void* msg)
 {
 	ImageGallery* ig = (ImageGallery*) msg;	
 
-	int fs = Filelist.size();
+	//int fs = Filelist.size();
 	while (ig->close_thread==false)
 	{
-		int to_end = fs - ig->current_image_index;
-		int number = min( NUMBER_TO_READ_AHEAD, to_end );
+		//int to_end = fs - ig->current_image_index;
+		//int number = min( NUMBER_TO_READ_AHEAD, to_end );
 		int expected_last_index = ig->current_image_index + NUMBER_TO_READ_AHEAD;
 		// Assuming forward direction only for now!
 		
@@ -162,7 +162,8 @@ void* image_load_function(void* msg)
 			ImageInfo.push_back(ii);
 			ImageIndex.push_back(ig->last_loaded_index);
 			if (Debug) 
-				printf("Loaded: %d %s : %x %x   %x\n", ig->last_loaded_index, Filelist[ig->last_loaded_index].c_str(),
+				printf("Loaded: %d %s : %d %d   %d\n", ig->last_loaded_index, 
+						Filelist[ig->last_loaded_index].c_str(),
 						images.back(), images.size(), ImageInfo.end() );
 				
 		} else { printf("THREAD STOPPED!!\n");   ig->close_thread= true;  }
@@ -188,7 +189,7 @@ void ImageGallery::load_resources( )
 													 current_image_index+number );
 	}
 	// Load images ahead:
-	int i;
+	size_t i;
 	for (i=0; i<Filelist.size(); i++)
 	{
 		image = createImageFromJpeg( Filelist[i].c_str(), &ii );
@@ -254,7 +255,7 @@ int	 ImageGallery::onClick(int x, int y, bool mouse_is_down)
 			sprintf(str, "%d / %d : %s", current_image_index, Filelist.size(), Filelist[current_image_index].c_str() );
 			MainDisplay.m_status.set_text(str);
 
-			int count = find_index(current_image_index);		
+			//int count = find_index(current_image_index);		
 //			ImageView->set_image( &(*iter), &(*ii_iter) );
 			Invalidate();
 			images.pop_back();

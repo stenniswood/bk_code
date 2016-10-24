@@ -27,7 +27,7 @@ public:
 
 	virtual void 	Initialize(	);
 	int				calc_metrics();
-	int				place_views();
+	void			place_views();
 
 	int				handle_incoming_msg	( struct sCAN* msg );
 	int				setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms );

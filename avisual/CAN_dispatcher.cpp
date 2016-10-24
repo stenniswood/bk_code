@@ -54,7 +54,7 @@ void dispath_to_all_can_receivers( struct sCAN* mPtr )
 	while (iter != m_callbacks.end() )
 	{
 		tmp = (tCallback)*iter;
-		BOOL result = tmp( mPtr );			// Call each callback
+		tmp( mPtr );			// Call each callback
 		iter++;
 	}
 }

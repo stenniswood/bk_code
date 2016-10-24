@@ -81,7 +81,7 @@ void	RobotDiagnosticsPanel::calc_metrics()
  	Window::calc_metrics();
 }
 
-int	RobotDiagnosticsPanel::place_views()
+void	RobotDiagnosticsPanel::place_views()
 { 
 	printf("RobotDiagnosticsPanel::place_views (  )");
 	Clear.set_text("Clear Fault",true);
@@ -91,7 +91,6 @@ int	RobotDiagnosticsPanel::place_views()
 	add_control_local_coords( &Clear 	);
 	add_control_local_coords( &ClearAll  );
 	register_child( &FaultList );
-	return 1;
 }
 
 int	RobotDiagnosticsPanel::onCreate	  (  )

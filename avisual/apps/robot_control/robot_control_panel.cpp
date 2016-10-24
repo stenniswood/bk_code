@@ -134,7 +134,7 @@ int	RobotPanel::calc_metrics()
  	Window::calc_metrics();
  	return 1;
 }
-int	RobotPanel::place_views()
+void	RobotPanel::place_views()
 {	
 	// Link the Dataseries
 	Stop.set_text("Stop");
@@ -200,7 +200,6 @@ int	RobotPanel::place_views()
 
 	print_children();
 	printf("====== Robot CONTROL POSITIONS AFTER ===\n");
-	return 1;
 }
 
 int	RobotPanel::onCreate	  (  )	// chance to load resources, call functions which use fonts

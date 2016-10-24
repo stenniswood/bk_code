@@ -205,10 +205,10 @@ void	AnalogView::create_groups()
 		create_group( 3 );
 }
 
-int		AnalogView::place_views()
+void	AnalogView::place_views()
 {
 	long size = m_indicators.size();
-	printf("AnalogView::place_views() %d\n",size);
+	printf("AnalogView::place_views() %ld\n",size);
 
 	m_chip_enable1->move_to(10, bottom+height/2);
 	m_chip_enable2->set_position_below( m_chip_enable1, true, 40.0 );
@@ -238,7 +238,7 @@ int		AnalogView::place_views()
 		b+= m_row_increment;
 	}
 
-	return 1;
+	return ;
 }
 
 void AnalogView::show_group( int mGroup, bool mVisible )

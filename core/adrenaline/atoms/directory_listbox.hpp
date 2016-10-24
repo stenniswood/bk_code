@@ -36,8 +36,8 @@ public:
 	void 			compose_detail_line	( char* path, char* d_name );
 	
 	//void			populate			( char* mPath			  );
-	void			populate_files		( char* mPath, int Column );
-	void			populate_directories( char* mPath, int Column );
+	void			populate_files		( const char* mPath, int Column );
+	void			populate_directories( const char* mPath, int Column );
 
 	bool			is_item_a_directory	( int mIndex=-1 );
 	const char*		get_item_text		( int mIndex=-1 );

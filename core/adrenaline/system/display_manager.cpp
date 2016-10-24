@@ -216,7 +216,7 @@ int	DisplayManager::onPlace( )
 	m_calendar.hide		   ( );
 
 	
-	float summary_w = 250;
+	//float summary_w = 250;
 	//float summary_h = m_calendar.get_height();   m_calendar.get_left()-summary_w
 	m_calendar_summary.set_position( 0, m_calendar.get_right(), 
 									 m_calendar.get_height(), 0.0 );
@@ -274,11 +274,11 @@ void DisplayManager::print_running_apps(  )
 
 void DisplayManager::idle_tasks( )
 {
-	Application* tmp = NULL;
+//	Application* tmp = NULL;
 	if ((m_current_running_app>=0) && (m_current_running_app< m_running_apps->size())) 
 	{
 		//printf("idle task: %d \n", m_current_running_app );		
-		tmp = (*m_running_apps)[m_current_running_app];
+//		tmp = (*m_running_apps)[m_current_running_app];
 //		tmp->background_time_slice();
 	}
 }
@@ -295,7 +295,7 @@ void DisplayManager::close_app( Application* mApp )
 
 	// Note these are Apps, not m_child_controls.  Other than that same logic as the
 	// remove_object()
-	for (int i=0; i<m_running_apps->size(); i++)
+	for (size_t i=0; i<m_running_apps->size(); i++)
 	{
 		if ((*m_running_apps)[i] == mApp) {
 			m_running_apps->erase( m_running_apps->begin()+i );

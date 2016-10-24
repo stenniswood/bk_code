@@ -13,7 +13,7 @@ public:
 	
 	virtual void 	Initialize(	);
 	int				calc_metrics();
-	int				place_views();
+	void			place_views();
 
 	
 };

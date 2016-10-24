@@ -85,7 +85,7 @@ int		MsgValueComposer::calc_metrics()
 	return 0;
 }
 
-int		MsgValueComposer::place_views()
+void		MsgValueComposer::place_views()
 {
 	printf(" MsgValueComposer::place_views()   \n");
 	m_add.move_to( left+20, bottom+10 );
@@ -107,6 +107,6 @@ int		MsgValueComposer::place_views()
 	m_msg_id_.print_positions();
 	m_byte_start_index_.print_positions();
 	m_byte_length_.print_positions();		*/
-	return 1;	
+	return ;	
 }
 

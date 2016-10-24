@@ -35,7 +35,7 @@ public:
 
 	virtual void 	Initialize  ( );
 	int				calc_metrics( );
-	virtual int		place_views ( );
+	virtual void	place_views ( );
 
 	int				handle_generic_msg ( struct sCAN* msg );
 	int				handle_incoming_msg	( struct sCAN* msg );

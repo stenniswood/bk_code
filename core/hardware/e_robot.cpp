@@ -34,7 +34,7 @@
 #include "window_layouts.hpp"
 #include "callbacks.hpp"
 #include "motor.hpp"
-#include "robot.hpp"
+#include "e_robot.hpp"
 #include "Leg.hpp"
 #include "arm.hpp"
 #include "vector_file.hpp"
@@ -47,14 +47,15 @@ Preferences robotPref("robot.ini");
 Robot 		Onesimus("Ronny");
 VectorGroupSequence vgs;
 
-Robot::Robot( char* mName )
+ 
+Robot::Robot( const char* mName )
 //:LeftLeg("Left"), get_right_leg()->("Right")
 {
 	//string  my_str("Hello world!\n");
 	//cout << my_str;			Yep!  this works!
 	board_list   = &bl;
 	Mode 		 = CALIBRATE_MODE;
-	PersonalName = mName;	
+	PersonalName = strdup(mName);	
 }
 
 Arm*	Robot::get_left_arm( )

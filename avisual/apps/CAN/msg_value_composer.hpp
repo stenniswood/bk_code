@@ -27,7 +27,7 @@ public:
 	
 	virtual void 	Initialize(	);
 	int				calc_metrics();
-	virtual int		place_views();
+	virtual void	place_views();
 
 	unsigned short 	m_instance;
 	unsigned short 	m_id;

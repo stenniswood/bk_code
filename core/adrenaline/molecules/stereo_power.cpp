@@ -21,7 +21,6 @@
 #define Debug 0
 
 
-
 StereoPowerLevels::StereoPowerLevels(int Left, int Right, int Top, int Bottom )
 : Control(Left,Right,Top,Bottom)
 {
@@ -79,7 +78,8 @@ int StereoPowerLevels::draw( )
 	Control::draw();
 	Dprintf("StereoPowerLevels::draw()\n");
 	left_ch.draw();
-	right_ch.draw();		
+	right_ch.draw();
+	return 1;
 }
 
 void StereoPowerLevels::set_max  ( float mMax )	

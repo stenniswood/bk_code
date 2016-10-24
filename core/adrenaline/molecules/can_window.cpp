@@ -46,7 +46,7 @@ FilterSelector* fs = NULL;
 
 void adjust_filter_cb( void* mCANMessages )
 {
-	CANMessages* cm = (CANMessages*) mCANMessages;
+	//CANMessages* cm = (CANMessages*) mCANMessages;
 	fs = new FilterSelector();	
 	fs->set_width_height( 300, 200 );
 	fs->move_to		    ( 200, 100 );
@@ -63,7 +63,7 @@ HorizontalMenu   can_menu(-1,-1);
 VerticalMenu     can_file_menu(-1,-1);
 VerticalMenu     can_view_menu(-1,-1);
 
-int show_CAN_screens( void* menuPtr, int mMenuIndex )
+void show_CAN_screens( void* menuPtr, int mMenuIndex )
 {
 /*	switch(mMenuIndex) 
 	{
@@ -158,6 +158,7 @@ void 	CANMessages::Initialize(	)
 
 int		CANMessages::calc_metrics() 
 { 
+	return 0;
 }
 
 // chance to load resources, call functions which use fonts
@@ -165,12 +166,11 @@ int		CANMessages::onCreate(  )
 {
 	if (created)	return 0;
 		
-	place_views();
-	
-	Window::onCreate();
+	place_views();	
+	int retval = Window::onCreate();
 	m_msg_view.calc_column_positions_from_widths();
+	return retval;
 }
-
 
 void  CANMessages::reset_boards_present()
 {
@@ -178,7 +178,7 @@ void  CANMessages::reset_boards_present()
 	m_board_view.Invalidate(); 
 }
 
-int		CANMessages::place_views()
+void	CANMessages::place_views()
 {
 	//printf("CANMessages::place_views()\t\t");
 	//print_positions();
@@ -196,7 +196,6 @@ int		CANMessages::place_views()
 	m_filter.set_text		  	  ( "Filter", true );
 	m_filter.set_position_right_of( &m_rescan );
 	m_filter.set_on_click_listener	( adjust_filter_cb, this );
-
 
 	m_msg_view.move_to  		 ( left+width/2.-10, bottom  );
 	m_msg_view.set_width_height	 ( width/2-10   , height   );
@@ -225,16 +224,17 @@ int	CANMessages::handle_incoming_msg	( struct sCAN* msg )
 }
 int		CANMessages::setup_periodic_msg	( struct sCAN* msg, int mTimePeriod_ms ) 
 { 
+	return 0;
 }
 int		CANMessages::setup_triggered_response_msg( struct sCAN* mTriggerMsg, struct sCAN* mResponse ) 
-{ 
+{ 	return 0;
 }
 int   	CANMessages::draw		 		(				) 
 { 
 	return Control::draw();
 }
 int		CANMessages::get_hit_index		( int Mousex, int Mousey ) 
-{ 
+{ 	return 0;
 }
 int		CANMessages::onClick(int x, int y, bool mouse_is_down) 
 { 

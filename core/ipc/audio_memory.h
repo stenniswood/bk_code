@@ -60,7 +60,7 @@ int  audio_read_segment_id	(char* mFilename);
 int  audio_allocate_memory	();
 void audio_deallocate_memory();
 
-int  audio_attach_memory	();
+void audio_attach_memory	();
 void audio_reattach_memory	();
 void audio_detach_memory	();
 

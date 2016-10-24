@@ -163,9 +163,9 @@ int	ClientListPanel::onCreate(  )
 	m_clients->update_available_client_list();
 
 	m_connect.set_on_click_listener( connect_button_cb, this );
-	add_control( m_clients );
+	add_control( m_clients  );
 	add_control( &m_connect );
-		
+
 	Window::onCreate();
 
 	// Create a Timer for updating the list box,  No!
@@ -175,7 +175,7 @@ int	ClientListPanel::onCreate(  )
 	//      So... we poll cli_is_new_client() instead.
 }
 
-int ClientListPanel::place_views( )
+void ClientListPanel::place_views( )
 {
 	m_connect.set_text( "connect", true );
 	m_connect.set_position_right_of( m_clients );	

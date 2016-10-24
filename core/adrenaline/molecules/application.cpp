@@ -27,7 +27,7 @@ using namespace std;
 /* Standard handlers for About, Preferences, and Quit() */
 static int app_menu_actions( void* menuPtr, int mMenuIndex, Application* mApp )
 { 
-	if (Debug) printf("app_menu_actions() app=%x\n", mApp);
+	if (Debug) printf("app_menu_actions() app=%p\n", mApp);
 	if (mApp)
 		switch(mMenuIndex) 
 		{

@@ -22,8 +22,6 @@
 #include "text_view.hpp"
 
 
-
-
 AudioVolumePanel::AudioVolumePanel()
 {
 
@@ -55,12 +53,12 @@ void AudioVolumePanel::Initialize()
 
 }
 
-int	AudioVolumePanel::place_views()
+void	AudioVolumePanel::place_views()
 {
 	m_HDMI_output_selector.set_position(10,20,40,10);
 	m_headphones_output_selector.set_position_below( m_HDMI_output_selector );
 	m_network_output_selector.set_position_below( m_headphones_output_selector );
 	m_aux_output_selector.set_position_below( m_network_output_selector );
-	
+
 }
 

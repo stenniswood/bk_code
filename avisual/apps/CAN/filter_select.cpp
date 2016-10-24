@@ -31,7 +31,7 @@ int	FilterSelector::calc_metrics()
 {
 	return 0;
 }
-int	FilterSelector::place_views()
+void FilterSelector::place_views()
 {
 	
 }

@@ -164,7 +164,7 @@ void accept_line(void* mThis)
 	ptr->accept_poly_line();
 }
 
-int		Drawing2D::place_views()
+void	Drawing2D::place_views()
 {
 	printf("Drawing2D::place_views()\t\t");
 	//print_positions();

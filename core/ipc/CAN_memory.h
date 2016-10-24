@@ -35,8 +35,8 @@ struct can_ipc_memory_map
 	byte		RxOverFlow;		// indicator if not receiving quickly enough.
  
 	char		isTransmitting;			// is being sent over tcp/ip (not local can card)
-	unsigned int 	 	TxHeadLap;
-	unsigned int 	 	TxHead;
+	unsigned int 	 TxHeadLap;
+	unsigned int 	 TxHead;
 	struct sCAN Transmit[MAX_CAN_TX_MESSAGES];
 	byte		TxOverFlow;		// indicator if trying to send too quickly.
 };
@@ -73,8 +73,8 @@ void 		 print_rx_position();
 
 /***** Tx Buffer Functions (replaces former "can_txbuff.cpp"):	******/
 void 		 shm_add_can_tx_message  ( struct sCAN* mMsg );
-BOOL   		 shm_isTxMessageAvailable( int* mTail, int* mTailLaps  );
-struct sCAN* shm_GetNextTxMsg		 ( int* mTail, int* mTailLaps );	// pointer to 1 allocation. overwritten on next call!
+BOOL   		 shm_isTxMessageAvailable( unsigned int* mTail, unsigned int* mTailLaps  );
+struct sCAN* shm_GetNextTxMsg		 ( unsigned int* mTail, unsigned int* mTailLaps );	// pointer to 1 allocation. overwritten on next call!
 void 		 print_tx_position();
 
 

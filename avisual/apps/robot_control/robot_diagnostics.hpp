@@ -14,7 +14,7 @@ public:
 
 	virtual void 	Initialize(	);
 	void			calc_metrics();
-	int				place_views();
+	void			place_views();
 
 	void			setup_headings();
 	

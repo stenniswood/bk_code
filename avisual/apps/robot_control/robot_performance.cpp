@@ -61,7 +61,7 @@ void	RobotPerformancePanel::calc_metrics( )
 	Window::calc_metrics(); 
 }
 
-int		RobotPerformancePanel::place_views ( )
+void	RobotPerformancePanel::place_views ( )
 { 
 	float l_third = width / 3;
 	float l_two_third = 2* width / 3;

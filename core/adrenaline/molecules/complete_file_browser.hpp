@@ -50,7 +50,7 @@ public:
 	~CompleteFileBrowser();
 	
 	virtual void 	Initialize			( );
-	void			set_base_path		( char* mBasePath );
+	void			set_base_path		( const char* mBasePath );
 	
 	virtual int		onClick				( int x, int y, bool mouse_is_down=true );
 	virtual int		onPlace		  		(  );	// chance to place children.

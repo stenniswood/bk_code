@@ -2,7 +2,7 @@
 #define _STICKLEG_H_
 
 #include "control.hpp"
-#include "robot.hpp"
+#include "e_robot.hpp"
 
 /* We want to make this work without the Robot or MotorPack classes
    because they depend on hardware presence.  

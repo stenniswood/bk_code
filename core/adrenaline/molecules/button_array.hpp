@@ -50,8 +50,8 @@ public:
 
 	void (*m_callback)(int,int);	
 private:
-	int	m_rows;
-	int	m_cols;
+	size_t	m_rows;
+	size_t	m_cols;
 	std::vector<std::vector<Button*> >	m_buttons;
 };
 

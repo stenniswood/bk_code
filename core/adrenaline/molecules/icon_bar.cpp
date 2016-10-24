@@ -49,5 +49,6 @@ int IconBar::onPlace(  )
 		m_child_controls[i]->move_bottom_to( bottom    );
 		left_edge += left;
 	}	
+	return 1;
 }
 

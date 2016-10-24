@@ -1,8 +1,7 @@
-#ifndef _ROBOT_H_
-#define _ROBOT_H_
+#ifndef _E_ROBOT_H_
+#define _E_ROBOT_H_
 
 #include "vector_file.hpp"
-
 #include "Container.hpp"
 #include "motor.hpp"
 #include "tilt_sensor.hpp"
@@ -22,14 +21,14 @@ class VectorGroupSequence;
 #define RESERVED_MODE 	0x05
 
 
-/*******************************************
-Top Level Object for Robot
+/**********************************************************
+Top Level Object for the electronically actuated Robot
 
-*******************************************/
+***********************************************************/
 class Robot
 {
 public:
-	Robot( char* mName = "Mr T" );
+	Robot( const char* mName = "Mr T" );
 	
 	// Accessors:
 	Arm*		 get_left_arm	(  	);

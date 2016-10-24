@@ -38,7 +38,7 @@ void	RobotVisionPanel::calc_metrics( )
 {
 	Window::calc_metrics(); 
 }
-int		RobotVisionPanel::place_views ( )
+void	RobotVisionPanel::place_views ( )
 {
 	return 1; 
 }

@@ -52,7 +52,7 @@ void FileBrowser::Initialize( )
 	if (Debug) printf("\tFileBrowser::Initialize()::done!\n");
 }
 
-void FileBrowser::set_base_path( char* mBasePath )
+void FileBrowser::set_base_path( const char* mBasePath )
 {
 	if (Debug) printf("Set base_path( %s )\n", mBasePath );
 	base_path = mBasePath;
@@ -232,9 +232,9 @@ int FileBrowser::onClick( int Mousex, int Mousey, bool mouse_is_down )
 {
 	int retval = 0;
 	//if (Debug) 
-	if (Debug) printf("FileBrowser::onClick() Mousex,Mousey= %d, %d\n",  Mousex,Mousey);		
-	bool start_closing = false;
-	int  size = levels.size();
+	if (Debug) printf("FileBrowser::onClick() Mousex,Mousey= %d, %d\n",  Mousex, Mousey);
+	//bool start_closing = false;
+	//size_t  size = levels.size();
 
 	// WHICH LEVEL:
 	int level_index = which_level_clicked( Mousex, Mousey );

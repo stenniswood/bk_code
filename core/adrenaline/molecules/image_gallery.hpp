@@ -46,7 +46,7 @@ public:
 	bool						close_thread;
 	bool						thread_closed;	
 	int							last_loaded_index;		//
-	int							current_image_index;	//	index within the Filelist
+	uint16_t					current_image_index;	//	index within the Filelist
 
 
 private:

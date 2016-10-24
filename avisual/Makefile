@@ -26,7 +26,7 @@ CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 	     ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \
 	     ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
 APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/ \
-	     ./apps/file_editer/ ./apps/video/ ./apps/finder/ ./apps/gallery/
+	     ./apps/file_editer/ ./apps/video/ ./apps/finder/ ./apps/gallery/ ./test_code/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 SQL_INC    = -I/usr/include/mysql
 INC	   = $(CORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
@@ -67,11 +67,10 @@ HARDWARE_OBJS= AUDIO_device.o sinewave.o tone_generator.o
 FUSE_OBJS   = fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o 
 VG_OBJS     = libshapes.o oglinit.o 
 AVISUAL_OBJS= visual_main.o window_layouts.o callbacks.o string_util.o \
-			   test_layouts.o test_combo_layouts.o client_list_control.o \
-			   test_game_layouts.o test_graph_layouts.o avisual_menu.o  \
+			   client_list_control.o avisual_menu.o  \
 			   power.o home_screen.o datalog_graph.o \
 			   motor_gui.o serial_loadcell.o CAN_dispatcher.o robot_moves_1_sequencer.o
-
+TEST_OBJS = test_layouts.o test_combo_layouts.o test_game_layouts.o test_graph_layouts.o 
 APPS_OBJS      = 
 GALLERY_APP_OBJS = gallery_app.o
 FILE_EDIT_OBJS = file_editor_app.o 
@@ -128,7 +127,8 @@ VOICE_OBJS 	=
 	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
 
 avisual: $(AVISUAL_OBJS) 					\
-		$(addprefix ./voice/, 			$(VOICE_OBJS)) 			\
+		$(addprefix ./test_code/, 			$(TEST_OBJS)) 			\
+		$(addprefix ./voice/, 				$(VOICE_OBJS)) 			\
 		$(addprefix ../core/kinetic/, 		$(KINETIC_OBJS)) 		\
 		$(addprefix ./games/reversi/, 		$(REV_GAME_OBJS)) 		\
 		$(addprefix ./games/hearts/, 		$(HEARTS_GAME_OBJS)) 	\

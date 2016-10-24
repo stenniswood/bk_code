@@ -98,10 +98,10 @@ void CompleteFileBrowser::Initialize( )
 	if (Debug) printf("\tCompleteFileBrowser::Initialize()::done!\n");
 }
 
-void CompleteFileBrowser::set_base_path( char* mBasePath )
+void CompleteFileBrowser::set_base_path( const char* mBasePath )
 {
 	//if (Debug)  printf("Set base_path( %s )\n", mBasePath );	
-	m_browser_pane.set_base_path( mBasePath );	
+	m_browser_pane.set_base_path( mBasePath );
 }
 
 int CompleteFileBrowser::onPlace	(  )	// chance to place children.

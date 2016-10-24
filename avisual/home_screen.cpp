@@ -72,9 +72,9 @@ void init_home_screen()
 
 	// Add to display manager:
 	MainDisplay.remove_all_objects(		  );
-	MainDisplay.add_object( &ClientInputEdit   );
-	MainDisplay.add_object( &RobotResponse 	  );
-	MainDisplay.add_object( &AvailClients );
+	MainDisplay.add_object( &ClientInputEdit);
+	MainDisplay.add_object( &RobotResponse 	);
+	MainDisplay.add_object( &AvailClients 	);
 //	MainDisplay.add_object( &adren_board_list );
 //	MainDisplay.load_resources();
 }

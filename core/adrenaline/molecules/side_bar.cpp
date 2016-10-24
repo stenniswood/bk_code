@@ -52,7 +52,7 @@ void SideBar::calc_metrics	 	(   )
 void SideBar::clear( bool mDelete )
 {
 	if (mDelete)
-		for(int i=0; i<m_child_controls.size(); i++)
+		for(size_t i=0; i<m_child_controls.size(); i++)
 			delete m_child_controls[i];
 			
 	m_child_controls.clear();	
@@ -60,7 +60,7 @@ void SideBar::clear( bool mDelete )
 
 void SideBar::onPlace()
 {
-	for(int i=0; i<m_child_controls.size(); i++)
+	for(size_t i=0; i<m_child_controls.size(); i++)
 	{
 		float c_left;
 		if (Alignment == SIDEBAR_ALIGN_LEFT)
@@ -75,7 +75,7 @@ void SideBar::onPlace()
 }
 void SideBar::load_resources	 ( 	 )
 {
-	for(int i=0; i<m_child_controls.size(); i++)
+	for(size_t i=0; i<m_child_controls.size(); i++)
 		m_child_controls[i]->load_resources();
 	calc_metrics();
 	onPlace();

@@ -19,7 +19,7 @@
 
 
 #define margin_percent 0.07
-static long int ColorSequence[] = {
+static unsigned long int ColorSequence[] = {
 	0xFF00FF00,
 	0xFFFFFF00,
 	0xFFFF0000,
@@ -158,5 +158,6 @@ int FrequencyView::draw( )
 		draw_bar( x, data[bar] );
 		x+=bar_x_spacing;
 	}
+	return 1;
 }
 

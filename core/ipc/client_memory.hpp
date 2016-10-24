@@ -9,7 +9,7 @@
 	Then puts it into this shared memory.
 	avisual polls 
  ************************************************************/
-//#include <list>
+#include "global.h"
 
 #define IPC_KEY_CLI  0x04D4   // 1236 in decimal.
 #define MAX_CLIENTS  300
@@ -29,20 +29,20 @@ struct client_ipc_memory_map
 	char	 ipAddress[40];
     
     char	 ConnectionStatus[64];
-	long int StatusCounter;
-	long int StatusAcknowledgedCounter;
+	Uint32_t StatusCounter;
+	Uint32_t StatusAcknowledgedCounter;
 
     char	 Sentence[255];								// verbal commands (NLP) activate connection requests.
-	long int UpdateCounter;								// Incremented on change to any of below:
-	long int AcknowledgedCounter;
+	Uint32_t UpdateCounter;								// Incremented on change to any of below:
+	Uint32_t AcknowledgedCounter;
 
     char	 Response[255];								// verbal commands (NLP) activate connection requests.
-	long int ResponseCounter;							// Incremented on change to any of below:
-	long int ResponseAcknowledgedCounter;				// Incremented on change to any of below:
+	Uint32_t ResponseCounter;							// Incremented on change to any of below:
+	Uint32_t ResponseAcknowledgedCounter;				// Incremented on change to any of below:
     char     ResponderName[100];                        // "instant", "simulator", etc
 
-	long int NewClientUpdateCounter;					// Incremented on change to any of below:
-	long int NewClientAcknowledgedCounter;
+	Uint32_t NewClientUpdateCounter;					// Incremented on change to any of below:
+	Uint32_t NewClientAcknowledgedCounter;
 	int		 NumberClients;	
 	struct stClientData ClientArray[MAX_CLIENTS];		// String array (dimension of NumberClients)
 };
@@ -81,8 +81,8 @@ void cli_wait_for_response();
 void cli_ack_response	  ();
 
 // CLIENT LIST:
-//void cli_ipc_add_new_client  ( struct in_addr mbeacon_ip_list );
 void cli_reset_client_list	   (  );
+//void cli_ipc_add_new_client  ( struct in_addr mbeacon_ip_list );
 void cli_ipc_add_new_client	   ( struct stClientData* mEntry );
 bool cli_is_new_client			( );
 void cli_ack_new_client			( );

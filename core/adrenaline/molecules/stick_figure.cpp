@@ -56,11 +56,11 @@ void StickFigure::draw_arm(int mStartx, int mStarty, byte mIndex)
 	Stroke_l( Limb_color[mIndex] );
 	StrokeWidth(3);
 	
-	Leg* leg; // = (Leg*)robot->get_limb( mIndex );
-	int  num_motors = leg->getNumItems();
+	//Leg* leg; // = (Leg*)robot->get_limb( mIndex );
+	//int  num_motors = leg->getNumItems();
 
 	float angles[MAX_MOTORS];
-	int num_angles;
+	//int num_angles;
 	//leg->get_angle_vector( angles, &num_angles );
 
 	// Now Draw a stick for each:
@@ -110,11 +110,11 @@ void StickFigure::draw_leg(int mStartx, int mStarty, byte mIndex)
 	Stroke_l( Limb_color[mIndex] );
 	StrokeWidth(3);	
 
-	Leg* leg = NULL; // (Leg*)robot->get_limb( mIndex );
-	int  num_motors; // = leg->getNumItems();
+	//Leg* leg = NULL; // (Leg*)robot->get_limb( mIndex );
+	//int  num_motors; // = leg->getNumItems();
 	
 	float angles[MAX_MOTORS];
-	int num_angles;
+	//int num_angles;
 	//leg->get_angle_vector( angles, &num_angles ); 
 
 	// Now Draw a stick for each:
@@ -167,7 +167,7 @@ int StickFigure::draw()
 {
 	Control::draw();
 	//printf("StickFigure:a0=%6.1f a1=%6.1f a2=%6.1f\n", angles[0], angles[1], angles[2]);
-	float center_height_fraction = 2.0/4.0;
+	//float center_height_fraction = 2.0/4.0;
 	float center_height = 1.1*get_leg_length()*scale_x;
 	float half_chest_height = Chest_height/2.0;
 

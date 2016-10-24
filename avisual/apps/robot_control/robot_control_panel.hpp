@@ -14,7 +14,7 @@ public:
 
 	virtual void 	Initialize	( );
 	int				calc_metrics( );
-	int				place_views	( );
+	void			place_views	( );
 	virtual int		onCreate	( );	// chance to load resources, call functions which use fonts
 	
 	int				pack_enables(char* mData);		// return is length

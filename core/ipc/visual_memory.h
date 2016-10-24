@@ -40,7 +40,7 @@ int  vis_allocate_memory	();
 void vis_deallocate_memory	(int msegment_id);
 
 
-int  vis_attach_memory		();
+void vis_attach_memory		();
 void vis_reattach_memory	();
 void vis_detach_memory		();
 

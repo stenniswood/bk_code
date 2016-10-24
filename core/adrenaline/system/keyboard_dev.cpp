@@ -68,7 +68,6 @@ void *Keyboard_eventThread(void *arg)
 {
 	const char *dev = "/dev/input/by-path/platform-20980000.usb-usb-0:1.2.1:1.0-event-kbd";
     ssize_t n;
-    int fd;
 
     keyboard_fd = open(dev, O_RDONLY);
     if (keyboard_fd == -1) {
@@ -114,8 +113,7 @@ void *Keyboard_eventThread(void *arg)
     return EXIT_FAILURE;
 }
 
-
-int dev_keyboard_init()
+void dev_keyboard_init()
 {
 	key_map[KEY_MINUS]		= '-';
 	key_map[KEY_EQUAL]		= '=';
@@ -177,7 +175,7 @@ int dev_keyboard_init()
 	int result = pthread_create(&inputThread, NULL, &Keyboard_eventThread, NULL);
 	if (result != 0) {
 		fprintf(stderr, "Unable to initialize the mouse\n");
-	}    
+	}
 }
 
 int dev_keyboard_timeslice()
@@ -188,5 +186,7 @@ int dev_keyboard_timeslice()
 int dev_keyboard_close(float screen_width, float screen_height)
 {
     close (keyboard_fd);
+    keyboard_fd = 0;
+    return keyboard_fd;
 }
 

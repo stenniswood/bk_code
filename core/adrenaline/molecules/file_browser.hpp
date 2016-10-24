@@ -26,7 +26,7 @@ public:
 	~FileBrowser();
 	
 	virtual void 	Initialize			( );
-	void			set_base_path		( char* mBasePath );	
+	void			set_base_path		( const char* mBasePath );	
 	void	 		create_file_browser (  );
 	void 			add_level			( string mAppendPath );
 	void			show_hidden			( bool mShow=true   );

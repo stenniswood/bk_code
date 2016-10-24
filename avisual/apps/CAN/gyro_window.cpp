@@ -45,7 +45,7 @@ void update_value_cb ( void* mObj )
 void change_value_cb ( void* mObj )
 {
 	printf("=== change_value_cb === \n");	
-	GyroOverview* gv = (GyroOverview*)mObj;
+	//GyroOverview* gv = (GyroOverview*)mObj;
 	
 	graph_index = 0;
 	mvc = new MsgValueComposer( );
@@ -173,15 +173,15 @@ int GyroOverview::calc_metrics()
 	return 0;
 }
 
-int GyroOverview::place_views()
+void GyroOverview::place_views()
 {
 	// 3 graphs side by side.
 	int	Number_of_graphs = 3;
 	float graph_x_spacing = (width / Number_of_graphs);
-	float graph_width    = graph_x_spacing * 0.8;
+	//float graph_width    = graph_x_spacing * 0.8;
 	float graph_margin   = graph_x_spacing * 0.1;	
-	float graph_height   = (height)*0.8;
-	float graph_h_margin = (height)*0.1;	
+	//float graph_height   = (height)*0.8;
+	//float graph_h_margin = (height)*0.1;	
 	printf("GyroOverview::place_views() \n");
 
 	m_value1.move_to( graph_margin, 150 );
@@ -202,14 +202,13 @@ int GyroOverview::place_views()
 	m_value2.move_to( graph_margin+graph_x_spacing, x_axis->get_top() );
 	m_value3.move_to( graph_margin+graph_x_spacing*2, x_axis->get_top() );
 */
-	return 1;
 }
 
 int	GyroOverview::handle_generic_msg ( struct sCAN* msg )
 {
-	float gyro_sum_x = 0;
-	float gyro_sum_y = 0;
-	float gyro_sum_z = 0;
+	//float gyro_sum_x = 0;
+	//float gyro_sum_y = 0;
+	//float gyro_sum_z = 0;
 	
 	int retval = 0;
 	int datum;
@@ -267,7 +266,7 @@ int	GyroOverview::handle_incoming_msg	( struct sCAN* msg )
 	
 	int instance;
 	int channel;
-	int value;
+	//int value;
 
 	return 0;
 	

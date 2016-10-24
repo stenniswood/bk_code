@@ -234,7 +234,7 @@ void can_parse_serial_number_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
 void can_parse_board_description_msg( struct sCAN* mMsg, struct stBoardInfo2* mOut )
 {
 	int i;
-    byte Starting_Index = mMsg->data[0];
+    //byte Starting_Index = mMsg->data[0];
 
    	for (i=0; i<8; i++)
 	    mOut->Description[i] = mMsg->data[i+1];

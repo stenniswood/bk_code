@@ -20,7 +20,7 @@ public:
 	AudioVolumePanel( int Left, int Right, int Top, int Bottom );
 
 	virtual void 	Initialize(	);
-	int				place_views();
+	void			place_views();
 	
 
 	StereoPowerLevels 	spl;

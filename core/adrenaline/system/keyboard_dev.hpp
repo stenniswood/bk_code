@@ -7,7 +7,7 @@
 
 char map_key(int code);
 
-int dev_keyboard_init	  ();
+void dev_keyboard_init	  ();
 int dev_keyboard_timeslice();
 int dev_keyboard_close	  (float screen_width, float screen_height);
 

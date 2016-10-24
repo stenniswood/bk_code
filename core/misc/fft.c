@@ -107,7 +107,7 @@ void fftMag(float* x, int length, float* mag)
 }
 
 
-float KeepEvery2( float* mVector, int mLength )				  
+void KeepEvery2( float* mVector, int mLength )				  
 {
 	int i  =0;
 	int bin=0;
@@ -117,8 +117,7 @@ float KeepEvery2( float* mVector, int mLength )
 	}
 }
 
-
-float KeepEvery8(  float* mVector, int mLength  )				
+void KeepEvery8(  float* mVector, int mLength  )				
 {
 	int i=0;
 	int bin=0;
@@ -128,13 +127,12 @@ float KeepEvery8(  float* mVector, int mLength  )
 	}
 }
 
-/*
+/* Each value will be the sum of 8 consequative values.
  * Bins will be dimensioned /8 of the mVector 
- * RETURN:  number of bins.
+ * RETURN:  number of bins (mLength/8)
  */
 int Bin8( float* mVector, int mLength )	
 {
-	int i	=0;
 	int bin	=0;
 	int j	=0;
 	int k   =0;
@@ -143,11 +141,11 @@ int Bin8( float* mVector, int mLength )
 	for ( j=0; j<mLength; j+=8 )
 	{
 		tmpValue = 0;
-		for ( k=j; k<j+8; k++ )
+		for ( k=j; k<j+8; k++ )			// Add up all 8
 		{
 			tmpValue += mVector[k];
 		}
-		mVector[bin] = tmpValue;
+		mVector[bin] = tmpValue;		// Store it.
 		bin++;
 	}
  	return bin;
@@ -160,7 +158,6 @@ int Bin8( float* mVector, int mLength )
 #define BIN4 4
 int Bin4( float* mVector, int mLength )	
 {
-	int i	=0;
 	int bin	=0;
 	int j	=0;
 	int k   =0;

@@ -13,6 +13,7 @@ MISC_OBJS  = leds.o vector_math.o timer.o preferences.o
 FUSE_OBJS  = fuse_ag.o fuse_accel.o fuse_gyro.o fuse_magnet.o fuse_log.o catagorization.o 
 CPPOBJ     = 
 IPC_OBJS  =  sway_memory.o 
+
 #CAN_memory.o
 %.o: %.cpp $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) -c -o $@ $< $(CFLAGS)

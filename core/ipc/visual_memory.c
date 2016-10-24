@@ -31,6 +31,7 @@ AUTHOR	:  Stephen Tenniswood
 #include "interrupt.h"
 #include "visual_memory.h"
 
+#define Debug 0
 
 char* 	visual_shared_memory;
 int 	visual_segment_id;
@@ -79,7 +80,7 @@ int vis_allocate_memory( )
 	return visual_segment_id;	
 }
 
-int vis_attach_memory()
+void vis_attach_memory()
 {
 	/* Attach the shared memory segment. */
 	visual_shared_memory = (char*) shmat (visual_segment_id, 0, 0);
@@ -167,15 +168,15 @@ BOOL is_avisual_IPC_memory_available()
 {
 	struct shmid_ds buf;			// shm data descriptor.
 
-	printf("Checking for avisual IPC memory... ");
+	Dprintf("Checking for avisual IPC memory... ");
 	// First see if the memory is already allocated:
 //	visual_segment_id = CAN_read_segment_id( segment_id_filename );
 	int retval = shmctl(visual_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
-		printf("Error: %s\n", strerror(errno) );
+		Dprintf("Error: %s\n", strerror(errno) );
 		return FALSE;
 	}
-	printf( " Found segment, size=%d and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+	Dprintf( " Found segment, size=%d and %ld attachments.\n", buf.shm_segsz, buf.shm_nattch );
 	
 	if ((buf.shm_segsz > 0)			// segment size > 0
 	    && (buf.shm_nattch >= 1))	// number of attachments.

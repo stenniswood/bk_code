@@ -27,7 +27,7 @@ public:
 	virtual void 	Initialize(	);
 	int				count_rows_showing();
 	int				calc_metrics();
-	int				place_views();
+	void			place_views();
 	
 
 	void			configure_screen();	// based on which checkboxes enabled.

@@ -36,7 +36,6 @@ AUTHOR	:  Stephen Tenniswood
 #include <arpa/inet.h>
 #include <errno.h>
 #include "global.h"
-//#include "bk_system_defs.h"
 #include "client_memory.hpp"
 
 
@@ -82,14 +81,14 @@ int cli_read_segment_id(char* mFilename)
 	char tline[40];
 	FILE* fd = fopen( mFilename, "r" );
 	if (fd==NULL)  {
-		printf("CLI_read_segment_id - ERROR: %s \n", strerror(errno) );	
+		Dprintf("CLI_read_segment_id - ERROR: %s \n", strerror(errno) );	
 		return -1;
 	}
 	size_t result = fread( tline, 1, 20, fd);		//	fscanf( fd, "%d", &can_segment_id );
 	tline[result] = 0;
 	client_segment_id = atoi( tline );
 	fclose( fd );
-	if (Debug) printf("cli_segment_id= %d \n", client_segment_id );	
+	Dprintf("cli_segment_id= %d \n", client_segment_id );	
 	return client_segment_id;
 }
 
@@ -147,7 +146,7 @@ long int cli_get_segment_size()
 	/* Determine the segment’s size. */
 	shmctl (client_segment_id, IPC_STAT, &shmbuffer);
 	size_t segment_size = shmbuffer.shm_segsz;
-	Dprintf ("Client segment size: %ld\n", segment_size);
+	Dprintf ("Client segment size: %d\n", segment_size);
 	return segment_size;
 }
 
@@ -182,7 +181,7 @@ void cli_ipc_write_sentence( char* mSentence )
 		return ;
 
 	size_t length = strlen(mSentence);
-	int MaxAllowedLength = sizeof(ipc_memory_client->Sentence);	
+	size_t MaxAllowedLength = sizeof(ipc_memory_client->Sentence);	
 	if (length>MaxAllowedLength) {
 		length = MaxAllowedLength;
 		mSentence[MaxAllowedLength] = 0;
@@ -197,7 +196,7 @@ void cli_ipc_write_sentence( char* mSentence )
 void cli_ipc_write_response( char* mSentence, char* mResponderName )
 {
 	size_t length = strlen(mSentence);
-	int MaxAllowedLength = sizeof(ipc_memory_client->Response);	
+	size_t MaxAllowedLength = sizeof(ipc_memory_client->Response);	
 	if (length>MaxAllowedLength) {
 		length = MaxAllowedLength;
 		mSentence[MaxAllowedLength] = 0;
@@ -211,7 +210,7 @@ void cli_ipc_write_response( char* mSentence, char* mResponderName )
 void cli_ipc_write_connection_status( char* mStatus )
 {
 	size_t length = strlen(mStatus);
-	int MaxAllowedLength = sizeof(ipc_memory_client->ConnectionStatus);
+	size_t MaxAllowedLength = sizeof(ipc_memory_client->ConnectionStatus);
 	if (length > MaxAllowedLength) {
 		length = MaxAllowedLength;	// do not write into memory of next variable.
 		mStatus[MaxAllowedLength] = 0;
@@ -254,7 +253,7 @@ bool is_client_ipc_memory_available()
 		Dprintf("Error: %s\n", strerror(errno) );
 		return false;
 	}
-	Dprintf( " Found segment, size=%ld and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+	Dprintf( " Found segment, size=%d and %ld attachments.\n", buf.shm_segsz, buf.shm_nattch );
 	
 	if ((buf.shm_segsz > 0)			// segment size > 0
 	    && (buf.shm_nattch >= 1))	// number of attachments.
@@ -423,7 +422,9 @@ void cli_ipc_add_new_client( struct stClientData* mEntry )
 					
 	ipc_memory_client->NewClientUpdateCounter++;
 	ipc_memory_client->NumberClients++;
-	if (Debug) printf("cli_ipc_add_new_client() size=%d;  NewClientUpdateCounter=%d\n", ipc_memory_client->NumberClients, ipc_memory_client->NewClientUpdateCounter);
+	Dprintf("cli_ipc_add_new_client() size=%d;  NewClientUpdateCounter=%ld\n", 
+			ipc_memory_client->NumberClients, 
+			ipc_memory_client->NewClientUpdateCounter);
 		
 //	ipc_memory_client->UpdateCounter++;		Cannot use this counter because it also triggers a new client sentence parsing!!
 //	therefore the NewClientUpdateCounter.

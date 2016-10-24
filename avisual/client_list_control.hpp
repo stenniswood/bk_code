@@ -28,7 +28,7 @@ public:
 	~ClientListPanel();
 	
 	virtual int		 onCreate   ( );
-	virtual int		 place_views( );
+	virtual void	 place_views( );
 	
 	virtual Control* HitTest( int x, int y );
 	virtual int		 onClick( int x, int y, bool mouse_is_down=true );

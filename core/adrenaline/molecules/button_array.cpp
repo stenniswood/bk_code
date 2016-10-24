@@ -77,18 +77,18 @@ void ButtonArray::create()
 	vector<Button*> tmpB;
 	
 	// First, free up old buttons.  No memory leaks!
-	for (int r=0; r<m_rows; r++)
-		for (int c=0; c<m_cols; c++)
+	for (size_t r=0; r<m_rows; r++)
+		for (size_t c=0; c<m_cols; c++)
 		{
 			if ( r<m_buttons.size() )
 				if ( c<m_buttons[r].size() )
 					if (m_buttons[r][c])
 						delete m_buttons[r][c]; 
 		}
-	for (int r=0; r<m_rows; r++) 
+	for (size_t r=0; r<m_rows; r++) 
 	{
 		tmpB.clear();
-		for (int c=0; c<m_cols; c++)
+		for (size_t c=0; c<m_cols; c++)
 		{
 			tmp = new Button( left+c*BWidth, left+(c+1)*BWidth, bottom+(r+1)*BHeight, bottom+(r)*BHeight );
 			//tmp->set_on_click_listener( button_array_callback, tmp );
@@ -101,8 +101,8 @@ void ButtonArray::create()
 
 void ButtonArray::place	( )
 {
-	for (int r=0; r<m_rows; r++) 
-		for (int c=0; c<m_cols; c++)
+	for (uint16_t r=0; r<m_rows; r++) 
+		for (uint16_t c=0; c<m_cols; c++)
 		{
 			//m_buttons[r][c].move_to(  );			
 		}	
@@ -111,9 +111,10 @@ void ButtonArray::place	( )
 // chance to load resources, call functions which use fonts (already loaded before this call) etc.
 int	ButtonArray::onCreate (  )
 {
-	Control::onCreate();
+	int retval = Control::onCreate();
 	printf("ButtonArray::onCreate\n");
 //	create();
+	return retval;
 }
 void ButtonArray::set_button_text_row( int row, vector<string>&  mTexts )
 {
@@ -134,15 +135,15 @@ void ButtonArray::set_callback( void (*callback)(int,int) )
 
 int ButtonArray::draw( )
 {
-	Control::draw();
+	return Control::draw();
 }
 
-int	ButtonArray::onClick( int x, int y, bool mouse_is_down=true )
+int	ButtonArray::onClick( int x, int y, bool mouse_is_down )
 {
 	Control* result = ChildrenHitTest(x,y);
 	if (result)
 	{
-		int r,c;
+		size_t r,c;
 		for (r=0; r<m_rows; r++) 
 			for (c=0; c<m_cols; c++)
 			{

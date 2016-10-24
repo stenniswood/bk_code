@@ -29,21 +29,18 @@ AUTHOR	:  Stephen Tenniswood
 #include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
-#include "bk_system_defs.h"
-#include "interrupt.h"
+#include "global.h"
 
+#include "interrupt.h"
 #include "CAN_memory.h"
 
- 
 int 	can_segment_id;
 char* 	can_shared_memory;							// unstructured
 struct  can_ipc_memory_map* ipc_memory_can=NULL;	// structured memory.
 
 
 
-
-
-#define Debug 1
+#define Debug 0
 
 static void print_message(struct sCAN* msg)
 {	
@@ -93,7 +90,7 @@ void sprint_message(char* mBuffer, struct sCAN* msg)
 
 void dump_CAN_ipc()
 {
-	printf("StatusCounter=%d\n", 	  	ipc_memory_can->StatusCounter);
+	printf("StatusCounter=%ld\n", 	  	ipc_memory_can->StatusCounter);
 	printf("Connection Status: %s\n", 	ipc_memory_can->ConnectionStatus );
 	
 	printf("RxHead=%d\n", 				ipc_memory_can->RxHead );
@@ -143,16 +140,16 @@ void init_can_memory()
 int can_allocate_memory( )
 {
 	const int 	shared_segment_size = sizeof(struct can_ipc_memory_map);
-	if (Debug) printf ("CAN shm seg size=%d\n", shared_segment_size );
+	Dprintf ("CAN shm seg size=%d\n", shared_segment_size );
 	
 	/* Allocate a shared memory segment. */
 	can_segment_id = shmget( IPC_KEY_CAN, shared_segment_size, IPC_CREAT | 0666 );
 	int errsv = errno;
 	if (can_segment_id==-1) {
-		if (Debug) printf("can_allocate_memory - shmget ERROR: %s \n", strerror(errsv) );
+		Dprintf("can_allocate_memory - shmget ERROR: %s \n", strerror(errsv) );
 		return 0;
 	} else {
-		if (Debug) printf ("CAN Allocated %d bytes shm segment_id=%d\n", shared_segment_size, can_segment_id );
+		Dprintf ("CAN Allocated %d bytes shm segment_id=%d\n", shared_segment_size, can_segment_id );
 		init_can_memory(); 
 	}
 		// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
@@ -340,7 +337,7 @@ BOOL shm_isTxMessageAvailable( int* mTail, int* mTailLaps  )
 
 	return (head_count > tail_count);
 }
-struct sCAN* shm_GetNextTxMsg( int* mTail, int* mTailLaps )	// pointer to 1 allocation. overwritten on next call!
+struct sCAN* shm_GetNextTxMsg( unsigned int* mTail, unsigned int* mTailLaps )	// pointer to 1 allocation. overwritten on next call!
 {
 	if ((ipc_memory_can==NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 		return NULL;
@@ -379,7 +376,7 @@ int CAN_read_segment_id(char* mFilename)
 	char tline[40];
 	FILE* fd = fopen( mFilename, "r" );
 	if (fd==NULL)  {
-		printf("CAN_read_segment_id - File ERROR: %s %s\n", strerror(errno), mFilename );	
+		Dprintf("CAN_read_segment_id - File ERROR: %s %s\n", strerror(errno), mFilename );	
 		return -1;
 	}
 
@@ -387,7 +384,7 @@ int CAN_read_segment_id(char* mFilename)
 	tline[result] = 0;
 	int tmp_can_segment_id = atol( tline );
 	fclose( fd );
-	if (Debug) printf("can_segment_id= %d \n", tmp_can_segment_id );	
+	Dprintf("can_segment_id= %d \n", tmp_can_segment_id );	
 	return tmp_can_segment_id;
 }
 
@@ -411,16 +408,16 @@ BOOL is_CAN_IPC_memory_available()
 {
 	struct shmid_ds buf;			// shm data descriptor.
 
-	if (Debug) printf("Checking for CAN IPC memory... ");
+	Dprintf("Checking for CAN IPC memory... ");
 	// First see if the memory is already allocated:
 	can_segment_id = CAN_read_segment_id( segment_id_filename );
 	int retval = shmctl(can_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
 		//if (Debug) printf("Error: shmctl %s\n", strerror(errno) );
-		if (Debug) printf("CAN IPC Memory : unavailable.\n" );
+		Dprintf("CAN IPC Memory : unavailable.\n" );
 		return FALSE;
 	}
-	if (Debug) printf( " Found segment, size=%d and %d attachments.\n", buf.shm_segsz, buf.shm_nattch );
+	Dprintf( " Found segment, size=%d and %ld attachments.\n", buf.shm_segsz, buf.shm_nattch );
 	
 	if ((buf.shm_segsz > 0)			// segment size > 0
 	    && (buf.shm_nattch >= 1))	// number of attachments.

@@ -181,7 +181,7 @@ void DirectoryListBox::compose_detail_line( char* path, char* d_name )
 	if (Debug) printf("load_file: result=%d/%d;  fizesize=%d\n", result, errsv, FileSize);
 }
 
-void DirectoryListBox::populate_files( char* mPath, int Column )
+void DirectoryListBox::populate_files( const char* mPath, int Column )
 {
 	DIR           *d;
 	struct dirent *dir;
@@ -214,7 +214,7 @@ void DirectoryListBox::populate_files( char* mPath, int Column )
 	}
 }
 
-void DirectoryListBox::populate_directories( char* mPath, int Column )
+void DirectoryListBox::populate_directories( const char* mPath, int Column )
 {
 	DIR           *d;
 	struct dirent *dir;
