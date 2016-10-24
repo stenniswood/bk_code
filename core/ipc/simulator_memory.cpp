@@ -218,11 +218,11 @@ void sim_detach_memory()
 }
 
 #if (PLATFORM==Mac)
-char sim_segment_id_filename[] = "/Users/stephentenniswood/code/Mac/bk_code/client/sim_segment_id.cfg";
+char sim_segment_id_filename[] = "/Users/stephentenniswood/code/Mac/bk_code/shm_ids/sim_segment_id.cfg";
 #elif (PLATFORM==RPI)
-char sim_segment_id_filename[] = "/home/pi/bk_code/client/sim_shared_memseg_id.cfg";
+char sim_segment_id_filename[] = "/home/pi/bk_code/shm_ids/sim_shared_memseg_id.cfg";
 #elif (PLATFORM==linux_desktop)
-char sim_segment_id_filename[] = "/home/steve/bk_code/client/sim_shared_memseg_id.cfg";
+char sim_segment_id_filename[] = "/home/steve/bk_code/shm_ids/sim_shared_memseg_id.cfg";
 #endif
 
 //char sim_segment_id_filename[] = "seq_segment_id.cfg";

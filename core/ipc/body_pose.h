@@ -1,4 +1,5 @@
-
+#ifndef _BODY_POSE_H_
+#define _BODY_POSE_H_
 
 enum robot_servo_indices {
 	l_hip_rotate,
@@ -34,4 +35,6 @@ struct stBodyPositionVector
 	float	servo_values[MAX_SERVOS];	// See "struct stBodyPosition" at bottom of this file for order definition:
 };
 
+
+#endif
 

@@ -232,11 +232,11 @@ void cli_ipc_write_connection_status( char* mStatus )
 
 
 #if (PLATFORM==Mac)
-char cli_segment_id_filename[] = "/Users/stephentenniswood/code/Mac/bk_code/client/cli_shared_memseg_id.cfg";
+char cli_segment_id_filename[] = "/Users/stephentenniswood/code/Mac/bk_code/shm_ids/cli_shared_memseg_id.cfg";
 #elif (PLATFORM==RPI)
-char cli_segment_id_filename[] = "/home/pi/bk_code/client/cli_shared_memseg_id.cfg";
+char cli_segment_id_filename[] = "/home/pi/bk_code/shm_ids/cli_shared_memseg_id.cfg";
 #elif (PLATFORM==linux_desktop)
-char cli_segment_id_filename[] = "/home/steve/bk_code/client/cli_shared_memseg_id.cfg";
+char cli_segment_id_filename[] = "/home/steve/bk_code/shm_ids/cli_shared_memseg_id.cfg";
 #endif
 
 

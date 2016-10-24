@@ -42,11 +42,11 @@ int 	eyes_segment_id;
 struct  eyes_ipc_memory_map* ipc_memory_eyes=NULL;
 
 #if (PLATFORM==Mac)
-char eyes_segment_id_filename[] = "/Users/stephentenniswood/code/Mac/bk_code/client/eyes_segment_id.cfg";
+char eyes_segment_id_filename[] = "/Users/stephentenniswood/code/Mac/bk_code/shm_ids/eyes_segment_id.cfg";
 #elif (PLATFORM==RPI)
-char eyes_segment_id_filename[] = "/home/pi/bk_code/client/eyes_shared_memseg_id.cfg";
+char eyes_segment_id_filename[] = "/home/pi/bk_code/shm_ids/eyes_shared_memseg_id.cfg";
 #elif (PLATFORM==linux_desktop)
-char eyes_segment_id_filename[] = "/home/steve/bk_code/client/eyes_shared_memseg_id.cfg";
+char eyes_segment_id_filename[] = "/home/steve/bk_code/shm_ids/eyes_shared_memseg_id.cfg";
 #endif
 
 bool is_eyes_ipc_memory_available()

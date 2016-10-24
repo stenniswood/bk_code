@@ -215,11 +215,11 @@ bool ipc_add_sequence( struct stBodyPositionVector*  mVector )
 
  
 #if (PLATFORM==Mac)
-char seq_segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/client/seq_shared_memseg_id.cfg";
+char seq_segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/shm_ids/seq_shared_memseg_id.cfg";
 #elif (PLATFORM==RPI)
-char seq_segment_id_filename[] = "/home/pi/bk_code/client/seq_shared_memseg_id.cfg";
+char seq_segment_id_filename[] = "/home/pi/bk_code/shm_ids/seq_shared_memseg_id.cfg";
 #elif (PLATFORM==linux_desktop)
-char seq_segment_id_filename[] = "/home/steve/bk_code/client/seq_shared_memseg_id.cfg";
+char seq_segment_id_filename[] = "/home/steve/bk_code/shm_ids/seq_shared_memseg_id.cfg";
 #endif
 
 

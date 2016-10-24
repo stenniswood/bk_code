@@ -393,11 +393,11 @@ int CAN_read_segment_id(char* mFilename)
 
 
 #if (PLATFORM==Mac)
-char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/amonitor/acan_shared_memseg_id.cfg";
+char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/shm_ids/acan_shared_memseg_id.cfg";
 #elif (PLATFORM==RPI)
-char segment_id_filename[] = "/home/pi/bk_code/amonitor/acan_shared_memseg_id.cfg";
+char segment_id_filename[] = "/home/pi/bk_code/shm_ids/acan_shared_memseg_id.cfg";
 #elif (PLATFORM==linux_desktop)
-char segment_id_filename[] = "/home/steve/bk_code/amonitor/acan_shared_memseg_id.cfg";
+char segment_id_filename[] = "/home/steve/bk_code/shm_ids/acan_shared_memseg_id.cfg";
 #endif
 
 BOOL is_CAN_IPC_ptr_valid()

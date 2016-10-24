@@ -226,11 +226,11 @@ int audio_read_segment_id(char* mFilename)
 
 
 #if (PLATFORM==Mac)
-static char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/abkInstant/audio_shared_memseg_id.cfg";
+static char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/shm_ids/audio_shared_memseg_id.cfg";
 #elif (PLATFORM==RPI)
-static char segment_id_filename[] = "/home/pi/bk_code/abkInstant/audio_shared_memseg_id.cfg";
+static char segment_id_filename[] = "/home/pi/bk_code/shm_ids/audio_shared_memseg_id.cfg";
 #elif (PLATFORM==linux_desktop)
-static char segment_id_filename[] = "/home/steve/bk_code/abkInstant/audio_shared_memseg_id.cfg";
+static char segment_id_filename[] = "/home/steve/bk_code/shm_ids/audio_shared_memseg_id.cfg";
 #endif
 
 

@@ -16,4 +16,13 @@ make
 cd ../aquad
 make clean
 make
+cd ../home_3D
+make clean
+make
+cd ../abkInstant
+make clean
+make
+cd ../agps
+make clean
+make
 
