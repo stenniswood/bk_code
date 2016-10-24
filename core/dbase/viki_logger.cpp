@@ -5,13 +5,13 @@
 #include <string.h>
 #include <vector>
 #include <time.h>
-#include <my_global.h>
-#include <mysql.h>
 #include <stdint.h>
-//#include "bk_system_defs.h"
+
 #include "global.h"
 #include "viki_logger.hpp"
 #include "sequencer_memory.hpp"
+#include <my_global.h>
+#include <mysql.h>
 
 
 #define Debug 1

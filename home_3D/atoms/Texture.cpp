@@ -23,6 +23,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 // Include OpenCV here for the imread function!
+#include "global_funcs.h"
+
 
 using namespace cv ;
 using namespace std;
@@ -45,7 +47,7 @@ Texture::~Texture()
 
 void Texture::load_image( string mFilename )
 { 
-	dprintf("Texture::load_image( %s )\n", mFilename.c_str() );
+	Dprintf("Texture::load_image( %s )\n", mFilename.c_str() );
 	m_image = imread(mFilename);
 
     //imshow( "Display Image2", m_image );
@@ -70,11 +72,11 @@ GLuint	Texture::generate_TBO	( )
                 break;
         default: break;
     }
-    dprintf("Texture::generate_TBO: rows=%d; cols=%d\n", m_image.rows, m_image.cols);
+    Dprintf("Texture::generate_TBO: rows=%d; cols=%d\n", m_image.rows, m_image.cols);
     glEnable     (GL_TEXTURE_2D );
     glGenTextures(1, &m_TBO     );
     glBindTexture(GL_TEXTURE_2D, m_TBO);
-    //dprintf("Texture::generate_TBO: m_TBO=%d\n", m_TBO);
+    //Dprintf("Texture::generate_TBO: m_TBO=%d\n", m_TBO);
 
     /* may need these for odd sized images: */
 //    glPixelStorei(GL_UNPACK_ALIGNMENT,   1);

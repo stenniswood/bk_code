@@ -16,9 +16,9 @@ ifeq ($(PLATFORM), $(Mac))
 HARDWARE_PATH = ./hardware/mac/
 endif
 
-CC         = g++
-OPTIONS	   = -std=c99 -g  
-CFLAGS = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) -std=gnu++11 -DGLM_FORCE_RADIANS=1 \
+CC      = g++
+OPTIONS	= -std=c99 -g  
+CFLAGS  = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) -std=gnu++11 -DGLM_FORCE_RADIANS=1 \
 	     -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac) -DGL_GLEXT_PROTOTYPES=1
 
 #***** INCLUDE PATHS : 
@@ -43,9 +43,9 @@ OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lo
 	-lopencv_objdetect -l opencv_ml -lopencv_calib3d -lopencv_imgproc -lopencv_highgui \
 	-lopencv_core
 
-# MAIN DIRECTORY OBJECTS:
+# MAIN DIRECTORY OBJECTS: serverthread.o 
 OBJ     = main.o t_object.o mouse_nav.o cursor_nav.o
-NLP_CORE_OBJ = color_protocol.o parameter.o nlp_sentence.o serverthread.o 
+NLP_CORE_OBJ = color_protocol.o parameter.o nlp_sentence.o 
 NLP_OBJ = robot_legs_protocol.o \
   create_object_nlp.o positioner_2d.o robot_protocol.o ThreeD_object_protocol.o \
   it.o positioner_3d.o scene_nlp.o top_level_protocol_sim.o \
@@ -70,7 +70,7 @@ SQL_OBJ   = scene.o sql_load.o
 BUILDINGS_OBJ = abstract_wall.o apartment.o basket_ball_court.o door.o floor.o room2.o sports_bench.o \
     dwelling2.o floor_plan.o room_of_tables.o dwelling.o dwelling_level.o \
     quarter_629.o basketball_arena.o hampton_complex.o stairway.o wall.o door_handle.o 
-FRAMEWORK_OBJ = asset_importer.o imageloader.o key_press.o sequencer_memory.o \
+FRAMEWORK_OBJ = asset_importer.o imageloader.o key_press.o \
     ConFloat.o init_samples.o object_primitive_creator.o tk_colors.o \
     DecisionTree.o instant_ipc.o proc_client_cmds.o stats.o verbal_object.o
 
@@ -79,7 +79,7 @@ VISION_OBJS  = findEyeCenter.o findEyeCorner.o face_detect.o face_recog.o face_s
 			   optical_flow.o misc_detect.o  image_proc_misc.o helpers.o frame_grabber.o
 DBASE_OBJS    = viki_logger.o vision_logger.o
 MISC_OBJS     = super_string.o
-IPC_OBJS      = vision_memory.o simulator_memory.o client_memory.o
+IPC_OBJS      = vision_memory.o simulator_memory.o client_memory.o sequencer_memory.o
 KINETIC_OBJS  = vector.o
 
 %.o: %.cpp $(DEPS)
@@ -111,19 +111,19 @@ KINETIC_OBJS  = vector.o
 
 
 home3D: $(OBJ) $(addprefix ../core/kinetic/,$(KINETIC_OBJS)) \
-	$(addprefix ./nlp/,    $(NLP_OBJ)) \
-	$(addprefix ./physics/,$(PHYSICS_OBJ)) \
-	$(addprefix ./atoms/,  $(ATOMS_OBJ)) \
-	$(addprefix ./molecules/,$(MOLECULES_OBJ)) \
-	$(addprefix ./robot/,  $(ROBOT_OBJ)) \
-	$(addprefix ./route/,  $(ROUTE_OBJ)) \
-	$(addprefix ./Large/,  $(LARGE_OBJ)) \
+	$(addprefix ./nlp/,       $(NLP_OBJ))       \
+	$(addprefix ./physics/,   $(PHYSICS_OBJ))   \
+	$(addprefix ./atoms/,     $(ATOMS_OBJ))     \
+	$(addprefix ./molecules/, $(MOLECULES_OBJ)) \
+	$(addprefix ./robot/,     $(ROBOT_OBJ))     \
+	$(addprefix ./route/,     $(ROUTE_OBJ))     \
+	$(addprefix ./Large/,     $(LARGE_OBJ))     \
 	$(addprefix ./framework/,  $(FRAMEWORK_OBJ)) \
 	$(addprefix ./buildings/,  $(BUILDINGS_OBJ)) \
-	$(addprefix ./sql/,        $(SQL_OBJ)) \
+	$(addprefix ./sql/,        $(SQL_OBJ))      \
 	$(addprefix ../core/nlp/,  $(NLP_CORE_OBJ)) \
-    $(addprefix ../core/dbase/,$(DBASE_OBJS)) \
-	$(addprefix ../core/misc/, $(MISC_OBJS)) \
+    $(addprefix ../core/dbase/,$(DBASE_OBJS))   \
+	$(addprefix ../core/misc/, $(MISC_OBJS))    \
 	$(addprefix ../core/ipc/,  $(IPC_OBJS))
 	g++ -o $@ $^ $(CFLAGS) $(LIBFLAGS) $(LDFLAGS) $(OPENCV_LIBS)
 

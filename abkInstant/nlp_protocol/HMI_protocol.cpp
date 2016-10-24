@@ -121,7 +121,7 @@ return  TRUE = GPIO Telegram was Handled by this routine
 *****************************************************************/
 int Parse_HMI_Statement(const char* mSentence, ServerHandler* mh)
 {
-	dprintf("Parse_HMI_Statement\n");
+	Dprintf("Parse_HMI_Statement\n");
 	int retval = -1;	
 	
 	std::string* subject  	= extract_word( mSentence, &subject_list );

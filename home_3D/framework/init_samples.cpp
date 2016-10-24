@@ -25,7 +25,7 @@
 #include "imageloader.h"
 #include "all_objects.h"
 #include "simulator_memory.h"
-#include "sequencer_memory.h"
+#include "sequencer_memory.hpp"
 #include "client_memory.hpp"
 #include "proc_client_cmds.h"
 #include "sign.h"

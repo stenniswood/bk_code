@@ -49,7 +49,8 @@ void load_position( ifstream& ifile, struct stBodyPosition* bp )
  */
 void glStaticMovesRobot::load_file( string mFilename )
 {
-    struct stBodyPosition position;
+    struct stBodyPosition 		position;
+    struct stBodyPositionVector positionV;    
     ifstream ifile;
     ifile.open( mFilename);
     if (ifile.fail())
@@ -57,7 +58,8 @@ void glStaticMovesRobot::load_file( string mFilename )
     while (ifile.eof()==false)                  // Read all positions within the file and store.
     {
         load_position( ifile, &position );
-        m_positions.push_back( position );
+        memcpy(positionV.servo_values, &position, sizeof(struct stBodyPosition) );
+        m_positions.push_back( positionV );
         m_left_arm.m_gripper.read_angles ( ifile ); // ?? prolly gripper is treated separate from the rest of the body.
         m_right_arm.m_gripper.read_angles( ifile ); // ??
     }
@@ -65,10 +67,11 @@ void glStaticMovesRobot::load_file( string mFilename )
 }
 
 
-void save_position( ofstream& ofile, struct stBodyPosition* bp )
+void save_position( ofstream& ofile, struct stBodyPositionVector* bp )
 {
-    int num_floats = sizeof(struct stBodyPosition) / sizeof(float);
-    float* ptr = (float*) bp;
+    int num_floats = MAX_SERVOS;
+    //sizeof(struct stBodyPositionVector) / sizeof(float);
+    float* ptr = (float*) bp->servo_values;
 
     ofile << "--Start of BodyPosition" << endl;
     for (int i=0; i<num_floats; i++)
@@ -82,7 +85,7 @@ void glStaticMovesRobot::save_file( string mFilename  )
     outfile.open(mFilename);
 
     int count=1;
-    struct stBodyPosition bp;
+    struct stBodyPositionVector bp;
     bool   result = false;
     while (result==false)                           // Loop thru all positions within the demo() function.
     {

@@ -8,10 +8,8 @@
 //
 // NOTE: Origin of the robot is the center of the Torso.
 
-    Stride is defined as the distance from heel to heel.  The max hip swing angles will be 
-    based on this.
- 
- 
+    Stride is defined as the distance from heel to heel.  The max hip swing 
+    angles will be based on this.
 */
 
 #ifndef __home3D__walking_robot__
@@ -22,7 +20,6 @@
 #include "robot_leg_piece.hpp"
 #include "route_feet.hpp"
 #include "robot_interpolator.h"
-
 
 
 class glWalkingRobot : public glRobotInterpolator

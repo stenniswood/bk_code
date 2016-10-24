@@ -10,11 +10,13 @@
  ************************************************************/
 
 #include <list>
+#include "global.h"
+#include "body_pose.h"
 
-#define IPC_KEY_CLI    1275
+#define IPC_KEY_SEQ    1275
 #define MAX_SEQUENCES  300
 
-const int l_hip_rotate	 = 0;
+/*const int l_hip_rotate	 = 0;
 const int l_hip_swing	 = 1;
 const int l_hip_fb_swing = 2;
 const int l_knee		 = 3;
@@ -24,7 +26,6 @@ const int r_hip_swing	 = 6;
 const int r_hip_fb_swing = 7;
 const int r_knee		 = 8;
 const int r_ankle		 = 9;
-
 const int l_shoulder_rotate	 	= 10;
 const int l_shoulder_swing	 	= 11;
 const int l_shoulder_fore_rotate= 12;
@@ -35,8 +36,7 @@ const int r_shoulder_swing	 	= 16;
 const int r_shoulder_fore_rotate= 17;
 const int r_wrist_rotate	 	= 18;
 const int r_wrist_swing		 	= 19;
-
-const int MAX_SERVOS = 24;
+*/
 
 
 struct stPerformanceData
@@ -53,11 +53,11 @@ struct stDiagnosticData
 	float	servo_energy [MAX_SERVOS];
 };
 
-struct stBodyPositionVector 
+/*struct stBodyPositionVector 
 {
 	int 	num_active_servos;
 	float	servo_values[MAX_SERVOS];	// See "struct stBodyPosition" at bottom of this file for order definition:
-};
+};*/
 
 /******************** sequencer MEMORY MAP *****************/
 struct sequencer_ipc_memory_map
@@ -106,6 +106,9 @@ int  seq_get_segment_size   ( );
 void seq_fill_memory		( );
 /************************************************************/
 
+//bool seq_new_command_available( );
+//void seq_acknowledge_command( );
+
 /*********** MEMORY DATA ACCESS FUNCTIONS **************/
 // for instant to fill in the shared mem buffer:
 void seq_ipc_write_connection_status( char* mStatus   );
@@ -130,8 +133,10 @@ void seq_ack_performance_status	();
 void seq_ack_diagnostic_status	();
 void seq_ack_enable_status		();
 void seq_ack_vector_status		();
-/************************************************************/
 
+bool ipc_add_sequence           ( struct stBodyPositionVector*  mVector );
+
+/************************************************************/
 
 #endif
 

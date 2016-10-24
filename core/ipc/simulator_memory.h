@@ -1,8 +1,8 @@
 
 #include <vector>
 #include "vector.hpp"
-#include "sequencer_memory.hpp"
-
+//#include "sequencer_memory.hpp"
+#include "body_pose.h"
 
 #define IPC_KEY_SIM           0x04D2        // 1234 in decimal!
 #define MAX_CLIENT_ARRAY_SIZE 2048

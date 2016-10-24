@@ -7,7 +7,7 @@
 //
 #include <stdlib.h>
 #include <string>
-#include "bk_system_defs.h"
+#include "global.h"
 #include "nlp_sentence.hpp"
 #include "string_util.h"
 #include "prefilter.hpp"
@@ -19,7 +19,7 @@
 
 
 // Common to all Protocols :
-WordGroup 	preposition_list;
+//WordGroup 	preposition_list;
 
 Sentence::Sentence()
 {
@@ -46,7 +46,9 @@ Sentence::~Sentence()
  false => This is a Voice Response and not to be processed! */
 bool Sentence::prefilter_text(  )
 {
-    char* result = strstr(m_sentence.c_str(), "VR:");
+	char pre[] = "VR:";
+	char* str = (char*)m_sentence.c_str();
+    char* result = strstr( str, pre );
     if (result != NULL)
     {
         m_voice_response = true;
@@ -374,12 +376,12 @@ void init_preposition_list()
     //    ie.  subtract 21 from 101.
     //      or what is 101 subtract 21
     
-    preposition_list.add_word( "to"   );
+/*    preposition_list.add_word( "to"   );
     preposition_list.add_word( "from" );
     preposition_list.add_word( "as" );
     preposition_list.add_word( "by" );
     preposition_list.add_word( "for");
-    preposition_list.add_word( "in" );
+    preposition_list.add_word( "in" ); */
 }
 
 

@@ -10,7 +10,9 @@
 #include <math.h>
 #include <regex>
 #include <iostream>
-#include "bk_system_defs.h"
+#include "global.h"
+
+//#include "bk_system_defs.h"
 #include "super_string.hpp"
 
 

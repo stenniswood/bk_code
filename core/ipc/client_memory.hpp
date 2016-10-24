@@ -1,10 +1,6 @@
 #ifndef _CLIENT_MEMORY_HPP_
 #define _CLIENT_MEMORY_HPP_
 
-
-/*#ifdef  __cplusplus
-extern "C" {
-#endif */
     
 /************************************************************
 	Data Flow - Client List from UDP received to avisual 
@@ -109,10 +105,6 @@ void        cli_ack_connection_status	();
 void        cli_ack_update_status		();
 
 /************************************************************/
-
-/*#ifdef  __cplusplus
-}
-#endif */
 
 
 #endif

@@ -127,7 +127,7 @@ void*  listen_thread(void* )
 	   then we call accept().  Since select()/Poll() are nonblocking, we can
 	   also check for connect_to_robot() client initiated request.	*****/
 
-	dprintf("establish_connection()\n");	
+	Dprintf("establish_connection()\n");	
     //socklen_t size = (socklen_t)sizeof(client_addr);
     //memset(&client_addr, '0', sizeof(socklen_t) );
 	

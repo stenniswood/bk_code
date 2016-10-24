@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-//#include "bk_system_defs.h"
+
 #include "nlp_sentence.hpp"
 #include "GENERAL_protocol.hpp"
 #include "family_relationships.hpp"
@@ -153,7 +153,7 @@ int  Parse_Family_Statement( Sentence& mSentence, ServerHandler* mh )
     int index = mSentence.any_one_word_found_in_sentence(word_list);
     word_index = mSentence.get_word_pointer();
     
-    dprintf("Family=%d\n", index);
+    Dprintf("Family=%d\n", index);
     // check database if relationship is known.
     if (index>0)
     {

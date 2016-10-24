@@ -1,4 +1,3 @@
-
 /*********************************************************************
 Product of Beyond Kinetics, Inc
 ------------------------------------------
@@ -33,7 +32,9 @@ AUTHOR	:  Stephen Tenniswood
 #include <list>
 #include <arpa/inet.h>
 #include <errno.h>
-#include "bk_system_defs.h"
+//#include "bk_system_defs.h"
+#include "global.h"
+
 #include "interrupt.h"
 #include "sequencer_memory.hpp"
 
@@ -41,7 +42,6 @@ AUTHOR	:  Stephen Tenniswood
 char* 	sequencer_shared_memory;
 int 	sequencer_segment_id;
 struct  sequencer_ipc_memory_map* ipc_memory_sequencer =NULL;
-
 
 void seq_dump_ipc()
 {
@@ -92,7 +92,7 @@ int seq_allocate_memory( )
 	printf ("Client shm seg size=%d\n", shared_segment_size );
 	
 	/* Allocate a shared memory segment. */
-	sequencer_segment_id = shmget( IPC_KEY_CLI, shared_segment_size, IPC_CREAT | 0666 );
+	sequencer_segment_id = shmget( IPC_KEY_SEQ, shared_segment_size, IPC_CREAT | 0666 );
 	int errsv = errno;
 	if (sequencer_segment_id==-1)
 		printf("seq_allocate_memory - ERROR: %s \n", strerror(errsv) );
@@ -188,6 +188,28 @@ void seq_ipc_write_connection_status( char* mStatus )
 {
 	ipc_memory_avis->ScreenNumber = NewActivePage;
 } */
+
+bool ipc_write_sequence( int mIndex, struct stBodyPositionVector* mBP )
+{
+    if ((mIndex >= MAX_SEQUENCES) || (ipc_memory_sequencer == NULL))
+        return false;
+    
+    ipc_memory_sequencer->SequenceArray[mIndex] = *mBP;
+    return true;
+}
+
+// Return true if added.
+bool ipc_add_sequence( struct stBodyPositionVector*  mVector )
+{
+    if (ipc_memory_sequencer == NULL)  return false;
+    
+    int index = ipc_memory_sequencer->NumberSequences++;
+    if (ipc_memory_sequencer->NumberSequences >= MAX_SEQUENCES)
+        ipc_memory_sequencer->NumberSequences = 0;
+    
+    return ipc_write_sequence( index, mVector);
+}
+
 
 /* See udp_transponder for update_client_list()		*/
 

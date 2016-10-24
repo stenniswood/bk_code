@@ -28,16 +28,18 @@ public:
     float      interpolate_one ( float mAngle1, float mAngle2,
                                  float mNumberOfSamples, float mIndex );
                                 
-    struct stBodyPosition*  interpolate( struct stBodyPosition* bp1, struct stBodyPosition* bp2,
-                                        int number_samples, int index_within_samples );
+    struct stBodyPositionVector*  interpolate( struct stBodyPositionVector* bp1, 
+    									struct stBodyPositionVector* bp2,
+                                        int number_samples, 
+                                        int index_within_samples );
 
-    void    interpolate_all( struct stBodyPosition* bp1,
-                             struct stBodyPosition* bp2,
+    void    interpolate_all( struct stBodyPositionVector* bp1,
+                             struct stBodyPositionVector* bp2,
                              int number_samples );
     bool    play_next  ( );
     void    morph_demos( );
     
-    vector<struct stBodyPosition>   m_sequence;
+    vector<struct stBodyPositionVector>   m_sequence;
     int     m_interpolated_index;
 };
 

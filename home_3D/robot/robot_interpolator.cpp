@@ -60,41 +60,41 @@ void glRobotInterpolator::save_one_vector( std::ofstream &mofs, int mIndex, bool
     /* Note The order here *must* match the order in robot::extract_robot_position() */
     // Left Leg :
     mofs << "0, 3, ";
-    //mofs << m_sequence[mIndex].l_hip_rotate << ", ";
-    mofs << m_sequence[mIndex].l_hip_swing << ", ";
-    //mofs << m_sequence[mIndex].l_hip_fb_swing << ", ";
+    //mofs << m_sequence[mIndex].servo_values[l_hip_rotate] << ", ";
+    mofs << m_sequence[mIndex].servo_values[l_hip_swing] << ", ";
+    //mofs << m_sequence[mIndex].servo_values[l_hip_fb_swing] << ", ";
     
-    mofs << m_sequence[mIndex].l_knee << ", ";
-    mofs << m_sequence[mIndex].l_ankle << ", \n";
+    mofs << m_sequence[mIndex].servo_values[l_knee] << ", ";
+    mofs << m_sequence[mIndex].servo_values[l_ankle] << ", \n";
     
     // Right Leg :
     mofs << "1, 3, ";
     //mofs << m_sequence[mIndex].r_hip_rotate << ", ";
-    mofs << m_sequence[mIndex].r_hip_swing << ", ";
-    // mofs << m_sequence[mIndex].r_hip_fb_swing << ", ";
+    mofs << m_sequence[mIndex].servo_values[r_hip_swing] << ", ";
+    // mofs << m_sequence[mIndex].servo_values[r_hip_fb_swing] << ", ";
     
-    mofs << m_sequence[mIndex].r_knee << ", ";
-    mofs << m_sequence[mIndex].r_ankle << ", \n";
+    mofs << m_sequence[mIndex].servo_values[r_knee] << ", ";
+    mofs << m_sequence[mIndex].servo_values[r_ankle] << ", \n";
     
     // Left Arm
    // bool save_arms=false;
     if (mSaveArms) {
         mofs << "2, 6, ";
-        mofs << m_sequence[mIndex].l_shoulder_fore_rotate << ", ";
-        mofs << m_sequence[mIndex].l_shoulder_rotate   << ", ";
-        mofs << m_sequence[mIndex].l_shoulder_swing    << ", ";
-        mofs << m_sequence[mIndex].l_elbow             << ", ";
-        mofs << m_sequence[mIndex].l_wrist_swing       << ", ";
-        mofs << m_sequence[mIndex].l_wrist_rotate      << ", \n";
+        mofs << m_sequence[mIndex].servo_values[l_shoulder_fore_rotate] << ", ";
+        mofs << m_sequence[mIndex].servo_values[l_shoulder_rotate]   << ", ";
+        mofs << m_sequence[mIndex].servo_values[l_shoulder_swing]    << ", ";
+        mofs << m_sequence[mIndex].servo_values[l_elbow]             << ", ";
+        mofs << m_sequence[mIndex].servo_values[l_wrist_swing]       << ", ";
+        mofs << m_sequence[mIndex].servo_values[l_wrist_rotate]      << ", \n";
 
         // Right Arm
         mofs << "3, 6, ";
-        mofs << m_sequence[mIndex].r_shoulder_fore_rotate << ", ";
-        mofs << m_sequence[mIndex].r_shoulder_rotate << ", ";
-        mofs << m_sequence[mIndex].r_shoulder_swing << ", ";
-        mofs << m_sequence[mIndex].r_elbow          << ", ";
-        mofs << m_sequence[mIndex].r_wrist_swing    << ", ";
-        mofs << m_sequence[mIndex].r_wrist_rotate   << ", \n";
+        mofs << m_sequence[mIndex].servo_values[r_shoulder_fore_rotate] << ", ";
+        mofs << m_sequence[mIndex].servo_values[r_shoulder_rotate] << ", ";
+        mofs << m_sequence[mIndex].servo_values[r_shoulder_swing] << ", ";
+        mofs << m_sequence[mIndex].servo_values[r_elbow]          << ", ";
+        mofs << m_sequence[mIndex].servo_values[r_wrist_swing]    << ", ";
+        mofs << m_sequence[mIndex].servo_values[r_wrist_rotate]   << ", \n";
     }
 }
 
@@ -123,32 +123,31 @@ float glRobotInterpolator::interpolate_one( float mAngle1, float mAngle2,
     return result;
 }
 
-struct stBodyPosition*  glRobotInterpolator::interpolate(
-                                struct stBodyPosition* bp1,
-                                struct stBodyPosition* bp2,
+struct stBodyPositionVector*  glRobotInterpolator::interpolate(
+                                struct stBodyPositionVector* bp1,
+                                struct stBodyPositionVector* bp2,
                                 int number_samples,
                                 int index_within_samples )
 {
-    static struct stBodyPosition bp;
+    static struct stBodyPositionVector bp;
     float* r  = (float*)&bp;
-    float* s1 = (float*)bp1;
-    float* s2 = (float*)bp2;
-    int number_of_floats = sizeof( struct stBodyPosition ) / sizeof(float);
+    float* s1 = (float*)bp1->servo_values;
+    float* s2 = (float*)bp2->servo_values;
+    int number_of_floats = sizeof( struct stBodyPositionVector ) / sizeof(float);
     
     for (int i=0; i<number_of_floats; i++)
-        r[i] = interpolate_one( s1[i], s2[i], number_samples, index_within_samples );
-    
+        r[i] = interpolate_one( s1[i], s2[i], number_samples, index_within_samples );    
     return &bp;
 }
 
 
 /* results stored int m_sequence vector */
 void  glRobotInterpolator::interpolate_all
-                            (struct stBodyPosition* bp1,
-                             struct stBodyPosition* bp2,
+                            (struct stBodyPositionVector* bp1,
+                             struct stBodyPositionVector* bp2,
                              int number_samples  )
 {
-    struct stBodyPosition* tmp;
+    struct stBodyPositionVector* tmp;
     for (int i=0; i<number_samples; i++)
     {
         tmp = interpolate( bp1, bp2, number_samples, i);
@@ -171,8 +170,8 @@ bool glRobotInterpolator::play_next()
 
 void glRobotInterpolator::morph_demos()
 {
-    struct stBodyPosition bp1;
-    struct stBodyPosition bp2;
+    struct stBodyPositionVector bp1;
+    struct stBodyPositionVector bp2;
     m_sequence.clear();
     
     extract_body_pose(&bp1);  // save current positions

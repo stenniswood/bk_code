@@ -6,9 +6,8 @@
 //
 #include <stdlib.h>
 
-
 #include "simulator_memory.h"
-#include "sequencer_memory.h"
+#include "sequencer_memory.hpp"
 #include "proc_client_cmds.h"
 #include "object_primitive_creator.hpp"
 #include "all_objects.h"
@@ -17,7 +16,6 @@
 #include "walking_robot.h"
 #include "init_samples.hpp"
 #include "robot_protocol.hpp"
-//#include "room2.hpp"
 #include "nlp_sentence.hpp"
 
 
@@ -96,8 +94,8 @@ void proc_sim_command()
     char*   last_space;
     long    size;
 
-    struct stBodyPosition bp;
-    float*  bp_ptr      = (float*)&bp;
+    struct stBodyPositionVector bp;
+    float*  bp_ptr      = (float*)&(bp.servo_values);
     int     num_floats  = 0;
     int     num_servos  = 0;
     int     servo_index = 0;
@@ -402,18 +400,12 @@ void respond_to_client_timeslice()
 {
     // Check Command Counter
     bool sim = sim_new_command_available();
-    bool seq = seq_new_command_available();
     if (sim) {
         printf("New Simulator Command available!\t");
         proc_sim_command       ();
         sim_acknowledge_command();
     }
-    if (seq) {
-        printf("New Sequencer Command available!\t");
-        seq_acknowledge_command();
-    }
 }
-
 
 
 /* Direct Robot Movement command */

@@ -216,14 +216,13 @@ return  -1	=> Not handled
 int Parse_Camera_Statement( const char* mSentence, ServerHandler* mh )
 {
 	int retval=-1;
-
-	dprintf("Parse_Camera_Statement\n");
+	Sentence theSentence(mSentence);
+	
+	Dprintf("Parse_Camera_Statement\n");
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);	
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
 	std::string* object 	= extract_word( mSentence, &object_list  	);	
-//	std::string* preposition= extract_word( mSentence, &preposition_list  );
 	std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-//	int prepos_index      	= get_preposition_index( mSentence, preposition_list );
     diagram_sentence		( subject, verb, adjective, object, NULL );
 
 	if (compare_word( subject, "camera tilt")==0)
@@ -304,10 +303,12 @@ int Parse_Camera_Statement( const char* mSentence, ServerHandler* mh )
 		{	
 			printf("verb matched!\n");
 			int cond_1 = ((compare_word (adjective, "my")==0) ||
-                          (preposition_list.has_group_member("to") && (compare_word(object, "you")==0)) );
+						  (theSentence.is_found_in_sentence("to") && 
+                          (compare_word(object, "you")==0)) );
 		  	
             int cond_2 = ((compare_word (adjective, "your") ==0) ||
-		  				  ((preposition_list.has_group_member("to")==0) && (compare_word(object, "me")==0)) );
+		  				  (theSentence.is_found_in_sentence("to") && 
+		  				  (compare_word(object, "me")==0)) );
             
 			printf("cond1=%d; cond2=%d;\n", cond_1, cond_2 );
 			if (cond_1)

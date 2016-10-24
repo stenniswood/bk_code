@@ -1,7 +1,7 @@
 /* Home3D Robot Simulator
  * www.beyondkinetics.com
  * Stephen Tenniswood
- 
+
  Start MySQL with:
     sudo /usr/local/mysql/support-files/mysql.server start
 
@@ -26,7 +26,7 @@
 #include "imageloader.h"
 #include "all_objects.h"
 #include "simulator_memory.h"
-#include "sequencer_memory.h"
+#include "sequencer_memory.hpp"
 #include "client_memory.hpp"
 #include "proc_client_cmds.h"
 #include "atom_objects.h"

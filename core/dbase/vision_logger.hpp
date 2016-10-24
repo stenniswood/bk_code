@@ -17,7 +17,7 @@
 */
 
 using namespace std;
-#define BOOL unsigned char
+
 /*
 	
 

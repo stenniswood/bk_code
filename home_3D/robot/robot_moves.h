@@ -90,7 +90,7 @@ public:
     void            scan_arms       ( );
     bool            demo            ( );
     
-    vector<struct stBodyPosition>   m_positions;
+    vector<struct stBodyPositionVector>   m_positions;
     
 };
 

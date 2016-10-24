@@ -111,13 +111,10 @@ return  TRUE = GPIO Telegram was Handled by this routine
 int Parse_File_Statement(const char* mSentence, ServerHandler* mh)
 {
 	int retval = -1;
-	dprintf("Parse_FILE_Statement\n");
+	Dprintf("Parse_FILE_Statement\n");
 	
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
-	//std::string* object 	= extract_word( mSentence, &object_list  	);
-	//std::string* adjective	= extract_word( mSentence, &adjective_list  );	
-	//int prepos_index      	= get_preposition_index( mSentence );
 
     if ((compare_word(subject, "file"   ) ==0)      ||
         (compare_word(subject, "files")==0)     ||

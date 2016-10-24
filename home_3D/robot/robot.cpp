@@ -254,70 +254,69 @@ void glRobot::calc_world_right_foot_positions( )
     m_right_leg.m_foot.calc_angle( m_right_leg.m_foot.m_world_coords );
 }
 
-void  glRobot::extract_body_pose( struct stBodyPosition* bp)
+void  glRobot::extract_body_pose( struct stBodyPositionVector* bp )
 {
     //static struct stBodyPosition bp;
+    bp->servo_values[l_hip_rotate]     = m_left_leg.get_hip_rotate_angle   ();
+    bp->servo_values[r_hip_rotate]     = m_right_leg.get_hip_rotate_angle  ();
+    bp->servo_values[l_hip_swing]      = m_left_leg.get_hip_ss_swing_angle ();
+    bp->servo_values[r_hip_swing]      = m_right_leg.get_hip_ss_swing_angle();
+    bp->servo_values[l_hip_fb_swing]   = m_left_leg.get_hip_angle     	   ();
+    bp->servo_values[r_hip_fb_swing]   = m_right_leg.get_hip_angle    	   ();
 
-    bp->l_hip_rotate     = m_left_leg.get_hip_rotate_angle   ();
-    bp->r_hip_rotate     = m_right_leg.get_hip_rotate_angle  ();
-    bp->l_hip_swing      = m_left_leg.get_hip_ss_swing_angle ();
-    bp->r_hip_swing      = m_right_leg.get_hip_ss_swing_angle();
-    bp->l_hip_fb_swing   = m_left_leg.get_hip_angle     ();
-    bp->r_hip_fb_swing   = m_right_leg.get_hip_angle    ();
-
-    bp->l_knee           = m_left_leg.get_knee_angle    ();
-    bp->r_knee           = m_right_leg.get_knee_angle   ();
-    bp->l_ankle          = m_left_leg.get_ankle_angle   ();
-    bp->r_ankle          = m_right_leg.get_ankle_angle  ();
+    bp->servo_values[l_knee]           = m_left_leg.get_knee_angle    ();
+    bp->servo_values[r_knee]           = m_right_leg.get_knee_angle   ();
+    bp->servo_values[l_ankle]          = m_left_leg.get_ankle_angle   ();
+    bp->servo_values[r_ankle]          = m_right_leg.get_ankle_angle  ();
 
     // ARMS:
-    bp->l_shoulder_fore_rotate   = m_left_arm.get_upper_arm_rotate_angle();
-    bp->l_shoulder_rotate        = m_left_arm.get_shoulder_rotate_angle();
-    bp->l_shoulder_swing         = m_left_arm.get_shoulder_angle();
-    bp->l_elbow                  = m_left_arm.m_elbow_angle;
-    bp->l_wrist_swing            = m_left_arm.m_wrist_angle;
-    bp->l_wrist_rotate           = m_left_arm.m_wrist_rotate_angle;
+    bp->servo_values[l_shoulder_fore_rotate]   = m_left_arm.get_upper_arm_rotate_angle();
+    bp->servo_values[l_shoulder_rotate]        = m_left_arm.get_shoulder_rotate_angle();
+    bp->servo_values[l_shoulder_swing]         = m_left_arm.get_shoulder_angle();
+    bp->servo_values[l_elbow]                  = m_left_arm.m_elbow_angle;
+    bp->servo_values[l_wrist_swing]            = m_left_arm.m_wrist_angle;
+    bp->servo_values[l_wrist_rotate]           = m_left_arm.m_wrist_rotate_angle;
     
-    bp->r_shoulder_fore_rotate   = m_right_arm.get_upper_arm_rotate_angle();
-    bp->r_shoulder_rotate        = m_right_arm.get_shoulder_rotate_angle();
-    bp->r_shoulder_swing         = m_right_arm.get_shoulder_angle();
-    bp->r_elbow                  = m_right_arm.m_elbow_angle;
-    bp->r_wrist_swing            = m_right_arm.m_wrist_angle;
-    bp->r_wrist_rotate           = m_right_arm.m_wrist_rotate_angle;
+    bp->servo_values[r_shoulder_fore_rotate]   = m_right_arm.get_upper_arm_rotate_angle();
+    bp->servo_values[r_shoulder_rotate]        = m_right_arm.get_shoulder_rotate_angle();
+    bp->servo_values[r_shoulder_swing]         = m_right_arm.get_shoulder_angle();
+    bp->servo_values[r_elbow]                  = m_right_arm.m_elbow_angle;
+    bp->servo_values[r_wrist_swing]            = m_right_arm.m_wrist_angle;
+    bp->servo_values[r_wrist_rotate]           = m_right_arm.m_wrist_rotate_angle;
 }
 
-void glRobot::set_body_pose( struct stBodyPosition* mBPosition )
+void glRobot::set_body_pose( struct stBodyPositionVector* mBPosition )
 {
     // LEGS:
-    m_left_leg.set_hip_rotate_angle     ( mBPosition->l_hip_rotate );
-    m_left_leg.set_hip_sideways_swing_angle( mBPosition->l_hip_swing );
-    m_left_leg.set_hip_angle            ( mBPosition->l_hip_fb_swing  );
-    m_left_leg.set_knee_angle           ( mBPosition->l_knee  );
-    m_left_leg.set_ankle_angle          ( mBPosition->l_ankle );
+    m_left_leg.set_hip_rotate_angle     ( mBPosition->servo_values[l_hip_rotate] );
+    m_left_leg.set_hip_sideways_swing_angle( mBPosition->servo_values[l_hip_swing] );
+    m_left_leg.set_hip_angle            ( mBPosition->servo_values[l_hip_fb_swing]  );
+    m_left_leg.set_knee_angle           ( mBPosition->servo_values[l_knee]  );
+    m_left_leg.set_ankle_angle          ( mBPosition->servo_values[l_ankle] );
 
-    m_right_leg.set_hip_rotate_angle    ( mBPosition->r_hip_rotate );
-    m_right_leg.set_hip_sideways_swing_angle( mBPosition->r_hip_swing );
-    m_right_leg.set_hip_angle           ( mBPosition->r_hip_fb_swing  );
-    m_right_leg.set_knee_angle          ( mBPosition->r_knee  );
-    m_right_leg.set_ankle_angle         ( mBPosition->r_ankle );
+    m_right_leg.set_hip_rotate_angle    ( mBPosition->servo_values[r_hip_rotate] );
+    m_right_leg.set_hip_sideways_swing_angle( mBPosition->servo_values[r_hip_swing] );
+    m_right_leg.set_hip_angle           ( mBPosition->servo_values[r_hip_fb_swing]  );
+    m_right_leg.set_knee_angle          ( mBPosition->servo_values[r_knee]  );
+    m_right_leg.set_ankle_angle         ( mBPosition->servo_values[r_ankle] );
 
     // ARMS:
-    m_left_arm.set_upper_arm_rotate_angle( mBPosition->l_shoulder_fore_rotate );
-    m_left_arm.set_shoulder_rotate_angle ( mBPosition->l_shoulder_rotate );
-    m_left_arm.set_shoulder_angle        ( mBPosition->l_shoulder_swing );
-    m_left_arm.set_elbow_angle           ( mBPosition->l_elbow          );
-    m_right_arm.set_wrist_angle          ( mBPosition->l_wrist_swing    );
-    m_right_arm.set_wrist_rotate_angle   ( mBPosition->l_wrist_rotate   );
+    m_left_arm.set_upper_arm_rotate_angle( mBPosition->servo_values[l_shoulder_fore_rotate] );
+    m_left_arm.set_shoulder_rotate_angle ( mBPosition->servo_values[l_shoulder_rotate] );
+    m_left_arm.set_shoulder_angle        ( mBPosition->servo_values[l_shoulder_swing] );
+    m_left_arm.set_elbow_angle           ( mBPosition->servo_values[l_elbow]          );
+    m_right_arm.set_wrist_angle          ( mBPosition->servo_values[l_wrist_swing]    );
+    m_right_arm.set_wrist_rotate_angle   ( mBPosition->servo_values[l_wrist_rotate]   );
     
-    m_right_arm.set_upper_arm_rotate_angle( mBPosition->r_shoulder_fore_rotate );
-    m_right_arm.set_shoulder_rotate_angle ( mBPosition->r_shoulder_rotate );
-    m_right_arm.set_shoulder_angle        ( mBPosition->r_shoulder_swing );
-    m_right_arm.set_elbow_angle           ( mBPosition->r_elbow          );
-    m_right_arm.set_wrist_angle           ( mBPosition->r_wrist_swing    );
-    m_right_arm.set_wrist_rotate_angle    ( mBPosition->r_wrist_rotate   );
+    m_right_arm.set_upper_arm_rotate_angle( mBPosition->servo_values[r_shoulder_fore_rotate] );
+    m_right_arm.set_shoulder_rotate_angle ( mBPosition->servo_values[r_shoulder_rotate] );
+    m_right_arm.set_shoulder_angle        ( mBPosition->servo_values[r_shoulder_swing] );
+    m_right_arm.set_elbow_angle           ( mBPosition->servo_values[r_elbow]          );
+    m_right_arm.set_wrist_angle           ( mBPosition->servo_values[r_wrist_swing]    );
+    m_right_arm.set_wrist_rotate_angle    ( mBPosition->servo_values[r_wrist_rotate]   );
     
-    m_head.look_left( mBPosition->head_turn );
-    m_head.set_tilt ( mBPosition->head_tilt );
+    m_head.look_left( mBPosition->servo_values[head_turn] );
+    m_head.set_tilt ( mBPosition->servo_values[head_tilt] );
 
     // more to come...
 }
@@ -687,7 +686,7 @@ void	glRobot::place_right_toe_at( struct Vertex mHeel )
 
 #include "glm/ext.hpp"
 #include "glm/gtx/string_cast.hpp"
-void glRobot::test()
+/*void glRobot::test()
 {
     glm::vec4 RobotCoordinate( 1.0, 2.0, 3.0, 1.0 );
     printf("\n%s\n", glm::to_string(RobotCoordinate).c_str());
@@ -697,4 +696,4 @@ void glRobot::test()
     
     glm::vec4 tmp2 = map_to_object_coords(tmp);
     printf("%s\n", glm::to_string(tmp2).c_str());        // should be same as starting
-}
+}*/

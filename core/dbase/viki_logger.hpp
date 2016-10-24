@@ -5,6 +5,7 @@
 #include <ctime>
 #include <my_global.h>
 #include <mysql.h>
+#include "global.h"
 
 /*  The purpose of this class will be to store and retrieve events.
 		Primarily from and for the machine vision (xeyes) app.
@@ -17,7 +18,7 @@
 */
 
 using namespace std;
-#define BOOL unsigned char
+
 /*
 
 */
@@ -70,11 +71,7 @@ public:
 };
 
 extern Viki_SQL_Logger viki_logger;
-
 void 	test_viki_logger();
-
-
-
 
  
 #endif

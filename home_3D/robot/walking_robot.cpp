@@ -24,7 +24,7 @@
 
 
 #include "all_objects.h"
-#include "sequencer_memory.h"
+#include "sequencer_memory.hpp"
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -719,9 +719,12 @@ void glWalkingRobot::take_step( bool mForward )
 // Add current body position to the sequencer.
 void glWalkingRobot::add_to_sequence()
 {
-    struct stBodyPosition bp;
+	struct stBodyPositionVector bp;
+    //struct stBodyPosition bp;
     extract_body_pose(&bp);
-    m_sequence.push_back( bp );
+    // this has to be changed in robot_interpolator, and there are many references 
+    // in that file!  So temporarily comment out here.  
+    //m_sequence.push_back( bp );
     ipc_add_sequence( &bp );
 }
 

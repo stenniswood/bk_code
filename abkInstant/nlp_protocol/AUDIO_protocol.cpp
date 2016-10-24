@@ -301,7 +301,7 @@ int Parse_Audio_Statement( const char* mSentence, ServerHandler* mh )
 {
 	int retval = -1;
 	
-	dprintf("Parse_Audio_Statement\n");
+	Dprintf("Parse_Audio_Statement\n");
 	std::string* subject  	= extract_word( mSentence, &subject_list );	
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 );
 	std::string* object     = extract_word( mSentence, &object_list  );

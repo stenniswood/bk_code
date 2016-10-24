@@ -29,6 +29,7 @@
 
 #include "face_box.h"
 #include "all_objects.h"
+#include "global_funcs.h"
 
 using namespace cv;
 using namespace std;
@@ -72,11 +73,11 @@ GLuint	CuboidTexture::generate_TBO	( int mSide )
             break;
         default: break;
     }
-    dprintf("Texture::generate_TBO: rows=%d; cols=%d\n", m_images[mSide].rows, m_images[mSide].cols);
+    Dprintf("Texture::generate_TBO: rows=%d; cols=%d\n", m_images[mSide].rows, m_images[mSide].cols);
     glEnable     (GL_TEXTURE_2D );
     glGenTextures(1, &m_TBOs[mSide]     );
     glBindTexture(GL_TEXTURE_2D, m_TBOs[mSide]);
-    //dprintf("Texture::generate_TBO: m_TBO=%d\n", m_TBOs[mSide]);
+    //Dprintf("Texture::generate_TBO: m_TBO=%d\n", m_TBOs[mSide]);
     
     /* may need these for odd sized images: */
     glPixelStorei(GL_UNPACK_ALIGNMENT,   1);

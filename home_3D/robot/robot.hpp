@@ -4,7 +4,6 @@
 NOTE: Origin of the robot is the center of the Torso.
  
  */
-
 #ifndef _ROBOT_H_
 #define _ROBOT_H_
 
@@ -17,9 +16,6 @@ NOTE: Origin of the robot is the center of the Torso.
 #include "robot_foot.hpp"
 #include "gl_misc.h"
 
-//#include "route_feet.hpp"
-//class glRouteWithFeet;
-//using namespace std;
 
 float degrees( float mRad );
 
@@ -27,6 +23,10 @@ const int ROBOT_MODE_WALKING_FORWARD  = 100;
 const int ROBOT_MODE_WALKING_BACKWARD = 200;
 const int ROBOT_MODE_STANDING         = 300;
 const int ROBOT_MODE_SQUATTING        = 400;
+
+#include "body_pose.h"
+
+
 
 // One entry for each DC motor:
 struct stBodyPosition {     // all angles given in degrees!
@@ -70,7 +70,6 @@ struct stBodyPosition {     // all angles given in degrees!
     Disadvantages:  Difficulty Propogating up the object hierarchy?
     -- This Wins --
  
- 
  B) Each part should return in it's local coordinate system.
     Advatanges   :
     Disadvantages:  Always having to get the coordinate, then map it.
@@ -92,8 +91,8 @@ public:
     glm::vec4       get_eye_target_robot_coords      ( );        // in world cooridnates for viewing.
     
     //
-    void            extract_body_pose    ( struct stBodyPosition* bp             );
-    void            set_body_pose        ( struct stBodyPosition* mBodyPosition  );
+    void            extract_body_pose    ( struct stBodyPositionVector* bp       );
+    void            set_body_pose        ( struct stBodyPositionVector* mBodyPosition  );
 
     float           get_servo_angle      ( int mServoIndex  );
     void            set_servo_angle      ( int mServoIndex, float mServoAngle  );
@@ -126,7 +125,7 @@ public:
     void            place_over_vertex               ( struct Vertex mVertex );
     void            adjust_body_vertical            ( float mGroundHeight   );
     void            adjust_body_vertical_for_leg    ( float mGroundHeight, bool mLeftLeg);    
-    void            test                            ( );
+//    void            test                            ( );
     void            update_nose_line                ( );
     
     // FEET PLACEMENT :
@@ -166,6 +165,9 @@ public:
     
 };
 
+//#include "route_feet.hpp"
+//class glRouteWithFeet;
+//using namespace std;
 
 
 #endif

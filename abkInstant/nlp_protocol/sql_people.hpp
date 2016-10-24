@@ -26,7 +26,7 @@
  */
 
 //using namespace std;
-#define BOOL unsigned char
+
 /*
  */
 class SQL_Friends
