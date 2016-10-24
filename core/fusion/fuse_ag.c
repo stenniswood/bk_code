@@ -33,7 +33,7 @@
 #include "fuse_log.h"
 #include "CAN_Interface.h"
 #include "can_txbuff.h"
-#include "callbacks.hpp"
+//#include "callbacks.hpp"
 
 #define cast_f  (struct fXYZ  *)
 #define cast_fr (struct frXYZ *)
@@ -95,6 +95,8 @@ void fuse_init()
 		fuse_gyro.c				Processes the gyro independantly.
 
 */
+BOOL Accel_Data_Dirty = 0;
+
 BOOL callback_tilt_reading( struct sCAN* mMsg )
 {
 	byte 	result;
@@ -112,7 +114,8 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		process_accel	(ShowAccelerometerData);
 		if (ShowAccelerometerData) 	printf("\n");
 
-		tilt_sensor_update_gui();
+		Accel_Data_Dirty = 1;
+		//tilt_sensor_update_gui();
 		
 		// For Histogram reporting:		
 		/*sf1.set_ab( AccelAngularPosition.rx );

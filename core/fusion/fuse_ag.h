@@ -35,6 +35,8 @@ extern "C" {
 #define Accel_variance_angle_delta_z 0.5
 /*********************************************************/
 
+extern BOOL Accel_Data_Dirty;	// Update GUI
+
 /******************* FUNCTIONS ***************************/
 void fuse_init				(					);
 float calc_time_delta		( struct timeval* mstart, struct timeval* mend );
@@ -73,6 +75,10 @@ extern struct fXYZ BestLinearAcceleration;	// Holds the best estimate of rate of
 /***********************************************************/
 extern struct fXYZ AR_weight_accel;				// 1=> Gyro; 2=> AccelDelta;
 
+
+extern int count_accel;
+extern int count_gyro;
+extern int count_magnet;
 
 #ifdef  __cplusplus
 }

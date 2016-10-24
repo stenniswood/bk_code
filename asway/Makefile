@@ -1,17 +1,19 @@
-cc		  = g++
+cc	  = g++
 OPTIONS	  = -std=gnu99 -lm 
-INC		  = ../core/can/ ../core/msg/ ../core/misc/ ../core/fusion/ ./
+INC	  = ../core/can/ ../core/msg/ ../core/misc/ ../core/fusion/ ../core/ipc/ ./
 SELF_INC  = ../../orient/ ./
 CFLAGS 	  = -lwiringPi -lm -lrt -lstdc++
 DEPS   	  = 
 OBJ        = segway_main.o board_list.o help.o sway_config.o app_tilt.o 
-CAN_OBJS   = CAN_Interface.o can_instance.o can_eid.o can_rxbuff.o can_txbuff.o   \
+#
+CAN_OBJS   = CAN_Interface.o can_instance.o can_eid.o can_txbuff.o can_rxbuff.o \
 	         bk_system_defs.o can_id_list.o system_msgs_callback.o 
 MSG_OBJS   = packer_lcd.o packer.o parser_tilt.o packer_motor.o
-MISC_OBJS  = leds.o vector_math.o timer.o preferences.o sway_memory.o
+MISC_OBJS  = leds.o vector_math.o timer.o preferences.o
 FUSE_OBJS  = fuse_ag.o fuse_accel.o fuse_gyro.o fuse_magnet.o fuse_log.o catagorization.o 
 CPPOBJ     = 
-
+IPC_OBJS  =  sway_memory.o 
+#CAN_memory.o
 %.o: %.cpp $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) -c -o $@ $< $(CFLAGS)
 
@@ -21,11 +23,14 @@ CPPOBJ     =
 #libcan_eid.so: ./core/can_eid.o 
 #	gcc -shared -o libcan_eid.so ./core/can_eid.o 
 
-sway: $(OBJ)    $(addprefix   ../core/can/, $(CAN_OBJS)) 	 \
+LIB_FLAGS = -lpthread
+
+sway: $(OBJ)    $(addprefix ../core/can/, $(CAN_OBJS)) 	 \
 		$(addprefix ../core/misc/,$(MISC_OBJS))  	 \
 		$(addprefix ../core/fusion/,$(FUSE_OBJS))  	 \
+		$(addprefix ../core/ipc/, $(IPC_OBJS))        \
 		$(addprefix ../core/msg/, $(MSG_OBJS)) 
-	gcc -o  $@ $^ $(CFLAGS)
+	gcc -o  $@ $^ $(CFLAGS) $(LIB_FLAGS) 
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.png *.pdf *.bak 

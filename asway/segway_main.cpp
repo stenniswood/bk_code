@@ -11,6 +11,7 @@
 #include "packer_lcd.h"
 #include "can_txbuff.h"
 #include "can_rxbuff.hpp"
+//#include "CAN_memory.h"
 #include "packer.h"
 #include "system_msgs_callback.h"
 #include "board_list.h"
@@ -37,6 +38,10 @@
 
 #define GYRO_THRESHOLD = 0.1;		// dps
 
+int RxTail_cmdline=0;
+int RxTail_cmdline_laps=0;
+int TxTail_cmdline=0;
+int TxTail_cmdline_laps=0;
 
 
 /**************  CAN SEND THREAD   *************************************/

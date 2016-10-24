@@ -29,6 +29,7 @@
 #include "parser_tilt.h"
 #include "fuse_ag.h"
 #include "fuse_magnet.h"
+#include "global_funcs.h"
 
 
 // See ../core/msg/parser_tilt.c   for RawxyzAccel and routine for extracting from CAN

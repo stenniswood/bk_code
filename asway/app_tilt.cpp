@@ -44,9 +44,9 @@ bool	EmergencyStop = false;
 float median_angle_filter[MEDIAN_ANGLE_FILTER_SIZE];
 float sorted_angles		 [MEDIAN_ANGLE_FILTER_SIZE];
 
-int count_accel  = 0;
-int count_gyro   = 0;
-int count_magnet = 0;
+//int count_accel  = 0;
+//int count_gyro   = 0;
+//int count_magnet = 0;
 int count_samples= 0;
 
 float TiltAngle 	= 0.;
@@ -278,7 +278,7 @@ BOOL fusion_complete()
 	update_segway_base( );
 }
 
-BOOL callback_tilt_reading( struct sCAN* mMsg )
+/*BOOL callback_tilt_reading( struct sCAN* mMsg )
 {
 	float percent ;
 	float time_delta;
@@ -301,14 +301,14 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		retval=TRUE;
 		break;
 
-/*	case ID_MAGNET_XYZ : 
+*	case ID_MAGNET_XYZ : 
 		count_magnet++;
 		if (ShowMagnetData && ShowCANData)		print_message(mMsg);		
 		parse_magnet_msg(mMsg);
 		process_magnet(ShowMagnetData);
 		if (ShowMagnetData) printf("\n");		
 		retval= TRUE;
-		break; */
+		break; *
 	default:
 		retval= FALSE;
 		break;
@@ -321,17 +321,17 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		//if (tiltsensor_callback)
 		//	(*tiltsensor_callback)( );
 
-		/*if (count_samples++ < 300)
+		*if (count_samples++ < 300)
 			save_timeslice_data();
 		else 
 			close_log_file();
-		*/
+		*
 		count_accel=0;
 		count_gyro=0;
 		count_magnet=0;
 	}
 	return retval;
-}
+}*/
 
 
 

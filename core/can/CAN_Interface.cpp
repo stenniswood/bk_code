@@ -19,6 +19,7 @@
 //#include "can_rxbuff.hpp"		use CAN_memory.c routines instead.  This facilitates cross application sharing.
 #include "CAN_memory.h"
 
+
 #include "can_eid.h"
 #include "can_id_list.h"
 #ifdef WIFI_SOCKET
@@ -260,7 +261,8 @@ void CAN_isr()
 		//printf("rx%d", rxbuff);
 		get_message ( &rxmessage, rxbuff 		);
 		bit_modify  ( CANINTF, rxFlagMask, 0x00 ); 
-		ipc_add_can_rx_message( &rxmessage );
+		AddToRxList( &rxmessage );
+		//ipc_add_can_rx_message( &rxmessage );
 		if (msg_callbacks( &rxmessage, rxbuff) == FALSE)
 		{
 			// printf(" Rx0:%x:%x\n", status, intf);
@@ -311,7 +313,7 @@ void CAN_isr()
 	}
 	Rx=FALSE;
 	intf = read_register( CANINTF );
-} while( inte & intf);
+  } while( inte & intf);
 	
 	return ;
 } 

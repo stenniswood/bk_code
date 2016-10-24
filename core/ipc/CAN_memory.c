@@ -466,19 +466,19 @@ int can_connect_shared_memory(char mAllocate)
 //// RECEIVING OVER TCP/IP:
 void		set_tcp_receiving_flag_ipc_can()
 {
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
-			return ;
+	if (is_CAN_IPC_ptr_valid())
+		return;
 	ipc_memory_can->isReceiving = TRUE;
 }
 void		clear_tcp_receiving_flag_ipc_can()
 {
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+	if (is_CAN_IPC_ptr_valid())
 			return ;
 	ipc_memory_can->isReceiving = FALSE;
 }
 BOOL		is_tcp_receiving_flag_ipc_can   ()
 {
-	if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+	if (is_CAN_IPC_ptr_valid())
 			return FALSE;
 	return ipc_memory_can->isReceiving;
 }
@@ -486,30 +486,24 @@ BOOL		is_tcp_receiving_flag_ipc_can   ()
 //// TRANSMITTING OVER TCP/IP:
 void		set_tcp_transmitting_flag_ipc_can()
 {
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+	if (is_CAN_IPC_ptr_valid())
 			return ;
 	ipc_memory_can->isTransmitting = TRUE;
 }
 void		clear_tcp_transmitting_flag_ipc_can()
 {
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+	if (is_CAN_IPC_ptr_valid())
 			return ;
 	ipc_memory_can->isTransmitting = FALSE;
 }
 BOOL		is_tcp_transmitting_flag_ipc_can   ()
 {
-		if ((ipc_memory_can == NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
+	if (is_CAN_IPC_ptr_valid())
 			return FALSE;
 	return ipc_memory_can->isTransmitting;	
 }
 
 
-//	if (head_count < tail_count)
-//		printf("h/t: %d/%d \n", head_count, tail_count );
-	/* Not new way.
-	if (ipc_memory_can->RxTail == ipc_memory_can->RxHead)
-		ipc_memory_can->RxTail = ipc_memory_can->RxHead = 0; 
-	(ipc_memory_can->RxHead > ipc_memory_can->RxTail);		*/	
 /*void can_ipc_write_can_message( struct sCAN* mMsg )
 {		
 	copy_can_msg( &(ipc_memory_can->Transmit[ipc_memory_can->TxHead]), mMsg );
