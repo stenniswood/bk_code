@@ -34,27 +34,27 @@ using namespace std;
 
 /*
 */
-vector<Vec4i> m_vlines;
+Vec4i m_vlines;
 
 
-void convert_to_slope_intercept( vector<Vec4i> lines )
+void convert_to_slope_intercept( Vec4i lines )
 {
-	float rise = (l[3] - l[1]);
-	float run  = (l[2] - l[0]);
+	float rise = (lines[3] - lines[1]);
+	float run  = (lines[2] - lines[0]);
 
 	float slope = rise / run;
 //	if (run == 0)	slope = nan;	
 }
 
 
-void extract_vlines( vector<Vec4i> lines )
+void extract_vlines( Vec4i lines )
 {
-	float rise = (l[3] - l[1]);
-	float run  = (l[2] - l[0]);
+	float rise = (lines[3] - lines[1]);
+	float run  = (lines[2] - lines[0]);
 
-	for (int l=0; l<lines.size(); l++)  {
-		rise = (l[3] - l[1]);
-		run  = (l[2] - l[0]);
+	for (int l=0; l<4; l++)  {
+		rise = (lines[3] - lines[1]);
+		run  = (lines[2] - lines[0]);
 			
 		
 	}

@@ -1,6 +1,6 @@
-CC		   = g++
+CC	   = g++
 OPTIONS	   = -fpermissive -Wwrite-strings 
-INC		   = ./lib/  
+INC	  = ./lib/  
 
 SELF_INC   = ./ ../
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
@@ -18,10 +18,10 @@ ifeq ($(shell uname),Darwin)
 else
 	LIBS = -lglut
 endif
-LIBS +=  -lpthread -lm -L./lib -lfreenect -L/usr/local/lib/ \
-		-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_calib3d \
-		-lopencv_ml -lopencv_objdetect -lopencv_ts -lopencv_imgcodecs
-DEPS   	   = 
+LIBS +=  -lpthread -lm -lglut -lGL -L/usr/local/lib/ -L./lib -lfreenect -L/usr/local/lib/ \
+	-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_calib3d \
+	-lopencv_ml -lopencv_objdetect -lopencv_ts -lopencv_imgcodecs
+DEPS   = 
 
 # CORE CODE:
 BKVIEW_OBJS  = bkview.o line_segmenter.o rectangular.o 
