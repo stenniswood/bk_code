@@ -57,6 +57,7 @@ int   	Window::draw(	 )
 {
 	if (Visible==false)	 return 0;
 	Control::draw();
+	return 1;
 }
 
 void	Window::calc_metrics	 (   )
@@ -191,17 +192,20 @@ int	Window::add_control_local_coords( Control* mControl )
 {
 	mControl->move_by( left, bottom ); 
 	register_child( mControl );	
+	return 1;
 }
 
 int	Window::onCreate(  )
 {
-	Control::onCreate();
+	int retval = Control::onCreate();
 	place_views();
+	return retval;
 }
 
-int		Window::add_control		 ( Control* mControl )
+int	Window::add_control ( Control* mControl )
 {
 	register_child( mControl );	
+	return 1;
 }
 
 void	Window::move_by			( int dX, int dY )

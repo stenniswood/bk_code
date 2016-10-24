@@ -85,13 +85,14 @@ Wave::~Wave()
 	   delete m_data;
 }
 
+//size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream); 
+
 void Wave::Save(string mFileName)
 {
 	//CFile::modeCreate | CFile::modeWrite
 	FILE* File = fopen(mFileName.c_str(), "a" );
-	long int chunkSize = sizeof(WAVEFORMATEX);
+	size_t chunkSize = sizeof(WAVEFORMATEX);
 	
-	size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream); 
 	size_t result = 0;
 	result = fwrite("RIFF", 4, 1, File); 
 		
@@ -158,6 +159,7 @@ bool Wave::read_chunk(FILE* mFile, char mName[4], long int* mSize)
 	{  ErrStr = "expected a chunk!";  ErrStr+= mName; throw ErrStr;  }
 
 	result = fread( mSize, 1, 4, mFile );	
+	return (result>0);
 }
 
 void  Wave::set_wave_format	( WAVEFORMATEX* mFormat )
@@ -176,7 +178,7 @@ string ErrStr;
 bool Wave::Load(string Filename)
 {
 	char tmp[20];
-	long int chunkSize;
+	unsigned long  chunkSize;
 	long int fileSize;
 	size_t result;
 	
@@ -205,7 +207,7 @@ bool Wave::Load(string Filename)
 	{  ErrStr = "expected a fmt chunk in wave file";  throw ErrStr;  }
 
 	result = fread( &chunkSize, 1, 4, inFile );	// should be 16, 18, or 40
-	if (chunkSize>sizeof(WAVEFORMATEX))
+	if (chunkSize > sizeof(WAVEFORMATEX))
 	{  ErrStr = "fmt chunk size is too large in wave file";  throw ErrStr;  }
 
 	//printf( "fmt  chunkSize=%d bytes;  WAVEFORMATEX=%d bytes  \n", chunkSize, sizeof(WAVEFORMATEX) );	
@@ -249,7 +251,7 @@ bool Wave::Load(string Filename)
 		so should only require 1/2.  however this causes GPF crashes! */
 		//char* tmp = (char*) malloc (chunkSize);
 		m_data    = (short*) new short[nsamples];
-		printf("allocated bytes;  required: %d /%d= %d shorts \n", 
+		printf("allocated bytes;  required: %ld /%d= %ld shorts \n", 
 				chunkSize, sizeof(short), nsamples );
 	}
 
@@ -315,7 +317,7 @@ int Wave::get_VG_path_coords( float* &mCoords, int mChannel, float mPixelHeight,
 void Wave::AppendData(WAVEHDR &mHeader)
 {
 	BYTE* ptr = (BYTE*)m_data;
-   long int BytesAvail = m_buffer_length - m_bytes_recorded;
+   size_t BytesAvail = m_buffer_length - m_bytes_recorded;
    if ((mHeader.dwBytesRecorded < BytesAvail))
    {
       memcpy (ptr+m_bytes_recorded, mHeader.lpData, mHeader.dwBytesRecorded );
@@ -476,12 +478,13 @@ short* Wave::GetSamplePtr(long int mSampIndex, int mChannel)
 WAVEFORMATEX*	Wave::GetWaveFormat	(				)
 {
 	static WAVEFORMATEX fmt;
-	fmt.wFormatTag;
+	//fmt.wFormatTag;
 	fmt.nChannels		=m_number_channels;
 	fmt.nSamplesPerSec	=m_samples_per_second;
 	fmt.nAvgBytesPerSec	=get_average_bytes_per_second();
 	fmt.nBlockAlign		=m_block_align;
 	fmt.wBitsPerSample	=2;
+	return &fmt;
 }
 
 /* Build up the structure. */
@@ -496,4 +499,5 @@ WAVEHDR*		Wave::GetWaveHeader	(				)
 	hdr.dwLoops			=0;
 	hdr.lpNext			=NULL;
 	hdr.reserved		=0;	
+	return &hdr;
 }

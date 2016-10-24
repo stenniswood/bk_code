@@ -92,6 +92,7 @@ int ProgressBar::draw()
 		Fill_l		(text_color);			
 		TextMid( center_x, text_y,  percent,  SerifTypeface, text_size );
 	}
+	return 1;
 }
 
 

@@ -409,6 +409,9 @@ int	Control::onHover ( int x, int y	)
 	return 0;
 };
 
+/* Return 1 => was a child control click.
+		-1  => No children involved.
+*/
 int	Control::onClick(int x, int y, bool mouse_is_down)
 {
 	Control* result = ChildrenHitTest(x,y);

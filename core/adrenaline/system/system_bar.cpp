@@ -105,7 +105,7 @@ void	SystemBar::onPlace		(	)
 	m_MenuEnd_x   = 3.*width/4.;
 	m_MenuStart_x = 100.;
 	
-	if (Debug) 	printf("SystemBar::onPlace():m_Menu=%x\n", m_Menu);	
+	if (Debug) 	printf("SystemBar::onPlace():m_Menu=%p\n", m_Menu);	
 	if (m_Menu)
 	{
 		m_Menu->set_width_height( (m_MenuEnd_x-m_MenuStart_x),  height );
@@ -148,7 +148,7 @@ int   	SystemBar::draw (	)
 		printf("SystemBar::draw():m_Menu::\t");
 		m_Menu->print_positions();
 	}	
-	Control::draw();
+	return Control::draw();
 }
 
 void 	SystemBar::set_width_height  	  ( int Width, int Height )
@@ -193,12 +193,13 @@ int		SystemBar::onClick(int x, int y, bool mouse_is_down)
 
 int	SystemBar::onDoubleClick( 		)
 { 
+	return 1;
 }
 
 
 void SystemBar::set_menu( HorizontalMenu* mMenu )
 {
-	if (Debug) 	printf("SystemBar::set_menu ( %x ) old=%x\n", mMenu, m_Menu );
+	if (Debug) 	printf("SystemBar::set_menu ( %p ) old=%p\n", mMenu, m_Menu );
 	unregister_child( m_Menu );	
 	if (Debug) printf("after removal 1: \n");		
 	m_Menu = mMenu;
@@ -218,7 +219,7 @@ int	SystemBar::onCreate(  )
 		init_system_hmenu(  );	
 		first_time = false; 	
 	};	
-	if (Debug) printf("\tSystem Menu:  sysmenu:%x  draw_menu: \n", &system_hmenu );
+	if (Debug) printf("\tSystem Menu:  sysmenu:%p  draw_menu: \n", &system_hmenu );
 	m_Menu = &system_hmenu;	
 
 	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_side) );
@@ -235,6 +236,6 @@ int	SystemBar::onCreate(  )
 	register_child( &m_show_taskbar );
 	register_child( &m_wifi 		);
 	register_child( &m_volume 		);
-	Control::onCreate();
+	return Control::onCreate();
 }
 

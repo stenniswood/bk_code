@@ -71,7 +71,7 @@ public:
 	void			set_item   			( const char* mString );
 	string*			get_item   			( int index =-1     );
 	virtual float	get_line_bottom		( int mVisibleIndex );
-	virtual int		get_total_lines		( )	{ /*printf("listbox::gettotal_lines %d\n", LineTexts.size() );*/ return LineTexts.size();  };
+	virtual size_t	get_total_lines		( );
 	int				get_selection		( );
 	
 	void			set_first_visible	( int mValue 	 );
@@ -96,11 +96,11 @@ public:
 
 protected:
 	int				first_visible_line;
-	int   			number_lines_visible;	// this is used anyway despite the scroll bar.
+	size_t			number_lines_visible;	// this is used anyway despite the scroll bar.
 	float 	 		LineHeight;
 	bool			isTopDown;
 	int				body_height;
-	int				selected_item;
+	uint16_t		selected_item;
 	
 private:
 	long int 		EvenColor;

@@ -146,9 +146,10 @@ int WaveView::create_path( int mChannel, float mZoom )
 
 	vgAppendPathData(path, numCmds, commands, coords);
 	printf( "WaveView::draw_wave2() drawPath done\n" );
+	return 1;
 }
 
-int WaveView::delete_path( )
+void WaveView::delete_path( )
 {
 	delete commands;
 	delete coords;

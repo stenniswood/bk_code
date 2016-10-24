@@ -21,7 +21,8 @@ public:
 	ScrollBar( bool mIsVertical=true );
 	ScrollBar( int Left,  int Right,  int Top, int Bottom, bool mIsVertical=true );
 	ScrollBar( int Width, int Height, bool mIsVertical=true );	
-	~ScrollBar();
+	virtual ~ScrollBar();
+	
 	void 		  Initialize();	
 	
 	//virtual void 	set_position	  	 ( int Left, int Right, int Top, int Bottom );

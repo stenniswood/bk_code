@@ -145,11 +145,13 @@ bool	DirectoryListBox::is_item_a_directory( int mIndex )
 	if (mIndex==-1)	mIndex = selected_item;
 	return (icon_id[mIndex]==DIRECTORY_ID) ? true: false;
 }
-char*	DirectoryListBox::get_item_text ( int mIndex )
+
+const char*	DirectoryListBox::get_item_text ( int mIndex )
 {
 	if (mIndex==-1)	mIndex = selected_item;
-	return LineData[mIndex][0].c_str();
+	return LineData[mIndex][0].data();
 }
+
 int	DirectoryListBox::get_item_id	( int mIndex )
 {	// file type
 	if (mIndex==-1)	mIndex = selected_item;

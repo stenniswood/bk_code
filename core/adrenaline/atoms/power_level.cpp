@@ -57,8 +57,8 @@ PowerLevel::~PowerLevel()
 
 void PowerLevel::calc_metrics( )
 {
-	float box_height = (height / number_levels);
-	float box_width  = width * (1-2*margin);
+//	float box_height = (height / number_levels);
+//	float box_width  = width * (1-2*margin);
 }
 
 void PowerLevel::set_number_boxes( int mBoxes )	
@@ -115,6 +115,7 @@ int PowerLevel::draw( )
 		draw_box( box_left, y, color );
 		box_number++;
 	}
+	return 1;
 }
 
 // level compared to max value:

@@ -57,6 +57,7 @@ int		VerticalLineGroup::add_source_top		( Control* mItem 	)
 	l += (w/2.);
 	float sy = mItem->get_bottom() + mItem->get_height();
 	add_source_point( l, sy );
+	return 1;
 }
 
 int		VerticalLineGroup::add_source_point		( float mx, float my 	)
@@ -67,6 +68,7 @@ int		VerticalLineGroup::add_source_point		( float mx, float my 	)
 	pt->sy = my;
 	pt->point_type = 'S';
 	m_source_points.push_back( pt );
+	return 1;
 }
 
 int		VerticalLineGroup::add_destination	( Control* mItem 		)
@@ -76,6 +78,7 @@ int		VerticalLineGroup::add_destination	( Control* mItem 		)
 	l += (w/2.);
 	float sy = mItem->get_bottom() + mItem->get_height();
 	add_destination_point( l, sy );
+	return 1;
 }
 
 int		VerticalLineGroup::add_destination_point( float mx, float my 	)
@@ -86,11 +89,12 @@ int		VerticalLineGroup::add_destination_point( float mx, float my 	)
 	pt->sy = my;
 	pt->point_type = 'E';
 	m_destination_points.push_back( pt );
+	return 1;
 }
 
 int		VerticalLineGroup::place_destination_center( )
 {
-	
+	return 1;
 }
 
 // First we start by assuming vertical orientation:
@@ -107,7 +111,7 @@ int	VerticalLineGroup::draw( )
 	float min, max;
 
 	// Draw all the Source stem lines:
-	for (int i=0; i<m_source_points.size(); i++)
+	for (size_t i=0; i<m_source_points.size(); i++)
 	{
 		if ((*siter)->sx < min)
 			min = (*siter)->sx;
@@ -121,6 +125,7 @@ int	VerticalLineGroup::draw( )
 
 	// Now Draw Destination Stem :
 	Line( (*diter)->sx,  y_half,  (*diter)->sx, (*diter)->sx );
+	return 1;
 }
 
 

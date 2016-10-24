@@ -111,7 +111,7 @@ void IconView::read_from_jpeg_file ( )
 void convertToUpper(char *str)
 {
     char *p = str;
-    while( *p=toupper(*p) )  { p++; };
+    while( (*p=toupper(*p)) )  { p++; };
 }
 
 /* Parse based on the file extension.  And then read. */
@@ -175,8 +175,11 @@ int IconView::draw()
 	unsigned int h = height;
 	int min_w = std::min(ImageInfo.width, w);
 	int min_h = std::min(ImageInfo.height, h);
-	if (image != 0)
+	if (image != 0) {
 		vgSetPixels(l, b, image, 0, 0, min_w, min_h);
+		return 1;
+	}
+	return 0;
 }
 
 int	IconView::onClick(int x, int y, bool mouse_is_down)

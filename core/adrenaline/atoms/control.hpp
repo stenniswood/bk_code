@@ -14,7 +14,7 @@ public:
 	Control( int Left,  int Right, int Top, int Bottom );
 	Control( int Width, int Height 					   );
 	Control();
-	~Control();
+	virtual ~Control();
 
 	virtual void 	Initialize			  (					);	
 	virtual void  	set_text_size		  ( float TextSize	);

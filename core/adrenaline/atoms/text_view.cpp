@@ -318,6 +318,7 @@ int TextView::draw()
 	return 1;
 }
 
+char NotFoundMsg[] = "File not found";
 
 void TextView::load_file( char* mFullFilename )
 {
@@ -326,7 +327,7 @@ void TextView::load_file( char* mFullFilename )
 	if (Debug) 	printf("load_file:: filename=%s;\t\tfd=%p\n", mFullFilename, fd);
 	if (fd==NULL)
 	{
-		text = "File not found";
+		text = NotFoundMsg;
 	}
 	else
 	{

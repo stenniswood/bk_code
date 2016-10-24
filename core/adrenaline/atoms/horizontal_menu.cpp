@@ -62,7 +62,7 @@ int 	HorizontalMenu::calc_metrics( )
 	// Calc the widths for each entry:
 	m_menu_padding	 = 20.;
 	float sx = left; 
-	for (int i=0; i<m_entries.size(); i++)
+	for (size_t i=0; i<m_entries.size(); i++)
 	{
 		m_entries[i].width	= TextWidth( m_entries[i].text, SerifTypeface, text_size );
 		//printf("%s %6.1f pad=%6.1f\n", m_entries[i]->text, m_entries[i]->width, m_menu_padding );
@@ -123,7 +123,7 @@ int 	HorizontalMenu::select 	( int mSelected 	)
 int HorizontalMenu::draw(	)
 { 
 	// CENTER TEXT:
-	int item_count = m_entries.size();
+	size_t item_count = m_entries.size();
 	float l = left;
 	float c = (height-text_size) / 2.0 + bottom;
 
@@ -143,7 +143,7 @@ int HorizontalMenu::draw(	)
 	}
 
 	// Print text for each entry:
-	for (int i=0; i<item_count; i++)
+	for (size_t i=0; i<item_count; i++)
 	{
 		if (m_selection==i)
 		{
@@ -182,9 +182,9 @@ int HorizontalMenu::draw(	)
 
 int	HorizontalMenu::get_id(   )
 {
-	if (m_selection==-1)				return -1;
+	if (m_selection==(size_t)-1)				return -1;
 	if (m_selection > m_entries.size()) return -1;
-	int result = (m_selection*1000);
+	//int result = (m_selection*1000);
 	//m_entries[m_selection]->menu->get_id();
 	return 1;
 }

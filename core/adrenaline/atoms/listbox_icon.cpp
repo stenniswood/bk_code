@@ -39,12 +39,12 @@ void IconListBox::Initialize			( )
 	strcpy (class_name, "IconListBox");		
 }
 int	IconListBox::onPlace(  )	// chance to place children.
-{
+{ return 1;
 }
 int	IconListBox::onCreate(  )	// chance to load resources, 
-{
+{ return 1;
 }
 
-int	IconListBox::onClick( int x, int y, bool mouse_is_down=true )
-{
+int	IconListBox::onClick( int x, int y, bool mouse_is_down )
+{ return 1;
 }

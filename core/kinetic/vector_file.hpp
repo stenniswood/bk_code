@@ -39,15 +39,16 @@ public:
 	float		z			(  							);
 	float		get_magnitude(  						);
 	
-	float*		get_data   ( )  					{ return fData; };
+	float*		get_data   ( )  					{ return m_data.data(); };
 	float* 		atof_array ( char** mStrArray );
-	void 		print	   (  ) 					{  printf("OneVector: %6.2f, %6.2f, %6.2f\n", fData[0], fData[1], fData[2] ); };
+	void 		print	   (  );
 	int			get_dimension()	{ return dimension; };
 	void		to_radians ( );
 	void		to_degrees ( );
 	
 private:
-	float* 		fData;
+	std::vector<float>	m_data;
+//	float* 		fData;
 	int	   		dimension;
 };
 
@@ -72,25 +73,23 @@ public:
 	void 	   add_vector	 ( OneVector* mVector );
 
 	void	   set_mode	 	 ( int mMode  );
-	BOOL	   move_to	 	 ( int mIndex );
+	BOOL	   move_to	 	 ( uint16_t mIndex );
 	BOOL	   start_over 	 ( 			  )  { return move_to(0);		};
 	BOOL	   next_vector 	 ( 			  )  { CurrentIndex++;	return false; };
 
-	OneVector* get_vector	 ( 			  );
-	OneVector* get_ivector   ( int mIndex );
-	OneVector* get_ivelocity_vector( int mIndex=-1 );
-	OneVector* get_iaccel_vector   ( int mIndex=-1 );
+	OneVector* get_vector	 	   ( 			  	 );
+	OneVector* get_ivector   	   ( uint16_t mIndex );
+	OneVector* get_ivelocity_vector( uint16_t mIndex=-1 );
+	OneVector* get_iaccel_vector   ( uint16_t mIndex=-1 );
 
-	int		   get_dimension ( 			  ) { return Dimension; 	 };
+	int		   get_dimension 	   ( 			  ) { return Dimension; 	 };
 	byte	   data_type;
 	std::vector<OneVector>	m_data;
 	
 private:
-
-
-	byte 	Mode;
-	int 	CurrentIndex;
-	int		Dimension;		// All vectors must share this dimension.
+	byte 		Mode;
+	uint16_t 	CurrentIndex;
+	int			Dimension;		// All vectors must share this dimension.
 };
 
 /* A group of sequences.  ie. a Sequence for each limb of the robot */
@@ -104,7 +103,9 @@ public:
 	// LIST FUNCTIONS:
 	void				set_mode				( int mMode 			);
 	void 				set_data_type_all_lists	( byte mType, word mSpeed );
-	void 				copy_robot_structure	( Robot *mRobot			);
+	void				add_limb_group			( int mActuators 		);
+	
+//	void 				copy_robot_structure	( Robot *mRobot			);
 	void 				add_vector_sequence		( VectorSequence* mSequence );
 	VectorSequence*		get_limb_sequence		( byte mIndex 			);
 

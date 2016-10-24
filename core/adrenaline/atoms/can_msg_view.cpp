@@ -19,7 +19,6 @@
 #include "CAN_base.h"
 #include "horizontal_menu.hpp"
 #include "can_msg_view.hpp"
-
 #include "can_id_list.h"
 
 #define Debug 0
@@ -66,9 +65,6 @@ int		CANMessageView::calc_metrics()
 
 int	CANMessageView::handle_incoming_msg	( struct sCAN* msg )
 {
-	int instance;
-	int channel;
-	int value;
 	int in_filter = 1;
 	static int count = 0;
 //	if (msg->id.group.id == ID_ANALOG_MEASUREMENT)
@@ -222,15 +218,13 @@ void   	CANMessageView::draw_entry 			( int mState	)
 }	
 int   	CANMessageView::draw		 		(				) 
 {
- 	TabularListBox::draw();
+ 	return TabularListBox::draw();
 }
-
-
 
 
 void save_msg( std::ofstream& ofs, vector<string>* str )
 {
-	for (int i=0; i<str->size(); i++)
+	for (size_t i=0; i<str->size(); i++)
 	{
 		ofs << (*str)[i].c_str() << ",";
 	}
@@ -240,7 +234,7 @@ void	CANMessageView::save( string mFilename )
 {
 	vector<string>* stra = NULL;
 	std::ofstream ofs( mFilename.c_str(), std::ofstream::out );
-	for (int i=0; i<m_msgs.size(); i++)
+	for (size_t i=0; i<m_msgs.size(); i++)
 	{
 		stra = convert_to_string( m_msgs[i] );		
 		save_msg( ofs, stra );
@@ -248,11 +242,11 @@ void	CANMessageView::save( string mFilename )
 	ofs.close();	
 }
 
-int		CANMessageView::get_hit_index		( int Mousex, int Mousey ) 
+int		CANMessageView::get_hit_index( int Mousex, int Mousey ) 
 {
- 
+ 	return TabularListBox::get_hit_index( Mousex, Mousey );
 }
 int		CANMessageView::onClick( int x, int y, bool mouse_is_down ) 
 { 
-
+ 	return TabularListBox::onClick(x,y,mouse_is_down);
 }

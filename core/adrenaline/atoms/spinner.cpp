@@ -30,7 +30,6 @@ void on_down_click( void* mthis )
 	((SpinnerControl*)mthis)->Invalidate();
 }
 
-
 SpinnerControl::SpinnerControl()
 :Control()
 { 
@@ -96,7 +95,7 @@ void  	SpinnerControl::move_to	  		( float Left, float  Bottom )
 
 int   	SpinnerControl::draw 				(	)
 { 
-	float x,y,w;
+	float x,y;
 	Control::draw();
 	char str[30];
 	sprintf( str, "%d", m_value );
@@ -106,21 +105,21 @@ int   	SpinnerControl::draw 				(	)
 	switch(m_alignment)
 	{
 	case ALIGN_LEFT:	x = (left + margin);
-				if (Debug) printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
+				if (Debug) printf("%5.1f %5.1f text_color=%4lx %4lx : %s\n", x, y, text_color, background_color, str );
 						Text( x, y,    str, SerifTypeface, text_size );	
 						break;
 	case ALIGN_CENTER:	
 						x = (left + width/2.);
-				if (Debug) printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
+				if (Debug) printf("%5.1f %5.1f text_color=%4lx %4lx : %s\n", x, y, text_color, background_color, str );
 						TextMid( x, y, str, SerifTypeface, text_size );
 						break;
 	case ALIGN_RIGHT:	x = (left + width - m_up.get_width() - margin);
-				if (Debug) printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
+				if (Debug) printf("%5.1f %5.1f text_color=%4lx %4lx : %s\n", x, y, text_color, background_color, str );
 						TextEnd( x, y, str, SerifTypeface, text_size );
 						break;
 	default: 	if (Debug) printf(" default case \n" );
 				x = (left + margin);
-				if (Debug) printf("%5.1f %5.1f text_color=%4x %4x : %s\n", x, y, text_color, background_color, str );
+				if (Debug) printf("%5.1f %5.1f text_color=%4lx %4lx : %s\n", x, y, text_color, background_color, str );
 				Text( x, y,    str, SerifTypeface, text_size );	
 				break;
 	}
@@ -134,7 +133,7 @@ int		SpinnerControl::get_hit_index		( int Mousex, int Mousey )
 	return 0;
 }
 
-int		SpinnerControl::onClick				( int x, int y, bool mouse_is_down=true )
+int		SpinnerControl::onClick				( int x, int y, bool mouse_is_down )
 { 
 	Control* up_result   = m_up.HitTest  ( x, y );
 	if (up_result)

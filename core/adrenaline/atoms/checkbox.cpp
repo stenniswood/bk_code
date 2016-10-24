@@ -62,12 +62,12 @@ void CheckBox::wrap_content( )
 	height = text_size*1.5;	
 }
 
-void CheckBox::set_text( const char* NewText, bool mWrapContent=false )	// Allocates and copies!		
+void CheckBox::set_text( const char* NewText, bool mWrapContent )	// Allocates and copies!		
 {
 	Control::set_text( NewText, true);
 }
 
-int	CheckBox::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
+void	CheckBox::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
 {
 	on_click_context  = mOn_click_context;
 	on_click_callback = callback;
@@ -80,6 +80,7 @@ int CheckBox::draw_check_mark()
 	Fill_l( box_background_color );	
 	Line(box_rectangle[0], box_rectangle[1], box_rectangle[2], box_rectangle[3] );
 	Line(box_rectangle[0], box_rectangle[3], box_rectangle[2], box_rectangle[1] );
+	return 1;
 }
 
 int CheckBox::draw()
@@ -106,6 +107,7 @@ int CheckBox::draw()
 	// Draw the text:
 	Fill_l( text_color );		
 	Text(box_rectangle[2]+BOX_PADDING, bottom+space_y, text, SerifTypeface, text_size );
+	return 1;
 }
 
 /* Use -1, -1 for the width,height constructor.
@@ -121,7 +123,7 @@ Control* CheckBox::HitTest ( int x, int y 	)
 	Control* retval=NULL;
 
 	retval = Control::HitTest(x,y);
-	printf("CheckBox::HitTest() %x\n", retval);
+	printf("CheckBox::HitTest() %p\n", retval);
 	print_positions();
 	return retval;
 }
@@ -130,6 +132,7 @@ Control* CheckBox::HitTest ( int x, int y 	)
 int	CheckBox::set_check(bool CheckOn)
 {
 	checked = CheckOn;
+	return 1;
 }
 
 int	CheckBox::onClick(int x, int y, bool mouse_is_down)

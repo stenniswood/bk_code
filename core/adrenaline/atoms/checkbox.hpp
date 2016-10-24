@@ -29,7 +29,7 @@ public:
 
 	bool			get_check()		{ return checked;  };
 	bool			is_checked()	{ return checked;  };
-	int				set_on_click_listener( void (*callback)(void*), void* mOn_click_context );
+	void			set_on_click_listener( void (*callback)(void*), void* mOn_click_context );
 		
 	virtual Control* HitTest ( int x, int y 	);
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);

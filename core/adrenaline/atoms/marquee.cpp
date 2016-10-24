@@ -98,7 +98,7 @@ int MarqueeView::get_num_chars_fit( char* mString, int mWidth )
 
 int MarqueeView::count_num_lines_present( char* mString, int mWidth )
 {
-	
+	return -1;
 }
 
 void  MarqueeView::set_text( char* NewText )
@@ -112,13 +112,14 @@ mVerticalPix - is height relative to bottom of the control.
 char* MarqueeView::draw_one_line( char* mtext, int mVerticalPix )
 {
 	int strLength = strlen(mtext);
-	int pos = strchr(mtext, (int)'\n');
-	int length = get_num_chars_fit( mtext, right_margin-left_margin );
+	char* pos = strchr(mtext, '\n');
+	int len = (pos-mtext);
+	
+	int length = get_num_chars_fit( mtext, right_margin-left_margin );		
+	if ((pos>0) && (len<length))
+		length = len;
 //	printf("MarqueeView::draw_one_line width=%d num_chars=%d nl=%d\n", (right_margin-left_margin),
 //					 length, pos);
-		
-	if ((pos>0) && (pos<length))
-		length = pos;
 
 	char tmp = mtext[length];
 	mtext[length] = 0;
@@ -170,7 +171,7 @@ int MarqueeView::draw()
 		if (vertical < 0)
 			break;
 	} while ( ptr ); 
-
+	return 1;
 }
 
 

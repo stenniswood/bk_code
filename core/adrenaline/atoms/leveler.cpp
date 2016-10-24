@@ -83,10 +83,8 @@ void Leveler::draw_vertical_line( )
 	Stroke(255, 128, 128, 0.5);
 	StrokeWidth(4);
 
-	int i;
-	VGfloat x;
 	VGfloat alpha = 1.0;				// start solid
-	VGfloat x_spacing = (width) / 10.0;	
+	//VGfloat x_spacing = (width) / 10.0;	
 	
 	// VERTICAL
 	Fill(255, 0, 125, alpha);
@@ -95,7 +93,7 @@ void Leveler::draw_vertical_line( )
 
 int Leveler::draw_y_label() 
 {
-	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
+	//VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
 	VGfloat alpha = 1.0;
 	int yrange = (height);
 	int tenpercent = (float)(width)*margin_percent;
@@ -109,38 +107,41 @@ int Leveler::draw_y_label()
 	TextMid  ( 0, 0, yAxisLabel, SerifTypeface, size );
 	Rotate   ( -90    );	
 	Translate( -x, -y );
+	return 1;
 }
 
 int Leveler::draw_x_label() 
 {
 	char label[10];
 
-	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
-	VGfloat alpha = 1.0;
-	int xrange = (width);
-	int yrange = (height);	
+	//VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
+	//VGfloat alpha = 1.0;
+	//int xrange = (width);
+	//int yrange = (height);	
 	int tenpercent = (float)(height)*margin_percent;
 	sprintf(label, "%6.1f", Level);
 	int size = 16.0 ; //xrange/strlen(label);	
 
 	Fill(255, 255, 0, 1.0);
 	Text( left+TIC_WIDTH, bottom-tenpercent,  label, SerifTypeface, size );
+	return 1;
 }
 
 int Leveler::draw_l_title() 
 {
-	VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
+	//VGfloat fade  = (100.0 / (VGfloat) 1) / 100.0;
 	VGfloat alpha = 1.0;
-	float xrange  = (width);
-	int yrange    = (height);	
+	//float xrange  = (width);
+	//int yrange    = (height);	
 	int tenpercent= (float)(height)*margin_percent;	
-	float length  = strlen(title);
-	float size    = (xrange+6.0*xrange*margin_percent)/length;	
+	//float length  = strlen(title);
+	//float size    = (xrange+6.0*xrange*margin_percent)/length;	
  	
 	Fill( 255, 255, 255, alpha );
 	// Fix!! should not go outside client Rect!!
 	
-	Text( left+TIC_WIDTH, bottom+height+tenpercent, text, SerifTypeface, text_size );				
+	Text( left+TIC_WIDTH, bottom+height+tenpercent, text, SerifTypeface, text_size );
+	return 1;	
 }
 
 float Leveler::get_level_pixel()

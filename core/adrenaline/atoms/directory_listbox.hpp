@@ -40,7 +40,7 @@ public:
 	void			populate_directories( char* mPath, int Column );
 
 	bool			is_item_a_directory	( int mIndex=-1 );
-	char*			get_item_text		( int mIndex=-1 );
+	const char*		get_item_text		( int mIndex=-1 );
 	int				get_item_id			( int mIndex=-1 ); 	// file type
 		
 	virtual void	draw_one_cell		( int mRow, int mCol, float mY );

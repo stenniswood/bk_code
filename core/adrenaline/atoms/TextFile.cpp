@@ -57,7 +57,7 @@ void TextFile::open( BOOL mReadOnly )
 		fd = fopen(FileName, "r");
 	else 
 		fd = fopen(FileName, "w+");
-	printf("FN=%s; fd=%x\n", FileName, fd);
+	printf("FN=%s; fd=%p\n", FileName, fd);
 }
 /* This will read the first non-blank line.
    ie. it skips blank lines */

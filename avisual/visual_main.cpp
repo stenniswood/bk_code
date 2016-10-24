@@ -168,8 +168,7 @@ void can_interface()
 void gui_interface()
 {
 	static int left_mouse_button_prev  = 0;
-	static int right_mouse_button_prev = 0;
-
+//	static int right_mouse_button_prev = 0;
 
 	// HANDLE MOUSE EVENTS :
 	//MainDisplay.start_screen(); 	
@@ -177,6 +176,7 @@ void gui_interface()
 	//printf(" mouse.time_slice()  result =%d\n", result );
 	MainDisplay.end_screen(); 
 
+	int child_ctrl;
 	Control* object_clicked = NULL; 
 	int x = round(mouse.x);
 	int y = round(mouse.y);
@@ -186,14 +186,14 @@ void gui_interface()
 	}
 	else if (result == LEFT_BUTTON_DOWN)
 	{
-		//if (left_mouse_button_prev == 0)
+		if (left_mouse_button_prev == 0)
 		{
 			Dprintf(" Left button clicked!  mousexy=(%d,%d)\n", x,y );
 			object_clicked = MainDisplay.HitTest( x, y );
 			if (object_clicked)
 			{ 
-				Dprintf("clicked an object %s %p!\n", object_clicked->class_name, object_clicked);
-				int num = object_clicked->onClick( x, y );
+				child_ctrl = object_clicked->onClick( x, y );
+				Dprintf("clicked an object %s %p  child=%d!\n", object_clicked->class_name, object_clicked, child_ctrl);
 				//UpdateDisplaySemaphore=1;
 				Dprintf("clicked an object - called onClick() DONE\n");				
 			}  

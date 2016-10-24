@@ -4,8 +4,6 @@
 
 #include "control.hpp"
 #include "scroll_bar.hpp"
-//using namespace std;
-//#include <string> 
 
 
 #define DEFAULT_VSCROLL_WIDTH 10
@@ -20,15 +18,13 @@ All it does is add the scrollbar objects and enables/disables based
 on variables for amount visible and amount available in each direction.
 
 ***************************************/
-
 class ScrollControl : public Control 
 {
-	
 public:
-	ScrollControl();
-	ScrollControl( int Left, int Right, int Top, int Bottom );
-	ScrollControl( int Width, int Height );
-	~ScrollControl();
+	ScrollControl ();
+	ScrollControl ( int Left, int Right, int Top, int Bottom );
+	ScrollControl ( int Width, int Height );
+	virtual ~ScrollControl();
 	
 	virtual void	Initialize		 (   );	
 	virtual int   	draw 			 (	 );

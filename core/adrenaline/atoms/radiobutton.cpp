@@ -89,6 +89,7 @@ int	RadioButton::select(  )
 		tmp = tmp->Prev;
 	}
 	Invalidate();
+	return (checked==true);
 }
 
 float RadioButton::get_longest_width(  )
@@ -145,10 +146,8 @@ int	RadioButton::join_group( RadioButton* mNewButton )
 {
 	// mNewButton should not have any other attached RadioButtons.
 	// ie. Next==NULL; Prev==NULL;  anything else will be disregarded.
-
 	// The new control goes Next
 	// Prev remains unchanged!
-
 	if (Next)
 		Next->Prev = mNewButton;
 
@@ -156,6 +155,7 @@ int	RadioButton::join_group( RadioButton* mNewButton )
 	mNewButton->Next = Next;
 	Next 			 = mNewButton;
 	mNewButton->Prev = this;
+	return 1;
 }
 
 int	RadioButton::get_selected_index(  )		// scans from top of group. index according to linked list.
@@ -238,6 +238,7 @@ int RadioButton::draw()
 	float space_y = (height - line_height)/2.0;
 	Fill_l  ( text_color );	
 	Text(x, bottom+space_y, text, SerifTypeface, text_size );				
+	return 1;
 }
 // Allocates and copies!	
 void RadioButton::set_text( const char* NewText, bool mWrapContent )

@@ -77,10 +77,11 @@ int  VerticalMenu::calc_metrics()
 int  VerticalMenu::onCreate	(  )
 {
 	if (Debug) printf( "VerticalMenu::onCreate()\n" );
-	ListBox::onCreate();
+	int retval = ListBox::onCreate();
 	m_underneath = vgCreateImage(VG_sABGR_8888, width, height, 
 								 VG_IMAGE_QUALITY_BETTER);
 	save_pixels();
+	return retval;
 }
 
 // New sjt - add to header!
@@ -260,7 +261,7 @@ Application*	VerticalMenu::get_application(   )
 // int 	VerticalMenu::set_on_click_listener( void (void*) )	
 int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 {
-	int result = get_hit_index( x, y );
+	size_t result = get_hit_index( x, y );
 	//printf("VerticalMenu::onClick() hit=%d\n", result);
 
 	if (((result < m_entries.size()) && (result >= 0)) &&

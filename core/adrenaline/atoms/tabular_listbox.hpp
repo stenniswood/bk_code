@@ -68,7 +68,7 @@ public:
 	virtual void  	move_to					( float Left, float Bottom );
 	virtual void 	set_width_height   		( int Width, int Height );
 
-	virtual int		get_total_lines			( 	)	{ /*printf("tabularListbox::gettotal_lines\n");*/ return LineData.size();  };
+	virtual size_t  get_total_lines			( 	);
 	vector<string>*	get_line_data			( int mIndex );
 	void			set_headings			( vector<struct HeaderItemInfo> *mHeaderTexts );
 	void			set_header_text			( string& mText, int mColumn = 0 );	
@@ -88,8 +88,6 @@ public:
 protected : 
 	vector<struct HeaderItemInfo> 	Headings;
 	vector< vector<string> >		LineData;
-
-	
 };
 
  

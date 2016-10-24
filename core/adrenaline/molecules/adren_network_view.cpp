@@ -53,7 +53,7 @@ NetworkView::~NetworkView(  )
 	Initialize();
 }
 
-int	NetworkView::setup_headers()
+void NetworkView::setup_headers()
 {
 	static struct HeaderItemInfo mNewHeading;	// = new struct HeaderItemInfo();
 	//mNewHeading.width	  = -1;
@@ -106,7 +106,7 @@ struct stBoardInfoText* NetworkView::convert_to_text( struct stBoardInfo2* mInfo
 	sprintf( Txt.status, 			"%d", mInfo->status   		);
 	sprintf( Txt.Software_Version, 	"%d.%d", mInfo->Software_Major, mInfo->Software_Minor );
 	sprintf( Txt.Hardware_Revision, "%c", mInfo->Hardware_Revision );
-	sprintf( Txt.BKSerialNumber, 	"%4x", mInfo->BKSerialNumber );
+	sprintf( Txt.BKSerialNumber, 	"%4lx", mInfo->BKSerialNumber );
 	sprintf( Txt.Description, 		"%s", mInfo->Description    );
 //	sprintf( Txt.Manufacturer, 		"%d", mInfo->Manufacturer   );
 	return &Txt;
@@ -124,9 +124,10 @@ int	NetworkView::formulate_line	( struct stBoardInfoText* mTxt )
 	data.push_back( mTxt->Description );
 	//data.push_back( mTxt->Manufacturer );
 	add_row( &data );
+	return 1;
 }
 
-int	NetworkView::add_board( struct stBoardInfo2* mBInfo )
+void NetworkView::add_board( struct stBoardInfo2* mBInfo )
 {
 	if (Debug) printf("NetworkView::add_board() \n");
 	m_board_info.push_back( *mBInfo );
@@ -160,6 +161,7 @@ int	NetworkView::handle_incoming_msg( struct sCAN* msg )
 		break;							
 	default: break;
 	}
+	return 1;
 }
 
 void 	NetworkView::Initialize  (	) 
@@ -169,7 +171,7 @@ void 	NetworkView::Initialize  (	)
 	populate_with_boards();
 }
 
-int	NetworkView::populate_with_boards(	)
+void	NetworkView::populate_with_boards(	)
 {
         struct stBoardInfo2 bi;
         bi.model = 21;
@@ -194,25 +196,25 @@ int	NetworkView::populate_with_boards(	)
         add_board               ( &bi );
 }
 
-int		NetworkView::calc_metrics(	) 
+void NetworkView::calc_metrics(	) 
 {
 
 }
 	
 int	NetworkView::draw_board( )
 {
-
+	return 1;
 }
 
 
 int	NetworkView::draw_board_info( )
 {
-
+	return 1;
 }
 
 int	NetworkView::draw  	( )
 {
-	TabularListBox::draw();
+	return TabularListBox::draw();
 }
 
 void can_parse_board_revision_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
@@ -229,7 +231,7 @@ void can_parse_serial_number_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
     						(mMsg->data[2]<<8) + (mMsg->data[3]);
 }
 
-void can_parse_board_description_msg( sCAN* mMsg, struct stBoardInfo2* mOut )
+void can_parse_board_description_msg( struct sCAN* mMsg, struct stBoardInfo2* mOut )
 {
 	int i;
     byte Starting_Index = mMsg->data[0];

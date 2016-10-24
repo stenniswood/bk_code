@@ -15,8 +15,7 @@
 #include "control.hpp" 
 #include "listbox.hpp"
 #include "display.h"
-
-
+//#include "global_funcs.h"
 
 #define margin_percent 0.07
 #define Debug 0
@@ -171,13 +170,17 @@ void ListBox::draw_one_row( int mRow, float mY )
 	Text( left, mY+above_line_offset, (char*)get_item(mRow)->c_str(), SerifTypeface, text_size );
 }
 
+size_t	ListBox::get_total_lines( )	
+{
+	return LineTexts.size();  
+}
+	
 int ListBox::draw_text()
 {
 	// Number Lines to Draw:
-	int num_lines = min( number_lines_visible, get_total_lines() );
+	int num_lines = std::min( number_lines_visible, get_total_lines() );
 	
 	//printf("ListBox::draw_text() num_lines=%d  get_total_lines=%d\n", num_lines, get_total_lines() );
-	int i=0;
 	int screen_i=0;	
 	int start = first_visible_line;					// index
 	int stop  = first_visible_line+num_lines;
@@ -228,7 +231,7 @@ int ListBox::draw_line_backgrounds()
 {
 	StrokeWidth(1.0);
 	// DRAW LINE BACKGROUND COLOR:
-	int   i = first_visible_line;
+	size_t   i = first_visible_line;
 	int   j = 0;
 	float y;
 	for (; i<(first_visible_line+number_lines_visible); i++, j++)	
@@ -269,7 +272,7 @@ void ListBox::set_text_size( float mTextSize )
 
 void ListBox::clear_items( )  
 {
-	int size = LineTexts.size();
+	//size_t size = LineTexts.size();
 	LineTexts.clear();
 	enable_v_scroll_bar(false);
 	Invalidate();

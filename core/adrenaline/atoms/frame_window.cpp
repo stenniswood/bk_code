@@ -10,14 +10,15 @@
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
+
 #include "Graphbase.hpp"
 #include "control.hpp"
 #include "listbox.hpp"
 #include "display.h"
 #include "window.hpp"
 #include "display_manager.hpp"
-  
 #include "frame_window.hpp"
+#include "global_funcs.h"
 
 #define Debug 0
  
@@ -72,8 +73,6 @@ void FrameWindow::calc_metrics(  	)
 
 void FrameWindow::move_to			( float NewX, float NewY )
 {
-	float deltaX = NewX-left;
-	float deltaY = NewY-bottom;
 	Window::move_to( NewX, NewY );
 	calc_metrics();	
 }
@@ -90,6 +89,7 @@ int   	FrameWindow::draw_header( )
 	Stroke_l( 0xAFFFFFFF );
 	Fill_l  ( 0xFF9f9fAf );
 	Rect    ( left, bottom+body_height, width, title_height );
+	return 1;
 }
 
 /* Draws the close, minimize, and maximize buttons
@@ -106,16 +106,16 @@ int   	FrameWindow::draw_close ( bool mHovering )
 		float center_y   = (title_height)/2.0+close_button_coords[BOTTOM];
 		//Dprintf("Close button:  %6.1f, %6.1f, %6.1f, %6.1f \n", close_button_coords[0],
 		//		close_button_coords[1], close_button_coords[2], close_button_coords[3] );
-				
-		float angle_rad  = 45.0*M_PI/180.0;
-		float x_component= m_buttons_radius * sin(angle_rad);
+		//float angle_rad  = radians(45.0);
+		//float x_component= m_buttons_radius * sin(angle_rad);
 		Circle( center_x, center_y, m_buttons_radius );	
 		// assume y_component is identical.
-		float left_x  = center_x-x_component;
+/*		float left_x  = center_x-x_component;
 		float right_x = center_x+x_component;
-		//Line( left_x, center_y-x_component, right_x, center_y+x_component );
-		//Line( left_x, center_y+x_component, right_x, center_y-x_component );
+		Line( left_x, center_y-x_component, right_x, center_y+x_component );
+		Line( left_x, center_y+x_component, right_x, center_y-x_component ); */
 	}
+	return 1;
 }
 
 int FrameWindow::draw_min(	bool mHovering )
@@ -135,6 +135,7 @@ int FrameWindow::draw_min(	bool mHovering )
 		Stroke_l( 0xFF8F8F00 );
 		//Line(min_button_coords[0], center_y, min_button_coords[1], center_y );
 	}
+	return 1;
 }
 
 int FrameWindow::draw_max(	bool mHovering )
@@ -151,6 +152,7 @@ int FrameWindow::draw_max(	bool mHovering )
 		//Line( max_button_coords[0], center_y, max_button_coords[1], center_y ); 
 		//Line( center_x, center_y-m_buttons_radius, center_x, center_y+m_buttons_radius );
 	}
+	return 1;
 }
 
 int FrameWindow::draw( )
@@ -160,6 +162,7 @@ int FrameWindow::draw( )
 	draw_max   ();
 	if (m_size_state != MAXIMIZED)	draw_min   ();
 	draw_close ();
+	return 1;
 }
 
 void FrameWindow::allocate_save_buff	()		// for current dimensions.
@@ -303,6 +306,6 @@ int FrameWindow::onClick(int x, int y, bool mouse_is_down)
 	}
 	
 	// Disperse to affected child:
-	Control::onClick(x,y, mouse_is_down);	
+	return Control::onClick(x,y, mouse_is_down);	
 }
 

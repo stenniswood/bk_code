@@ -68,6 +68,7 @@ int   	Button::draw_sunken (	)
 	Fill_l (text_color);
 	float y = bottom + (height - text_size)/2.0;
 	TextMid(left+width/2.0, y, text, SerifTypeface, text_size );
+	return 1;
 }
 
 int   	Button::draw_raised (	)
@@ -85,6 +86,7 @@ int   	Button::draw_raised (	)
 	if (text==NULL) return 1;
 	Fill_l (text_color);
 	TextMid(left+width/2.0, y, text, SerifTypeface, text_size );
+	return 1;
 }
  
 /********************************************************************
@@ -107,9 +109,10 @@ int Button::draw()
 	{
 		draw_raised();
 	}  
+	return 1;
 }
 
-int	Button::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
+void	Button::set_on_click_listener( void (*callback)(void*), void* mOn_click_context )
 {
 	on_click_context  = mOn_click_context;
 	on_click_callback = callback;
@@ -117,7 +120,7 @@ int	Button::set_on_click_listener( void (*callback)(void*), void* mOn_click_cont
 
 int	Button::onClick(int x, int y, bool mouse_is_down)
 {
-	if (Debug) printf("sunken = true.   on_click_callback=%x: %x\n", on_click_callback, on_click_context );
+	if (Debug) printf("sunken = true.   on_click_callback=%p: %p\n", on_click_callback, on_click_context );
 	if (on_click_callback)
 		on_click_callback( on_click_context );
 

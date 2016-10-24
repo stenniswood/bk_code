@@ -69,31 +69,34 @@ void TabularListBox::Initialize()
 
 int	TabularListBox::onCreate(  	)	// after loading resources, call functions which use fonts (already loaded before this call) etc.	
 {
-	ListBox::onCreate();
+	int retval = ListBox::onCreate();
 	calc_widths_from_text( );
 	calc_column_positions_from_widths( );	
 	//printf("TabularListBox::onCreate() column pos \n");		
+	return retval;
 }
 
 void TabularListBox::print_client_rect(   )		// body_height, scroll_bar width
 {
-	printf("TabularListBox-ClientRect Info:\t body_height=%6.1f; height=%6.1f; width=%6.1f \n", body_height, height, width );
+	printf("TabularListBox-ClientRect Info:\t body_height=%d; height=%6.1f; width=%6.1f \n", 
+						body_height, height, width );
 }
 
 void TabularListBox::print_tab_info(   )
 {	
 	printf("TabularListBox-Tab Info:\tNumHeadings=%d; \t", Headings.size() );
-	for (int i=0; i<Headings.size(); i++)
+	for (size_t i=0; i<Headings.size(); i++)
 	{
 		int sx = Headings[i].start_x;
-		printf("%d:\tStart_x=%d; width=%d; %s \n", sx, Headings[i].width, Headings[i].text.c_str() );
+		printf("%d:\tStart_x=%d; width=%6.1f; %s \n",i, sx, Headings[i].width, 
+												Headings[i].text.c_str() );
 	}
 }
 
 void TabularListBox::clear_items( )  
 {
 	ListBox::clear_items();
-	for(int row=0; row<LineData.size(); row++)
+	for(size_t row=0; row<LineData.size(); row++)
 	{
 		LineData[row].clear();
 	}
@@ -106,7 +109,8 @@ void TabularListBox::calc_metrics( )
 	ListBox::calc_metrics();
 	
 	//if (vsb) vsb->set_amount_visible(number_lines_visible);
-	if (Debug) printf("TabularLB: calc_metrics: height=%6.2f; body_height=%6.2f\n", height, body_height );	
+	if (Debug) printf("TabularLB: calc_metrics: height=%6.2f; body_height=%d\n", 
+	height, body_height );	
 	
 	// The change in height, could change number_lines_visible, which would require scroll bar:
 	/*if (LineData.size() > number_lines_visible) {
@@ -114,7 +118,12 @@ void TabularListBox::calc_metrics( )
 		set_v_scroll_values( LineData.size(), 0, first_visible_line, number_lines_visible );
 	}*/
 }
-
+size_t TabularListBox::get_total_lines( 	)
+{
+	/*printf("tabularListbox::gettotal_lines\n");*/
+	return LineData.size();  
+}
+	
 void TabularListBox::set_width_height( int Width, int Height )
 {
 	int Ht = Height-(header_text_size*4);
@@ -166,7 +175,7 @@ int TabularListBox::draw_header(	)
 
 	// LOOP THRU ALL HEADINGS:
 	float x = left;		// this will keep updating with the width of each heading.
-	for (int i=0; i < Headings.size(); i++)
+	for (size_t i=0; i < Headings.size(); i++)
 	{
 		x = Headings[i].start_x;
 		if ((x>(left+width)) || (Headings[i].end_x>(left+width)))
@@ -204,6 +213,7 @@ int TabularListBox::draw_header(	)
 			TextEnd( Headings[i].end_x, Hdr_Bottom+vspace, (char*)Headings[i].text.c_str(), SerifTypeface, header_text_size );
 		}
 	}
+	return 1;
 }
 
 // This class implements strings only for the view.
@@ -261,11 +271,11 @@ void TabularListBox::draw_one_row( int mRow, float mY )
 	
 int TabularListBox::draw_vertical_lines()
 {	
-	float x,y1,y2;
+	float x;
 	StrokeWidth(2);
 	Stroke_l	( 0xFF000000 );
 	Fill_l  	( 0xFF0000AF);		
-	for (int col=1; col< Headings.size(); col++)
+	for (size_t col=1; col< Headings.size(); col++)
 	{
 		x = Headings[col].start_x - 2;
 		if (x>(left+width))
@@ -273,6 +283,7 @@ int TabularListBox::draw_vertical_lines()
 		//if (Debug) printf("Vertical Lines: x=%6.2f\n", x);
 		Line(x, bottom, x, bottom+body_height);	
 	}
+	return 1;
 }
 
 int TabularListBox::draw()
@@ -289,7 +300,7 @@ int TabularListBox::draw()
 	if (Debug) printf("TabularListBox:draw_text_() done\n");
 	draw_vertical_lines();
 	// DRAW Scroll Bars:
-	ScrollControl::draw();
+	return ScrollControl::draw();	
 }
 
 /* This scans all rows and the header to find max number of pixels.
@@ -313,7 +324,7 @@ void TabularListBox::calc_widths_from_text( int mNotToExceed )
 		// Each column has the same font.  So the most characters is the most pixels.
 		// But bad assumption.  The font may be proportional, so some letters smaller/longer.		
 		// Find the longest data row for this column:
-		for (int row=0; row < LineData.size(); row++)
+		for (size_t row=0; row < LineData.size(); row++)
 		{
 			int len = LineData[row][col].length();
 			if (len > max_chars)
@@ -340,7 +351,7 @@ void TabularListBox::calc_widths_from_text( int mNotToExceed )
 			final_width = mNotToExceed;
 
 		Headings[col].width = round(final_width);
-		if (Debug) printf("Chosen Column Width= %d\n", Headings[col].width );
+		if (Debug) printf("Chosen Column Width= %6.1f\n", Headings[col].width );
 	}
 }
 

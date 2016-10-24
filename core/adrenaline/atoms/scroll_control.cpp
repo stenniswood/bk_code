@@ -174,18 +174,19 @@ void ScrollControl::set_amount_visible_h( int mValue )
 
 int ScrollControl::draw()
 {
-	Control::draw();
+	int retval = Control::draw();
 	if (vsb) {
-		vsb->draw();
+		return vsb->draw();
 		//vsb->print_positions();
 		//vsb->print_scroll_info();	
 	}
 	if (hsb)
-		hsb->draw();	
+		return hsb->draw();	
+	return retval;
 }
 Control* ScrollControl::HitTest(int x, int y)
 {
-	Control::HitTest(x,y);
+	return Control::HitTest(x,y);
 }
 
 int	ScrollControl::onClick(int x, int y, bool mouse_is_down)

@@ -50,11 +50,11 @@ public:
 	~NetworkView(  );
 
 	virtual void 	Initialize  (	);
-	int				calc_metrics(	);
+	void			calc_metrics(	);
 
 	//int			set_view_mode ( int mViewMode ); 
- 	int				setup_headers	( );
-	int				add_board 		( struct stBoardInfo2* mBInfo );
+ 	void			setup_headers	( );
+	void			add_board 		( struct stBoardInfo2* mBInfo );
 	int				handle_incoming_msg		( struct sCAN* msg );
 	
 	int				formulate_line	( struct stBoardInfoText* mTxt );
@@ -62,7 +62,7 @@ public:
 	struct stBoardInfoText* convert_to_text( struct stBoardInfo2* mInfo );
 
 	void		reset();
-	int		populate_with_boards(	);	
+	void		populate_with_boards(	);	
 	
 	
 	int	draw_board		( );

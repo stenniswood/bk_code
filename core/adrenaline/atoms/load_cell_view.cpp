@@ -148,7 +148,7 @@ int   	LoadCellView::draw   			(  )
 	TextMid( center_x, bottom+0.9*height, m_name, SerifTypeface, text_size );	
 	
 	// Print Toe Fraction:	
-	sprintf(title, "%3.0f \%\n", m_toe_fraction*100 );
+	sprintf(title, "%3.0f %%\n", m_toe_fraction*100 );
 	Text( left+5, bottom+0.7*height, title, SerifTypeface, 10 );	
 	
 	bool left_foot = (strcmp(m_name, "left" )==0);	

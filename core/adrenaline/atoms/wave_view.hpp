@@ -29,7 +29,7 @@ public:
 	float		sample_to_y 	   ( short mSampleValue );
 	int 		get_VG_path_coords ( float* &mCoords, int mChannel, float mZoomFactor );									
 	int 		create_path ( int mChannel, float mZoom );	
-	int 		delete_path ( );
+	void 		delete_path ( );
 
 	void 		draw_box 	( float mx, float my, long int mColor );
 	virtual int draw		( );

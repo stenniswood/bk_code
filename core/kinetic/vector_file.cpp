@@ -72,79 +72,77 @@ This lends itself to object oriented C++
 OneVector::OneVector( int Dimension )
 : dimension(Dimension)
 {
-	fData = new float[Dimension];
+	m_data.resize(Dimension);
 }
 OneVector::OneVector( OneVector* original )		// copy ctor	
 {
 	dimension = original->get_dimension();
-	fData     = new float[dimension];
-	for (int i=0; i<dimension; i++)
-		fData[i] = original->get_element(i);
+	m_data = original->m_data;
 }	
 OneVector::~OneVector()
 {
-	delete fData;
 }
 
 void OneVector::set_element(  float mValue, int mIndex )
 {
-	if (fData==NULL) return;
-	
-	fData[mIndex] = mValue;	
+	m_data[mIndex] = mValue;	
 }
 
 float OneVector::get_element( int mIndex )
 {
-	if (fData==NULL) return 0.;		// at least we're not accessing it.
-	return fData[mIndex];
+	return m_data[mIndex];
 }		
-
+void OneVector::print(  ) 					
+{
+	printf("OneVector: %6.2f, %6.2f, %6.2f\n", m_data[0], m_data[1], m_data[2] );
+}
+	
 float OneVector::operator[]( int   mIndex )
 {
-	if (fData==NULL) return 0.;		// at least we're not accessing it.
-	return fData[mIndex];
+//	if (fData==NULL) return 0.;		// at least we're not accessing it.
+	return m_data[mIndex];
 }
 void OneVector::operator-=( OneVector* mSub	)
 {
-	if ((fData==NULL) || (mSub==NULL)) return;		// at least we're not accessing it.
+	if ((mSub==NULL)) return;		// at least we're not accessing it.
 	for (int i=0; i<dimension; i++)
-		fData[i] -= mSub->get_element(i);		
+		m_data[i] -= mSub->get_element(i);
 }
 void OneVector::operator+=( OneVector* mAddend	)
 {
-	if ((fData==NULL) || (mAddend==NULL)) return;		// at least we're not accessing it.
+	if ((mAddend==NULL)) return;		// at least we're not accessing it.
 	for (int i=0; i<dimension; i++)
-		fData[i] -= mAddend->get_element(i);
+		m_data[i] -= mAddend->get_element(i);
 }
 
 float	OneVector::x	(  	)
 {
-	if (fData==NULL) return 0.;		// at least we're not accessing it.
-	return fData[0];
+//	if (fData==NULL) return 0.;		// at least we're not accessing it.
+	return m_data[0];
 }
 float	OneVector::y	(  	)
 {
-	if (fData==NULL) return 0.;		// at least we're not accessing it.
-	return fData[1];
+//	if (fData==NULL) return 0.;		// at least we're not accessing it.
+	return m_data[1];
 }
 float	OneVector::z	(  	)
 {
-	if (fData==NULL) return 0.;		// at least we're not accessing it.
-	return fData[2];
+//	if (fData==NULL) return 0.;		// at least we're not accessing it.
+	return m_data[2];
 }
 
 float* OneVector::atof_array( char** mStrArray )
 {
 	for (int i=0; i<dimension; i++)
-		fData[i] = atof( mStrArray[i] );
-	return fData;
+		m_data[i] = atof( mStrArray[i] );
+	return m_data.data();
 }
 
 float OneVector::get_magnitude(	)
 {
 	float mag = 0.0;
 	for (int i=0; i<dimension; i++)
-		mag += ( fData[i]*fData[i] );
+		mag += ( m_data[i]*m_data[i] );
 	
 	return sqrt(mag);
 }
@@ -152,12 +150,12 @@ float OneVector::get_magnitude(	)
 void OneVector::to_radians( )
 {
 	for (int i=0; i<dimension; i++)
-		fData[i] =  fData[i] * (M_PI/180.0);
+		m_data[i] =  m_data[i] * (M_PI/180.0);
 }
 void OneVector::to_degrees( )
 {
 	for (int i=0; i<dimension; i++)
-		fData[i] = fData[i] * (180.0/M_PI);
+		m_data[i] = m_data[i] * (180.0/M_PI);
 }
 
 /************************************************************
@@ -194,7 +192,7 @@ OneVector* VectorSequence::get_vector( )
 	return (OneVector*)&(m_data[CurrentIndex]);
 }
 
-OneVector* VectorSequence::get_ivector( int mIndex )
+OneVector* VectorSequence::get_ivector( uint16_t mIndex )
 {
 	if (CurrentIndex >= m_data.size())
 		return NULL;
@@ -205,7 +203,7 @@ OneVector* VectorSequence::get_ivector( int mIndex )
 	ie based on previous position (not future position).
    Caller must delete returned object when done to prevent memory leaks.
 */
-OneVector* VectorSequence::get_ivelocity_vector( int mIndex )
+OneVector* VectorSequence::get_ivelocity_vector( uint16_t mIndex )
 {
 	if (mIndex==-1) mIndex = CurrentIndex;
 	if (mIndex==0)  return NULL;
@@ -221,7 +219,7 @@ OneVector* VectorSequence::get_ivelocity_vector( int mIndex )
 	ie based on previous position (not future position).
    Caller must delete returned object when done to prevent memory leaks.
 */
-OneVector* VectorSequence::get_iaccel_vector( int mIndex )
+OneVector* VectorSequence::get_iaccel_vector( uint16_t mIndex )
 {
 	if (mIndex==-1) 	mIndex = CurrentIndex;
 	if (mIndex <= 1) 	return NULL;
@@ -245,7 +243,7 @@ void VectorSequence::add_vector( OneVector* mVector )
 	m_data.push_back( *mVector );
 }
 
-BOOL VectorSequence::move_to( int mIndex )
+BOOL VectorSequence::move_to( uint16_t mIndex )
 {
 	if (mIndex > m_data.size())
 		return FALSE;
@@ -273,7 +271,14 @@ void VectorGroupSequence::add_vector_sequence( VectorSequence* mSequence )
 	m_seqs.push_back( *mSequence );
 }
 
-void VectorGroupSequence::copy_robot_structure(Robot *mRobot)
+void VectorGroupSequence::add_limb_group( int mActuators )
+{
+	VectorSequence* tmp;
+	tmp       = new VectorSequence(mActuators);
+	add_vector_sequence(tmp);		// 1 Leg or arm
+}
+
+/*void VectorGroupSequence::copy_robot_structure(Robot *mRobot)
 {
 	// Create a VectorSequence for each limb : 
 	VectorSequence* tmp;
@@ -303,7 +308,7 @@ void VectorGroupSequence::copy_robot_structure(Robot *mRobot)
 	add_vector_sequence(tmp);		// Right Arm
 	free(tmp);
 	//printf("vector group : copying %d limbs\n", getNumItems() );
-}
+}*/
 
 VectorGroupSequence::~VectorGroupSequence()
 {
@@ -323,7 +328,7 @@ VectorGroupSequence::~VectorGroupSequence()
 void VectorGroupSequence::set_data_type_all_lists( byte mType, word mSpeed )
 {
 	// For each sequence group : 	
-	for (int i=0; i<m_seqs.size(); i++)
+	for (size_t i=0; i<m_seqs.size(); i++)
 	{
 		m_seqs[i].data_type = mType;			// INT or FLOAT
 		if (mSpeed)
@@ -453,13 +458,13 @@ OneVector*	VectorGroupSequence::get_vector_rad( int mLimbIndex )
 OneVector*	VectorGroupSequence::get_velocity_deg	 ( int mLimbIndex, int mIndex )
 {
 	VectorSequence* vs = get_limb_sequence( mLimbIndex );
-	vs->get_ivelocity_vector( mIndex );
+	return vs->get_ivelocity_vector( mIndex );
 }
 
 OneVector*	VectorGroupSequence::get_acceleration_deg( int mLimbIndex, int mIndex )
 {
 	VectorSequence* vs = get_limb_sequence( mLimbIndex );
-	vs->get_iaccel_vector( mIndex );	
+	return vs->get_iaccel_vector( mIndex );	
 }
 
 /* 
@@ -551,7 +556,7 @@ void VectorGroupSequence::read_vector_file( char* mFilename )
 	}
 	
 	// For Each limb:
-	for (int i=0; i<m_seqs.size(); i++)
+	for (uint16_t i=0; i<m_seqs.size(); i++)
 	{
 		VectorSequence* vs = (VectorSequence*)&(m_seqs[i]);
 		num_vectors = vs->m_data.size();

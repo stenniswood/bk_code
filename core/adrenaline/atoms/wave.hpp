@@ -67,7 +67,7 @@ public:
 	float 			calc_zoom		( int mPixels, float mSamples );
 	inline long int	get_average_bytes_per_second( ) { return (m_samples_per_second*m_number_channels*2); };
 	inline long int	get_data_length_bytes		( ) { return (m_buffer_length); };
-	inline long int	get_samples_recorded		( );
+	long int		get_samples_recorded		( );
 	inline long int	get_samples_allocated		( );
 
 	void			set_wave_format	( WAVEFORMATEX* mFormat );
@@ -79,7 +79,7 @@ public:
 										float mZoomFactor, float left, float bottom );
 
 	
-	inline short	GetSample		(long int mSampIndex, int mChannel);
+	short			GetSample		(long int mSampIndex, int mChannel);
 	inline short* 	GetSamplePtr	(long int mSampIndex, int mChannel);
     
 	inline float 	TimeToSamples(float mSeconds)  {	return m_samples_per_second * mSeconds;			}

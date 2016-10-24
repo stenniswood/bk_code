@@ -38,6 +38,7 @@ int GroupBox::draw()
 	Roundrect( left, bottom, left+width, bottom+height, 3.0, 3.0 );
 	TextMid  ( left+width/2.0, bottom+height/2.0, text, SerifTypeface, 
 				text_size );
+	return 1;
 }
 
 

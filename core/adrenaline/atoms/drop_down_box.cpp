@@ -32,12 +32,12 @@ void DropDownBox::Initialize(	)
 
 int	DropDownBox::calc_metrics()
 {
-
+	return 1;
 }
 
 int DropDownBox::onKey	  ( char mKey )
 {
-
+	return 1;
 }
 
 bool alpha_compare( std::string m1, std::string m2 )
@@ -45,6 +45,7 @@ bool alpha_compare( std::string m1, std::string m2 )
 	int result = m1.compare( m2 );
 	if (result<0)
 		return true;
+	return false;
 }
 
 void DropDownBox::alphabetize( )

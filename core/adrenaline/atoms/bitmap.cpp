@@ -48,41 +48,46 @@ void Bitmap::CreateBitmap( int nWidth, int nHeight, const void* lpBits )
 //Returns a pointer to a Bitmap object when given a handle to a Windows HBITMAP bitmap.
 int Bitmap::GetBitmapInfo( BITMAP* pBitMap )
 {
-
+	return 0;
 }	
 
 //Fills a BITMAP structure with information about the bitmap.
 //The number of bytes copied to the buffer if the method was successful; otherwise 0.
 uint8_t* Bitmap::GetBitmapBits( long dwCount, void* lpBits )
 {
-
+	return NULL;
 }
 	
 long Bitmap::SetBitmapBits	( long dwCount, const void* lpBits 	)
 {
-
+	return 0;
 }
 
 //Returns the width and height of the bitmap. The height and width are assumed to have been set previously by the SetBitmapDimension member function.
 sSize Bitmap::GetBitmapDimension( )
 {
+	sSize s;
+	return s;
 }	
 
 sSize Bitmap::SetBitmapDimension( int nWidth,  int nHeight )
 {
+	sSize s;
+	return s;
 }
 
 
 bool	Bitmap::LoadBitmap( const char* mFileName )
 {
 	struct image_info ii;
-	char* extension = strchr( mFileName, '.' ) + 1;
+	char* extension = (char*)strchr( mFileName, '.' ) + 1;
 	if (strcmp(extension, "JPG")==0)
 		createImageFromJpeg( mFileName, &ii );
 	else if (strcmp(extension, "PNG")==0)
 		createImageFromPNG( mFileName, &ii );
 	else if (strcmp(extension, "BMP")==0)
 		createImageFromBMP(mFileName);
+	return true;
 }
 
 // createImageFromJpeg decompresses a JPEG image to the standard image format
@@ -181,7 +186,7 @@ VGImage Bitmap::createImageFromJpeg( const char *filename, struct image_info* II
 
 VGImage Bitmap::createImageFromPNG  ( const char *filename, struct image_info* II )
 {
-
+	return 0;
 }
 
 
@@ -192,9 +197,9 @@ VGImage Bitmap::createImageFromPNG  ( const char *filename, struct image_info* I
 VGImage* Bitmap::createImageFromBMP(const char* filename) 
 {
 	string errMsg;
-	char text[256];
+	//char text[256];
 	char buffer[2];
-	int  FileSize;
+	//int  FileSize;
 	
 	FILE* input = fopen(filename, "rb" );
 	if (input==NULL)
@@ -202,7 +207,7 @@ VGImage* Bitmap::createImageFromBMP(const char* filename)
 
 	// "BM"
 	int bytes_read = fread( buffer, 1, 2, input );	
-	assert(buffer[0] == 'B' && buffer[1] == 'M' || !"Not a bitmap file");
+	assert((buffer[0] == 'B') && (buffer[1] == 'M'));	//|| !"Not a bitmap file"
 	
 	// Ignore 8 bytes.	Ignore file size and 4 reserved bytes
 	bytes_read = fread( buffer, 1, 8, input );	// skip 8 bytes 
@@ -219,10 +224,10 @@ VGImage* Bitmap::createImageFromBMP(const char* filename)
 	int height;
 	short planes;
 	short bpp;
-	short tmp;
+	//short tmp;
 	BITMAPINFOHEADER bih ;
 	BITMAPV4HEADER   bv4h;
-	BITMAPV5HEADER   bv5h;
+//	BITMAPV5HEADER   bv5h;
 	switch(headerSize) {
 		case 12:	/* Windows 2.x, OS/2 V1	*/
 			fread( &width,  1, 2, input );
@@ -272,8 +277,8 @@ VGImage* Bitmap::createImageFromBMP(const char* filename)
 	}
 
 	//Read the data
-	int bytesPerRow = ((width * 3 + 3) / 4) * 4 - (width * 3 % 4);
-	int size = bytesPerRow * height;
+	//int bytesPerRow = ((width * 3 + 3) / 4) * 4 - (width * 3 % 4);
+	//int size = bytesPerRow * height;
 	//array<char> pixels(new char[size]);
 		
 	//input.seekg(dataOffset, ios_base::beg);
@@ -295,5 +300,6 @@ VGImage* Bitmap::createImageFromBMP(const char* filename)
 	fclose( input );
 	//input.close();
 	//return new Image(pixels2.release(), width, height);
+	return 0;
 }
 

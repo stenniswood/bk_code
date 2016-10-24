@@ -39,7 +39,7 @@ void TableWindow::Initialize(   )
 
 int   	TableWindow::draw 			 (	 )
 {
-	Window::draw();
+	return Window::draw();
 }
 
 void	TableWindow::calc_metrics	 (   )
@@ -50,16 +50,16 @@ void	TableWindow::calc_metrics	 (   )
 // This will add the window offsets before adding:
 int	TableWindow::add_control_local_coords( Control* mControl, int mRow, int mCol )
 {
-	int dLeft   = left;
-	int dBottom = bottom;
+	//int dLeft   = left;
+	//int dBottom = bottom;
 	mControl->move_by( -left, -bottom );
 	//controls.push_back( mControl );
-	Window::add_control_local_coords( mControl );
+	return Window::add_control_local_coords( mControl );
 }
 
 int	TableWindow::add_control_absolute_coords( Control* mControl, int mRow, int mCol )
 {
-	Window::add_control( mControl );
+	return Window::add_control( mControl );
 }
 
 void TableWindow::set_column_width( int mWidth  )	

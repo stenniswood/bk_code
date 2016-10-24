@@ -47,7 +47,7 @@ public:
 //	int 		  	load_from_resource	(	);
 
 	std::vector<stHorizMenuInfo>		m_entries;
-	int									m_selection;
+	size_t								m_selection;
 	Application*						m_application;   // associated with the menu.
 	
 protected:

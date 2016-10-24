@@ -50,11 +50,10 @@ void SliderControl::Initialize(	)
 }
 
 int SliderControl::calc_metrics()
-{
+{ return 0;
 }
 int	SliderControl::onKey( char mKey )
-{
-
+{ return 0;
 }
 
 /*void SliderControl::set_position(int Left, int Right, int Top, int Bottom)

@@ -59,7 +59,7 @@ void ScrollBar::Initialize()
 
 void ScrollBar::print_scroll_info( )
 {
-	printf("ScrollInfo: max=%d; min=%d; lines_visible=%d; m_position=%d\n", 
+	printf("ScrollInfo: max=%ld; min=%ld; lines_visible=%ld; m_position=%ld\n", 
 			m_MaxValue, m_MinValue, m_AmountVisibleValue, m_position);
 	printf("Scrollbar Pixel:  m_start_pixel=%d;   m_bar_pixel_length=%d \n",
 			m_start_pixel, m_bar_pixel_length );	
@@ -141,6 +141,7 @@ int ScrollBar::draw (	)
 		calc_horizontal_bar_pixels(); 
 		Rect( m_start_pixel, bottom, m_bar_pixel_length, height ); 
 	} 
+	return 1;
 }
 
 void ScrollBar::set_max_value		( long int  mMax )
@@ -216,7 +217,7 @@ int	ScrollBar::onClick	 (int x, int y, bool mouse_is_down)
 		// Want to place the same portion of the bar as when we picked it up; in the
 		// new location.
 		// Subtract off where we :
-		float top_pixel = y + m_top_to_y_delta;		// adjust to top of bar
+		//float top_pixel = y + m_top_to_y_delta;		// adjust to top of bar
 		long int new_value = interpolate(y);
 		scroll_to(new_value);
 		
@@ -233,6 +234,7 @@ int	ScrollBar::onClick	 (int x, int y, bool mouse_is_down)
 			m_top_to_y_delta = (m_start_pixel+m_bar_pixel_length)-y;
 			m_is_dragging = true;			
 			printf("ScrollBar::onClick()  Mouse Hit BAR!\n");
+			return 1;			
 		}
 	} else if (area == HIT_SPACE)	
 	{
@@ -248,8 +250,10 @@ int	ScrollBar::onClick	 (int x, int y, bool mouse_is_down)
 				page_up();
 				// Page Up
 			}			
+			return 1;
 		}		
-	}	
+	}
+	return 0;	
 }
 
 
