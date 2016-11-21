@@ -43,7 +43,7 @@ void SSerial::open(const char* mDeviceName)
 {
 	if (mDeviceName)
 		_cl_port = strdup( mDeviceName );
-	fd = ::open( _cl_port, O_RDWR | O_NONBLOCK ); 		// 
+	fd = ::open( _cl_port, O_RDWR  ); 		// | O_NONBLOCK
 	if (fd < 0)
 	{
 		fprintf (stderr, "Unable to open serial device: %s - %s\n", _cl_port, strerror (errno));

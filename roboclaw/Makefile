@@ -3,10 +3,11 @@ OPTIONS	= -std=c99 -lm
 INC	= ./ ../core/can/ ../core/dbase/ ../core/kinetic/ ../core/misc/ ../core/hardware/
 CFLAGS 	= -lwiringPi -lm
 DEPS   	= 
-KINETIC_OBJ = leg_claw.o arm_claw.o robot_claw.o vector_file.o vector.o 
-MISC_OBJ = preferences.o string_util.o 
-OBJ     =  gpio.o claw_main2.o sserial.o roboclaw.o serial_loadcell.o 
-DBASE_OBJS = can_sql_logger.o 
+KINETIC_OBJ  = vector_file.o vector.o 
+MISC_OBJ     = preferences.o string_util.o 
+OBJ          = gpio.o claw_main.o sserial.o roboclaw.o serial_loadcell.o 
+DBASE_OBJS   = can_sql_logger.o 
+HARDWARE_OBJ = robot_claw.o leg_claw.o arm_claw.o 
 #configuration.o leds.o can_id_list.o 
 
 CPPOBJ = 
@@ -24,10 +25,11 @@ LIBFLAGS = $(SQL_LIB) -lpthread
 #	gcc -shared -o libcan_eid.so ./core/can_eid.o
 
 claw: $(OBJ) \
-	$(addprefix ../core/misc/, $(MISC_OBJ)) \
-	$(addprefix ../core/kinetic/, $(KINETIC_OBJ)) \
-	$(addprefix ../core/dbase/, $(DBASE_OBJS))
-	g++ -o  $@ $^ $(LIBFLAGS) $(CFLAGS)
+	$(addprefix ../core/hardware/, $(HARDWARE_OBJ)) \
+	$(addprefix ../core/misc/,     $(MISC_OBJ)) \
+	$(addprefix ../core/kinetic/,  $(KINETIC_OBJ)) \
+	$(addprefix ../core/dbase/,    $(DBASE_OBJS))
+	g++ -o  $@ $^ $(LIBFLAGS)      $(CFLAGS)
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.png *.pdf *.bak 
