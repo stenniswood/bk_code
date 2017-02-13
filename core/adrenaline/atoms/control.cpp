@@ -49,7 +49,7 @@ void Control::Initialize()
 	strcpy (class_name, "Control");
 	created		= false;
 	text		= NULL;
-	HasBorder 	= true;	
+	HasBorder 	= 1;	
 	Visible   	= true;
 	text_size 	= 14.0;
 	border_roundness_x = 15.0;
@@ -342,11 +342,18 @@ void Control::erase()
 int Control::draw_border()
 {
 	//printf("Control::draw_border() HasBorder!\n");
-	
-	Stroke_l ( border_color );
-	Fill_l   ( background_color );
-	Roundrect( left, bottom, width, height, 15.0, 15.0);
-	return 1;
+	if (HasBorder==1) {
+		Stroke_l ( border_color );
+		Fill_l   ( background_color );
+		Roundrect( left, bottom, width, height, 15.0, 15.0);
+		return 1;
+	} else if (HasBorder==2) {
+		Stroke_l ( border_color );
+		Fill_l   ( background_color );
+		Rect( left, bottom, width, height);	
+		return 1;		
+	}
+	return 0;
 }
 
 Control* Control::ChildrenHitTest( int x, int y )
@@ -355,7 +362,7 @@ Control* Control::ChildrenHitTest( int x, int y )
 
 	std::vector<Control*> hit_objects;
 	Control* retval = NULL;
-	
+
 	std::vector<Control*>::iterator iter = m_child_controls.begin();
 	while ( iter != m_child_controls.end() )
 	{

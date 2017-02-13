@@ -7,6 +7,9 @@
 #define CENTER_VERTICAL   0x02
 #define WRAP_IMAGE_SIZE	  0x10
 
+/* Use open CV
+		to read files png, jpg, etc.
+*/
 struct image_info
 {
 	unsigned int width;
@@ -32,7 +35,7 @@ public:
 	void			read_from_jpeg_file	( );
 	void			read_from_file     	( );
 
-	virtual void 	load_resources( );
+	virtual void 	load_resource( );
 	void			match_image_size()  {  set_width_height( ImageInfo.width, ImageInfo.height);  };
 
 	virtual void  	set_position	( int Left, int Right, int Top, int Bottom );
@@ -56,6 +59,11 @@ private:
 	VGImage 			image;
 	struct image_info 	ImageInfo;
 
+	VGfloat 	start_left;
+	VGfloat 	start_bottom;
+	int 		min_w;
+	int 		min_h;
+		
 	int			left_margin;
 	int			bottom_margin;
 	int			font_height;

@@ -4,6 +4,7 @@ void print_test_list();
 void load_test_screen(int number);
 
 void init_simple_button_test();
+void init_power_levels();
 void init_gyro_view();
 void init_loadcell_view();
 void init_textview_test();

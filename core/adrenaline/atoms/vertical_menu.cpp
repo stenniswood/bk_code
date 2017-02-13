@@ -21,19 +21,19 @@
 
 
 VerticalMenu::VerticalMenu()
-:ListBox()
+:Menu()
 {
 	Initialize();
 }
 
 VerticalMenu::VerticalMenu( int Left, int Right, int Top, int Bottom )
-:ListBox ( Left, Right, Top, Bottom )
+:Menu ( Left, Right, Top, Bottom )
 {
 	Initialize();
 }
 
 VerticalMenu::VerticalMenu( int Width, int Height )
-:ListBox( Width, Height )
+:Menu( Width, Height )
 {
 	Initialize();
 }
@@ -44,16 +44,15 @@ VerticalMenu::~VerticalMenu()
 
 void 	VerticalMenu::Initialize(	)
 {
-	ListBox::Initialize();
+	Menu::Initialize();
 
-	
-	set_odd_color ( 0xEFFFFFFF );
-	set_even_color( 0xEFFFFFFF );
+//	set_odd_color ( 0xEFFFFFFF );
+//	set_even_color( 0xEFFFFFFF );
 
-	m_horiz_parent	   = NULL;
+	m_parent	   = NULL;
 	callback_all_items = NULL;
 	has_scroller	= false;
-	isTopDown  		= true;
+//	isTopDown  		= true;
 	text_size 		= 19;
 	text_color 		= 0xFF000000;	
 	m_disabled_color = 0xFF7f7f7f;
@@ -61,23 +60,23 @@ void 	VerticalMenu::Initialize(	)
 
 int  VerticalMenu::calc_metrics()
 {
-	has_header = false;
-	number_lines_visible = m_entries.size();
-	//ListBox::adjust_height_for_num_visible_items(number_lines_visible);
+	//has_header = false;
+	//number_lines_visible = m_entries.size();
+	//Menu::adjust_height_for_num_visible_items(number_lines_visible);
 
 	float tmp_width  	 = get_longest_line();	
-	LineHeight           = 1.5 * text_size;
-	float tmp_height 	 = (number_lines_visible*LineHeight)+5;
+	LineHeight     = 1.5 * text_size;
+	float tmp_height 	 = (m_entries.size()*LineHeight)+5;
 	set_width_height( tmp_width, tmp_height );
 
-	ListBox::calc_metrics();
+	Menu::calc_metrics();
 	return 1;
 }
 
 int  VerticalMenu::onCreate	(  )
 {
 	if (Debug) printf( "VerticalMenu::onCreate()\n" );
-	int retval = ListBox::onCreate();
+	int retval = Menu::onCreate();
 	m_underneath = vgCreateImage(VG_sABGR_8888, width, height, 
 								 VG_IMAGE_QUALITY_BETTER);
 	save_pixels();
@@ -99,15 +98,15 @@ int  VerticalMenu::create_std_file_menu()
 int  VerticalMenu::add_simple_command( const char* mText, char* mShortcut )
 {
 	if (Debug) printf( "add_simple_command:: %s \n", mText );
-	set_item( mText );
+	//set_item( mText );
 
-	struct stVertMenuInfo m;  
+	struct stMenuInfo m;  
 	strcpy (m.alt_key, 		 " ");
 	strcpy (m.short_cut_key, " ");
 	m.width 	= 0;
 	m.state 	= MENU_STATE_NORMAL;
 	m.callback 	= NULL;	
-	m.menu 		= NULL;
+	m.submenu 		= NULL;
 	strcpy (m.text, mText 		);
 	
 	if (mShortcut)
@@ -132,7 +131,7 @@ int	VerticalMenu::add_callback_all_items( int (*callback)(void*, int, Applicatio
 	return 1;	
 }
 
-int 	VerticalMenu::add_sub_menu		( char* mText, VerticalMenu* mSubMenu )
+/*int 	VerticalMenu::add_sub_menu		( char* mText, VerticalMenu* mSubMenu )
 {
 	return 1;	
 }
@@ -140,17 +139,10 @@ int 	VerticalMenu::add_sub_menu		( char* mText, VerticalMenu* mSubMenu )
 int 	VerticalMenu::add_entry 		( stVertMenuInfo mEntry )
 {
 	return 1;
-}
+}*/
 
-int		VerticalMenu::attach_at			( float x, float y )
-{
-//	left   =  x;
-//	bottom = (y - height);
-	move_to(x, y-height);
-	return 1;	
-}
 	
-int 	VerticalMenu::set_state ( int mState, int mIndex )
+int 	VerticalMenu::set_state ( enum eMenuState mState, int mIndex )
 {
 	m_entries[mIndex].state = mState;
 	return 1;	
@@ -173,9 +165,9 @@ void 	VerticalMenu::draw_one_row( int mRow, float mY )
 	}
 	
 	//printf("%6.1f %6.1f   %s \n", left, mY, (char*)get_item(mRow)->c_str() ); 
-	Text( left, mY, (char*)get_item(mRow)->c_str(), SerifTypeface, text_size );
+	Text( left, mY, (char*)m_entries[mRow].text, SerifTypeface, text_size );
 
-	if (m_entries[mRow].menu)
+	if (m_entries[mRow].submenu)
 		draw_triangle( mRow, mY );
 
 	// draw short cut info (if available)
@@ -199,24 +191,11 @@ int	VerticalMenu::draw_triangle( int mRow, float mY )
 
 int   	VerticalMenu::draw		 		( 	)
 {
-	//printf("VerticalMenu::draw	\n");
-	//print_positions();
-	ListBox::draw();
+	Menu::draw();
 	return 1;	
 }
 
-int 	VerticalMenu::get_hit_index		( int Mousex, int Mousey )
-{
-	//printf("VerticalMenu::get_hit_index()\n");
-	return ListBox::get_hit_index( Mousex, Mousey );
-	
-}
 
-int	VerticalMenu::set_h_parent			( HorizontalMenu* mMenu )
-{
-	m_horiz_parent = mMenu;
-	return 1;
-}
 
 /* We need to establish a capture mouse mechanism.  Maybe not for this though.
 	Can we evaluate HitTest() for every object visible on the screen, fast enough to
@@ -252,26 +231,25 @@ void VerticalMenu::close_menu( )
 	Invalidate();
 }	
 
-Application*	VerticalMenu::get_application(   )
+Application* VerticalMenu::get_application(   )
 {
-	if (m_horiz_parent==NULL) return NULL;
-	return  m_horiz_parent->m_application;
+	if (m_parent==NULL) return NULL;
+	return  m_parent->m_application;
 }
 
-// int 	VerticalMenu::set_on_click_listener( void (void*) )	
 int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 {
 	size_t result = get_hit_index( x, y );
-	//printf("VerticalMenu::onClick() hit=%d\n", result);
-
-	if (((result < m_entries.size()) && (result >= 0)) &&
+	if (((result >= 0) && (result < m_entries.size())) &&
 			(m_entries[result].state != MENU_STATE_GRAYED))
 	{
 		printf("VerticalMenu:: Selected Item #%d: %s\n", result, m_entries[result].text );
+		// 1 Callback for entire menu :
 		if (callback_all_items) {
 			Application* app = get_application(   );
 			callback_all_items( NULL, result, app );
 		}	
+		// Individual Callbacks :
 		if (m_entries[result].callback)
 			m_entries[result].callback( NULL, result );
 		close_menu();
@@ -279,3 +257,59 @@ int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 	return 1;	
 }
 
+/*	This does not count the header!
+	Lines within the box only!
+
+	VisibleIndex means the index which is visible on the screen. 
+	This is different from the item index (lines may not be visible)
+*/
+float VerticalMenu::get_line_bottom( int mVisibleIndex )
+{
+	float y; 
+	if (isTopDown)
+	{
+		y = bottom + height - LineHeight * (mVisibleIndex+1);
+		return y;
+	} else {
+		y = bottom + LineHeight * (mVisibleIndex);
+		return y;
+	}
+}
+
+int VerticalMenu::get_hit_index(int mx, int my)
+{
+	int   start	 = 0;
+	int   end  	 = m_entries.size();
+	int	  retval = -1;
+	float y;
+
+	for ( int i=start; i<end; i++ )
+	{
+		y = get_line_bottom( i-start ); 
+		if ( (my>y) && (my<(y+LineHeight)) )
+			retval = i;
+	}
+	string str = *get_item(retval);
+//	if (Debug) printf("Selected Item # %d : start=%d, end=%d  %s\n", retval, first_visible_line, end, str.c_str() );
+	return retval; 
+}
+
+// result in pixels : 
+float VerticalMenu::get_longest_line(  )
+{
+	float max_w = 0;
+	for (size_t i=0; i<m_entries.size(); i++)
+	{
+		float w = TextWidth( (char*)m_entries[i].c_str(), SerifTypeface, text_size );
+		if (w > max_w)
+			max_w = w;
+	}
+	//printf("ListBox::get_longest_line() max_w=%6.1f\n", max_w );
+	return max_w;
+}
+
+/*int		VerticalMenu::attach_at			( float x, float y )
+{
+	move_to(x, y-height);
+	return 1;	
+}*/

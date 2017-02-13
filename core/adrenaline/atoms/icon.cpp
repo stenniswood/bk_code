@@ -29,6 +29,7 @@
 #define margin_percent 0.07
 #define Debug 0
 
+
 VGImage createImageFromJpeg(const char *filename, struct image_info* II);
 
 
@@ -102,6 +103,14 @@ void IconView::calc_margins( )
 	bottom_margin = height - ImageInfo.height;
 	if (left_margin  <0) left_margin   = 0;
 	if (bottom_margin<0) bottom_margin = 0;
+	
+	start_left   = left+left_margin;
+	start_bottom = bottom+bottom_margin;	
+	
+	unsigned int w = width;
+	unsigned int h = height;
+	min_w = std::min(ImageInfo.width, w);
+	min_h = std::min(ImageInfo.height, h);	
 }
 
 void IconView::read_from_jpeg_file ( )
@@ -145,10 +154,10 @@ void IconView::read_from_file( )
 	calc_margins();
 }
 
-void IconView::load_resources( )
+void IconView::load_resource( )
 {
 	read_from_file( );
-	if (Debug) printf("IconView:load_resources(): FN=%s;  image=%d\n", Filename, image );	
+	if (Debug) printf("IconView:load_resource(): FN=%s;  image=%d\n", Filename, image );	
 }
 
 void IconView::set_image( VGImage* mImage, struct image_info* mImageInfo )
@@ -164,19 +173,10 @@ void IconView::set_image( VGImage* mImage, struct image_info* mImageInfo )
 *********************************************************************/
 int IconView::draw()
 {
-	Control::draw();
+	Control::draw();		// Draw border if selected.
 
-	Fill_l( background_color );				// 
-	Rect  ( left, bottom, +width, +height );
-
-	VGfloat l = left+left_margin;
-	VGfloat b = bottom+bottom_margin;
-	unsigned int w = width;
-	unsigned int h = height;
-	int min_w = std::min(ImageInfo.width, w);
-	int min_h = std::min(ImageInfo.height, h);
 	if (image != 0) {
-		vgSetPixels(l, b, image, 0, 0, min_w, min_h);
+		vgSetPixels(start_left, start_bottom, image, 0, 0, min_w, min_h);
 		return 1;
 	}
 	return 0;

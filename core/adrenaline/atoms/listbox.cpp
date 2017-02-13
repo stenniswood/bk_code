@@ -226,7 +226,6 @@ float ListBox::get_line_bottom( int mVisibleIndex )
 	}
 }
 
-
 int ListBox::draw_line_backgrounds()
 {
 	StrokeWidth(1.0);

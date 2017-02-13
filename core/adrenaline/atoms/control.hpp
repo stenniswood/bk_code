@@ -122,7 +122,7 @@ protected:
 	char*		text;
 
 	bool		Visible;
-	bool		HasBorder;
+	char		HasBorder;
 	long int 	background_color;
 	long int 	border_color;
 };

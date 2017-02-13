@@ -214,6 +214,7 @@ int main(int argc, char ** argv)
 			imwrite(fn, frame /* see face_detect.cpp */ );
 		}
       	imshow	( main_window_name, original );
+      	//imshow	( "gray", gray_frame );      	
 
       	// USER CONTROL : 
 		int c = cv::waitKey( 10 );

@@ -29,7 +29,6 @@ struct finger_info {
 	int		state;		// down, released
 };
 
-
 class Mouse 
 {
 public:

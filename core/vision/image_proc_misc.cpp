@@ -42,7 +42,7 @@ void filter_color( cv::Mat& mImage, Color mMin, Color mMax )
 
 void process_frames()
 {
-	filter_color   ( original, blue, coral );
+	//filter_color   ( original, blue, coral );
 	
 	if (frame_count++) { 
 		//optic_flow( prev_gray_frame, gray_frame, flow, frame );
@@ -50,22 +50,22 @@ void process_frames()
 		//imshow( "optical flow", frame );
 	}
 
-	//fd_timeslice( gray_frame, original, false );
+	fd_timeslice( gray_frame, original, true );
 	//misc_detect_timeslice( original, gray_frame );
 	if (num_faces_present)
 	{	
-		std::vector<int> predictedLabels;
+/*		std::vector<int> predictedLabels;
 		if (model) {
 			message = face_recongition_tasks( gray_frame, faces, predictedLabels, capture_frame );
 			save_faces(frame, predictedLabels);
 		}
-
+*/
 		// Inform Client of Presence : 
 		message = "face detected";
 		find_center( mover_x, mover_y, faces[0] );
 		mover_width  = frame.cols;
 		mover_height = frame.rows;
-		eyes_compose_coordinate_xy( mover_x, mover_y );
+		eyes_compose_coordinate_xy( mover_x, mover_y ); 
 	}
 	else {
 		// No Faces detected:

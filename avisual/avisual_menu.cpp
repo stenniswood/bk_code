@@ -62,7 +62,7 @@ int show_view_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 	case 3:	init_grid_test		();		break;
 	case 4:	init_motor_gui_test	();		break;
 	default: 	return 0;				break;
-	}	
+	}
 	return 1;
 }
 
@@ -84,36 +84,35 @@ int show_atom_screens (void* menuPtr, int mMenuIndex, Application* mApp )
 	switch(mMenuIndex) 
 	{	
 	case 0:	init_simple_button_test	();		break;
-	case 1:	init_gyro_view		    ();		break;
-	case 2:	init_textview_test		();		break;
-	case 3: init_progressbar_test	();		break;
-	case 4: init_radio_button_test	();		break;
-	case 5: init_check_button_test	();		break;
-//	case 6: init_simple_text		();		break;
-	case 6: init_loadcell_view		();		break;
-	case 7: init_simple_path		();		break;
-	case 8: pack_sample_window		();		break;
-	case 9: init_frame_window		();		break;		
-	case 10: init_textfile_view		();		break;		
+	case 1:	init_power_levels		();		break;	
+	case 2:	init_gyro_view		    ();		break;
+	case 3:	init_textview_test		();		break;
+	case 4: init_progressbar_test	();		break;
+	case 5: init_radio_button_test	();		break;
+	case 6: init_check_button_test	();		break;
+	case 7: init_loadcell_view		();		break;
+	case 8: init_simple_path		();		break;
+	case 9: pack_sample_window		();		break;
+	case 10: init_frame_window		();		break;		
+	case 11: init_textfile_view		();		break;		
+	case 12: init_combo_menu		();		break;
+	case 13: init_spinner_menu		();		break;
+	case 14: init_listbox			();		break;	
+	case 15: init_tab_listbox		();		break;			
+//	case 7: init_simple_text		();		break;
 //	case 11: init_horiz_menu		();		break;			
 //	case 12: init_vert_menu			();		break;
-	case 11: init_combo_menu		();		break;
-	case 12: init_spinner_menu		();		break;
-	case 13: init_listbox			();		break;	
-	case 14: init_tab_listbox		();		break;			
-	case 15: /*init_CAN_msg_view	();*/		break;
+	case 16: init_CAN_msg_view		();		break;
 	default: 	return 0;					break;
 	}
 	return 1;
 }
-
-
 void init_atom_menu()
 {
 	if (Debug) printf("init_atom_menu()\n");
 	atoms.add_simple_command( "init_simple_button_test" );
-	if (Debug) printf("init_atom_menu() 1\n");
-	atoms.add_simple_command( "init_gyro_view" );
+	atoms.add_simple_command( "init_power_levels" 		);	
+	atoms.add_simple_command( "init_gyro_view" 			);
 	atoms.add_simple_command( "init_textview_test"		);
 	atoms.add_simple_command( "init_progressbar_test"   );
 	atoms.add_simple_command( "init_radio_button_test"  );
@@ -128,8 +127,8 @@ void init_atom_menu()
 	//atoms.add_simple_command( "init_vert_menu"			);
 	atoms.add_simple_command( "init_combo_menu"			);
 	atoms.add_simple_command( "init_spinner_menu"		);
-	//atoms.add_simple_command( "init_listbox"			);
-	//atoms.add_simple_command( "init_tab_listbox"		);
+	atoms.add_simple_command( "init_listbox"			);
+	atoms.add_simple_command( "init_tab_listbox"		);
 	atoms.add_simple_command( "init_CAN_msg_view"		);
 	atoms.add_callback_all_items( show_atom_screens );	
 }
@@ -160,7 +159,7 @@ void init_molecule_menu()
 */
 int handle_apps_screens( void* menuPtr, int mMenuIndex, Application* mApp )
 {
-	Application* tmp_app=NULL;
+	//Application* tmp_app=NULL;
 	printf("handle_apps_screens()\n");
 	switch(mMenuIndex) 
 	{

@@ -2,7 +2,6 @@
 #define _MOUSE_
 
 
-
 // The thread puts this into left, middle, right.
 // The timeslice will clear it.
 #define UNHANDLED_EVENT 0x80

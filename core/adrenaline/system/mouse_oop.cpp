@@ -24,12 +24,13 @@ pthread_t inputThread_id;
 //extern Mouse* mouse;
 //extern DraggerGesture mouse; 
 extern Mouse mouse;
+signed char mBuff[4];
 
 // eventThread reads from the mouse input file
 static void* eventThread(void *arg) 
 {
 	Dprintf("eventThread(): \n");
-	char counter=0;
+
 	char dev_name[40];
 	
 	//Mouse* M = (Mouse*) arg;	
@@ -39,24 +40,14 @@ static void* eventThread(void *arg)
 	Dprintf("Mouse mode=%d\n", M->mouse_mode );
 	
 	// Open mouse driver
-//	if ((mouse_fd = open("/dev/input/mouse0", O_RDONLY)) < 0) {	
-	for (counter=9; counter>0; counter--)
-	{
-		//sprintf( dev_name, "/dev/input/event2");		
-		sprintf( dev_name, "/dev/input/event%d", counter );		
-		//sprintf( dev_name, "/dev/input/mouse%d", counter );		
-		mouse_fd = open( dev_name, O_RDONLY );
-		if (mouse_fd >= 0) {
-			Dprintf( "Opened Mouse:  %s\n", dev_name );
-			//M->show_mouse();			
-			break;
-		} 
-		
-		if (counter==0) {
-			fprintf(stderr, "Error opening Mouse!\n");
-			quitState = 1;
-			return &quitState;
-		}
+	sprintf( dev_name, "/dev/input/mice" );
+	mouse_fd = open( dev_name, O_RDONLY );
+	if (mouse_fd >= 0) {
+		printf( "Opened Mouse:  %s\n", dev_name );
+	} else {
+		fprintf(stderr, "Error opening Mouse!\n");
+		quitState = 1;
+		return &quitState;
 	}
 
 	M->x = M->max_x / 2;			   // Reset mouse
@@ -64,11 +55,10 @@ static void* eventThread(void *arg)
 	
 	while (1) {
 		M->m_prev_ev_time = M->mouse_ev.time;
-		read(mouse_fd, &(M->mouse_ev), sizeof(struct input_event));
-		M->print_event_info();	
-		//M->hide_mouse();
+		read( mouse_fd, mBuff, 3 );
 		M->handle_event();
-
+		//M->print_event_info();
+		//M->hide_mouse();
 		Dprintf("\n");
 	}
 }
@@ -77,117 +67,35 @@ void Mouse::print_event_info()
 {
 	if (Debug==0) return;
 
-	if (mouse_ev.type == EV_SYN)
-		printf("EV_SYN:");
-	if (mouse_ev.type == EV_REL)
-		printf("EV_REL:");
-	if (mouse_ev.type == EV_ABS)
-		printf("EV_ABS:");	
-	if (mouse_ev.type == EV_KEY)
-		printf("EV_KEY:");
-	Dprintf("t=%d, c=%d, v=%d\t", mouse_ev.type, mouse_ev.code, mouse_ev.value );
+	Dprintf("lmr=<%d,%d,%d>\t", left, middle, right );
+	int dx = (signed char)mBuff[1];
+	int dy = mBuff[2];
+	Dprintf("dx=%d, dy=%d\t", dx, dy );
+	Dprintf("x=%6.1f, y=%6.1f\n", x,y );		
 }
 
 void Mouse::handle_event()
 {	
-	if (mouse_ev.type == EV_REL) {
-		if (mouse_ev.code == REL_X) {
-			x += (VGfloat) mouse_ev.value;
-			if (x < 0)		x = 0;
-			if (x > max_x) 	x = max_x;				
-		}
-		if (mouse_ev.code == REL_Y) {	   //This ones goes backwards hence the minus
-			y -= (VGfloat) mouse_ev.value;
-			if (y < 0)		y = 0;
-			if (y > max_y) 	y = max_y;
-		}
-	} else if (mouse_ev.type == EV_ABS) {
-		extract_finger_info( );
-	} else if (mouse_ev.type == EV_KEY) {
-		//printf("Time Stamp:%d - type %d, code %d, value %d\n",
-		//      mouse_ev.time.tv_usec,mouse_ev.type,mouse_ev.code,mouse_ev.value);
-		if (mouse_ev.code == BTN_LEFT) {
-			left = UNHANDLED_EVENT | (mouse_ev.value & 0x01);
-//			restore_pixels();
-			//if (Debug) 
-			printf("Left button: evalue=%d\n", mouse_ev.value );
-		}
-		if (mouse_ev.code == BTN_RIGHT) {
-			right = UNHANDLED_EVENT | (mouse_ev.value & 0x01);
-			if (Debug) printf("Right button: value=%d\n", mouse_ev.value);
-		}
-	} else 	if (mouse_ev.type == EV_SYN) {
-		for (int f=0; f<m_num_fingers_down; f++) {
-			m_finger_history[f].push_back( m_fingers[f] );
-			if (Debug) printf("xy %d = <%6.2f, %6.2f> %d 53:54 \t", f, m_fingers[f].x, m_fingers[f].y, m_finger_history[f].size() );		
-		}
-	}
-	else
-	{
-		if (Debug) printf("Unknown type=%d; code=%d value=%d \n", mouse_ev.type, mouse_ev.code, mouse_ev.value);
-	}	
+	static int pleft=0;
+	static int pright=0;
+	static int pmiddle=0;
+	
+	left   = (mBuff[0] & 0x01)>0;
+	right  = (mBuff[0] & 0x02)>0;
+	middle = (mBuff[0] & 0x04)>0;
+	
+	if (left!=pleft)     left   |= UNHANDLED_EVENT;
+	if (right!=pright)   right  |= UNHANDLED_EVENT;
+	if (middle!=pmiddle) middle |= UNHANDLED_EVENT;
+
+	pleft   = left;
+	pright  = right;
+	pmiddle = middle;
+
+	x += mBuff[1];
+	y += mBuff[2];		
 }
 
-// for multi-touch screens
-void Mouse::extract_finger_info()
-{	
-	static int received = 0;	
-	//printf("Absolute Touch event! Type=%d; Code=%d; value=%d\t", mouse_ev.type, mouse_ev.code, mouse_ev.value );
-	switch(mouse_ev.code) 
-	{
-	case 0:	x = mouse_ev.value;
-			//m_fingers[m_finger].x = mouse_ev.value;		
-			received |= 0x01;
-			break;
-	case 1: y = max_y - mouse_ev.value;
-			//m_fingers[m_finger].y = mouse_ev.value;
-			received |= 0x02;
-			break;
-	case 24: //printf("Absolute Touch event! Code=%d; value=%d\t", mouse_ev.code, mouse_ev.value );
-			m_fingers[m_finger].pressure = mouse_ev.value;
-			if (Debug) printf (" Pressure = %d  %6.2f\n", mouse_ev.value, m_fingers[m_finger].pressure);
-			break;
-	case 53: /*  ABS_MT_POSITION_X  */
-			m_fingers[m_finger].x = mouse_ev.value;		
-			received |= 0x10;
-			//printf("Absolute Touch event! Code=%d; value=%d %x\n", mouse_ev.code, mouse_ev.value, received ); 
-			break;
-	case 54: /*  ABS_MT_POSITION_Y  */
-			m_fingers[m_finger].y = mouse_ev.value;			
-			received |= 0x20;
-			//printf("Absolute Touch event! Code=%d; value=%d %x\n", mouse_ev.code, mouse_ev.value, received ); 
-			break;
-
-	case 57: //printf("Absolute Touch event! Code=%d; value=%d\t", mouse_ev.code, mouse_ev.value );
-			if (mouse_ev.value != -1) {
-				if (Debug) printf(" Finger Down.");
-				m_fingers[m_finger].state = 1;
-				//left = (UNHANDLED_EVENT|(0x01));
-				if (m_num_fingers_down==0) m_num_fingers_down = 1;
-				for (int f=0; f<10; f++)
-					m_finger_history[f].clear();
-			} else {
-				if (Debug) printf(" Finger Released!");
-				m_fingers[m_finger].state = 0;
-				//left = UNHANDLED_EVENT | (0);
-				m_num_fingers_down = 0;
-			}
-			break; 
-	case 47:// printf("Absolute Touch event! Code=%d; value=%d\t", mouse_ev.code, mouse_ev.value ); 
-			/* ABS_MT_SLOT */	// multi-touch finger number.
-			m_finger = mouse_ev.value;
-			if ((m_finger+1) > m_num_fingers_down)
-				m_num_fingers_down = m_finger+1;			
-			if (Debug) printf(" Finger # %d/%d", mouse_ev.value, m_num_fingers_down);			
-			break;			
-	default: if (Debug) printf("Absolute Touch event! Code=%d; value=%d", mouse_ev.code, mouse_ev.value ); 
-			break;			
-	}	
-	if ((received & 0x30)==0x30) {		
-		received = (received & 0x0F);
-	}
-	//printf(" Fingers %d \n", m_num_fingers_down);
-}
 
 Mouse::Mouse()
 {
@@ -312,11 +220,10 @@ void Mouse::init_fingers( )
 	}
 }
 
-
 int	Mouse::time_slice()
 {
 	if (x != cursorx || y != cursory) 	// if the mouse moved...
-	{		
+	{
 		hide_mouse();
 		cursorx = x;		// save for comparison on next timeslice.
 		cursory = y;

@@ -28,8 +28,8 @@
 
 // Offer one instance for whole app;
 DisplayManager MainDisplay(1920, 1080);
-#define Debug  0 
-#define Debug2 0
+#define Debug  1
+#define Debug2 1
 
 Keyboard		m_keyboard;
 Control			mctrl;
@@ -517,7 +517,7 @@ int	DisplayManager::draw_invalid_children( )
 /* Mark all objects as valid, since we just redrew */
 int	DisplayManager::update_invalidated(  )
 {
-	if (Debug) printf("child count=%d\n", m_child_controls.size() );
+//	if (Debug) printf("child count=%d\n", m_child_controls.size() );
 	vector<Control*>::iterator	iter = m_child_controls.begin();
 	for (int i=0; iter!=m_child_controls.end(); i++, iter++ )
 	{
@@ -580,7 +580,7 @@ int   DisplayManager::draw_background( 	)
 Control* DisplayManager::HitTest( int x, int y )
 {
 	Control* retval = Control::HitTest(x,y);
-	if (Debug)  printf("DisplayManager::HitTest()  %p \n", retval );
+	if (Debug)  printf("DisplayManager::HitTest() %p \n", retval );
 	
 	if (retval==this)
 		return NULL;	// don't want display manager empty space to do anything.

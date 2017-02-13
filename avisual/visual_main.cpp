@@ -59,7 +59,7 @@
 /***********************************************************************/
 extern int DisplayNum;
 
-#define Debug 0
+#define Debug 1
 
 void* serial_interface(void* );
 pthread_t serial_leftfoot_thread_id;
@@ -167,13 +167,11 @@ void can_interface()
 
 void gui_interface()
 {
-	static int left_mouse_button_prev  = 0;
-//	static int right_mouse_button_prev = 0;
+//	static int left_mouse_button_prev  = 0;
+	static int right_mouse_button_prev = 0;
 
 	// HANDLE MOUSE EVENTS :
-	//MainDisplay.start_screen(); 	
 	int result = mouse.time_slice();
-	//printf(" mouse.time_slice()  result =%d\n", result );
 	MainDisplay.end_screen(); 
 
 	int child_ctrl;
@@ -186,22 +184,22 @@ void gui_interface()
 	}
 	else if (result == LEFT_BUTTON_DOWN)
 	{
-		if (left_mouse_button_prev == 0)
-		{
-			Dprintf(" Left button clicked!  mousexy=(%d,%d)\n", x,y );
-			object_clicked = MainDisplay.HitTest( x, y );
-			if (object_clicked)
-			{ 
-				child_ctrl = object_clicked->onClick( x, y );
-				Dprintf("clicked an object %s %p  child=%d!\n", object_clicked->class_name, object_clicked, child_ctrl);
-				//UpdateDisplaySemaphore=1;
-				Dprintf("clicked an object - called onClick() DONE\n");				
-			}  
-			left_mouse_button_prev = result;
+		// Mouse handle_event() ensures only UNHANDLED events (no held down button)!
+		Dprintf(" Left button clicked!  mousexy=(%d,%d)\n", x,y );
+		object_clicked = MainDisplay.HitTest( x, y );
+		if (object_clicked)
+		{ 
+			child_ctrl = object_clicked->onClick( x, y );
+			Dprintf("clicked an object %s %p  child=%d!\n", object_clicked->class_name, object_clicked, child_ctrl);
+			UpdateDisplaySemaphore=1;
 		}
 	} 
 	else if (result == RIGHT_BUTTON_DOWN)
 	{
+		if (right_mouse_button_prev == 0)
+		{
+			right_mouse_button_prev = result;
+		}
 	}
 	else
 	{
@@ -404,7 +402,7 @@ int main( int argc, char *argv[] )
 
 		MainDisplay.idle_tasks();		
 		//printf("done with MainDisplay.idle_tasks()\n");
-		
+
 		// Want to be able to open the screen leaving everything as is.
 		// then do an end again to render the mouse.
 
@@ -417,50 +415,3 @@ int main( int argc, char *argv[] )
 //	DLL_API void DLL_CALLCONV FreeImage_DeInitialise();
 }
 
-
-/*	CalendarEntry ce;
-	ce.connect_to_calendar_db();
-	//ce.create_calendar_table_nq();
-	//ce.query(false);
-	
-	ce.m_user_id = 2;
-	ce.m_location = "629 Junk";
-	ce.m_description = "This stuff is working well";
-	ce.sql_add();
-	
-	
-	SQL_Logger sl;
-	sl.connect_to_logger_db ();
-	//sl.create_readings_table();
-	//sl.create_CAN_table     ();
-	//sl.create_viki_table    ();
-	stLoadCellReading lcRead;
-	lcRead.sensor[0] = 1.0;
-	lcRead.sensor[1] = 2.0;
-	lcRead.sensor[2] = 3.0;
-	lcRead.sensor[3] = 4.0;	
-	lcRead.sensor[4] = 5.0;
-	lcRead.sensor[5] = 6.0;
-	lcRead.sensor[6] = 7.0;
-	lcRead.sensor[7] = 8.0;
-	lcRead.num_reads = 8;	 
-	sl.add_loadcell( lcRead );
-	
-	stGyroReading  gRead;
-	gRead.tilt = 30.0;
-	gRead.pitch = 45.0;
-	gRead.heading = 12.0;
-	sl.add_gyro( gRead );	
-	
-	struct tm start;
-	start.tm_mon = 2;
-	start.tm_mday = 2;
-	start.tm_year = 2016-1900;
-	mktime(&start);
-	struct tm end;
-	end.tm_mon = 3;
-	end.tm_mday = 20;	
-	end.tm_year = 2016-1900;
-	mktime(&end);
-	sl.find_reading( "load cell", start, end );
-*/	

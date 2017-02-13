@@ -42,7 +42,6 @@ AUTHOR	: Steve Tenniswood
 #include "test_combo_layouts.hpp"
 #include "test_game_layouts.hpp"
 #include "test_graph_layouts.hpp"
-//#include "can_msg_view.hpp"
 #include "window_layouts.hpp"
 #include "load_cell_view.hpp"
 #include "packer_motor.h"
@@ -77,20 +76,34 @@ static RadioButton 	MyRadio4 ( -1, -1 );
 
 static vector<DirectoryListBox>  dir_lb;
 static char 		ConnectionStatusText[128];
-//ButtonArrayMot MyArray( 700, 1070, 350, 100);
 
 void init_simple_button_test()
 {
 	/* Demonstrate different styles.  Image button? */
 	MyButt.set_text( "Push me" );
 	MyButt.set_state(true);
-	MyButt.move_to ( 0.5*MainDisplay.screen_width, 200 );	
+	MyButt.move_to ( 0.75*MainDisplay.screen_width, 0.5*MainDisplay.screen_height );	
 	if (Debug) MyButt.print_positions( );
 	
 	Button* test = new Button( -1, -1 ); 
 	test->set_text( "Try me and see", true );
 	test->set_position_right_of( &MyButt );
+	test->move_to ( 0.5*MainDisplay.screen_width, 0.5*MainDisplay.screen_height  );	
 
+	Button* test2 = new Button( -1, -1 ); 
+	test2->set_text( "I can go multi\n lines long too", true );
+	test2->set_position_right_of( &MyButt );
+	test2->move_to ( 0.25*MainDisplay.screen_width, 0.5*MainDisplay.screen_height  );	
+
+	// Add to display manager:
+	MainDisplay.remove_all_objects(	);
+	MainDisplay.add_object( &MyButt );	
+	MainDisplay.add_object( test );		
+	MainDisplay.add_object( test2 );			
+}
+
+void init_power_levels()
+{
 	// PowerLevel
 	pl.move_to  		(100, 200 );
 	pl.set_width_height ( 75, 150 );
@@ -105,15 +118,12 @@ void init_simple_button_test()
 	spl.set_min  		(   0.0 );
 	spl.set_level_left	(  75.0 );
 	spl.set_level_right	(  75.0 ); 
-	
+
 	// Add to display manager:
 	MainDisplay.remove_all_objects(	);
-	MainDisplay.add_object( &MyButt );	
-	MainDisplay.add_object( test );		
 	MainDisplay.add_object( &pl  );
 	MainDisplay.add_object( &spl );	
 }
-
 
 void init_textview_test()
 {

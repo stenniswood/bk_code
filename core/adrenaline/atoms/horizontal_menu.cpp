@@ -19,21 +19,144 @@
 #define DEFAULT_PADDING 20
 #define Debug 0
 
+/******************************************************************
+		MenuEntry	
+ ******************************************************************/
+MenuEntry::MenuEntry()
+{
+	memset(text,0,50);
+	alt_key[0]=0;				// to activate from keyboard once menu is already active.
+	short_cut_key[0]=0;		// to directly activate from keyboard 
+	width = 30;
+	sx=0.0;				// computed in calc_metrics()
+	ex=10.0;				// computed in calc_metrics()	
+	state=MENU_STATE_NORMAL;
+	(callback)= NULL;		// called when the item is selected.
+	text_size = 14.;
+}
+MenuEntry::~MenuEntry()
+{
+}	
+void	MenuEntry::set_text  ( const char* mText )
+{
+	strcpy(text, mText);
+}
+void	MenuEntry::calc_width( const char* mText )
+{
+	LineHeight = text_size*1.25;
+	width = TextWidth( text, SerifTypeface, text_size );
+}
+int		MenuEntry::draw()
+{
+	float above_line_offset = (LineHeight-text_size)/2.0;
+	Text( sx, Y+above_line_offset, (char*)text, SerifTypeface, text_size );
+	return 1;
+}
 
+/******************************************************************
+		CascadeMenuEntry
+ ******************************************************************/
+CascadeMenuEntry::CascadeMenuEntry()
+:MenuEntry()
+{
+	submenu = NULL;
+}
+CascadeMenuEntry::~CascadeMenuEntry()
+{
+}
+void CascadeMenuEntry::calc_width( const char* mText )
+{
+	const int ARROW_WIDTH = 40;
+	width = TextWidth( text, SerifTypeface, text_size );
+	width += ARROW_WIDTH;
+}
+int	 CascadeMenuEntry::draw()
+{
+	MenuEntry::draw();
+	return 1;
+}
+
+/******************************************************************
+		Menu  base class
+ ******************************************************************/
+Menu::Menu()
+{
+	Initialize(); 
+}
+Menu::Menu ( int Left, int Right, int Top, int Bottom )
+{
+	Initialize(); 
+}
+Menu::Menu ( int Width, int Height 					 )
+{
+	Initialize(); 
+}
+Menu::~Menu()
+{
+
+}	
+void Menu::Initialize	(	)
+{
+	Control::Initialize();
+	strcpy (class_name, "HorizontalMenu");		
+	background_color = 0xFFFFFFFF;
+	m_selected_color = 0xFF007FBF;
+	text_color 		 = 0xFF000000;
+	text_size 		 = 14.;
+
+	m_selection		 = -1 ;
+	m_application	 = NULL;
+	//printf("Colors: background=%4x; selected=%4x; text=%4x; mp=%6.1f\n", background_color, m_selected_color, text_color, m_menu_padding );
+}
+int	Menu::add_sub_menu( const char* mMenuText, Menu* vm )
+{
+	vm->set_parent( this );		// back link here.
+	struct stMenuInfo hmi; 
+	hmi.submenu = vm;
+	strcpy( hmi.text, mMenuText );	
+	m_entries.push_back( hmi );
+	return 1;
+}
+int	Menu::add_entry	( stMenuInfo mEntry 	  )
+{
+	m_entries.push_back( mEntry );
+	calc_metrics();
+	return 1;
+}
+
+/*int	Menu::add_callback( int  mIndex, int (*callback)(void*, int)=NULL )
+{}*/
+
+void Menu::clear_all( 		  )
+{
+	m_entries.clear();
+}
+
+int	Menu::attach_at( float x, float y )
+{
+	move_to(x, y-height);
+	return 1;	
+}
+
+
+
+/******************************************************************/
+
+/******************************************************************/
 HorizontalMenu::HorizontalMenu ()  
-:Control()
+:Menu()
 {
 	Initialize(); 
 }
 
 HorizontalMenu::HorizontalMenu ( int Left, int Right, int Top, int Bottom )  
-:Control(Left, Right, Top, Bottom)
+:Menu(Left, Right, Top, Bottom)
 { 
 	Initialize();
 }
 
 HorizontalMenu::HorizontalMenu ( int Width, int Height )
-:Control( Width, Height )
+:Menu( Width, Height )
 { 
 	Initialize();
 }
@@ -45,16 +168,10 @@ HorizontalMenu::~HorizontalMenu()
 
 void 	HorizontalMenu::Initialize (	)  
 { 
-	Control::Initialize();
+	Menu::Initialize();
 	strcpy (class_name, "HorizontalMenu");		
-	background_color = 0xFFFFFFFF;
-	m_selected_color = 0xFF007FBF;
-	text_color 		 = 0xFF000000;
-	text_size 		 = 14.;
 	m_menu_padding	 = 50.;
-	m_selection		 = -1 ;
-	m_application	 = NULL;
-	//printf("Colors: background=%4x; selected=%4x; text=%4x; mp=%6.1f\n", background_color, m_selected_color, text_color, m_menu_padding );
+	calc_metrics();
 }
 
 int 	HorizontalMenu::calc_metrics( )
@@ -70,7 +187,7 @@ int 	HorizontalMenu::calc_metrics( )
 		m_entries[i].ex    = sx+m_entries[i].width + m_menu_padding;
 		sx += (m_entries[i].width + m_menu_padding);
 		
-		VerticalMenu* vm = m_entries[i].menu;
+		Menu* vm = m_entries[i].submenu;
 		if (vm)
 			vm->attach_at( m_entries[i].sx, bottom );
 	}
@@ -79,40 +196,23 @@ int 	HorizontalMenu::calc_metrics( )
 
 int		HorizontalMenu::add_entry_text( const char* mMenuText )
 {
-	struct stHorizMenuInfo hmi;// = new struct stHorizMenuInfo;
-	int len = strlen(mMenuText);
-	hmi.text = new char[len];
-	hmi.menu = NULL;
+	struct stMenuInfo hmi;// = new struct stHorizMenuInfo;
+	hmi.submenu = NULL;
 	strcpy(hmi.text, mMenuText);
-	
 	m_entries.push_back( hmi );
 	calc_metrics();
 	return 1;
 }
-void		HorizontalMenu::clear_all()
-{
-	m_entries.clear( );
-}
-int		HorizontalMenu::add_sub_menu( const char* mMenuText, VerticalMenu* vm )
-{
-	vm->set_h_parent( this );		// back link here.
-	struct stHorizMenuInfo hmi; 
-	int len  = strlen(mMenuText);
-	hmi.text = new char[len];
-	hmi.menu = vm;
-	strcpy( hmi.text, mMenuText );
-	
-	m_entries.push_back( hmi );
-	calc_metrics();
-	return 1;
-}
+/*int		HorizontalMenu::add_sub_menu( const char* mMenuText, VerticalMenu* vm )
+{ return 0;
+}*/
 
-int 	HorizontalMenu::add_entry( struct stHorizMenuInfo* mEntry )
+/*int 	HorizontalMenu::add_entry( struct stMenuInfo* mEntry )
 {
 	m_entries.push_back( *mEntry );
 	calc_metrics();
 	return 1;
-}
+}*/
 
 int 	HorizontalMenu::select 	( int mSelected 	) 
 {
@@ -150,8 +250,8 @@ int HorizontalMenu::draw(	)
 			Stroke_l( background_color );
 			Fill_l  ( background_color );
 			//printf  ("MenuColor: txt=%4x\n", background_color );
-			if (m_entries[i].menu)
-				m_entries[i].menu->draw();
+			if (m_entries[i].submenu)
+				m_entries[i].submenu->draw();
 		} else {
 			Stroke_l( text_color );
 			Fill_l  ( text_color );
@@ -170,11 +270,11 @@ int HorizontalMenu::draw(	)
 	}
 	if ( is_selection_valid() )  {
 		//printf("H Menu selection is valid!\n");
-		if ((m_entries[m_selection].menu) && 
-			(m_entries[m_selection].menu->is_visible())) 
+		if ((m_entries[m_selection].submenu) && 
+			(m_entries[m_selection].submenu->is_visible())) 
 		{
 			//printf("H Menu selection is a menu\n");					
-			m_entries[m_selection].menu->draw();
+			m_entries[m_selection].submenu->draw();
 		}
 	}
 	return 1;	
@@ -207,7 +307,7 @@ int 	HorizontalMenu::get_hit_index( int Mousex, int Mousey )
 		if ((Mousex > l) && (Mousex < r) )
 			return i;
 	}	
-	// if no items,
+	// if no items, 
 	return -1;
 }
 
@@ -220,13 +320,15 @@ bool	HorizontalMenu::is_selection_valid( )
 
 Control* HorizontalMenu::HitTest( int x, int y )
 {
-	// Test this Horizontal Menu first.	
-	Control* result = Control::HitTest(x,y);	
+	printf("HorizontalMenu::HitTest() \n" );
+	Control* result = Control::HitTest(x,y);	// also checks the open selected menu too.
 
-	if ((result==NULL) && is_selection_valid()) 
+	if ( (result==NULL) && is_selection_valid() )
 	{
 		// Test the open submenu:
-		result = m_entries[m_selection].menu->HitTest(x,y);
+		printf("HorizontalMenu::HitTest() selection=%d\n", m_selection );
+		result = m_entries[m_selection].submenu->HitTest(x,y);
+		printf("result==%p\n", result );		
 	}
 	//if (result)
 	//	printf( "HorizontalMenu::HitTest() %d,%d =  %x\n", x,y,result );
@@ -239,23 +341,20 @@ int	HorizontalMenu::onClick( int x, int y, bool mouse_is_down )
 	if (menu_index >= 0)
 	{
 		printf( "Mouse Click  Horiz Menu Item # %d\n", menu_index );	
-		if (m_entries[menu_index].menu)
+		if (m_entries[menu_index].submenu)
 		{
-			printf("Is a SubMenu. \n");
-			m_entries[menu_index].menu->set_z_order( ++MainDisplay.m_z_order_counter );
-			m_entries[menu_index].menu->show();
-
+			printf("Is a SubMenu. \n");			
 			// hide any other visible menu
 			if ( is_selection_valid() )  {
-				if (m_entries[m_selection].menu) {
-					m_entries[m_selection].menu->hide();
+				if (m_entries[m_selection].submenu) {
+					m_entries[m_selection].submenu->hide();
 					Invalidate();
 				}
 			}
 			m_selection = menu_index;
-			m_entries[menu_index].menu->show(true);
-			m_entries[menu_index].menu->draw();
-			//m_entries[menu_index]->menu->draw();
+			m_entries[menu_index].submenu->set_z_order( ++MainDisplay.m_z_order_counter );
+			m_entries[menu_index].submenu->show(true);
+			m_entries[menu_index].submenu->draw();
 			//Invalidate();			
 		}
 		return 1;		
