@@ -28,7 +28,7 @@ char	  dev3[25] = "/dev/ttyACM2";
 char	  dev4[25] = "/dev/ttyACM3";
 //Leg		LeftLeg (dev1, dev2);
 //Leg		RightLeg(dev3, dev4);
-Robot robot;
+RobotAct robot;
 
 pthread_t serial_leftfoot_thread_id;
 pthread_t serial_rightfoot_thread_id;
@@ -54,7 +54,6 @@ void print_args(int argc, char *argv[])
 	}
 	printf("\n");
 }
-
 
 void* serial_interface(void* mParam)				// serial port used for arduino connections & GPS.
 {
@@ -139,7 +138,6 @@ int main( int argc, char *argv[] )
 			printf("Read Status!");
 			exit(1);			
 		}
-
 	}	
 	time_t t;
 	time(&t);

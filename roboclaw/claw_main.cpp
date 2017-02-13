@@ -32,6 +32,7 @@ pthread_t serial_rightfoot_thread_id;
 //LoadCell_SerialInterface right_foot;
 
 RoboClaw  claw (dev1,10000);
+
 /*RoboClaw  claw2(dev2,1000);
 RoboClaw  claw3(dev3,1000);
 RoboClaw  claw4(dev4,1000); */
@@ -141,14 +142,14 @@ void read_encoders()
 void init_claws()
 {
 	int maxCurrent = 20;
-	claw.open			(dev1);
+	claw.open			( dev1   );
 	claw.set_baud		( B38400 );	
-	read_main_battery();
+	read_main_battery   ( );
 
 	uint16_t  config = 0x0067;
-	claw.SetConfig(address, config );
+	claw.SetConfig      ( address, config );
 	usleep(1000000);	// 0.1 sec
-	
+
 	config = 0;
 	bool result = claw.GetConfig( address, config );
 	printf("Config=%4x\n", config);	
@@ -201,13 +202,13 @@ int main( int argc, char *argv[] )
 	time_t t;
 	time(&t);
 	time_stamp = *(localtime(&t));
-	printf("====================== GPS =======================HELLO==\n");
+	printf("====================== CLAW =======================HELLO==\n");
 	printf("==== WARNING: This sets the baud rate.\n");
 
 	char text[80];
 	bool result = claw.ReadVersion( address, text );
 	printf("\ntext=%s\n", text); 
-//	exit(1);
+	exit(1);
 	 
 	if (stop) {
 		claw.ForwardM1 (address, 0);
