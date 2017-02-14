@@ -92,15 +92,16 @@ void fd_timeslice( cv::Mat& frame_gray, cv::Mat& original, bool mFindEyes )
 	face_cascade.detectMultiScale( frame_gray, faces, 1.015, 2, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(150, 150) );
 	//  findSkin(debugImage);
 	uint64_t end = GetTimeStamp2();
-	
 	num_faces_present = faces.size();
-	printf("FaceDetect() Duration = %6.2f;  faces_present=%d\n", (float)(end-start)/1000000., num_faces_present );
 		
 	// extract Face : 
 	if (num_faces_present) 
 	{
+		printf("FaceDetect() Duration = %6.2f;  faces_present=%d\n", (float)(end-start)/1000000., num_faces_present );
 		//cv::flip(frame_gray, frame_gray, 1);
-		  start = GetTimeStamp2();
+		start = GetTimeStamp2();
+		printf("FaceRect: <%6.2f, %6.2f>\n", faces[0].height, faces[0].width );
+		
 		faceROIc = original(faces[0]);
 		if (mFindEyes)
 			findEyes( frame_gray, faces[0] );

@@ -11,6 +11,9 @@
 #include "neck_thread.hpp"		// can we remove this?
 #include "vision_memory.h"
 
+using namespace cv;
+using namespace std;
+
 
 int   mover_x=0;
 int   mover_y=0;
@@ -39,6 +42,54 @@ void filter_color( cv::Mat& mImage, Color mMin, Color mMax )
 	//cv::inRange	 ( mImage, cv::Scalar(160, 100, 100), cv::Scalar(179, 255, 255), upper_red_hue_range);	
 }
 
+vector<Point2f> corners;
+vector<Point2f> good_corners;
+
+void inside_oval()
+{
+	double radius;
+	double minRadius = min ( faces[0].height/2, faces[0].width/2 );
+	minRadius *= minRadius;
+	for( int i = 0; i < corners.size(); i++ )
+	{
+		float deltax = corners[i].x-faces[0].width/2;
+		float deltay = corners[i].y-faces[0].height/2;
+		radius = (deltax*deltax) + (deltay*deltay);
+		if (radius < minRadius)
+			good_corners.push_back( corners[i] );
+	}
+	cout<<"** Faces h,w = "<<faces[0].height<<", "<<faces[0].width<<endl;
+	cout<<"** Radius= "<<minRadius;
+	cout<<"** Number of Good corners detected: "<<corners.size()<<endl;
+}
+
+void extract_good_features()
+{
+	Mat src = faceROIc;
+	Mat src_gray;
+	cvtColor( src, src_gray, CV_BGR2GRAY );
+	int maxCorners = 50;
+
+	double qualityLevel = 0.01;
+	double minDistance  = 8;
+	goodFeaturesToTrack(src_gray, corners, maxCorners, 
+				qualityLevel, minDistance );
+
+  // Draw corners detected:
+  cout<<"** Number of corners detected: "<<corners.size()<<endl;
+  inside_oval();
+  
+  RNG rng(12345);
+  int r = 4;
+  for( int i = 0; i < good_corners.size(); i++ )
+     { circle( src, good_corners[i], r, Scalar(rng.uniform(0,255), rng.uniform(0,255),
+              rng.uniform(0,255)), -1, 8, 0 ); }
+
+  // Show what you got
+  namedWindow( "source_window", CV_WINDOW_AUTOSIZE );
+  imshow( "source_window", src );
+}
+
 
 void process_frames()
 {
@@ -54,6 +105,8 @@ void process_frames()
 	//misc_detect_timeslice( original, gray_frame );
 	if (num_faces_present)
 	{	
+		extract_good_features();
+		
 /*		std::vector<int> predictedLabels;
 		if (model) {
 			message = face_recongition_tasks( gray_frame, faces, predictedLabels, capture_frame );
@@ -73,5 +126,9 @@ void process_frames()
 //		if (!MOVE_TO_MOUSE)
 //			neck_duty = 0;
 	}
+	
+//	cv::Mat edge_frame;	
+//	Canny( original, edge_frame, 30, 150 );
+//	imshow("edge", edge_frame);	
 
 }
