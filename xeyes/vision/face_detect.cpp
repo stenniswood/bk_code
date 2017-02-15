@@ -100,7 +100,7 @@ void fd_timeslice( cv::Mat& frame_gray, cv::Mat& original, bool mFindEyes )
 		printf("FaceDetect() Duration = %6.2f;  faces_present=%d\n", (float)(end-start)/1000000., num_faces_present );
 		//cv::flip(frame_gray, frame_gray, 1);
 		start = GetTimeStamp2();
-		printf("FaceRect: <%6.2f, %6.2f>\n", faces[0].height, faces[0].width );
+		printf("FaceRect: <%6.2f, %d>\n", faces[0].height, faces[0].width );
 		
 		faceROIc = original(faces[0]);
 		if (mFindEyes)

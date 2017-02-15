@@ -10,6 +10,8 @@
 #include "face_recog.hpp"
 #include "neck_thread.hpp"		// can we remove this?
 #include "vision_memory.h"
+#include "depth_plane_detect.hpp"
+
 
 using namespace cv;
 using namespace std;
@@ -29,7 +31,6 @@ void find_center( int& x, int &y, cv::Rect mrect)
 	y = mrect.y + (mrect.height/2);
 }
 
-	
 void filter_color( cv::Mat& mImage, Color mMin, Color mMax )
 {
 	cv::Mat lower_red_hue_range;
@@ -68,7 +69,7 @@ void extract_good_features()
 	Mat src = faceROIc;
 	Mat src_gray;
 	cvtColor( src, src_gray, CV_BGR2GRAY );
-	int maxCorners = 50;
+	int maxCorners = 10;
 
 	double qualityLevel = 0.01;
 	double minDistance  = 8;

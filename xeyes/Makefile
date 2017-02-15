@@ -1,3 +1,5 @@
+USE_KINECT = 1
+
 RPI = 1
 linux_desktop = 2
 Mac = 3
@@ -18,7 +20,7 @@ endif
 
 cc      = g++
 OPTIONS	= -std=c99 -g  
-CFLAGS  = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) \
+CFLAGS  = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) -DUSE_KINECT_SENSOR=$(USE_KINECT) \
 	     -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac)
 
 # ***** INCLUDE PATHS : 
@@ -38,10 +40,10 @@ LIBFLAGS= -L../core/libs/ilclient/ -L/usr/local/lib -L/opt/vc/lib -L../core/libs
 	      -lshapes -lwiringPi -lm $(SQL_LIB)
 OPENCV_LIBS = -lopencv_video -lopencv_videoio -lopencv_imgcodecs -lopencv_ts -lopencv_face \
 	-lopencv_objdetect -l opencv_ml -lopencv_calib3d -lopencv_imgproc -lopencv_highgui \
-	-lopencv_core
+	-lopencv_core -lopencv_plot
 
 # MAIN DIRECTORY OBJECTS:
-OBJ     = mouse.o x_eyes_main.o \
+OBJ     = mouse.o x_eyes_main.o plot.o \
 	      cal_screen.o key_config.o 
 NLP_OBJ = nlp_thread.o  nlp_vision_general_protocol.o nlp_vision_thing_protocol.o color_protocol.o \
 		  qualitative_time.o nlp_sentence.o tk_colors.o serverthread.o

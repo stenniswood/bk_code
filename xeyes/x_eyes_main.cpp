@@ -31,7 +31,7 @@
 #include "image_proc_misc.hpp"
 #include "vision_logger.hpp"
 #include "viki_logger.hpp"
-
+#include "plot.hpp"
   
 int   	  device_number;
 const int ScreenWidth  		 = 1280;
@@ -176,7 +176,6 @@ int main(int argc, char ** argv)
 		handle_arguments(argc,argv);		
 	}
 //	delete_all_shm();
-
 	//nlp_test();
 	//test_viki_logger();	
 	//test_face_summary();		
@@ -193,6 +192,7 @@ int main(int argc, char ** argv)
 		mouse_timeslice( );		
 		frame_grabs    ( );
 		process_frames ( );
+		plot(cv_depth);
 		
 		if (MOVE_TO_MOUSE) {
 			mover_x = trunc( mouse.x );		// Overwrite values assign in process_frames()
@@ -214,7 +214,7 @@ int main(int argc, char ** argv)
 			imwrite(fn, frame /* see face_detect.cpp */ );
 		}
       	imshow	( main_window_name, original );
-      	//imshow	( "gray", gray_frame );      	
+      	//imshow( "gray", gray_frame );      	
 
       	// USER CONTROL : 
 		int c = cv::waitKey( 10 );

@@ -9,10 +9,10 @@
 #include "face_detect.hpp"
 
 
-#define USE_KINECT_SENSOR 0
+//#define USE_KINECT_SENSOR 1
   
 cv::VideoCapture 	capture(-1);
-cv::Mat 			frame, gray_frame, prev_frame, prev_gray_frame, flow, original, cv_depth;
+cv::Mat 			frame, gray_frame, prev_frame, prev_gray_frame, flow, original, raw_depth, cv_depth;
 
 volatile int die = 0;
 uint8_t *depth_mid, *depth_front;
@@ -46,9 +46,18 @@ void depth_cb(freenect_device *dev, void *v_depth, uint32_t timestamp)
 
 	pthread_mutex_lock(&gl_backbuf_mutex);
 	for (i=0; i<640*480; i++) {
+//		cv_depth[i] = depth[i];
 		int pval = t_gamma[depth[i]];
 		int lb = pval & 0xff;
-		switch (pval>>8) {
+
+		raw_depth.data[i] = depth[i];
+		
+		lb = (depth[i] >> 3);
+		depth_mid[3*i+0] = 255-lb;
+		depth_mid[3*i+1] = 255-lb;
+		depth_mid[3*i+2] = 255-lb;
+
+/*		switch (pval>>8) {
 			case 0:
 				depth_mid[3*i+0] = 255;
 				depth_mid[3*i+1] = 255-lb;
@@ -84,13 +93,14 @@ void depth_cb(freenect_device *dev, void *v_depth, uint32_t timestamp)
 				depth_mid[3*i+1] = 0;
 				depth_mid[3*i+2] = 0;
 				break;
-		}
+		}*/
 	}
 	got_depth++;
 
 	// COPY DATA INTO OPENCV IMAGE:
-	memcpy( cv_depth.data, depth_mid, 640*480*3 );
-	cv::cvtColor( cv_depth, cv_depth, cv::COLOR_BGR2RGB);
+//	memcpy( cv_depth.data, depth, 640*480*2 );
+	memcpy( cv_depth.data, depth_mid, 640*480*3 );	
+	//cv::cvtColor( cv_depth, cv_depth, cv::COLOR_BGR2RGB);
 	
 	pthread_cond_signal(&gl_frame_cond);
 	pthread_mutex_unlock(&gl_backbuf_mutex);
@@ -109,7 +119,7 @@ void rgb_cb(freenect_device *dev, void *rgb, uint32_t timestamp)
 	got_rgb++;
 	
 	// COPY DATA INTO OPENCV IMAGE:
-	//memcpy( cv_depth.data, rgb, 640*480*3 );
+	//memcpy( cv_depth.data, rgb, 640*480*3 );	
 	memcpy( frame.data, rgb, 640*480*3 );	
 	cv::cvtColor( frame, frame, cv::COLOR_BGR2RGB);
 
@@ -182,6 +192,7 @@ void frame_grab_init(int mDeviceNumber )
 {
 	if (USE_KINECT_SENSOR) {
 		frame.create   ( 480, 640, CV_8UC3 );
+		raw_depth.create( 480, 640, CV_16UC1 );
 		cv_depth.create( 480, 640, CV_8UC3 );
 		freenect_init(mDeviceNumber);
 				
