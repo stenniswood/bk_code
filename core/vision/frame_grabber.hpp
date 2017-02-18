@@ -20,7 +20,7 @@
 */
 
 extern cv::VideoCapture  capture;
-extern cv::Mat frame, gray_frame, prev_frame, prev_gray_frame, flow, original, cv_depth;
+extern cv::Mat frame, gray_frame, prev_frame, prev_gray_frame, flow, original, raw_depth, cv_depth;
 
 void *freenect_threadfunc(void *arg);
 

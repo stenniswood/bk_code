@@ -12,9 +12,9 @@ extern int   mover_width;
 extern int   mover_height;
 extern bool  capture_frame;
 
-void find_center( int& x, int &y, cv::Rect mrect);
-void filter_color( cv::Mat& mImage, Color mMin, Color mMax );
-void process_frames();
+void find_center   ( int& x, int &y, cv::Rect mrect);
+void filter_color  ( cv::Mat& mImage, Color mMin, Color mMax );
+void process_frames( );
 
 
 #endif

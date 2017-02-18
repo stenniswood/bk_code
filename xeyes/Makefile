@@ -49,8 +49,10 @@ NLP_OBJ = nlp_thread.o  nlp_vision_general_protocol.o nlp_vision_thing_protocol.
 		  qualitative_time.o nlp_sentence.o tk_colors.o serverthread.o
 CONTROL_OBJS = serial.o serial_synchronous.o roboclaw.o x_eyes.o neck_thread.o
 VISION_OBJS  = findEyeCenter.o findEyeCorner.o face_detect.o face_recog.o face_summary.o \
-			   misc_detect.o  helpers.o
-CORE_VISION_OBJS = optical_flow.o image_proc_misc.o frame_grabber.o
+			   misc_detect.o  helpers.o 
+CORE_VISION_OBJS = optical_flow.o image_proc_misc.o frame_grabber.o neighborhood_tricks.o
+#				depth_plane_detect.o 
+
 DBASE_OBJS    = viki_logger.o vision_logger.o
 MISC_OBJS     = super_string.o
 IPC_OBJS      = vision_memory.o

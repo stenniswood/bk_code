@@ -14,6 +14,9 @@
 cv::VideoCapture 	capture(-1);
 cv::Mat 			frame, gray_frame, prev_frame, prev_gray_frame, flow, original, raw_depth, cv_depth;
 
+extern cv::Mat				planeLabels;	// defined in neighborhood_tricks.cpp
+
+
 volatile int die = 0;
 uint8_t *depth_mid, *depth_front;
 uint8_t *rgb_back, *rgb_mid, *rgb_front;
@@ -44,14 +47,14 @@ void depth_cb(freenect_device *dev, void *v_depth, uint32_t timestamp)
 	int i;
 	uint16_t *depth = (uint16_t*)v_depth;
 
+	uint16_t *rdepth = (uint16_t*)raw_depth.data;
+					
 	pthread_mutex_lock(&gl_backbuf_mutex);
 	for (i=0; i<640*480; i++) {
-//		cv_depth[i] = depth[i];
 		int pval = t_gamma[depth[i]];
 		int lb = pval & 0xff;
 
-		raw_depth.data[i] = depth[i];
-		
+		rdepth[i] = depth[i];
 		lb = (depth[i] >> 3);
 		depth_mid[3*i+0] = 255-lb;
 		depth_mid[3*i+1] = 255-lb;
@@ -168,9 +171,9 @@ void freenect_init(int mDeviceNumber )
 	}
 
 	freenect_set_tilt_degs		(f_dev, freenect_angle);
-	freenect_set_led			(f_dev, LED_RED);
+	freenect_set_led			(f_dev, LED_RED );
 	freenect_set_depth_callback (f_dev, depth_cb);
-	freenect_set_video_callback (f_dev, rgb_cb);
+	freenect_set_video_callback (f_dev, rgb_cb  );
 	freenect_set_video_mode		(f_dev, freenect_find_video_mode(FREENECT_RESOLUTION_MEDIUM, current_format));
 	freenect_set_depth_mode		(f_dev, freenect_find_depth_mode(FREENECT_RESOLUTION_MEDIUM, FREENECT_DEPTH_11BIT));
 	freenect_set_video_buffer	(f_dev, rgb_back);
@@ -180,6 +183,7 @@ void freenect_init(int mDeviceNumber )
 	freenect_start_video(f_dev);
 	printf("freenect_init() done \n");
 
+	
 /*	int res = pthread_create(&freenect_thread, NULL, freenect_threadfunc, NULL);
 	if (res) {
 		printf("pthread_create failed\n");
@@ -191,9 +195,11 @@ void freenect_init(int mDeviceNumber )
 void frame_grab_init(int mDeviceNumber )
 {
 	if (USE_KINECT_SENSOR) {
-		frame.create   ( 480, 640, CV_8UC3 );
-		raw_depth.create( 480, 640, CV_16UC1 );
-		cv_depth.create( 480, 640, CV_8UC3 );
+		frame.create       ( 480, 640, CV_8UC3 );
+		raw_depth.create   ( 480, 640, CV_16UC1);
+		cv_depth.create    ( 480, 640, CV_8UC3 );
+		planeLabels.create ( 480, 640, CV_8UC3 );
+
 		freenect_init(mDeviceNumber);
 				
 		cv::namedWindow("depth",CV_WINDOW_NORMAL);
@@ -236,10 +242,10 @@ void frame_grab_close()
 {
 	printf("\nshutting down streams...\n");
 	if (USE_KINECT_SENSOR) {
-		freenect_stop_depth(f_dev);
-		freenect_stop_video(f_dev);	
+		freenect_stop_depth  (f_dev);
+		freenect_stop_video  (f_dev);	
 		freenect_close_device(f_dev);
-		freenect_shutdown(f_ctx);
+		freenect_shutdown    (f_ctx);
 
 		free(depth_mid);
 		free(depth_front);
@@ -270,9 +276,9 @@ void *freenect_threadfunc(void *arg)
 		}
 
 		if (requested_format != current_format) {
-			freenect_stop_video(f_dev);
+			freenect_stop_video    (f_dev);
 			freenect_set_video_mode(f_dev, freenect_find_video_mode(FREENECT_RESOLUTION_MEDIUM, requested_format));
-			freenect_start_video(f_dev);
+			freenect_start_video   (f_dev);
 			current_format = requested_format;
 		}
 	}

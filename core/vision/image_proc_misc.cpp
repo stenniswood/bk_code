@@ -11,6 +11,8 @@
 #include "neck_thread.hpp"		// can we remove this?
 #include "vision_memory.h"
 #include "depth_plane_detect.hpp"
+#include "image_proc_misc.hpp"
+#include "neighborhood_tricks.hpp"
 
 
 using namespace cv;
@@ -102,6 +104,11 @@ void process_frames()
 		//imshow( "optical flow", frame );
 	}
 
+	// Plane Detection (ie wall & floor):
+	//scan_image_neighborhoods( raw_depth );
+	segment_planes( raw_depth, planeLabels );
+	
+	
 	fd_timeslice( gray_frame, original, true );
 	//misc_detect_timeslice( original, gray_frame );
 	if (num_faces_present)
