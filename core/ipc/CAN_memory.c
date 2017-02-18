@@ -314,7 +314,7 @@ void shm_add_can_tx_message( struct sCAN* mMsg )
 	//Dprintf("TxHead=%d\n", ipc_memory_can->TxHead );
 	copy_can_msg( &(ipc_memory_can->Transmit[ipc_memory_can->TxHead++]), mMsg );	
 }
-BOOL shm_isTxMessageAvailable( int* mTail, int* mTailLaps  )
+BOOL shm_isTxMessageAvailable( unsigned int* mTail, unsigned int* mTailLaps  )
 {
 	if ((ipc_memory_can==NULL) || (ipc_memory_can==(struct can_ipc_memory_map*)-1))
 		return FALSE;

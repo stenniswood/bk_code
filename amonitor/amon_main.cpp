@@ -31,8 +31,8 @@
 // Tail for this amon app.
 int RxTail_cmdline=0;
 int RxTail_cmdline_laps=0;
-int TxTail_cmdline=0;
-int TxTail_cmdline_laps=0;
+unsigned int TxTail_cmdline=0;
+unsigned int TxTail_cmdline_laps=0;
 
 int can_speed = CANSPEED_250;
 
