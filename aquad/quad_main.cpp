@@ -10,7 +10,7 @@
 #include <wiringPi.h>
 
 #include "pican_defines.h"
-#include "CAN_Interface.h"
+#include "CAN_Interface.hpp"
 #include "packer_lcd.h"
 #include "can_txbuff.h"
 #include "packer.h"
@@ -47,7 +47,7 @@ byte  value;
 // Wiring PI pin number (gpio pin 15)
 //#define CAN_INT_PIN 	3
 int  fd;
-BOOL ShowAccelerometerData 	= TRUE;
+/*BOOL ShowAccelerometerData 	= TRUE;
 BOOL ShowGyroData 			= TRUE;
 BOOL ShowMagnetData 		= TRUE;
 BOOL ShowCANData 			= TRUE;
@@ -63,21 +63,21 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 	{
 	case ID_ACCEL_XYZ : count_accel++;
 		if (ShowAccelerometerData && ShowCANData)	print_message(mMsg);
-		parse_accel_msg(mMsg, FALSE);		
+		parse_accel_msg(mMsg);		
 		process_accel(ShowAccelerometerData);
 		if (ShowAccelerometerData) printf("\n");
 		retval= TRUE;
 		break;
 	case ID_GYRO_XYZ : count_gyro++;
 		if (ShowGyroData && ShowCANData)		print_message(mMsg);		
-		parse_gyro_msg(mMsg, ShowGyroData);
+		parse_gyro_msg(mMsg);
 		process_gyro(ShowGyroData);
 		if (ShowGyroData) printf("\n");		
 		retval=TRUE;
 		break;
 	case ID_MAGNET_XYZ : 
 		if (ShowMagnetData && ShowCANData)		print_message(mMsg);		
-		parse_magnet_msg(mMsg, ShowMagnetData);
+		parse_magnet_msg(mMsg);
 		process_magnet(ShowMagnetData);
 		if (ShowMagnetData) printf("\n");		
 		retval= TRUE;
@@ -93,7 +93,7 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		count_gyro=0;
 	}
 	return retval;
-}
+}*/
 
 void timeslice_handler(int sig, siginfo_t *si, void *uc)
 {
@@ -146,7 +146,7 @@ void init()
 	  exit(1);
 	}
 	//set_system_rx_callback( callback_board_presence );
-	Init( CANSPEED_250, 0 );
+	CAN_init( CANSPEED_250, 0 );
 	
 	printf("Starting Timer \n");
 	// SETUP OS timer

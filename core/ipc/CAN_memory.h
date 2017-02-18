@@ -46,9 +46,9 @@ struct can_ipc_memory_map
 //void copy_can_msg( struct sCAN* mDest, struct sCAN* mSrc );
 
 // The SERVER calls these to setup the memory.  (ie. abkInstant or amon )
-BOOL is_CAN_IPC_memory_available();
-int  can_allocate_memory	();
-void can_deallocate_memory	();
+BOOL 	is_CAN_IPC_memory_available();
+int  	can_allocate_memory		();
+void 	can_deallocate_memory	();
 
 // CLIENT uses these to connect:
 int		can_connect_shared_memory(char mAllocate);
