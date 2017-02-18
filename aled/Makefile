@@ -20,7 +20,7 @@ CPPOBJ =
 #	gcc -shared -o libcan_eid.so ./core/can_eid.o 
 
 aled: $(OBJ) $(addprefix ../core/can/, $(CORE_OBJS)) $(addprefix ../core/misc/, $(MISC_OBJS)) $(addprefix ../core/msg/, $(MSG_OBJS)) 
-	gcc -o  $@ $^ $(CFLAGS)
+	$(cc) -o  $@ $^ $(CFLAGS)
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.png *.pdf *.bak 

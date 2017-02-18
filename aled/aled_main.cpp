@@ -8,7 +8,7 @@
 #include <wiringPi.h>
 #include "mcp2515.h"
 #include "pican_defines.h"
-#include "CAN_Interface.h"
+#include "CAN_Interface.hpp"
 #include "packer_lcd.h"
 #include "can_txbuff.h"
 #include "packer.h"
@@ -39,7 +39,7 @@ BOOL can_msg_callback( struct sCAN* mMsg )
 	}
 }
 
-void tx_register_dump(byte mBuffer)
+/*void tx_register_dump(byte mBuffer)
 {
 	byte bank = (mBuffer<<4);
 	read_register( TXB0CTRL+bank );
@@ -74,7 +74,7 @@ void register_dump()
 		read_register( CNF2 );
 		read_register( CNF3 );
 	}
-}
+}*/
 
 
 // Wiring PI pin number (gpio pin 15)
