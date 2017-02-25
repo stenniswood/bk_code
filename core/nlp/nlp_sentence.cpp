@@ -23,6 +23,7 @@
 
 Sentence::Sentence()
 {
+	m_eat_words		= false;
     m_raw_sentence  = NULL;
     m_sentence      = NULL;
     m_voice_response= false;
@@ -131,7 +132,8 @@ int Sentence::is_found_in_sentence( const char* mSearchWord, bool mOrItsPlural )
     int match_count = m_reduced_sentence.is_found_in_sentence( mSearchWord, 0, &remove_wi, mOrItsPlural );
     if (match_count>0) {
         set_word_pointer( remove_wi[0]);
-        reduce_sentence ( remove_wi );
+		if (m_eat_words)
+	        reduce_sentence ( remove_wi );
     }
     return match_count;
 }
@@ -165,7 +167,7 @@ int Sentence::are_found_in_sentence( SuperString& Tsearches, bool mOrItsPlural )
     if(match_count>0)
     {
         set_word_pointer( remove_wi[0] );
-        reduce_sentence(remove_wi);
+        if (m_eat_words)  reduce_sentence(remove_wi);
     }
     return match_count;
 }

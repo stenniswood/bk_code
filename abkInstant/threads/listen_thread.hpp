@@ -1,3 +1,4 @@
 
-void*  listen_thread(void* );
+void   close_listen_socket( int sig );
+void*  listen_thread	  ( void*   );
 

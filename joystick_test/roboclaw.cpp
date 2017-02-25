@@ -9,6 +9,7 @@
 #include "roboclaw.h"
 #include "global.h"
 
+
 #define MAXRETRY 2
 #define SetDWORDval(arg) (uint8_t)(((uint32_t)arg)>>24),(uint8_t)(((uint32_t)arg)>>16),(uint8_t)(((uint32_t)arg)>>8),(uint8_t)arg
 #define SetWORDval(arg)  (uint8_t)(((uint16_t)arg)>>8),(uint8_t)arg
@@ -108,6 +109,8 @@ uint16_t RoboClaw::crc_get()
 */
 bool RoboClaw::write_n(uint8_t cnt, ... )
 {
+	if (connected==false)	return false;
+	
 	//printf( "write_n() ");	fflush(stdout);
 	uint8_t trys=MAXRETRY;
 	do{
@@ -1001,6 +1004,31 @@ size_t RoboClaw::write2(uint8_t byte)
 {
 	Dprintf  ("%2x ", byte );
 	return 0;
+}
+
+bool RoboClaw::UpdateStatus			( )		// populate internal variables.
+{
+	bool valid;
+	m_status = ReadError(0x80, &valid );
+	return valid;
+}
+bool RoboClaw::UpdateCurrents		( )
+{
+	bool valid = ReadCurrents(0x80, m_current1, m_current2);
+	return valid;
+}
+bool RoboClaw::UpdateTemps			( )
+{
+	bool valid = ReadTemp(0x80, m_temperature1);
+	valid = ReadTemp2(0x80, m_temperature2);
+	return valid;	
+}
+
+bool RoboClaw::Update				( )
+{
+	UpdateStatus();
+	UpdateCurrents();
+	UpdateTemps();	
 }
 
 

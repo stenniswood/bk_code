@@ -12,11 +12,12 @@
 //#include "adrenaline_graphs.h"
 
 
-#define MENU_STATE_NORMAL 		1
+/*#define MENU_STATE_NORMAL 		1
 #define MENU_STATE_GRAYED 		2
 #define MENU_STATE_SELECTED 	3
 #define MENU_STATE_CIRCLED 		4
 #define MENU_STATE_EMPHASIZED 	5
+*/
 
 struct stValueInfo {
 	int	 instance;

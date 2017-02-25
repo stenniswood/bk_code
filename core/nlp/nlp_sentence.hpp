@@ -64,7 +64,8 @@ public:
     bool        m_question;
     bool        m_verbage_question;     // 
     bool        m_voice_response;
-
+	bool		m_eat_words;			// after a good match.
+	
     int*        m_tag;
     int         m_last_search_found_index;  // private var used for next word matches
     

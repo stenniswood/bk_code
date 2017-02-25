@@ -1,0 +1,22 @@
+How does the Instant server work?
+
+	Two Different ways of connecting to Instant:
+		a) Client app (uses cli shared memory)
+		b) TCP/IP client connect 
+
+
+instant_main starts a listening thread - this loops infinitely, waiting for any new connections
+	If one comes in :
+			for each client which connects, we generate a ServerHandler(), 
+			call it's accept() (the object holds the file descriptor of the socket)
+			start a connection thread (connection_handler()) and 
+			add it to a list of connections server_handlers()
+
+			see files:  threads/listen.cpp, core/nlp/serverthread.cpp
+			
+	The connection_handler() loops until the socket is closed from the other side 
+			(ie. read returns 0 eof)
+			It keeps checking for incoming messages and gives them to the NLP parser.
+			Responses are formulated and sent back.
+			
+			

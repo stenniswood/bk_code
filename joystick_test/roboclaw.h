@@ -215,6 +215,11 @@ public:
 	bool SetPWMMode				(uint8_t address, uint8_t mode);
 	bool GetPWMMode				(uint8_t address, uint8_t &mode);
 
+	bool UpdateStatus			( );		// populate internal variables.
+	bool UpdateCurrents			( );
+	bool UpdateTemps			( );
+	bool Update					( );
+	
 	static int16_t library_version() { return _SS_VERSION; }
 
 	void 			begin		( long speed);
@@ -228,6 +233,10 @@ public:
 	bool 			listen		( );
 	void 		 	clear		( );
 
+	uint16_t		m_status;
+	int16_t			m_current1,m_current2;
+	uint16_t		m_temperature1,m_temperature2;
+	
 private:
 
 	void 	 crc_clear	();

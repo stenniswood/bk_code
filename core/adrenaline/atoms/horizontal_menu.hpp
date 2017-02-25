@@ -40,6 +40,8 @@ public:
 	int				(*callback)(void*, int);		// called when the item is selected.
 	float			text_size;
 };
+
+
 class CascadeMenuEntry : public MenuEntry
 {
 public:

@@ -16,46 +16,61 @@
 
 SSerial::SSerial()
 {
-	connected = false;
-	_cl_port = NULL;
-	_cl_baud = B9600;
-	_cl_tx_bytes = 0;	
-	_cl_tx_detailed = 0;
-	memset(rx_buffer, 0, RX_BUFFER_SIZE);
-	memset(tx_buffer, 0, TX_BUFFER_SIZE);	
+	initialize();
 }
 
 SSerial::SSerial(const char* mDeviceName)
 {
-	connected = false;
-	_cl_port = NULL;
-	_cl_baud = B9600;
-	_cl_tx_bytes = 50;
-	_cl_tx_detailed = 0;
-	_cl_port = strdup( mDeviceName);
+	initialize();
+	_cl_port = strdup( mDeviceName );
+	open();
 }
+
 SSerial::~SSerial()
 {
+}
 
+void SSerial::initialize()
+{
+	fd = 0;
+	memset(rx_buffer, 0, RX_BUFFER_SIZE);
+	memset(tx_buffer, 0, TX_BUFFER_SIZE);	
+	
+	rx_bytes	=0;		 // rx data bytes in buffer
+	_cl_baud	= B9600;
+	_cl_tx_bytes=0;
+	connected	= false;
+	_cl_port 	= NULL;
+	
+	serial_poll.fd 		= 0;
+	serial_poll.revents = POLLIN;
+	serial_poll.events  = POLLIN;
+
+	memset(&time_stamp, 0, sizeof(struct tm) );
+	printf("SSerial::initialize() \n");	
 }
 
 void SSerial::open(const char* mDeviceName)
 {
 	if (mDeviceName)
 		_cl_port = strdup( mDeviceName );
-	fd = ::open( _cl_port, O_RDWR  ); 		// | O_NONBLOCK
+		
+	fd = ::open( _cl_port, O_RDWR | O_NONBLOCK  ); 		// | O_NONBLOCK
 	if (fd < 0)
 	{
-		fprintf (stderr, "Unable to open serial device: %s - %s\n", _cl_port, strerror (errno));
+		printf ("Unable to open serial device: %s - %s\n", _cl_port, strerror (errno));
+		//fprintf (stderr, "Unable to open serial device: %s - %s\n", _cl_port, strerror (errno));
     	return ;
 	}	
-	printf("SSerial::open() port=%s\n", _cl_port );
+
 	connected = true;
 	serial_poll.fd = fd;
-	serial_poll.events |= POLLIN;
+	serial_poll.events  |= POLLIN;
 	serial_poll.revents |= POLLIN;	
-	fsync(fd);
+	//fsync(fd);
+	printf("SSerial : opened port=%s\n", _cl_port );	
 }
+
 void SSerial::close()
 {
 	::close(fd);
@@ -73,27 +88,37 @@ int SSerial::available()
 
 char SSerial::serialGetchar()
 {
-	// if (!connected) return -1;
-	char buff[3];
-	const int LOOPS = 500000;
+	if (!connected) {
+		printf( "Getchar()  not connected\n");		//return -1;
+		return 0;
+	}
+	
+	//printf( "Getchar() "); fflush(stdout);
+	char      buff[3];
+	const int LOOPS = 30000;
 	int c;
 	long int count=0;
-	//printf("::serialGetchar() fd=%d\n", fd);
 	do {
 		c = ::read( fd, (void*)&buff, 1 );
 		count++;
-	} while ((c==0) || (c==-1) && (count<LOOPS));
-	if (count==LOOPS)
+	} while ((c==0) || ((c==-1) && (count<LOOPS)));
+
+	//printf( "c=%d; count=%d; ", c, count); 	fflush(stdout);
+	if (count>=LOOPS) {
 		buff[0] = -1;
+		printf("timeout!\n");
+		return 0;
+	}
 //	else
-//		printf(" %x_%c ", buff[0], buff[0]);	
+//		printf(" %x_%c ", buff[0], buff[0]);
 	return buff[0];
 }
+
 
 void SSerial::set_baud(int speed)
 {
 	_cl_baud = speed;
-	//printf("Baudrate = %d\n", speed);
+	printf("Baudrate = %d\n", speed);
 	struct termios options;
 	tcgetattr  ( fd, 	   		&options);
 	cfsetispeed( &options, 		speed );
@@ -101,42 +126,50 @@ void SSerial::set_baud(int speed)
 	tcsetattr  ( fd, TCSANOW, 	&options);
 }
 
-char	SSerial::read( )
+void SSerial::print_buffer(char* mBuffer, int mLength )
 {
-	return serialGetchar();
+	printf("print_buffer:\n");
+	for (int i=0; i<mLength; i++)
+	{
+		printf(" %2x ", mBuffer[i] );
+	}
+	printf("\n");
 }
 
+/* Not used for roboclaw - b/c it needs an ack after 1st byte. 
 size_t	SSerial::write(char* mBuffer, int mLength )
 {
-	printf("\nLen = %d: ", mLength );
 	if (!connected) return 0;
+	if (_cl_tx_bytes)
+		printf("Buffer already has data! overwriting...\n" );
+
+	print_buffer( mBuffer, mLength);
 	
 	memcpy(tx_buffer, mBuffer, mLength);
 	_cl_tx_bytes = mLength;
 
-	for (int i=0; i<mLength; i++)
-		printf(" %2x ", mBuffer[i] );
+//	for (int i=0; i<mLength; i++)
+//		printf(" %2x ", mBuffer[i] );
 		
-	return ::write(fd, tx_buffer, _cl_tx_bytes);
-}
+	size_t retval = ::write(fd, tx_buffer, _cl_tx_bytes);	// if this blocks, we are okay.
+	fsync(fd);
+	return retval;
+}*/
 
 size_t	SSerial::write( char mBuffer )
-{
-	//if (!connected) { return 0; }
-	
-	//printf(" %2x ", mBuffer);	fflush(stdout);
+{	
+	//printf(" %2x ", mBuffer );
+	// since all writes block, we are free to send immediately.	
 	size_t retval = ::write(fd, &mBuffer, 1);
 	fsync(fd);	
 	return retval;
 }
 
-
-void SSerial::flush()
+void SSerial::flush_inbuff()
 {
 	int retval=0;
 	while ( available() )
 		retval = ::read(fd, rx_buffer, RX_BUFFER_SIZE);
-	//if (connected) 	printf("flush() done.\n");
 }
 
 struct serial_struct ss;

@@ -30,10 +30,9 @@
 #include "self_identity.hpp"
 
 
-#define Debug 0
+#define Debug 1
 
 /***********************************************************************
-
  Suggested statements:
  
         I am viki.  [response to who are you, what's your name, etc.]
@@ -47,8 +46,6 @@
 
         I am able to vacume, sweep, paint, etc.
  ***********************************************************************/
-
-
 void Init_Self_Identity_Protocol()
 {
 }
@@ -66,27 +63,21 @@ void Init_Self_Identity_Protocol()
 int Parse_Self_Identity_Statement( Sentence& mSentence, ServerHandler* mh )
 {
     int retval=-1;
-    
-/*    int subject_count	= subject_list.evaluate_sentence( mSentence.m_sentence.c_str() );
-    int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence.c_str() );
-    int object_count    = object_list.evaluate_sentence ( mSentence.m_sentence.c_str() 	 );
-    int adjective_count = adjective_list.evaluate_sentence( mSentence.m_sentence.c_str() ); */
-    
+        
     if (Debug) printf("Parse_Self_Identity_Statement\n");
-    //diagram_sentence		( subject, verb, adjective, object, preposition );
     
     bool foundS = mSentence.is_found_in_sentence ( "who" );
     bool foundV = mSentence.is_found_in_sentence ( "are" );
     bool foundO = mSentence.is_found_in_sentence ( "you" );
     bool cond1  = (foundS && foundV && foundO);
 
-    foundS = mSentence.is_found_in_sentence( "name" );
+    foundS 		= mSentence.is_found_in_sentence( "name" );
     bool foundA = mSentence.is_found_in_sentence( "your" );
     bool cond2 = (foundS && foundA);
     
+    
     if ((cond1) || (cond2))
-    {        
-        //strcpy ( (char*)NLP_Response, "I am Vicki (Virtual Interactive Kinetic Intelligence. How may I assist you?");
+    {   
         mh->form_response( "I am Vicki (Virtual Interactive Kinetic Intelligence. How may I assist you?" );
         retval = 0;
     }
@@ -99,14 +90,16 @@ int Parse_Self_Identity_Statement( Sentence& mSentence, ServerHandler* mh )
         }
         retval=0;
     }
-    if ((mSentence.is_found_in_sentence("who") || mSentence.is_found_in_sentence("who's")) && (mSentence.is_found_in_sentence( "owner" ) || mSentence.are_found_in_sentence( "belong to" )))        
+    foundS = (mSentence.is_found_in_sentence("who") || mSentence.is_found_in_sentence("who's"));
+    foundV = (mSentence.is_found_in_sentence( "owner" ) || mSentence.are_found_in_sentence( "belong to" ));    
+    if (foundS && foundV)
     {
         mh->form_response( "I belong to the zootopia police department!" );
         retval=0;
     }
     if (mSentence.are_found_in_sentence("how are you") || mSentence.are_found_in_sentence( "how do you do" ))
     {        
-        mh->form_response( "Great all systems working!" );
+        mh->form_response( "Great - all systems working!" );
         
        /* form_response( "I am critically ill." );
         form_response( "I am okay, but..." );
@@ -119,8 +112,6 @@ int Parse_Self_Identity_Statement( Sentence& mSentence, ServerHandler* mh )
         
         retval = 0;
     }
-        
-
     
     foundS = mSentence.is_found_in_sentence( "what" );
     foundV = mSentence.is_found_in_sentence( "are" );
@@ -160,3 +151,9 @@ int Parse_Self_Identity_Statement( Sentence& mSentence, ServerHandler* mh )
     return retval;
 }
 
+
+/* Need to restore sentences after each is_found_in_sentence()!!! 
+	Because once found, they get "eaten" up so no one else can use them!!
+	SHould have a eat words mode!
+	Pick up here tomorrow Steve.
+*/

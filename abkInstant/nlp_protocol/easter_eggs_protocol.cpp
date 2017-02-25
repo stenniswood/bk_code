@@ -26,7 +26,7 @@ int  Parse_EasterEggs_Statement( Sentence& mSentence, ServerHandler* mh )
     bool cond1 = (foundS && foundA && foundO);
     if (cond1)
     {
-        mh->form_response( "The meaning of life is to calculate anything and everything that makes life easier for humans." );
+        mh->form_response( "The meaning of my life is to calculate anything and everything that makes life easier for humans." );
         retval = 0;
     }
     

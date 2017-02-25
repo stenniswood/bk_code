@@ -92,8 +92,8 @@ void Leg::Init()
 	m_board_knee.open			(  );
 	m_board_knee.set_baud		( BaudRate );
 	
-	m_board_hip.flush ();
-	m_board_knee.flush();
+	m_board_hip.flush_inbuff ();
+	m_board_knee.flush_inbuff();
 
 //	read_main_battery(m_board_hip, m_board_knee);
 //	read_version	 (m_board_hip, m_board_knee);

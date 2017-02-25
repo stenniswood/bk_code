@@ -99,9 +99,16 @@ static void get_ip_address()
  	// END OF DISPLAY IP ADDRESS
 }
 
+void close_listen_socket( int sig )
+{
+	close(listenfd);
+}
 
-/* Loop infinitely - 
-		each client which connects we generate a ServerHandler and start a connection thread.
+/* Loop infinitely - listening for a new connection.		
+		for each client which connects, we generate a ServerHandler(), 
+		call it's accept() 
+		start a connection thread and 
+		add it to a list of connections server_handlers()
 		
 */
 void*  listen_thread(void* )
@@ -115,7 +122,21 @@ void*  listen_thread(void* )
     serv_addr.sin_port 			= htons(BK_MEDIA_PORT);
     int result = bind  (listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     if (result<0)
-    	perror("listen_thread:  Bind failed: \n");
+    {
+    	perror("listen_thread:  Bind failed: ");
+    	close(listenfd);
+    	printf("retrying...\n");
+    	while (result<0) {
+			result = bind  (listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+			if (result<0) {
+				perror("listen_thread:  Bind failed: ");
+				close(listenfd);
+			}
+			usleep(1000000);
+    	}
+   		while(1) {};
+    	//exit();
+    }
     	
     listen(listenfd, 10);
 
@@ -169,6 +190,7 @@ void*  listen_thread(void* )
 				exit(EXIT_FAILURE);
 			}
 		}
+
 /*		else 
 			// ALTERNATELY:  Client memory requested we be the client, initiate connection : 
 			if (REQUEST_client_connect_to_robot)

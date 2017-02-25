@@ -67,7 +67,7 @@ ServerHandler::ServerHandler()
     bytes_available = 0;
     done            = false;
     ticks           = 0;
-    keep_open       = false;
+    keep_open       = true;
 }
 
 void ServerHandler::SendTelegram( unsigned char* mBuffer, int mSize)
@@ -139,6 +139,7 @@ void* connection_handler( void* mh )
          For streaming data, remember multiple 'telegrams' may come in a single read.
          */
         h->bytes_rxd = read( h->connfd, h->socket_buffer, h->bytes_available );
+        
         if (h->bytes_rxd == 0)
         {
             printf("Server thread Received Close (0 bytes) \n");
@@ -146,8 +147,8 @@ void* connection_handler( void* mh )
         }
         else if (h->bytes_rxd == -1)
         {
-            perror("NLP Server thread error: Received -1 bytes;");
-            exit1();
+            perror("NLP Server error: Received -1 bytes : ");
+            //exit1();
         }
         else 	// DATA ARRIVED, HANDLE:
         {
@@ -172,6 +173,7 @@ void* connection_handler( void* mh )
                 //		if used in Instant:  check sim memory, sequencer memory, xeyes memory, or avisual memory:
                 //		Plus (in house NLPs) such as :  self-identity, ordering, math, etc. etc.
                 //	General Protocol : 
+
 				next_telegram_ptr = Parse_Statement( (char*)next_telegram_ptr, h );
                 // next the problem of split packages - which will occur!
             }

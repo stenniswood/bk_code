@@ -32,7 +32,6 @@ public:
 
 	void 	flush_inbuff	();	
 
-
 	int    			fd;
 	struct 	pollfd 	serial_poll;
 	struct tm 		time_stamp;

@@ -10,6 +10,7 @@
 #include <vector>
 #include <pthread.h>
 #include <stdint.h>
+#include <signal.h>
 
 #if (PLATFORM==RPI)
 #include "bcm_host.h"
@@ -41,7 +42,7 @@
 
 
 // Right now this is user settable.  Need to detect:
-BOOL	PiCAN_Present=FALSE;
+BOOL		PiCAN_Present=FALSE;
 
 struct sCAN MMsg;
 byte 		count = 0;
@@ -245,7 +246,13 @@ void scan_client()
 		//cli_wait_for_ack_update();		// should be a timeout on this though
 	}	
 }
-		
+
+void close_all_sockets( int sig )
+{
+	printf("Program Terminating :  Closing sockets!\n");
+	close_listen_socket( sig );
+	exit(0);
+}
 
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
@@ -253,6 +260,8 @@ void scan_client()
 
 int main( int argc, char *argv[] )
 {
+	signal(SIGINT, close_all_sockets); 	// in Ctrl-C event.
+	
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg 
 	if (argc>1)

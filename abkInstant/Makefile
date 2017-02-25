@@ -82,7 +82,7 @@ NLP_CORE_OBJS = nlp_extraction.o nlp_sentence.o alias.o serverthread.o
 NLP_PROTOCOL_OBJS = adrenaline_creator.o color_protocol.o IMAGE_protocol.o parameter.o SEQUENCER_protocol.o \
  adrenaline_protocol.o easter_eggs_protocol.o jets_pizza.o positioner_2d.o specific_restaurants.o \
  AUDIO_interface.o family_relationships.o  positioner_3d.o sql_people.o \
- AUDIO_protocol.o FILE_protocol.o math_protocol.o qualitative_time.o system_configuration.o \
+ AUDIO_protocol.o FILE_protocol.o math_protocol2.o qualitative_time.o system_configuration.o \
  calendar_protocol.o GENERAL_protocol.o menu_items.o question_to_user.o ThreeD_object_protocol.o \
  CAMERA_protocol.o GPIO_protocol.o menus_orders.o \
  CAN_protocol.o hearts_game.o robot_arms_protocol.o \

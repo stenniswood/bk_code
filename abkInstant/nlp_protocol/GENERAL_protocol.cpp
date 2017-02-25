@@ -153,6 +153,13 @@ void append_response(const char* mTextToAdd)
     nlp_reply_formulated = TRUE;
 } */
 
+
+/* Auxiliary Apps could be anything like 
+		xeyes 	- for vision (ie. "track red ball", "following my finger", etc.)
+		home3D 	- for verbal object placement, creation, etc. (spatial temporal - "move scisors to living room")
+		avisual	- for system commands ("show gyro for last 5 minutes", open "Audio Editor", etc)
+		
+*/
 int pass_to_aux_apps( Sentence& theSentence, ServerHandler* mh )
 {
 	int result=0;
@@ -279,7 +286,7 @@ const char* Parse_Statement(const char* mSentence, ServerHandler* mh )
     //result = Parse_adrenaline_statement( theSentence, mh );
     //if (result>=0)          return (end_of_telegram + result);
     
-    pass_to_aux_apps( theSentence, mh );
+ //   pass_to_aux_apps( theSentence, mh );
 
 /*  result = Parse_IMAGE_Statement   ( mSentence );
 	if (result>=0)	

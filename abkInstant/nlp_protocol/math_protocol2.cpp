@@ -46,21 +46,12 @@
  */
 
 /***********************************************************************
- All Incoming Video will also be saved to the hard-drive on those
- systems with enough capacity.  This allows the user to call back anything
- in its memory banks.  Think star trek logs.  "There were two people outside
- your side door yesterday...    Can you replay it?
- What was the topic of it?  How long was it?  A smart robot could even
- use the info to answer questions.  On Sept 20th, you said you wanted to
- ignore all upgrade notices.
  ***********************************************************************/
-
 string interrogative_expression = "(what is|how much is)";
 string Plus_expression      = "(\\d+ )(plus|added to|add) (\\d+)";
 string Minus_expression     = "(\\d+ )(minus|subtract|subtracted from) (\\d+)";
 string Multiply_expression  = "(\\d+ )(times|multiply|multiplied by) (\\d+)";
-string Divide_expression    = "(\\d+ )(divided by|divide|over) (\\d+)";          // "quotient of (\\d+) over (\\d+)";
-
+string Divide_expression    = "(\\d+) (divided by|divide|over) (\\d+)";          // "quotient of (\\d+) over (\\d+)";
 
 /* equal, what is, what does, how much */
 //Word mult("times, multiplied by, multiply" );   // this should work
@@ -78,6 +69,7 @@ void get_numbers( std::smatch matches, float& first_number, float& second_number
     tmp = matches[3];
     second_number = atoi( tmp.c_str() );
 }
+
 // The sentence may contain several operations.
 // mFoundWord will be gauranteed to be part of the sentence (b/c it was from evaluate_sentence() )
 int Parse_One_Statement( Sentence& mSentence, float& first_number, float& second_number, float& final_answer )
@@ -104,14 +96,16 @@ int Parse_One_Statement( Sentence& mSentence, float& first_number, float& second
         final_answer = first_number * second_number;
     }
     result = mSentence.regex_find( Divide_expression );
+    printf("Divide result=%d\n", result);
     if (result) {
         get_numbers( mSentence.m_sentence.regex_matches, first_number, second_number );
+        printf(" Divide: %6.2f / %6.2f \n", first_number, second_number);
         if (second_number!=0.0)
             final_answer = first_number / second_number;
         else
             final_answer = FLT_MAX;
     }
-    return final_answer;
+    return result;
 }
 
 string speed_exp = "(miles per hour|kilometers per hour|meters per second|feet per second)";
@@ -180,7 +174,7 @@ int Parse_Math_Statement( Sentence& mSentence, ServerHandler* mh )
 {
     int retval=-1;
     mSentence.restore_reduced();
-    printf("Parse_Math_Statement\n");
+    //printf("Parse_Math_Statement\n");
     
     int operation_count=0;
     float first_number, second_number, final_answer;
