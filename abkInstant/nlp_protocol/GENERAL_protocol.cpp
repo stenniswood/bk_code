@@ -238,8 +238,8 @@ const char* Parse_Statement(const char* mSentence, ServerHandler* mh )
     result = Parse_Calendar_Statement( theSentence, mh );
     if (result>=0)          return (end_of_telegram + result);
 
-    result = Parse_Math_Statement  ( theSentence, mh );
-	if (result>=0)          return (end_of_telegram + result);
+//    result = Parse_Math_Statement  ( theSentence, mh );
+//	if (result>=0)          return (end_of_telegram + result);
 
     result = Parse_Self_Identity_Statement( theSentence, mh );
     if (result>=0)          return (end_of_telegram + result);

@@ -17,6 +17,7 @@
 #include "specific_restaurants.hpp"
 #include "simulator_memory.h"
 
+#include "machine_defs.h"
 
 string integer_e   = "(\d+ )";
 string real_e      = "([-+]?[0-9]*\\.?[0-9]+ )";
@@ -38,7 +39,10 @@ static void object_finish_with_error( )
     mysql_close( menus_db );
     exit(1);
 }
-
+void close_menu_items_db()
+{
+	mysql_close( menus_db );
+}
 void connect_menus_db()
 {
     menus_db = mysql_init(NULL);
@@ -49,8 +53,8 @@ void connect_menus_db()
         return;  // exit(1);
     }
     
-    if (mysql_real_connect(menus_db, "localhost", "root", "password",
-                           "bk_advertisements", 0, NULL, 0) == NULL)
+    if (mysql_real_connect(menus_db, "localhost", sql_username, sql_password,
+                           sql_user_dbase_name, 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(menus_db));
         printf("Cannot connect to database bk_advertisements !\n" );

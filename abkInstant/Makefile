@@ -2,18 +2,21 @@ RPI = 1
 linux_desktop = 2
 Mac = 3
 
-PLATFORM  = $(RPI)
-#PLATFORM = $(linux_desktop)
+#PLATFORM  = $(RPI)
+PLATFORM = $(linux_desktop)
 #PLATFORM  = $(Mac)
 
 ifeq ($(PLATFORM), $(RPI))
 HARDWARE_PATH = ./hardware/rpi/
+SELF_PATH = /home/pi/bk_code/abkInstant
 endif
 ifeq ($(PLATFORM), $(linux_desktop))
 HARDWARE_PATH = ./hardware/linux_desktop/
+SELF_PATH = /home/stenniswood/bk_code/abkInstant
 endif
 ifeq ($(PLATFORM), $(Mac))
 HARDWARE_PATH = ./hardware/mac/
+SELF_PATH = /users/stephentenniswood/code/bk_code/abkInstant
 endif
 
 CC		   = g++
@@ -25,8 +28,8 @@ INC_CORE   = ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc
 LOCAL_INC  =  ./threads/ ./nlp_protocol/ ./nlp_adrenaline/ ./voice/ ./util/ ./nlp_core/ $(HARDWARE_PATH) \
 SYSTEM_INC =  /home/pi/raspicam/interface \
 			 /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/
-SELF_INC   = /home/pi/bk_code/abkInstant/
-MYSQL_INC    = /usr/include/mysql /usr/include/
+SELF_INC   = $(SELF_PATH)
+MYSQL_INC    = /usr/include/mysql /usr/include/ $(SELF_PATH)/mysql/
 INC 	   = $(INC_CORE) $(LOCAL_INC) $(SYSTEM_INC) $(SELF_INC) $(MYSQL_INC)
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 		     -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
@@ -51,12 +54,12 @@ KINETIC_OBJS = vector.o
 CAN_OBJS   =  can_eid.o bk_system_defs.o can_id_list.o
 MSG_OBJS   =  packer_lcd.o packer_motor.o packer.o
 #parser_tilt.o
-MISC_OBJS  =  vector_math.o ini_file.o super_string.o string_util.o
+MISC_OBJS  =  vector_math.o ini_file.o string_util.o
 FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
-APP_CPP_OBJS	= instant_main.o 
+APP_CPP_OBJS	= instant_main.o machine_defs.o
 IPC_OBJS    	= picamscan_memory.o sway_memory.o vision_memory.o visual_memory.o audio_memory.o \
 		  		  CAN_memory.o client_memory.o simulator_memory.o sequencer_memory.o
-THREAD_OBJS 	= video_thread.o can_thread.o file_thread.o listen_thread.o \
+THREAD_OBJS 	= video_thread.o can_thread.o file_thread.o listen_thread.o serverthread.o \
 				  file_tx_thread.o hmi_thread.o thread_control.o
 HARDWARE_OBJS = GPIO_device.o AUDIO_device.o IMAGE_device.o CAMERA_device.o
 ILCLIENT_OBJS = ilclient.o ilcore.o
@@ -68,7 +71,8 @@ CALENDAR_OBJS = calendar_entry.o
 # APP CODE calendar.o calendar_summary.o 
 UTIL_OBJS = tk_colors.o client_to_socket.o AUDIO_file_util.o CAMERA_util.o CAN_util.o IMAGE_file_util.o VIDEO_file_util.o
 
-NLP_CORE_OBJS = nlp_extraction.o nlp_sentence.o alias.o serverthread.o
+MYSQL_OBJS = sql_users.o
+NLP_CORE_OBJS = super_string.o nlp_extraction.o nlp_sentence.o alias.o 
 #prefilter.o 
 #ordering_protocol.o CAN_util.o IMAGE_file_util.o 
 #othello_ai_player.o
@@ -118,6 +122,7 @@ endif
 instant: $(APP_CPP_OBJS) 						\
 		$(addprefix ../core/nlp/, 	$(NLP_CORE_OBJS)) 	\
 		$(addprefix ./threads/, 	$(THREAD_OBJS)) 	\
+		$(addprefix ./mysql/, 		$(MYSQL_OBJS)) 		\
 		$(addprefix ../core/adrenaline/molecules/calendar/, $(CALENDAR_OBJS)) 	\
 		$(addprefix ./nlp_protocol/, $(NLP_PROTOCOL_OBJS)) 	\
 		$(addprefix ./util/, 		$(UTIL_OBJS)) 		\

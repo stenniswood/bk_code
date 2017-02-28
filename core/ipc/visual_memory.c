@@ -30,12 +30,32 @@ AUTHOR	:  Stephen Tenniswood
 #include "bk_system_defs.h"
 #include "interrupt.h"
 #include "visual_memory.h"
+#include "machine_defs.h"
+#include <dirent.h>
+
 
 #define Debug 0
 
 char* 	visual_shared_memory;
 int 	visual_segment_id;
 struct  avisual_ipc_memory_map* ipc_memory_avis=NULL;
+
+void ensure_shm_ids_directory()
+{
+	char path[200];
+	strcpy(path, shared_mem_ids_base_path );
+	
+	DIR* dir = opendir(path);
+	if (dir) {
+		printf("Making already exists: %s\n", path);
+		closedir(dir);		
+	} else if (ENOENT == errno) {
+		printf("Making directory: %s\n", path);
+		int retval = mkdir (path, S_IRWXU );
+		if (retval==-1)
+			perror("Cannot create folder for shared memory!\n");
+	}
+}
 
 void dump_ipc()
 {

@@ -155,6 +155,8 @@ public:
 
 
 void    connect_menus_db        ();
+void	close_menu_items_db		();
+
 string  find_known_restaurants  ();
 
 

@@ -62,13 +62,23 @@ static void get_ip_address()
     struct ifaddrs * ifAddrStruct=NULL;
     struct ifaddrs * ifa=NULL;
     void * tmpAddrPtr=NULL;
-    getifaddrs(&ifAddrStruct);
+    int result = getifaddrs(&ifAddrStruct);
+    if (result==-1) {
+    	perror("getifaddrs");
+        exit(EXIT_FAILURE);
+	}
+    //printf("***** LISTEN THREAD:  get_ip_address()=%d\n", result);
     
 	// Go thru each (device/connection) IP address (ie. wifi, ethernet - en0, en1, etc.)
     for (ifa = ifAddrStruct; ifa != NULL;  ifa=ifa->ifa_next)
     {
+	    if (ifa->ifa_addr == NULL)
+        {	printf("empty\n");
+            continue;
+		}	    
         if (ifa->ifa_addr->sa_family==AF_INET) 	// check it is IP4
         {
+        	printf("***** IP4\t");
             // is a valid IP4 Address
             tmpAddrPtr = &((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
             char addressBuffer[INET_ADDRSTRLEN];
@@ -86,20 +96,21 @@ static void get_ip_address()
             	// strcpy ( broadcast_addr, addressBuffer );            	
             }
         } else if (ifa->ifa_addr->sa_family==AF_INET6) 	// check it is IP6
-        { 
+        {         	
             // is a valid IP6 Address
             tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
             char addressBuffer[INET6_ADDRSTRLEN];
             inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
             printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer); 	
         } 
+        //else printf("unkown IP Address type \n"); 	
     }
     if (ifAddrStruct!=NULL) 
     	freeifaddrs(ifAddrStruct);
  	// END OF DISPLAY IP ADDRESS
 }
 
-void close_listen_socket( int sig )
+void close_listen_socket( )
 {
 	close(listenfd);
 }
@@ -113,9 +124,12 @@ void close_listen_socket( int sig )
 */
 void*  listen_thread(void* )
 {
+	printf("***** LISTEN THREAD:  listen_thread\n");
 	get_ip_address( );		// Get "ip_addr" of this machine.
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
+	printf("***** LISTEN THREAD:  listenfd=%d\n", listenfd );
+	
     memset(&serv_addr, '0', sizeof(serv_addr));
     serv_addr.sin_family 		= AF_INET;
     serv_addr.sin_addr.s_addr 	= htonl(INADDR_ANY);
@@ -186,8 +200,9 @@ void*  listen_thread(void* )
 			if (iret1)
 			{
 				fprintf(stderr,"Error - pthread_create() return code: %d\n", iret1 );
+				printf("Error - pthread_create() return code: %d\n", iret1 );
 				delete sh;
-				exit(EXIT_FAILURE);
+				//exit(EXIT_FAILURE);
 			}
 		}
 

@@ -12,29 +12,37 @@
 #include <stdint.h>
 #include <signal.h>
 
+#include "ordering_protocol.hpp"	// this has to go before something which redefines max()
+
+
 #if (PLATFORM==RPI)
 #include "bcm_host.h"
 #include "ilclient.h"
+#include "pican_defines.h"
 #endif
 
+#include "udp_transponder.hpp"
 #include "listen_thread.hpp"
-#include "pican_defines.h"
+#include "serverthread.hpp"
+
 #include "CAN_Interface.hpp"
 #include "can_id_list.h"
 #include "cmd_process.h"
-#include "serverthread.hpp"
+
+/*** IPC Includes ***/
 #include "visual_memory.h"
 #include "sway_memory.h"
 #include "audio_memory.h"
 #include "picamscan_memory.h"
 #include "client_memory.hpp"
 #include "simulator_memory.h"
-
 #include "CAN_memory.h"
-#include "udp_transponder.hpp"
+/*** END IPC Includes ***/
+
 #include "GENERAL_protocol.hpp"
 #include "client_to_socket.hpp"
 #include "tone_generator.h"
+#include "sql_users.hpp"
 
 #define  uint32_t long int
 
@@ -247,11 +255,32 @@ void scan_client()
 	}	
 }
 
-void close_all_sockets( int sig )
+#include "global.h"
+
+//#include "calendar_entry.hpp"
+//#include "menu_items.hpp"
+
+void close_all_dbases()
 {
-	printf("Program Terminating :  Closing sockets!\n");
-	close_listen_socket( sig );
-	exit(0);
+	printf("\tClosing mysql connections!\n");
+	sql_users.close_connection();	
+//	close_menus_db();
+//	close_menu_items_db();
+//	close_calendar_db();
+	
+}
+void close_all_sockets( )
+{
+	printf("\tClosing sockets!\n");
+	close_listen_socket( );
+
+}
+void shutdown( int sig )
+{
+	printf("Program Terminating :\n");
+	close_all_sockets();
+	close_all_dbases();
+	exit(0);	
 }
 
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
@@ -260,7 +289,7 @@ void close_all_sockets( int sig )
 
 int main( int argc, char *argv[] )
 {
-	signal(SIGINT, close_all_sockets); 	// in Ctrl-C event.
+	signal(SIGINT, shutdown); 	// in Ctrl-C event.
 	
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg 

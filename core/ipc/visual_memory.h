@@ -30,6 +30,7 @@ struct avisual_ipc_memory_map
 /******************** AVISUAL MEMORY MAP *****************/
 /*********************************************************/
 
+void ensure_shm_ids_directory();
 void dump_ipc				();
 void vis_save_segment_id	(char* mFilename);
 int  read_segment_id		(char* mFilename);

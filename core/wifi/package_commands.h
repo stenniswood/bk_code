@@ -3,8 +3,8 @@
 extern "C" {
 #endif
 
-#define BYTE unsigned char
-#define WORD unsigned short
+//#define BYTE unsigned char
+//#define WORD unsigned short
 #define boolean BYTE
 
 

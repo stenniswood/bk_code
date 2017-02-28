@@ -44,6 +44,8 @@ SQL_Friends::~SQL_Friends()
 {
     
 }
+#include "machine_defs.h"
+
 void SQL_Friends::connect_to_friends_db()
 {
     friends_db = mysql_init(NULL);
@@ -52,8 +54,9 @@ void SQL_Friends::connect_to_friends_db()
         fprintf(stderr, "init %s\n", mysql_error(friends_db));
         exit(1);
     }
-    if (mysql_real_connect(friends_db, "localhost", "root", "password",
-                           "robot_local", 0, NULL, 0) == NULL)
+    if (mysql_real_connect(friends_db, "localhost", sql_username, sql_password,
+                           sql_user_dbase_name, 0, NULL, 0) == NULL)
+                           // was robot_local
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(friends_db));
         mysql_close(friends_db);

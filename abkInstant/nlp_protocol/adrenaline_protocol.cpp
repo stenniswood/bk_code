@@ -27,6 +27,7 @@ static string              query_string;
 static MYSQL_RES*          result;
 //static MYSQL_ROW           row;
 
+#include "machine_defs.h"
 
 void connect_creator_db()
 {
@@ -37,8 +38,9 @@ void connect_creator_db()
         exit(1);
     }
     
-    if (mysql_real_connect(creator_db, "localhost", "root", "password",
-                           "robot_local", 0, NULL, 0) == NULL)
+    if (mysql_real_connect(creator_db, "localhost", sql_username, sql_password,
+                           sql_user_dbase_name, 0, NULL, 0) == NULL)
+                           // was robot_local
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(creator_db));
         mysql_close(creator_db);

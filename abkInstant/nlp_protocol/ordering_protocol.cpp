@@ -22,6 +22,7 @@ static string          known_restaurants;
 static int  has_verbal_focus = 0;                 // Verbal focus - ie next statements are likely to be handled here until the order is comlete.
 RestaurantOrder  my_order;
 
+#include "machine_defs.h"
 
 void object_finish_with_error( )
 {
@@ -38,13 +39,17 @@ void connect_menus_db()
         exit(1);
     }
     
-    if (mysql_real_connect(menus_db, "localhost", "root", "password",
-                           "bk_advertisements", 0, NULL, 0) == NULL)
+    if (mysql_real_connect(menus_db, "localhost", sql_username, sql_password,
+                           sql_user_dbase_name, 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(menus_db));
         mysql_close(menus_db);
         exit(1);
     }
+}
+void    close_menus_db          ()
+{
+	mysql_close( menus_db );
 }
 int query( bool mRetrieving )
 {

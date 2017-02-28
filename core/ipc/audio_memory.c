@@ -207,8 +207,13 @@ void audio_save_segment_id(char* mFilename)
 	fclose( fd );
 }
 
+#include "visual_memory.h"
+
 int audio_read_segment_id(char* mFilename)
 {
+	// SJT relocate:
+	//ensure_shm_ids_directory();
+	
 	char tline[40];
 	FILE* fd = fopen( mFilename, "r" );
 	if (fd==NULL)  {
@@ -224,14 +229,9 @@ int audio_read_segment_id(char* mFilename)
 	return tmp_audio_segment_id;
 }
 
+#include "machine_defs.h"
 
-#if (PLATFORM==Mac)
-static char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/shm_ids/audio_shared_memseg_id.cfg";
-#elif (PLATFORM==RPI)
-static char segment_id_filename[] = "/home/pi/bk_code/shm_ids/audio_shared_memseg_id.cfg";
-#elif (PLATFORM==linux_desktop)
-static char segment_id_filename[] = "/home/steve/bk_code/shm_ids/audio_shared_memseg_id.cfg";
-#endif
+static char segment_id_filename[200];
 
 
 BOOL is_audio_ipc_memory_available()
@@ -239,6 +239,9 @@ BOOL is_audio_ipc_memory_available()
 	struct shmid_ds buf;			// shm data descriptor.
 
 	Dprintf("Check audio IPC memory... ");
+	strcpy(segment_id_filename, shared_mem_ids_base_path );
+	strcat(segment_id_filename, "audio_shared_memseg_id.cfg" );
+
 	// First see if the memory is already allocated:
 	audio_segment_id = audio_read_segment_id( segment_id_filename );
 	Dprintf("id=%x; fn=%s\n", audio_segment_id, segment_id_filename );
@@ -283,3 +286,10 @@ int audio_connect_shared_memory(char mAllocate)
 
 /* See udp_transponder for update_client_list()		*/
 
+/*#if (PLATFORM==Mac)
+static char segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/shm_ids/audio_shared_memseg_id.cfg";
+#elif (PLATFORM==RPI)
+static char segment_id_filename[] = "/home/pi/bk_code/shm_ids/audio_shared_memseg_id.cfg";
+#elif (PLATFORM==linux_desktop)
+static char segment_id_filename[] = "/home/steve/bk_code/shm_ids/audio_shared_memseg_id.cfg";
+#endif */

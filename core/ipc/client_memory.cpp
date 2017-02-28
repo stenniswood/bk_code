@@ -81,14 +81,14 @@ int cli_read_segment_id(char* mFilename)
 	char tline[40];
 	FILE* fd = fopen( mFilename, "r" );
 	if (fd==NULL)  {
-		Dprintf("CLI_read_segment_id - ERROR: %s \n", strerror(errno) );	
+		printf("CLI_read_segment_id - ERROR: %s \n", strerror(errno) );	
 		return -1;
 	}
 	size_t result = fread( tline, 1, 20, fd);		//	fscanf( fd, "%d", &can_segment_id );
 	tline[result] = 0;
 	client_segment_id = atoi( tline );
 	fclose( fd );
-	Dprintf("cli_segment_id= %d \n", client_segment_id );	
+	printf("cli_segment_id= %d \n", client_segment_id );	
 	return client_segment_id;
 }
 
@@ -230,24 +230,13 @@ void cli_ipc_write_connection_status( char* mStatus )
 /* See udp_transponder for update_client_list()		*/
 
 
-#if (PLATFORM==Mac)
-char cli_segment_id_filename[] = "/Users/stephentenniswood/code/Mac/bk_code/shm_ids/cli_shared_memseg_id.cfg";
-#elif (PLATFORM==RPI)
-char cli_segment_id_filename[] = "/home/pi/bk_code/shm_ids/cli_shared_memseg_id.cfg";
-#elif (PLATFORM==linux_desktop)
-char cli_segment_id_filename[] = "/home/steve/bk_code/shm_ids/cli_shared_memseg_id.cfg";
-#endif
+#include "machine_defs.h"
+char cli_segment_id_filename[200];
 
 
 bool is_client_ipc_memory_available()
 {
 	struct shmid_ds buf;			// shm data descriptor.
-
-	if (Debug) printf("Checking for client IPC memory... ");
-	if (Debug) printf( "reading segment id: %s\n", cli_segment_id_filename );
-	
-	// First see if the memory is already allocated:
-	client_segment_id = cli_read_segment_id( cli_segment_id_filename );
 	int retval = shmctl(client_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
 		Dprintf("Error: %s\n", strerror(errno) );
@@ -272,23 +261,33 @@ Return :
 */
 int connect_shared_client_memory( char mAllocate )
 {
+	// First see if the memory is already allocated:
+	strcpy(cli_segment_id_filename, shared_mem_ids_base_path );
+	strcat(cli_segment_id_filename, "cli_shared_memseg_id.cfg" );
+	if (Debug) printf("Checking for client IPC memory... ");
+	if (Debug) printf("reading segment id: %s\n", cli_segment_id_filename );	
+	client_segment_id = cli_read_segment_id( cli_segment_id_filename );
+
 	bool available = is_client_ipc_memory_available();
- 
-	if ((!available) && (mAllocate))
+ 	printf("connect_shared_client_memory: available = %d\n", available);
+ 	
+	if (!available)
 	{
-		int result = cli_allocate_memory( );
-		if (result == -1)	{
-			Dprintf("Cannot allocate shared memory!\n");
-		}
-		cli_attach_memory( );
-		cli_fill_memory  ( );				
+		if (mAllocate) {
+			int result = cli_allocate_memory( );
+			if (result == -1)	{
+				Dprintf("Cannot allocate shared memory!\n");
+			}
+			cli_attach_memory( );
+			cli_fill_memory  ( );				
 		
-		Dprintf("Saving segment id: ");
-		cli_save_segment_id( cli_segment_id_filename );		
-		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
-			return 1;
+			Dprintf("Saving segment id: ");
+			cli_save_segment_id( cli_segment_id_filename );		
+			if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
+				return 1;
+		}
 	}
-	 else  
+	else  
 	{
 		cli_attach_memory();	
 		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
@@ -333,12 +332,14 @@ void cli_ack_connection_status()
 
 bool cli_is_new_update()
 {
-	if (ipc_memory_client)
+	if (ipc_memory_client) {
+		//printf("ipc_memory_client=%p\n", ipc_memory_client);
 		if (ipc_memory_client->UpdateCounter > ipc_memory_client->AcknowledgedCounter)
 		{
 			//Dprintf("Update/Ack Counters = %ld/%ld\n", ipc_memory_client->UpdateCounter, ipc_memory_client->AcknowledgedCounter);
 			return true;
 		}
+	}
 	return false;
 }
 void cli_ack_update_status()
@@ -499,3 +500,10 @@ void cli_ack_new_client()
 	
 	ipc_memory_client->UpdateCounter++;	
 }*/
+/*#if (PLATFORM==Mac)
+char cli_segment_id_filename[] = "/Users/stephentenniswood/code/Mac/bk_code/shm_ids/cli_shared_memseg_id.cfg";
+#elif (PLATFORM==RPI)
+char cli_segment_id_filename[] = "/home/pi/bk_code/shm_ids/cli_shared_memseg_id.cfg";
+#elif (PLATFORM==linux_desktop)
+char cli_segment_id_filename[] = "/home/steve/bk_code/shm_ids/cli_shared_memseg_id.cfg";
+#endif*/

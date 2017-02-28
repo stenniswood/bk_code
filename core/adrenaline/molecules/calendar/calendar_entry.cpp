@@ -15,6 +15,7 @@
 #include "calendar_entry.hpp"
 #include "global_funcs.h"
 
+#include "machine_defs.h"
 
 //extern MYSQL *calendar_db;
 MYSQL 		 *calendar_db = NULL;
@@ -38,6 +39,11 @@ CalendarEntry::~CalendarEntry()
 	
 }
 
+
+void close_calendar_db()
+{
+	mysql_close( calendar_db );
+}
 void CalendarEntry::connect_to_calendar_db()
 {
     calendar_db = mysql_init(NULL);
@@ -47,8 +53,8 @@ void CalendarEntry::connect_to_calendar_db()
         exit(1);
     }
     
-    if (mysql_real_connect(calendar_db, "localhost", "root", "password",
-                           "bk_useraccounts", 0, NULL, 0) == NULL)
+    if (mysql_real_connect(calendar_db, "localhost", sql_username, sql_password,
+                           sql_user_dbase_name, 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(calendar_db));
         mysql_close(calendar_db);

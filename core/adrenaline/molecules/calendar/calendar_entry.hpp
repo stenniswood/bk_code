@@ -64,5 +64,6 @@ public:
 	string			query_string;
 };
 
+void close_calendar_db();
  
 #endif

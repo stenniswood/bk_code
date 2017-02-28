@@ -104,6 +104,7 @@ public:
 
 
 void    connect_menus_db        ();
+void    close_menus_db          ();
 //string  find_known_restaurants  ();
 //void    retrieve_menu           ( Restaurant& mRest, char* mRestaurant);
 

@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+
+#if (PLATFORM==linux_desktop)
+#include <string.h>
+#endif
+
 #include "bk_system_defs.h"
 #include "protocol.h"
 //#include "devices.h"
