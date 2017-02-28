@@ -39,7 +39,7 @@ static void object_finish_with_error( )
 /*********************************************************************************/
 SQL_Users::SQL_Users()
 {
-    
+    connect_to_users_db();
 }
 SQL_Users::~SQL_Users()
 {

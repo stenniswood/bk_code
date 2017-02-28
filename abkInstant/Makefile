@@ -148,14 +148,16 @@ clean:
 	rm -rf ../core/misc/*.o
 	rm -rf ../core/fusion/*.o
 	rm -rf ./adrenaline/*.o 
+	rm -rf ./adrenaline/molecules/calendar/*.o 	
 	rm -rf ./adrenaline/*/*.o 
 	rm -rf ./adrenaline/*/*/*.o 	
 	rm -rf ./hardware/*/*.o 	
-	rm -rf ./threads/*.o 			
-	rm -rf ./nlp_protocol/*.o 				
+	rm -rf ./threads/*.o
+	rm -rf ./nlp_protocol/*.o
 	rm -rf ./nlp_adrenaline/*.o 					
 	rm -rf ./nlp_core/*.o	
 	rm -rf ./voice/*.o 	
 	rm -rf ./util/*.o
+	rm -rf ./mysql/*.o	
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
 

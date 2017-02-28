@@ -67,10 +67,11 @@ int create_client_thread_requested = 0;		// from a serverthread which received a
 
 void create_threads()
 {
-	/* These threads are located in :   	*/
+	const char *message1 = "every second";
+	/* These threads are located in :   	
 
 	// CREATE UDP - Transponder : 
-	const char *message1 = "every second";
+	
 	int iret1 = pthread_create( &udp_tx_thread_id, NULL, udp_transponder_function, (void*) message1);
 	if (iret1)
 	{
@@ -85,7 +86,7 @@ void create_threads()
 		fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
 		exit(EXIT_FAILURE);
 	}
-
+*/
 	// ETHERNET SERVER PROTOCOL:
 	int iret3 = pthread_create( &server_thread_id, NULL, listen_thread, (void*) message1);
 	if (iret3)
@@ -255,7 +256,7 @@ void scan_client()
 	}	
 }
 
-#include "global.h"
+
 
 //#include "calendar_entry.hpp"
 //#include "menu_items.hpp"
@@ -267,16 +268,16 @@ void close_all_dbases()
 //	close_menus_db();
 //	close_menu_items_db();
 //	close_calendar_db();
-	
 }
 void close_all_sockets( )
 {
 	printf("\tClosing sockets!\n");
+	//close_client_sockets();
 	close_listen_socket( );
-
 }
 void shutdown( int sig )
 {
+	ShutDownConnections = true;
 	printf("Program Terminating :\n");
 	close_all_sockets();
 	close_all_dbases();

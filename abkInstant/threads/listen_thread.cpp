@@ -67,7 +67,7 @@ static void get_ip_address()
     	perror("getifaddrs");
         exit(EXIT_FAILURE);
 	}
-    //printf("***** LISTEN THREAD:  get_ip_address()=%d\n", result);
+    printf("***** get_ip_address()=%d\n", result);
     
 	// Go thru each (device/connection) IP address (ie. wifi, ethernet - en0, en1, etc.)
     for (ifa = ifAddrStruct; ifa != NULL;  ifa=ifa->ifa_next)
@@ -114,21 +114,32 @@ void close_listen_socket( )
 {
 	close(listenfd);
 }
+void close_client_sockets()
+{
+	for (int i=0; i<server_handlers.size(); i++) {
+		printf("Closing client %d\n", server_handlers[i]->connfd );
+		close(server_handlers[i]->connfd);
+	}
+}
 
 /* Loop infinitely - listening for a new connection.		
 		for each client which connects, we generate a ServerHandler(), 
 		call it's accept() 
 		start a connection thread and 
 		add it to a list of connections server_handlers()
-		
 */
 void*  listen_thread(void* )
 {
-	printf("***** LISTEN THREAD:  listen_thread\n");
+	printf("***** LISTEN THREAD:  ENTRY\n");
 	get_ip_address( );		// Get "ip_addr" of this machine.
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
-	printf("***** LISTEN THREAD:  listenfd=%d\n", listenfd );
+	printf("***** LISTEN SOCKET:  listenfd=%d\n", listenfd );
+	int enable = 1;
+	if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+    	perror("setsockopt(SO_REUSEADDR) failed");
+	if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0)
+    	perror("setsockopt(SO_REUSEPORT) failed");
 	
     memset(&serv_addr, '0', sizeof(serv_addr));
     serv_addr.sin_family 		= AF_INET;
@@ -141,17 +152,19 @@ void*  listen_thread(void* )
     	close(listenfd);
     	printf("retrying...\n");
     	while (result<0) {
-			result = bind  (listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+			listenfd = socket(AF_INET, SOCK_STREAM, 0);
+			printf("***** LISTEN SOCKET:  listenfd=%d\n", listenfd );    	
+			result = bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
 			if (result<0) {
 				perror("listen_thread:  Bind failed: ");
 				close(listenfd);
 			}
 			usleep(1000000);
     	}
-   		while(1) {};
+   		//while(1) {};
     	//exit();
     }
-    	
+
     listen(listenfd, 10);
 
 	char* ip_addr = inet_ntoa( serv_addr.sin_addr );

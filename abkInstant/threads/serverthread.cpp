@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <sys/ioctl.h>
+#include "super_string.hpp"
 #include "global.h"
 
 #include "serverthread.hpp"
@@ -29,6 +30,9 @@
 //#include "top_level_protocol_sim.hpp"
 //#include "vision_memory.h"
 #include "simulator_memory.h"
+#include "sql_users.hpp"
+
+bool ShutDownConnections = false;
 
 //#include "nlp_vision_general_protocol.hpp"
 
@@ -100,7 +104,7 @@ void ServerHandler::Send_Reply()
     bytes_txd = write( connfd, NLP_Response.c_str(), (int)NLP_Response.length() );
     if (keep_open==false)
         close_connection();
-    printf("Reply sent.\n");
+    //printf("Reply sent.\n");
 }
 
 void ServerHandler::print_response(  )
@@ -113,8 +117,6 @@ void ServerHandler::accept( int mlistenfd )
     socklen_t size = (socklen_t)sizeof(client_addr);	
 	connfd = ::accept( mlistenfd, (struct sockaddr*)&(client_addr), &size );
 }
-
-#include "super_string.hpp"
 
 /* 
 INPUT:  Single line '\n' terminated.  	
@@ -140,7 +142,7 @@ bool ServerHandler::parse_credentials( string mCredentials )
 	passwd.split(':');
 	m_login_password = passwd.m_split_words[1];
 	
-	printf("Login=%s\t\tpasswd=%s\n", m_login_name.c_str(), m_login_password.c_str() );
+	//printf("Login=%s\t\tpasswd=%s\n", m_login_name.c_str(), m_login_password.c_str() );
 	return retval;
 }
 
@@ -149,16 +151,26 @@ bool ServerHandler::validate( string mCredentials )
 	bool ok = parse_credentials( mCredentials );
 	if 	(ok)
 	{
-		// look up username in Sql 
+		int found = sql_users.sql_find( m_login_name );
+		if (found)
+		{
+			printf("Found the username in dbase :\t");
+			m_credentials_validated = sql_users.verify_password( m_login_name, m_login_password );
+			if (m_credentials_validated)
+			{
+				form_response( "Welcome" );
+			} else {
+				form_response( "Bad password" );
+			}
+		}
+		else {
+			printf("NOT found in dbase\n");		
+			form_response( "Sorry I can't find that username.  Please register." );
+		}
 		// and verify the password!		
-		m_credentials_validated = true;
-		form_response( "Welcome" );
-		Send_Reply();
 	} else
 	{
-		m_credentials_validated = false;	
-		form_response( "Bad credentials" );
-		Send_Reply();	
+		form_response( "Sorry there was garbled text in your credentials." );
 	}
 	return m_credentials_validated;
 }
@@ -170,6 +182,7 @@ void test_server_handler()
 	sh.parse_credentials( credentials );	
 }
 
+
 /******************************************************
  * Could rename as nlp_server_thread()
  * return true 	- The telegram was handled.
@@ -177,26 +190,27 @@ void test_server_handler()
  ******************************************************/
 void* connection_handler( void* mh )
 {
+	static long int connection_count = 0;
+	connection_count++;
     ServerHandler* h = (ServerHandler*)mh;
-	printf("connection accepted!\n");
-	// For Client Status purpose, let them know we are connected.
-	h->form_response( "Welcome" );
-	h->Send_Reply();
+	printf("%d - Connection accepted!\n", connection_count);
     while (!h->done)
     {
+    	if (ShutDownConnections==true)
+    	{	h->done = true; continue;	};
+    		
         // CHECK STATUS of CONNECTION :
         ioctl(h->connfd, FIONREAD, &h->bytes_available);
         if (h->bytes_available==0) {
             transmit_queued_entities(h);     // any and all outgoing data!
             continue;                       // top of loop
         }
-        
+
         /*
          Get data from the client. 
          For streaming data, remember multiple 'telegrams' may come in a single read.
          */
-        h->bytes_rxd = read( h->connfd, h->socket_buffer, h->bytes_available );
-        
+        h->bytes_rxd = read( h->connfd, h->socket_buffer, h->bytes_available );        
         if (h->bytes_rxd == 0)
         {
             printf("Server thread Received Close (0 bytes) \n");
@@ -230,8 +244,16 @@ void* connection_handler( void* mh )
                 //		if used in Instant:  check sim memory, sequencer memory, xeyes memory, or avisual memory:
                 //		Plus (in house NLPs) such as :  self-identity, ordering, math, etc. etc.
                 //	General Protocol : 
-
-				next_telegram_ptr = Parse_Statement( (char*)next_telegram_ptr, h );
+				if (h==NULL) {
+					printf("h is NULL!!\n");					
+				}
+				if (h->m_credentials_validated==false)
+				{
+					std::string credentials = (char*)next_telegram_ptr;
+					h->validate( credentials );
+					next_telegram_ptr = (next_telegram_ptr+strlen(next_telegram_ptr)+1);
+				} else
+					next_telegram_ptr = Parse_Statement( (char*)next_telegram_ptr, h );
                 // next the problem of split packages - which will occur!
             }
             printf("Done parsing. %d\n", h->connfd);
@@ -253,6 +275,7 @@ void* connection_handler( void* mh )
     h->Send_Reply( );
     printf( " %s\n", h->NLP_Response.c_str() );
     
+    printf("Closing client connection %d\n", h->connfd );
     close(h->connfd);
     sleep(0.25);
     delete h;
