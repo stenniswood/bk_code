@@ -16,9 +16,7 @@
 #include "packer_motor.h"
 #include "system_msgs_callback.h"
 #include "board_list.h"
-//#include "motor_vector.h"
 #include "can_id_list.h"
-//#include "cmd_process.h"
 #include "buttons.h"
 #include "help.h"
 
@@ -38,42 +36,6 @@ BOOL can_msg_callback( struct sCAN* mMsg )
 	}
 }
 
-void tx_register_dump(byte mBuffer)
-{
-	byte bank = (mBuffer<<4);
-	read_register( TXB0CTRL+bank );
-	read_register( TXB0SIDH+bank );
-	read_register( TXB0SIDL+bank );	
-	read_register( TXB0EID8+bank );	
-	read_register( TXB0EID0+bank );	
-	read_register( TXB2DLC+bank  );
-	read_register( TXB2D0+bank   );
-	for (int i=0; i<8; i++)
-	read_register( TXB2D0+i+bank );
-}
-void register_dump()
-{
-	// READ CAN:
-	read_register( CANINTE );
-	read_register( CANINTF );
-	read_register( CANSTAT );
-	read_register( CANCTRL );
-	read_register( EFLG );
-	read_register( TEC );
-	read_register( REC );
-	read_register( TXRTSCTRL );
-	read_register( RXB0CTRL );
-	read_register( RXB1CTRL );
-	read_register( TXB0CTRL );
-	read_register( TXB1CTRL );
-	read_register( TXB2CTRL );
-	if (0)
-	{
-		read_register( CNF1 );
-		read_register( CNF2 );
-		read_register( CNF3 );
-	}
-}
 
 
 // Wiring PI pin number (gpio pin 15)
@@ -375,3 +337,40 @@ int main( int argc, char *argv[] )
 
 
 
+/* Use the ones in ../core/can/CAN_Interface.o
+void tx_register_dump(byte mBuffer)
+{
+	byte bank = (mBuffer<<4);
+	read_register( TXB0CTRL+bank );
+	read_register( TXB0SIDH+bank );
+	read_register( TXB0SIDL+bank );	
+	read_register( TXB0EID8+bank );	
+	read_register( TXB0EID0+bank );	
+	read_register( TXB2DLC+bank  );
+	read_register( TXB2D0+bank   );
+	for (int i=0; i<8; i++)
+	read_register( TXB2D0+i+bank );
+}
+void register_dump()
+{
+	// READ CAN:
+	read_register( CANINTE );
+	read_register( CANINTF );
+	read_register( CANSTAT );
+	read_register( CANCTRL );
+	read_register( EFLG );
+	read_register( TEC );
+	read_register( REC );
+	read_register( TXRTSCTRL );
+	read_register( RXB0CTRL );
+	read_register( RXB1CTRL );
+	read_register( TXB0CTRL );
+	read_register( TXB1CTRL );
+	read_register( TXB2CTRL );
+	if (0)
+	{
+		read_register( CNF1 );
+		read_register( CNF2 );
+		read_register( CNF3 );
+	}
+}*/

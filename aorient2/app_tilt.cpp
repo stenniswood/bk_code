@@ -53,9 +53,9 @@ bool	EmergencyStop = false;
 float median_angle_filter[MEDIAN_ANGLE_FILTER_SIZE];
 float sorted_angles		 [MEDIAN_ANGLE_FILTER_SIZE];
 
-int count_accel  = 0;
-int count_gyro   = 0;
-int count_magnet = 0;
+//int count_accel  = 0;
+//int count_gyro   = 0;
+//int count_magnet = 0;
 int count_samples= 0;
 
 float TiltAngle 	= 0.;
@@ -288,6 +288,7 @@ BOOL fusion_complete()
 	return TRUE;
 }
 
+/* use the one in fuse_ag.c 
 BOOL callback_tilt_reading( struct sCAN* mMsg )
 {
 	float percent ;
@@ -341,15 +342,15 @@ BOOL callback_tilt_reading( struct sCAN* mMsg )
 		//compute_accelGyro_fusion(FALSE);
 		//if (tiltsensor_callback)
 		//	(*tiltsensor_callback)( );
-		/*if (count_samples++ < 300)
+		*if (count_samples++ < 300)
 			save_timeslice_data();
 		else 
 			close_log_file();
-		*/
+		*
 		count_accel =0;
 		count_gyro  =0;
 		count_magnet=0;
 	}
 	return retval;
-}
+} */
 

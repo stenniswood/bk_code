@@ -28,7 +28,7 @@ AUTHOR	:  Stephen Tenniswood
 #include "bk_system_defs.h"
 #include "interrupt.h"
 #include "atmel_spi.h"
-#include "ipc_mem_bkinstant.h"
+//#include "ipc_mem_bkinstant.h"
 #include "shared_mem_extractor.h"
 
 

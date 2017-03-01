@@ -1,6 +1,6 @@
 cc=g++
 OPTIONS	 = -std=gnu99 -lm 
-INC		 = ../core/can/ ../core/msg/ ../core/misc/ ../core/fusion/ ./
+INC		 = ../core/can/ ../core/msg/ ../core/misc/ ../core/fusion/ ../core/ipc/ ./
 SELF_INC = ../../orient/ ./
 CFLAGS 	 = -lwiringPi -lm
 DEPS   	   = 

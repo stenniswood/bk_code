@@ -26,7 +26,7 @@
 #include <pthread.h>
 #include "packer_motor.h"
 #include "atmel_spi.h"
-#include "ipc_mem_bkinstant.h"
+//#include "ipc_mem_bkinstant.h"
 #include "shared_mem_extractor.h"
 
 /**************  CAN SEND THREAD   *************************************/
@@ -166,12 +166,12 @@ int main( int argc, char *argv[] )
 	init();
 
 	printf("Establishing Shared Memory\n");		
-	/* Allocate a shared memory segment. */
+	/* Allocate a shared memory segment. *
 	int segment_id = allocate_memory();
 	attach_memory(segment_id);
 	save_segment_id( "shared_memory_segment_id.cfg" );
 	ipc_print_mem();
-
+*/
 	// TEST SHARED MEMORY with ATILTCAM
 	/* while (1)
 	{	
