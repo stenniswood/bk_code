@@ -39,7 +39,7 @@ int  Parse_Routing_Statement( Sentence& mSentence, ServerHandler* mh )
 		while (iter != m_user_list[mh->m_user_index].connections.end())
 		{
 			devices += (*iter)->m_login_devicename;
-			if (iter != m_user_list[mh->m_user_index].connections.back())
+			if (*iter != m_user_list[mh->m_user_index].connections.back())
 				devices += ", ";
 			else devices += ".";
 			
