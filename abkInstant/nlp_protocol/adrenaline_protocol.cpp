@@ -14,10 +14,6 @@
 #include <mysql.h>
 #include "nlp_sentence.hpp"
 #include "GENERAL_protocol.hpp"
-//#include "question_to_user.hpp"
-//#include "menu_items.hpp"
-//#include "specific_restaurants.hpp"
-//#include "simulator_memory.h"
 
 using namespace std;
 
@@ -44,7 +40,6 @@ void connect_creator_db()
     {
         fprintf(stderr, "Adrenaline:: real_connect %s\n", mysql_error(creator_db));
         mysql_close(creator_db);
-        exit(1);
     }
 }
 

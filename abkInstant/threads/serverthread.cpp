@@ -28,7 +28,7 @@
 #include "simulator_memory.h"
 #include "sql_users.hpp"
 #include "user_list.hpp"		// for RAM binding of sockets.
-
+#include "protocol.h"
 
 using namespace std;
 #define Debug 1
@@ -210,8 +210,114 @@ void* connection_handler( void* mh )
     return NULL;    
 }  // Terminate thread.
 
+#include<errno.h> //For errno - the error number
+#include<netdb.h> //hostent
+#include<arpa/inet.h>
+#include<sys/socket.h>
 
 
+/*  Get ip from domain name */
+int hostname_to_ip(char * hostname , char* ip)
+{
+    struct hostent *he;
+    struct in_addr **addr_list;
+    int i;    
+    if ( (he = gethostbyname( hostname ) ) == NULL) 
+    {
+        herror("gethostbyname");
+        return 1;
+    }
+    addr_list = (struct in_addr **) he->h_addr_list;
+    for(i = 0; addr_list[i] != NULL; i++) 
+    {
+        //Return the first one;
+        strcpy(ip , inet_ntoa(*addr_list[i]) );
+        printf("host=%s;  ip=%s;\n", hostname, ip );
+        return 0;
+    }    
+    return 1;
+}
+
+
+void send_credentials(int connfd)
+{
+	char Credentials[512];
+	strcpy(Credentials, "Login:stenniswood;Password:Mozart2nd;device:RPI\n");
+	write(connfd, Credentials, strlen(Credentials) );	
+}
+
+void send_device_capabilities(int connfd)
+{
+	char str[1024];
+	std::string caps = "Device Capabilities:";
+	caps += "Audio Input:";         caps += "true;";
+	caps += "Audio Output:";        caps += "true;";
+	caps += "Video Input:";         caps += "camera;";
+	caps += "Video Output:";        caps += "true;";
+	caps += "Motor Controls:";      caps += "false;";
+	caps += "CAN:";                 caps += "false;";	
+	strcpy(str,    caps.c_str() );
+	write (connfd, str, strlen(str) );	
+}
+
+
+int connect_to_viki()
+{
+	char 	ip[26];
+	hostname_to_ip("www.beyond-kinetics.com" , ip );
+	int retval = connect_to_robot( ip );
+	
+	return retval;	
+}
+
+/* This will establish a client connection to Viki.
+	Further communications will be handled by the connection_handler() thread above.
+	
+	Return 1 =>Error;	0 =>Okay;
+*/
+int connect_to_robot(char *ip_address )
+{
+	int  	sockfd=0;
+	printf("====Connect_to_robot...ip=%s\n", ip_address);    
+    if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        printf("\n Error : Could not create socket \n");
+        return 1;
+    }
+
+    struct sockaddr_in	serv_addr; 
+    memset(&serv_addr, '0', sizeof(serv_addr)); 
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port   = htons(BK_MEDIA_PORT);
+    if(inet_pton(AF_INET, ip_address, &serv_addr.sin_addr)<=0)
+    {
+        printf("\n inet_aton error occured\n");
+        return 1;
+    } 
+
+	printf("ROBOT CLIENT Connecting to : %s:%d\n", ip_address, BK_MEDIA_PORT );
+    if( connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+       printf("\n Error : Connect Failed \n");
+       return 1;
+    } 
+	printf("ROBOT CLIENT Connected\n");
+	send_credentials(sockfd);
+	//send_device_capabilities(sockfd);
+
+
+	ServerHandler* sh = new ServerHandler();	
+	sh->connfd = sockfd;
+	int iret1 = pthread_create( &(sh->server_thread_id), NULL, connection_handler, (void*) sh);
+	if (iret1)
+	{
+		fprintf(stderr,"Error - pthread_create() return code: %d\n", iret1 );
+		printf("Error - pthread_create() return code: %d\n", iret1 );
+		delete sh;
+	}	
+	server_handlers.push_back( sh );		
+    return 0;
+}
 
 
 void video_interface()

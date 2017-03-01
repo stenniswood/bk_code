@@ -290,6 +290,10 @@ void shutdown( int sig )
 
 #include "protocol_unit_tests.hpp"
 
+
+#include "serverthread.hpp"
+
+
 int main( int argc, char *argv[] )
 {
 	signal(SIGINT, shutdown); 	// in Ctrl-C event.
@@ -303,7 +307,17 @@ int main( int argc, char *argv[] )
 			help();
 			return 0;
 		}
+		else if ((strcmp(argv[first_param], "viki") == 0))
+		{
+			char ip[26];
+			int result = hostname_to_ip  ( "www.beyond-kinetics.com", ip );
+			result= connect_to_robot( ip );
+		} else {
+			int result= connect_to_robot( argv[first_param] );
+		}		
 	}
+	
+//	exit(1);
 	
 	//protocol_unit_tests();		// will exit the app when done testing!
 		

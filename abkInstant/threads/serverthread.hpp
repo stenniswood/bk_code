@@ -17,6 +17,15 @@ void* 		 connection_handler ( void* mh );
 extern bool ShutDownConnections;
 
 
+int hostname_to_ip  ( char * hostname , char* ip);
+int connect_to_viki ( );
+int connect_to_robot( char *ip_address );
+
+
+void send_credentials		 ();
+void send_device_capabilities();
+
+
 
 /* Ah, this may even hold frames of 1080i video, so... let's make it big: 5MB  */
 void update_ipc_status				( struct sockaddr_in* sa  );

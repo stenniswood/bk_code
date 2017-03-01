@@ -56,9 +56,9 @@ void CalendarEntry::connect_to_calendar_db()
     if (mysql_real_connect(calendar_db, "localhost", sql_username, sql_password,
                            sql_user_dbase_name, 0, NULL, 0) == NULL)
     {
-        fprintf(stderr, "real_connect %s\n", mysql_error(calendar_db));
+        fprintf(stderr, "CalendarEntry:: real_connect %s\n", mysql_error(calendar_db));
         mysql_close(calendar_db);
-        exit(1);
+        //exit(1);
     }
 }
 

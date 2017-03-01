@@ -48,7 +48,7 @@ void SQL_Users::connect_to_users_db()
 {
     users_db = mysql_init(NULL);
     if (users_db == NULL)
-    {
+    { 
         fprintf(stderr, "init %s\n", mysql_error(users_db));
         exit(1);
     }
@@ -58,7 +58,7 @@ void SQL_Users::connect_to_users_db()
     {
         fprintf(stderr, "SQL_Users:: real_connect %s\n", mysql_error(users_db));
         mysql_close(users_db);
-        exit(1);
+        //exit(1);
     }
 }
 
