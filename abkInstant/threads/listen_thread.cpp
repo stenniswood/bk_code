@@ -50,7 +50,6 @@ fd_set rfds;
 struct sockaddr_in serv_addr;   
 static char 	ip_addr[16]; 			// for user feedback
 
-std::vector<ServerHandler*>  server_handlers;
 
 /********************************************************************
 Init - 
@@ -201,8 +200,8 @@ void*  listen_thread(void* )
 			printf("%s \n", strerror(errno));
 
 		connection_pending = FD_ISSET(listenfd, &rfds);
-		if (number_active>0)
-			printf("select() = %d; pending=%d\n", number_active, connection_pending);
+//		if (number_active>0)
+//			printf("select() = %d; pending=%d\n", number_active, connection_pending);
 
 		if (connection_pending) {
 			ServerHandler* sh = new ServerHandler();

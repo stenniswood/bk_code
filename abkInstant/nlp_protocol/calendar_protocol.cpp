@@ -448,3 +448,37 @@ int Parse_Calendar_Statement( Sentence& mSentence, ServerHandler* mh )
     return retval;
 }
 
+void test_calendar_protocol()
+{
+	printf("======= CALENDAR PROTOCOL UNIT TESTS ==========\n");
+	ServerHandler mh;
+	Sentence sent;
+	sent.set("what time is it?");
+	int result = Parse_Calendar_Statement( sent, &mh );
+	if (mh.nlp_reply_formulated)  printf("RESPONSE: %s\n", mh.NLP_Response.c_str() );	
+
+	sent.set("what is the date today?");
+	result = Parse_Calendar_Statement( sent, &mh );
+	if (mh.nlp_reply_formulated)  printf("RESPONSE: %s\n", mh.NLP_Response.c_str() );	
+
+	sent.set("Set a reminder for Friday morning 8am to take out the trash");
+	result = Parse_Calendar_Statement( sent, &mh );
+	if (mh.nlp_reply_formulated)  printf("RESPONSE: %s\n", mh.NLP_Response.c_str() );	
+
+	sent.set("Set a timer for 10 minutes");
+	result = Parse_Calendar_Statement( sent, &mh );
+	if (mh.nlp_reply_formulated)  printf("RESPONSE: %s\n", mh.NLP_Response.c_str() );	
+
+	sent.set("I need a wake up call at 7am tomorrow");
+	result = Parse_Calendar_Statement( sent, &mh );
+	if (mh.nlp_reply_formulated)  printf("RESPONSE: %s\n", mh.NLP_Response.c_str() );	
+
+	sent.set("make a new appointment at 2:30pm tomorrow at the dentist");
+	result = Parse_Calendar_Statement( sent, &mh );
+	if (mh.nlp_reply_formulated)  printf("RESPONSE: %s\n", mh.NLP_Response.c_str() );	
+
+	sent.set("Do I have any appointments today?");
+	result = Parse_Calendar_Statement( sent, &mh );
+	if (mh.nlp_reply_formulated)  printf("RESPONSE: %s\n", mh.NLP_Response.c_str() );	
+
+}

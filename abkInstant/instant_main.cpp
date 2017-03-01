@@ -13,7 +13,7 @@
 #include <signal.h>
 
 #include "ordering_protocol.hpp"	// this has to go before something which redefines max()
-
+#include "serverthread.hpp"
 
 #if (PLATFORM==RPI)
 #include "bcm_host.h"
@@ -288,6 +288,8 @@ void shutdown( int sig )
 	Seems like functionality doesn't work without interrupts.  ie. flags 
 	are only set when the Enable is.  maybe.		*/
 
+#include "protocol_unit_tests.hpp"
+
 int main( int argc, char *argv[] )
 {
 	signal(SIGINT, shutdown); 	// in Ctrl-C event.
@@ -302,6 +304,9 @@ int main( int argc, char *argv[] )
 			return 0;
 		}
 	}
+	
+	//protocol_unit_tests();		// will exit the app when done testing!
+		
     Init_General_Protocol();
 	init();	// <-- Serverthread is established
 	

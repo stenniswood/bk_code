@@ -25,7 +25,6 @@ Sentence::Sentence()
 {
 	m_eat_words		= false;
     m_raw_sentence  = NULL;
-    m_sentence      = NULL;
     m_voice_response= false;
     m_question      = false;
     m_tag           = NULL;

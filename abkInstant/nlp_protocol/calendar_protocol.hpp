@@ -15,9 +15,9 @@
 
 
 void Init_Calendar_Protocol  ( );
-
 int  Parse_Calendar_Statement( Sentence& mSentence, ServerHandler* mh );
 
+void test_calendar_protocol  ( );
 
 
 #endif /* calendar_protocol_hpp */

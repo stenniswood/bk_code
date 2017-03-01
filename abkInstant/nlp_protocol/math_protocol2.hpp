@@ -18,4 +18,6 @@ void Init_Math_Protocol  ( );
 
 int  Parse_Math_Statement( Sentence& mSentence, ServerHandler* mh );
 
+void test_math_protocol();
+
 #endif /* math_protocol2_hpp */

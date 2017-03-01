@@ -22,28 +22,23 @@
 #include <sys/ioctl.h>
 #include "super_string.hpp"
 #include "global.h"
-
 #include "serverthread.hpp"
 #include "visual_memory.h"
 #include "GENERAL_protocol.hpp"
-
-//#include "top_level_protocol_sim.hpp"
-//#include "vision_memory.h"
 #include "simulator_memory.h"
 #include "sql_users.hpp"
+#include "user_list.hpp"		// for RAM binding of sockets.
 
-bool ShutDownConnections = false;
-
-//#include "nlp_vision_general_protocol.hpp"
-
-byte  REQUEST_client_connect_to_robot = FALSE;
-char* REQUESTED_client_ip    = NULL;
 
 using namespace std;
-
 #define Debug 1
+
+bool ShutDownConnections = false;
+byte  REQUEST_client_connect_to_robot = FALSE;
+char* REQUESTED_client_ip    = NULL;
 static void 	exit1() {	while (1==1) {  }; }
 
+/* simulator shared memory */
 void update_ipc_status( struct sockaddr_in* sa )
 {
     static char msg[80];
@@ -53,7 +48,7 @@ void update_ipc_status( struct sockaddr_in* sa )
     strcat(msg, client_ip);
     sim_ipc_write_connection_status( msg );
 }
-
+/* simulator shared memory */
 void update_ipc_status_no_connection( )
 {
     static char msg[80];
@@ -61,127 +56,65 @@ void update_ipc_status_no_connection( )
     sim_ipc_write_connection_status( msg );
 }
 
-ServerHandler::ServerHandler()
+/* This verifies the login credentials against the mysql database of usernames. */
+void handle_login(ServerHandler* h, const char* mCreds)
 {
-	m_credentials_validated = false;
-    memset( socket_buffer,0,MAX_SENTENCE_LENGTH );
-    NLP_Response    = "";
-    connfd          = 0;
-    bytes_rxd       = 0;
-    bytes_txd       = 0;
-    bytes_available = 0;
-    done            = false;
-    ticks           = 0;
-    keep_open       = true;
-}
+	std::string credentials = (char*)mCreds;
+	h->validate( credentials );
 
-void ServerHandler::SendTelegram( unsigned char* mBuffer, int mSize)
-{
-    write(connfd, mBuffer, mSize );
-}
-void ServerHandler::close_connection()
-{
-    close(connfd);
-}
-
-void ServerHandler::form_response(const char* mTextToSend)
-{
-    NLP_Response = "VR:";
-    NLP_Response += mTextToSend;
-    nlp_reply_formulated = true;
-}
-
-void ServerHandler::append_response(const char* mTextToAdd)
-{
-    NLP_Response += mTextToAdd;
-    nlp_reply_formulated = true;
-}
-
-// Send nlp response:
-void ServerHandler::Send_Reply()
-{
-    printf("RESPONSE:|%s|\t\n", NLP_Response.c_str());
-    bytes_txd = write( connfd, NLP_Response.c_str(), (int)NLP_Response.length() );
-    if (keep_open==false)
-        close_connection();
-    //printf("Reply sent.\n");
-}
-
-void ServerHandler::print_response(  )
-{
-    printf("%s\t\n\n", NLP_Response.c_str() );
-}
-
-void ServerHandler::accept( int mlistenfd )
-{
-    socklen_t size = (socklen_t)sizeof(client_addr);	
-	connfd = ::accept( mlistenfd, (struct sockaddr*)&(client_addr), &size );
-}
-
-/* 
-INPUT:  Single line '\n' terminated.  	
-	Login:stenniswood;Password:blahblah77;\n
-	
-OUTPUT: m_login_name & m_login_password 
-	m_login_name
-	m_login_password
-*/
-bool ServerHandler::parse_credentials( string mCredentials )
-{
-	bool retval = true;
-	SuperString str = mCredentials;
-	
-	int count = str.split(';');
-	if (count < 2)
-		return false;
-	SuperString name = str.m_split_words[0];
-	SuperString passwd = str.m_split_words[1];
-	
-	name.split(':');
-	m_login_name = name.m_split_words[1];
-	passwd.split(':');
-	m_login_password = passwd.m_split_words[1];
-	
-	//printf("Login=%s\t\tpasswd=%s\n", m_login_name.c_str(), m_login_password.c_str() );
-	return retval;
-}
-
-bool ServerHandler::validate( string mCredentials )
-{
-	bool ok = parse_credentials( mCredentials );
-	if 	(ok)
+	// Now look in list of users currently active:
+	int user_index = find_user( h->m_login_name );
+	if (user_index>=0)
 	{
-		int found = sql_users.sql_find( m_login_name );
-		if (found)
-		{
-			printf("Found the username in dbase :\t");
-			m_credentials_validated = sql_users.verify_password( m_login_name, m_login_password );
-			if (m_credentials_validated)
-			{
-				form_response( "Welcome" );
-			} else {
-				form_response( "Bad password" );
-			}
-		}
-		else {
-			printf("NOT found in dbase\n");		
-			form_response( "Sorry I can't find that username.  Please register." );
-		}
-		// and verify the password!		
+		//printf("Already other connections by this user...\n");
+		h->m_user_index = user_index;
+		add_connection( h->m_login_name, h );		
 	} else
 	{
-		form_response( "Sorry there was garbled text in your credentials." );
+		// To RAM list of actives (for joining/routing if requested later on):
+		h->m_user_index = add_user( h->m_login_name );
+		add_connection( h->m_login_name, h );		
 	}
-	return m_credentials_validated;
+	print_user_list();
 }
 
-void test_server_handler()
+/* Return :  number of bytes to advance text pointer.
+*/
+int handle_telegram( ServerHandler* h, char* mTelegram )
 {
-	string credentials = "Login:stenniswood;Password:blahblah77;\n";
-	ServerHandler sh;	
-	sh.parse_credentials( credentials );	
+	/* The telegram is handled 1 of 3 ways currently:
+			a) As login credentials,
+			b) As a routing request relay (if setup)
+			c) As NLP question. (will set up routes)
+	*/
+	if (h->m_credentials_validated==false)
+	{
+		printf("Authenticating\n");
+		handle_login(h, mTelegram);
+		//next_telegram_ptr = (mTelegram+strlen(mTelegram)+1);
+		return strlen(mTelegram)+1;
+	} 
+	else if (h->routes.size()) 
+	{
+		int len = strlen(mTelegram);
+		h->route_traffic( (char*)mTelegram, len );
+		//next_telegram_ptr = (mTelegram+len+1);
+		return len+1;
+	} else {
+		//	General Protocol : 
+		char* next_ptr = Parse_Statement( (char*)mTelegram, h );
+		return (next_ptr - mTelegram);
+	}
 }
 
+bool telegram_delim_found( char* mTelegram)
+{
+	char* ptr = strchr(mTelegram, '\n');
+	if (ptr==NULL)
+		return false;
+	*ptr = 0;
+	return true;	
+}
 
 /******************************************************
  * Could rename as nlp_server_thread()
@@ -190,10 +123,10 @@ void test_server_handler()
  ******************************************************/
 void* connection_handler( void* mh )
 {
-	static long int connection_count = 0;
-	connection_count++;
+	static long int connection_count = 0;	
     ServerHandler* h = (ServerHandler*)mh;
-	printf("%d - Connection accepted!\n", connection_count);
+	char* next_telegram_ptr = h->socket_buffer;	
+	printf("%d - Connection accepted!\n", ++connection_count ); 
     while (!h->done)
     {
     	if (ShutDownConnections==true)
@@ -208,9 +141,11 @@ void* connection_handler( void* mh )
 
         /*
          Get data from the client. 
-         For streaming data, remember multiple 'telegrams' may come in a single read.
+         For streaming data, remember multiple 'telegrams' may come in a single read, or
+         	we may only get a partial one in a single read!
+         	'\n' is considered the deliminator between telegrams.
          */
-        h->bytes_rxd = read( h->connfd, h->socket_buffer, h->bytes_available );        
+        h->bytes_rxd = read( h->connfd, next_telegram_ptr, h->bytes_available );        
         if (h->bytes_rxd == 0)
         {
             printf("Server thread Received Close (0 bytes) \n");
@@ -223,65 +158,61 @@ void* connection_handler( void* mh )
         }
         else 	// DATA ARRIVED, HANDLE:
         {
-            h->socket_buffer[h->bytes_rxd] = 0;
-            const char* next_telegram_ptr  = h->socket_buffer;
+            next_telegram_ptr[h->bytes_rxd] = 0;
+            bool delim_found = telegram_delim_found(next_telegram_ptr);
+			if (delim_found==false)
+			{
+				printf("No delim found... getting another read...\n");
+				// for the problem of split packages - which will occur!
+				next_telegram_ptr += h->bytes_rxd;
+				continue;		// skip to next read (need more data!)
+			} else {
+				printf("Delim found, handling |%s|\n", next_telegram_ptr );
 
-            // Loop thru all telegrams received (multiple telegrams sent quickly will arrive in a big batch)
-            while ( (next_telegram_ptr - h->socket_buffer) < h->bytes_rxd )
-            {
-                long buff_index = (next_telegram_ptr-h->socket_buffer);
-                if (buff_index > 10)
-                {
-                    for (long c=buff_index-3; c<buff_index+26; c++)
-                        if (h->socket_buffer[c]==0)
-                            printf("|");
-                        else
-                            printf("%c", h->socket_buffer[c]);
-                    printf( ":  NextString = %s\n", next_telegram_ptr );
-                }
-                printf(" Start parsing. buff_index=%ld of bytes_rxd=%ld; \n", buff_index, h->bytes_rxd);
-                // Give the package to which Nlp top levels?
-                //		if used in Instant:  check sim memory, sequencer memory, xeyes memory, or avisual memory:
-                //		Plus (in house NLPs) such as :  self-identity, ordering, math, etc. etc.
-                //	General Protocol : 
-				if (h==NULL) {
-					printf("h is NULL!!\n");					
-				}
-				if (h->m_credentials_validated==false)
+				// Loop thru all telegrams received (multiple telegrams sent quickly will arrive in a big batch)
+				while (((next_telegram_ptr - h->socket_buffer) <= MAX_SENTENCE_LENGTH ) && 
+						(delim_found))	// b/c if no more telegram it will be null
 				{
-					std::string credentials = (char*)next_telegram_ptr;
-					h->validate( credentials );
-					next_telegram_ptr = (next_telegram_ptr+strlen(next_telegram_ptr)+1);
-				} else
-					next_telegram_ptr = Parse_Statement( (char*)next_telegram_ptr, h );
-                // next the problem of split packages - which will occur!
-            }
-            printf("Done parsing. %d\n", h->connfd);
-
-            if (h)
-                if (h->nlp_reply_formulated)
-                {
-                    h->Send_Reply();
-                    h->nlp_reply_formulated = false;
-                }
+					next_telegram_ptr += handle_telegram( h, next_telegram_ptr );	
+					delim_found = telegram_delim_found(next_telegram_ptr);
+				}
+				next_telegram_ptr = h->socket_buffer;	// reset 	
+				printf("Done parsing. %d\n", h->connfd);
+			}
+			
+			if (h->nlp_reply_formulated)
+			{
+				h->Send_Reply();
+				h->nlp_reply_formulated = false;
+			}
             printf("\n");
-        }
+        }	// end Data Arrived (read handling)        
     }
     h->done = false;
+    remove_connection( h->m_login_name, h );
     
     // SEND Timestamp:
     h->ticks = time(NULL);
     h->NLP_Response = "Closing this connection.";    
     h->Send_Reply( );
-    printf( " %s\n", h->NLP_Response.c_str() );
     
     printf("Closing client connection %d\n", h->connfd );
     close(h->connfd);
     sleep(0.25);
+    
+    // Remove this ServerHandler from the list:
+    for (int i=0; i<server_handlers.size(); i++)
+    	if (server_handlers[i] == h)    		
+    		server_handlers.erase( server_handlers.begin()+i );  // Need the iterator position
+	// Then delete it.
     delete h;
     h=NULL;
     return NULL;    
-}  // Terminate thread, wait for another connect.
+}  // Terminate thread.
+
+
+
+
 
 void video_interface()
 {
@@ -300,8 +231,20 @@ void transmit_queued_entities(ServerHandler* mh)
 }
 
 
-//void* connection_handler( void* mconnfd );
-//void ServerHandler::SendTelegram( BYTE* mBuffer, int mSize );
-//void ServerHandler::close_connection();
-//connection_established = FALSE;
-//done = TRUE;
+/*long buff_index = (next_telegram_ptr-h->socket_buffer);
+if (buff_index > 10)
+{
+	for (long c=buff_index-3; c<buff_index+26; c++)
+		if (h->socket_buffer[c]==0)
+			printf("|");
+		else
+			printf("%c", h->socket_buffer[c]);
+	printf( ":  NextString = %s\n", next_telegram_ptr );
+} 
+printf(" Start parsing. buff_index=%ld of bytes_rxd=%ld; \n", buff_index, h->bytes_rxd);                
+*/
+
+// Give the package to which Nlp top levels?
+//		if used in Instant:  check sim memory, sequencer memory, xeyes memory, or avisual memory:
+//		Plus (in house NLPs) such as :  self-identity, ordering, math, etc. etc.
+

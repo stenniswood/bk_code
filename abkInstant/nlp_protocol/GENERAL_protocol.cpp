@@ -49,6 +49,7 @@
 
 #include "family_relationships.hpp"
 #include "specific_restaurants.hpp"
+#include "route_protocol.hpp"
 
  
 
@@ -234,12 +235,15 @@ const char* Parse_Statement(const char* mSentence, ServerHandler* mh )
 
 	if (strcmp(mSentence, "I don't understand. Ignoring.")==0)
 		return end_of_telegram;
+
+    result = Parse_Routing_Statement( theSentence, mh );
+    if (result>=0)          return (end_of_telegram + result);
     
     result = Parse_Calendar_Statement( theSentence, mh );
     if (result>=0)          return (end_of_telegram + result);
 
-//    result = Parse_Math_Statement  ( theSentence, mh );
-//	if (result>=0)          return (end_of_telegram + result);
+    result = Parse_Math_Statement  ( theSentence, mh );
+	if (result>=0)          return (end_of_telegram + result);
 
     result = Parse_Self_Identity_Statement( theSentence, mh );
     if (result>=0)          return (end_of_telegram + result);
