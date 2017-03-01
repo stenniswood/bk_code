@@ -5,8 +5,6 @@
 //  Created by Stephen Tenniswood on 9/25/16.
 //  Copyright © 2016 Stephen Tenniswood. All rights reserved.
 //
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,15 +15,14 @@
 #include <my_global.h>
 #include <mysql.h>
 #include <stdint.h>
-
 #include "global.h"
 #include "sql_users.hpp"
 #include "sequencer_memory.hpp"
-
 #include "machine_defs.h"
 
+
 #define Debug 0
-MYSQL 		 	*users_db = NULL;
+MYSQL 		  *users_db = NULL;
 SQL_Users     sql_users;
 
 
@@ -59,7 +56,7 @@ void SQL_Users::connect_to_users_db()
                            sql_user_dbase_name, 0, NULL, 0) == NULL)
                            // was robot_local
     {
-        fprintf(stderr, "real_connect %s\n", mysql_error(users_db));
+        fprintf(stderr, "SQL_Users:: real_connect %s\n", mysql_error(users_db));
         mysql_close(users_db);
         exit(1);
     }

@@ -39,10 +39,10 @@ void connect_creator_db()
     }
     
     if (mysql_real_connect(creator_db, "localhost", sql_username, sql_password,
-                           sql_user_dbase_name, 0, NULL, 0) == NULL)
+                           sql_global_knowledge_name, 0, NULL, 0) == NULL)
                            // was robot_local
     {
-        fprintf(stderr, "real_connect %s\n", mysql_error(creator_db));
+        fprintf(stderr, "Adrenaline:: real_connect %s\n", mysql_error(creator_db));
         mysql_close(creator_db);
         exit(1);
     }

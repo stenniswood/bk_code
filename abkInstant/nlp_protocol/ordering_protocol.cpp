@@ -42,7 +42,7 @@ void connect_menus_db()
     if (mysql_real_connect(menus_db, "localhost", sql_username, sql_password,
                            sql_user_dbase_name, 0, NULL, 0) == NULL)
     {
-        fprintf(stderr, "real_connect %s\n", mysql_error(menus_db));
+        fprintf(stderr, "ordering_protocol:: real_connect %s\n", mysql_error(menus_db));
         mysql_close(menus_db);
         exit(1);
     }

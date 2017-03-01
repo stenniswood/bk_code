@@ -56,7 +56,7 @@ void connect_menus_db()
     if (mysql_real_connect(menus_db, "localhost", sql_username, sql_password,
                            sql_user_dbase_name, 0, NULL, 0) == NULL)
     {
-        fprintf(stderr, "real_connect %s\n", mysql_error(menus_db));
+        fprintf(stderr, "menu_items:: real_connect %s\n", mysql_error(menus_db));
         printf("Cannot connect to database bk_advertisements !\n" );
         mysql_close(menus_db);
         menus_db = NULL;

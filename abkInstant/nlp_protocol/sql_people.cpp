@@ -58,7 +58,7 @@ void SQL_Friends::connect_to_friends_db()
                            sql_user_dbase_name, 0, NULL, 0) == NULL)
                            // was robot_local
     {
-        fprintf(stderr, "real_connect %s\n", mysql_error(friends_db));
+        fprintf(stderr, "SQL_people:: real_connect %s\n", mysql_error(friends_db));
         mysql_close(friends_db);
         exit(1);
     }
