@@ -100,14 +100,14 @@ int  VerticalMenu::add_simple_command( const char* mText, char* mShortcut )
 	if (Debug) printf( "add_simple_command:: %s \n", mText );
 	//set_item( mText );
 
-	struct stMenuInfo m;  
+	//struct stMenuInfo m;  
+	MenuEntry m;
 	strcpy (m.alt_key, 		 " ");
 	strcpy (m.short_cut_key, " ");
 	m.width 	= 0;
 	m.state 	= MENU_STATE_NORMAL;
 	m.callback 	= NULL;	
-	m.submenu 		= NULL;
-	strcpy (m.text, mText 		);
+	m.set_text(mText);
 	
 	if (mShortcut)
 		strcpy ( m.short_cut_key, mShortcut );		// to directly activate from keyboard 	
@@ -167,7 +167,8 @@ void 	VerticalMenu::draw_one_row( int mRow, float mY )
 	//printf("%6.1f %6.1f   %s \n", left, mY, (char*)get_item(mRow)->c_str() ); 
 	Text( left, mY, (char*)m_entries[mRow].text, SerifTypeface, text_size );
 
-	if (m_entries[mRow].submenu)
+	Menu* m = m_entries[mRow].getSubMenu();
+	if (m)
 		draw_triangle( mRow, mY );
 
 	// draw short cut info (if available)
@@ -266,7 +267,8 @@ int		VerticalMenu::onClick(int x, int y, bool mouse_is_down)
 float VerticalMenu::get_line_bottom( int mVisibleIndex )
 {
 	float y; 
-	if (isTopDown)
+	//if (isTopDown)
+	if (1)	
 	{
 		y = bottom + height - LineHeight * (mVisibleIndex+1);
 		return y;
@@ -289,7 +291,8 @@ int VerticalMenu::get_hit_index(int mx, int my)
 		if ( (my>y) && (my<(y+LineHeight)) )
 			retval = i;
 	}
-	string str = *get_item(retval);
+	//string str = *get_item(retval);
+	string str =m_entries[retval].text;
 //	if (Debug) printf("Selected Item # %d : start=%d, end=%d  %s\n", retval, first_visible_line, end, str.c_str() );
 	return retval; 
 }
@@ -300,7 +303,7 @@ float VerticalMenu::get_longest_line(  )
 	float max_w = 0;
 	for (size_t i=0; i<m_entries.size(); i++)
 	{
-		float w = TextWidth( (char*)m_entries[i].c_str(), SerifTypeface, text_size );
+		float w = TextWidth( (char*)m_entries[i].text, SerifTypeface, text_size );
 		if (w > max_w)
 			max_w = w;
 	}

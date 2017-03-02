@@ -6,11 +6,13 @@
 #include "can_msg_view.hpp"
 #include "adrenaline_windows.h"
 
+
+/*#include "horizontal_menu.hpp"
 #define MENU_STATE_NORMAL 		1
 #define MENU_STATE_GRAYED 		2
 #define MENU_STATE_SELECTED 	3
 #define MENU_STATE_CIRCLED 		4
-#define MENU_STATE_EMPHASIZED 	5
+#define MENU_STATE_EMPHASIZED 	5 */
 
 /*
 This Window : 

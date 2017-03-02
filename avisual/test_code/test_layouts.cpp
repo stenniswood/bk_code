@@ -734,7 +734,7 @@ void init_motor_gui_test()
 	MainDisplay.add_object( &servo );
 }
 
-/*CANMessageView 			 msg_view;
+CANMessageView 			 msg_view;
 void fill_data( byte* mdata, byte last)
 {
 	mdata[0] = 0x12;
@@ -770,7 +770,7 @@ void init_CAN_msg_view( )
 
 	MainDisplay.remove_all_objects(	);
 	MainDisplay.add_object( &msg_view );
-}*/
+}
 //static ListBox  	 MyList	   ( 20, 320, 700, 550  );
 //static ProgressBar MyProgress( 450, 650, 400, 375 );
 //static CheckBox 	 MyCheck   ( 300, 400, 400, 350 );

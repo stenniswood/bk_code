@@ -12,6 +12,7 @@
 #include "calendar_entry.hpp"
 #include "can_sql_logger.hpp"
 #include "sequencer_memory.hpp"
+#include "sql_common.hpp"
 
 
 //extern MYSQL *logger_db;
@@ -134,30 +135,6 @@ void SQL_Logger::create_viki_table( )		// logs viki proceedings.
 
 }
 
-char* form_date_string( struct tm& time_bd )
-{
-	static char tmp[16];
-	sprintf(tmp, "%4d-%d-%d", time_bd.tm_year+1900,
-								time_bd.tm_mon,
-								time_bd.tm_mday );
-	return tmp;
-}
-char* form_time_string( struct tm& time_bd )
-{
-	static char tmp[16];
-	sprintf(tmp, "%2d:%2d:%2d", time_bd.tm_hour,
-								time_bd.tm_min,
-								time_bd.tm_sec );	
-	return tmp;
-}
-char* form_date_time_string( struct tm& time_bd )
-{
-	static char tmp[32];
-	strcpy(tmp, form_date_string(time_bd));
-	strcat(tmp, " ");
-	strcat(tmp, form_time_string(time_bd));
-	return tmp;
-}
 
 void SQL_Logger::find_reading( string mDataType, struct tm start_time_bd, 
 							   struct tm end_time_bd,	int mUser_id )
@@ -175,12 +152,6 @@ void SQL_Logger::find_reading( string mDataType, struct tm start_time_bd,
 	Dprintf("Num Results=%d\n", get_number_results() );
 }
 
-char* append_float( float mFloat )
-{
-	static char tmp[16];
-	sprintf(tmp, "'%6.2f'", mFloat );
-	return tmp;
-}
 
 void SQL_Logger::add_loadcell( stLoadCellReading& mRead )
 {

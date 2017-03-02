@@ -54,10 +54,10 @@ void connect_menus_db()
     }
     
     if (mysql_real_connect(menus_db, "localhost", sql_username, sql_password,
-                           sql_user_dbase_name, 0, NULL, 0) == NULL)
+                           sql_global_knowledge_name, 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "menu_items:: real_connect %s\n", mysql_error(menus_db));
-        printf("Cannot connect to database bk_advertisements !\n" );
+        printf("Cannot connect to database %s !\n", sql_global_knowledge_name );
         mysql_close(menus_db);
         menus_db = NULL;
         return;  // exit(1);
@@ -70,6 +70,7 @@ int query( bool mRetrieving )
 	
     if (mysql_query( menus_db, query_string.c_str() ))
     {
+    	printf("menu_items.cpp: \t%s\n", query_string.c_str() );
         fprintf(stderr, "Object: %s\n", mysql_error(menus_db));
     }
     
@@ -89,7 +90,9 @@ int query( bool mRetrieving )
 
 string find_known_restaurants()
 {
-    query_string = "SELECT DISTINCT restaurant from restaurant_menu_items;";
+    query_string = "SELECT DISTINCT restaurant from ";
+    query_string += sql_global_knowledge_name;
+    query_string += ".restaurant_menu_items;";
     query(true);
     string retval;
     
@@ -384,12 +387,15 @@ void MenuItem::construct_regex( )
 
 void MenuItem::load_size_options(int mSize_id, int mRestaurant_id)
 {
-    query_string = "select * from sizes_options WHERE size_id=";
+    query_string = "select * from ";
+    query_string += sql_global_knowledge_name;
+    query_string += ".sizes_options WHERE size_id=";
     query_string += append_int(mSize_id);
     query_string += " and restaurant_id=";
     query_string += append_int(mRestaurant_id);
     query_string += ";";
     // restaurant = restaurant_id;  but we don't know the restaurant id.
+    printf("%s\n", query_string.c_str() ); 
     query(true);
     int                 type=-1;
     PickOne             one;
@@ -714,7 +720,9 @@ Menu::~Menu()
 
 void Menu::retrieve_menu( int mID, string mRestaurant_name )
 {
-    query_string = "SELECT * FROM bk_advertisements.restaurant_menu_items WHERE restaurant='";
+    query_string = "SELECT * FROM ";
+    query_string += sql_global_knowledge_name;
+    query_string +=".restaurant_menu_items WHERE restaurant='";
     query_string += mRestaurant_name;
     query_string += "';";
     query(true);

@@ -18,7 +18,7 @@ public:
 	~VerticalMenu( );
 
 	virtual void 	Initialize			(	);
-	int				calc_metrics		(	);
+	virtual int		calc_metrics		(	);
 	int  			create_std_file_menu(	);
 
 	int				add_simple_command	( const char* mText, char* mShortcut=NULL );
@@ -29,6 +29,8 @@ public:
 	void			close_menu			();
 	int				set_state			( enum eMenuState mState, int mIndex );
 	Application*	get_application		(   );
+
+	float 			get_line_bottom		( int mVisibleIndex );
 
 	virtual int		onCreate		  	( );
 	void			save_pixels			( );

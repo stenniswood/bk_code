@@ -24,7 +24,7 @@ OPTIONS	   = -std=c99 -g -fpermissive -Wwrite-strings -Wno-deprecated -w
 
 INC_CORE   = ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/   \
 			 ../core/wifi/ ../core/libs/ilclient/ ../core/kinetic/ ../core/hardware/ \
-			 ../core/nlp/ ../core/adrenaline/molecules/calendar/
+			 ../core/nlp/ ../core/adrenaline/molecules/calendar/ ../core/dbase/
 LOCAL_INC  =  ./threads/ ./nlp_protocol/ ./nlp_adrenaline/ ./voice/ ./util/ ./nlp_core/ $(HARDWARE_PATH) \
 SYSTEM_INC =  /home/pi/raspicam/interface \
 			 /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/
@@ -56,7 +56,7 @@ MSG_OBJS   =  packer_lcd.o packer_motor.o packer.o
 #parser_tilt.o
 MISC_OBJS  =  vector_math.o ini_file.o string_util.o
 FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
-APP_CPP_OBJS	= instant_main.o machine_defs.o user_list.o
+APP_CPP_OBJS	= instant_main.o user_list.o
 IPC_OBJS    	= picamscan_memory.o sway_memory.o vision_memory.o visual_memory.o audio_memory.o \
 		  		  CAN_memory.o client_memory.o simulator_memory.o sequencer_memory.o
 THREAD_OBJS 	= video_thread.o can_thread.o file_thread.o listen_thread.o serverthread.o \
@@ -71,6 +71,7 @@ CALENDAR_OBJS = calendar_entry.o
 # APP CODE calendar.o calendar_summary.o 
 UTIL_OBJS = tk_colors.o client_to_socket.o AUDIO_file_util.o CAMERA_util.o CAN_util.o IMAGE_file_util.o VIDEO_file_util.o
 
+DBASE_OBJS = machine_defs.o
 MYSQL_OBJS = sql_users.o
 NLP_CORE_OBJS = super_string.o nlp_extraction.o nlp_sentence.o alias.o 
 
@@ -120,6 +121,7 @@ instant: $(APP_CPP_OBJS) 						\
 		$(addprefix ./util/, 		$(UTIL_OBJS)) 		\
 		$(addprefix $(HARDWARE_PATH), 	$(HARDWARE_OBJS)) 	\
 		$(addprefix ../core/ipc/, 	$(IPC_OBJS)) 		\
+		$(addprefix ../core/dbase/,	$(DBASE_OBJS)) 		\
 		$(addprefix ../core/kinetic/, 	$(KINETIC_OBJS)) 	\
 		$(addprefix ../core/can/, 	$(CAN_OBJS)) 		\
 		$(addprefix ../core/msg/, 	$(MSG_OBJS)) 		\

@@ -12,17 +12,18 @@
 #include "global.h"
 #include "vision_logger.hpp"
 #include "sequencer_memory.hpp"
+#include "sql_common.hpp"
 
 
 #define Debug 0
-MYSQL 		 	*logger_db = NULL;
-Event_SQL_Logger sql_logger;
+MYSQL 		 	*vision_logger_db = NULL;
+Event_SQL_Logger vis_sql_logger;
 
 
 static void object_finish_with_error( )
 {
-    fprintf    ( stderr, "%s\n", mysql_error(logger_db));
-    mysql_close( logger_db );
+    fprintf    ( stderr, "%s\n", mysql_error(vision_logger_db));
+    mysql_close( vision_logger_db );
     exit(1);
 }
 
@@ -37,24 +38,24 @@ Event_SQL_Logger::~Event_SQL_Logger()
 }
 void Event_SQL_Logger::connect_to_logger_db()
 {
-    logger_db = mysql_init(NULL);
-    if (logger_db == NULL)
+    vision_logger_db = mysql_init(NULL);
+    if (vision_logger_db == NULL)
     {
-        fprintf(stderr, "init %s\n", mysql_error(logger_db));
+        fprintf(stderr, "init %s\n", mysql_error(vision_logger_db));
         exit(1);
     }
-    if (mysql_real_connect(logger_db, "localhost", "root", "password",
+    if (mysql_real_connect(vision_logger_db, "localhost", "root", "password",
                            "robot_local", 0, NULL, 0) == NULL)
     {
-        fprintf(stderr, "real_connect %s\n", mysql_error(logger_db));
-        mysql_close(logger_db);
+        fprintf(stderr, "real_connect %s\n", mysql_error(vision_logger_db));
+        mysql_close(vision_logger_db);
         exit(1);
     }
 }
 
 void Event_SQL_Logger::create_events_table( )	
 {
-	bool exists = sql_logger.events_table_exists();
+	bool exists = vis_sql_logger.events_table_exists();
 	if (exists) 
 	{ 
 		//printf("TABLE Already Exists\n");
@@ -94,14 +95,14 @@ int	Event_SQL_Logger::get_number_columns()
 int  Event_SQL_Logger::query( bool mRetrieving )
 {
   printf("%s\n", query_string.c_str() );
-  if (mysql_query(logger_db, query_string.c_str() ))
+  if (mysql_query(vision_logger_db, query_string.c_str() ))
   {
-      fprintf(stderr, "Object: %s\n", mysql_error(logger_db));
+      fprintf(stderr, "Object: %s\n", mysql_error(vision_logger_db));
   }
   // Question : what happens when no results?
   //   Answer : if  mysql_store_result returns a non-zero value
   if (mRetrieving) {
-	  m_result = mysql_store_result(logger_db);
+	  m_result = mysql_store_result(vision_logger_db);
 	  if (m_result == NULL)  {
 		  Dprintf("query Error result==null!\n");
 		  return 0;
@@ -117,32 +118,6 @@ int	Event_SQL_Logger::get_number_results()
 	return mysql_num_rows(m_result);
 }
 
-char* form_date_string( struct tm& time_bd )
-{
-	static char tmp[16];
-	sprintf(tmp, "%4d-%d-%d", time_bd.tm_year+1900,
-								time_bd.tm_mon+1,
-								time_bd.tm_mday );
-	return tmp;
-}
-
-char* form_time_string( struct tm time_bd )
-{
-	static char tmp[32];
-	strftime( tmp, 32, "%H:%M:%S", &time_bd);
-	return tmp;
-	//return asctime( &time_bd );
-}
-
-char* form_date_time_string( struct tm& time_bd )
-{
-	static char tmp[32];
-	strcpy(tmp, form_date_string(time_bd));
-	strcat(tmp, " ");
-	strcat(tmp, form_time_string(time_bd));
-	printf("%s \n", tmp);
-	return tmp;
-}
 
 int	Event_SQL_Logger::sql_add_system_activated( bool mCamera, bool mEyes, bool mNeck )
 {
@@ -161,7 +136,7 @@ int	Event_SQL_Logger::sql_add_system_activated( bool mCamera, bool mEyes, bool m
 	query_string += names;
 	query_string += "');";	
 	//printf("\n%s\n", query_string.c_str() );
-	query(false);
+	return query(false);
 }
 
 int	Event_SQL_Logger::sql_add_system_deactivated( )
@@ -172,7 +147,7 @@ int	Event_SQL_Logger::sql_add_system_deactivated( )
 	query_string += description;
 	query_string += "' );";
 	printf("\n%s\n", query_string.c_str() );
-	query(false);
+	return query(false);
 }
 
 int	Event_SQL_Logger::sql_add_event( string mPersonName, string mDescription )
@@ -184,7 +159,7 @@ int	Event_SQL_Logger::sql_add_event( string mPersonName, string mDescription )
 	query_string += mPersonName;
 	query_string += "');";	
 	printf("\n%s\n", query_string.c_str() );
-	query(false);	
+	return query(false);	
 }
 
 int	Event_SQL_Logger::sql_query_event( string mPersonName, string mDescription )		// including "unknown"
@@ -199,7 +174,7 @@ int	Event_SQL_Logger::sql_query_event( string mPersonName, string mDescription )
 	query_string += mDescription;
 	query_string += "%' ORDER BY timestamp DESC;";
 	//printf("\n%s\n", query_string.c_str() );
-	query(true);
+	return query(true);
 }
 
 int	Event_SQL_Logger::sql_query_time( string mPersonName, string mDescription, 
@@ -225,7 +200,7 @@ int	Event_SQL_Logger::sql_query_time( string mPersonName, string mDescription,
 	}
 	query_string += " ORDER BY timestamp DESC;";
 	//printf("\n%s\n", query_string.c_str() );
-	query(true);
+	return query(true);
 }
 
 void Event_SQL_Logger::print_row( )
@@ -250,7 +225,7 @@ void Event_SQL_Logger::print_results( )
 
 int	Event_SQL_Logger::sql_query_time_qualitative( string mDateTime)	// such as "yesterday", "today", "4 hours ago"
 {
-
+	return 0;
 }
 
 int Event_SQL_Logger::form_response__how_many_times( string mNames, string mDescription, 
@@ -370,12 +345,6 @@ int Event_SQL_Logger::form_response__last_time_i_deactivated( time_t& mTime)
 	return rows;
 }
 
-char* append_float( float mFloat )
-{
-	static char tmp[16];
-	sprintf(tmp, "'%6.2f'", mFloat );
-	return tmp;
-}
 
 MYSQL_ROW Event_SQL_Logger::goto_first_row()
 {
@@ -401,14 +370,14 @@ void Event_SQL_Logger::extract_result	( )		// for the last fetched row.
 void test_vision_logger()
 {
 	// Add some samples rows : 
-	sql_logger.connect_to_logger_db();
+	vis_sql_logger.connect_to_logger_db();
 	
-	sql_logger.sql_add_event("Unknown", "Face Detected" );
-	sql_logger.sql_add_event("Unknown", "Face Detected");
-/*	sql_logger.sql_add_event("Stephen", "Face Left"    );
-	sql_logger.sql_add_event("David",   "Face Detected" );
-	sql_logger.sql_add_event("David",   "Face Left"  	);
-	sql_logger.sql_add_event("Lynn",    "Face Left"  	);*/
+	vis_sql_logger.sql_add_event("Unknown", "Face Detected" );
+	vis_sql_logger.sql_add_event("Unknown", "Face Detected");
+/*	vis_sql_logger.sql_add_event("Stephen", "Face Left"    );
+	vis_sql_logger.sql_add_event("David",   "Face Detected" );
+	vis_sql_logger.sql_add_event("David",   "Face Left"  	);
+	vis_sql_logger.sql_add_event("Lynn",    "Face Left"  	);*/
 
 }
 

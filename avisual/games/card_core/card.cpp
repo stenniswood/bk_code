@@ -19,6 +19,7 @@
 #include "display.h"
 #include "icon.hpp"
 #include "card.hpp"
+#include "global.h"
 
 char e_card_values[] = {
 'A','2','3','4','5','6','7','8','9','T','J','Q','K',
@@ -140,6 +141,10 @@ int Card::get_value( )
 	default  : return -1;
 	}
 }
+#include <algorithm>
+#include <math.h>
+
+//#define min(X,Y) (((X) < (Y)) ? : (X) : (Y))
 
 int	Card::draw( )
 {
@@ -151,13 +156,16 @@ int	Card::draw( )
 		Rect  ( left, bottom, +width, +height );	
 		VGfloat l = left;    //+left_margin;
 		VGfloat b = bottom;  //+bottom_margin;
-		int min_w = min(back_ImageInfo.width,  width );
-		int min_h = min(back_ImageInfo.height, height);
+		unsigned int w = trunc(width);
+		unsigned int h = trunc(height);
+		int min_w = std::min(back_ImageInfo.width,  w );
+		int min_h = std::min(back_ImageInfo.height, h);
 		if (back_image != NULL)
-			vgSetPixels(l, b, Card::back_image, 0, 0, min_w, min_h);
+			vgSetPixels(l, b, Card::back_image, 0, 0, min_w, min_h);		
 	} else {
 		IconView::draw();
 	}
+	return 1;
 }
 
 const char red_back[] = "./games/card_images/card_back_red.jpg";
@@ -173,7 +181,8 @@ int	Card::onCreate(  )
 		//printf("%s\n", Card::CardBackFilename ); 
 		back_image = createImageFromJpeg( Card::CardBackFilename, &Card::back_ImageInfo );		
 	}
-	load_resources();
+	load_resource();
 	match_image_size();
+	return 1;
 }
 

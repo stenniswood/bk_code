@@ -18,11 +18,19 @@ enum eMenuState
 	MENU_STATE_EMPHASIZED
 };
 
+enum eEntryType {
+	REGULAR_ENTRY,
+	SUB_MENU_ENTRY
+};
+
 class MenuEntry 
 {
 public:
 	MenuEntry();
 	~MenuEntry();
+	
+	virtual enum eEntryType	getEntryType();
+	virtual Menu*		getSubMenu()	{ return NULL; };
 	
 	void		set_text  ( const char* mText );
 	void		calc_width( const char* mText );
@@ -48,6 +56,9 @@ public:
 	CascadeMenuEntry();
 	~CascadeMenuEntry();
 	
+	virtual enum eEntryType	getEntryType();
+	virtual Menu*		getSubMenu()	{ return submenu; };
+		
 	void		calc_width( const char* mText );
 	int			draw();
 	Menu*		submenu;
@@ -63,12 +74,14 @@ public:
 
 	virtual void 	Initialize	(	);	
 	virtual int		calc_metrics(	);	
-	int				add_sub_menu( const char* mMenuText, Menu* vm );
+	int				add_sub_menu( const char* mMenuText,  Menu* vm );
 	int				add_entry	( MenuEntry mEntry 	 		  );
 	int				attach_at	( float x, float y );	
 	void			clear_all	( 								  );
-	int				set_parent	( Menu* mMenu  );
-
+	Menu*			set_parent	( Menu* mMenu  );
+	int				select				( int mSelected 		);
+	bool			is_selection_valid	( 	);
+		
 	Menu*						m_parent;					
 	std::vector<MenuEntry>		m_entries;	
 	size_t						m_selection;
@@ -86,13 +99,10 @@ public:
 	~HorizontalMenu();
 
 	virtual void 	Initialize			(	);
-	int				calc_metrics		(	);
+	virtual int		calc_metrics		(	);
 	int				get_id				(   );
-
 	int				add_entry_text		( const char* mMenuText );
-	int				select				( int mSelected 		);
 	virtual int   	draw		 		(	);
-	bool			is_selection_valid	( 	);
 
 	int				 get_hit_index		( int Mousex, int Mousey	);
 	virtual Control* HitTest			( int x, int y 				);

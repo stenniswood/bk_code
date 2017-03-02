@@ -71,7 +71,7 @@ public:
 	string			query_string;
 };
 
-extern Event_SQL_Logger sql_logger;
+extern Event_SQL_Logger vis_sql_logger;
 
 void	test_vision_logger();
 

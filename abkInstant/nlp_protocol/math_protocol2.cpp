@@ -265,7 +265,7 @@ int Parse_Math_Statement( Sentence& mSentence, ServerHandler* mh )
 {
     int retval=-1;
     mSentence.restore_reduced();
-    printf("Parse_Math_Statement: %s\n", mSentence.m_raw_sentence );
+    //printf("Parse_Math_Statement: %s\n", mSentence.m_raw_sentence );
     
     int operation_count=0;
     float first_number, second_number, final_answer;
@@ -307,7 +307,7 @@ int Parse_Math_Statement( Sentence& mSentence, ServerHandler* mh )
 		return 1;	
     }    
 	
-//    if (retval>-1)  printf( "Parse_Math_Statement done\n" );
+    if (retval>-1)  printf( "Parse_Math_Statement done\n" );
 }
 
 void test_math_protocol()

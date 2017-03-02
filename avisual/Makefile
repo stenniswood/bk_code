@@ -81,7 +81,8 @@ CAN_APP_OBJS   = can_app.o gyro_window.o analog_board_app.o filter_select.o msg_
 AUDIO_APP_OBJS = audio_app.o audio_app_menu.o 
 ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot_performance.o \
 			robot_vision.o
-DBASE_OBJS    = viki_logger.o vision_logger.o
+DBASE_OBJS    = viki_logger.o vision_logger.o machine_defs.o can_sql_logger.o sql_common.o
+#
 
 #ipc_can_rxbuff.o 
 IPC_OBJS   = CAN_memory.o client_memory.o visual_memory.o audio_memory.o ipc_can_rxbuff.o
@@ -117,9 +118,8 @@ ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o calendar_entry.o
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o legend.o
 KINETIC_OBJS = balance.o vector_file.o
-DBASE_OBJS = can_sql_logger.o
 # APP CODE
-VOICE_OBJS 	= 
+#VOICE_OBJS 	= 
 
 %.o: %.cpp $(DEPS)
 	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
@@ -132,10 +132,10 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ../core/kinetic/, 		$(KINETIC_OBJS)) 		\
 		$(addprefix ./games/reversi/, 		$(REV_GAME_OBJS)) 		\
 		$(addprefix ./games/hearts/, 		$(HEARTS_GAME_OBJS)) 	\
-		$(addprefix ./games/, 			$(GAME_OBJS)) 			\
+		$(addprefix ./games/, 				$(GAME_OBJS)) 			\
 		$(addprefix ./games/blackjack/, 	$(BLACKJACK_GAME_OBJS)) \
 		$(addprefix ./games/card_core/, 	$(CARDCORE_GAME_OBJS)) 	\
-		$(addprefix ../core/misc/,		$(MISC_OBJS))  			\
+		$(addprefix ../core/misc/,			$(MISC_OBJS))  			\
 		$(addprefix /home/pi/openvg/,		$(VG_OBJS))  			\
 		$(addprefix ../core/hardware/,		$(HARDWARE_OBJS))		\
 		$(addprefix ../core/fusion/,		$(FUSE_OBJS))  			\

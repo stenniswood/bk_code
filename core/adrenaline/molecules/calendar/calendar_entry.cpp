@@ -225,6 +225,7 @@ int  CalendarEntry::query( bool mRetrieving )
   if (mysql_query(calendar_db, query_string.c_str() ))
   {
       fprintf(stderr, "Object: %s\n", mysql_error(calendar_db));
+      printf ( "Object: %s\n", mysql_error(calendar_db));
   }
   int row_count=0;
   // Question : what happens when no results?

@@ -55,6 +55,7 @@ int query( bool mRetrieving )
 {
     if (mysql_query(menus_db, query_string.c_str() ))
     {
+       	printf("ordering_protocol.cpp: \t%s\n", query_string.c_str() );
         fprintf(stderr, "Object: %s\n", mysql_error(menus_db));
     }
     
@@ -74,7 +75,9 @@ int query( bool mRetrieving )
 
 string find_known_restaurants()
 {
-    query_string = "SELECT DISTINCT restaurant from restaurant_menu_items;";
+    query_string = "SELECT DISTINCT restaurant from ";
+    query_string += sql_global_knowledge_name;
+    query_string += ".restaurant_menu_items;";
     query(true);
     string retval;
     
@@ -97,7 +100,9 @@ static char* append_int( int mInt )
 
 void Topping::load_size_options(int mSize_id)
 {
-    query_string = "select * from sizes_options WHERE size_id=";
+    query_string = "select * from ";
+    query_string += sql_global_knowledge_name;
+    query_string += "sizes_options WHERE size_id=";
     query_string += append_int(mSize_id);
     query_string += ";";
     // restaurant = restaurant_id;  but we don't know the restaurant id.
@@ -158,7 +163,9 @@ MenuItem::~MenuItem()
 }
 void MenuItem::load_size_options(int mSize_id)
 {
-    query_string = "select * from sizes_options WHERE size_id=";
+    query_string = "select * from ";
+    query_string += sql_global_knowledge_name;
+    query_string += ".sizes_options WHERE size_id=";
     query_string += append_int(mSize_id);
     query_string += ";";
     // restaurant = restaurant_id;  but we don't know the restaurant id.

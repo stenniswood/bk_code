@@ -33,7 +33,7 @@
 using namespace std;
 #define Debug 1
 
-bool ShutDownConnections = false;
+bool  ShutDownConnections 	 = false;
 byte  REQUEST_client_connect_to_robot = FALSE;
 char* REQUESTED_client_ip    = NULL;
 static void 	exit1() {	while (1==1) {  }; }
@@ -103,16 +103,16 @@ int handle_telegram( ServerHandler* h, char* mTelegram )
 	} else {
 		//	General Protocol : 
 		char* next_ptr = Parse_Statement( (char*)mTelegram, h );
-		return (next_ptr - mTelegram);
+		return (next_ptr - mTelegram)+1;
 	}
 }
 
 bool telegram_delim_found( char* mTelegram)
 {
-	char* ptr = strchr(mTelegram, '\n');
+	char* ptr = strchr(mTelegram, 0);
 	if (ptr==NULL)
 		return false;
-	*ptr = 0;
+	//*ptr = 0;
 	return true;	
 }
 
@@ -158,8 +158,12 @@ void* connection_handler( void* mh )
         }
         else 	// DATA ARRIVED, HANDLE:
         {
+	        next_telegram_ptr = h->socket_buffer;
             next_telegram_ptr[h->bytes_rxd] = 0;
-            bool delim_found = telegram_delim_found(next_telegram_ptr);
+            bool delim_found = true; // telegram_delim_found(next_telegram_ptr);
+			long buff_index = (next_telegram_ptr - h->socket_buffer);
+			printf(" Start parsing. buff_index=%ld of bytes_rxd=%ld; \n", buff_index, h->bytes_rxd);                
+            
 			if (delim_found==false)
 			{
 				printf("No delim found... getting another read...\n");
@@ -174,7 +178,7 @@ void* connection_handler( void* mh )
 						(delim_found))	// b/c if no more telegram it will be null
 				{
 					next_telegram_ptr += handle_telegram( h, next_telegram_ptr );	
-					delim_found = telegram_delim_found(next_telegram_ptr);
+					delim_found = false; //telegram_delim_found(next_telegram_ptr);
 				}
 				next_telegram_ptr = h->socket_buffer;	// reset 	
 				printf("Done parsing. %d\n", h->connfd);

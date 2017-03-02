@@ -9,11 +9,11 @@
 #include "horizontal_menu.hpp"
 #include "vertical_menu.hpp"
 
-#define MENU_STATE_NORMAL 		1
+/*#define MENU_STATE_NORMAL 		1
 #define MENU_STATE_GRAYED 		2
 #define MENU_STATE_SELECTED 	3
 #define MENU_STATE_CIRCLED 		4
-#define MENU_STATE_EMPHASIZED 	5
+#define MENU_STATE_EMPHASIZED 	5*/
 
 /* All the Display Manager should have to do is new an instance of the derived Application,
 	add it to the list of controls, call it's onCreate().
