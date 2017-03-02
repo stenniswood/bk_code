@@ -50,8 +50,9 @@ void Viki_SQL_Logger::connect_to_logger_db()
                            DBASE_NAME, 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(logger_db));
+        printf("real_connect %s\n", mysql_error(logger_db));
         mysql_close(logger_db);
-        exit(1);
+		logger_db = NULL;
     }
 }
 
@@ -97,6 +98,8 @@ int	Viki_SQL_Logger::get_number_columns()
 int Viki_SQL_Logger::query( bool mRetrieving )
 {
   Dprintf("%s\n", query_string.c_str() );	
+  if (logger_db==NULL) return 0;
+  
   if (mysql_query(logger_db, query_string.c_str() ))
   {
       fprintf(stderr, "Object: %s\n", mysql_error(logger_db));

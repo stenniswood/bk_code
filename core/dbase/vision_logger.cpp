@@ -48,8 +48,9 @@ void Event_SQL_Logger::connect_to_logger_db()
                            "robot_local", 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(vision_logger_db));
+        printf( "Event_SQL_Logger::real_connect %s\n", mysql_error(vision_logger_db));
         mysql_close(vision_logger_db);
-        exit(1);
+        vision_logger_db = NULL;
     }
 }
 
@@ -95,6 +96,8 @@ int	Event_SQL_Logger::get_number_columns()
 int  Event_SQL_Logger::query( bool mRetrieving )
 {
   printf("%s\n", query_string.c_str() );
+  if (vision_logger_db==NULL) return 0;
+  
   if (mysql_query(vision_logger_db, query_string.c_str() ))
   {
       fprintf(stderr, "Object: %s\n", mysql_error(vision_logger_db));

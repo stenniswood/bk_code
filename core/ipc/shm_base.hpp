@@ -1,37 +1,41 @@
-#ifndef _SHMBASE_H_
-#define _SHMBASE_H_
+#ifndef _SHMBASE_HPP_
+#define _SHMBASE_HPP_
+#include "global.h"
+#include "machine_defs.h"	// base path for segment_id filename.
+
 
 /* This class will be the base for any shared memory 
 
 */
-
 class SHMBase
 {
 public:
-	SHMBase( uint16_t mKey );
-	~SHMBase();
-
-	int  connect_shared_memory( char mAllocate );
-	BOOL is_IPC_memory_available();	
-	BOOL is_poiner_valid();		
-	int  allocate_memory	();
-	void deallocate_memory	(int msegment_id);
-
-	void save_segment_id	(char* mFilename);
-	int  read_segment_id	(char* mFilename);
+	SHMBase ( uint16_t mKey, size_t mSizeInBytes, char* mFilename );
+	~SHMBase( );
 	
-	void attach_memory		();
-	void reattach_memory	();
-	void detach_memory		();
+	int  	connect_shared_memory( char mAllocate );
+	bool 	is_IPC_memory_available();	
+	bool 	is_poiner_valid		();		
+	int  	allocate_memory		();
+	void 	deallocate_memory	();
 
-	int  get_segment_size	();
-	void fill_memory		();
+	void 	save_segment_id		();
+	int  	read_segment_id		();
+	
+	int  	attach_memory		();
+	void 	reattach_memory		();
+	void 	detach_memory		();
 
+	int  	get_segment_size	();
+	void 	fill_memory			();
+	void 	hex_dump			();
+	
 private:
+	char* 		m_segment_filename;
 	uint16_t	m_key;
-	char* 	m_shared_memory;
-	int 	m_segment_id;
-	struct  avisual_ipc_memory_map* ipc_memory=NULL;
+	char* 		m_shared_memory;
+	int 		m_segment_id;
+	size_t		m_size;		// in bytes;
 };
 
 

@@ -58,7 +58,7 @@ void CalendarEntry::connect_to_calendar_db()
     {
         fprintf(stderr, "CalendarEntry:: real_connect %s\n", mysql_error(calendar_db));
         mysql_close(calendar_db);
-        //exit(1);
+        calendar_db = NULL;
     }
 }
 
@@ -189,7 +189,6 @@ void CalendarEntry::find_description	( string mDescription )
 
 void CalendarEntry::add_entry_nq		( 				 )
 {
-	char value[16];
 	query_string = "INSERT INTO bk_useraccounts.calendar VALUES ('0', ";
 	query_string += append_int(m_user_id);		query_string += ", ";
 	query_string += form_date_string();			query_string += ", ";
@@ -204,7 +203,6 @@ void CalendarEntry::add_entry_nq		( 				 )
 
 void CalendarEntry::update_entry_nq		( )
 {  
-	char value[16];
 	query_string = "UPDATE bk_useraccounts.calendar SET user_id="; 
 	query_string += append_int(m_user_id);
 	query_string += "date=";			query_string += form_date_string();
@@ -221,29 +219,31 @@ void CalendarEntry::update_entry_nq		( )
 int  CalendarEntry::query( bool mRetrieving )
 {
 	printf("%s\n", query_string.c_str() );
+	if (calendar_db==NULL)	return 0;
 	
-  if (mysql_query(calendar_db, query_string.c_str() ))
-  {
-      fprintf(stderr, "Object: %s\n", mysql_error(calendar_db));
-      printf ( "Object: %s\n", mysql_error(calendar_db));
-  }
-  int row_count=0;
-  // Question : what happens when no results?
-  //   Answer : if  mysql_store_result returns a non-zero value
-  if (mRetrieving) {
+	if (mysql_query(calendar_db, query_string.c_str() ))
+	{
+	  fprintf(stderr, "Object: %s\n", mysql_error(calendar_db));
+	  printf ( "Object: %s\n", mysql_error(calendar_db));
+	}
+	int row_count=0;
+	// Question : what happens when no results?
+	//   Answer : if  mysql_store_result returns a non-zero value
+	if (mRetrieving) {
 	  m_result = mysql_store_result(calendar_db);
 	  if (m_result == NULL)  {
 		  printf("query Error result==null!\n");
 		  return 0; 
 	  }
 	  row_count = mysql_num_rows(m_result);
-  }    
-  printf("row_count=%d\n", row_count);
-  return row_count;
+	}    
+	printf("row_count=%d\n", row_count);
+	return row_count;
 }
 
 int	CalendarEntry::get_number_results()
 {
+	if (calendar_db==NULL)	return 0;
 	return mysql_num_rows(m_result);
 }
 void CalendarEntry::extract_result( )
@@ -285,7 +285,6 @@ void CalendarEntry::sql_load			( int mCalendar_id )
 	extract_result( ); 
 	mysql_free_result( m_result );
 }
-
 
 void CalendarEntry::show_date( int mMonth, int mDay )	// other than the current
 {

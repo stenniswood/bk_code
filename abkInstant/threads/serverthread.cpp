@@ -311,6 +311,7 @@ int connect_to_robot(char *ip_address )
 
 
 	ServerHandler* sh = new ServerHandler();	
+	sh->m_credentials_validated = true;		// Since we are client and authenticating into viki.
 	sh->connfd = sockfd;
 	int iret1 = pthread_create( &(sh->server_thread_id), NULL, connection_handler, (void*) sh);
 	if (iret1)

@@ -85,7 +85,7 @@ DBASE_OBJS    = viki_logger.o vision_logger.o machine_defs.o can_sql_logger.o sq
 #
 
 #ipc_can_rxbuff.o 
-IPC_OBJS   = CAN_memory.o client_memory.o visual_memory.o audio_memory.o ipc_can_rxbuff.o
+IPC_OBJS   = CAN_memory.o client_memory.o visual_memory.o audio_memory.o ipc_can_rxbuff.o shm_base.o
 ILCLIENT_OBJS = ilclient.o ilcore.o
 
 REV_GAME_OBJS    	= reversi_ai_player.o reversi_board_memory.o reversi_board.o \

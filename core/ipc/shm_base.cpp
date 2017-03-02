@@ -1,25 +1,67 @@
+#include <stdio.h> 
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <string>
+#include <errno.h>
+
+// #if (PLATFORM==RPI)
+#include <string.h>
+// #endif
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include "shm_base.hpp"
+
+#define Debug 1
 
 
-
-
-SHMBase::SHMBase(uint16_t mKey)
+SHMBase::SHMBase(uint16_t mKey, size_t mSizeInBytes, char* mFilename)
 :m_key(mKey)
 {
+	m_size = mSizeInBytes;
 }
 
 SHMBase::~SHMBase()
 {
 }
 
-BOOL SHMBase::is_IPC_memory_available()
+void SHMBase::hex_dump()
 {
-
+	int row = 0;
+	for (size_t i=0; i<m_size; i++)
+	{
+		if ((i%32)==0)
+		{	
+			row++;	printf("\n"); 	
+			printf("%d,%5d:%2x ", row, row*32, m_shared_memory[i] );
+		}		
+		printf("%2x ", m_shared_memory[i] );
+	}
 }
-BOOL SHMBase::is_poiner_valid()
+
+bool SHMBase::is_IPC_memory_available()
 {
-	if ((ipc_memory_client != (struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
-		return TRUE;
-	return FALSE;	
+	struct shmid_ds buf;			// shm data descriptor.
+	int retval = shmctl(m_segment_id, IPC_STAT, &buf);
+	if (retval==-1) {
+		perror("is_IPC_memory_available \n" );
+		return false;
+	}
+	Dprintf( "Found segment, size=%d and %ld attachments.\n", buf.shm_segsz, buf.shm_nattch );
+	
+	if ((buf.shm_segsz > 0)			// segment size > 0
+	    && (buf.shm_nattch >= 1))	// number of attachments.
+		return true;
+	return false;
+}
+
+bool SHMBase::is_poiner_valid()
+{
+	if ((m_shared_memory != (char*)-1) && (m_shared_memory != NULL))
+		return true;
+	return false;	
 }
 
 int  SHMBase::connect_shared_memory( char mAllocate )
@@ -36,70 +78,89 @@ int  SHMBase::connect_shared_memory( char mAllocate )
 		fill_memory  ( );				
 		
 		Dprintf("Saving segment id: ");
-		save_segment_id( m_segment_id_filename );		
-
-			return 1;
+		save_segment_id( );		
+		return 1;
 	}
 	 else  
 	{
-		cli_attach_memory();	
-		if ((ipc_memory_client!=(struct client_ipc_memory_map*)-1) && (ipc_memory_client != NULL))
+		attach_memory();	
+		if (is_poiner_valid()==true)
 			return 1;			
 	}
 	return 0;
 }
 	
-void SHMBase::save_segment_id	(char* mFilename)
+void SHMBase::save_segment_id	()
 {
-	FILE* fd = fopen(mFilename, "w");
+	char fn[1024];
+	strcpy( fn, shared_mem_ids_base_path);
+	strcat( fn, m_segment_filename );
+	FILE* fd = fopen(fn, "w");
+	if (fd==NULL) {
+		printf("Cannot open file for writing %s. %s \n", fn, strerror(errno) );		
+		return;
+	}
 	Dprintf("Segment_id=%d\n", m_segment_id );
 	fprintf( fd, "%d", m_segment_id );
 	fclose( fd );
 }
 
-int SHMBase::read_segment_id	(char* mFilename)
+int SHMBase::read_segment_id()
 {
-	FILE* fd = fopen( mFilename, "r" );
+	char fn[1024];
+	strcpy( fn, shared_mem_ids_base_path);
+	strcat( fn, m_segment_filename );	
+	FILE* fd = fopen( fn, "r" );
+	if (fd==NULL)  {
+		printf("read_segment_id - ERROR: %s \n", strerror(errno) );	
+		return -1;
+	}
 	fscanf( fd, "%d", &m_segment_id );
+	Dprintf("Segment_id=%d\n", m_segment_id );
 	fclose( fd );
 	return m_segment_id;
 }
 	
 int  SHMBase::allocate_memory	()
 {
-	const int 	shared_segment_size = sizeof(struct avisual_ipc_memory_map);
-	Dprintf ("Visual shm seg size=%d\n", shared_segment_size );
-	
+	Dprintf ("Visual shm seg size=%d\n", m_size );
+
 	/* Allocate a shared memory segment. */
-	visual_segment_id = shmget( IPC_KEY_VIS, shared_segment_size, IPC_CREAT | 0666 );
-	int errsv = errno;
-	if (visual_segment_id==-1)
-		printf("vis_allocate_memory() - shmget ERROR: %s \n", strerror(errsv) );
+	m_segment_id = shmget( m_key, m_size, IPC_CREAT | 0666 );
+	if (m_segment_id==-1)
+		perror("SHMBase::allocate_memory() shmget \n" );
 	else 
-		printf ("Visual shm segment_id=%d\n", m_segment_id );
-	return visual_segment_id;	
+		printf ("SHMBase:: segment_id=%d\n", m_segment_id );
+	return m_segment_id;
 }
 
-void SHMBase::deallocate_memory	(int msegment_id)
+void SHMBase::deallocate_memory()
 {
+	/* Deallocate the shared memory segment. */ 
+	shmctl (m_segment_id, IPC_RMID, 0);
 }
 
-	
-void SHMBase::attach_memory		()
+int SHMBase::attach_memory		()
 {
 	/* Attach the shared memory segment. */
 	m_shared_memory = (char*) shmat (m_segment_id, 0, 0);
-	ipc_memory			 = (struct avisual_ipc_memory_map*)m_shared_memory;
-	printf ("Visual shm attached at address %p\n", m_shared_memory); 	
-
+	if (m_shared_memory==(char*)-1) {
+		Dprintf("cli_attach_memory - Error: %s \n", strerror(errno) );
+		return 1;
+	} else 
+		Dprintf ("Client shm attached at address %p\n", m_shared_memory); 	
+	return 0;
 }
 
 void SHMBase::reattach_memory	()
 {
 	/* Reattach the shared memory segment, at a different address. */ 
 	m_shared_memory = (char*) shmat (m_segment_id, (void*) 0x5000000, 0); 
-	ipc_memory			 = (struct avisual_ipc_memory_map*)m_shared_memory;	
-	printf ("Visual shm reattached at address %p\n", m_shared_memory); 
+	if (m_shared_memory==(char*)-1) {
+		Dprintf("SHMBase::reattach_memory - ERROR: %s \n", strerror(errno) );
+		return ;
+	} 
+	printf ("shm reattached at address %p\n", m_shared_memory); 
 }
 
 void SHMBase::detach_memory		()
@@ -108,19 +169,20 @@ void SHMBase::detach_memory		()
 	shmdt (m_shared_memory);
 }
 
-
+/* Should be identical to m_size! */
 int  SHMBase::get_segment_size	()
 {
-	struct 		shmid_ds	shmbuffer;
 	/* Determine the segment’s size. */
-	shmctl (visual_segment_id, IPC_STAT, &shmbuffer);
+	struct 		shmid_ds	shmbuffer;
+	shmctl (m_segment_id, IPC_STAT, &shmbuffer);
 	int segment_size = shmbuffer.shm_segsz;
-	printf ("Visual segment size: %d\n", segment_size);
+	printf ("segment size: %d\n", segment_size);
 	return segment_size;
 }
 
 void SHMBase::fill_memory		()
 {
-	memset(m_shared_memory, 0, vis_get_segment_size());
+	Dprintf("SHMBase::fill_memory() - ");
+	memset(m_shared_memory, 0, m_size);
 }
 

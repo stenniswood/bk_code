@@ -15,7 +15,7 @@
 #include "sql_common.hpp"
 
 
-//extern MYSQL *logger_db;
+
 MYSQL 		 *logger_db = NULL;
 
 #define Debug 0
@@ -49,14 +49,16 @@ void SQL_Logger::connect_to_logger_db()
                            "bk_useraccounts", 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(logger_db));
+        printf( "SQL_Logger::real_connect %s\n", mysql_error(logger_db));
         mysql_close(logger_db);
-        exit(1);
+        logger_db = NULL;
     }
 }
 
 int  SQL_Logger::query( bool mRetrieving )
 {
 	Dprintf("%s\n", query_string.c_str() );
+	if (logger_db==NULL) return 0;
 	
   if (mysql_query(logger_db, query_string.c_str() ))
   {
