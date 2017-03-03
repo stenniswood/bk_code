@@ -47,6 +47,7 @@ struct client_ipc_memory_map
 	struct stClientData ClientArray[MAX_CLIENTS];		// String array (dimension of NumberClients)
 };
 
+
 extern char* 	client_shared_memory;
 extern int 		client_segment_id;
 extern struct   client_ipc_memory_map* ipc_memory_client;

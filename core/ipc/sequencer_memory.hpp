@@ -2,11 +2,29 @@
 #define _SEQUENCER_MEMORY_HPP_
 
 /************************************************************
-	Data Flow - sequencer List from UDP received to avisual 
+	Data Flow - abkInstant data routed to this RPI device
+	will delegate to this shared memory for a chance to handle.
+	Provided that no other protocol upstream already responded.
+	So the top_level_protocol.cpp  - pass_to_aux_apps() will 
+	put the telegram into this shared memory.	aseq polls 
 	
-	abkInstant receives the UDP beacon and stores it ___[where]___
-	Then puts it into this shared memory.
-	avisual polls 
+	This text will then pass thru aseq's own protocol (with response 
+	if necessary; or simply move the motors - no verbal feedback).
+	
+	This can be greatly expanded - from simple commands such as:
+
+	to low level commands such as:
+		MOTOR SPEED: M1=125; M2=0; M3=23;  M4=-126; M5=15; M6=23;
+		MOTOR POSITION: M1=125; M2=0; M3=23;  M4=-126; M5=15; M6=23;
+	TO mid-level:
+		Play sequence file "walk.csv", "dance.csv", "open_door.csv"
+		etc.
+	TO high-level:
+		"sit", "stand", "half-step forward", "turn around", etc.	
+		
+	NOTICE:  There is also similarity between the simulator IPC memory
+	and this - such as body pose.  Provision is made to load sequences
+	from simulator to sequencer directly.
  ************************************************************/
 
 #include <list>
@@ -15,28 +33,6 @@
 
 #define IPC_KEY_SEQ    1275
 #define MAX_SEQUENCES  300
-
-/*const int l_hip_rotate	 = 0;
-const int l_hip_swing	 = 1;
-const int l_hip_fb_swing = 2;
-const int l_knee		 = 3;
-const int l_ankle		 = 4;
-const int r_hip_rotate	 = 5;
-const int r_hip_swing	 = 6;
-const int r_hip_fb_swing = 7;
-const int r_knee		 = 8;
-const int r_ankle		 = 9;
-const int l_shoulder_rotate	 	= 10;
-const int l_shoulder_swing	 	= 11;
-const int l_shoulder_fore_rotate= 12;
-const int l_wrist_rotate	 	= 13;
-const int l_wrist_swing		 	= 14;
-const int r_shoulder_rotate	 	= 15;
-const int r_shoulder_swing	 	= 16;
-const int r_shoulder_fore_rotate= 17;
-const int r_wrist_rotate	 	= 18;
-const int r_wrist_swing		 	= 19;
-*/
 
 
 struct stPerformanceData
@@ -141,6 +137,28 @@ bool ipc_add_sequence           ( struct stBodyPositionVector*  mVector );
 #endif
 
 /*
+/*const int l_hip_rotate	 = 0;
+const int l_hip_swing	 = 1;
+const int l_hip_fb_swing = 2;
+const int l_knee		 = 3;
+const int l_ankle		 = 4;
+const int r_hip_rotate	 = 5;
+const int r_hip_swing	 = 6;
+const int r_hip_fb_swing = 7;
+const int r_knee		 = 8;
+const int r_ankle		 = 9;
+const int l_shoulder_rotate	 	= 10;
+const int l_shoulder_swing	 	= 11;
+const int l_shoulder_fore_rotate= 12;
+const int l_wrist_rotate	 	= 13;
+const int l_wrist_swing		 	= 14;
+const int r_shoulder_rotate	 	= 15;
+const int r_shoulder_swing	 	= 16;
+const int r_shoulder_fore_rotate= 17;
+const int r_wrist_rotate	 	= 18;
+const int r_wrist_swing		 	= 19;
+*/
+
 struct stBodyPosition {     // all angles given in degrees!
     // Legs:
     float   l_hip_rotate;
@@ -173,4 +191,4 @@ struct stBodyPosition {     // all angles given in degrees!
     float   head_turn;
     float   head_tilt;
 };
-*/
+

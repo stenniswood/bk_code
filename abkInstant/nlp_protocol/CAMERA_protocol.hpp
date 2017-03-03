@@ -1,6 +1,9 @@
-#ifdef  __cplusplus
-extern "C" {
-#endif
+#ifndef _CAMERA_PROTOCOL_HPP_
+#define _CAMERA_PROTOCOL_HPP_
+
+
+#include "nlp_sentence.hpp"
+#include "server_handler.hpp"
 
 
 extern BOOL  CAMERA_tcpip_WatchingOn;		
@@ -12,20 +15,17 @@ extern FILE* sending_camera_playback_file_fd;		// prerecorded cam (robot's histo
 
 
 void Init_Camera_Protocol();
-int Parse_Camera_Statement( const char* mSentence, ServerHandler* mh );
+int Parse_Camera_Statement( Sentence& theSentence, ServerHandler* mh );
 //BOOL Perform_Camera_actions( char* mAction, char* mAdjectives, char* mObjects );
 
 
 /* Action Initiators */
 void send_camera_file ( char* mFilename );
-void send_camera();
-void camera_watch(BOOL Save=FALSE);
-void camera_two_way();
-void camera_cancel();
+void send_camera(ServerHandler* mh);
+void camera_watch(ServerHandler* mh, BOOL Save=FALSE );
+void camera_two_way(ServerHandler* mh);
+void camera_cancel(ServerHandler* mh);
 
 
 
-#ifdef  __cplusplus
-}
 #endif
-

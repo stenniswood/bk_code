@@ -40,7 +40,7 @@
 
 #include "audio_app.hpp"
 #include "client_memory.hpp"
-#include "visual_memory.h"
+#include "visual_memory.hpp"
 #include "audio_memory.h"
 #include "CAN_memory.h"
 
@@ -49,6 +49,7 @@
 #include "can_sql_logger.hpp"
 #include "serial_loadcell.hpp"
 #include "CAN_dispatcher.hpp"
+#include "ipc_mem_bkinstant.h"
 
 #include "fuse_ag.h"
 /***********************************************************************/
@@ -91,7 +92,9 @@ int bkInstant_connected = FALSE;
 int can_connected 		= FALSE;
 int audio_mem_connected = FALSE;			// audio memory is not necessary to hear audio.
 
-void init_ipc( const char* mVectorFileName )
+aVisualMemory avisual_mem;
+
+void init_ipc( )
 {
 	printf("============== IPC MEMORY ==============\n");
 	bkInstant_connected = connect_shared_client_memory( FALSE );
@@ -100,8 +103,7 @@ void init_ipc( const char* mVectorFileName )
 	else
 		printf("IPC Client - unavailable.\n");
 	
-	//printf("init_ipc %d \n", bkInstant_connected );
-	//bkInstant_connected = connect_shared_abkInstant_memory(); 
+	avisual_mem.connect_shared_memory(TRUE);		// data from Instant server arrives here.
 
 	// AUDIO : 
 	audio_mem_connected = audio_connect_shared_memory(TRUE);
@@ -256,6 +258,48 @@ void sequencer_interface()
 {	/* select script, play, loop, link, etc */ 
 }
 
+
+void abkInstant_interface()		/* wifi comms */
+{
+	if (avisual_mem.is_IPC_memory_available()==false)	return 0;
+	
+	if ( avisual_mem.is_new_connection_status() )		
+	{	
+		//if (Debug) 
+		printf("New status : %s\n", avisual_mem.get_connection_status());	
+		RobotResponse.set_text( avisual_mem.get_connection_status() );
+		avisual_mem.ack_status_counter();
+		UpdateDisplaySemaphore=1;
+	}
+
+	if ( avisual_mem.is_new_sentence() )	// a new request (sentence)	
+	{
+		printf("---CLIENT New Sentence! %s\n", avisual_mem.get_sentence() );
+		ClientInputEdit.set_text( avisual_mem.get_sentence() ); 
+		avisual_mem.ack_sentence_counter();
+		UpdateDisplaySemaphore=1;			
+		// Will want to parse text as well (sometimes & sometimes just relay): 
+		//result = Parse_adrenaline_statement( theSentence, mh );	this should occur inside of avisual's parser!
+	}
+	
+	if (0)
+	{
+		printf("---NEW CLIENT AVAILABLE! \n" );	// udp_thread found a new beacon.
+		AvailClients.m_clients->update_available_client_list();
+		AvailClients.Invalidate();
+		UpdateDisplaySemaphore=1;					
+	}
+	if (0) // is_new_response() )
+	{
+		printf("---Receive New Response: %s\n", ipc_memory_client->Sentence);
+		RobotResponse.set_text( ipc_memory_client->Sentence );		//ConnectionStatus
+		printf("Receive New Response: %s\n", ipc_memory_client->Response);
+		RobotResponse.Invalidate();
+		cli_ack_response();
+		UpdateDisplaySemaphore=1;			
+	}
+}
+
 void ethernet_interface()		/* wifi comms */
 {
 	if (ipc_memory_client==NULL)  return ;
@@ -357,7 +401,7 @@ int main( int argc, char *argv[] )
 
 	printf("======= main() ==============\n");		
 	create_threads();
-	init_ipc("simple_walk.csv");
+	init_ipc( );
 	DisplayNum = 4;
 
 	if (argc>1)
@@ -395,7 +439,8 @@ int main( int argc, char *argv[] )
 	
 	printf("================= Main Loop ==========================\n");	
 	while (1)
-	{		
+	{	
+		abkInstant_interface();
 		ethernet_interface();
 		gui_interface();
 		can_interface();

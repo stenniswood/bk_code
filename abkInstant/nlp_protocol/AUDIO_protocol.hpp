@@ -1,10 +1,8 @@
 #ifndef _AUDIO_PROTOCOL_H_
 #define _AUDIO_PROTOCOL_H_
 
-#ifdef  __cplusplus
-//extern "C" {
-#endif
-
+#include "nlp_sentence.hpp"
+#include "server_handler.hpp"
 #include "serverthread.hpp"
 
 /* Note - Sometimes the Raspberry Pi doesn't play over HDMI anyway.
@@ -24,21 +22,20 @@ extern FILE* sending_audio_file_fd;
 
 /* Action Initiators */
 void send_audio_file( char* mFilename );
-void send_audio		( );
+void send_audio		( ServerHandler* mh);
 //void audio_listen	(BOOL Save=FALSE);
-void audio_listen	();     // c doesn't support audio_listen
+void audio_listen	( ServerHandler* mh);     // c doesn't support audio_listen
 
-void audio_two_way	( );
-void audio_cancel	( );
+void audio_two_way	( ServerHandler* mh);
+void audio_cancel	( ServerHandler* mh);
 
 
 void 	DumpBuffer( BYTE* mbuff, int mlength);
 void 	Init_Audio_Protocol();
-int 	Parse_Audio_Statement( const char* mSentence, ServerHandler* mh );
+
+int 	Parse_Audio_Statement( Sentence& msentence, ServerHandler* mh );
+//int 	Parse_Audio_Statement( const char* mSentence, ServerHandler* mh );
 
 
-#ifdef  __cplusplus
-//}
-#endif
 
 #endif

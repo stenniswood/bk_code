@@ -271,7 +271,7 @@ void handle_client_request(ServerHandler* mh)
 			if (found)
 			{
 				// okay receive audio has been requested by client,			
-				audio_listen();		// AUDIO_protocol.c
+				audio_listen(mh);		// AUDIO_protocol.c
 	
 				// Pass the request to the other end:
 				strcpy (relay_buffer, "send audio to me");
@@ -285,7 +285,7 @@ void handle_client_request(ServerHandler* mh)
 			if (found)
 			{
 				// okay receive audio has been requested by client,			
-				camera_watch();		// AUDIO_interface.c
+				camera_watch(mh);		// AUDIO_interface.c
 	
 				// Pass the request to the other end:
 				strcpy (relay_buffer, "send camera to me");
@@ -334,7 +334,7 @@ void handle_client_request(ServerHandler* mh)
 		  				  ((compare_word(preposition, "to")==0) && (compare_word(object, "me")==0)) );		
 			if (cond_1)
 			{
-				send_camera();
+				send_camera(mh);
 				strcpy (relay_buffer, "sending camera to you.");
 				length = strlen(relay_buffer);
 				mh->SendTelegram( (BYTE*)relay_buffer, length);
@@ -405,7 +405,7 @@ void handle_client_request(ServerHandler* mh)
 		result = compare_word(subject, "audio");
 		if (result==0)
 		{
-		    send_audio();
+		    send_audio(mh);
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "receive audio ");
 			length = strlen(relay_buffer);
@@ -415,7 +415,7 @@ void handle_client_request(ServerHandler* mh)
 		result = compare_word(subject, "camera");			
 		if (result==0)
 		{
-		    send_camera();
+		    send_camera(mh);
 		    
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "receive camera ");
@@ -463,7 +463,7 @@ void handle_client_request(ServerHandler* mh)
 		result = compare_word(subject, "audio");
 		if (result==0)
 		{
-		    audio_cancel();
+		    audio_cancel(mh);
 			// Pass the request to the other end:
 			strcpy (relay_buffer, "stop audio ");
 			length = strlen(relay_buffer);

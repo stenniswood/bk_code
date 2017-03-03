@@ -25,9 +25,9 @@
  
 
 TextView 		ConnectionStatus( 50, 700, 500, 50 	);
-EditBox 		ClientInputEdit ( 50, 700, 420, 300 );
+EditBox 		ClientInputEdit ( 50, 700, 420, 300 ); 
 TextView 		RobotResponse 	( 50, 700, 290, 190 );
-ClientListPanel	AvailClients 	( 20, 700, 160, 50	);
+ClientListPanel	AvailClients 	( 50, 700, 160, 50	);
 
 static char ConnectionStatusText[128];
 static char CommandText[255];
@@ -43,9 +43,8 @@ void send_to_viki( void* mEditBoxPtr )
 		
 	cli_ipc_write_sentence( str );
 }
-/* viki works on a polling basis, so where are we going to do that polling at?  MainLoop.  Already in there.
-	ethernet_interface. */
-
+/* viki works on a polling basis, so where are we going to do that polling at?  MainLoop.  
+	Already in there - abkInstant_interface, ethernet_interface. */
  
 void init_home_screen()
 {

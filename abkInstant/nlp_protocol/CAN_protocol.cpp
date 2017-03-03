@@ -17,7 +17,6 @@
 #include "CAN_util.h"
 #include "GENERAL_protocol.hpp"
 #include "CAMERA_device.hpp"
-//#include "thread_control.h"
 #include "CAN_protocol.hpp"
 #include "nlp_extraction.hpp"
 #include "prefilter.hpp"
@@ -152,11 +151,12 @@ return:	pointer to the next telegram (ie. after all our header and data bytes)
 		this will be null if end of the received buffer (terminator added in serverthread.c
 		by the number of bytes read).
 *****************************************************************/
-int Parse_CAN_Statement( const char* mSentence, ServerHandler* mh )
+int Parse_CAN_Statement( Sentence& theSentence, ServerHandler* mh )
 {
 	if (Debug) printf("Parse_CAN_Statement - \n");
 	//char* retval = mSentence + strlen(mSentence)+ 1/*nullterminator*/;
 	int retval = -1;
+	char* mSentence = theSentence.m_raw_sentence;
 	
 	//extract_nlp_words( mSentence, &subject_list, &verb_list, &object_list, &adjective_list );
 
@@ -194,8 +194,9 @@ int Parse_CAN_Statement( const char* mSentence, ServerHandler* mh )
 				if (action==0)
 				{
 					printf("No action for request to start amon!\n");
-					nlp_reply_formulated = TRUE;
-					strcpy (NLP_Response, "Sorry, CAN is not available.");
+					mh->form_response ("Sorry, CAN is not available.");
+					//nlp_reply_formulated = TRUE;
+					//strcpy (NLP_Response, "Sorry, CAN is not available.");
 					retval=0;					
 					return retval;
 				}						
@@ -206,9 +207,10 @@ int Parse_CAN_Statement( const char* mSentence, ServerHandler* mh )
                 set_tcp_transmitting_flag_ipc_can();
                 /* rather than creating a new thread, we are going to set a variable to
                     send on the main server thread.			*/
-                
-                nlp_reply_formulated = TRUE;
-                strcpy (NLP_Response, "Okay, I will be sending you my CAN traffic.");
+          
+          		mh->form_response("Okay, I will be sending you my CAN traffic.");      
+               // nlp_reply_formulated = TRUE;
+        //        strcpy (NLP_Response, "Okay, I will be sending you my CAN traffic.");
                 retval=0;
             }
 			/* the messages will be pulled off of the Received buffer.
@@ -220,8 +222,9 @@ int Parse_CAN_Statement( const char* mSentence, ServerHandler* mh )
 			CAN_SendingOn   = FALSE;
 			clear_tcp_transmitting_flag_ipc_can();
 			// Leave connection to IPC and amon running.
-			nlp_reply_formulated = TRUE;
-			strcpy (NLP_Response, "Okay, No more CAN traffic will be transmitted over tcpip.");
+			mh->form_response("Okay, No more CAN traffic will be transmitted over tcpip.");
+			//nlp_reply_formulated = TRUE;
+			//strcpy (NLP_Response, "Okay, No more CAN traffic will be transmitted over tcpip.");
 			retval=0;			
 		}
 

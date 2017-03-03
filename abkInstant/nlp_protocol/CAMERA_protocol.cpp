@@ -137,26 +137,28 @@ void Init_Camera_Protocol()
 
 
 /**** ACTION INITIATORS:    (4 possible actions) *****/
-void send_camera_file ( char* mFilename )
+void send_camera_file ( char* mFilename, ServerHandler* mh )
 {	
     sending_camera_playback_file_fd  = fopen( mFilename, "r" );
     if (sending_camera_playback_file_fd == NULL)
     {
-	nlp_reply_formulated=TRUE;
-	sprintf ( NLP_Response, "Sorry, the camera file %s does not exist!", mFilename );
-	printf( NLP_Response );
+    	mh->form_response("Sorry, the camera file  does not exist!");
+//	nlp_reply_formulated=TRUE;
+//	sprintf ( NLP_Response, "Sorry, the camera file %s does not exist!", mFilename );
+//	printf( NLP_Response );
 	return;
     }
     
 	//printf( "Sending camera file over tcpip...\n");	
 	CAMERA_tcpip_SendingOn = TRUE;
 
-	nlp_reply_formulated=TRUE;
-	sprintf ( NLP_Response, "Okay, I'm sending the camera file %s.", mFilename );
-	printf( NLP_Response );
+    mh->form_response("Okay, I'm sending the camera file.");
+	//nlp_reply_formulated=TRUE;
+	//sprintf ( NLP_Response, "Okay, I'm sending the camera file %s.", mFilename );
+	//printf( NLP_Response );
 }
 
-void send_camera()
+void send_camera(ServerHandler* mh)
 {
 	// Maybe want to verify the source IP address for security purposes
 	// later on.  Not necessary now!
@@ -165,23 +167,25 @@ void send_camera()
 	// Fill in later...!  WaveHeader struct	
 	CAMERA_tcpip_SendingOn = TRUE;
 
-	nlp_reply_formulated=TRUE;
-	strcpy(NLP_Response, "Okay, I will be sending you my camera.");
-	printf("%s\n", NLP_Response);
+    mh->form_response("Okay, I will be sending you my camera.");
+//	nlp_reply_formulated=TRUE;
+//	strcpy(NLP_Response, "Okay, I will be sending you my camera.");
+//	printf("%s\n", NLP_Response);
 }
 
-void camera_watch(BOOL Save)
+void camera_watch(ServerHandler* mh, BOOL Save )
 {	
 	// Maybe want to verify the source IP address for security purposes
 	// later on.  Not necessary now!
 	//printf( "Watching for incoming tcpip camera...\n");
 	CAMERA_tcpip_WatchingOn = TRUE;
 
-	nlp_reply_formulated=TRUE;
-	strcpy(NLP_Response, "Okay, I'm watching for your camera");
+    mh->form_response("Okay, I'm watching for your camera");
+//	nlp_reply_formulated=TRUE;
+//	strcpy(NLP_Response, "Okay, I'm watching for your camera");
 }
 
-void camera_two_way()
+void camera_two_way(ServerHandler* mh)
 {
 	//printf( "Opening 2 way camera...\n");
 
@@ -190,20 +194,22 @@ void camera_two_way()
 	CAMERA_tcpip_SendingOn  = TRUE;
 	CAMERA_tcpip_WatchingOn = TRUE;
 	
-	nlp_reply_formulated=TRUE;
-	strcpy(NLP_Response, "Okay, we'll both see each other now.");
-	printf("%s\n", NLP_Response);
+    mh->form_response("Okay, we'll both see each other now.");	
+//	nlp_reply_formulated=TRUE;
+//	strcpy(NLP_Response, "Okay, we'll both see each other now.");
+//	printf("%s\n", NLP_Response);
 }
 
-void camera_cancel()
+void camera_cancel(ServerHandler* mh)
 {
 	//printf( "Cancelling camera connection.\n");
 	CAMERA_tcpip_SendingOn = FALSE;
 	CAMERA_tcpip_WatchingOn = FALSE;
 	
-	nlp_reply_formulated      = TRUE;
-	strcpy(NLP_Response, "Okay, I am terminating our camera connection.");
-	printf("%s\n", NLP_Response);
+    mh->form_response("Okay, I am terminating our camera connection.");		
+//	nlp_reply_formulated      = TRUE;
+//	strcpy(NLP_Response, "Okay, I am terminating our camera connection.");
+//	printf("%s\n", NLP_Response);
 }
 
 
@@ -213,11 +219,12 @@ return  -1	=> Not handled
 		else number of extra bytes extracted from the mSentence buffer.
 			- besides strlen(mSentence)! 
 *****************************************************************/
-int Parse_Camera_Statement( const char* mSentence, ServerHandler* mh )
+int Parse_Camera_Statement( Sentence& theSentence, ServerHandler* mh )
 {
 	int retval=-1;
-	Sentence theSentence(mSentence);
-	
+	//Sentence theSentence(mSentence);
+	char* mSentence = theSentence.m_raw_sentence;
+		
 	Dprintf("Parse_Camera_Statement\n");
 	std::string* subject  	= extract_word( mSentence, &subject_list 	);	
 	std::string* verb 		= extract_word( mSentence, &verb_list 	 	);
@@ -312,13 +319,13 @@ int Parse_Camera_Statement( const char* mSentence, ServerHandler* mh )
             
 			printf("cond1=%d; cond2=%d;\n", cond_1, cond_2 );
 			if (cond_1)
-			{    camera_watch();		retval = 0;		}					  				  
+			{    camera_watch(mh,FALSE);		retval = 0;		}					  				  
 			else if (cond_2)
-			{    send_camera();			retval = 0;		}
+			{    send_camera(mh);			retval = 0;		}
 		}
 		if (compare_word( adjective, "two way")==0 )
 		{
-		    camera_two_way();
+		    camera_two_way(mh);
 		    retval = 0;
 		};
 		
@@ -343,7 +350,7 @@ int Parse_Camera_Statement( const char* mSentence, ServerHandler* mh )
 		    (compare_word(verb, "terminate") ==0)  ||		    		    
 		    (compare_word(verb, "kill" ) ==0))
 		{
-		    camera_cancel();
+		    camera_cancel(mh);
 		    retval = 0;
 		};
 		

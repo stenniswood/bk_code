@@ -226,10 +226,9 @@ int Parse_Time_from_now_Statement( Sentence& mSentence, ServerHandler* mh )
         t += delta_time;
         som = *localtime(&t);
 
-        
+        char NLP_Response[256];
         sprintf( NLP_Response, "%6.1f seconds from now. is %s", delta_time, form_date_string() );
         mh->form_response(NLP_Response);
-
         retval=0;
     }
     return retval;

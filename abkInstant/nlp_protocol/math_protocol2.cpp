@@ -243,15 +243,16 @@ void form_verbal_answer(Sentence& mSentence, ServerHandler* mh, float final_answ
     int integer = trunc(final_answer);
     float remainder = final_answer - integer;
 
+	char NLP_Response[512];
     if (remainder<0.001)
         sprintf ( NLP_Response, "%s is %d", mSentence.m_sentence.c_str(), integer );
     else if (remainder<0.099)
         sprintf ( NLP_Response, "%s is %6.3f", mSentence.m_sentence.c_str(), final_answer );
     else
         sprintf ( NLP_Response, "%s is %6.1f", mSentence.m_sentence.c_str(), final_answer );
+
     CLIENT_Response      = NLP_Response;
     ClientRequestPending = true;
-    nlp_reply_formulated = TRUE;
     mh->form_response( NLP_Response );
 }
 

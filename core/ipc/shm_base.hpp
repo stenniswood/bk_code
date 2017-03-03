@@ -1,5 +1,6 @@
 #ifndef _SHMBASE_HPP_
 #define _SHMBASE_HPP_
+
 #include "global.h"
 #include "machine_defs.h"	// base path for segment_id filename.
 
@@ -30,7 +31,7 @@ public:
 	void 	fill_memory			();
 	void 	hex_dump			();
 	
-private:
+public:
 	char* 		m_segment_filename;
 	uint16_t	m_key;
 	char* 		m_shared_memory;

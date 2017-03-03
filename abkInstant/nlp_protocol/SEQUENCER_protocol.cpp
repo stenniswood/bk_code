@@ -20,6 +20,7 @@
 #include "sequencer_memory.hpp"
 
 #include "CAN_util.h"
+#include "CAN_protocol.hpp"
 #include "GENERAL_protocol.hpp"
 #include "CAMERA_device.hpp"
 #include "nlp_extraction.hpp"
@@ -153,21 +154,8 @@ static char aseq_command[] = "sudo /home/pi/bk_code/aseq/seq";
 static char aseq_command[] = "";
 #endif
 
-int start_amon() 
-{
-    int pid;
-    switch (pid=fork()) {
-        case -1:
-			printf("fork() = -1 %s\n", strerror(errno) );
-            return 0;
-        case 0:
-            execvp(amon_command, NULL);
-            printf("returned from ececvp\n");
-        default:
-            return 0;
-    }
-    return 1;
-}
+extern int start_seq();
+
 int start_sequencer() 
 {
     int pid;

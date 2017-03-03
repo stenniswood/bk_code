@@ -58,7 +58,7 @@ MISC_OBJS  =  vector_math.o ini_file.o string_util.o
 FUSE_OBJS  =  fuse_gyro.o fuse_ag.o fuse_log.o fuse_accel.o fuse_magnet.o
 APP_CPP_OBJS	= instant_main.o user_list.o
 IPC_OBJS    	= picamscan_memory.o sway_memory.o vision_memory.o visual_memory.o audio_memory.o \
-		  		  CAN_memory.o client_memory.o simulator_memory.o sequencer_memory.o
+		  		  CAN_memory.o client_memory.o simulator_memory.o sequencer_memory.o shm_base.o
 THREAD_OBJS 	= video_thread.o can_thread.o file_thread.o listen_thread.o serverthread.o \
 				  file_tx_thread.o hmi_thread.o thread_control.o server_handler.o
 HARDWARE_OBJS = GPIO_device.o AUDIO_device.o IMAGE_device.o CAMERA_device.o
@@ -80,7 +80,7 @@ NLP_PROTOCOL_OBJS = adrenaline_creator.o color_protocol.o IMAGE_protocol.o param
  AUDIO_interface.o family_relationships.o  positioner_3d.o sql_people.o \
  AUDIO_protocol.o FILE_protocol.o math_protocol2.o qualitative_time.o system_configuration.o \
  calendar_protocol.o GENERAL_protocol.o menu_items.o question_to_user.o ThreeD_object_protocol.o \
- CAMERA_protocol.o GPIO_protocol.o menus_orders.o route_protocol.o \
+ CAMERA_protocol.o GPIO_protocol.o menus_orders.o route_protocol.o top_level_protocol.o \
  CAN_protocol.o hearts_game.o robot_arms_protocol.o \
  HMI_protocol.o  robot_legs_protocol.o \
  card_player.o othello_board.o self_identity.o protocol_unit_tests.o 

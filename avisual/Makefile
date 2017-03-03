@@ -60,7 +60,7 @@ DEPS   	 =
 CAN_OBJS    = can_id_list.o can_eid.o CAN_Interface.o
 #CAN_Interface.o can_instance.o can_buff.o can_txbuff.o bk_system_defs.o 
 MSG_OBJS   = packer_lcd.o packer_motor.o packer.o parser_tilt.o 
-# ipc_mem_bkinstant.o
+# 
 //MSG_OBJS  =  parser_tilt.o packer_motor.o
 MISC_OBJS   = vector_math.o ini_file.o fft.o
 HARDWARE_OBJS= AUDIO_device.o sinewave.o tone_generator.o

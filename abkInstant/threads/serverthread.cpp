@@ -29,6 +29,7 @@
 #include "sql_users.hpp"
 #include "user_list.hpp"		// for RAM binding of sockets.
 #include "protocol.h"
+#include "top_level_protocol.hpp"
 
 using namespace std;
 #define Debug 1
@@ -102,7 +103,8 @@ int handle_telegram( ServerHandler* h, char* mTelegram )
 		return len+1;
 	} else {
 		//	General Protocol : 
-		char* next_ptr = Parse_Statement( (char*)mTelegram, h );
+		char* next_ptr = Parse_top_level_protocol( mTelegram, h );
+		//char* next_ptr = Parse_Statement( (char*)mTelegram, h );
 		return (next_ptr - mTelegram)+1;
 	}
 }

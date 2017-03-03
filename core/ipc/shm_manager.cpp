@@ -1,5 +1,24 @@
-
+#include <string>
+#include <string.h>
 #include "shm_manager.hpp"
+
+
+void ensure_shm_ids_directory()
+{
+	char path[200];
+	strcpy(path, shared_mem_ids_base_path );
+	
+	DIR* dir = opendir(path);
+	if (dir) {
+		printf("Making already exists: %s\n", path);
+		closedir(dir);		
+	} else if (ENOENT == errno) {
+		printf("Making directory: %s\n", path);
+		int retval = mkdir (path, S_IRWXU );
+		if (retval==-1)
+			perror("Cannot create folder for shared memory!\n");
+	}
+}
 
 
 SHMManager::SHMManager ( )

@@ -208,16 +208,17 @@ void send_audio_file ( char* mFilename, ServerHandler* mh )
     sending_audio_file_fd  = fopen( mFilename, "r" );
     if (sending_audio_file_fd == NULL)
     {
-        nlp_reply_formulated=TRUE;
-        sprintf ( NLP_Response, "Sorry, the audio file %s does not exist!", mFilename );
-        printf  ( NLP_Response );
+	
+		mh->form_response( "Sorry, the audio file  does not exist!" );
+//        sprintf ( NLP_Response, "Sorry, the audio file %s does not exist!", mFilename );
         return;
     }
     
     BOOL success = OpenAudioFileRead( mFilename );
     if (!success)
     {
-        sprintf ( NLP_Response, "Sorry, cannot open the audio file %s.", mFilename );
+		mh->form_response( "Sorry, cannot open the audio file." );    
+//        sprintf ( NLP_Response, "Sorry, cannot open the audio file %s.", mFilename );
         return;
     }
     
@@ -228,13 +229,14 @@ void send_audio_file ( char* mFilename, ServerHandler* mh )
     mh->SendTelegram( (BYTE*)&audio_hdr, sizeof(struct WAVE_HEADER));
     
 	AUDIO_tcpip_SendingOn = TRUE;
-	nlp_reply_formulated=TRUE;
-	sprintf ( NLP_Response, "Okay, I'm sending the audio file %s.", mFilename );
+//	nlp_reply_formulated=TRUE;
+	mh->form_response( "Okay, I'm sending the audio file." );    
+//	sprintf ( NLP_Response, "Okay, I'm sending the audio file %s.", mFilename );
 }
 
 const int AUDIO_SAMPLE_SIZE = 16*1024;	/* see autio_interface */
 
-void send_audio()
+void send_audio(ServerHandler* mh)
 {
 	// Maybe want to verify the source IP address for security purposes
 	// later on.  Not necessary now!
@@ -244,13 +246,13 @@ void send_audio()
         // Fill in later...!  WaveHeader struct
         //char* header=NULL;
         AUDIO_tcpip_SendingOn = TRUE;
-
-        nlp_reply_formulated=TRUE;
-        strcpy(NLP_Response, "Okay, I will begin sending you my audio.");
+		mh->form_response( "Okay, I will begin sending you my audio." );    
+//        nlp_reply_formulated=TRUE;
+//        strcpy(NLP_Response, "Okay, I will begin sending you my audio.");
     }
 }
 
-void audio_listen()
+void audio_listen(ServerHandler* mh)
 {	
 	// Fake out the other end, just verify the audio works:
 	//play_api_test(22050, 16, 1, 0);
@@ -258,12 +260,13 @@ void audio_listen()
 	int32_t result = audio_setup( destination, 22050, 1, AUDIO_SAMPLE_SIZE );
     if (result) {
         AUDIO_tcpip_ListeningOn = TRUE;
-        nlp_reply_formulated=TRUE;
-        strcpy(NLP_Response, "Okay, I'm listening for your audio");
+		mh->form_response( "Okay, I'm listening for your audio" );        
+//        nlp_reply_formulated=TRUE;
+//        strcpy(NLP_Response, "Okay, I'm listening for your audio");
     }
 }
 
-void audio_two_way()
+void audio_two_way(ServerHandler* mh)
 {
 	printf( "Opening 2 way audio...\n");
 	// add echo cancelation algorithm here.
@@ -273,12 +276,13 @@ void audio_two_way()
 	AUDIO_tcpip_SendingOn  = TRUE;
 	AUDIO_tcpip_ListeningOn = TRUE;
 	
-	nlp_reply_formulated=TRUE;
-	strcpy(NLP_Response, "Okay, we'll both hear each other now.");
-	printf("%s\n", NLP_Response);
+	mh->form_response( "Okay, we'll both hear each other now." );        	
+	//nlp_reply_formulated=TRUE;
+	//strcpy(NLP_Response, "Okay, we'll both hear each other now.");
+	//printf("%s\n", NLP_Response);
 }
 
-void audio_cancel()
+void audio_cancel(ServerHandler* mh)
 {
 	printf( "Cancelling audio connection.\n");
 
@@ -286,9 +290,10 @@ void audio_cancel()
 	AUDIO_tcpip_ListeningOn = FALSE;
 	audio_close( );
 	
-	nlp_reply_formulated      = TRUE;
-	strcpy(NLP_Response, "Okay, I am terminating our audio connection.");
-	printf("%s\n", NLP_Response);
+	mh->form_response( "Okay, I am terminating our audio connection." );        	
+//	nlp_reply_formulated      = TRUE;
+//	strcpy(NLP_Response, "Okay, I am terminating our audio connection.");
+//	printf("%s\n", NLP_Response);
 }
 
 
@@ -297,9 +302,10 @@ Do the work of the Telegram :
 return  number of extra bytes extracted (ie. in addition to the strlen)
 		This number will be added to the char* ptr in the General_protocol()		
 *****************************************************************/
-int Parse_Audio_Statement( const char* mSentence, ServerHandler* mh )
+int Parse_Audio_Statement( Sentence& msentence, ServerHandler* mh )
 {
 	int retval = -1;
+	char* mSentence = msentence.m_raw_sentence;
 	
 	Dprintf("Parse_Audio_Statement\n");
 	std::string* subject  	= extract_word( mSentence, &subject_list );	
@@ -320,51 +326,53 @@ int Parse_Audio_Statement( const char* mSentence, ServerHandler* mh )
 		    (compare_word(verb, "receive")==0) 	   ||
 		    (compare_word(verb, "incoming" ) ==0) )
 		{
-			audio_listen();
+			audio_listen(mh);
 			retval=0;
 		}
 		if ((compare_word(verb, "hear") ==0) ||
 		    (compare_word(verb, "listen") ==0))
 		{
 			if (compare_word(adjective, "your") ==0)
-			{	audio_listen();	
+			{	audio_listen(mh);	
 				retval=0;	}
 		}
 		if (compare_word(verb, "send") ==0)
 		{
 			//if (strcmp(object->c_str(), "me") ==0)
-			{	send_audio();	retval=0;	}
+			{	send_audio(mh);	retval=0;	}
 			//if (strcmp(object->c_str(), "you") ==0)
 			//{	audio_listen();		retval = TRUE;	}
 		}
 		if ((compare_word(verb, "mute") ==0) )
 		{			
 		    AUDIO_tcpip_SendingMuted = TRUE;
-
-			nlp_reply_formulated = TRUE;
-			strcpy (NLP_Response, "Muted.");			
+			mh->form_response( "Muted" );
+//			nlp_reply_formulated = TRUE;
+//			strcpy (NLP_Response, "Muted.");			
 			retval=0;			
 		}
 		if ((compare_word(verb, "unmute") ==0) )
 		{
 		    AUDIO_tcpip_SendingMuted = FALSE;
-
-			nlp_reply_formulated = TRUE;
-			strcpy (NLP_Response, "Unmuted.");			
+			mh->form_response( "Unmuted" );
+//			nlp_reply_formulated = TRUE;
+//			strcpy (NLP_Response, "Unmuted.");			
 			retval=0;
 		}
 		if ((compare_word(verb, "silence") ==0) )
 		{
 		    AUDIO_tcpip_ListeningSilenced = TRUE;
-			nlp_reply_formulated = TRUE;
-			strcpy (NLP_Response, "Silenced.");			
+			mh->form_response( "Silenced." );		    
+//			nlp_reply_formulated = TRUE;
+//			strcpy (NLP_Response, "Silenced.");			
 			retval=0;
 		}
 		if ((compare_word(verb, "unsilence") ==0) )
 		{
 		    AUDIO_tcpip_ListeningSilenced = FALSE;
-			nlp_reply_formulated = TRUE;
-			strcpy (NLP_Response, "unSilenced.");			
+			mh->form_response( "unSilenced." );	
+//			nlp_reply_formulated = TRUE;
+//			strcpy (NLP_Response, "unSilenced.");			
 			retval=0;
 		}
 		
@@ -374,13 +382,13 @@ int Parse_Audio_Statement( const char* mSentence, ServerHandler* mh )
 		    (compare_word(verb, "terminate") ==0)  ||		    		    
 		    (compare_word(verb, "kill" ) ==0))
 			{
-				 audio_cancel(); 
+				 audio_cancel(mh); 
 				 retval=0;
 			}
 	}
 	if (compare_word( adjective, "two way")==0 )
 	{
-	    audio_two_way();
+	    audio_two_way(mh);
 	    retval=0;
 	};
 
@@ -459,7 +467,7 @@ int Parse_Audio_Statement( const char* mSentence, ServerHandler* mh )
 	{
 		if (object)  {
 			if (compare_word( object, "connection")==0)
-			{	audio_two_way();	retval=0;	}
+			{	audio_two_way(mh);	retval=0;	}
 		}
 	}
 

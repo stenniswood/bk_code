@@ -366,7 +366,9 @@ int Parse_ThreeD_Statement( Sentence& mSentence, ServerHandler* mh )
             if (result) {
                 last_object_id = ipc_memory_sim->new_object_ids[ipc_memory_sim->num_valid_ids-1];
                 sim_acknowledge_response();
-                sprintf(NLP_Response, "%s with ID of %ld.", NLP_Response, last_object_id );
+                char NLP_Response[255];
+                printf(NLP_Response, "%s with ID of %ld.", NLP_Response, last_object_id );
+                mh->form_response(NLP_Response);
             }
         }
     }

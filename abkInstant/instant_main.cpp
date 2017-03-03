@@ -24,13 +24,12 @@
 #include "udp_transponder.hpp"
 #include "listen_thread.hpp"
 #include "serverthread.hpp"
-
 #include "CAN_Interface.hpp"
 #include "can_id_list.h"
 #include "cmd_process.h"
 
 /*** IPC Includes ***/
-#include "visual_memory.h"
+#include "visual_memory.hpp"
 #include "sway_memory.h"
 #include "audio_memory.h"
 #include "picamscan_memory.h"
@@ -140,9 +139,7 @@ void establish_ipc()
 	if (USE_AVISUAL)
 	{
 		//printf("************************* AVISUAL SHARED MEMORY *****************************\n");
-		vis_allocate_memory();
-		vis_attach_memory  ();
-		vis_fill_memory	   ();
+
 	}
 	//else vis_deallocate_memory( 98307 );
 
@@ -256,8 +253,6 @@ void scan_client()
 	}	
 }
 
-
-
 //#include "calendar_entry.hpp"
 //#include "menu_items.hpp"
 
@@ -289,14 +284,16 @@ void shutdown( int sig )
 	are only set when the Enable is.  maybe.		*/
 
 #include "protocol_unit_tests.hpp"
-
-
 #include "serverthread.hpp"
 
+
+aVisualMemory avisual_mem;
 
 int main( int argc, char *argv[] )
 {
 	signal(SIGINT, shutdown); 	// in Ctrl-C event.
+	avisual_mem.connect_shared_memory(FALSE); 
+	
 	
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg 

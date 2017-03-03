@@ -14,13 +14,15 @@
 
 #include "shm_base.hpp"
 
-#define Debug 1
+#define Debug 0
 
 
 SHMBase::SHMBase(uint16_t mKey, size_t mSizeInBytes, char* mFilename)
 :m_key(mKey)
 {
 	m_size = mSizeInBytes;
+	m_segment_filename = strdup( mFilename );
+	read_segment_id();
 }
 
 SHMBase::~SHMBase()
@@ -46,7 +48,7 @@ bool SHMBase::is_IPC_memory_available()
 	struct shmid_ds buf;			// shm data descriptor.
 	int retval = shmctl(m_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
-		perror("is_IPC_memory_available \n" );
+		perror("is_IPC_memory_available : " );
 		return false;
 	}
 	Dprintf( "Found segment, size=%d and %ld attachments.\n", buf.shm_segsz, buf.shm_nattch );
@@ -123,13 +125,13 @@ int SHMBase::read_segment_id()
 	
 int  SHMBase::allocate_memory	()
 {
-	Dprintf ("Visual shm seg size=%d\n", m_size );
+	Dprintf ("SHMBase:: key=%x; shm seg size=%d\n", m_key, m_size );
 
 	/* Allocate a shared memory segment. */
 	m_segment_id = shmget( m_key, m_size, IPC_CREAT | 0666 );
 	if (m_segment_id==-1)
-		perror("SHMBase::allocate_memory() shmget \n" );
-	else 
+		perror("SHMBase::allocate_memory() shmget " );
+	else
 		printf ("SHMBase:: segment_id=%d\n", m_segment_id );
 	return m_segment_id;
 }
@@ -137,7 +139,9 @@ int  SHMBase::allocate_memory	()
 void SHMBase::deallocate_memory()
 {
 	/* Deallocate the shared memory segment. */ 
-	shmctl (m_segment_id, IPC_RMID, 0);
+	int result = shmctl (m_segment_id, IPC_RMID, 0);
+	if (result==-1)
+		perror("SHMBase::deallocate_memory() ");	
 }
 
 int SHMBase::attach_memory		()
