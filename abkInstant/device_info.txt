@@ -1,0 +1,4 @@
+Device Info;
+Pet_names:(main TV|TV|livingroom TV);
+Platform:RPI;
+OS:Rasbian;

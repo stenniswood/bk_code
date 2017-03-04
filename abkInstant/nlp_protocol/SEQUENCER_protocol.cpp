@@ -12,7 +12,6 @@
 #include <list>
 #include <vector>
 
-//#include "global.h"
 #include "protocol.h"
 #include "devices.h"
 #include "CAN_memory.h"
@@ -33,97 +32,25 @@
 BOOL SEQ_ListeningOn;	// if true we will be receiving CAN Traffic.
 BOOL SEQ_SendingOn;		// if true we will be sending CAN Traffic.
 
-WordGroup  	subject_list;
-WordGroup 	verb_list;
-
-static std::list<std::string> 	adjective_list;
-static std::list<std::string>  	object_list;
 
 //#define NLP_DEBUG 1
 
 static void init_subject_list()
 {
-	subject_list.add_word( "sequencer"      );
-	subject_list.add_word( "sequence"       );
-	subject_list.add_word( "robot" 	);
+	string subjects = "(sequencer|sequence|robot)";
 }
 
-static void init_verb_list()
-{
-    Word raise, lower, rotate_left, walk, stop;
-    
-    raise.add_new("raise");
-    raise.add_new("lift");
-
-    lower.add_new("lower");
-    lower.add_new("drop");
-
-    rotate_left.add_new("rotate");
-    rotate_left.add_new("twist ");
-    rotate_left.add_new("turn");
-    rotate_left.add_new("swivel");      // left/right comes from the object!
-    
-    walk.add_new("walk");
-    walk.add_new("step");
-    walk.add_new("come");
-    
-    stop.add_new( "stop"   );
-    stop.add_new( "freeze" );
-    stop.add_new( "end"    );
-
-    verb_list.add_new( raise );
-	verb_list.add_new( lower );
-	verb_list.add_new( rotate_left );
-    verb_list.add_new( walk );
-    verb_list.add_new( stop );
-
-/*    verb_list.add_word( "play" 	 );
-	verb_list.add_word( "replay" );
-	verb_list.add_word( "run" 	 );
-	verb_list.add_word( "rerun" );
-	verb_list.add_word( "set" ); */
-}
-
-
-static void init_adjective_list()		// and adverbs
-{ 
-	adjective_list.push_back( "straight" );	
-	adjective_list.push_back( "highest" );
-	adjective_list.push_back( "fast" 	);
-	adjective_list.push_back( "slowly"	);
-	adjective_list.push_back( "low" 	);
-	adjective_list.push_back( "lowest"	);
-	adjective_list.push_back( "best" 	);
-	adjective_list.push_back( "backward" );
-	adjective_list.push_back( "forward"  );
-}
-
-static void init_object_list()
-{   // Object might be a numerical value preceded by a preposition.
-	// ie. "set camera tilt _to_ _25.5 degrees"
-	// prepositions to look for :
-	//		to by as 
-	object_list.push_back( "leg" 	);		
-	object_list.push_back( "arm"	);
-	object_list.push_back( "foot"	);
-	object_list.push_back( "ankle" );
-	object_list.push_back( "knee"  );	
-	object_list.push_back( "hip"	);
-	object_list.push_back( "step"	);
-	
-	object_list.push_back( "elbow"	);
-	object_list.push_back( "wrist"	);
-	object_list.push_back( "hand"	);
-	object_list.push_back( "finger"	);
-	
-}
-
+// Object might be a numerical value preceded by a preposition.
+// ie. "set camera tilt _to_ _25.5 degrees"
+// prepositions to look for :
+//		to by as 
 static void init_word_lists()
 {
-	init_subject_list();
-	init_verb_list();
-	init_object_list();
-	init_adjective_list();	
+    Word raise, lower, rotate_left, walk, stop;
+	string action = "(raise|lift|lower|drop|rotate|twist|turn|swivel|walk|step|come|stop|freeze|end)";
+	string action2 = "(play|replay|run|rerun|set)";
+	string adjective = "(straight|highest|fast|slowly|low|lowest|best|backward|forward)";
+	string objects = "(leg|arm|foot|ankle|knee|hip|step|elbow|wrist|hand|finger)";	
 }
 
 /*****************************************************************
@@ -172,14 +99,38 @@ int start_sequencer()
     return 1;
 }
 
+// No ServerHandler Response for these!  Just move the motors!
+void parse_motor_speed_command(Sentence& mSentence, float& mValues[], int& mSize)
+{
+	mSentence.split(";");
+	int okay = mSentence.m_split_words[0].compare( "MOTOR SPEED:" );
+	if (okay !=0) return;
+	
+	int motors_found = mSentence.m_split_words.size()-1;
+	for (int i=1; i<motors_found; i++)
+	{
+		mSentence.m_split_words[i].fprintf ();		
+		mValues[i-1] = blah;
+	}
+}
 
-static std::string* subject  = NULL;
-static std::string* verb     = NULL;
-//static std::string* object   = NULL;
-//static std::string* adjective=NULL;
+// No ServerHandler Response for these!  Just move the motors!
+void parse_motor_position_command(Sentence& mSentence, float& mValues[], int& mSize)
+{
+	mSentence.split(";");
+	int okay = mSentence.m_split_words[0].compare( "MOTOR POSITION:" );
+	if (okay !=0) return;
 
+	int motors_found = mSentence.m_split_words.size()-1;
+	for (int i=1; i<motors_found; i++)
+	{
+		mSentence.m_split_words[i].fprintf("M");
+		mValues[i-1] = blah;
+//		mSentence.m_split_words[i].fprintf("M");
+	}
+}
 
-
+extern SequencerIPC  sequencer_mem;		// see main.cpp
 
 /*****************************************************************
 Do the work of the Telegram :
@@ -198,17 +149,9 @@ int Parse_Sequencer_Statement( Sentence& mSentence, ServerHandler* mh )
 	if (Debug) printf("Parse_Sequencer_Statement() ");
     mSentence.restore_reduced();
     
-    //int subject_count	= subject_list.evaluate_sentence( mSentence.m_sentence.c_str() );
-    //int verb_count		= verb_list.evaluate_sentence   ( mSentence.m_sentence.c_str() );
-
-    //string* object 		= extract_word( mSentence.m_sentence.c_str(), &object_list  	  );
-    string* adjective	= extract_word( mSentence.m_sentence.c_str(), &adjective_list    );
-    //diagram_sentence		( subject, verb, adjective, object, preposition );
-    
 	/* Main thing we want for starters is:
 	   "sequencer, queue up these named poses and "run", "animate", "play"
-	   them.  Repeat 5 times."
-	   
+	   them.  Repeat 5 times."	   
 	   */
 	if ( (compare_word( subject, "sequencer")==0) )
 	{
@@ -225,7 +168,8 @@ int Parse_Sequencer_Statement( Sentence& mSentence, ServerHandler* mh )
 			// later on.  Not necessary now!
 			printf( "Initiating robot sequence... (Watch for objects in path of limbs!)\n");
 			//int action;
-			int available = seq_connect_shared_sequencer_memory( TRUE );
+			//sequencer_mem.connect_shared_memory(TRUE);			
+			int available = 1; //seq_connect_shared_sequencer_memory( TRUE );
 			if (!available)
 			{
 				printf("Starting fork for amon(itor)\n");
@@ -233,7 +177,7 @@ int Parse_Sequencer_Statement( Sentence& mSentence, ServerHandler* mh )
 				//if (action)
 				//	printf("No action for request to start amon!\n");
 			}
-			available = seq_connect_shared_sequencer_memory( TRUE );
+			//available = seq_connect_shared_sequencer_memory( TRUE );
 
 			
 			/* the messages will be pulled off of the Received buffer.

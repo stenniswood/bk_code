@@ -17,13 +17,16 @@ void* 		 connection_handler ( void* mh );
 extern bool ShutDownConnections;
 
 
+
+
 int hostname_to_ip  ( char * hostname , char* ip);
 int connect_to_viki ( );
 int connect_to_robot( char *ip_address );
 
 
-void send_credentials		 ();
-void send_device_capabilities();
+void send_credentials		 (int connfd);
+void send_device_info		 (int connfd);
+void send_device_capabilities(int connfd);
 
 
 

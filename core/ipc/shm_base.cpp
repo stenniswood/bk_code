@@ -14,7 +14,7 @@
 
 #include "shm_base.hpp"
 
-#define Debug 0
+#define Debug 1
 
 
 SHMBase::SHMBase(uint16_t mKey, size_t mSizeInBytes, char* mFilename)
@@ -48,7 +48,8 @@ bool SHMBase::is_IPC_memory_available()
 	struct shmid_ds buf;			// shm data descriptor.
 	int retval = shmctl(m_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
-		perror("is_IPC_memory_available : " );
+		perror("is_IPC_memory_available IPC_STAT ");
+		printf("segment_id=%d\n", m_segment_id );
 		return false;
 	}
 	Dprintf( "Found segment, size=%d and %ld attachments.\n", buf.shm_segsz, buf.shm_nattch );
@@ -70,18 +71,18 @@ int  SHMBase::connect_shared_memory( char mAllocate )
 {
 	bool available = is_IPC_memory_available();
  
-	if ((!available) && (mAllocate))
+	if (!available) 
 	{
-		int result = allocate_memory( );
-		if (result == -1)	{
-			Dprintf("Cannot allocate shared memory!\n");
+		if (mAllocate) {
+			int result = allocate_memory( );
+			if (result == -1)	{
+				Dprintf("Cannot allocate shared memory!\n");
+			}
+			attach_memory( );
+			fill_memory  ( );
+			save_segment_id( );		
+			return 1;
 		}
-		attach_memory( );
-		fill_memory  ( );				
-		
-		Dprintf("Saving segment id: ");
-		save_segment_id( );		
-		return 1;
 	}
 	 else  
 	{
@@ -114,7 +115,7 @@ int SHMBase::read_segment_id()
 	strcat( fn, m_segment_filename );	
 	FILE* fd = fopen( fn, "r" );
 	if (fd==NULL)  {
-		printf("read_segment_id - ERROR: %s \n", strerror(errno) );	
+		printf("read_segment_id - ERROR: %s ; %s\n", strerror(errno),m_segment_filename );	
 		return -1;
 	}
 	fscanf( fd, "%d", &m_segment_id );

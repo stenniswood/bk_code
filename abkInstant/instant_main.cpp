@@ -285,14 +285,21 @@ void shutdown( int sig )
 
 #include "protocol_unit_tests.hpp"
 #include "serverthread.hpp"
-
+#include "sequencer_memory.hpp"
 
 aVisualMemory avisual_mem;
+SequencerIPC  sequencer_mem;
+
 
 int main( int argc, char *argv[] )
 {
 	signal(SIGINT, shutdown); 	// in Ctrl-C event.
 	avisual_mem.connect_shared_memory(FALSE); 
+	sequencer_mem.connect_shared_memory(FALSE); 
+
+	sequencer_mem.write_sentence( "HELLO JACK NICHOLAS HERE!\n");
+	sequencer_mem.wait_for_ack_sentence_counter();
+	sequencer_mem.write_sentence( "HELLO Shadow HERE!\n");
 	
 	
 	print_args( argc, argv );

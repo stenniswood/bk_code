@@ -20,10 +20,11 @@
 #include <string>
 #include <vector>
 #include <sys/ioctl.h>
+
 #include "super_string.hpp"
 #include "global.h"
 #include "serverthread.hpp"
-#include "visual_memory.h"
+//#include "visual_memory.hpp"
 #include "GENERAL_protocol.hpp"
 #include "simulator_memory.h"
 #include "sql_users.hpp"
@@ -244,26 +245,44 @@ int hostname_to_ip(char * hostname , char* ip)
     return 1;
 }
 
+char credentials_filename[] = "credentials.txt";
+char device_info_filename[] = "device_info.txt";
+char device_caps_filename[] = "device_caps.txt";
 
 void send_credentials(int connfd)
 {
-	char Credentials[512];
-	strcpy(Credentials, "Login:stenniswood;Password:Mozart2nd;device:RPI\n");
-	write(connfd, Credentials, strlen(Credentials) );	
+	char str[1024*4];
+	FILE* fd = fopen( credentials_filename, "r");
+	if (fd==-1) {
+		perror("Cannot open Device Info file ");
+		printf("%s\n", device_info_filename );
+	}
+	int bytes_read = fread( str, 1024, 1, fd );
+	write (connfd, str, strlen(str) );	
+}
+
+void send_device_info(int connfd)
+{
+	char str[1024*4];
+	FILE* fd = fopen( device_info_filename, "r");
+	if (fd==-1) {
+		perror("Cannot open Device Info file ");
+		printf("%s\n", device_info_filename );
+	}
+	int bytes_read = fread( str, 1024, 1, fd );
+	write (connfd, str, strlen(str) );	
 }
 
 void send_device_capabilities(int connfd)
 {
-	char str[1024];
-	std::string caps = "Device Capabilities:";
-	caps += "Audio Input:";         caps += "true;";
-	caps += "Audio Output:";        caps += "true;";
-	caps += "Video Input:";         caps += "camera;";
-	caps += "Video Output:";        caps += "true;";
-	caps += "Motor Controls:";      caps += "false;";
-	caps += "CAN:";                 caps += "false;";	
-	strcpy(str,    caps.c_str() );
-	write (connfd, str, strlen(str) );	
+	char str[1024*4];
+	FILE* fd = fopen( device_caps_filename, "r");
+	if (fd==-1) {
+		perror("Cannot open Device Info file ");
+		printf("%s\n", device_info_filename );
+	}
+	int bytes_read = fread( str, 1024, 1, fd );
+	write (connfd, str, strlen(str) );
 }
 
 
@@ -308,9 +327,9 @@ int connect_to_robot(char *ip_address )
        return 1;
     } 
 	printf("ROBOT CLIENT Connected\n");
-	send_credentials(sockfd);
-	//send_device_capabilities(sockfd);
-
+	send_credentials (sockfd);
+	send_device_info (sockfd);
+	send_device_capabilities(sockfd);
 
 	ServerHandler* sh = new ServerHandler();	
 	sh->m_credentials_validated = true;		// Since we are client and authenticating into viki.
@@ -327,13 +346,13 @@ int connect_to_robot(char *ip_address )
 }
 
 
+
 void video_interface()
 {
 }
 void sequence_interface()
 {
 }
-
 // Any and all outgoing data!
 void transmit_queued_entities(ServerHandler* mh)
 {
@@ -344,20 +363,4 @@ void transmit_queued_entities(ServerHandler* mh)
 }
 
 
-/*long buff_index = (next_telegram_ptr-h->socket_buffer);
-if (buff_index > 10)
-{
-	for (long c=buff_index-3; c<buff_index+26; c++)
-		if (h->socket_buffer[c]==0)
-			printf("|");
-		else
-			printf("%c", h->socket_buffer[c]);
-	printf( ":  NextString = %s\n", next_telegram_ptr );
-} 
-printf(" Start parsing. buff_index=%ld of bytes_rxd=%ld; \n", buff_index, h->bytes_rxd);                
-*/
-
-// Give the package to which Nlp top levels?
-//		if used in Instant:  check sim memory, sequencer memory, xeyes memory, or avisual memory:
-//		Plus (in house NLPs) such as :  self-identity, ordering, math, etc. etc.
-
+/*printf(" Start parsing. buff_index=%ld of bytes_rxd=%ld; \n", buff_index, h->bytes_rxd);                */

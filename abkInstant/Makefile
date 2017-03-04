@@ -75,7 +75,7 @@ DBASE_OBJS = machine_defs.o
 MYSQL_OBJS = sql_users.o
 NLP_CORE_OBJS = super_string.o nlp_extraction.o nlp_sentence.o alias.o 
 
-NLP_PROTOCOL_OBJS = adrenaline_creator.o color_protocol.o IMAGE_protocol.o parameter.o SEQUENCER_protocol.o \
+NLP_PROTOCOL_OBJS = adrenaline_creator.o color_protocol.o IMAGE_protocol.o parameter.o \
  adrenaline_protocol.o easter_eggs_protocol.o jets_pizza.o positioner_2d.o specific_restaurants.o \
  AUDIO_interface.o family_relationships.o  positioner_3d.o sql_people.o \
  AUDIO_protocol.o FILE_protocol.o math_protocol2.o qualitative_time.o system_configuration.o \

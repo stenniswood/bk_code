@@ -16,6 +16,7 @@
 #include "vision_memory.h"
 #include "client_to_socket.hpp"
 #include "client_memory.hpp"
+#include "sequencer_memory.hpp"
 
 /* Sample sentences bkInstant would be able to respond to :
 	What's your host name? what's your IP address?
@@ -39,6 +40,7 @@
 */
 
 extern aVisualMemory avisual_mem;	// in main.cpp
+extern SequencerIPC  sequencer_mem;		// see main.cpp
 
 /* Auxiliary Apps could be anything like 
 		xeyes 	- for vision (ie. "track red ball", "following my finger", etc.)
@@ -87,6 +89,15 @@ int pass_to_aux_apps( Sentence& theSentence, ServerHandler* mh )
     	// ipc_write_wait_for_response();
 	    return (theSentence.m_sentence.length());
 	}
+
+    if ( sequencer_mem.is_IPC_memory_available() )
+    {
+    	printf("Found SEQUENCER shared memory. Delegating to its protocol.\n");    
+    	sequencer_mem.write_sentence( theSentence.m_sentence.c_str() );
+    	// ipc_write_wait_for_response();
+	    return (theSentence.m_sentence.length());
+	}
+	
 }
 
 const char* Parse_top_level_protocol( const char*  mSentence, ServerHandler* mh )

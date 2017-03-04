@@ -1,0 +1,8 @@
+Device Capabilities:
+Audio Input:true;
+Audio Output:true;
+Video Input:camera;
+Video Output:true;
+Motor Controls:false;
+CAN:false;
+

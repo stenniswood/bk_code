@@ -207,7 +207,6 @@ void audio_save_segment_id(char* mFilename)
 	fclose( fd );
 }
 
-#include "visual_memory.h"
 
 int audio_read_segment_id(char* mFilename)
 {

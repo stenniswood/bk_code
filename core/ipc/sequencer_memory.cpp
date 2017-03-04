@@ -34,133 +34,70 @@ AUTHOR	:  Stephen Tenniswood
 #include <errno.h>
 //#include "bk_system_defs.h"
 #include "global.h"
-
 #include "interrupt.h"
 #include "sequencer_memory.hpp"
 
 
-char* 	sequencer_shared_memory;
-int 	sequencer_segment_id;
-struct  sequencer_ipc_memory_map* ipc_memory_sequencer =NULL;
+#define Debug 1
 
-void seq_dump_ipc()
+/*********************************************************/
+/* Class Functions 										 */
+/*********************************************************/
+
+SequencerIPC::SequencerIPC()	
+: SHMBase(IPC_KEY_SEQ, sizeof(struct sequencer_ipc_memory_map), "seq_shared_memseg_id.cfg" )
 {
-	int length = sizeof(struct sequencer_ipc_memory_map);
-	for (int i=0; i<length; i++)
+}
+SequencerIPC::~SequencerIPC()
+{
+}
+
+int SequencerIPC::read_sentence_counter()
+{
+	struct sequencer_ipc_memory_map* ipc_memory = get_memory_seq();
+	return ipc_memory->SentenceCounter;
+}
+char* SequencerIPC::get_sentence()
+{
+	struct sequencer_ipc_memory_map* ipc_memory = get_memory_seq();
+	return (ipc_memory->Sentence);
+}
+BOOL SequencerIPC::is_new_sentence()
+{
+	struct sequencer_ipc_memory_map* ipc_memory = get_memory_seq();
+	if (ipc_memory->SentenceCounter  > ipc_memory->SentenceAcknowledgedCounter)
 	{
-		if ((i%32)==0)
-			printf("\n");
-		printf("%2x ", sequencer_shared_memory[i] );
-	}	
-}
-
-void seq_save_segment_id(char* mFilename)
-{
-	FILE* fd = fopen(mFilename, "w+");
-	if (fd==NULL) {
-		printf("Cannot write to file %s. %s \n", mFilename, strerror(errno) );		
+		return TRUE;
 	}
-	
-	//FILE* fd = fopen("client_shared_memseg_id.cfg", "w");
-	printf("Segment_id=%d\n", sequencer_segment_id );
-	char line[80];
-	//fprintf( fd, "%d", sequencer_segment_id );
-	sprintf( line, "%d", sequencer_segment_id );
-	fwrite ( line, strlen(line), 1, fd  );
-	fclose( fd );
+	return FALSE;
+}
+void SequencerIPC::ack_sentence_counter	()
+{
+	struct sequencer_ipc_memory_map* ipc = get_memory_seq();
+	ipc->SentenceAcknowledgedCounter = ipc->SentenceCounter;
 }
 
-int seq_read_segment_id(char* mFilename)
+void SequencerIPC::wait_for_ack_sentence_counter( )
 {
-	char tline[40];
-	FILE* fd = fopen( mFilename, "r" );
-	if (fd==NULL)  {
-		printf("seq_read_segment_id - ERROR: %s \n", strerror(errno) );	
-		return -1;
-	}
-	int result = fread( tline, 1, 20, fd);		//	fscanf( fd, "%d", &can_segment_id );
-	tline[result] = 0;
-	sequencer_segment_id = atol( tline );
-	fclose( fd );
-	printf("seq_segment_id= %d \n", sequencer_segment_id );	
-	return sequencer_segment_id;
+	struct sequencer_ipc_memory_map* ipc = get_memory_seq();
+	Dprintf("sentence counter=%d/%d;\n", ipc->SentenceAcknowledgedCounter, ipc->SentenceCounter );
+	while (ipc->SentenceAcknowledgedCounter < ipc->SentenceCounter)
+	{};
 }
 
-int seq_allocate_memory( )
+void SequencerIPC::write_sentence( char* mSentence )
 {
-	const int shared_segment_size = sizeof(struct sequencer_ipc_memory_map);
-	printf ("Client shm seg size=%d\n", shared_segment_size );
-	
-	/* Allocate a shared memory segment. */
-	sequencer_segment_id = shmget( IPC_KEY_SEQ, shared_segment_size, IPC_CREAT | 0666 );
-	int errsv = errno;
-	if (sequencer_segment_id==-1)
-		printf("seq_allocate_memory - ERROR: %s \n", strerror(errsv) );
-	else 
-		printf ("Client shm segment_id=%d\n", sequencer_segment_id );
-	// IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
-	return sequencer_segment_id;
-}
+	struct sequencer_ipc_memory_map* ipc_memory = get_memory_seq();
 
-int seq_attach_memory()
-{
-	/* Attach the shared memory segment. */
-	int error=0;
-	sequencer_shared_memory = (char*) shmat (sequencer_segment_id, 0, 0);
-	if (sequencer_shared_memory==(char*)-1) {
-		printf("seq_attach_memory - ERROR: %s \n", strerror(errno) );
-		return 0;
-	} else 
-		printf ("Client shm attached at address %p\n", sequencer_shared_memory); 	
-	
-	ipc_memory_sequencer		 = (struct sequencer_ipc_memory_map*)sequencer_shared_memory;
-	return 1;
+	int length = strlen(mSentence);	
+	int MaxAllowedLength = sizeof(ipc_memory->Sentence);	
+	if (length>MaxAllowedLength)
+		length = MaxAllowedLength;
+		
+	strcpy(ipc_memory->Sentence, mSentence);
+	ipc_memory->SentenceCounter++;
+	printf("|%s|:%d\n", ipc_memory->Sentence, ipc_memory->SentenceCounter );	
 }
-
-void seq_reattach_memory()
-{
-	/* Reattach the shared memory segment, at a different address. */ 
-	sequencer_shared_memory = (char*) shmat (sequencer_segment_id, (void*) 0x5000000, 0); 
-	if (sequencer_shared_memory==(char*)-1) {
-		printf("seq_attach_memory - ERROR: %s \n", strerror(errno) );
-		return;
-	}
-	ipc_memory_sequencer	 = (struct sequencer_ipc_memory_map*)sequencer_shared_memory;	
-	printf ("Client shm reattached at address %p\n", sequencer_shared_memory); 
-}
-
-void seq_detach_memory()
-{
-	/* Detach the shared memory segment. */
-	shmdt (sequencer_shared_memory);
-}
-
-int seq_get_segment_size()
-{
-	struct 		shmid_ds	shmbuffer;
-	/* Determine the segment’s size. */
-	shmctl (sequencer_segment_id, IPC_STAT, &shmbuffer);
-	int segment_size = shmbuffer.shm_segsz;
-	printf ("Client segment size: %d\n", segment_size);
-	return segment_size;
-}
-void seq_fill_memory()
-{
-	int size = seq_get_segment_size();
-	memset(sequencer_shared_memory, 0, size);
-//	for (int i=0; i<size; i++)
-//		sequencer_shared_memory[i] = (i%128); 
-}
-
-void seq_deallocate_memory(int msegment_id)
-{
-	/* Deallocate the shared memory segment. */ 
-	shmctl (msegment_id, IPC_RMID, 0);
-}
-
-/*********************************************************/
-/* Functions which access the data members:				 */
-/*********************************************************/
 
 /* WRITE IMPLIES TO SHARED MEMORY.  And since we are the abkInstant task,
 	the writes will be transfer to avisual
@@ -169,58 +106,49 @@ FORMAT:
 	char[255] 	Buffer
 */
 
-void seq_ipc_write_connection_status( char* mStatus )
+void SequencerIPC::write_connection_status( char* mStatus )
 {
-	int length = strlen(mStatus);	
-	int MaxAllowedLength = sizeof(ipc_memory_sequencer->ConnectionStatus);
+	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
+	
+	int length = strlen(mStatus);		
+	int MaxAllowedLength = sizeof(seq->ConnectionStatus);
 	if (length > MaxAllowedLength) {
 		length = MaxAllowedLength;	// do not write into memory of next variable.
 		mStatus[MaxAllowedLength] = 0;
 	}
-	ipc_memory_sequencer->StatusCounter++;
+	seq->StatusCounter++;
 
 	//printf("%d:Copying %d bytes to shared mem.\n", StatusCounter, length );
-	strcpy( ipc_memory_sequencer->ConnectionStatus, mStatus);
-	printf( "|%s|\n", ipc_memory_sequencer->ConnectionStatus );
+	strcpy( seq->ConnectionStatus, mStatus);
+	printf( "|%s|\n", seq->ConnectionStatus );
 }
 
-/*void seq_ipc_write_active_page( short NewActivePage )
-{
-	ipc_memory_avis->ScreenNumber = NewActivePage;
-} */
 
-bool ipc_write_sequence( int mIndex, struct stBodyPositionVector* mBP )
+bool SequencerIPC::ipc_write_sequence( int mIndex, struct stBodyPositionVector* mBP )
 {
-    if ((mIndex >= MAX_SEQUENCES) || (ipc_memory_sequencer == NULL))
+	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
+    if ((mIndex >= MAX_SEQUENCES) || (seq == NULL))
         return false;
     
-    ipc_memory_sequencer->SequenceArray[mIndex] = *mBP;
+    seq->SequenceArray[mIndex] = *mBP;
     return true;
 }
 
 // Return true if added.
-bool ipc_add_sequence( struct stBodyPositionVector*  mVector )
+bool SequencerIPC::ipc_add_sequence( struct stBodyPositionVector*  mVector )
 {
-    if (ipc_memory_sequencer == NULL)  return false;
+	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
+    if (seq == NULL)  return false;
     
-    int index = ipc_memory_sequencer->NumberSequences++;
-    if (ipc_memory_sequencer->NumberSequences >= MAX_SEQUENCES)
-        ipc_memory_sequencer->NumberSequences = 0;
+    int index = seq->NumberSequences++;
+    if (seq->NumberSequences >= MAX_SEQUENCES)
+        seq->NumberSequences = 0;
     
     return ipc_write_sequence( index, mVector);
 }
 
 
 /* See udp_transponder for update_client_list()		*/
-
- 
-#if (PLATFORM==Mac)
-char seq_segment_id_filename[] = "/Users/stephentenniswood/code/bk_code/shm_ids/seq_shared_memseg_id.cfg";
-#elif (PLATFORM==RPI)
-char seq_segment_id_filename[] = "/home/pi/bk_code/shm_ids/seq_shared_memseg_id.cfg";
-#elif (PLATFORM==linux_desktop)
-char seq_segment_id_filename[] = "/home/steve/bk_code/shm_ids/seq_shared_memseg_id.cfg";
-#endif
 
 
 /* The allocating should be done by abkInstant. 
@@ -231,69 +159,45 @@ Return :
 	0 => No connection.
 */
 
-int seq_connect_shared_sequencer_memory( char mAllocate )
-{
-	if (mAllocate)
-	{
-		int result = seq_allocate_memory( );
-		if (result == -1)	{
-			printf("Cannot allocate shared memory!\n");
-		}
-		seq_attach_memory( );
-		seq_fill_memory  ( );				
-		printf("Saving segment id: ");
-		seq_save_segment_id( seq_segment_id_filename );		
-		if ((ipc_memory_sequencer!=(struct sequencer_ipc_memory_map*)-1) && (ipc_memory_sequencer != NULL))
-			return 1;
-	}
-	 else  
-	{	
-		printf( "Reading segment id: %s\n", seq_segment_id_filename );
-		seq_read_segment_id( seq_segment_id_filename );
-		seq_attach_memory();	
-		if ((ipc_memory_sequencer!=(struct sequencer_ipc_memory_map*)-1) && (ipc_memory_sequencer != NULL))
-			return 1;			
-	}
-	return 0;	
-}
  
-char* get_connection_status()
+char* SequencerIPC::get_connection_status()
 {
-	return (ipc_memory_sequencer->ConnectionStatus);
+	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
+	return (seq->ConnectionStatus);
 }
 
 /******************** _is_new_____ functions *************************/
-BOOL  seq_is_new_connection_status	()
+BOOL  SequencerIPC::is_new_connection_status	()
 { 
-	if (ipc_memory_sequencer==NULL) return FALSE;
+	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
+	if (seq==NULL) return FALSE;
 	
-	if (ipc_memory_sequencer->StatusCounter > ipc_memory_sequencer->StatusAcknowledgedCounter)
-	{
+	if (seq->StatusCounter > seq->StatusAcknowledgedCounter)
 		return TRUE;
-	}
-	return FALSE;
-	
+	else 
+		return FALSE;
 }
-BOOL  seq_is_new_performance_status	()
+BOOL  SequencerIPC::is_new_performance_status	()
 {
-	if (ipc_memory_sequencer==NULL) return FALSE;
-	if (ipc_memory_sequencer->PerformanceUpdateCounter > ipc_memory_sequencer->PerformanceAcknowledgedCounter)
-	{
+	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
+	if (seq==NULL) return FALSE;
+	if (seq->PerformanceUpdateCounter > seq->PerformanceAcknowledgedCounter)
 		return TRUE;
-	}
-	return FALSE;	 
+	else 
+		return FALSE;	 
 }
-BOOL  seq_is_new_diagnostic_status	()
+BOOL  SequencerIPC::is_new_diagnostic_status	()
 { 
+	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
 	if (ipc_memory_sequencer==NULL) return FALSE;
 	if (ipc_memory_sequencer->DiagnosticUpdateCounter > ipc_memory_sequencer->DiagnosticAcknowledgedCounter)
-	{
 		return TRUE;
-	}
-	return FALSE;
+	else 
+		return FALSE;
 }
-BOOL  seq_is_new_enable_status	    ()
+BOOL  SequencerIPC::is_new_enable_status	    ()
 { 
+	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
 	if (ipc_memory_sequencer==NULL) return FALSE;
 	if (ipc_memory_sequencer->EnableUpdateCounter > ipc_memory_sequencer->EnableAcknowledgedCounter)
 	{
@@ -301,8 +205,9 @@ BOOL  seq_is_new_enable_status	    ()
 	}
 	return FALSE;
 }
-BOOL  seq_is_new_vector_status	    ()
+BOOL  SequencerIPC::is_new_vector_status	    ()
 { 
+	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
 	if (ipc_memory_sequencer==NULL) return FALSE;
 	if (ipc_memory_sequencer->VectorUpdateCounter > ipc_memory_sequencer->VectorAcknowledgedCounter)
 	{
@@ -312,30 +217,36 @@ BOOL  seq_is_new_vector_status	    ()
 	return FALSE;
 }
 /********** BEGIN _acknowledgement___ functions *************************/
-void seq_ack_connection_status	()
+void SequencerIPC::ack_connection_status	()
 { 
+	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
 	ipc_memory_sequencer->StatusAcknowledgedCounter = ipc_memory_sequencer->StatusCounter;
 }
-void seq_ack_performance_status	()
+void SequencerIPC::ack_performance_status	()
 { 
+	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
 	ipc_memory_sequencer->PerformanceAcknowledgedCounter = ipc_memory_sequencer->PerformanceUpdateCounter;
 }
-void seq_ack_diagnostic_status	()
+void SequencerIPC::ack_diagnostic_status	()
 { 
+	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
 	ipc_memory_sequencer->DiagnosticAcknowledgedCounter = ipc_memory_sequencer->DiagnosticUpdateCounter;
 }
-void seq_ack_enable_status	()
+void SequencerIPC::ack_enable_status	()
 { 
+	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
 	ipc_memory_sequencer->EnableAcknowledgedCounter = ipc_memory_sequencer->EnableUpdateCounter;
 }
-void seq_ack_vector_status	()
+void SequencerIPC::ack_vector_status	()
 { 
+	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
 	ipc_memory_sequencer->VectorAcknowledgedCounter = ipc_memory_sequencer->VectorUpdateCounter;
 }
 /********** END _acknowledgement___ functions *************************/
 
-void seq_print_sequence()
+void SequencerIPC::print_sequence()
 {
+	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
 	if (ipc_memory_sequencer==NULL) return ;
 	
 	int size = ipc_memory_sequencer->NumberSequences;
@@ -419,3 +330,8 @@ void seq_print_sequence()
 	strcpy( ptr, mClientText );
 	ipc_memory_sequencer->NumberClients++;
 }*/
+
+/*void seq_ipc_write_active_page( short NewActivePage )
+{
+	ipc_memory->ScreenNumber = NewActivePage;
+} */

@@ -29,7 +29,7 @@
 #include "math_protocol.hpp"
 #include "robot_arms_protocol.hpp"
 #include "robot_legs_protocol.hpp"
-#include "SEQUENCER_protocol.hpp"
+//#include "SEQUENCER_protocol.hpp"
 #include "calendar_protocol.hpp"
 #include "self_identity.hpp"
 #include "ThreeD_object_protocol.hpp"
@@ -110,7 +110,6 @@ void Init_General_Protocol( )
     
     //Init_Robot_Legs_Protocol();
     Init_Self_Identity_Protocol();
-    Init_Sequencer_Protocol();
     Init_Calendar_Protocol();
     
     Init_Family_Protocol();
@@ -144,17 +143,18 @@ int Parse_General_Statement( Sentence& theSentence, ServerHandler* mh )
     result = Parse_Self_Identity_Statement( theSentence, mh );
     if (result>=0)          return ( result);
 
+    result = Parse_EasterEggs_Statement( theSentence, mh );
+    if (result>=0)          return ( result);
+
 //    result = Parse_Robot_Legs_Statement( theSentence, mh  );
 //    if (result>=0)          return (end_of_telegram + result);
 
 //    result = Parse_Robot_Arms_Statement( theSentence, mh );
 //    if (result>=0)          return (end_of_telegram + result);
-
-    result = Parse_EasterEggs_Statement( theSentence, mh );
-    if (result>=0)          return ( result);
     
-    result = Parse_Sequencer_Statement( theSentence, mh );
-    if (result>=0)          return ( result);
+// this should be located inside the aseq app!
+//    result = Parse_Sequencer_Statement( theSentence, mh );
+//    if (result>=0)          return ( result);
     
     result = Parse_Family_Statement( theSentence, mh );
     if (result>=0)          return ( result);

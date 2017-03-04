@@ -47,7 +47,10 @@ Analog Board Configuration should be:
 #include "robot.hpp"
 #include "teach_pendant.hpp"
 #include "seq_init.hpp"
+#include "sequencer_memory.hpp"
 
+
+SequencerIPC  sequencer_mem;
 
 #define fifty_ms    50000000
 
@@ -234,6 +237,9 @@ int main( int argc, char *argv[] )
 {
 	char* SequenceFileName = "vectors_raw.ini";		// was "vectors_raw.ini"
 	print_args( argc, argv );
+	
+	sequencer_mem.connect_shared_memory(TRUE); 
+	
 	int first_param = 1;		// sudo ./pican cfg
 	int value    	= 0;
 	int resample_iterations = 0;
@@ -246,6 +252,20 @@ int main( int argc, char *argv[] )
 				help();
 				return 0;
 		}		
+		if ( strcmp(argv[1], "remote") == 0 )
+		{
+			printf("Inside REMOTE\n");
+			//setup_scheduler();					// sets a timer for  next_sequence_handler()
+			while (1)
+			{
+				if (sequencer_mem.is_new_sentence())
+				{
+					printf("NEW SENTENCE: %s\n", sequencer_mem.get_sentence() );					
+					sequencer_mem.ack_sentence_counter();
+				}
+			}
+		}
+
 		init();			
 		create_threads();		
 
@@ -431,8 +451,7 @@ int main( int argc, char *argv[] )
 					robot.next_vector();			// Advance to the next vector
 					//seq_counter_handled = seq_counter;
 
-					printf("next_sequence_handler() next_vector Done \n");
-					
+					printf("next_sequence_handler() next_vector Done \n");					
 					usleep(period_us);
 				}
 			  /* timer based - next_sequence_handler(); 
@@ -447,5 +466,6 @@ int main( int argc, char *argv[] )
 			printf("all iterations requested have completed.  Done.\n");		
 		}
 	}
+	
 }
 

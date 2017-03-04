@@ -39,8 +39,6 @@
 #include "timer.h"
 #include "vector_file.h"
 #include "robot.hpp"
-
-#include "sequencer_memory.hpp"
 #include "seq_init.hpp"
 
 
@@ -48,6 +46,7 @@
 struct sCAN msg;
 TeachPendant 	teach_pendant;
 char 	ConfigureFileName2[] = "config_new.ini";
+
 
 
 void Button1r_isr()
@@ -150,7 +149,8 @@ void init()
 	setup_teach();
 	
 	// SHARED MEM (for receiving commands via Instant) :
-	int result = seq_connect_shared_sequencer_memory(TRUE);
+	//int result = seq_connect_shared_sequencer_memory(TRUE); see main.cpp
+	
 }
 
 
@@ -196,6 +196,8 @@ void help()
 	printf("\t[repeat times]\t\tSpecifies how many times the sequence should be repeated.\n");
 	printf("			  \t use -1 for infinite.\n"									 );
 	printf("\n"	 );
+	printf("remote\tLoop idle until we receive commands via Instant server.\n"	 		);		
+	printf("      \ttext commands are described via Sequencer_protocol.cpp\n");
 }
 
 void print_args(int argc, char *argv[])

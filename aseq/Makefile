@@ -18,7 +18,7 @@ MACROS = -DPLATFORM=$(PLATFORM) -DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -D
 
 cc		 = g++
 OPTIONS	 =  -lm
-INC		 = ../core/can ../core/msg ../core/misc ../core/ipc
+INC		 = ../core/can ../core/msg ../core/misc ../core/ipc ../core/dbase/
 SELF_INC = ./
 CFLAGS 	= -lwiringPi -lm -lrt $(MACROS)
 DEPS   	= 
@@ -31,7 +31,8 @@ CAN_OBJS =  CAN_Interface.o can_instance.o can_eid.o can_rxbuff.o can_txbuff.o  
 	        bk_system_defs.o can_id_list.o system_msgs_callback.o 
 MISC_OBJS = buttons.o leds.o vector_math.o timer.o preferences.o 
 MSG_OBJS  = packer_lcd.o packer_motor.o packer.o 
-IPC_OBJS  = sequencer_memory.o
+IPC_OBJS  = sequencer_memory.o shm_base.o
+DBASE_OBJS = machine_defs.o
 CPPOBJ 	  = 
 
 %.o: %.cpp $(DEPS)
@@ -44,6 +45,7 @@ CPPOBJ 	  =
 LD_FLAGS = -lpthread
 
 seq: $(OBJ) $(addprefix ../core/can/, $(CAN_OBJS)) \
+			$(addprefix ../core/dbase/, $(DBASE_OBJS)) \
 			$(addprefix ../core/msg/, $(MSG_OBJS)) \
 			$(addprefix ../core/ipc/, $(IPC_OBJS)) \
 			$(addprefix ../core/misc/,$(MISC_OBJS)) 

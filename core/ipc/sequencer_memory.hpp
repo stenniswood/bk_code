@@ -26,7 +26,6 @@
 	and this - such as body pose.  Provision is made to load sequences
 	from simulator to sequencer directly.
  ************************************************************/
-
 #include <list>
 #include "global.h"
 #include "body_pose.h"
@@ -49,11 +48,7 @@ struct stDiagnosticData
 	float	servo_energy [MAX_SERVOS];
 };
 
-/*struct stBodyPositionVector 
-{
-	int 	num_active_servos;
-	float	servo_values[MAX_SERVOS];	// See "struct stBodyPosition" at bottom of this file for order definition:
-};*/
+
 
 /******************** sequencer MEMORY MAP *****************/
 struct sequencer_ipc_memory_map
@@ -61,6 +56,15 @@ struct sequencer_ipc_memory_map
 	long int StatusCounter;
 	char	 ConnectionStatus[64];
 	long int StatusAcknowledgedCounter;
+
+	long int SentenceCounter;
+	Uint32_t SentenceAcknowledgedCounter;
+	char	 Sentence        [128];	
+
+	char	 Response[255];								// verbal commands (NLP) activate connection requests.
+	Uint32_t ResponseCounter;							// Incremented on change to any of below:
+	Uint32_t ResponseAcknowledgedCounter;				// Incremented on change to any of below:
+    char     ResponderName[100];                        // "instant", "simulator", etc
 
 	// PERFORMANCE DATA (for evaluation the robot's motion):
 	long int PerformanceUpdateCounter;			// Incremented on change to any of below:
@@ -84,53 +88,56 @@ struct sequencer_ipc_memory_map
 	struct stBodyPositionVector SequenceArray[MAX_SEQUENCES];		// String array (dimension of NumberClients)
 };
 /******************** sequencer MEMORY MAP *****************/
-extern char* 	sequencer_shared_memory;
-extern int 		sequencer_segment_id;
-extern struct   sequencer_ipc_memory_map* ipc_memory_sequencer;
-/*********************************************************/
-
-/*********** SHARED MEMORY SEGMENT FUNCTIONS **************/
-void seq_dump_ipc			( );
-void seq_save_segment_id	(char* mFilename);
-int  seq_read_segment_id	(char* mFilename);
-int  seq_allocate_memory	( );
-void seq_deallocate_memory	( int msegment_id );
-int  seq_attach_memory		( );
-void seq_detach_memory		( );
-void seq_reattach_memory	( );
-int  seq_get_segment_size   ( );
-void seq_fill_memory		( );
-/************************************************************/
 
 //bool seq_new_command_available( );
 //void seq_acknowledge_command( );
+#include "shm_base.hpp"
 
-/*********** MEMORY DATA ACCESS FUNCTIONS **************/
-// for instant to fill in the shared mem buffer:
-void seq_ipc_write_connection_status( char* mStatus   );
-void seq_ipc_write_performance_data ( struct stPerformanceData* mData  );
-void seq_ipc_write_diagnostic_data  ( struct stDiagnosticData*  mData  );
-void seq_ipc_write_enables	        ( BOOL* mEnableArray, int mSize    );
-void seq_ipc_write_vector           ( struct stBodyPositionVector* mStatus );
 
-void seq_print_sequence		    	( );
+class SequencerIPC : public SHMBase
+{
+	public:
+	SequencerIPC();
+	~SequencerIPC();
+	
+	struct  sequencer_ipc_memory_map* get_memory_seq()	{ return (struct  sequencer_ipc_memory_map*)m_shared_memory;  };
+	
+	/*********** MEMORY DATA ACCESS FUNCTIONS **************/
+	// for instant to fill in the shared mem buffer:
+	void write_connection_status( char* mStatus   );
+	void write_performance_data ( struct stPerformanceData* mData  );
+	void write_diagnostic_data  ( struct stDiagnosticData*  mData  );
+	void write_enables	        ( BOOL* mEnableArray, int mSize    );
+	void write_vector           ( struct stBodyPositionVector* mStatus );
+	void write_sentence		   	( char* mSentence );
+	
+	void  print_sequence		    ( );
 
-int   seq_connect_shared_sequencer_memory( char mAllocate=FALSE );
-char* seq_get_connection_status		();
+	char*	get_sentence					();
+	BOOL 	is_new_sentence					();
+	int  	read_sentence_counter			();	
+	void 	ack_sentence_counter			();
+	void	wait_for_ack_sentence_counter	();
+	
 
-BOOL  seq_is_new_connection_status	();
-BOOL  seq_is_new_performance_status	();
-BOOL  seq_is_new_diagnostic_status	();
-BOOL  seq_is_new_enable_status	    ();
-BOOL  seq_is_new_vector_status	    ();
+	char* get_connection_status		();
 
-void seq_ack_connection_status	();
-void seq_ack_performance_status	();
-void seq_ack_diagnostic_status	();
-void seq_ack_enable_status		();
-void seq_ack_vector_status		();
+	BOOL  is_new_connection_status	();
+	BOOL  is_new_performance_status	();
+	BOOL  is_new_diagnostic_status	();
+	BOOL  is_new_enable_status	    ();
+	BOOL  is_new_vector_status	    ();
 
-bool ipc_add_sequence           ( struct stBodyPositionVector*  mVector );
+	void  ack_connection_status		();
+	void  ack_performance_status	();
+	void  ack_diagnostic_status		();
+	void  ack_enable_status			();
+	void  ack_vector_status			();
+
+	bool  ipc_add_sequence          ( struct stBodyPositionVector*  mVector );
+	bool  ipc_write_sequence		( int mIndex, struct stBodyPositionVector* mBP );
+
+};
 
 /************************************************************/
 
@@ -192,3 +199,8 @@ struct stBodyPosition {     // all angles given in degrees!
     float   head_tilt;
 };
 
+/*struct stBodyPositionVector 
+{
+	int 	num_active_servos;
+	float	servo_values[MAX_SERVOS];	// See "struct stBodyPosition" at bottom of this file for order definition:
+};*/
