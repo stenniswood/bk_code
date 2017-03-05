@@ -89,6 +89,11 @@ int handle_telegram( ServerHandler* h, char* mTelegram )
 			b) As a routing request relay (if setup)
 			c) As NLP question. (will set up routes)
 	*/
+	char key_word[40];
+	char* ptr = strchr(mTelegram, ';');
+	if (ptr) {
+		*ptr = 0;		strcpy( key_word, mTelegram );		*ptr = ';';
+	}
 	if (h->m_credentials_validated==false)
 	{
 		printf("Authenticating\n");
@@ -96,6 +101,14 @@ int handle_telegram( ServerHandler* h, char* mTelegram )
 		//next_telegram_ptr = (mTelegram+strlen(mTelegram)+1);
 		return strlen(mTelegram)+1;
 	} 
+	else if (strcmp(key_word, "Device Info")==0)
+	{
+		printf("Device Info RECEIVED:\n%s\n", ptr );
+	}
+	else if (strcmp(key_word, "Device Capabilities")==0)
+	{
+		printf("Device Capabilities RECEIVED:\n%s\n", ptr );
+	}
 	else if (h->routes.size()) 
 	{
 		int len = strlen(mTelegram);
@@ -328,8 +341,8 @@ int connect_to_robot(char *ip_address )
     } 
 	printf("ROBOT CLIENT Connected\n");
 	send_credentials (sockfd);
-	send_device_info (sockfd);
-	send_device_capabilities(sockfd);
+	//send_device_info (sockfd);
+	//send_device_capabilities(sockfd);
 
 	ServerHandler* sh = new ServerHandler();	
 	sh->m_credentials_validated = true;		// Since we are client and authenticating into viki.

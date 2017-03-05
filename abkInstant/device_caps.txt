@@ -1,4 +1,4 @@
-Device Capabilities:
+Device Capabilities;
 Audio Input:true;
 Audio Output:true;
 Video Input:camera;

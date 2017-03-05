@@ -78,11 +78,9 @@ void SSerial::close()
 
 int SSerial::available()
 {
-	int retval = poll( &serial_poll, 1, 20 );
+	int retval = poll( &serial_poll, 1, 5 );	// 20 ms timeout
 	if (serial_poll.revents & POLLIN)
-	{
 		return TRUE;
-	}
 	return FALSE;
 }
 
@@ -95,13 +93,24 @@ char SSerial::serialGetchar()
 	
 	//printf( "Getchar() "); fflush(stdout);
 	char      buff[3];
-	const int LOOPS = 30000;
+	const long int LOOPS = 600000;
 	int c;
 	long int count=0;
-	do {
-		c = ::read( fd, (void*)&buff, 1 );
-		count++;
-	} while ((c==0) || ((c==-1) && (count<LOOPS)));
+	if (available()) {
+//	do {	
+			c = ::read( fd, (void*)&buff, 1 );
+			if (c==0) printf("0");
+			else if (c==-1) printf("?");
+			else printf("%c", buff[0]);		
+			return buff[0];
+		}
+		else {
+			printf("no data\n");
+			return 0;
+		}
+		
+//			count++;
+//	} while ((c==0) || ((c==-1) && (count<LOOPS)));
 
 	//printf( "c=%d; count=%d; ", c, count); 	fflush(stdout);
 	if (count>=LOOPS) {
@@ -111,7 +120,8 @@ char SSerial::serialGetchar()
 	}
 //	else
 //		printf(" %x_%c ", buff[0], buff[0]);
-	return buff[0];
+		
+
 }
 
 
@@ -131,7 +141,7 @@ void SSerial::print_buffer(char* mBuffer, int mLength )
 	printf("print_buffer:\n");
 	for (int i=0; i<mLength; i++)
 	{
-		printf(" %2x ", mBuffer[i] );
+		//printf(" %2x ", mBuffer[i] );
 	}
 	printf("\n");
 }
@@ -161,7 +171,7 @@ size_t	SSerial::write( char mBuffer )
 	//printf(" %2x ", mBuffer );
 	// since all writes block, we are free to send immediately.	
 	size_t retval = ::write(fd, &mBuffer, 1);
-	fsync(fd);	
+//	fsync(fd);	
 	return retval;
 }
 

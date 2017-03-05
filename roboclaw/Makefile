@@ -5,9 +5,12 @@ CFLAGS 	= -lwiringPi -lm
 DEPS   	= 
 KINETIC_OBJ  = vector_file.o vector.o 
 MISC_OBJ     = preferences.o string_util.o 
-OBJ          = gpio.o claw_main.o sserial.o roboclaw.o serial_loadcell.o 
-DBASE_OBJS   = can_sql_logger.o 
-HARDWARE_OBJ = robot_claw.o leg_claw.o arm_claw.o 
+OBJ          = claw_main.o sserial.o roboclaw.o 
+#serial_loadcell.o gpio.o 
+DBASE_OBJS   = can_sql_logger.o sql_common.o
+HARDWARE_OBJ = 
+#robot_claw.o 
+#leg_claw.o arm_claw.o 
 #configuration.o leds.o can_id_list.o 
 
 CPPOBJ = 

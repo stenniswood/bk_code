@@ -9,25 +9,29 @@
 #include "roboclaw.h"
 #include "global.h"
 
+
 #define MAXRETRY 2
 #define SetDWORDval(arg) (uint8_t)(((uint32_t)arg)>>24),(uint8_t)(((uint32_t)arg)>>16),(uint8_t)(((uint32_t)arg)>>8),(uint8_t)arg
 #define SetWORDval(arg)  (uint8_t)(((uint16_t)arg)>>8),(uint8_t)arg
 
 #define Debug 1
 
+uint64_t GetTimeStamp2() 
+{
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    uint64_t t = tv.tv_sec*(uint64_t)1000000 + tv.tv_usec;
+    //printf("GetTimeStamp()  %ld  %ld  = %ld\n", tv.tv_sec, tv.tv_usec, t );
+    return t;
+}
+
 /*	Constructor:
 	mPortName : for instance "/dev/ttyACM0"	
 */
 RoboClaw::RoboClaw( const char* mPortName, uint32_t time_out )
-:SSerial( )
+:SSerial( mPortName )
 {
-	connected = false;
-	_cl_tx_bytes    = 50;
-	_cl_port 		= strdup(mPortName);
-	_cl_baud 		= 9600;
-	_cl_tx_detailed = 1;
 	timeout = time_out;
-	//Dprintf("RoboClaw::ctor() port=%s\n", _cl_port );
 }
 
 //
@@ -69,13 +73,13 @@ char RoboClaw::read( uint32_t timeout )
 		  return -1;
 		}
 	}
-	return SSerial::read();
+	return SSerial::serialGetchar();
 } 
 
 void RoboClaw::clear()
 {
 	while(available())
-		SSerial::read();
+		SSerial::serialGetchar();
 }
 
 void RoboClaw::crc_clear()
@@ -105,7 +109,9 @@ uint16_t RoboClaw::crc_get()
 */
 bool RoboClaw::write_n(uint8_t cnt, ... )
 {
-	printf( "write_n() %s: ", _cl_port );
+	if (connected==false)	return false;
+	
+	//printf( "write_n() ");	fflush(stdout);
 	uint8_t trys=MAXRETRY;
 	do{
 		crc_clear();				 // send data with crc
@@ -130,11 +136,12 @@ bool RoboClaw::write_n(uint8_t cnt, ... )
 		//response = rx_buffer[0]
 		char response = serialGetchar();		
 		if(response==0xFF) {
-			printf("\n");
+			//printf("\n");
 			return true;
 		}
+		//printf( "retrying ");	fflush(stdout);		
 	} while(trys--);
-	printf("\n");
+	//printf("\n");
 	return false;
 }
 
@@ -144,7 +151,7 @@ bool RoboClaw::read_n(uint8_t cnt, uint8_t address, uint8_t cmd,...)
 	uint8_t trys=MAXRETRY;
 	int16_t data;
 	do{
-		flush();
+		flush_inbuff();
 
 		data=0;
 		crc_clear();
@@ -225,7 +232,7 @@ uint8_t RoboClaw::Read1(uint8_t address,uint8_t cmd,bool *valid){
 	uint8_t trys=MAXRETRY;
 	int16_t data;
 	do{
-		flush();
+		flush_inbuff();
 
 		crc_clear();
 		write(address);
@@ -267,7 +274,7 @@ uint16_t RoboClaw::Read2(uint8_t address,uint8_t cmd,bool *valid){
 	uint8_t trys=MAXRETRY;
 	int16_t data;
 	do{
-		flush();
+		flush_inbuff();
 
 		crc_clear();
 		write(address);
@@ -316,7 +323,7 @@ uint32_t RoboClaw::Read4(uint8_t address, uint8_t cmd, bool *valid){
 	uint8_t trys=MAXRETRY;
 	int16_t data;
 	do{
-		flush();
+		flush_inbuff();
 
 		crc_clear();
 		write(address);
@@ -376,7 +383,7 @@ uint32_t RoboClaw::Read4_1(uint8_t address, uint8_t cmd, uint8_t *status, bool *
 	uint8_t trys=MAXRETRY;
 	int16_t data;
 	do{
-		flush();
+		flush_inbuff();
 
 		crc_clear();
 		write(address);
@@ -515,7 +522,7 @@ bool RoboClaw::ReadVersion(uint8_t address, char *version)
 	uint8_t trys=MAXRETRY;
 	printf(" %s: ", _cl_port );
 	do{
-		flush();
+		flush_inbuff();
 		data = 0;		
 		crc_clear();
 		crc_update(address);
@@ -823,7 +830,7 @@ bool RoboClaw::GetPinFunctions(uint8_t address, uint8_t &S3mode, uint8_t &S4mode
 	uint8_t trys=MAXRETRY;
 	int16_t data;
 	do{
-		flush();
+		flush_inbuff();
 
 		crc_clear();
 		crc_update(address);
@@ -997,6 +1004,31 @@ size_t RoboClaw::write2(uint8_t byte)
 {
 	Dprintf  ("%2x ", byte );
 	return 0;
+}
+
+bool RoboClaw::UpdateStatus			( )		// populate internal variables.
+{
+	bool valid;
+	m_status = ReadError(0x80, &valid );
+	return valid;
+}
+bool RoboClaw::UpdateCurrents		( )
+{
+	bool valid = ReadCurrents(0x80, m_current1, m_current2);
+	return valid;
+}
+bool RoboClaw::UpdateTemps			( )
+{
+	bool valid = ReadTemp(0x80, m_temperature1);
+	valid = ReadTemp2(0x80, m_temperature2);
+	return valid;	
+}
+
+bool RoboClaw::Update				( )
+{
+	UpdateStatus();
+	UpdateCurrents();
+	UpdateTemps();	
 }
 
 

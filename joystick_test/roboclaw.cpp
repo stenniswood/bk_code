@@ -20,7 +20,7 @@ uint64_t GetTimeStamp2()
 {
     struct timeval tv;
     gettimeofday(&tv,NULL);
-    uint64_t t = tv.tv_sec*(uint64_t)1000000 + tv.tv_usec;
+    uint64_t t = tv.tv_sec + tv.tv_usec*(uint64_t)1000000;
     //printf("GetTimeStamp()  %ld  %ld  = %ld\n", tv.tv_sec, tv.tv_usec, t );
     return t;
 }
@@ -64,17 +64,22 @@ extern uint64_t 	   GetTimeStamp2();
 
 char RoboClaw::read( uint32_t timeout )
 {
+	int count=0;
 	uint32_t start = GetTimeStamp2();
 	while(!available())
 	{
+		count++;
 	   if((GetTimeStamp2()-start)>=timeout)
 		{	
-		  //printf("RoboClaw::read timeout!\n");
+		  printf("RoboClaw::read timeout! %d\n", count);
 		  return -1;
 		}
-	}
-	return SSerial::serialGetchar();
-} 
+	} 
+	if (available())
+		return SSerial::serialGetchar();
+	printf("Claw::read Timeout\n");
+	return -1;
+}
 
 void RoboClaw::clear()
 {
@@ -134,7 +139,7 @@ bool RoboClaw::write_n(uint8_t cnt, ... )
 		//printf("crc=|%4x|\n", crc);
 		//size_t len = read(1);
 		//response = rx_buffer[0]
-		char response = serialGetchar();		
+		char response = serialGetchar();	
 		if(response==0xFF) {
 			//printf("\n");
 			return true;
@@ -520,33 +525,40 @@ bool RoboClaw::ReadVersion(uint8_t address, char *version)
 {
 	uint8_t data;
 	uint8_t trys=MAXRETRY;
-	printf(" %s: ", _cl_port );
-	do{
+	printf("ReadVersion %s: ", _cl_port );
+	do {
+		printf("TRY #%d\n", trys);
 		flush_inbuff();
 		data = 0;		
 		crc_clear();
 		crc_update(address);
 		crc_update(GETVERSION);
 		printf(" %x %x \n", address, GETVERSION );
-		
+
 		write(address);
 		write(GETVERSION);
 
 		uint8_t i;
-		for(i=0;i<48;i++){
-			if(data!=-1){
-				data=serialGetchar(); // read(timeout);
+		for(i=0;i<48;i++) {
+
+			if(data!=-1) {
+				data=read(timeout);
+				printf("%2x,", data); 
 				if (data==(uint8_t)-1) { printf("timeout\n"); i=48; break; }
+					
 				version[i] = data;
 				crc_update(version[i]);
-				if(version[i]==0) {
+				
+				if(version[i]==0) {	// null terminator, end of version text.
+					printf("check crc\n");
 					uint16_t ccrc;
-					data = serialGetchar(); // read(timeout);
-					if(data!=-1){
+					data = read(timeout);	// first byte of crc
+					if(data!=-1){		
 						ccrc = data << 8;
-						data = serialGetchar(); // read(timeout);
+						data = read(timeout);	// 2nd byte of crc
 						if(data!=-1){
-							ccrc |= data;
+							ccrc |= data;			// form 16 bit crc
+							printf("ccrc=%4x\n", ccrc);
 							return crc_get()==ccrc;
 						}
 					}
@@ -1002,7 +1014,7 @@ bool RoboClaw::GetPWMMode(uint8_t address, uint8_t &mode){
 //	virtual size_t  write		( uint8_t byte     );
 size_t RoboClaw::write2(uint8_t byte)
 {
-	Dprintf  ("%2x ", byte );
+	//Dprintf  ("%2x ", byte );
 	return 0;
 }
 
