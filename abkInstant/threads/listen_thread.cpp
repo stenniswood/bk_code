@@ -36,7 +36,7 @@
 #include "FILE_protocol.hpp"
 #include "AUDIO_protocol.hpp"
 #include "CAMERA_protocol.hpp"
-#include "visual_memory.h"
+//#include "visual_memory.h"
 #include "bk_system_defs.h"
 #include "client_memory.hpp"
 

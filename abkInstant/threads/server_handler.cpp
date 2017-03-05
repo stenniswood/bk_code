@@ -20,7 +20,7 @@
 #include "global.h"
 
 #include "serverthread.hpp"
-#include "visual_memory.h"
+//#include "visual_memory.h"
 #include "GENERAL_protocol.hpp"
 
 #include "simulator_memory.h"
@@ -100,6 +100,7 @@ bool ServerHandler::parse_credentials( string mCredentials )
 	SuperString str = mCredentials;
 	
 	int count = str.split(';');
+	
 	if (count < 2)
 		return false;
 	SuperString name = str.m_split_words[0];
