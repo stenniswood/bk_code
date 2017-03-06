@@ -29,6 +29,8 @@
 
 #include "calendar_entry.hpp"
 #include "calendar_protocol.hpp"
+#include "sql_common.hpp"
+
 
 extern time_t    now;
 extern struct tm bd_now;
@@ -167,7 +169,8 @@ void Init_Calendar_Protocol()
     time(&t);
     current_date = *localtime(&t);
     
-    ce.connect_to_calendar_db();
+    connect_to_users_db();
+    //ce.connect_to_calendar_db();
 }
 
 char* form_date_string()

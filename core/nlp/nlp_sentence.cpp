@@ -23,6 +23,7 @@
 
 Sentence::Sentence()
 {
+	m_always_convert_to_lowercase=true;
 	m_eat_words		= false;
     m_raw_sentence  = NULL;
     m_voice_response= false;
@@ -57,7 +58,8 @@ bool Sentence::prefilter_text(  )
     m_voice_response = false;
     
     m_sentence.trim_spaces();
-    m_sentence.convert_to_lower_case();
+	if (m_always_convert_to_lowercase)
+	    m_sentence.convert_to_lower_case();
     
     // REMOVE PUNCTUATION
     m_question = (m_sentence[m_sentence.length()-1]=='?');
@@ -107,7 +109,7 @@ void Sentence::reduce_sentence( vector<int> mWordIndices )
 }
 
 int Sentence::regex_find( string  mRegexpression )
-{
+{ 
     return m_sentence.regex_find(mRegexpression, &answers, &remove_wi );
     
     // Now remove words from m_reduced_sentence

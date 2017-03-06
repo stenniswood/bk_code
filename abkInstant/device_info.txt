@@ -1,4 +1,5 @@
 Device Info;
+hostname:roadsucces2
 Pet_names:(main TV|TV|livingroom TV);
 Platform:RPI;
 OS:Rasbian;

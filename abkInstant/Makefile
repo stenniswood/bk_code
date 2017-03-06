@@ -2,8 +2,8 @@ RPI = 1
 linux_desktop = 2
 Mac = 3
 
-PLATFORM  = $(RPI)
-#PLATFORM = $(linux_desktop)
+#PLATFORM  = $(RPI)
+PLATFORM = $(linux_desktop)
 #PLATFORM  = $(Mac)
 
 ifeq ($(PLATFORM), $(RPI))
@@ -24,7 +24,7 @@ OPTIONS	   = -std=c99 -g -fpermissive -Wwrite-strings -Wno-deprecated -w
 
 INC_CORE   = ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/   \
 			 ../core/wifi/ ../core/libs/ilclient/ ../core/kinetic/ ../core/hardware/ \
-			 ../core/nlp/ ../core/adrenaline/molecules/calendar/ ../core/dbase/
+			 ../core/nlp/ ../core/adrenaline/molecules/calendar/ ../core/mysql/
 LOCAL_INC  =  ./threads/ ./nlp_protocol/ ./nlp_adrenaline/ ./voice/ ./util/ ./nlp_core/ $(HARDWARE_PATH) \
 SYSTEM_INC =  /home/pi/raspicam/interface \
 			 /opt/vc/include/  /opt/vc/include/interface/vmcs_host/linux/
@@ -67,12 +67,11 @@ WIFI_OBJS     = udp_transponder.o
 #client.o
 VIDEO_OBJS    = vc_vchi_gencmd.c vc_vchi_filesys.c vc_vchi_dispmanx.c vc_vchi_cecservice.c \
 				vc_service_common.c vcilcs_out.c vcilcs_in.c vcilcs_common.c vcilcs.c
-CALENDAR_OBJS = calendar_entry.o 
+
 # APP CODE calendar.o calendar_summary.o 
 UTIL_OBJS = tk_colors.o client_to_socket.o AUDIO_file_util.o CAMERA_util.o CAN_util.o IMAGE_file_util.o VIDEO_file_util.o
 
-DBASE_OBJS = machine_defs.o
-MYSQL_OBJS = sql_users.o
+MYSQL_OBJS = machine_defs.o sql_users.o sql_device.o calendar_entry.o sql_common.o 
 NLP_CORE_OBJS = super_string.o nlp_extraction.o nlp_sentence.o alias.o 
 
 NLP_PROTOCOL_OBJS = adrenaline_creator.o color_protocol.o IMAGE_protocol.o parameter.o \
@@ -115,13 +114,12 @@ endif
 instant: $(APP_CPP_OBJS) 						\
 		$(addprefix ../core/nlp/, 	$(NLP_CORE_OBJS)) 	\
 		$(addprefix ./threads/, 	$(THREAD_OBJS)) 	\
-		$(addprefix ./mysql/, 		$(MYSQL_OBJS)) 		\
+		$(addprefix ../core/mysql/, $(MYSQL_OBJS)) 		\
 		$(addprefix ../core/adrenaline/molecules/calendar/, $(CALENDAR_OBJS)) 	\
 		$(addprefix ./nlp_protocol/, $(NLP_PROTOCOL_OBJS)) 	\
 		$(addprefix ./util/, 		$(UTIL_OBJS)) 		\
 		$(addprefix $(HARDWARE_PATH), 	$(HARDWARE_OBJS)) 	\
 		$(addprefix ../core/ipc/, 	$(IPC_OBJS)) 		\
-		$(addprefix ../core/dbase/,	$(DBASE_OBJS)) 		\
 		$(addprefix ../core/kinetic/, 	$(KINETIC_OBJS)) 	\
 		$(addprefix ../core/can/, 	$(CAN_OBJS)) 		\
 		$(addprefix ../core/msg/, 	$(MSG_OBJS)) 		\
@@ -154,6 +152,7 @@ clean:
 	rm -rf ./util/*.o
 	rm -rf ./mysql/*.o	
 	rm -rf *.lst *.map $(EXTRA_CLEAN_FILES)
+	rm -rf ../core/adrenaline/molecules/calendar/*.o
 
 #prefilter.o 
 #ordering_protocol.o CAN_util.o IMAGE_file_util.o 

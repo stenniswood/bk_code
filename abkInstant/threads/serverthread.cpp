@@ -28,6 +28,7 @@
 #include "GENERAL_protocol.hpp"
 #include "simulator_memory.h"
 #include "sql_users.hpp"
+#include "sql_device.hpp"
 #include "user_list.hpp"		// for RAM binding of sockets.
 #include "protocol.h"
 #include "top_level_protocol.hpp"
@@ -80,6 +81,42 @@ void handle_login(ServerHandler* h, const char* mCreds)
 	print_user_list();
 }
 
+
+void register_device_if_not_already(int mUserid, char* mDeviceInfo )
+{
+	SuperString info = mDeviceInfo;
+	info.split(';');
+	info.trim_spaces_in_splits();
+	char fields[] = "( user_id, device_name, personal_name, device_type )";
+	string values = std::to_string(mUserid);
+		
+	for (int i=0; i<info.m_split_words.size(); i++)
+	{
+		info.m_split_words[i].split(':');
+		if (info.m_split_words[i].m_split_words[0].compare("hostname"))
+		{
+			values += ", '";
+			values += info.m_split_words[i].m_split_words[1];
+			values += "'";
+		}
+		if (info.m_split_words[i].m_split_words[0].compare("Pet_names"))
+		{
+			values += ", ";		
+			values += info.m_split_words[i].m_split_words[1];
+			values += "'";
+		}
+		if (info.m_split_words[i].m_split_words[0].compare("Platform"))
+		{
+			values += ", ";		
+			values += info.m_split_words[i].m_split_words[1];
+			values += "'";
+		}
+	}
+	printf("register_device_if_not_already(): \n");
+	sql_devices.sql_add_if_not_already( mUserid, fields, values, "successroad1");
+}		
+
+
 /* Return :  number of bytes to advance text pointer.
 */
 int handle_telegram( ServerHandler* h, char* mTelegram )
@@ -103,11 +140,12 @@ int handle_telegram( ServerHandler* h, char* mTelegram )
 	} 
 	else if (strcmp(key_word, "Device Info")==0)
 	{
-		printf("Device Info RECEIVED:\n%s\n", ptr );
+		printf("Device Info RECEIVED:\n" );
+		register_device_if_not_already(h->m_user_id, mTelegram);
 	}
 	else if (strcmp(key_word, "Device Capabilities")==0)
 	{
-		printf("Device Capabilities RECEIVED:\n%s\n", ptr );
+		printf("Device Capabilities RECEIVED:\n" );
 	}
 	else if (h->routes.size()) 
 	{
@@ -341,8 +379,8 @@ int connect_to_robot(char *ip_address )
     } 
 	printf("ROBOT CLIENT Connected\n");
 	send_credentials (sockfd);
-	//send_device_info (sockfd);
-	//send_device_capabilities(sockfd);
+	send_device_info (sockfd);
+	send_device_capabilities(sockfd);
 
 	ServerHandler* sh = new ServerHandler();	
 	sh->m_credentials_validated = true;		// Since we are client and authenticating into viki.

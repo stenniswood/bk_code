@@ -333,17 +333,21 @@ int SuperString::regex_reduce()
     }
     return 0;
 }
+
 int SuperString::regex_find( string&  mRegexpression, vector<int>* answers, vector<int>* remove_wi )
 {
     m_regex = mRegexpression;
     regex regex  ( m_regex );
-    regex_search ( *this, regex_matches, regex );
+    //printf("string=%s; regex=%s\n", this->c_str(), m_regex.c_str());
+    bool match = regex_search( *this, regex_matches, regex );
  
     if (Debug) {
     //    for (auto x:regex_matches)
     //        std::cout<< x <<" "<<std::endl;
     }
-    return (int)regex_matches.size();
+	if (match) return 1;
+	return 0;
+    //return (int)regex_matches.size();
 }
 
 /* After performing a regex_find() with an expression that has "()" in it.  */

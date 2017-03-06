@@ -291,16 +291,13 @@ aVisualMemory avisual_mem;
 SequencerIPC  sequencer_mem;
 
 
+#include "sql_device.hpp"
+
 int main( int argc, char *argv[] )
 {
 	signal(SIGINT, shutdown); 	// in Ctrl-C event.
 	avisual_mem.connect_shared_memory(FALSE); 
-	sequencer_mem.connect_shared_memory(FALSE); 
-
-	sequencer_mem.write_sentence( "HELLO JACK NICHOLAS HERE!\n");
-	sequencer_mem.wait_for_ack_sentence_counter();
-	sequencer_mem.write_sentence( "HELLO Shadow HERE!\n");
-	
+	sequencer_mem.connect_shared_memory(FALSE); 	
 	
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg 
@@ -321,6 +318,7 @@ int main( int argc, char *argv[] )
 		}		
 	}
 	
+//	test_devices_db();
 //	exit(1);
 	
 	//protocol_unit_tests();		// will exit the app when done testing!

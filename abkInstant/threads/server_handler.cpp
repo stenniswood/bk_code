@@ -43,7 +43,9 @@ ServerHandler::ServerHandler()
     ticks           = 0;
     keep_open       = true;
 }
-
+ServerHandler::~ServerHandler()
+{
+}
 void ServerHandler::SendTelegram( unsigned char* mBuffer, int mSize)
 {
     write(connfd, mBuffer, mSize );
@@ -100,6 +102,7 @@ bool ServerHandler::parse_credentials( string mCredentials )
 	SuperString str = mCredentials;
 	
 	int count = str.split(';');
+	str.trim_spaces_in_splits();	
 	
 	if (count < 2)
 		return false;
@@ -127,8 +130,8 @@ bool ServerHandler::validate( string mCredentials )
 	bool ok = parse_credentials( mCredentials );
 	if 	(ok)
 	{
-		int found = sql_users.sql_find( m_login_name );
-		if (found)
+		m_user_id = sql_users.sql_find( m_login_name );
+		if (m_user_id)
 		{
 			printf("Found the username in dbase :\t");
 			m_credentials_validated = sql_users.verify_password( m_login_name, m_login_password );

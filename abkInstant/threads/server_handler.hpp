@@ -13,6 +13,7 @@
 class ServerHandler {
 public:
     ServerHandler();
+    ~ServerHandler();
     //void* connection_handler ( void* mconnfd );
 	
 	bool 	parse_credentials  ( std::string mCredentials );
@@ -37,6 +38,7 @@ public:
 	std::string		m_login_name;
 	std::string		m_login_password;
 	std::string		m_login_devicename;	
+	size_t			m_user_id;
 	size_t			m_user_index;		// see user_list.cpp
 	std::list<ServerHandler*> routes;	// communications will be transferred
 	

@@ -21,6 +21,7 @@
 #include "global.h"
 #include "sql_people.hpp"
 #include "sequencer_memory.hpp"
+#include "sql_common.hpp"
 
 
 #define Debug 0
@@ -28,12 +29,6 @@ MYSQL 		 	*friends_db = NULL;
 SQL_Friends     sql_friends;
 
 
-static void object_finish_with_error( )
-{
-    fprintf    ( stderr, "%s\n", mysql_error(friends_db));
-    mysql_close( friends_db );
-    exit(1);
-}
 
 /*********************************************************************************/
 SQL_Friends::SQL_Friends()
@@ -55,12 +50,12 @@ void SQL_Friends::connect_to_friends_db()
         exit(1);
     }
     if (mysql_real_connect(friends_db, "localhost", sql_username, sql_password,
-                           sql_user_dbase_name, 0, NULL, 0) == NULL)
+                           "robot_local", 0, NULL, 0) == NULL)
                            // was robot_local
     {
         fprintf(stderr, "SQL_people:: real_connect %s\n", mysql_error(friends_db));
         mysql_close(friends_db);
-        exit(1);
+        friends_db = NULL;
     }
 }
 
@@ -146,32 +141,6 @@ int	SQL_Friends::get_number_results()
     return (int)mysql_num_rows(m_result);
 }
 
-char* form_date_string( struct tm& time_bd )
-{
-    static char tmp[16];
-    sprintf(tmp, "%4d-%d-%d", time_bd.tm_year+1900,
-            time_bd.tm_mon+1,
-            time_bd.tm_mday );
-    return tmp;
-}
-
-char* form_time_string( struct tm time_bd )
-{
-    static char tmp[32];
-    strftime( tmp, 32, "%H:%M:%S", &time_bd);
-    return tmp;
-    //return asctime( &time_bd );
-}
-
-char* form_date_time_string( struct tm& time_bd )
-{
-    static char tmp[32];
-    strcpy(tmp, form_date_string(time_bd));
-    strcat(tmp, " ");
-    strcat(tmp, form_time_string(time_bd));
-    printf("%s \n", tmp);
-    return tmp;
-}
 
 int	SQL_Friends::sql_add_system_activated( bool mCamera, bool mEyes, bool mNeck )
 {
@@ -398,12 +367,6 @@ int SQL_Friends::form_response__last_time_i_deactivated( time_t& mTime)
     return rows;
 }
 
-char* append_float( float mFloat )
-{
-    static char tmp[16];
-    sprintf(tmp, "'%6.2f'", mFloat );
-    return tmp;
-}
 
 MYSQL_ROW SQL_Friends::goto_first_row()
 {

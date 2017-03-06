@@ -44,7 +44,7 @@ AUTHOR	:  Stephen Tenniswood
 /* Class Functions 										 */
 /*********************************************************/
 
-SequencerIPC::SequencerIPC()	
+SequencerIPC::SequencerIPC()
 : SHMBase(IPC_KEY_SEQ, sizeof(struct sequencer_ipc_memory_map), "seq_shared_memseg_id.cfg" )
 {
 }
@@ -55,16 +55,19 @@ SequencerIPC::~SequencerIPC()
 int SequencerIPC::read_sentence_counter()
 {
 	struct sequencer_ipc_memory_map* ipc_memory = get_memory_seq();
+	if (ipc_memory==NULL) return NULL;		
 	return ipc_memory->SentenceCounter;
 }
 char* SequencerIPC::get_sentence()
 {
 	struct sequencer_ipc_memory_map* ipc_memory = get_memory_seq();
+	if (ipc_memory==NULL) return NULL;	
 	return (ipc_memory->Sentence);
 }
 BOOL SequencerIPC::is_new_sentence()
 {
 	struct sequencer_ipc_memory_map* ipc_memory = get_memory_seq();
+	if (ipc_memory==NULL) return FALSE;
 	if (ipc_memory->SentenceCounter  > ipc_memory->SentenceAcknowledgedCounter)
 	{
 		return TRUE;
@@ -73,13 +76,15 @@ BOOL SequencerIPC::is_new_sentence()
 }
 void SequencerIPC::ack_sentence_counter	()
 {
-	struct sequencer_ipc_memory_map* ipc = get_memory_seq();
-	ipc->SentenceAcknowledgedCounter = ipc->SentenceCounter;
+	struct sequencer_ipc_memory_map* ipc_memory = get_memory_seq();
+	if (ipc_memory==NULL) return;
+	ipc_memory->SentenceAcknowledgedCounter = ipc_memory->SentenceCounter;
 }
 
 void SequencerIPC::wait_for_ack_sentence_counter( )
 {
 	struct sequencer_ipc_memory_map* ipc = get_memory_seq();
+	if (ipc==NULL) return;
 	Dprintf("sentence counter=%d/%d;\n", ipc->SentenceAcknowledgedCounter, ipc->SentenceCounter );
 	while (ipc->SentenceAcknowledgedCounter < ipc->SentenceCounter)
 	{};
@@ -88,7 +93,8 @@ void SequencerIPC::wait_for_ack_sentence_counter( )
 void SequencerIPC::write_sentence( char* mSentence )
 {
 	struct sequencer_ipc_memory_map* ipc_memory = get_memory_seq();
-
+	if (ipc_memory==NULL) return;
+	
 	int length = strlen(mSentence);	
 	int MaxAllowedLength = sizeof(ipc_memory->Sentence);	
 	if (length>MaxAllowedLength)
@@ -109,7 +115,8 @@ FORMAT:
 void SequencerIPC::write_connection_status( char* mStatus )
 {
 	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
-	
+	if (seq==NULL) return;
+		
 	int length = strlen(mStatus);		
 	int MaxAllowedLength = sizeof(seq->ConnectionStatus);
 	if (length > MaxAllowedLength) {
@@ -127,6 +134,8 @@ void SequencerIPC::write_connection_status( char* mStatus )
 bool SequencerIPC::ipc_write_sequence( int mIndex, struct stBodyPositionVector* mBP )
 {
 	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
+	if (seq==NULL) return;
+		
     if ((mIndex >= MAX_SEQUENCES) || (seq == NULL))
         return false;
     
@@ -137,7 +146,7 @@ bool SequencerIPC::ipc_write_sequence( int mIndex, struct stBodyPositionVector* 
 // Return true if added.
 bool SequencerIPC::ipc_add_sequence( struct stBodyPositionVector*  mVector )
 {
-	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
+	struct  sequencer_ipc_memory_map* seq = get_memory_seq();	
     if (seq == NULL)  return false;
     
     int index = seq->NumberSequences++;
@@ -163,6 +172,7 @@ Return :
 char* SequencerIPC::get_connection_status()
 {
 	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
+	if (seq==NULL) return NULL;	
 	return (seq->ConnectionStatus);
 }
 
@@ -220,26 +230,31 @@ BOOL  SequencerIPC::is_new_vector_status	    ()
 void SequencerIPC::ack_connection_status	()
 { 
 	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
+	if (ipc_memory_sequencer==NULL) return;	
 	ipc_memory_sequencer->StatusAcknowledgedCounter = ipc_memory_sequencer->StatusCounter;
 }
 void SequencerIPC::ack_performance_status	()
 { 
 	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
+	if (ipc_memory_sequencer==NULL) return;	
 	ipc_memory_sequencer->PerformanceAcknowledgedCounter = ipc_memory_sequencer->PerformanceUpdateCounter;
 }
 void SequencerIPC::ack_diagnostic_status	()
 { 
 	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
+	if (ipc_memory_sequencer==NULL) return;	
 	ipc_memory_sequencer->DiagnosticAcknowledgedCounter = ipc_memory_sequencer->DiagnosticUpdateCounter;
 }
 void SequencerIPC::ack_enable_status	()
 { 
 	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
+	if (ipc_memory_sequencer==NULL) return;	
 	ipc_memory_sequencer->EnableAcknowledgedCounter = ipc_memory_sequencer->EnableUpdateCounter;
 }
 void SequencerIPC::ack_vector_status	()
 { 
 	struct  sequencer_ipc_memory_map* ipc_memory_sequencer = get_memory_seq();
+	if (ipc_memory_sequencer==NULL) return;	
 	ipc_memory_sequencer->VectorAcknowledgedCounter = ipc_memory_sequencer->VectorUpdateCounter;
 }
 /********** END _acknowledgement___ functions *************************/
