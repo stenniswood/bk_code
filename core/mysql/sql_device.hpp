@@ -46,6 +46,7 @@ public:
 	int				get_all_device_names_regex ( int mUserID, std::string& mRegex );
 	
     int				sql_update_user_id  ( std::string mDevice_name, int mUser_id );
+    int				sql_bump_login_count( std::string mDevice_name, int mUser_id );    
     
 /* NOTE: These remaining functions can possibly be removed (copied from friends_db for vision event processsing)*/
     int				sql_add_system_activated( bool mCamera, bool mEyes, bool mNeck );

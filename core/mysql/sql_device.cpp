@@ -60,6 +60,8 @@ void SQL_Devices::create_users_table( )
 
     query_string = "CREATE TABLE `my_devices` (	\
   `_id` int(11) NOT NULL AUTO_INCREMENT, \
+  `login_count` int(11) NOT NULL, \
+  `last_login` TIMESTAMP NOT NULL, \
   `personal_name` text NOT NULL COMMENT 'Such as \"Steves phone\" rather than dev_name \"Sensation\"', \
   `user_id` int(11) NOT NULL, \
   `device_type` text NOT NULL COMMENT 'Phone, Humanoid, Tablet, Reader, Playstation,Wii, etc.', \
@@ -109,6 +111,7 @@ int	SQL_Devices::get_number_columns()
 */
 int  SQL_Devices::query( bool mRetrieving )
 {
+	if (users_db==NULL) return 0;
     Dprintf("SQL_Devices:: %s\n", query_string.c_str() );
     if (mysql_query(users_db, query_string.c_str() ))
     {
@@ -473,6 +476,16 @@ int	SQL_Devices::get_all_device_names_regex ( int mUserID, std::string& mRegex )
     return retval;
 }
 
+int	SQL_Devices::sql_bump_login_count( std::string mDevice_name, int mUser_id )
+{
+    query_string =  "UPDATE ";
+    query_string += table_name;
+    query_string += " SET login_count = login_count+1";
+    query_string += " WHERE device_name='";
+    query_string += mDevice_name;
+    query_string += "';";
+    return query(true); 
+}
 
 int	SQL_Devices::sql_update_user_id( std::string mDevice_name, int mUser_id )
 {

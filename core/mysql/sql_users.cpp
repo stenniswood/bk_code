@@ -116,6 +116,8 @@ int	SQL_Users::get_number_columns()
 */
 int  SQL_Users::query( bool mRetrieving )
 {
+	if (users_db==NULL) return 0;
+	
     Dprintf("SQL_Users:: %s\n", query_string.c_str() );
     if (mysql_query(users_db, query_string.c_str() ))
     {
