@@ -74,7 +74,7 @@ void SuperString::trim_duplicate_spaces  (  )
 }      // between words of the sentence.
 void SuperString::trim_spaces            ( )
 {
-    string whitespace = " \t";
+    string whitespace = " \t\n";
     const auto strBegin = find_first_not_of(whitespace);
     if (strBegin == std::string::npos)
         return ; // no content

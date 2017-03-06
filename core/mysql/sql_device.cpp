@@ -59,6 +59,7 @@ void SQL_Devices::create_users_table( )
     }
 
     query_string = "CREATE TABLE `my_devices` (	\
+  `_id` int(11) NOT NULL AUTO_INCREMENT, \
   `personal_name` text NOT NULL COMMENT 'Such as \"Steves phone\" rather than dev_name \"Sensation\"', \
   `user_id` int(11) NOT NULL, \
   `device_type` text NOT NULL COMMENT 'Phone, Humanoid, Tablet, Reader, Playstation,Wii, etc.', \
@@ -82,7 +83,8 @@ void SQL_Devices::create_users_table( )
   `Tags` text NOT NULL, \
   `Type` text NOT NULL, \
   `User` text NOT NULL, \
-  `gmail` text NOT NULL \
+  `gmail` text NOT NULL, \
+  PRIMARY KEY (_id)	\
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1";
 	printf("CREATING TABLE: %s\n", query_string.c_str() );
     query(false);
@@ -438,7 +440,7 @@ int	SQL_Devices::sql_find	( int mUser_id, std::string mDevice_name )
     query_string =  "SELECT device_name,device_type FROM ";
     query_string += table_name;
     query_string += " ";
-    query_string += " WHERE device_name='";
+    query_string += " WHERE device_name='";		// device_name is hostname
     query_string += mDevice_name;
     query_string += "' AND user_id=";
     query_string += append_int( mUser_id );

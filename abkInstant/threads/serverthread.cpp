@@ -78,7 +78,7 @@ void handle_login(ServerHandler* h, const char* mCreds)
 		h->m_user_index = add_user( h->m_login_name );
 		add_connection( h->m_login_name, h );		
 	}
-	print_user_list();
+	//print_user_list();
 }
 
 
@@ -87,33 +87,43 @@ void register_device_if_not_already(int mUserid, char* mDeviceInfo )
 	SuperString info = mDeviceInfo;
 	info.split(';');
 	info.trim_spaces_in_splits();
+	printf("\n\n");
+	
 	char fields[] = "( user_id, device_name, personal_name, device_type )";
-	string values = std::to_string(mUserid);
-		
-	for (int i=0; i<info.m_split_words.size(); i++)
+	string values = "(";
+	values += std::to_string(mUserid);
+	string hostname;
+	
+	for (int i=1; i<info.m_split_words.size(); i++)
 	{
 		info.m_split_words[i].split(':');
-		if (info.m_split_words[i].m_split_words[0].compare("hostname"))
+		info.m_split_words[i].trim_spaces_in_splits();
+		printf("%s\t- prefix=%s\n", info.m_split_words[i].c_str(), info.m_split_words[i].m_split_words[0].c_str() );
+		if (info.m_split_words[i].m_split_words[0].compare("hostname")==0)
 		{
+			hostname = info.m_split_words[i].m_split_words[1]; 
 			values += ", '";
-			values += info.m_split_words[i].m_split_words[1];
+			values += hostname;
 			values += "'";
+
 		}
-		if (info.m_split_words[i].m_split_words[0].compare("Pet_names"))
+		if (info.m_split_words[i].m_split_words[0].compare("Pet_names")==0)
 		{
-			values += ", ";		
+			values += ", '";		
 			values += info.m_split_words[i].m_split_words[1];
 			values += "'";
 		}
-		if (info.m_split_words[i].m_split_words[0].compare("Platform"))
+		if (info.m_split_words[i].m_split_words[0].compare("Platform")==0)
 		{
-			values += ", ";		
+			values += ", '";		
 			values += info.m_split_words[i].m_split_words[1];
 			values += "'";
 		}
+			printf("%s\n", values.c_str() );
 	}
-	printf("register_device_if_not_already(): \n");
-	sql_devices.sql_add_if_not_already( mUserid, fields, values, "successroad1");
+	values += ")";
+	printf("register_device_if_not_already(): %d, %s\n",mUserid, values.c_str());
+	sql_devices.sql_add_if_not_already( mUserid, fields, values, hostname);
 }		
 
 
@@ -311,17 +321,30 @@ void send_credentials(int connfd)
 	int bytes_read = fread( str, 1024, 1, fd );
 	write (connfd, str, strlen(str) );	
 }
+#include <unistd.h>
 
 void send_device_info(int connfd)
 {
 	char str[1024*4];
+	char hostname[80];
+	char fulltext[1024*4];
+	int ret = gethostname(hostname, 80);
+	if (ret==-1)
+		perror("gethostname ");
+	
 	FILE* fd = fopen( device_info_filename, "r");
+		
 	if (fd==-1) {
 		perror("Cannot open Device Info file ");
 		printf("%s\n", device_info_filename );
 	}
-	int bytes_read = fread( str, 1024, 1, fd );
-	write (connfd, str, strlen(str) );	
+
+	strcpy(fulltext, "Device Info;\nhostname:");
+	strcat(fulltext, hostname);
+	strcat(fulltext, ";\n");
+	int bytes_read = fread( str, 1024, 1, fd );	
+	strcat(fulltext, str);
+	write (connfd, fulltext, strlen(fulltext) );	
 }
 
 void send_device_capabilities(int connfd)
