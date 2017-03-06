@@ -96,9 +96,7 @@ bool SQL_Devices::users_table_exists( )
 {
     // how to query it?
     query_string = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'sjtennis_bk_useraccounts' AND  TABLE_NAME = 'my_devices';";
-    query(true);
-    int result_count = get_number_results();
-    return (result_count>0);
+    return query(true);
 }
 
 int	SQL_Devices::get_number_columns()

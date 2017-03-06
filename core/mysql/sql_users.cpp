@@ -101,9 +101,7 @@ bool SQL_Users::users_table_exists( )
 {
     // how to query it?
     query_string = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'sjtennis_bk_useraccounts' AND  TABLE_NAME = 'Users';";
-    query(true);
-    int result_count = get_number_results();
-    return (result_count>0);
+    return query(true);
 }
 
 int	SQL_Users::get_number_columns()
