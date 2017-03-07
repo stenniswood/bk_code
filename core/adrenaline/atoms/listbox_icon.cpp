@@ -12,7 +12,7 @@
 #include "dataset.hpp"
 #include "adrenaline_windows.h"
 #include "display_manager.hpp"
-#include "visual_memory.h"
+//#include "visual_memory.hpp"
 #include <vector>
 #include "listbox_icon.hpp"
 

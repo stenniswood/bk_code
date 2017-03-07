@@ -15,7 +15,7 @@
 #include "CAN_Interface.h"
 #include "adrenaline_windows.h"
 #include "display_manager.hpp"
-#include "visual_memory.h"
+//#include "visual_memory.h"
 #include "test_layouts.hpp"
 
 #define Debug 1

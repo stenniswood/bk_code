@@ -26,7 +26,7 @@ AUTHOR	: Steve Tenniswood
 #include "bk_system_defs.h"
 #include "adrenaline_windows.h"
 #include "adrenaline_graphs.h"
-#include "visual_memory.h"
+//#include "visual_memory.hpp"
 #include "audio_memory.h"
 
 #include "audio_app_menu.hpp"

@@ -23,7 +23,7 @@ AUTHOR	: Steve Tenniswood
 #include <vector>
 #include "power_level.hpp"
 #include "stereo_power.hpp"
-#include "visual_memory.h"
+//#include "visual_memory.h"
 #include "audio_memory.h"
 #include "fft.h"
 #include "audio_app.hpp"

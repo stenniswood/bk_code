@@ -16,7 +16,7 @@
 #include "dataset.hpp"
 #include "adrenaline_windows.h"
 #include "display_manager.hpp"
-#include "visual_memory.h"
+//#include "visual_memory.h"
 #include "file_browser.hpp"
 #include "complete_file_browser.hpp"
 #include "test_layouts.hpp"
