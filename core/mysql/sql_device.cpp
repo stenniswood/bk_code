@@ -61,7 +61,7 @@ void SQL_Devices::create_users_table( )
     query_string = "CREATE TABLE `my_devices` (	\
   `_id` int(11) NOT NULL AUTO_INCREMENT, \
   `login_count` int(11) NOT NULL, \
-  `last_login` TIMESTAMP NOT NULL, \
+  `last_login` TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP, \
   `personal_name` text NOT NULL COMMENT 'Such as \"Steves phone\" rather than dev_name \"Sensation\"', \
   `user_id` int(11) NOT NULL, \
   `device_type` text NOT NULL COMMENT 'Phone, Humanoid, Tablet, Reader, Playstation,Wii, etc.', \
@@ -412,6 +412,7 @@ void SQL_Devices::close_connection()
 //	mysql_close( users_db );
 }
 	
+/* return:  1=> just added */
 int	SQL_Devices::sql_add_if_not_already( int mUserId, std::string mFields, std::string mValues, std::string mDeviceName)
 {
 	// First check if it already exists in the database of users:
@@ -419,21 +420,34 @@ int	SQL_Devices::sql_add_if_not_already( int mUserId, std::string mFields, std::
 	if (result==0) {
 	    return sql_add( mFields, mValues );
 	} 
-	//else printf("Person already exists in database!\n");
+	//was found:
 	return 0;
 }
 
-int	SQL_Devices::sql_find_pet_name	( int mUser_id, std::string mPersonalName	)
+/* Return:  is the device_name (hostname) */
+std::string	SQL_Devices::sql_find_pet_name	( int mUser_id, std::string mPersonalName	)
 {
-    query_string =  "SELECT personal_name FROM ";
+    query_string =  "SELECT personal_name,device_name FROM ";
     query_string += table_name;
-    query_string += " ";
-    query_string += " WHERE personal_name='";
-    query_string += mPersonalName;
-    query_string += "' AND user_id=";
+    query_string += " WHERE ";
+    query_string += " user_id=";
     query_string += append_int( mUser_id );
     query_string += ";";
-    return query(true);
+    int retval = query(true);
+    // Now for all results, do the regex_search:
+    goto_first_row();
+    bool found=false;
+    std::regex exp;    
+    std::smatch match;
+    while (m_row)
+    {
+    	if (m_row[0])  exp=m_row[0];
+    	found = std::regex_search( mPersonalName, match, exp );
+    	if (found)
+    		return m_row[1];		// return device_name;
+    	goto_next_row();
+    }
+    return NULL;
 }
 
 int	SQL_Devices::sql_find	( int mUser_id, std::string mDevice_name )
@@ -473,6 +487,30 @@ int	SQL_Devices::get_all_device_names_regex ( int mUserID, std::string& mRegex )
     printf("ALL DEVICES REGEX: %s\n\n", mRegex.c_str() );
     return retval;
 }
+
+int	SQL_Devices::get_all_device_names ( int mUserID, std::string& mList )
+{
+    std::string tmp = std::to_string(mUserID);
+    
+    query_string =  "SELECT personal_name,user_id FROM ";
+    query_string += table_name;
+    query_string += " ";
+    query_string += " WHERE user_id='";
+    query_string += tmp;
+    query_string += "'";
+    int retval = query(true);
+
+	m_row = mysql_fetch_row( m_result );
+    while ( m_row ) 
+    {		
+		mList += m_row[0];
+		m_row = mysql_fetch_row( m_result );		
+		if (m_row)  mList += ", ";				
+    }
+    printf("ALL DEVICES: %s\n\n", mList.c_str() );
+    return retval;
+}
+
 
 int	SQL_Devices::sql_bump_login_count( std::string mDevice_name, int mUser_id )
 {

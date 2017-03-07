@@ -15,11 +15,14 @@
 #include "global_funcs.h"
 #include "machine_defs.h"
 #include "sql_common.hpp"
-
+#include "sql_device.hpp"
+#include "sql_users.hpp"
 
 #define Debug 0
 
+using namespace std;
 
+char calendar_table_name[128];
 
 CalendarEntry::CalendarEntry()
 {
@@ -27,7 +30,6 @@ CalendarEntry::CalendarEntry()
 }
 CalendarEntry::~CalendarEntry()
 {
-	
 }
 
 void close_users_db()
@@ -37,9 +39,12 @@ void close_users_db()
 
 void CalendarEntry::Initialize(	)
 {
-	if (users_db==NULL)
-		connect_to_users_db();
-		
+	strcpy(calendar_table_name, sql_user_dbase_name );
+	strcat(calendar_table_name, ".calendar");
+	
+	connect_to_users_db();
+	create_calendar_table();
+	
 	m_result=NULL;
 	m_display_mode=1;
 	_id=0;	
@@ -50,29 +55,29 @@ void CalendarEntry::Initialize(	)
 	printf("CalendarEntry:  month=%d;  day=%d\n", tmp->tm_mon, tmp->tm_mday );
 }
 
-char* CalendarEntry::form_date_string( )
+bool CalendarEntry::calendar_table_exists( )
 {
-	static char tmp[16];
-	sprintf(tmp, "'%4d-%d-%d'", m_scheduled_time_bd.tm_year+1900,
-								m_scheduled_time_bd.tm_mon,
-							m_scheduled_time_bd.tm_mday );
-	return tmp;
+    query_string = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'sjtennis_bk_useraccounts' AND  TABLE_NAME = 'calendar';";
+    return (query(true)>0);
 }
-char* CalendarEntry::form_time_string( )
-{
-	static char tmp[16];
-	sprintf(tmp, "'%2d:%2d:%2d'", m_scheduled_time_bd.tm_hour,
-								m_scheduled_time_bd.tm_min,
-							m_scheduled_time_bd.tm_sec );	
-	return tmp;
-}
-char* CalendarEntry::form_date_time_string( )
-{
-	static char tmp[32];
-	strcpy(tmp, form_date_string());
-	strcat(tmp, " ");
-	strcat(tmp, form_time_string());
-	return tmp;
+void CalendarEntry::create_calendar_table( )
+{  
+	if (calendar_table_exists())
+		return;
+	
+	query_string = "CREATE TABLE `calendar` ( \
+	  `_id` int(11) NOT NULL AUTO_INCREMENT, \
+	  `user_id` int(11) NOT NULL DEFAULT '0', \
+	  `date` date NOT NULL,\
+	  `time` time NOT NULL, \
+	  `date_time` datetime NOT NULL,\
+	  `location` text NOT NULL,\
+	  `description` text NOT NULL,\
+	  `advanced_notification` int(11) NOT NULL DEFAULT '60', \
+	  `display_mode` int(11) NOT NULL DEFAULT '1' COMMENT '0=Not shown,\n1=Shown,\n2=Highlighted\netc.',\
+	  PRIMARY KEY (`_id`)\
+	) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COMMENT='Calendar for all users';";
+	query(false);
 }
 
 string CalendarEntry::form_summary_string	 (  )			// suitable for Calendar Summary View
@@ -104,63 +109,64 @@ MYSQL_ROW	CalendarEntry::goto_next_row()
 }
 
 
-void CalendarEntry::create_calendar_table( )
-{  
-	query_string = "CREATE TABLE `calendar` ( \
-	  `_id` int(11) NOT NULL AUTO_INCREMENT, \
-	  `user_id` int(11) NOT NULL DEFAULT '0', \
-	  `date` date NOT NULL,\
-	  `time` time NOT NULL, \
-	  `date_time` datetime NOT NULL,\
-	  `location` text NOT NULL,\
-	  `description` text NOT NULL,\
-	  `display_mode` int(11) NOT NULL DEFAULT '1' COMMENT '0=Not shown,\n1=Shown,\n2=Highlighted\netc.',\
-	  PRIMARY KEY (`_id`)\
-	) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COMMENT='Calendar for all users';";
-	query(false);
-}
-
 void CalendarEntry::find_entry_nq		( int mCalendar_id   )
 {  
-	query_string =  "SELECT * FROM bk_useraccounts.calendar WHERE ";
-	query_string += "bk_useraccounts.calendar._id="; 
+	query_string =  "SELECT * FROM ";
+	query_string += calendar_table_name;
+	query_string += " WHERE ";
+	query_string += " _id="; 
 	query_string += append_int(mCalendar_id);
 	query_string += ";";
 }
 
 void CalendarEntry::find_date( int mUser_id )
 {
-	query_string =  "SELECT * FROM bk_useraccounts.calendar WHERE ";
-	query_string += "bk_useraccounts.calendar.user_id="; 
+	query_string =  "SELECT * FROM ";
+	query_string += calendar_table_name;	
+	query_string += " WHERE ";
+	query_string += " user_id="; 
 	query_string += append_int(mUser_id);  		query_string += " and ";
-	query_string += "bk_useraccounts.calendar.date="; 
-	query_string += form_date_string( );
-	query_string += ";";	
+	query_string += " date='"; 
+	query_string += form_date_string( m_scheduled_time_bd );
+	query_string += "';";	
 	Dprintf("%s\n", query_string.c_str() );
 	query(true);
 }
 void CalendarEntry::find_location		( string mLocation   )
 {
-	query_string =  "SELECT * FROM bk_useraccounts.calendar WHERE ";
+	query_string =  "SELECT * FROM ";
+		query_string += calendar_table_name;	
+		query_string += " WHERE ";
 	query_string += "location LIKE '"+mLocation+"'"; 
 	query_string += ";";	
 	query(true);	
 }
 void CalendarEntry::find_description	( string mDescription )
 {
-	query_string =  "SELECT * FROM bk_useraccounts.calendar WHERE ";
+	query_string =  "SELECT * FROM ";
+	query_string += calendar_table_name;	
+	query_string += " WHERE ";
 	query_string += "description LIKE '"+mDescription+"'"; 
 	query_string += ";";	
 	query(true);
 }
 
+/* fill in these member variables first:
+		m_user_id
+		m_scheduled_time_bd
+		m_location
+		m_description
+		m_display_mode
+*/
 void CalendarEntry::add_entry_nq		( 				 )
 {
-	query_string = "INSERT INTO bk_useraccounts.calendar VALUES ('0', ";
-	query_string += append_int(m_user_id);		query_string += ", ";
-	query_string += form_date_string();			query_string += ", ";
-	query_string += form_time_string();			query_string += ", ";
-	query_string += form_date_time_string();	query_string += ", '";
+	query_string = "INSERT INTO ";
+	query_string += calendar_table_name;	
+	query_string += " VALUES ('0', ";
+	query_string += append_int(m_user_id);		query_string += ", '";
+	query_string += form_date_string(m_scheduled_time_bd);			query_string += "', '";
+	query_string += form_time_string(m_scheduled_time_bd);			query_string += "', '";
+	query_string += form_date_time_string(m_scheduled_time_bd);	query_string += "', '";
 	query_string += m_location;					query_string += "', '";
 	query_string += m_description;				query_string += "', ";
 	query_string += append_int(m_display_mode);
@@ -168,16 +174,34 @@ void CalendarEntry::add_entry_nq		( 				 )
 }
 
 
+void CalendarEntry::add_entry( int mUserId, struct tm& m_scheduled_time_bd, 
+			string mLocation, string mDescription, int mDisplayMode	 )
+{
+	query_string = "INSERT INTO ";
+	query_string += calendar_table_name;	
+	query_string += " VALUES ('0', ";
+	query_string += append_int(m_user_id);		query_string += ", '";
+	query_string += form_date_string(m_scheduled_time_bd);			query_string += "', '";
+	query_string += form_time_string(m_scheduled_time_bd);			query_string += "', '";
+	query_string += form_date_time_string(m_scheduled_time_bd);	query_string += "', '";
+	query_string += m_location;					query_string += "', '";
+	query_string += m_description;				query_string += "', ";
+	query_string += append_int(m_display_mode);
+	query_string += "); ";
+}
+
 void CalendarEntry::update_entry_nq		( )
 {  
-	query_string = "UPDATE bk_useraccounts.calendar SET user_id="; 
+	query_string = "UPDATE ";
+	query_string += calendar_table_name;
+	query_string += " SET user_id="; 
 	query_string += append_int(m_user_id);
-	query_string += "date=";			query_string += form_date_string();
-	query_string += ",  time=";			query_string += form_time_string();
-	query_string += ",  date_time=";	query_string += form_date_time_string();
-	query_string += ",  location="	  + m_location;	
-	query_string += ",  description=" + m_description;	
-	query_string += ",  display_mode=";	
+	query_string += "date='";			query_string += form_date_string(m_scheduled_time_bd);
+	query_string += "',  time='";			query_string += form_time_string(m_scheduled_time_bd);
+	query_string += "',  date_time='";	query_string += form_date_time_string(m_scheduled_time_bd);
+	query_string += "',  location='"	  + m_location;	
+	query_string += "',  description='" + m_description;	
+	query_string += "',  display_mode='";	
 	query_string += append_int( m_display_mode );		
 	query_string += " WHERE _id=";
 	query_string += append_int( _id );
@@ -258,22 +282,66 @@ void CalendarEntry::show_date( int mMonth, int mDay )	// other than the current
 
 }
 
-
-    
-/*void CalendarEntry::connect_to_users_db()
+void test_calendar_db()
 {
-    users_db = mysql_init(NULL);
-    if (users_db == NULL)
-    {
-        fprintf(stderr, "init %s\n", mysql_error(users_db));
-        exit(1);
-    }
-    
-    if (mysql_real_connect(users_db, "localhost", sql_username, sql_password,
-                           sql_user_dbase_name, 0, NULL, 0) == NULL)
-    {
-        fprintf(stderr, "CalendarEntry:: real_connect %s\n", mysql_error(users_db));
-        mysql_close(users_db);
-        users_db = NULL;
-    }
+    // Add some samples rows : 
+    CalendarEntry ce;		// automatically connects and creates table is needed!
+	ce.m_user_id = sql_users.sql_find("stenniswood");
+	
+//	ce.m_scheduled_time_bd = ;
+	ce.m_location = "steve's pad";
+	ce.m_description = "come join the coder!";	
+	ce.m_display_mode = 1;
+	ce.add_entry_nq();
+
+//	ce.m_scheduled_time_bd = ;
+	ce.m_location = "Beyond Kinetics Garage";
+	ce.m_description = "we have a place!";	
+	ce.m_display_mode = 1;
+	ce.add_entry_nq();
+
+//	ce.m_scheduled_time_bd = ;
+	ce.m_location = "driveway";
+	ce.m_description = "remember to take out the junk";	
+	ce.m_display_mode = 1;
+	ce.add_entry_nq();
+	
+//	ce.m_scheduled_time_bd = ;
+	ce.m_location = "Dentist office";
+	ce.m_description = "remember to get that cavity filled with junk";	
+	ce.m_display_mode = 1;	
+	ce.update_entry_nq();
+
+/*	ce.find_entry_nq	(id);
+	ce.find_date		( mUser_id 	);			// based on broken down time.
+	ce.find_location	( string mLocation     );		
+	ce.find_description	( string mDescription  );			*/
+		
+	printf("Done with test_calendar_db()\n");
+}
+
+
+/*char* CalendarEntry::form_date_string( )
+{
+	static char tmp[16];
+	sprintf(tmp, "'%4d-%d-%d'", m_scheduled_time_bd.tm_year+1900,
+								m_scheduled_time_bd.tm_mon,
+							m_scheduled_time_bd.tm_mday );
+	return tmp;
+}
+char* CalendarEntry::form_time_string( )
+{
+	static char tmp[16];
+	sprintf(tmp, "'%2d:%2d:%2d'", m_scheduled_time_bd.tm_hour,
+								m_scheduled_time_bd.tm_min,
+							m_scheduled_time_bd.tm_sec );	
+	return tmp;
+}
+char* CalendarEntry::form_date_time_string( )
+{
+	static char tmp[32];
+	strcpy(tmp, form_date_string());
+	strcat(tmp, " ");
+	strcat(tmp, form_time_string());
+	return tmp;
 }*/

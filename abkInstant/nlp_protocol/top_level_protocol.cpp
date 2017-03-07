@@ -96,8 +96,7 @@ int pass_to_aux_apps( Sentence& theSentence, ServerHandler* mh )
     	sequencer_mem.write_sentence( theSentence.m_sentence.c_str() );
     	// ipc_write_wait_for_response();
 	    return (theSentence.m_sentence.length());
-	}
-	
+	}	
 }
 
 const char* Parse_top_level_protocol( const char*  mSentence, ServerHandler* mh )
@@ -128,10 +127,10 @@ const char* Parse_top_level_protocol( const char*  mSentence, ServerHandler* mh 
 	if (result>=0)
 		printf("Parse_General_Statement - done\n");
 	
-	if (result<=0) {
+	if (result<0) {
 		result = pass_to_aux_apps( theSentence, mh );
 	}
-	if (result<=0)		// Not handled:
+	if (result<0)		// Not handled:
 	    mh->form_response("I don't understand. Ignoring.");
 
 	return (end_of_telegram + result);

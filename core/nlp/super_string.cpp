@@ -340,7 +340,7 @@ int SuperString::regex_find( string&  mRegexpression, vector<int>* answers, vect
     regex regex  ( m_regex );
     //printf("string=%s; regex=%s\n", this->c_str(), m_regex.c_str());
     bool match = regex_search( *this, regex_matches, regex );
- 
+
     if (Debug) {
     //    for (auto x:regex_matches)
     //        std::cout<< x <<" "<<std::endl;

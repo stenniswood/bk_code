@@ -120,7 +120,7 @@ bool ServerHandler::parse_credentials( string mCredentials )
 	SuperString devname = str.m_split_words[2];	// device name
 	devname.split(':');
 	m_login_devicename = devname.m_split_words[1];
-	printf("\tdevname=%s\n", m_login_devicename.c_str() );
+	//printf("\tdevname=%s\n", m_login_devicename.c_str() );
 	//printf("Login=%s\t\tpasswd=%s\n", m_login_name.c_str(), m_login_password.c_str() );
 	return retval;
 }
@@ -133,7 +133,7 @@ bool ServerHandler::validate( string mCredentials )
 		m_user_id = sql_users.sql_find( m_login_name );
 		if (m_user_id)
 		{
-			printf("Found the username in dbase :\t");
+			printf("Found sql username :\t");
 			m_credentials_validated = sql_users.verify_password( m_login_name, m_login_password );
 			if (m_credentials_validated)
 			{

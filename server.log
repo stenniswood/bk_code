@@ -1,0 +1,84 @@
+shm_base.cpp Segment_id=393222
+shm_base.cpp Segment_id=393222
+SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'sjtennis_bk_useraccounts' AND  TABLE_NAME = 'calendar';
+row_count=1
+CalendarEntry:  month=2;  day=6
+segment_id=393222
+segment_id=393222
+ARGS: 1 /home/stenniswood/bk_code/abkInstant/instant 
+ERROR: can_connect_shared_memory() cannot allocate.
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=2 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=3 and restaurant_id=3;
+select * from sjtennis_global_knowledge.sizes_options WHERE size_id=3 and restaurant_id=3;
+************************* SHARED MEMORY *****************************
+cli_segment_id= 32769 
+connect_shared_client_memory: available = 1
+IPC Client - attached to memory.
+ERROR: can_connect_shared_memory() cannot allocate.
+IPC Audio - unavailable.
+IPC CAN - attached to memory.
+IPC Simulator - unavailable.
+****************** END SHARED MEMORY SETUP ************************ LISTEN THREAD:  ENTRY
+done with init()!
+===============================================
+================= Checking command line arguments ========================
+================= Main Loop ==========================
+***** get_ip_address()=0
+empty
+***** IP4	lo IP Address 127.0.0.1 
+***** IP4	eth0 IP Address 198.12.154.113 
+***** LISTEN SOCKET:  listenfd=6
+
+ Welcome to BK Media Control  :  IP=0.0.0.0:5000 
+
+1 - Connection accepted!
+ Start parsing. buff_index=0 of bytes_rxd=49; 
+Delim found, handling |Login:stenniswood;Password:Mozart2nd;Device:RPI;
+|
+Authenticating
+Found sql username :	PASSWORD VERIFIED!
+Done parsing. 7
+RESPONSE:|VR:Welcome|	
+
+ Start parsing. buff_index=0 of bytes_rxd=224; 
+Delim found, handling |Device Info;
+hostname:vision2;
+Pet_names:(LCD box|belly computer);
+Platform:RPI;
+OS:Rasbian;
+Device Capabilities;
+Audio Input:true;
+Audio Output:true;
+Video Input:camera;
+Video Output:true;
+Motor Controls:false;
+CAN:false;
+
+|
+Device Info RECEIVED:
+(46, 'vision2'
+(46, 'vision2', '(LCD box|belly computer)'
+(46, 'vision2', '(LCD box|belly computer)', 'RPI'
+(4

@@ -16,8 +16,8 @@ public:
 	~CalendarEntry();
 	
 	virtual void 	Initialize(	);
-	void			connect_to_calendar_db();
-
+	void			connect_to_calendar_db( );
+	bool			calendar_table_exists ( );
 	void			create_calendar_table( );
 	
 	void			find_entry_nq		( int mCalendar_id   );
@@ -25,6 +25,9 @@ public:
 	void			update_entry_nq		( );
 	int				query				( bool mRetrieving=true );
 	
+	void 			add_entry( int mUserId, struct tm& m_scheduled_time_bd, 
+							   string mLocation, string mDescription, int mDisplayMode	 );
+
 	void			find_date			( int mUser_id = 1  	);			// based on broken down time.
 	void			find_location		( string mLocation     );		
 	void			find_description	( string mDescription  );			
@@ -38,9 +41,6 @@ public:
 	MYSQL_ROW		goto_next_row();
 	int				get_number_results();
 	
-	char*			form_date_string	 (  );			// suitable to be added to SQL.
-	char*			form_time_string	 (  );			// suitable to be added to SQL.
-	char*			form_date_time_string(  );			// suitable to be added to SQL.
 	string			form_summary_string	 (  );			// suitable for Calendar Summary View
 	
 	void			show_date	( int mMonth, int mDay );	// other than the current
@@ -49,9 +49,8 @@ public:
 	MYSQL_RES*		m_result;
 	MYSQL_ROW		m_row;
 	
-	// DATA :
-	int				m_display_mode;
-	
+
+	int				m_display_mode;	
 	int				_id;	
 	int				m_user_id;
 	struct tm		m_scheduled_time_bd;		// broken down time.

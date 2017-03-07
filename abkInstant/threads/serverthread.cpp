@@ -81,31 +81,29 @@ void handle_login(ServerHandler* h, const char* mCreds)
 	//print_user_list();
 }
 
-
-void register_device_if_not_already(int mUserid, char* mDeviceInfo )
+// return : true => just added.
+bool register_device_if_not_already(ServerHandler* h, char* mDeviceInfo )
 {
 	SuperString info = mDeviceInfo;
 	info.split(';');
 	info.trim_spaces_in_splits();
-	printf("\n\n");
+	//printf("\n\n");
 	
 	char fields[] = "( user_id, device_name, personal_name, device_type )";
 	string values = "(";
-	values += std::to_string(mUserid);
-	string hostname;
+	values += std::to_string(h->m_user_id);
 	
 	for (int i=1; i<info.m_split_words.size(); i++)
 	{
 		info.m_split_words[i].split(':');
 		info.m_split_words[i].trim_spaces_in_splits();
-		printf("%s\t- prefix=%s\n", info.m_split_words[i].c_str(), info.m_split_words[i].m_split_words[0].c_str() );
+		//printf("%s\t- prefix=%s\n", info.m_split_words[i].c_str(), info.m_split_words[i].m_split_words[0].c_str() );
 		if (info.m_split_words[i].m_split_words[0].compare("hostname")==0)
 		{
-			hostname = info.m_split_words[i].m_split_words[1]; 
+			h->m_login_devicename = info.m_split_words[i].m_split_words[1]; 
 			values += ", '";
-			values += hostname;
+			values += h->m_login_devicename;
 			values += "'";
-
 		}
 		if (info.m_split_words[i].m_split_words[0].compare("Pet_names")==0)
 		{
@@ -122,8 +120,8 @@ void register_device_if_not_already(int mUserid, char* mDeviceInfo )
 			printf("%s\n", values.c_str() );
 	}
 	values += ")";
-	printf("register_device_if_not_already(): %d, %s\n",mUserid, values.c_str());
-	sql_devices.sql_add_if_not_already( mUserid, fields, values, hostname);
+	//printf("register_device_if_not_already(): %d, %s\n",mUserid, values.c_str());
+	return (sql_devices.sql_add_if_not_already( h->m_user_id, fields, values, h->m_login_devicename)>0);
 }		
 
 
@@ -151,7 +149,9 @@ int handle_telegram( ServerHandler* h, char* mTelegram )
 	else if (strcmp(key_word, "Device Info")==0)
 	{
 		printf("Device Info RECEIVED:\n" );
-		register_device_if_not_already(h->m_user_id, mTelegram);
+		bool just_added = register_device_if_not_already(h, mTelegram);
+		if (just_added==false)
+			sql_devices.sql_bump_login_count( h->m_login_devicename, h->m_user_id );			
 	}
 	else if (strcmp(key_word, "Device Capabilities")==0)
 	{

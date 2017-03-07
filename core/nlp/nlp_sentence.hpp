@@ -56,7 +56,7 @@ public:
     bool            prefilter_text          ( );
     void            restore_reduced         ( );
     void            reduce_sentence         ( vector<int> mWordIndices );
-    
+
     char*         m_raw_sentence;
     SuperString   m_sentence;
     SuperString   m_reduced_sentence;       // after some words have been "used up", this will hold the remaining portion. (for multiple menu items for instance.

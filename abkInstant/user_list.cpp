@@ -62,6 +62,21 @@ void	print_user_list( )
 				m_user_list[i].connections.size() );
 }
 
+ServerHandler*	find_device( int user_index, std::string mDeviceName )
+{	 
+	printf("LOOKING FOR dev=%s\n", mDeviceName.c_str() );
+	std::list<ServerHandler*>::iterator iter = m_user_list[user_index].connections.begin();	
+	while (iter != m_user_list[user_index].connections.end())
+	{
+		int comparison = ((*iter)->m_login_devicename.compare(mDeviceName));
+		printf( "dev_name=%s; \n", (*iter)->m_login_devicename.c_str() );
+		if (comparison==0)
+			return *iter;
+		iter++;
+	}
+	return NULL;
+}
+
 
 
 void test_user_list()

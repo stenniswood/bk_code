@@ -11,11 +11,11 @@
 struct stUsers {
 	std::string login_name;
 	std::list<ServerHandler*> connections;
-
 };
 
 int		add_user		 ( std::string mName );
 int		find_user		 ( std::string mName );
+ServerHandler*	find_device( int user_index, std::string mDeviceName );
 void	add_connection	 ( std::string mName, ServerHandler* mSH );
 bool	remove_connection( std::string mName, ServerHandler* mSH );
 bool	remove_all_connections( std::string mName );
