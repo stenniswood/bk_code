@@ -200,7 +200,6 @@ int Parse_Unit_Conversion_Statement( Sentence& mSentence, float& final_answer )
 int Parse_shape_geometry( Sentence& mSentence, float& final_answer )
 {
 	float first_number=0.0;
-	printf("parse shape geometry\n");
 
     int foundA = mSentence.regex_find( "area (of )?(a )?circle with radius (of )?(\\d+)" );
     if (foundA)	{ 
@@ -279,9 +278,9 @@ int Parse_Math_Statement( Sentence& mSentence, ServerHandler* mh )
                 mSentence.m_sentence.regex_reduce();
             }
             form_verbal_answer(mSentence, mh, final_answer);
+			operation_count++;
+			retval = 0;
         }        
-        operation_count++;
-        retval = 0;
     }
     
 	int result = Parse_Unit_Conversion_Statement( mSentence, final_answer );
@@ -294,7 +293,7 @@ int Parse_Math_Statement( Sentence& mSentence, ServerHandler* mh )
 	result = Parse_shape_geometry( mSentence, final_answer );
 	if (result>0) {
 		form_verbal_answer(mSentence, mh, final_answer);		
-		return retval;            
+		return result;            
 	}
 
     int foundA = mSentence.regex_find( "area (of )?(a )?circle" );
@@ -309,6 +308,7 @@ int Parse_Math_Statement( Sentence& mSentence, ServerHandler* mh )
     }    
 	
     if (retval>-1)  printf( "Parse_Math_Statement done\n" );
+    return retval;
 }
 
 void test_math_protocol()

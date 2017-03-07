@@ -152,7 +152,7 @@ int  Parse_Routing_Statement( Sentence& mSentence, ServerHandler* mh )
 		retval = 0;	
     }
     
-    foundA = mSentence.is_found_in_sentence( "(cancel|stop|drop)" ) ;
+    foundA = mSentence.regex_find( "(cancel|stop|drop)" ) ;
     int foundB = mSentence.is_found_in_sentence( "route" ) ;
     if (foundA && foundB)
     {
