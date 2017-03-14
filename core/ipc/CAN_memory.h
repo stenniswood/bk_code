@@ -13,7 +13,7 @@ extern "C" {
 
 #include "CAN_base.h"
 
-#define IPC_KEY_CAN 1239
+#define IPC_KEY_CAN 0x04D2
 
 extern char* 	can_shared_memory;
 extern int 		can_segment_id;

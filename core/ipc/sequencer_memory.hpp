@@ -30,7 +30,7 @@
 #include "global.h"
 #include "body_pose.h"
 
-#define IPC_KEY_SEQ    1275
+#define IPC_KEY_SEQ    0x04D5
 #define MAX_SEQUENCES  300
 
 

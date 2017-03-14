@@ -22,12 +22,12 @@ MYSQL 		 *logger_db = NULL;
 
 SQL_Logger sql_logger;
 
-static void object_finish_with_error( )
+/*static void object_finish_with_error( )
 {
     fprintf    ( stderr, "%s\n", mysql_error(logger_db));
     mysql_close( logger_db );
     exit(1);
-}
+}*/
 
 SQL_Logger::SQL_Logger()
 {

@@ -11,7 +11,7 @@
  ************************************************************/
 #include "global.h"
 
-#define IPC_KEY_CLI  0x04D4   // 1236 in decimal.
+#define IPC_KEY_CLI  0x04D3   // 1236 in decimal.
 #define MAX_CLIENTS  300
 
 struct stClientData {

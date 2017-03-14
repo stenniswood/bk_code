@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 
-#define 		IPC_KEY_PICAM 1235
+#define 		IPC_KEY_PICAM 0x04D4
 #define 		NUM_ANALOG_CHANNELS 	8	
 
 extern char* 	picam_shared_memory;

@@ -186,7 +186,7 @@ int Parse_General_Statement( Sentence& theSentence, ServerHandler* mh )
 	if (result>=0)	
 		return (end_of_telegram + result);
 */
-	return 0;
+	return -1; 
 }
 
 

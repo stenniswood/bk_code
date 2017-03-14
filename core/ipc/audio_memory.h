@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 
-#define IPC_AUDIO_KEY 1235
+#define IPC_AUDIO_KEY 0x04D1
 
 extern char* 	audio_shared_memory;
 extern int 		audio_segment_id;

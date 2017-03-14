@@ -7,7 +7,7 @@
 
 
 #define MAX_CLIENT_ARRAY_SIZE 2048
-#define IPC_KEY_VIS 1234
+#define IPC_KEY_VIS 0x04D0
 
 /******************** AVISUAL MEMORY MAP *****************/
 struct avisual_ipc_memory_map

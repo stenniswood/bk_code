@@ -21,7 +21,7 @@ OPTIONS	   = -Wwrite-strings -fpermissive -Wreturn-type -Wformat
 # 
 # INCLUDE PATHS:
 CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
-	     ../core/dbase/ ../core/misc/ ../core/msg/    ../core/wifi/     ../core/ipc/    	\
+	     ../core/mysql/ ../core/misc/ ../core/msg/    ../core/wifi/     ../core/ipc/    	\
 	     ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
 	     ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \
 	     ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
@@ -81,7 +81,8 @@ CAN_APP_OBJS   = can_app.o gyro_window.o analog_board_app.o filter_select.o msg_
 AUDIO_APP_OBJS = audio_app.o audio_app_menu.o 
 ROBOT_CONTROL_OBJS = robot_control_panel.o robot_app.o robot_diagnostics.o robot_performance.o \
 			robot_vision.o
-DBASE_OBJS    = viki_logger.o vision_logger.o machine_defs.o can_sql_logger.o sql_common.o
+DBASE_OBJS    = viki_logger.o vision_logger.o machine_defs.o can_sql_logger.o sql_common.o \
+			calendar_entry.o sql_users.o
 #
 
 #ipc_can_rxbuff.o 
@@ -113,7 +114,7 @@ ADRENALINE_MOLECULES_OBJS = adren_network_view.o file_browser.o  	  \
 			stereo_power.o stick_figure.o  can_window.o   \
 			application.o file_editor.o label_edit_box.o complete_file_browser.o \
 			icon_bar.o compass.o button_array.o button_array_gui.o
-ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o calendar_entry.o
+ADRENALINE_SYSTEM_UI_OBJS = calendar.o calendar_summary.o
 
 ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o legend.o
@@ -142,7 +143,7 @@ avisual: $(AVISUAL_OBJS) 					\
 		$(addprefix ../core/msg/,			$(MSG_OBJS))  			\
 		$(addprefix ../core/can/,			$(CAN_OBJS))			\
 		$(addprefix ../core/ipc/,			$(IPC_OBJS))			\
-	    $(addprefix ../core/dbase/, 		$(DBASE_OBJS)) 			\
+	    $(addprefix ../core/mysql/, 		$(DBASE_OBJS)) 			\
 		$(addprefix ./apps/,				$(APPS_OBJS))			\
 		$(addprefix ./apps/file_editer/,	$(FILE_EDIT_OBJS))		\
 		$(addprefix ./apps/finder/,			$(FINDER_OBJS))			\

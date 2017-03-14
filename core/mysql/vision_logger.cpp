@@ -20,13 +20,6 @@ MYSQL 		 	*vision_logger_db = NULL;
 Event_SQL_Logger vis_sql_logger;
 
 
-static void object_finish_with_error( )
-{
-    fprintf    ( stderr, "%s\n", mysql_error(vision_logger_db));
-    mysql_close( vision_logger_db );
-    exit(1);
-}
-
 /*********************************************************************************/
 Event_SQL_Logger::Event_SQL_Logger()
 {

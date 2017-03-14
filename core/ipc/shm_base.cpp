@@ -20,6 +20,7 @@
 SHMBase::SHMBase(uint16_t mKey, size_t mSizeInBytes, char* mFilename)
 :m_key(mKey)
 {
+	m_segment_id = 0;
 	m_size = mSizeInBytes;
 	m_segment_filename = strdup( mFilename );
 	read_segment_id();
@@ -45,6 +46,9 @@ void SHMBase::hex_dump()
 
 bool SHMBase::is_IPC_memory_available()
 {
+	if (m_segment_id==0)	
+		return false;	// don't encur the error below.
+	
 	struct shmid_ds buf;			// shm data descriptor.
 	int retval = shmctl(m_segment_id, IPC_STAT, &buf);
 	if (retval==-1) {
