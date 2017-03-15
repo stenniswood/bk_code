@@ -19,6 +19,7 @@ Analog Board Configuration should be:
 #include <pthread.h>
 #include <assert.h> 
 #include <string>
+#include <regex>
 
 #include "gpio.h"
 #include "mcp2515.h"
@@ -48,6 +49,9 @@ Analog Board Configuration should be:
 #include "teach_pendant.hpp"
 #include "seq_init.hpp"
 #include "sequencer_memory.hpp"
+#include "SEQUENCER_protocol.hpp"
+#include "nlp_sentence.hpp"
+#include "roboclaw.hpp"
 
 
 SequencerIPC  sequencer_mem;
@@ -61,6 +65,16 @@ bool FirstIssued = false;
 struct timeval	start_ts;
 struct timeval tv;
 struct timeval starttime;
+
+
+#if (MOTOR_DRIVER==USE_ROBOCLAW)
+RoboClaw mot1("/dev/ttyACM0", 50000000);
+RoboClaw mot2("/dev/ttyACM1", 10000);
+#elif (MOTOR_DRIVER==USE_BK_QM)
+
+#elif (MOTOR_DRIVER==USE_BK_CAN)
+
+#endif
 
 
 void print_sig_info( siginfo_t *si )
@@ -103,7 +117,7 @@ struct		sigevent  sev_sequencer;
 float compute_elapsed_time()
 {
 	// COMPUTE ELAPSED TIME from start until now:
-	assert      ( robot.limbs.size() == robot.seq.limbs.size() );
+//	assert      ( robot.limbs.size() == robot.seq.limbs.size() );
 	gettimeofday( &tv, NULL );
 	float dtime = (tv.tv_sec - starttime.tv_sec);
 //	dtime       += ((float)(tv.tv_usec) - (float)(starttime.tv_usec))/1000000.;
@@ -209,7 +223,6 @@ void configure_motor_reports( bool mOn )
 		mReports = 0;
 		mRate    = MODE_SEND_UPDATES_NONE;
 	}
-	
 	robot.configure_motor_reports( mRate, mReports );			
 }
 
@@ -226,8 +239,20 @@ void activate_outputs()
 		robot.limbs[1]->actuators[0]->ActiveOutputs = 0; //actuators[a].MotorEnable;
 		robot.limbs[1]->actuators[1]->ActiveOutputs = 1; //actuators[a].MotorEnable;
 		robot.limbs[1]->actuators[2]->ActiveOutputs = 1; //actuators[a].MotorEnable;
+}
+
+void init_roboclaws()
+{
+	if (mot1.connected == true)
+		 printf("Roboclaw #1 - Available\n"    );
+	else printf("Roboclaw #1 - not available\n");
+	
+	if (mot2.connected == true)	
+		 printf("Roboclaw #2 - Available\n"    );
+	else printf("Roboclaw #2 - not available\n");
 
 }
+
 
 /* WORK ON RECEIVE.  SOME ACTIVITY DETECTED WITH BUTTON PUSHES.
 	Seems like functionality doesn't work without interrupts.  ie. flags 
@@ -239,7 +264,9 @@ int main( int argc, char *argv[] )
 	print_args( argc, argv );
 	
 	sequencer_mem.connect_shared_memory(TRUE); 
-	
+	//ServerHandler mh;
+	Sentence theSentence;
+	 
 	int first_param = 1;		// sudo ./pican cfg
 	int value    	= 0;
 	int resample_iterations = 0;
@@ -260,8 +287,12 @@ int main( int argc, char *argv[] )
 			{
 				if (sequencer_mem.is_new_sentence())
 				{
+					theSentence.set( sequencer_mem.get_sentence(), false );
 					printf("NEW SENTENCE: %s\n", sequencer_mem.get_sentence() );					
-					sequencer_mem.ack_sentence_counter();
+					//printf("RAW SENTENCE: %s\n", theSentence.m_raw_sentence );						
+					Parse_Sequencer_Statement( theSentence );
+					sequencer_mem.ack_sentence_counter();	
+									
 				}
 			}
 		}
@@ -372,8 +403,7 @@ int main( int argc, char *argv[] )
 			printf("===All iterations requested have completed.  Done.===\n");
 		}
 		if ( strcmp(argv[1], "stop") == 0 )
-		{		
-			// 
+		{	
 			sRobotVector zero;
 			sVectorSet   zset;
 			sOneVector	 zvec;
@@ -416,7 +446,7 @@ int main( int argc, char *argv[] )
 				result = robot.are_reads_completed();
 			}; */
 
-			robot.seq.read_vector_file( /*"vectors_swing.ini"*/ SequenceFileName );
+			robot.seq.read_vector_file( SequenceFileName );
 			robot.set_vectors_limbs   (  );
 
 			printf("MotorEnable 0,1,2 =%d,%d,%d \n", 

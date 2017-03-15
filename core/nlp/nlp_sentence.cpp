@@ -35,6 +35,11 @@ Sentence::Sentence(const char* mSentence)
     set(mSentence);
 }
 
+Sentence::Sentence (std::string& mSentence)
+{
+    set(mSentence.c_str());
+}
+    
 Sentence::~Sentence()
 {
     if (m_raw_sentence) {
@@ -81,7 +86,7 @@ void Sentence::restore_reduced()
     m_reduced_sentence = m_sentence;
 }
 
-void Sentence::set( const char*  mNew )
+void Sentence::set( const char*  mNew, bool do_prefilter )
 {
     // COPY THE RAW Sentence :
     size_t length   = strlen(mNew)+1;
@@ -91,6 +96,8 @@ void Sentence::set( const char*  mNew )
     m_sentence      = m_raw_sentence;
     
     // Prefilter:
+    if (do_prefilter==false) return;
+    
     bool okay = prefilter_text();
     if (okay) {
         m_sentence.split( ' ' );

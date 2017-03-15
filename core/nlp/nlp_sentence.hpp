@@ -23,9 +23,10 @@ class Sentence
 public:
     Sentence ();
     Sentence (const char* mSentence);
+    Sentence (std::string& mSentence);
     ~Sentence();
 
-    void			set                     ( const char*  mNew );
+    void			set                     ( const char*  mNew, bool do_prefilter=true );
     void			set_word_pointer        ( int  mWordIndex );
     int             get_word_pointer        ( );
     int             get_number_words        ( )  { return (int)m_sentence.m_split_words.size(); };

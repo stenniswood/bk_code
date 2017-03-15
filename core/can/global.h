@@ -1,5 +1,5 @@
-//#ifndef	GLOBAL_H
-//#define	GLOBAL_H
+//#ifndef _GLOBAL_H_
+//#define _GLOBAL_H_
 
 #define 	_BV(bit)   (1 << (bit))
 #define 	bit_is_set(sfr, bit)   (sfr & _BV(bit))
@@ -36,8 +36,6 @@ typedef unsigned long int Uint32_t;
 #ifndef byte
 typedef unsigned char byte;
 #endif
-
-
 
 typedef unsigned int   UINT;
 typedef unsigned char  BOOL;

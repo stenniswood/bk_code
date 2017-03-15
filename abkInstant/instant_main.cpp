@@ -297,7 +297,21 @@ int main( int argc, char *argv[] )
 {
 	signal(SIGINT, shutdown); 	// in Ctrl-C event.
 	avisual_mem.connect_shared_memory(FALSE); 
-	sequencer_mem.connect_shared_memory(FALSE); 	
+	sequencer_mem.connect_shared_memory(FALSE); 
+	
+	char motor_speed_cmd [] = "Motor:Speed:Board=1:M1=120,M2=100,M3=123,M4=125;";
+	char motor_stop_cmd [] = "Motor:Speed:Board=1:M1=0,M2=0,M3=0,M4=0;";
+	char motor_position_cmd [] = "Motor:Position:Board=1:M1=100,M2=110,M3=120,M4=130;";	
+	
+//	sequencer_mem.write_sentence( motor_speed_cmd );
+	sequencer_mem.write_sentence( motor_stop_cmd );	
+	sequencer_mem.wait_for_ack_sentence_counter();
+
+	sequencer_mem.write_sentence( motor_position_cmd );
+	sequencer_mem.wait_for_ack_sentence_counter();
+
+	exit(1); 
+	
 	
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg 

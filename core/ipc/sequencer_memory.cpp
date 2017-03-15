@@ -134,7 +134,7 @@ void SequencerIPC::write_connection_status( char* mStatus )
 bool SequencerIPC::ipc_write_sequence( int mIndex, struct stBodyPositionVector* mBP )
 {
 	struct  sequencer_ipc_memory_map* seq = get_memory_seq();
-	if (seq==NULL) return;
+	if (seq==NULL) return false;
 		
     if ((mIndex >= MAX_SEQUENCES) || (seq == NULL))
         return false;

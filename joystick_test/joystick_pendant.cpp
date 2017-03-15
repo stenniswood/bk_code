@@ -1,9 +1,6 @@
 #include <math.h>
 #include <stdio.h>
-
 #include "joystick_pendant.hpp"
-
-
 
 
 JoystickPendant::JoystickPendant()
