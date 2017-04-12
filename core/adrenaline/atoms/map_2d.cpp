@@ -12,27 +12,28 @@
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-#include "Graphbase.hpp"
+
 #include "control.hpp"
 #include "button.hpp"
 #include "display.h"
 #include "text_view.hpp" 
+#include "map_2d.hpp"
 
 
 
-Map2D( ) 
+Map2D::Map2D( ) 
 { 
 }
 
-Map2D( int Left,  int Right, int Top, int Bottom ) 
+Map2D::Map2D( int Left,  int Right, int Top, int Bottom ) 
 { 
 }
 
-Map2D( int Width, int Height ) 
+Map2D::Map2D( int Width, int Height ) 
 { 
 }
 
-~Map2D() 
+Map2D::~Map2D() 
 { 
 }
 
@@ -47,10 +48,10 @@ void 			Map2D::print_info			( 						)
 void			Map2D::add_poly_line		( Path2d mPath 			) 
 { 
 }
-void			Map2D::define_room			( Rectangle mRoom, String mName	) 
+void			Map2D::define_room			( Rectangle mRoom, string mName	) 
 { 
 }
-void			Map2D::add_door				( stDoor mDoor,    String mName	) 
+void			Map2D::add_door				( stDoor mDoor,    string mName	) 
 { 
 }
 
@@ -66,22 +67,24 @@ void			Map2D::set_level_name 		( string mName 			)
 
 string			Map2D::get_room_name		( int mIndex )	
 {
- return m_rooms[mIndex]; 
+ return m_room_names[mIndex]; 
 } 
 		
 int   			Map2D::draw 				(				 ) 
 { 
+	return 0;
 }	
 int				Map2D::HitTestRoom			( int x, int y	 ) 
 { 
 	vector<Rectangle>::iterator iter = m_rooms.begin();
 	while (iter != m_rooms.end())
 	{		
-		m_rooms.
 		iter++;
 	}
+	return 0;
 }
 
-int		 		Map2D::onClick				( int x, int y, bool mouse_is_down ) 
+int	Map2D::onClick				( int x, int y, bool mouse_is_down ) 
 { 
+	return 0;
 }

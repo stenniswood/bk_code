@@ -1,4 +1,6 @@
 
+#include "finger_cursor.hpp"
+
 
 
 
@@ -13,6 +15,7 @@ FingerCursor::~FingerCursor()
 int FingerCursor::draw				(	)
 {
 	//vgDrawPath		(path, VG_STROKE_PATH			);	
+	return 0;
 }	
 
 void FingerCursor::compose_path()

@@ -11,7 +11,7 @@ struct stPoint {
 	float x;
 	float y;	
 };
-typdef vector<Point> Path2d;
+typedef vector<stPoint> Path2d;
 
 struct stDoor {
 	stPoint hinge;
@@ -50,15 +50,15 @@ public:
 	
 	void 			print_info			( 						);
 	void			add_poly_line		( Path2d mPath 			);
-	void			define_room			( Rectangle mRoom, String mName	);
-	void			add_door			( stDoor mDoor,    String mName	);
+	void			define_room			( Rectangle mRoom, string mName	);
+	void			add_door			( stDoor mDoor,    string mName	);
 
 	void			set_units			( eUnitType mUnitType 	);
 	void			set_floor_plan_name ( string mName 			);
 	void			set_level_name 		( string mName 			);
 
-	string			get_room_name		( int mIndex )	{ return m_rooms[mIndex]; };
-	string			get_room_name		( int mIndex )	{ return m_rooms[mIndex]; };
+	Rectangle		get_room			( int mIndex )	{ return m_rooms[mIndex]; };
+	string			get_room_name		( int mIndex );//	{ return m_room_names[mIndex]; };
 			
 	virtual int   	draw 				(				 );	
 

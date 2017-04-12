@@ -1,6 +1,7 @@
 #ifndef _WINDOW_CONTROL_
 #define _WINDOW_CONTROL_
 
+#include "global.h"
 #include "control.hpp"
 
 #include <list>

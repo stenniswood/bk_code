@@ -120,7 +120,7 @@ ADRENALINE_GRAPH_OBJS =  Graphbase.o dataset.o line_graph.o histogram.o \
 			 bar_graph.o bar_graph_stacked.o scatter_plot.o legend.o
 KINETIC_OBJS = balance.o vector_file.o
 # APP CODE
-#VOICE_OBJS 	= 
+#VOICE_OBJS  = 
 
 %.o: %.cpp $(DEPS)
 	$(CC) $(CFLAGS) $(VG_INCLUDE) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 

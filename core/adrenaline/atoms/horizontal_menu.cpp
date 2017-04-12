@@ -10,8 +10,11 @@
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-#include "Graphbase.hpp"
-#include "adrenaline_windows.h"
+#include "display.h"
+//#include "display_manager.h"
+
+
+//#include "adrenaline_windows.h"
 #include "horizontal_menu.hpp"
 #include "vertical_menu.hpp"
 
@@ -378,7 +381,10 @@ int	HorizontalMenu::onClick( int x, int y, bool mouse_is_down )
 				}
 			}
 			m_selection = menu_index;
-			m->set_z_order( ++MainDisplay.m_z_order_counter );
+
+			// SJT PUT THIS BACK IN !!!			
+			// Get Z order from Parents somehow
+			//m->set_z_order( ++MainDisplay.m_z_order_counter );
 			m->show(true);
 			m->draw();
 			//Invalidate();			

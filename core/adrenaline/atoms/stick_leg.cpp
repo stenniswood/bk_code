@@ -9,8 +9,8 @@
 #include "VG/vgu.h"
 #include "/home/pi/openvg/fontinfo.h"
 #include "/home/pi/openvg/shapes.h"
-#include "Graphbase.hpp"
-#include "../core/can/bk_system_defs.h"
+
+#include "bk_system_defs.h"
 #include "control.hpp"
 #include "stick_leg.hpp"
 #include "display.h"
