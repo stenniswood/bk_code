@@ -53,6 +53,6 @@ int JoystickPendant::convert_to_8bit( short mSpeed )
 
 int	 JoystickPendant::time_slice()
 {
-	Joystick::time_slice();
+	return Joystick::time_slice();
 }
 

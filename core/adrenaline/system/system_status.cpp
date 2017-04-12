@@ -13,19 +13,20 @@
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-#include "adrenaline_windows.h"
+//#include "adrenaline_windows.h"
 #include "display.h"
 #include "system_status.hpp"
 #include "keyboard.hpp"
 #include "global.h"
 #include "global_funcs.h"
 
+
 #define Debug 0
 
 
 void show_soft_keyboard( void* mSystemStatusBar )
 {
-	MainDisplay.show_keyboard();
+	//MainDisplay.show_keyboard();
 	Dprintf("show_soft_keyboard :: SHOW KEYBOARD  %p  %p \n", mSystemStatusBar,((SystemStatusBar*)mSystemStatusBar)->m_power_button );
 //	if (((SystemStatusBar*)mSystemStatusBar)->invalidated)
 //		printf("INVALID!\n");		
@@ -35,11 +36,11 @@ void show_soft_keyboard( void* mSystemStatusBar )
 void show_calendar( void* mSystemStatusBar )
 {
 	static bool is_visible = false;
-	if (is_visible==false)
+/*	if (is_visible==false)
 		MainDisplay.show_calendar();
 	else 
 		MainDisplay.hide_calendar();
-	Dprintf("show_calendar :: SHOW CALENDAR\n");	
+*/	Dprintf("show_calendar :: SHOW CALENDAR\n");	
 }
 
 

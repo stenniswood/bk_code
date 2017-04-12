@@ -22,7 +22,7 @@
 #include "calendar.hpp"
 #include "calendar_summary.hpp"
 #include "display_manager.hpp"
-#include "avisual_menu.hpp"		// Specific system menu.  not part of adrenaline_windows
+//#include "avisual_menu.hpp"		// Specific system menu.  not part of adrenaline_windows
 
 
 
@@ -99,7 +99,7 @@ void DisplayManager::Initialize()
 	m_running_apps = new std::vector<Application*>();
 	
 	// put actual icons on it:
-	init_default_sidebar( &m_side );
+//	init_default_sidebar( &m_side );
 	m_current_running_app = -1;
 	m_focus = NULL;	
 }
@@ -328,7 +328,7 @@ void DisplayManager::set_menu( HorizontalMenu* mHMenu )
 	if (Debug)  printf("\t\tDisplayManager::set_menu( )\n");
 	if (mHMenu==NULL)
 	{
-		m_sb.set_menu( &system_hmenu );
+//		m_sb.set_menu( &system_hmenu );
 		onPlace();
 		m_sb.Invalidate();
 	} else {

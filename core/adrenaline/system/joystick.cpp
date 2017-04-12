@@ -45,6 +45,7 @@ void* eventThread(void *arg)
 		joy->handle_event();
 		//joy.print_event_info();
 	}
+	return NULL;
 }
 
 Joystick::Joystick()
@@ -111,18 +112,18 @@ void Joystick::print_event_info()
 		//printf("time=%lu; Button #%d = %d\n", m_ev.time, m_ev.number, m_ev.value );
 		std::string button_name = get_button_name( m_ev.number );
 		if (m_ev.value==1)
-			printf("time=%lu; Button %d %s down\n", m_ev.time, m_ev.number, button_name.c_str() );
+			printf("time=%ul; Button %d %s down\n", m_ev.time, m_ev.number, button_name.c_str() );
 		else 
-			printf("time=%lu; Button %d %s up\n", m_ev.time, m_ev.number, button_name.c_str() );
+			printf("time=%ul; Button %d %s up\n", m_ev.time, m_ev.number, button_name.c_str() );
 	}
 	else if (m_ev.type==2) {
 		if (m_ev.number==25)
 				return;
 				
 		std::string axis_name = get_axis_name( m_ev.number );
-		printf("time=%lu; Axis   %d %s = %d\n", m_ev.time, m_ev.number, axis_name.c_str(), m_ev.value );	
+		printf("time=%ul; Axis   %d %s = %d\n", m_ev.time, m_ev.number, axis_name.c_str(), m_ev.value );	
 	} else 
-		printf("time=%lu; value=%d; type=%x; number=%d\n", m_ev.time, m_ev.value, m_ev.type, m_ev.number );	
+		printf("time=%ul; value=%d; type=%x; number=%d\n", m_ev.time, m_ev.value, m_ev.type, m_ev.number );	
 }
 void Joystick::read_event()
 {

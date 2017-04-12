@@ -20,7 +20,7 @@ CC		   = g++
 OPTIONS	   = -Wwrite-strings -fpermissive -Wreturn-type -Wformat
 # 
 # INCLUDE PATHS:
-CORE_INC   = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
+CORE_INC = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
 	     ../core/mysql/ ../core/misc/ ../core/msg/    ../core/wifi/     ../core/ipc/    	\
 	     ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
 	     ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \

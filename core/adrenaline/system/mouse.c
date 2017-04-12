@@ -49,7 +49,7 @@ void *eventThread(void *arg)
 	while (1) {
 		read(mouse_fd, &mouse_ev, sizeof(struct input_event));
 		printf("[%4.0f,%4.0f]\r",mouse.x,mouse.y);
-asdf
+
 		// Check events
 		//mouse.left = CUR_SIZ * 2;		   // Reset Mouse button states
 		//mouse.right = CUR_SIZ * 2;
@@ -196,6 +196,7 @@ int mouse_init(int screen_width, int screen_height)
 	if (result != 0) {
 		fprintf(stderr, "Unable to initialize the mouse\n");
 	}
+	return 0;
 } 
 
 void draw_cursor(int curx, int cury, int width, int height, int s) 
@@ -248,5 +249,6 @@ int mouse_close()
 	restore_pixels(CursorBuffer);			   // not strictly necessary as display will be closed
 	vgDestroyImage(CursorBuffer);			   // tidy up memory
 	finish();					   // Graphics cleanup
+	return 1;
 }
 

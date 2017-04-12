@@ -13,15 +13,15 @@
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-#include "CAN_Interface.h"
+//#include "CAN_Interface.h"
 
 #include <linux/input.h>
 
 #include "dataset.hpp"
 #include "display.h"
-#include "adrenaline_windows.h"
-#include "adrenaline_graphs.h"
-#include "display_manager.hpp"
+//#include "adrenaline_windows.h"
+//#include "adrenaline_graphs.h"
+//#include "display_manager.hpp"
 #include "client_memory.hpp"
 #include "client_list_control.hpp"
 #include "keyboard.hpp"
@@ -41,7 +41,7 @@ void close_keyboard_cb( void* mKeyboard )
 	Keyboard* ptr = (Keyboard*) mKeyboard;
 	ptr->hide();
 	ptr->Invalidate();
-	MainDisplay.draw();	
+	//MainDisplay.draw();	
 }
 
 Keyboard::Keyboard( int Left,  int Right, int Top, int Bottom )
@@ -322,7 +322,7 @@ int Keyboard::handle_special_keys( int mKeyIndex )
 	else if (mKeyIndex==RETURN_KEY)
 	{
 		append_character('\n');  
-		MainDisplay.hide_keyboard();
+		//MainDisplay.hide_keyboard();
 		Invalidate();
 		return 1; 
 	}
@@ -416,10 +416,10 @@ int Keyboard::onClick(int x, int y, bool mouse_is_down)
 	Invalidate();
 	int is_special_key = handle_special_keys( key_index );
 	if (is_special_key)	 {
-		MainDisplay.relay_key( key_index );
+		//MainDisplay.relay_key( key_index );
 		return TRUE;
 	} else
-		MainDisplay.relay_key( key );
+		//MainDisplay.relay_key( key );
 
 	append_character ( key );
 	if (m_index>BUFFER_LENGTH)	m_index = BUFFER_LENGTH;

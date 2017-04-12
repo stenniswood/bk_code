@@ -14,22 +14,13 @@ AUTHOR	: Steve Tenniswood
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-#include "CAN_Interface.h"
-#include "adrenaline_windows.h"
-#include "adrenaline_graphs.h"
 #include "display.h"
-#include "display_manager.hpp"
 #include "frame_window.hpp"
 #include <vector>
 #include "power_level.hpp"
 #include "stereo_power.hpp"
-//#include "visual_memory.h"
 #include "audio_memory.h"
 #include "fft.h"
-#include "audio_app.hpp"
-#include "can_app.hpp"
-#include "card_games.h"
-
 #include "slider.hpp"
 
 
@@ -44,7 +35,7 @@ void init_volume_control()
 	VolumeControl.pack_control      ( &volume, PACK_FILL_PARENT, PACK_RIGHT  		);
 	VolumeControl.pack_control      ( &pan,    PACK_FILL_PARENT, PACKER_ALIGN_BOTTOM );
 
-	MainDisplay.remove_all_objects(		);
-	MainDisplay.add_object( &VolumeControl );
+//	MainDisplay.remove_all_objects(		);
+//	MainDisplay.add_object( &VolumeControl );
 }
 

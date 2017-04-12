@@ -19,16 +19,15 @@
 #include <string>
 #include <fontinfo.h>
 #include <shapes.h>
-#include "Graphbase.hpp"
-#include "adrenaline_windows.h"
+//#include "Graphbase.hpp"
+//#include "adrenaline_windows.h"
 #include "system_bar.hpp"
-#include "avisual_menu.hpp"
+//#include "avisual_menu.hpp"
 
 
 #include "client_list_control.hpp"
-#include "home_screen.hpp"
-
-#include "draw_app.hpp"
+//#include "home_screen.hpp"
+//#include "draw_app.hpp"
 
 #define Debug 0
 
@@ -60,19 +59,19 @@ void show_volume(void* mObj )
 	if (Debug) 	printf("\n\nshow_volume callback\n");
 	if (obj->is_visible()==true) {
 		obj->hide( ); 
-		init_home_screen();
+		//init_home_screen();
 	} else {
 		printf("\n\nshow_volume callback - Showing\n");
 		obj->show( );
-		MainDisplay.remove_all_objects(	);
-		MainDisplay.add_object( obj );	
+		//MainDisplay.remove_all_objects(	);
+		//MainDisplay.add_object( obj );	
 	}
 }
 void show_tasks(void* mObj )		// running tasks
 {
 //	Control* obj = (Control*) mObj;
 	if (Debug) 	printf("\n\nShow_tasks callback : \n");
-	MainDisplay.print_running_apps();
+	//MainDisplay.print_running_apps();
 
 }
 
@@ -129,7 +128,7 @@ void	SystemBar::onPlace		(	)
 	m_show_taskbar.move_to( 0,        bottom);
 	m_show_sidebar.move_to( width-25, bottom);
 
-	float quarts   = MainDisplay.screen_width / 4.;
+	float quarts   = width / 4.;
 	float vc_left  = 3.* quarts;
 	volume_control.set_width_height( 75, 150);
 	volume_control.move_to( vc_left, bottom-volume_control.get_height() );
@@ -216,13 +215,14 @@ int	SystemBar::onCreate(  )
 	static bool first_time = true;
 	if (first_time)
 	{	
-		init_system_hmenu(  );	
+		//init_system_hmenu(  );	
 		first_time = false; 	
 	};	
-	if (Debug) printf("\tSystem Menu:  sysmenu:%p  draw_menu: \n", &system_hmenu );
-	m_Menu = &system_hmenu;	
 
-	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_side) );
+	//m_Menu = &system_hmenu;	
+	//if (Debug) printf("\tSystem Menu:  sysmenu:%p  \n", &m_Menu );	
+	
+//	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_side) );
 	m_wifi.set_on_click_listener  ( show_wifi,   (void*) NULL );
 	//m_wifi.set_on_click_listener  ( show_wifi,   (void*)&(MainDisplay.m_wifi  ) );
 	m_volume.set_on_click_listener( show_volume, (void*)&(volume_control) );
