@@ -93,7 +93,7 @@ void Wave::Save(string mFileName)
 	FILE* File = fopen(mFileName.c_str(), "a" );
 	size_t chunkSize = sizeof(WAVEFORMATEX);
 	
-	size_t result = 0;
+	//size_t result = 0;
 	result = fwrite("RIFF", 4, 1, File); 
 		
 	DWORD fSize = (get_data_length_bytes()+sizeof(WAVEFORMATEX) );
@@ -180,7 +180,7 @@ bool Wave::Load(string Filename)
 	char tmp[20];
 	unsigned long  chunkSize;
 	long int fileSize;
-	size_t result;
+	//size_t result;
 	
 	FILE* inFile = fopen( Filename.c_str(), "r" );	// binary?	
 	if(inFile==NULL)
