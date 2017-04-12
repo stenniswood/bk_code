@@ -12,14 +12,14 @@
 #include <fontinfo.h>
 #include <vector>
 #include <string>
-#include "CAN_Interface.h"
+//#include "CAN_Interface.h"
 #include "dataset.hpp"
-#include "adrenaline_windows.h"
-#include "display_manager.hpp"
+//#include "adrenaline_windows.h"
+//#include "display_manager.hpp"
 //#include "visual_memory.h"
 #include "file_browser.hpp"
 #include "complete_file_browser.hpp"
-#include "test_layouts.hpp"
+//#include "test_layouts.hpp"
 
 
 #define Debug 1

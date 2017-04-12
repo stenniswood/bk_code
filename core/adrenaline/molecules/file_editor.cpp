@@ -8,6 +8,7 @@
 #include <dirent.h> 
 #include <sys/stat.h>
 #include <errno.h>
+#include "global.h"
 
 #include "VG/openvg.h"
 #include "VG/vgu.h"
@@ -16,9 +17,10 @@
 #include "bcm_host.h"
 #include <fontinfo.h>
 #include <shapes.h>
+#include "tabular_listbox.hpp"
 
-#include "adrenaline_windows.h"
-#include "file_editor_app.hpp"
+//#include "adrenaline_windows.h"
+//#include "file_editor_app.hpp"
 #include "file_editor.hpp"
 #include "rectangle.hpp"
 

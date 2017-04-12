@@ -8,6 +8,7 @@
 #include "tabular_listbox.hpp"
 #include "icon_bar.hpp"
 #include "listbox.hpp"
+#include "directory_listbox.hpp"
 
 #include <vector>
 #include <list>

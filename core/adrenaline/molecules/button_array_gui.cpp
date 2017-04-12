@@ -8,26 +8,18 @@
 #include "VG/vgu.h"
 #include "/home/pi/openvg/fontinfo.h"
 #include "/home/pi/openvg/shapes.h"
-//#include "CAN_Interface.h"
-#include "line_graph.hpp"
+
 #include "dataset.hpp"
-#include "histogram.hpp"
-#include "line_graph.hpp"
 #include "leveler.hpp"
 #include "display.h"
-//#include "stick_leg.hpp"
-#include "display_manager.hpp"
+//#include "display_manager.hpp"
 #include "button.hpp"
 #include "listbox.hpp"
 #include "checkbox.hpp"
 #include "progressbar.hpp"
 #include "button_array_gui.hpp"
-//#include "packer_motor.h"
-//#include "can_txbuff.h"
-//#include "motor.hpp"
-//#include "motor_pack.hpp"
-#include "window_layouts.hpp"
-//#include "robot.hpp"
+//#include "window_layouts.hpp"
+
 
 
 #define Debug 0

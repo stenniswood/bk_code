@@ -7,6 +7,8 @@
 #include "scroll_bar.hpp"
 #include "scroll_control.hpp"
 #include "tabular_listbox.hpp"
+#include "directory_listbox.hpp"
+#include "text_view.hpp"
 
 #include <vector>
 #include <list>

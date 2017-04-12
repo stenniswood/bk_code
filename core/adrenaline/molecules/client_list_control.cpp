@@ -14,8 +14,8 @@
 #include "CAN_Interface.h"
 #include "dataset.hpp"
 #include "display.h"
-#include "adrenaline_windows.h"
-#include "adrenaline_graphs.h"
+//#include "adrenaline_windows.h"
+//#include "adrenaline_graphs.h"
 #include "display_manager.hpp"
 #include "client_memory.hpp"
 #include "client_list_control.hpp"
@@ -166,7 +166,7 @@ int	ClientListPanel::onCreate(  )
 	add_control( m_clients  );
 	add_control( &m_connect );
 
-	Window::onCreate();
+	return Window::onCreate();
 
 	// Create a Timer for updating the list box,  No!
 	// Should have a callback from the udp_transponder receive thread.
@@ -186,7 +186,7 @@ Control* ClientListPanel::HitTest( int x, int y )
 	return Window::HitTest(x,y);
 }
 
-int		 ClientListPanel::onClick( int x, int y, bool mouse_is_down=true )
+int	ClientListPanel::onClick( int x, int y, bool mouse_is_down )
 {
 	return Window::onClick(x,y, mouse_is_down);
 }

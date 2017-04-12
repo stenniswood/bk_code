@@ -12,11 +12,11 @@
 #include <fontinfo.h>
 #include "CAN_Interface.h"
 #include "dataset.hpp"
-#include "adrenaline_windows.h"
-#include "display_manager.hpp"
+//#include "adrenaline_windows.h"
+//#include "display_manager.hpp"
 //#include "visual_memory.h"
 #include <vector>
-#include "test_layouts.hpp"
+//#include "test_layouts.hpp"
 #include "file_browser.hpp"
 
 #define Debug 0

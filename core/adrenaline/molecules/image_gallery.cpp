@@ -13,10 +13,11 @@
 #include <dirent.h> 
 #include <math.h>
 #include "CAN_Interface.h"
-#include "adrenaline_windows.h"
-#include "display_manager.hpp"
+//#include "adrenaline_windows.h"
+//#include "display_manager.hpp"
 //#include "visual_memory.h"
-#include "test_layouts.hpp"
+//#include "test_layouts.hpp"
+#include "image_gallery.hpp"
 
 #define Debug 1
 
@@ -74,10 +75,10 @@ int ImageGallery::onCreate()
 	PrevImage->set_text("<");		// font has to be loaded before this will work!!
 	NextImage->set_text(">");		// It is loaded in init_screen();
 
-	Rectangle* rect   = MainDisplay.get_useable_rect( );
-	printf("rect = ");  rect->print_positions();  printf("\n ");
-	set_position(rect);
-	print_positions();
+	//Rectangle* rect   = MainDisplay.get_useable_rect( );
+	//printf("rect = ");  rect->print_positions();  printf("\n ");
+	//set_position(rect);
+	//print_positions();
 
 	// Should already have a preloaded buffer of images.
 	//std::list<VGImage>::iterator iter = images.begin();	
@@ -245,15 +246,15 @@ int	 ImageGallery::onClick(int x, int y, bool mouse_is_down)
 		current_image_index--;
 		if (current_image_index<0)  {
 			current_image_index=0;
-			MainDisplay.m_status.set_text( "At beginning.");
+			//MainDisplay.m_status.set_text( "At beginning.");
 		} else  if (current_image_index<=last_loaded_index)  {
 			// have to wait!
 			current_image_index--;		// hold position (ie back off last increment)
 			sprintf(str, "loading %d ...", last_loaded_index );
-			MainDisplay.m_status.set_text(str);			
+			//MainDisplay.m_status.set_text(str);			
 		} else {
 			sprintf(str, "%d / %d : %s", current_image_index, Filelist.size(), Filelist[current_image_index].c_str() );
-			MainDisplay.m_status.set_text(str);
+			//MainDisplay.m_status.set_text(str);
 
 			//int count = find_index(current_image_index);		
 //			ImageView->set_image( &(*iter), &(*ii_iter) );
@@ -272,18 +273,18 @@ int	 ImageGallery::onClick(int x, int y, bool mouse_is_down)
 		current_image_index++;
 		if (current_image_index>=Filelist.size())  {
 			current_image_index=Filelist.size()-1;
-			MainDisplay.m_status.set_text( "At end.");			
+			//MainDisplay.m_status.set_text( "At end.");			
 		} else if (current_image_index>=last_loaded_index) {
 			// have to wait!
 			current_image_index--;		// hold position (ie back off last increment)
 			sprintf(str, "loading %d ...", last_loaded_index );
 			printf("%s\n", str);
-			MainDisplay.m_status.set_text(str);
+			//MainDisplay.m_status.set_text(str);
 		} else {
 			sprintf(str, "%d/%d:%s", current_image_index, Filelist.size(), 
 										 Filelist[current_image_index].c_str());
 			printf("NEXT IMAGE %s\n", str );
-			MainDisplay.m_status.set_text(str);
+			//MainDisplay.m_status.set_text(str);
 			//MainDisplay.m_status.Invalidate();
 
 /*			int count = find_index(current_image_index);		

@@ -1,7 +1,7 @@
 #ifndef _FREQUENCY_VIEW_H_
 #define _FREQUENCY_VIEW_H_
 
-#include "../core/can/bk_system_defs.h"
+#include "bk_system_defs.h"
 
 #define DefaultPadding 15
 class Window;

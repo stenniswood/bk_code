@@ -3,9 +3,12 @@
 
 #include "control.hpp"
 #include "text_view.hpp"
+#include "tabular_listbox.hpp"
+
 
 #include <vector>
 using namespace std;
+
 
 class FileEditor : public TextView 
 {
@@ -21,15 +24,14 @@ public:
 	void			open_file	( string mFilename );
 	void			close_file	(  );
 
-	//virtual int   	draw 		(	);	
+	//virtual int   	draw   (	);
 	//virtual int		onClick(int x, int y, bool mouse_is_down=true);
 	
 protected:
-	TabularListBox*			m_open_documents;	//
+	TabularListBox*		m_open_documents;	//
 	vector<string>		m_file_names;		// 1 to 1 on the ListBox.
 
 	vector<TextView*>	m_editor;		// change to TextEdit!
-
 };
 
  

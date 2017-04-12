@@ -19,16 +19,13 @@
 #include <string>
 #include <fontinfo.h>
 #include <shapes.h>
-#include "Graphbase.hpp"
-#include "adrenaline_windows.h"
+#include "global.h"
+#include "stereo_power.hpp"
+
 #include "system_bar.hpp"
-#include "avisual_menu.hpp"
-
-
 #include "client_list_control.hpp"
-#include "home_screen.hpp"
-
-#include "draw_app.hpp"
+//#include "home_screen.hpp"
+//#include "draw_app.hpp"
 
 #define Debug 0
 
@@ -60,12 +57,14 @@ void show_volume(void* mObj )
 	if (Debug) 	printf("\n\nshow_volume callback\n");
 	if (obj->is_visible()==true) {
 		obj->hide( ); 
-		init_home_screen();
+		// System bar should be a benign object, redrawing should be handled
+		//at the display manager level.
+		//init_home_screen();
 	} else {
 		printf("\n\nshow_volume callback - Showing\n");
 		obj->show( );
-		MainDisplay.remove_all_objects(	);
-		MainDisplay.add_object( obj );	
+		//MainDisplay.remove_all_objects(	);
+		//MainDisplay.add_object( obj );	
 	}
 }
 /******************** END CALL BACKS ****************************/
@@ -97,7 +96,7 @@ void	SystemBar::onPlace		(	)
 	m_MenuEnd_x   = 3.*width/4.;
 	m_MenuStart_x = 100.;
 	
-	if (Debug) 	printf("SystemBar::onPlace():m_Menu=%x\n", m_Menu);	
+	if (Debug) 	printf("SystemBar::onPlace():m_Menu=%p\n", m_Menu );
 	if (m_Menu)
 	{
 		m_Menu->set_width_height( (m_MenuEnd_x-m_MenuStart_x),  height );
@@ -121,15 +120,14 @@ void	SystemBar::onPlace		(	)
 	m_show_taskbar.move_to( 0,        bottom);
 	m_show_sidebar.move_to( width-25, bottom);
 
-	float quarts   = MainDisplay.screen_width / 4.;
+	float quarts   = width / 4.;
 	float vc_left  = 3.* quarts;
 	volume_control.set_width_height( 75, 150);
 	volume_control.move_to( vc_left, bottom-volume_control.get_height() );
 	volume_control.set_max  		( 100.0 );
 	volume_control.set_min  		(   0.0 );
 	volume_control.set_level_left	(  75.0 );
-	volume_control.set_level_right	(  75.0 ); 
-	
+	volume_control.set_level_right	(  75.0 ); 	
 }
 
 int   	SystemBar::draw (	) 
@@ -140,7 +138,7 @@ int   	SystemBar::draw (	)
 		printf("SystemBar::draw():m_Menu::\t");
 		m_Menu->print_positions();
 	}	
-	Control::draw();
+	return Control::draw();
 }
 
 void 	SystemBar::set_width_height  	  ( int Width, int Height )
@@ -185,12 +183,13 @@ int		SystemBar::onClick(int x, int y, bool mouse_is_down)
 
 int	SystemBar::onDoubleClick( 		)
 { 
+	return 0;
 }
 
 
 void SystemBar::set_menu( HorizontalMenu* mMenu )
 {
-	if (Debug) 	printf("SystemBar::set_menu ( %x ) old=%x\n", mMenu, m_Menu );
+	if (Debug) 	printf("SystemBar::set_menu ( %p ) old=%p\n", mMenu, m_Menu );
 	unregister_child( m_Menu );	
 	if (Debug) printf("after removal 1: \n");		
 	m_Menu = mMenu;
@@ -207,13 +206,14 @@ int	SystemBar::onCreate(  )
 	static bool first_time = true;
 	if (first_time)
 	{	
-		init_system_hmenu(  );	
+		//init_system_hmenu(  );	
+		//m_Menu
 		first_time = false; 	
 	};	
-	if (Debug) printf("\tSystem Menu:  sysmenu:%x  draw_menu: \n", &system_hmenu );
-	m_Menu = &system_hmenu;	
+	if (Debug) printf("\tSystem Menu:  sysmenu:%p  draw_menu: \n", &m_Menu );
+//	m_Menu = &system_hmenu;	
 
-	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_side) );
+//	m_show_sidebar.set_on_click_listener( show_sidebar, (void*)&(MainDisplay.m_side) );
 	//m_show_taskbar.set_on_click_listener( show_taskbar, MainDisplay.m_show_sidebar );
 	//m_wifi.set_on_click_listener  ( show_wifi,   (void*)&(MainDisplay.m_wifi  ) );
 	m_volume.set_on_click_listener( show_volume, (void*)&(volume_control) );
@@ -224,6 +224,6 @@ int	SystemBar::onCreate(  )
 	register_child( &m_show_taskbar );
 	register_child( &m_wifi 		);
 	register_child( &m_volume 		);
-	Control::onCreate();
+	return Control::onCreate();
 }
 

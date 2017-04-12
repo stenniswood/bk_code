@@ -1,7 +1,9 @@
 #ifndef _STEREO_POWER_LEVELS_H_
 #define _STEREO_POWER_LEVELS_H_
 
-#include "../core/can/bk_system_defs.h"
+#include "control.hpp"
+#include "power_level.hpp"
+#include "bk_system_defs.h"
 
 #define DefaultPadding 15
 class Window;

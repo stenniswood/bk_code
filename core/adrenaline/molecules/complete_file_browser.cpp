@@ -10,15 +10,15 @@
 #include "VG/vgu.h"
 #include <shapes.h>
 #include <fontinfo.h>
-#include "CAN_Interface.h"
-#include "dataset.hpp"
-#include "adrenaline_windows.h"
+//#include "CAN_Interface.h"
+//#include "dataset.hpp"
+//#include "adrenaline_windows.h"
 #include "display_manager.hpp"
 //#include "visual_memory.h"
 #include <vector>
 #include "file_browser.hpp"
 #include "complete_file_browser.hpp"
-#include "test_layouts.hpp"
+//#include "test_layouts.hpp"
 
 
  

@@ -19,6 +19,11 @@ struct stFlowObject {
 	int   shape;	// See above definitions
 };
 
+struct stPoint2D {
+	float x;
+	float y;	
+};
+
 class FlowChart : public Control 
 {
 public:
@@ -29,7 +34,7 @@ public:
 	
 	virtual void 	Initialize(	);
 
-	int   			add_object			( stFlowObject* mObject );
+	void   			add_object			( stFlowObject* mObject );
 	int   			add_square			( float x, float y, char* text 	);
 	int   			add_circle			( float x, float y, char* text	);
 	int   			add_diamond			( float x, float y, char* text	);

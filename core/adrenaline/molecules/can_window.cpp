@@ -19,14 +19,16 @@
 #include "bcm_host.h"
 #include <fontinfo.h>
 #include <shapes.h>
-#include "Graphbase.hpp"
-#include "adrenaline_windows.h"
+//#include "Graphbase.hpp"
+//#include "adrenaline_windows.h"
 #include "display.h"
 #include "CAN_base.h"
 #include "can_window.hpp"
 #include "filter_select.hpp"
 #include "CAN_memory.h"
 #include "packer.h"
+#include "horizontal_menu.hpp"
+#include "vertical_menu.hpp"
 
 
 void rescan_cb( void* mCANMessages )
