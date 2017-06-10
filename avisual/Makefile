@@ -20,17 +20,17 @@ CC		   = g++
 OPTIONS	   = -Wwrite-strings -fpermissive -Wreturn-type -Wformat
 # 
 # INCLUDE PATHS:
-CORE_INC = ../core/can/  ../core/fusion/ ../core/hardware/ ../core/kinetic 	\
-	     ../core/mysql/ ../core/misc/ ../core/msg/    ../core/wifi/     ../core/ipc/    	\
-	     ../core/libs/vgfont/ ../core/adrenaline/graphs/ ../core/libs/ilclient/ \
-	     ../core/adrenaline/ ../core/adrenaline/atoms/   ../core/adrenaline/molecules/ \
-	     ../core/adrenaline/molecules/calendar/ ../core/adrenaline/system/
+CORE_INC = can/ fusion/ hardware/ kinetic/ mysql/ misc/ msg/ wifi/ ipc/ \
+	     libs/vgfont/ libs/ilclient/ \
+		 /adrenaline/ /adrenaline/atoms/ /adrenaline/molecules/ adrenaline/graphs/ \
+		 /adrenaline/molecules/calendar/ /adrenaline/molecules/CAN/ /adrenaline/system/
+PCORE_INC = $(addprefix ../core/, $(CORE_INC) )
+
 APPS_INC   = ./apps/ ./apps/CAN/ ./apps/audio/ ./apps/robot_control ./apps/draw/ \
-	     ./apps/file_editer/ ./apps/video/ ./apps/finder/ ./apps/gallery/ ./test_code/
+			./apps/file_editer/ ./apps/video/ ./apps/finder/ ./apps/gallery/ ./test_code/
 GAMES_INC  = ./games/ ./games/blackjack/ ./games/reversi/ ./games/card_core/ ./games/hearts/
 SQL_INC    = -I/usr/include/mysql
-INC	   = $(CORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
-
+INC	       = $(PCORE_INC) $(APPS_INC) $(GAMES_INC) $(SQL_INC) ./voice/ ./kinetic/ ./
 
 SELF_INC   = ../../avisual/ ./ ../ 
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \

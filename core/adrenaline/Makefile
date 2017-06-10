@@ -56,6 +56,8 @@ all:
 	mv adrenaline*.a ./lib/
 	cp $(wildcard atoms/*.hpp) ./include/
 	cp $(wildcard molecules/*.hpp) ./include/
+	cp $(wildcard molecules/CAN/*.hpp) ./include/
+	cp $(wildcard molecules/calendar/*.hpp) ./include/
 	cp $(wildcard system/*.hpp) ./include/
 	cp $(wildcard graphs/*.hpp) ./include/
 
