@@ -146,7 +146,9 @@ void SSerial::print_buffer(char* mBuffer, int mLength )
 	printf("\n");
 }
 
-/* Not used for roboclaw - b/c it needs an ack after 1st byte. 
+#ifdef USES_DRIVEFIVE
+
+// Not used for roboclaw - b/c it needs an ack after 1st byte. 
 size_t	SSerial::write(char* mBuffer, int mLength )
 {
 	if (!connected) return 0;
@@ -164,7 +166,9 @@ size_t	SSerial::write(char* mBuffer, int mLength )
 	size_t retval = ::write(fd, tx_buffer, _cl_tx_bytes);	// if this blocks, we are okay.
 	fsync(fd);
 	return retval;
-}*/
+}
+#endif
+
 
 size_t	SSerial::write( char mBuffer )
 {	

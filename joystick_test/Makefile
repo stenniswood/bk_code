@@ -1,10 +1,10 @@
 CC=g++
-OPTIONS	= -std=gnu99 -lm -fno-rtti
+OPTIONS	= -std=gnu99 -lm -fno-rtti 
 INC	= 
 SELF_INC= ./
-CFLAGS 	= -lm
+CFLAGS 	= -lm -g
 DEPS   	= 
-OBJ     =   joystick.o joystick_pendant.o main.o sserial.o roboclaw.o 
+OBJ     =   joystick.o joystick_pendant.o main.o drive_five.o
 
 CPPOBJ    = 
 

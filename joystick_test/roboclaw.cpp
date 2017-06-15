@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
-
 #include "sserial.hpp"
 #include "roboclaw.h"
 #include "global.h"

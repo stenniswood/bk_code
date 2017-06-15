@@ -27,14 +27,14 @@ void* eventThread(void *arg)
 	Joystick* joy = (Joystick*)arg;
 	
 	// Open Joystick driver
-	printf("eventThread(): joy=%p\t", joy);
+	printf("eventThread(): Joystick object=%p\t", joy);
 	sprintf( dev_name, "/dev/input/js0" );
 	joy->joystick_fd = open( dev_name, O_RDONLY );
 	
 	if (joy->joystick_fd >= 0) {
 		printf( "Opened Joystick:  %s\n", dev_name );
 	} else {
-		printf("Error opening Joystick!\n");
+		printf("Joystick not available!\n");
 		fprintf(stderr, "Error opening Joystick!\n");
 		quitState = 1;
 		return &quitState;
