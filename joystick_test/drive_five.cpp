@@ -41,14 +41,14 @@ DriveFive::DriveFive( )
 }
 
 // 	mPortName : for instance "/dev/ttyUSB0"	
-DriveFive::DriveFive( const char* mPortName)
+DriveFive::DriveFive( const char* mDeviceName)
 {
-	strcpy (m_port_name, mPortName );	
+	strcpy (m_port_name, mDeviceName );	
 }
 
-DriveFive::DriveFive( const char* mPortName, uint32_t time_out )
+DriveFive::DriveFive( const char* mDeviceName, uint32_t time_out )
 {
-	strcpy (m_port_name, mPortName );	
+	strcpy (m_port_name, mDeviceName );	
 	timeout = time_out;
 }
 

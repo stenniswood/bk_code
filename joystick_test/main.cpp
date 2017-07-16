@@ -95,14 +95,13 @@ void init_robo_drivers()
 	mot.open		( );
 	//mot.set_baud	( );
 	
-	mot.send_command( (char*)"read configuration");			
-	mot.read_response();		// will read and store entire response;  scan for NAK 
+//	mot.send_command( (char*)"read configuration");			
+//	mot.read_response();		// will read and store entire response;  scan for NAK 
 	
-	mot.send_command( (char*)"use encoders");				mot.read_response();
+	mot.send_command( (char*)"use encoders v w x y z");				mot.read_response();
 	mot.send_command( (char*)"read status");				mot.read_response();
-	mot.send_command( (char*)"read robot info");			mot.read_response();
-	
-	mot.send_command( (char*)"pwm v0.5 w0.75 x0.25 y0.5 z0.0");	mot.read_response();	
+//	mot.send_command( (char*)"read robot info");			mot.read_response();	
+//	mot.send_command( (char*)"pwm v0.5 w0.75 x0.25 y0.5 z0.0");	mot.read_response();	
 }
 #endif
 
@@ -110,7 +109,7 @@ void init_robo_drivers()
 
 int main()
 {
-	printf("main()  Begun!  joy=%p\n", &joy);
+	//printf("main()  Begun!  joy=%p\n", &joy);
 	init_robo_drivers();
 	
 	int speed1 = 0;

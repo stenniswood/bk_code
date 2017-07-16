@@ -16,11 +16,11 @@
 //using namespace std;
 
 extern Keyboard		m_keyboard;
+
 /* Packages Objects for display */
 class DisplayManager : public IconView
 {
 	//friend class Control;
-	
 public:
 	DisplayManager( int Left, int Right, int Top, int Bottom );
 	DisplayManager( int mScreenWidth, int mScreenHeight );

@@ -31,7 +31,7 @@ public:
 	int				add_control		 ( Control* mControl, char* mText=NULL );
 	void			hide			 ( bool mHide = true);
 	void			auto_hide		 ( bool mAutoHide = true);
-	void			set_alignment	 ( byte mAlignment = SIDEBAR_ALIGN_CENTER );
+	void			set_alignment	 ( byte mAlignment = PACKER_ALIGN_CENTER );
 
 	virtual int		onClick(int x, int y, bool mouse_is_down=true);
 

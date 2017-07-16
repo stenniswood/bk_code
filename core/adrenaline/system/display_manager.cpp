@@ -19,8 +19,6 @@
 #include <fontinfo.h>
 #include "touch_gesture.hpp"
 #include "rectangle.hpp"
-#include "calendar.hpp"
-#include "calendar_summary.hpp"
 #include "display_manager.hpp"
 //#include "avisual_menu.hpp"		// Specific system menu.  not part of adrenaline_windows
 
@@ -33,8 +31,6 @@ DisplayManager MainDisplay(1920, 1080);
 
 Keyboard		m_keyboard;
 Control			mctrl;
-Calendar		m_calendar;
-CalendarSummary m_calendar_summary;
 
 
 DisplayManager::DisplayManager(int Left, int Right, int Top, int Bottom )
@@ -124,23 +120,13 @@ void DisplayManager::hide_keyboard	(   )
 void DisplayManager::show_calendar	(   )
 {
 	if (Debug) printf("DisplayManager::show_calendar	(   )\n");
-	m_calendar_summary.show();
-	m_calendar_summary.draw();
-	m_calendar_summary.set_z_order( ++m_z_order_counter );
 
-	m_calendar.show();
-	m_calendar.draw();
 	if (Debug) printf("DisplayManager::returned from m_calendar.draw(); \n");
-	m_calendar.set_z_order( ++m_z_order_counter );
 	if (Debug) printf("DisplayManager::show_calendar  %ld	\n", m_z_order_counter);
-	sort_z_order();
 }
 void DisplayManager::hide_calendar	(   ) 
 {
 	if (Debug) printf("DisplayManager::hide_calendar(   )\n");
-	m_calendar.hide();
-	m_calendar_summary.hide();
-	//m_calendar.Invalidate();
 	draw();
 }
 
@@ -207,24 +193,6 @@ int	DisplayManager::onPlace( )
 
 	m_keyboard.invalidated = false;
 	if (Debug) printf("DisplayManager::onPlace() keyboard.hide() \n");
-
-	// PLACE CALENDAR : 
-	m_calendar.set_position( screen_width-m_calendar.get_width(), screen_width, 
-						     m_calendar.get_height(), 0.0 );
-	m_calendar.summary = &m_calendar_summary;
-	m_calendar.onCreate    ( );
-	m_calendar.hide		   ( );
-
-	
-	//float summary_w = 250;
-	//float summary_h = m_calendar.get_height();   m_calendar.get_left()-summary_w
-	m_calendar_summary.set_position( 0, m_calendar.get_right(), 
-									 m_calendar.get_height(), 0.0 );
-	m_calendar_summary.onCreate( );
-	m_calendar_summary.hide    ( );	
-	
-	if (Debug) printf("=== CALENDAR_SUMMARY :  ");
-	m_calendar_summary.print_positions();
 	return 1;
 }
 
@@ -457,8 +425,6 @@ void  DisplayManager::remove_all_objects(  )
 	register_child( &m_sb     );
 	register_child( &m_side   );
 	register_child( &m_keyboard );
-	register_child( &m_calendar );
-	register_child( &m_calendar_summary );
 }
 
 int   DisplayManager::draw(	)
@@ -469,7 +435,6 @@ int   DisplayManager::draw(	)
 	if (Debug)  printf("Side  Bar: %p\n", (unsigned int*)&m_side );
 	if (Debug)  printf("StatusBar: %p\n", (unsigned int*)&m_status );
 	if (Debug)  printf("Keyboard: %p\n" , (unsigned int*)&m_keyboard );
-	if (Debug)  printf("Calendar: %p\n" , (unsigned int*)&m_calendar );	
 	if ((Debug) && m_keyboard.is_visible()) printf("KB Visible!");
 	if (Debug)  printf("\n");
 

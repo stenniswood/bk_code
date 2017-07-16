@@ -19,8 +19,8 @@ int init_screen	( );
 int draw_screen	( float angleDegrees );
 int close_screen( );
 int tilt_beyond	( float angleDegrees );
-void Fill_l		( long int Color	 );
-void Stroke_l	( long int Color	 );
+//void Fill_l		( unsigned long int Color	 );
+//void Stroke_l	( unsigned long int Color	 );
 
 void Stroke_c	( Color c 			 );
 void Fill_c		( Color c 			 );

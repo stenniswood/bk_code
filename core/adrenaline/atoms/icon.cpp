@@ -30,7 +30,7 @@
 #define Debug 0
 
 
-VGImage createImageFromJpeg(const char *filename, struct image_info* II);
+//extern VGImage createImageFromJpeg(const char *filename, struct image_info* II);
 
 
 IconView::IconView( int Left, int Right, int Top, int Bottom, char* mFileName )
@@ -138,8 +138,8 @@ void IconView::read_from_file( )
 		printf("IconView::read_from_file(): %s; Extension=%s; width=%d height=%d; \n", 
 					Filename, CapExtension, ImageInfo.width, ImageInfo.height );
 
-	if (strcmp(CapExtension, "JPG")==0)	
-		image = createImageFromJpeg( Filename, &ImageInfo );
+//	if (strcmp(CapExtension, "JPG")==0)	
+//		image = createImageFromJpeg( Filename, &ImageInfo );
 /*	else if (strcmp(CapExtension, "PNG")==0)
 		image = createImageFromPNG ( Filename, &ImageInfo );
 	else if (strcmp(extension, "BMP")==0)
@@ -190,7 +190,7 @@ int	IconView::onClick(int x, int y, bool mouse_is_down)
 
 // createImageFromJpeg decompresses a JPEG image to the standard image format
 // source: https://github.com/ileben/ShivaVG/blob/master/examples/test_image.c
-VGImage createImageFromJpeg(const char *filename, struct image_info* II)
+/*VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 {
 	FILE   *infile;
 	struct jpeg_decompress_struct jdc;
@@ -274,7 +274,7 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 
 	if (Debug) printf("createImageFromJpeg() 2\n");
 	// Create VG image
-	img = vgCreateImage(rgbaFormat, II->width, II->height, VG_IMAGE_QUALITY_BETTER);
+	img = vgCre ateI mage(rgbaFormat, II->width, II->height, VG_IMAGE_QUALITY_BETTER);
 	if (Debug) printf("read jpeg, %d w=%d; h=%d\n", img, II->width, II->height);
 	vgImageSubData(img, data, II->dstride, rgbaFormat, 0, 0, II->width, II->height);
 	if (Debug) printf("read jpeg, %d %p w=%d; h=%d\n", img, data, II->width, II->height);
@@ -286,4 +286,4 @@ VGImage createImageFromJpeg(const char *filename, struct image_info* II)
 
 	if (Debug) printf("createImageFromJpeg() done\n");
 	return img;
-}
+}*/

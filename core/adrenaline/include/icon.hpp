@@ -2,6 +2,7 @@
 #define _ICON_VIEW_
 
 #include "control.hpp"
+#include "bitmap.hpp"
 
 #define CENTER_HORIZONTAL 0x01
 #define CENTER_VERTICAL   0x02
@@ -10,14 +11,14 @@
 /* Use open CV
 		to read files png, jpg, etc.
 */
-struct image_info
+/*struct image_info
 {
 	unsigned int width;
 	unsigned int height;
 	unsigned int dstride;
 	unsigned int dbpp;
 	VGImage  image;	
-};
+};*/
 extern VGImage createImageFromJpeg(const char *filename, struct image_info* II);
 
 class IconView : public Control 

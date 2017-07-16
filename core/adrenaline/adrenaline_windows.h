@@ -36,7 +36,7 @@
 //#include "multiselect_listbox.hpp"
 #include "tab_control.hpp"
 
-#include "can_app.hpp"
+//#include "can_app.hpp"
 #include "can_msg_view.hpp"
 
 #include "adren_network_view.hpp"

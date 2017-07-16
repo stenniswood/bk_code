@@ -26,8 +26,8 @@ class DriveFive
 public:
 	// public methods
 	DriveFive( );
-	DriveFive( const char* mPortName );
-	DriveFive( const char* mPortName, uint32_t time_out );
+	DriveFive( const char* mDeviceName );
+	DriveFive( const char* mDeviceName, uint32_t time_out );
 	~DriveFive();
 
 	void	set_baud		( int speed );

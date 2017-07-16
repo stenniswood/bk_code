@@ -14,7 +14,7 @@ public:
 	
 	virtual void 	Initialize(	);
 
-	int				select		( int mIndex );
+	void			select		( int mIndex );
 	int				deselect	( int mIndex );
 
 	virtual int   	draw 		(	);	

@@ -13,7 +13,7 @@
 int 		quitState  = 0;
 #define    	CUR_SIZ  16				// cursor size, pixels beyond centre dot
 
-#define Debug 1
+#define Debug 0
 pthread_t inputThread_id;
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define Dprintf if (Debug) printf("%s ", __FILENAME__); if (Debug) printf
@@ -27,8 +27,8 @@ void* eventThread(void *arg)
 	Joystick* joy = (Joystick*)arg;
 	
 	// Open Joystick driver
-	printf("eventThread(): Joystick object=%p\t", joy);
 	sprintf( dev_name, "/dev/input/js0" );
+	printf("opening Joystick:  %s\n", dev_name );
 	joy->joystick_fd = open( dev_name, O_RDONLY );
 	
 	if (joy->joystick_fd >= 0) {
@@ -43,7 +43,7 @@ void* eventThread(void *arg)
 	while (1) {
 		joy->read_event();
 		joy->handle_event();
-		//joy.print_event_info();
+		joy->print_event_info();
 	}
 }
 
@@ -107,7 +107,8 @@ void Joystick::print_event_info()
 {
 	if (Debug==0) return;
 
-	if (m_ev.type==1) {
+	if (m_ev.type==JS_EVENT_BUTTON) 
+	{
 		//printf("time=%lu; Button #%d = %d\n", m_ev.time, m_ev.number, m_ev.value );
 		std::string button_name = get_button_name( m_ev.number );
 		if (m_ev.value==1)
@@ -115,15 +116,18 @@ void Joystick::print_event_info()
 		else 
 			printf("time=%lu; Button %d %s up\n", m_ev.time, m_ev.number, button_name.c_str() );
 	}
-	else if (m_ev.type==2) {
+	else if (m_ev.type==JS_EVENT_AXIS) 
+	{
 		if (m_ev.number==25)
 				return;
-				
-		std::string axis_name = get_axis_name( m_ev.number );
-		printf("time=%lu; Axis   %d %s = %d\n", m_ev.time, m_ev.number, axis_name.c_str(), m_ev.value );	
+		if (m_ev.number<4) {
+			std::string axis_name = get_axis_name( m_ev.number );
+			printf("time=%lu; Axis   %d %s = %d\n", m_ev.time, m_ev.number, axis_name.c_str(), m_ev.value );	
+		}
 	} else 
 		printf("time=%lu; value=%d; type=%x; number=%d\n", m_ev.time, m_ev.value, m_ev.type, m_ev.number );	
 }
+
 void Joystick::read_event()
 {
 	//joy.m_prev_ev_time = joy.Joystick_ev.time;
