@@ -1,4 +1,15 @@
-/* BK Instant main file.  */
+/* BK Instant main file. 
+
+Install MySQL (on RPI):
+	sudo apt-get install mysqlserver mysqlclient
+	sudo apt-get install mysql-server
+	sudo apt-get install libmysqlclient-dev
+
+Starting Mysql on Mac:
+	sudo /usr/local/mysql/support-files/mysql.server start
+	
+
+ */
 #include <sys/time.h>
 #include <string.h>
 #include <errno.h>
@@ -42,6 +53,16 @@
 #include "client_to_socket.hpp"
 #include "tone_generator.h"
 #include "sql_users.hpp"
+#include "viki_logger.hpp"
+
+#include "protocol_unit_tests.hpp"
+#include "serverthread.hpp"
+#include "sequencer_memory.hpp"
+#include "sql_device.hpp"
+
+
+aVisualMemory avisual_mem;
+SequencerIPC  sequencer_mem;
 
 #define  uint32_t long int
 
@@ -283,36 +304,13 @@ void shutdown( int sig )
 	Seems like functionality doesn't work without interrupts.  ie. flags 
 	are only set when the Enable is.  maybe.		*/
 
-#include "protocol_unit_tests.hpp"
-#include "serverthread.hpp"
-#include "sequencer_memory.hpp"
-
-aVisualMemory avisual_mem;
-SequencerIPC  sequencer_mem;
-
-
-#include "sql_device.hpp"
 
 int main( int argc, char *argv[] )
 {
 	signal(SIGINT, shutdown); 	// in Ctrl-C event.
 	avisual_mem.connect_shared_memory(FALSE); 
-	sequencer_mem.connect_shared_memory(FALSE); 
-	
-	char motor_speed_cmd [] = "Motor:Speed:Board=1:M1=120,M2=100,M3=123,M4=125;";
-	char motor_stop_cmd [] = "Motor:Speed:Board=1:M1=0,M2=0,M3=0,M4=0;";
-	char motor_position_cmd [] = "Motor:Position:Board=1:M1=100,M2=110,M3=120,M4=130;";	
-	
-//	sequencer_mem.write_sentence( motor_speed_cmd );
-	sequencer_mem.write_sentence( motor_stop_cmd );	
-	sequencer_mem.wait_for_ack_sentence_counter();
+	sequencer_mem.connect_shared_memory(FALSE); 	
 
-	sequencer_mem.write_sentence( motor_position_cmd );
-	sequencer_mem.wait_for_ack_sentence_counter();
-
-	exit(1); 
-	
-	
 	print_args( argc, argv );
 	int first_param = 1;		// sudo ./pican cfg 
 	if (argc>1)
@@ -332,6 +330,7 @@ int main( int argc, char *argv[] )
 		}		
 	}
 	
+//	viki_logger.connect_to_logger_db();
 //	test_devices_db();
 //	exit(1);
 	

@@ -90,9 +90,9 @@ void ServerHandler::accept( int mlistenfd )
 
 /* 
 INPUT:  Single line '\n' terminated.  	
-	Login:stenniswood;Password:blahblah77;\n
+	Login:mtenniswood;Password:Tobart;Device name:motorola XT1565;\n
 	
-OUTPUT: m_login_name & m_login_password 
+OUTPUT: 
 	m_login_name
 	m_login_password
 */
@@ -102,54 +102,47 @@ bool ServerHandler::parse_credentials( string mCredentials )
 	SuperString str = mCredentials;
 	
 	int count = str.split(';');
-	str.trim_spaces_in_splits();	
-	
-	if (count < 2)
-		return false;
-	SuperString name = str.m_split_words[0];
-	SuperString passwd = str.m_split_words[1];
-	
+	str.trim_spaces_in_splits();		
+	if (count < 3) {
+		form_response( "Sorry there was garbled text in your credentials." );
+		return false;		
+	}
+	//	[0] is "Login;"
+	SuperString name   = str.m_split_words[1];	// UserID
+	SuperString passwd = str.m_split_words[2];	// Password
+	SuperString hostname = str.m_split_words[3];	// Password
+		
 	name.split(':');
 	m_login_name = name.m_split_words[1];
-	passwd.split(':');
+	passwd.split(':'); 
 	m_login_password = passwd.m_split_words[1];
-	
-	if (count < 3)
-		return retval;
-		
-	SuperString devname = str.m_split_words[2];	// device name
-	devname.split(':');
-	m_login_devicename = devname.m_split_words[1];
-	//printf("\tdevname=%s\n", m_login_devicename.c_str() );
+			
+	hostname.split(':');
+	m_login_hostname = hostname.m_split_words[1];
+	//printf("\tdevname=%s\n", m_login_hostname.c_str() );
 	//printf("Login=%s\t\tpasswd=%s\n", m_login_name.c_str(), m_login_password.c_str() );
 	return retval;
 }
 
 bool ServerHandler::validate( string mCredentials )
 {
-	bool ok = parse_credentials( mCredentials );
-	if 	(ok)
+	m_credentials_validated = false;
+
+	m_user_id = sql_users.sql_find( m_login_name );
+	if (m_user_id)
 	{
-		m_user_id = sql_users.sql_find( m_login_name );
-		if (m_user_id)
+		printf("Found sql username : %s\t", m_login_name.c_str() );
+		m_credentials_validated = sql_users.verify_password( m_login_name, m_login_password );
+		if (m_credentials_validated)
 		{
-			printf("Found sql username :\t");
-			m_credentials_validated = sql_users.verify_password( m_login_name, m_login_password );
-			if (m_credentials_validated)
-			{
-				form_response( "Welcome" );
-			} else {
-				form_response( "Bad password" );
-			}
+			form_response( "Welcome" );
+		} else {
+			form_response( "Bad password" );
 		}
-		else {
-			printf("NOT found in dbase\n");		
-			form_response( "Sorry I can't find that username.  Please register." );
-		}
-		// and verify the password!		
-	} else
-	{
-		form_response( "Sorry there was garbled text in your credentials." );
+	}
+	else {
+		printf("NOT found in dbase\n");		
+		form_response( "Sorry I can't find that username.  Please register." );
 	}
 	return m_credentials_validated;
 }

@@ -45,7 +45,7 @@ static int 	 listenfd = 0;
 fd_set rfds;
 
 
-#define Debug 0
+#define Debug 1
 
 struct sockaddr_in serv_addr;   
 static char 	ip_addr[16]; 			// for user feedback
@@ -174,7 +174,7 @@ void*  listen_thread(void* )
 	   then we call accept().  Since select()/Poll() are nonblocking, we can
 	   also check for connect_to_robot() client initiated request.	*****/
 
-	Dprintf("establish_connection()\n");	
+	//Dprintf("establish_connection()\n");	
     //socklen_t size = (socklen_t)sizeof(client_addr);
     //memset(&client_addr, '0', sizeof(socklen_t) );
 	
@@ -202,12 +202,14 @@ void*  listen_thread(void* )
 		connection_pending = FD_ISSET(listenfd, &rfds);
 //		if (number_active>0)
 //			printf("select() = %d; pending=%d\n", number_active, connection_pending);
-
+	
 		if (connection_pending) {
+			//printf("connection pending %d\n", connection_pending );	 
 			ServerHandler* sh = new ServerHandler();
 			sh->accept( listenfd );		
 			server_handlers.push_back( sh );
-			
+			printf("connection accepted.\n");
+						
 			int iret1 = pthread_create( &(sh->server_thread_id), NULL, connection_handler, (void*) sh);
 			if (iret1)
 			{

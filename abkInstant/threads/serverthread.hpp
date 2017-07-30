@@ -9,7 +9,7 @@
 #include "global.h"
 #include "server_handler.hpp"
 
-
+  
 extern char* REQUESTED_client_ip;
 extern BYTE  REQUEST_client_connect_to_robot;
 void* 		 connection_handler ( void* mh );

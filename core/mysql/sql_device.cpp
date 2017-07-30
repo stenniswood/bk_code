@@ -11,11 +11,13 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include <map>
 #include <time.h>
 #include <sys/types.h>
 #include <regex>
 #include <algorithm>
 #include <string>
+
 #include "nlp_sentence.hpp"
 
 #include <my_global.h>
@@ -27,9 +29,11 @@
 #include "sequencer_memory.hpp"
 #include "machine_defs.h"
 #include "sql_common.hpp"
+#include <iostream>
+#include <sstream>
 
 
-#define Debug 0
+#define Debug 1
 SQL_Devices     sql_devices;
 char table_name[128];
 
@@ -58,44 +62,42 @@ void SQL_Devices::create_users_table( )
         return ;
     }
 
-    query_string = "CREATE TABLE `my_devices` (	\
-  `_id` int(11) NOT NULL AUTO_INCREMENT, \
-  `login_count` int(11) NOT NULL, \
-  `last_login` TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP, \
-  `personal_name` text NOT NULL COMMENT 'Such as \"Steves phone\" rather than dev_name \"Sensation\"', \
-  `user_id` int(11) NOT NULL, \
-  `device_type` text NOT NULL COMMENT 'Phone, Humanoid, Tablet, Reader, Playstation,Wii, etc.', \
-  `device_name` text NOT NULL, \
-  `SerialNumber` text NOT NULL COMMENT 'This was not available in Android \"Build.SERIALNUMBER\"', \
-  `phone_number` varchar(20) NOT NULL, \
-  `Operating System` varchar(20) NOT NULL COMMENT 'Android/iPhone/WindowsCE/', \
-  `Board` text NOT NULL, \
-  `Bootloader` text NOT NULL, \
-  `Brand` text NOT NULL, \
-  `CPU_ABI` text NOT NULL, \
-  `CPU_ABI2` text NOT NULL, \
-  `Device` text NOT NULL, \
-  `Display` text NOT NULL, \
-  `FingerPrint` text NOT NULL, \
-  `Hardware` text NOT NULL, \
-  `ID` text NOT NULL, \
-  `Manufacturer` text NOT NULL, \
-  `Model` text NOT NULL, \
-  `Radio` text NOT NULL, \
-  `Tags` text NOT NULL, \
-  `Type` text NOT NULL, \
-  `User` text NOT NULL, \
-  `gmail` text NOT NULL, \
-  PRIMARY KEY (_id)	\
-) ENGINE=MyISAM DEFAULT CHARSET=latin1";
+  query_string = "CREATE TABLE `my_devices` (	\
+  `_id` int(11) NOT NULL AUTO_INCREMENT,		\
+  `login_count` int(11) NOT NULL,				\
+  `last_login` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,	\
+  `user_id` int(11) NOT NULL,					\
+  `regex` text COMMENT 'Contains a regex for matching user spoken name.',	\
+  `preferred_name` text NOT NULL COMMENT 'Such as \"Steves phone\" rather than dev_name \"Sensation\"',	\
+  `device_type` text NOT NULL COMMENT 'Phone, Humanoid, Tablet, Reader, Playstation,Wii, etc.',	\
+  `hostname` text NOT NULL,			\
+  `IP_address` text NOT NULL,		\
+  `Mac_address` text NOT NULL,		\
+  `SerialNumber` text NOT NULL COMMENT 'This was not available in Android \"Build.SERIALNUMBER\"',	\
+  `phone_number` varchar(20) NOT NULL,	\
+  `Operating_System` varchar(20) NOT NULL COMMENT 'Android/iPhone/WindowsCE/',	\
+  `Board` text NOT NULL,			\
+  `Bootloader` text NOT NULL,		\
+  `Brand` text NOT NULL,			\
+  `CPU_ABI` text NOT NULL,			\
+  `Display` text NOT NULL,			\
+  `Hardware` text NOT NULL,			\
+  `Manufacturer` text NOT NULL,		\
+  `Model` text NOT NULL,			\
+  `Tags` text NOT NULL,				\
+  PRIMARY KEY (`_id`)				\
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;";
+
 	printf("CREATING TABLE: %s\n", query_string.c_str() );
     query(false);
-}
+} 
 
 bool SQL_Devices::users_table_exists( )
 {
     // how to query it?
-    query_string = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'sjtennis_bk_useraccounts' AND  TABLE_NAME = 'my_devices';";
+    query_string = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE \
+    TABLE_SCHEMA = 'sjtennis_bk_useraccounts' AND \
+     TABLE_NAME = 'my_devices';";
     return query(true);
 }
 
@@ -136,7 +138,7 @@ int	SQL_Devices::get_number_results()
 
 int	SQL_Devices::sql_add_system_activated( bool mCamera, bool mEyes, bool mNeck )
 {
-    std::string description = "Vision System Activated";
+    std::string description = "Viki System Activated";
     std::string names;
     if (mCamera)
         names += "Camera On";
@@ -307,8 +309,10 @@ int	SQL_Devices::form_response__saw_for_duration( std::string mPerson, time_t& m
     return m_row_count;
 }
 
-int	SQL_Devices::form_response__hours_active( std::string mDescription, time_t& mTime,
-                                                  struct tm start_time_bd, struct tm end_time_bd )
+int	SQL_Devices::form_response__hours_active( std::string mDescription, 
+												  time_t& mTime,
+                                                  struct tm start_time_bd, 
+                                                  struct tm end_time_bd )
 {
     time_t sTime,eTime, sumTotal, deltaTime;
     sumTotal = 0;
@@ -413,27 +417,52 @@ void SQL_Devices::close_connection()
 }
 	
 /* return:  1=> just added */
-int	SQL_Devices::sql_add_if_not_already( int mUserId, std::string mFields, std::string mValues, std::string mDeviceName)
+int	SQL_Devices::sql_add_if_not_already( int mUserId, 
+						std::map<std::string,std::string> mFields )
 {
 	// First check if it already exists in the database of users:
-	int result = sql_find( mUserId, mDeviceName );
-	if (result==0) {
-	    return sql_add( mFields, mValues );
-	} 
+	// (user_id, preferred_name, device_type, hostname) must all match or it gets added.
+	int result = sql_find( mUserId, mFields["hostname"] );	
+	if (result==0) 
+	{
+		std::string fields = "( user_id, ";
+		std::string values = "(";
+		values += std::to_string(mUserId);
+
+		std::map<string,string>::iterator iter = mFields.begin();
+		while (iter !=mFields.end())
+		{
+			fields += iter->first;
+			values += iter->second;
+			fields += ", ";
+			values += ", ";
+			iter++;	
+		}
+		fields += ")";	
+		values += ")";
+		printf("fields:%s\n values:%s\n", fields.c_str(), values.c_str() );
+
+	    return sql_add( fields, values );
+	} else {
 	//was found:
+		printf("Device already registered!\n");
+	}
 	return 0;
 }
 
 /* Return:  is the device_name (hostname) */
-std::string	SQL_Devices::sql_find_pet_name	( int mUser_id, std::string mPersonalName	)
+std::string	SQL_Devices::sql_find_preferred_name	( int mUser_id, std::string mPreferredName	)
 {
-    query_string =  "SELECT personal_name,device_name FROM ";
+    query_string =  "SELECT preferred_name,hostname FROM ";
     query_string += table_name;
     query_string += " WHERE ";
     query_string += " user_id=";
     query_string += append_int( mUser_id );
-    query_string += ";";
+    query_string += " AND preferred_name='";
+    query_string += mPreferredName;
+    query_string += "';";
     int retval = query(true);
+
     // Now for all results, do the regex_search:
     goto_first_row();
     bool found=false;
@@ -442,7 +471,7 @@ std::string	SQL_Devices::sql_find_pet_name	( int mUser_id, std::string mPersonal
     while (m_row)
     {
     	if (m_row[0])  exp=m_row[0];
-    	found = std::regex_search( mPersonalName, match, exp );
+    	found = std::regex_search( mPreferredName, match, exp ); 
     	if (found)
     		return m_row[1];		// return device_name;
     	goto_next_row();
@@ -452,22 +481,27 @@ std::string	SQL_Devices::sql_find_pet_name	( int mUser_id, std::string mPersonal
 
 int	SQL_Devices::sql_find	( int mUser_id, std::string mDevice_name )
 {
-    query_string =  "SELECT device_name,device_type FROM ";
+    query_string =  "SELECT * FROM ";
     query_string += table_name;
     query_string += " ";
-    query_string += " WHERE device_name='";		// device_name is hostname
+    query_string += " WHERE hostname='";		// device_name is hostname
     query_string += mDevice_name;
     query_string += "' AND user_id=";
     query_string += append_int( mUser_id );
     query_string += ";";
-    return query(true);
+    int retval = query(true);
+    m_row = mysql_fetch_row( m_result );
+    if (m_row)
+	    _id = atoi(m_row[0]);
+    printf("device_id = %d\n", _id );
+    return retval;
 }
 
 int	SQL_Devices::get_all_device_names_regex ( int mUserID, std::string& mRegex )
 {
     std::string tmp = std::to_string(mUserID);
     
-    query_string =  "SELECT personal_name,user_id FROM ";
+    query_string =  "SELECT preferred_name,user_id FROM ";
     query_string += table_name;
     query_string += " ";
     query_string += " WHERE user_id='";
@@ -492,7 +526,7 @@ int	SQL_Devices::get_all_device_names ( int mUserID, std::string& mList )
 {
     std::string tmp = std::to_string(mUserID);
     
-    query_string =  "SELECT personal_name,user_id FROM ";
+    query_string =  "SELECT preferred_name,user_id FROM ";
     query_string += table_name;
     query_string += " ";
     query_string += " WHERE user_id='";
@@ -512,29 +546,33 @@ int	SQL_Devices::get_all_device_names ( int mUserID, std::string& mList )
 }
 
 
-int	SQL_Devices::sql_bump_login_count( std::string mDevice_name, int mUser_id )
+int	SQL_Devices::sql_bump_login_count( std::string mHostname, int mUser_id )
 {
-    query_string =  "UPDATE ";
-    query_string += table_name;
-    query_string += " SET login_count = login_count+1";
-    query_string += " WHERE device_name='";
-    query_string += mDevice_name;
-    query_string += "';";
-    return query(true); 
+	std::ostringstream query_str;	
+    query_str <<  "UPDATE " << table_name << " SET login_count = login_count+1";
+    query_str << " WHERE hostname='" << mHostname;
+    query_str << "' AND user_id='";
+    query_str << mUser_id;
+    query_str << "'; ";
+    //std::cout << query_str.str();
+    query_string = query_str.str();
+    //printf("%s\n", query_string.c_str() );
+    return query(false); 
 }
 
-int	SQL_Devices::sql_update_user_id( std::string mDevice_name, int mUser_id )
+int	SQL_Devices::sql_update_user_id( std::string mHostname, int mUser_id )
 {
+	std::ostringstream query_str;	
     query_string =  "UPDATE ";
     query_string += table_name;
     query_string += " ";
     query_string += " SET user_id='";
     query_string += mUser_id;
     query_string += "'";
-    query_string += " WHERE device_name='";
-    query_string += mDevice_name;
+    query_string += " WHERE hostname='";
+    query_string += mHostname;
     query_string += "';";
-    return query(true); 
+    return query(false); 
 }
 
 
@@ -573,10 +611,11 @@ void test_devices_db()
     std::string tmp1 = tmp + ", 'successroad1', '(main TV|TV)', 'RPI')";
 	std::string tmp2 = tmp + ", 'successroad2', '(bedroom TV)', 'RPI')";
 	std::string tmp3 = tmp + ", 'portable', '(LCD pi)', 'RPI')";
-		
-	sql_devices.sql_add_if_not_already(user_id, "( user_id, device_name, personal_name, device_type )", tmp1, "successroad1");
-	sql_devices.sql_add_if_not_already(user_id, "( user_id, device_name, personal_name, device_type )", tmp2, "successroad2");
-	sql_devices.sql_add_if_not_already(user_id, "( user_id, device_name, personal_name, device_type )", tmp3, "portable");
+
+//	sql_devices.sql_add_if_not_already(user_id, dev_info_map );
+//	sql_devices.sql_add_if_not_already(user_id, "( user_id, device_name, preferred_name, device_type )", tmp1, "successroad1");
+//	sql_devices.sql_add_if_not_already(user_id, "( user_id, device_name, preferred_name, device_type )", tmp2, "successroad2");
+//	sql_devices.sql_add_if_not_already(user_id, "( user_id, device_name, preferred_name, device_type )", tmp3, "portable");
 	
 	sql_devices.sql_find( user_id,"successroad1" );	sql_devices.print_results();
 	sql_devices.sql_find( user_id,"successroad2" );	sql_devices.print_results();

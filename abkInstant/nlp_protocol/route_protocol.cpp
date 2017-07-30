@@ -18,7 +18,7 @@ void form_device_regex(int mUserIndex, std::string& device_regex)
 	std::list<ServerHandler*>::iterator iter = (m_user_list[mUserIndex].connections.begin());
 	while (iter != m_user_list[mUserIndex].connections.end())
 	{
-		device_regex += (*iter)->m_login_devicename;		
+		device_regex += (*iter)->m_login_hostname;		
 		if (*iter != m_user_list[mUserIndex].connections.back())
 			device_regex += "|";
 		else device_regex += ")";		
@@ -39,7 +39,7 @@ int route_to_which( Sentence& mSentence, ServerHandler* mh )
 	
 		// now convert personal_name to hostname :
 		std::string matching_hostname = "unknown";
-		matching_hostname = sql_devices.sql_find_pet_name( mh->m_user_id, match1 );
+		matching_hostname = sql_devices.sql_find_preferred_name( mh->m_user_id, match1 );
 		
 		// Now look up in list of actives:
 		int user_index = find_user( mh->m_login_name );
@@ -76,7 +76,7 @@ int cancel_route_to_which( Sentence& mSentence, ServerHandler* mh )
 	
 		// now convert personal_name to hostname :
 		std::string matching_hostname = "unknown";
-		matching_hostname = sql_devices.sql_find_pet_name( mh->m_user_id, match1 );
+		matching_hostname = sql_devices.sql_find_preferred_name( mh->m_user_id, match1 );
 		
 		// Now look up in list of actives:
 		int user_index = find_user( mh->m_login_name );
@@ -112,30 +112,42 @@ int  Parse_Routing_Statement( Sentence& mSentence, ServerHandler* mh )
     {
     	std::string routes = "Established routes are ";
 		std::list<ServerHandler*>::iterator iter = mh->routes.begin();
+		int count = 0;
 		while (iter != mh->routes.end())
 		{
-			routes += (*iter)->m_login_devicename;
-			iter++;
-        }
-		mh->form_response( routes.c_str() );
-		printf("Established Routes : %s\n", routes.c_str() );
-		retval = 1;        
-    }
 
-    foundA = mSentence.regex_find( "(what )?(devices|connections)? (are )?available" ) ;
+			routes += (*iter)->m_login_hostname;
+			iter++;
+			count++;
+        }
+        if (count==0) {
+        	routes = "No routing has been established.";
+	        mh->form_response( routes.c_str() );
+	    } else 
+			mh->form_response( routes.c_str() );
+		printf(" %s\n", routes.c_str() );
+		retval = 1;        		
+    } 
+
+    foundA = mSentence.regex_find( "(what )?(devices|connections)? (are )?(available|online|connected)" ) ;
     if (foundA)
     {
-    	std::string devices = "Devices for routing are ";
+    	std::string devices = "Online Devices are ";    	
     	std::list<ServerHandler*>::iterator iter = (m_user_list[mh->m_user_index].connections.begin());
 		while (iter != m_user_list[mh->m_user_index].connections.end())
-		{
-			devices += (*iter)->m_login_devicename;
+		{ 
+			int dev_is_this_dev = mh->m_login_hostname.compare( (*iter)->m_login_hostname );
+			if (dev_is_this_dev)
+				devices += "this device";
+			else 
+				devices += (*iter)->m_dev_preferred_name;
+
 			if (*iter != m_user_list[mh->m_user_index].connections.back())
 				devices += ", ";
-			else devices += ".";
-			
+			else devices += ".";			
 			iter++;
         }
+        
 		mh->form_response( devices.c_str() );				
 		printf("Devices available for routing = %s\n", devices.c_str() );
 		retval = 0;			

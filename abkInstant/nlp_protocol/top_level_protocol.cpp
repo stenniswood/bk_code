@@ -17,6 +17,7 @@
 #include "client_to_socket.hpp"
 #include "client_memory.hpp"
 #include "sequencer_memory.hpp"
+#include "viki_logger.hpp"
 
 /* Sample sentences bkInstant would be able to respond to :
 	What's your host name? what's your IP address?
@@ -101,18 +102,18 @@ int pass_to_aux_apps( Sentence& theSentence, ServerHandler* mh )
 
 const char* Parse_top_level_protocol( const char*  mSentence, ServerHandler* mh )
 {
+	// Create a Sentence object:
 	if (mSentence==NULL) return mSentence; 
 	printf( "Sentence:|%s|\n", mSentence );
     Sentence theSentence( mSentence );
 
-    bool vr = theSentence.is_voice_response();
+	// Is Device sending us a automated Voice Response?
  	const char* end_of_telegram = mSentence + strlen(mSentence) +1 /*nullterminator*/;
 	int result = -1;
-	if (vr)
-	{
+    bool vr = theSentence.is_voice_response();
+	if (vr)	{
 		//printf("Prefilter determined a VoiceResponse!\n");
-		if (ClientRequestPending)
-		{
+		if (ClientRequestPending)  {
 			// For those cases where the response comes from the other end:
 			cli_ipc_write_response( mSentence, "instant" );	
 			ClientRequestPending = false;
@@ -120,19 +121,24 @@ const char* Parse_top_level_protocol( const char*  mSentence, ServerHandler* mh 
 		return end_of_telegram;
 	}
 
+	// Prevent feedback don't respond to this.
 	if (strcmp(mSentence, "I don't understand. Ignoring.")==0)
 		return end_of_telegram;
 
+	// The GENERAL NLP conversations:
 	result = Parse_General_Statement( theSentence, mh );
 	if (result>=0)
 		printf("Parse_General_Statement - done\n");
-	
+
+	// Auxiliary APPS:	
 	if (result<0) {
 		result = pass_to_aux_apps( theSentence, mh );
 	}
 	if (result<0)		// Not handled:
 	    mh->form_response("I don't understand. Ignoring.");
 
+	
+	viki_logger.sql_add_phrase( theSentence.m_sentence, mh->NLP_Response, mh->m_user_id ); 
 	return (end_of_telegram + result);
 }
 

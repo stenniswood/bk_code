@@ -37,20 +37,22 @@ public:
 	bool			m_credentials_validated;
 	std::string		m_login_name;
 	std::string		m_login_password;
-	std::string		m_login_devicename;	
+	std::string		m_login_hostname;	
+	size_t			m_device_id;
+	std::string		m_dev_preferred_name;
 	size_t			m_user_id;
 	size_t			m_user_index;		// see user_list.cpp
 	std::list<ServerHandler*> routes;	// communications will be transferred
 	
 	
-    bool     done;
-    bool     nlp_reply_formulated;
-    std::string   NLP_Response;
-    bool     keep_open;
-    time_t 	 ticks;
-    size_t   bytes_available;
-    size_t   bytes_rxd;
-    size_t   bytes_txd;
+    bool     		done;
+    bool     		nlp_reply_formulated;
+    std::string   	NLP_Response;  
+    bool     		keep_open;
+    time_t 	 		ticks;
+    size_t   		bytes_available;
+    size_t   		bytes_rxd;
+    size_t   		bytes_txd;
 };
 
 extern std::vector<ServerHandler*>  server_handlers;

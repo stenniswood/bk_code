@@ -1,6 +1,6 @@
 #ifndef _GENERAL_protocol_
 #define _GENERAL_protocol_
-
+ 
 
 #include "bk_system_defs.h"
 #include "serverthread.hpp"

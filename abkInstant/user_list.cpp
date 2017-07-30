@@ -68,8 +68,8 @@ ServerHandler*	find_device( int user_index, std::string mDeviceName )
 	std::list<ServerHandler*>::iterator iter = m_user_list[user_index].connections.begin();	
 	while (iter != m_user_list[user_index].connections.end())
 	{
-		int comparison = ((*iter)->m_login_devicename.compare(mDeviceName));
-		printf( "dev_name=%s; \n", (*iter)->m_login_devicename.c_str() );
+		int comparison = ((*iter)->m_login_hostname.compare(mDeviceName));
+		printf( "dev_name=%s; \n", (*iter)->m_login_hostname.c_str() );
 		if (comparison==0)
 			return *iter;
 		iter++;

@@ -63,7 +63,12 @@ void update_ipc_status_no_connection( )
 void handle_login(ServerHandler* h, const char* mCreds)
 {
 	std::string credentials = (char*)mCreds;
-	h->validate( credentials );
+	printf("Sentence:|%s|\n", mCreds);
+	bool ok = h->parse_credentials( credentials );
+	if (ok)
+		h->validate( credentials );
+	else 		
+		return;
 
 	// Now look in list of users currently active:
 	int user_index = find_user( h->m_login_name );
@@ -78,54 +83,28 @@ void handle_login(ServerHandler* h, const char* mCreds)
 		h->m_user_index = add_user( h->m_login_name );
 		add_connection( h->m_login_name, h );		
 	}
-	//print_user_list();
+	
+	if (h->m_credentials_validated==true)
+	{
+		// First check if it already exists in the database of users:
+		// (user_id, preferred_name, device_type, hostname) must all match or it gets added.
+		int result = sql_devices.sql_find( h->m_user_id, h->m_login_hostname );
+		if (result) 
+		{
+			h->m_device_id = sql_devices._id;
+			if (sql_devices.m_row) {
+				printf("sql_devices.m_row[5]= %s\n", sql_devices.m_row[5] );
+				h->m_dev_preferred_name = std::string((sql_devices.m_row)[5]);
+			}
+		} else 
+			h->m_device_id = -1;	
+	}
+	
 }
 
-// return : true => just added.
-bool register_device_if_not_already(ServerHandler* h, char* mDeviceInfo )
-{
-	SuperString info = mDeviceInfo;
-	info.split(';');
-	info.trim_spaces_in_splits();
-	//printf("\n\n");
-	
-	char fields[] = "( user_id, device_name, personal_name, device_type )";
-	string values = "(";
-	values += std::to_string(h->m_user_id);
-	
-	for (int i=1; i<info.m_split_words.size(); i++)
-	{
-		info.m_split_words[i].split(':');
-		info.m_split_words[i].trim_spaces_in_splits();
-		//printf("%s\t- prefix=%s\n", info.m_split_words[i].c_str(), info.m_split_words[i].m_split_words[0].c_str() );
-		if (info.m_split_words[i].m_split_words[0].compare("hostname")==0)
-		{
-			h->m_login_devicename = info.m_split_words[i].m_split_words[1]; 
-			values += ", '";
-			values += h->m_login_devicename;
-			values += "'";
-		}
-		if (info.m_split_words[i].m_split_words[0].compare("Pet_names")==0)
-		{
-			values += ", '";		
-			values += info.m_split_words[i].m_split_words[1];
-			values += "'";
-		}
-		if (info.m_split_words[i].m_split_words[0].compare("Platform")==0)
-		{
-			values += ", '";		
-			values += info.m_split_words[i].m_split_words[1];
-			values += "'";
-		}
-			printf("%s\n", values.c_str() );
-	}
-	values += ")";
-	//printf("register_device_if_not_already(): %d, %s\n",mUserid, values.c_str());
-	return (sql_devices.sql_add_if_not_already( h->m_user_id, fields, values, h->m_login_devicename)>0);
-}		
 
-
-/* Return :  number of bytes to advance text pointer.
+/* 
+Return :  number of bytes to advance text pointer.
 */
 int handle_telegram( ServerHandler* h, char* mTelegram )
 {
@@ -137,37 +116,29 @@ int handle_telegram( ServerHandler* h, char* mTelegram )
 	char key_word[40];
 	char* ptr = strchr(mTelegram, ';');
 	if (ptr) {
-		*ptr = 0;		strcpy( key_word, mTelegram );		*ptr = ';';
+		*ptr = 0;	strcpy( key_word, mTelegram );		*ptr = ';';
 	}
-	if (h->m_credentials_validated==false)
+	
+	if (h->m_credentials_validated==false) 
 	{
-		printf("Authenticating\n");
-		handle_login(h, mTelegram);
-		//next_telegram_ptr = (mTelegram+strlen(mTelegram)+1);
-		return strlen(mTelegram)+1;
-	} 
-	else if (strcmp(key_word, "Device Info")==0)
-	{
-		printf("Device Info RECEIVED:\n" );
-		bool just_added = register_device_if_not_already(h, mTelegram);
-		if (just_added==false)
-			sql_devices.sql_bump_login_count( h->m_login_devicename, h->m_user_id );			
-	}
-	else if (strcmp(key_word, "Device Capabilities")==0)
-	{
-		printf("Device Capabilities RECEIVED:\n" );
-	}
-	else if (h->routes.size()) 
-	{
-		int len = strlen(mTelegram);
-		h->route_traffic( (char*)mTelegram, len );
-		//next_telegram_ptr = (mTelegram+len+1);
-		return len+1;
+		if (strcmp(key_word, "Login")==0)  
+		{
+			printf("Authenticating\n");
+			handle_login( h, mTelegram );
+			return strlen(mTelegram)+1;
+		}
+		return 0;
 	} else {
-		//	General Protocol : 
-		char* next_ptr = Parse_top_level_protocol( mTelegram, h );
-		//char* next_ptr = Parse_Statement( (char*)mTelegram, h );
-		return (next_ptr - mTelegram)+1;
+		if (h->routes.size()) 
+		{
+			int len = strlen(mTelegram);
+			h->route_traffic( (char*)mTelegram, len );
+			return len+1;
+		} else {
+			//	General Protocol : 
+			char* next_ptr = Parse_top_level_protocol( mTelegram, h ); 
+			return (next_ptr - mTelegram)+1;
+		}
 	}
 }
 
@@ -226,7 +197,7 @@ void* connection_handler( void* mh )
             next_telegram_ptr[h->bytes_rxd] = 0;
             bool delim_found = true; // telegram_delim_found(next_telegram_ptr);
 			long buff_index = (next_telegram_ptr - h->socket_buffer);
-			printf(" Start parsing. buff_index=%ld of bytes_rxd=%ld; \n", buff_index, h->bytes_rxd);                
+			//printf(" Start parsing. buff_index=%ld of bytes_rxd=%ld; \n", buff_index, h->bytes_rxd);                
             
 			if (delim_found==false)
 			{
@@ -235,7 +206,8 @@ void* connection_handler( void* mh )
 				next_telegram_ptr += h->bytes_rxd;
 				continue;		// skip to next read (need more data!)
 			} else {
-				printf("Delim found, handling |%s|\n", next_telegram_ptr );
+				//printf("Delim found, |%s|\n", next_telegram_ptr );
+				printf("Delim found, ");
 
 				// Loop thru all telegrams received (multiple telegrams sent quickly will arrive in a big batch)
 				while (((next_telegram_ptr - h->socket_buffer) <= MAX_SENTENCE_LENGTH ) && 
@@ -402,7 +374,9 @@ int connect_to_robot(char *ip_address )
     } 
 	printf("ROBOT CLIENT Connected\n");
 	send_credentials (sockfd);
+	sleep(1);
 	send_device_info (sockfd);
+	sleep(1);
 	send_device_capabilities(sockfd);
 
 	ServerHandler* sh = new ServerHandler();	

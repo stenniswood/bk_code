@@ -12,13 +12,13 @@
 #include "sequencer_memory.hpp"
 #include <my_global.h>
 #include <mysql.h>
+#include "machine_defs.h"
 
-
-#define Debug 1
+#define Debug 0
 static MYSQL 	*logger_db = NULL;
 Viki_SQL_Logger viki_logger;
-#define DBASE_NAME 		"bk_useraccounts"
-#define VIKI_TABLE_NAME "viki_log"
+const char DBASE_NAME[]="sjtennis_bk_useraccounts";
+const char VIKI_TABLE_NAME[]="viki_proceedings";
 
 
 static void object_finish_with_error( )
@@ -31,8 +31,12 @@ static void object_finish_with_error( )
 /*********************************************************************************/
 Viki_SQL_Logger::Viki_SQL_Logger()
 {
-
+	connect_to_logger_db();
+	bool exists = viki_table_exists();
+	if (exists==false)
+		create_viki_table();
 }
+
 Viki_SQL_Logger::~Viki_SQL_Logger()
 {
 
@@ -46,7 +50,7 @@ void Viki_SQL_Logger::connect_to_logger_db()
         fprintf(stderr, "init %s\n", mysql_error(logger_db));
         exit(1);
     }
-    if (mysql_real_connect(logger_db, "localhost", "root", "password",
+    if (mysql_real_connect(logger_db, "localhost", sql_username, sql_password,
                            DBASE_NAME, 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "real_connect %s\n", mysql_error(logger_db));
@@ -56,23 +60,21 @@ void Viki_SQL_Logger::connect_to_logger_db()
     }
 }
 
+/* which are online? */
+
 void Viki_SQL_Logger::create_viki_table( )	
 {
-	bool exists = viki_logger.viki_table_exists();
-	if (exists) 
-	{ 
-		//printf("TABLE Already Exists\n");
-		return ;
-	}
+	query_string = "CREATE TABLE `viki_proceedings` (	\
+  `entry_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'count of the input statements',	\
+  `user_id` int(11) NOT NULL,							\
+  `device_id` int(11) DEFAULT NULL,						\
+  `session_id` int(11) NOT NULL,						\
+  `user_input` text NOT NULL,							\
+  `viki_response` text NOT NULL,						\
+  `date_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,	\
+  PRIMARY KEY (`entry_id`)								\
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Stores a history of user input to viki'";
 
-  query_string = "CREATE TABLE `viki_log` ( \
-  `_id` int(11) NOT NULL AUTO_INCREMENT, \
-  `user_name` text, \
-  `user_statement` text, \
-  `viki_response` text, \
-  `timestamp` timestamp NULL DEFAULT NULL, \
-  PRIMARY KEY (`_id`) \
-) ENGINE=InnoDB DEFAULT CHARSET=latin1";
   query(false);
 }
 
@@ -128,32 +130,65 @@ extern char* form_time_string		( struct tm time_bd  );
 extern char* form_date_time_string	( struct tm& time_bd );
 extern char* append_float			( float mFloat );
 
-int	Viki_SQL_Logger::sql_add_phrase( string mStatement, string mResponse, string mUser )
+int	Viki_SQL_Logger::sql_add_phrase( string mStatement, string mResponse, int mUser )
 {
-	query_string =  "INSERT INTO bk_useraccounts.";
+	query_string =  "INSERT INTO ";
+	query_string += DBASE_NAME;
+	query_string += ".";
 	query_string += VIKI_TABLE_NAME;
-	query_string += " (user_name, user_statement, viki_response, timestamp) ";
+	query_string += " (user_id, user_input, viki_response, date_time) ";
 	query_string += "VALUES ( '";
-	query_string += mUser;			query_string += "', '";
-	query_string += mStatement;		query_string += "', '";
-	query_string += mResponse;		query_string += "', ";
+	query_string += "47";			query_string += "', \""; 
+	query_string += mStatement;		query_string += "\", \"";
+	query_string += mResponse;		query_string += "\", ";
 	query_string += " NOW() );";
+	//printf(query_string.c_str() );
 	query(false);	
 }
 
-int	Viki_SQL_Logger::sql_query_phrase( string mStatement, string mUser )		// including "unknown"
+int	Viki_SQL_Logger::sql_query_user_input( string mUserStatement, int mUser )		// including "unknown"
 {
 	struct tm start_time_bd;
 	struct tm end_time_bd;
-	query_string =  "SELECT *,UNIX_TIMESTAMP(timestamp) FROM robot_local.vision_events WHERE ";
-	if (mUser.length()) {
-		query_string += "robot_local.vision_events.people_names LIKE '%";
-		query_string += mStatement;
+	query_string =  "SELECT *,UNIX_TIMESTAMP(date_time) FROM ";
+	query_string += DBASE_NAME;
+	query_string += ".";
+	query_string += VIKI_TABLE_NAME;
+	query_string += " WHERE ";
+	if (mUser!=-1) 
+	{ 
+		query_string += "user_input LIKE '%";
+		query_string += mUserStatement;
+		query_string += "%' AND ";
+		query_string += "user_id= ";
+		char tmp[10] = "47";		// mtenniswood
+		//itoa( mUser, tmp, 10 );
+		query_string += tmp;
+	}
+	query_string += " ORDER BY timestamp DESC;";
+	//printf(query_string.c_str());
+	query(true);
+}
+
+int	Viki_SQL_Logger::sql_query_viki_response( string mResponse, int mUser )		// including "unknown"
+{
+	struct tm start_time_bd;
+	struct tm end_time_bd;
+	query_string =  "SELECT *,UNIX_TIMESTAMP(date_time) FROM ";
+	query_string += DBASE_NAME;
+	query_string += ".";
+	query_string += VIKI_TABLE_NAME;
+	query_string += " WHERE ";
+//	if (mUser.length()) 
+	{
+		query_string += "viki_response LIKE '%";
+		query_string += mResponse;
 		query_string += "%' AND ";
 	}
-	query_string += "event_description LIKE '%";
-	query_string += mUser;
-	query_string += "%' ORDER BY timestamp DESC;";
+	query_string += "user_id= ";
+	query_string += "47";  //itoa(mUser);
+	query_string += " ORDER BY timestamp DESC;";
+	printf(query_string.c_str());
 	query(true);
 }
 
@@ -224,7 +259,7 @@ int Viki_SQL_Logger::form_response__how_many_times( string mStatement, string mU
 
 int Viki_SQL_Logger::form_response__last_time_i_activated( time_t& mTime)
 {
-	sql_query_phrase( "", "System Activated" );
+	sql_query_viki_response( "Viki System Activated", 47 );
 	m_row = mysql_fetch_row( m_result );
 	int rows = get_number_results();
 	int cols = get_number_columns();
@@ -234,7 +269,7 @@ int Viki_SQL_Logger::form_response__last_time_i_activated( time_t& mTime)
 
 int Viki_SQL_Logger::form_response__last_time_i_deactivated( time_t& mTime)
 {
-	sql_query_phrase( "", "System De-activated" );
+	sql_query_viki_response( "Viki System De-activated", 47 );
 	m_row = mysql_fetch_row( m_result );
 	int rows = get_number_results();
 	int cols = get_number_columns();
@@ -265,7 +300,7 @@ void Viki_SQL_Logger::extract_result	( )		// for the last fetched row.
 
 int	Viki_SQL_Logger::sql_add_system_activated( bool mCamera, bool mEyes, bool mNeck )
 {
-	string description = "Vision System Activated";
+	string description = "Viki System Activated";
 	string names;
 	if (mCamera)
 		names += "Camera On";
@@ -278,18 +313,17 @@ int	Viki_SQL_Logger::sql_add_system_activated( bool mCamera, bool mEyes, bool mN
 
 int	Viki_SQL_Logger::sql_add_system_deactivated( )
 {
-	string description = "Vision System De-activated";
+	string description = "Viki System De-activated";
 	sql_add_phrase(description.c_str(), "", "System" );	
 }
 
  
 void test_viki_logger()
 {
-	viki_logger.connect_to_logger_db();
-	
-	viki_logger.sql_add_phrase("When did you last see David?", 					"VR:I saw him yesterday.", 			  "Stephen" );
-	viki_logger.sql_add_phrase("How long have you been activated?", 			"VR:I have been active for 4 hours.", "Stephen" );
-	viki_logger.sql_add_phrase("How many times were you activated yesterday?", 	"VR:yesterday, 5 times", 			  "Stephen" );	
+//	viki_logger.connect_to_logger_db();	
+//	viki_logger.sql_query_user_input("When did you last see David?", 					"VR:I saw him yesterday.", 		  "Stephen" );
+//	viki_logger.sql_query_user_input("How long have you been activated?", 			"VR:I have been active for 4 hours.", "Stephen" );
+//	viki_logger.sql_query_user_input("How many times were you activated yesterday?", 	"VR:yesterday, 5 times", 		  "Stephen" );
 	printf("Added 3 entries\n");
 	exit(1);	
 }

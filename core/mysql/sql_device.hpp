@@ -13,6 +13,7 @@
 #include <ctime>
 #include <my_global.h>
 #include <mysql.h>
+#include <map>
 
 /*  The purpose of this class will be to store and retrieve events.
  Primarily from and for the machine vision (xeyes) app.
@@ -36,18 +37,18 @@ public:
     bool			users_table_exists ( );
     void			close_connection();
     
-    int				query                   ( bool mRetrieving=true );
+    int				query                   ( bool mRetrieving=true ); 
 
 	// Please use if_not_already to prevent duplicates in the database!
-	int				sql_add_if_not_already( int mUserId, std::string mFields, std::string mValues, std::string mDeviceName  );
-    int				sql_add				( std::string mName, std::string mPasswd  );
-    int				sql_find			( int mUser_id, std::string mDevice_name );
-    std::string		sql_find_pet_name	( int mUser_id, std::string mPersonalName );    
+	int				sql_add_if_not_already	( int mUserId, std::map<std::string,std::string> mFields  );
+    int				sql_add					( std::string mName, std::string mPasswd  );
+    int				sql_find				( int mUser_id, std::string mDevice_name );
+    std::string		sql_find_preferred_name	( int mUser_id, std::string mPreferredName );   
 	int				get_all_device_names_regex ( int mUserID, std::string& mRegex );
-	int				get_all_device_names 	   ( int mUserID, std::string& mList );
+	int				get_all_device_names 	( int mUserID, std::string& mList );
 	
-    int				sql_update_user_id  ( std::string mDevice_name, int mUser_id );
-    int				sql_bump_login_count( std::string mDevice_name, int mUser_id );    
+    int				sql_update_user_id  	( std::string mHostname, int mUser_id );
+    int				sql_bump_login_count	( std::string mHostname, int mUser_id );    
     
 /* NOTE: These remaining functions can possibly be removed (copied from friends_db for vision event processsing)*/
     int				sql_add_system_activated( bool mCamera, bool mEyes, bool mNeck );
@@ -86,7 +87,7 @@ public:
     // DATA :
     int				_id;
     int				m_user_id;
-    std::string			query_string;
+    std::string		query_string;
 };
 
 extern SQL_Devices sql_devices;

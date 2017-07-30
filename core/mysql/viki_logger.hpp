@@ -33,13 +33,13 @@ public:
 	bool			viki_table_exists ( );
 	
 	int				query				( bool mRetrieving=true );		
-	
-	int				sql_add_phrase		( string mStatement, string mResponse, string mUser );
+
+	int				sql_add_phrase		( string mStatement, string mResponse, int mUser );
 	int				sql_add_system_activated   ( bool mCamera, bool mEyes, bool mNeck );
 	int				sql_add_system_deactivated ( );
 
-	int				sql_query_phrase		   ( string mStatement, string mUser );
-
+	int				sql_query_user_input   ( string mStatement, int mUser ); 
+	int				sql_query_viki_response( string mResponse,  int mUser );
 
 	int				sql_query_time		( string mPersonName, string mDescription,  struct tm start_time_bd, struct tm end_time_bd );		// including "unknown"
 	int				sql_query_time_qualitative( string mDateTime);	// such as "yesterday", "today", "4 hours ago"

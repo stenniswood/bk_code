@@ -2,8 +2,8 @@ RPI = 1
 linux_desktop = 2
 Mac = 3
 
-PLATFORM  = $(RPI)
-#PLATFORM = $(linux_desktop)
+#PLATFORM  = $(RPI)
+PLATFORM = $(linux_desktop)
 #PLATFORM  = $(Mac)
 
 ifeq ($(PLATFORM), $(RPI))
@@ -33,7 +33,7 @@ MYSQL_INC    = /usr/include/mysql /usr/include/ $(SELF_PATH)/mysql/
 INC 	   = $(INC_CORE) $(LOCAL_INC) $(SYSTEM_INC) $(SELF_INC) $(MYSQL_INC)
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 		     -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
-SQL_LIB = -L/usr/lib/arm-linux-gnueabihf -lmysqlclient -lz -ldl
+SQL_LIB    = -L/usr/lib/arm-linux-gnueabihf -lmysqlclient -lz -ldl
 LIBFLAGS   = -lpthread  -lm $(SQL_LIB)
 
 #			  /opt/vc/include/interface/vcos/pthreads/
@@ -49,7 +49,7 @@ CFLAGS+=-DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POS
 		-DUSE_VCHIQ_ARM -Wno-psabi  -DPLATFORM=$(PLATFORM) \
 		-DRPI=$(RPI) -Dlinux_desktop=$(linux_desktop) -DMac=$(Mac) -std=c++11
 
-
+ 
 KINETIC_OBJS = vector.o
 CAN_OBJS   =  can_eid.o bk_system_defs.o can_id_list.o
 MSG_OBJS   =  packer_lcd.o packer_motor.o packer.o
@@ -71,7 +71,7 @@ VIDEO_OBJS    = vc_vchi_gencmd.c vc_vchi_filesys.c vc_vchi_dispmanx.c vc_vchi_ce
 # APP CODE calendar.o calendar_summary.o 
 UTIL_OBJS = tk_colors.o client_to_socket.o AUDIO_file_util.o CAMERA_util.o CAN_util.o IMAGE_file_util.o VIDEO_file_util.o
 
-MYSQL_OBJS = machine_defs.o sql_users.o sql_device.o calendar_entry.o sql_common.o 
+MYSQL_OBJS = machine_defs.o sql_users.o sql_device.o calendar_entry.o sql_common.o viki_logger.o
 NLP_CORE_OBJS = super_string.o nlp_extraction.o nlp_sentence.o alias.o 
 
 NLP_PROTOCOL_OBJS = adrenaline_creator.o color_protocol.o IMAGE_protocol.o parameter.o \
@@ -81,7 +81,7 @@ NLP_PROTOCOL_OBJS = adrenaline_creator.o color_protocol.o IMAGE_protocol.o param
  calendar_protocol.o GENERAL_protocol.o menu_items.o question_to_user.o ThreeD_object_protocol.o \
  CAMERA_protocol.o GPIO_protocol.o menus_orders.o route_protocol.o top_level_protocol.o \
  CAN_protocol.o hearts_game.o robot_arms_protocol.o \
- HMI_protocol.o  robot_legs_protocol.o \
+ HMI_protocol.o  robot_legs_protocol.o users_devs_protocol.o \
  card_player.o othello_board.o self_identity.o protocol_unit_tests.o 
  
 NLP_ADRENALINE_OBJS  =	 Adrenaline_nlp.o     	Adren_bigmotor_talk.o  		\
@@ -136,6 +136,7 @@ clean:
 	rm -rf ../core/ipc/*.o 
 	rm -rf ../core/can/*.o 
 	rm -rf ../core/msg/*.o 
+	rm -rf ../core/mysql/*.o 	
 	rm -rf ../core/wifi/*.o 	
 	rm -rf ../core/misc/*.o
 	rm -rf ../core/fusion/*.o
