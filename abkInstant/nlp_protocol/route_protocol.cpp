@@ -102,6 +102,22 @@ int cancel_route_to_which( Sentence& mSentence, ServerHandler* mh )
 	return retval;
 }
 
+int  Parse_Cancel_Routing_Statement( char* mSentence, ServerHandler* mh )
+{
+    int retval =-1;
+	if (mSentence==NULL) return mSentence; 
+	printf( "Sentence:|%s|\n", mSentence );
+    Sentence theSentence( mSentence );
+
+    int foundA = theSentence.regex_find( "(cancel|stop|drop)" );
+	int foundB = theSentence.regex_find( "(route|connection|redirect|talk)" ) ;
+    if (foundA && foundB)
+    {
+		retval = cancel_route_to_which(theSentence, mh);
+    }    
+    return retval;
+}
+
 int  Parse_Routing_Statement( Sentence& mSentence, ServerHandler* mh )
 {
     int retval =-1;
@@ -137,7 +153,7 @@ int  Parse_Routing_Statement( Sentence& mSentence, ServerHandler* mh )
 		while (iter != m_user_list[mh->m_user_index].connections.end())
 		{ 
 			int dev_is_this_dev = mh->m_login_hostname.compare( (*iter)->m_login_hostname );
-			if (dev_is_this_dev)
+			if (dev_is_this_dev==0)
 				devices += "this device";
 			else 
 				devices += (*iter)->m_dev_preferred_name;
@@ -165,7 +181,7 @@ int  Parse_Routing_Statement( Sentence& mSentence, ServerHandler* mh )
     }
     
     foundA = mSentence.regex_find( "(cancel|stop|drop)" ) ;
-    int foundB = mSentence.is_found_in_sentence( "route" ) ;
+    int foundB = mSentence.regex_find( "(route|connect|direct|talk)" ) ;
     if (foundA && foundB)
     {
 		retval = cancel_route_to_which(mSentence, mh);

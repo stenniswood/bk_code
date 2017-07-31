@@ -32,6 +32,8 @@
 #include "user_list.hpp"		// for RAM binding of sockets.
 #include "protocol.h"
 #include "top_level_protocol.hpp"
+#include "route_protocol.hpp"
+
 
 using namespace std;
 #define Debug 1
@@ -84,6 +86,7 @@ void handle_login(ServerHandler* h, const char* mCreds)
 		add_connection( h->m_login_name, h );		
 	}
 	
+	// Look up Device ID and Device Preferred Name: 
 	if (h->m_credentials_validated==true)
 	{
 		// First check if it already exists in the database of users:
@@ -131,9 +134,15 @@ int handle_telegram( ServerHandler* h, char* mTelegram )
 	} else {
 		if (h->routes.size()) 
 		{
-			int len = strlen(mTelegram);
-			h->route_traffic( (char*)mTelegram, len );
-			return len+1;
+			int procssed = Parse_Cancel_Routing_Statement( mTelegram, h ); 
+			//return (next_ptr - mTelegram)+1;
+			if (procssed==-1)
+			{			
+				int len = strlen(mTelegram);
+				h->route_traffic( (char*)mTelegram, len );
+				return len+1;
+			} 
+			else return 1;
 		} else {
 			//	General Protocol : 
 			char* next_ptr = Parse_top_level_protocol( mTelegram, h ); 
@@ -149,6 +158,24 @@ bool telegram_delim_found( char* mTelegram)
 		return false;
 	//*ptr = 0;
 	return true;	
+}
+
+bool speak_locally = false;
+void send_response( ServerHandler* h )
+{
+	string cmd;
+	if (h->nlp_reply_formulated)
+	{
+		if (speak_locally)
+		{
+			cmd = "echo \""; 
+			cmd += h->NLP_Response;
+			cmd += "\"; | festival -tts";
+			system(cmd.c_str() );
+		}
+		h->Send_Reply();
+		h->nlp_reply_formulated = false;
+	}
 }
 
 /******************************************************
@@ -219,12 +246,8 @@ void* connection_handler( void* mh )
 				next_telegram_ptr = h->socket_buffer;	// reset 	
 				printf("Done parsing. %d\n", h->connfd);
 			}
-			
-			if (h->nlp_reply_formulated)
-			{
-				h->Send_Reply();
-				h->nlp_reply_formulated = false;
-			}
+
+			send_response(h);			
             printf("\n");
         }	// end Data Arrived (read handling)        
     }

@@ -23,7 +23,7 @@ CC		   = g++
 OPTIONS	   = -std=c99 -g -fpermissive -Wwrite-strings -Wno-deprecated -w
 
 INC_CORE   = ../core/can/ ../core/msg/ ../core/fusion/ ../core/misc/ ../core/ipc/   \
-			 ../core/wifi/ ../core/libs/ilclient/ ../core/kinetic/ ../core/hardware/ \
+			 ../core/wifi/ ../core/libs/ilclient/ ../core/kinetic/ ../core/hardware/ ./ \
 			 ../core/nlp/ ../core/adrenaline/molecules/calendar/ ../core/mysql/
 LOCAL_INC  =  ./threads/ ./nlp_protocol/ ./nlp_adrenaline/ ./voice/ ./util/ ./nlp_core/ $(HARDWARE_PATH) \
 SYSTEM_INC =  /home/pi/raspicam/interface \

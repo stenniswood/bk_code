@@ -36,7 +36,7 @@
 #include "positioner_3d.hpp"
 #include "color_protocol.hpp"
 #include "sql_device.hpp"
-
+#include "sql_users.hpp"
  
 #define Debug 1
 
@@ -98,7 +98,7 @@ int  Parse_UserDevs_Statement( Sentence& mSentence, ServerHandler* mh )
 				// ADD TO DATABASE :
 				just_added = (sql_devices.sql_add_if_not_already( mh->m_user_id, 
 							 						  dev_info_map  )>0);	
-			printf("just_added = %d\n", just_added );
+			//printf("just_added = %d\n", just_added );
 			//bool just_added = register_device_if_not_already(mh, mSentence.m_sentence.c_str() );
 			if (just_added==false) {
 				sql_devices.sql_bump_login_count( mh->m_login_hostname, mh->m_user_id );			
@@ -134,7 +134,9 @@ int  Parse_UserDevs_Statement( Sentence& mSentence, ServerHandler* mh )
     foundA = mSentence.regex_find( "forgot my username" ) ;
 	if (foundA)
 	{
-		
+		string name;
+		string new_passwd;
+		sql_users.sql_update_password( name, new_passwd );			
 		return 1;
 	}
 

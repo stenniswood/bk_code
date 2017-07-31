@@ -6,6 +6,8 @@
 #include "server_handler.hpp"
 
 void Init_Routing_Protocol  ( );
+
+int  Parse_Cancel_Routing_Statement( char* mSentence, ServerHandler* mh );
 int  Parse_Routing_Statement( Sentence& mSentence, ServerHandler* mh );
   
 
