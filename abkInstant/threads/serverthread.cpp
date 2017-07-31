@@ -1,7 +1,7 @@
 /*  WARNING: This serverthread.c is Very different from the one in abkInstant
 	The one in ../core/wifi/serverthread.c is Token based
 	This one is simple NLP words based and is the current choice.
- */
+  */
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -248,7 +248,7 @@ void* connection_handler( void* mh )
 			}
 
 			send_response(h);			
-            printf("\n");
+         		printf("\n");
         }	// end Data Arrived (read handling)        
     }
     h->done = false;
