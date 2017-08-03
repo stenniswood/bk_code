@@ -1,4 +1,15 @@
 				Beyond Kinetics Source Code Repository
+		
+		This code contains apps intended for Raspberry Pi and robotics applications
+		Include Motor control, a informations passing server, sensor fusion, CAN 
+		communication tools, sequences, 3D simulation, natural language processing (NLP), 
+		and more.
+		
+		To see the products for the adrenaline network visit:
+		http://www.beyond-kinetics.com/store/show_products.php
+	
+				Joing us at:
+			http://www.beyond-kinetics.com
 
 PROJECT SUMMARY
 ========================================================================
