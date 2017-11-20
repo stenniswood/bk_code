@@ -40,6 +40,8 @@ AUTHOR	:  Stephen Tenniswood
 
 #define Debug 1
 
+SequencerIPC seqIPC;
+
 /*********************************************************/
 /* Class Functions 										 */
 /*********************************************************/

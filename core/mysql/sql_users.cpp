@@ -100,7 +100,7 @@ void SQL_Users::create_users_table( )
 bool SQL_Users::users_table_exists( )
 {
     // how to query it?
-    query_string = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'sjtennis_bk_useraccounts' AND  TABLE_NAME = 'Users';";
+    query_string = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'bk_useraccounts' AND  TABLE_NAME = 'Users';";
     return query(true);
 }
 

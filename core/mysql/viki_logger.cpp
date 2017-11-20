@@ -13,15 +13,16 @@
 #include <my_global.h>
 #include <mysql.h>
 #include "machine_defs.h"
+#include "sql_common.hpp"
 
 #define Debug 0
 static MYSQL 	*logger_db = NULL;
 Viki_SQL_Logger viki_logger;
-const char DBASE_NAME[]="sjtennis_bk_useraccounts";
+const char DBASE_NAME[]="bk_useraccounts";
 const char VIKI_TABLE_NAME[]="viki_proceedings";
 
 
-static void object_finish_with_error( )
+void log_object_finish_with_error( )
 {
     fprintf    ( stderr, "%s\n", mysql_error(logger_db));
     mysql_close( logger_db );
@@ -127,7 +128,7 @@ int	Viki_SQL_Logger::get_number_results()
 
 extern char* form_date_string		( struct tm& time_bd );
 extern char* form_time_string		( struct tm time_bd  );
-extern char* form_date_time_string	( struct tm& time_bd );
+//extern char* form_date_time_string	( struct tm& time_bd );
 extern char* append_float			( float mFloat );
 
 int	Viki_SQL_Logger::sql_add_phrase( string mStatement, string mResponse, int mUser )
@@ -308,13 +309,13 @@ int	Viki_SQL_Logger::sql_add_system_activated( bool mCamera, bool mEyes, bool mN
 		names += "Eyes On";
 	if (mNeck)
 		names += "Neck On";
-	sql_add_phrase(description.c_str(), names.c_str(), "System" );
+	sql_add_phrase(description.c_str(), names.c_str(), 0 /*"System"*/ );
 }
 
 int	Viki_SQL_Logger::sql_add_system_deactivated( )
 {
 	string description = "Viki System De-activated";
-	sql_add_phrase(description.c_str(), "", "System" );	
+	sql_add_phrase(description.c_str(), "", 0/*"System"*/ );	
 }
 
  

@@ -725,7 +725,7 @@ void glWalkingRobot::add_to_sequence()
     // this has to be changed in robot_interpolator, and there are many references 
     // in that file!  So temporarily comment out here.  
     //m_sequence.push_back( bp );
-    ipc_add_sequence( &bp );
+    seqIPC.ipc_add_sequence( &bp );
 }
 
 void glWalkingRobot::flat_footed( glFoot&  mfoot )

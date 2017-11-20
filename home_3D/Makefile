@@ -25,7 +25,8 @@ CFLAGS  = -lwiringPi -lrt -DPLATFORM=$(PLATFORM) -std=gnu++11 -DGLM_FORCE_RADIAN
 VG_INCLUDE = -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux \
 	         -I/opt/vc/include/interface/vcos/pthreads -I/home/pi/openvg
 SQL_INC    = /usr/include/mysql /usr/include/
-CORE_INC   = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/ ../core/nlp/
+CORE_INC   = ./ ../core/can/ ../core/kinetic/ ../core/misc/ ../core/msg/ ../core/ipc/ ../core/nlp/ \
+	../core/mysql/
 LOCAL_INC  = ./sql/ ./street_signs/ ./robot/ ./route/ ./paintings/ ./physics/ \
 			 ./nlp/ ./molecules/ ./atoms/ ./Large/ ./framework/ ./buildings/
 LIB_INC	   = ../abkInstant/threads/ ../core/dbase/
@@ -77,9 +78,9 @@ FRAMEWORK_OBJ = asset_importer.o imageloader.o key_press.o \
 CONTROL_OBJS = serial.o serial_synchronous.o roboclaw.o x_eyes.o neck_thread.o
 VISION_OBJS  = findEyeCenter.o findEyeCorner.o face_detect.o face_recog.o face_summary.o \
 			   optical_flow.o misc_detect.o  image_proc_misc.o helpers.o frame_grabber.o
-DBASE_OBJS    = viki_logger.o vision_logger.o
+DBASE_OBJS    = machine_defs.o sql_common.o viki_logger.o vision_logger.o
 MISC_OBJS     = super_string.o
-IPC_OBJS      = vision_memory.o simulator_memory.o client_memory.o sequencer_memory.o
+IPC_OBJS      = vision_memory.o simulator_memory.o client_memory.o shm_base.o sequencer_memory.o
 KINETIC_OBJS  = vector.o
 
 %.o: %.cpp $(DEPS)
@@ -122,8 +123,8 @@ home3D: $(OBJ) $(addprefix ../core/kinetic/,$(KINETIC_OBJS)) \
 	$(addprefix ./buildings/,  $(BUILDINGS_OBJ)) \
 	$(addprefix ./sql/,        $(SQL_OBJ))      \
 	$(addprefix ../core/nlp/,  $(NLP_CORE_OBJ)) \
-    $(addprefix ../core/dbase/,$(DBASE_OBJS))   \
-	$(addprefix ../core/misc/, $(MISC_OBJS))    \
+    $(addprefix ../core/mysql/,$(DBASE_OBJS))   \
+	$(addprefix ../core/nlp/, $(MISC_OBJS))    \
 	$(addprefix ../core/ipc/,  $(IPC_OBJS))
 	g++ -o $@ $^ $(CFLAGS) $(LIBFLAGS) $(LDFLAGS) $(OPENCV_LIBS)
 
@@ -132,7 +133,7 @@ home3D: $(OBJ) $(addprefix ../core/kinetic/,$(KINETIC_OBJS)) \
 
 clean:
 	rm ./*/*.o
-	rm ../core/dbase/*.o
+	rm ../core/mysql/*.o
 	rm ../core/misc/*.o
 	rm ../core/ipc/*.o
 	rm ../core/kinetic/*.o

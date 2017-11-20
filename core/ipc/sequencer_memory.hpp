@@ -139,6 +139,7 @@ class SequencerIPC : public SHMBase
 
 };
 
+extern SequencerIPC seqIPC;
 /************************************************************/
 
 #endif
@@ -166,7 +167,9 @@ const int r_wrist_rotate	 	= 18;
 const int r_wrist_swing		 	= 19;
 */
 
-struct stBodyPosition {     // all angles given in degrees!
+#include "robot.hpp"
+
+/*struct stBodyPosition {     // all angles given in degrees!
     // Legs:
     float   l_hip_rotate;
     float   l_hip_swing;
@@ -197,7 +200,7 @@ struct stBodyPosition {     // all angles given in degrees!
     
     float   head_turn;
     float   head_tilt;
-};
+}; */
 
 /*struct stBodyPositionVector 
 {

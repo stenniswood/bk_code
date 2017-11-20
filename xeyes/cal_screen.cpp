@@ -11,7 +11,7 @@
 #include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <wiringPi.h>
+//#include <wiringPi.h>
 #include "cal_screen.hpp"
 
 
@@ -211,31 +211,31 @@ void make_training_size( string mPath )
 
 void init_gpio()
 {
-	int result = wiringPiSetup();
+/*	int result = wiringPiSetup();
 	
 	pinMode( VOICE_LED_1, OUTPUT);
 	pinMode( VOICE_LED_2, OUTPUT);
 	digitalWrite( VOICE_LED_1, 0 );
-	digitalWrite( VOICE_LED_2, 0 );
+	digitalWrite( VOICE_LED_2, 0 ); */
 }
 
 /* blocks until done speaking */
 void text_to_speech_pico( const char* mText )
 {
-	digitalWrite( VOICE_LED_1, 1);	
+	//digitalWrite( VOICE_LED_1, 1);	
 	char cmd[512];
 	sprintf( cmd, "/usr/bin/pico2wave -w /tmp/tmp.wav \"%s\" && aplay /tmp/tmp.wav", mText );
 	system ( cmd );
-	digitalWrite( VOICE_LED_1, 0);
+	//digitalWrite( VOICE_LED_1, 0);
 }
 
 /* blocks until done speaking */
 void text_to_speech_festival( const char* mText )
 {
 	char cmd[512];
-	digitalWrite( VOICE_LED_1, 1);	
+	//digitalWrite( VOICE_LED_1, 1);	
 	sprintf( cmd, "echo \"%s\" | festival --tts ", mText );
 	system ( cmd );
-	digitalWrite( VOICE_LED_1, 0);
+	//digitalWrite( VOICE_LED_1, 0);
 }
 

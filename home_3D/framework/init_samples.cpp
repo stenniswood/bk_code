@@ -402,7 +402,7 @@ void init_objects()
     ground.create(); 
 */
 	//init_ground();
-    init_street_scene();
+//    init_street_scene();
     init_dwellings();
     init_robots();
 	//init_terrain(); 

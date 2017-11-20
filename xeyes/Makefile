@@ -69,8 +69,8 @@ xeyes: $(OBJ) \
 	$(addprefix ./control/, $(CONTROL_OBJS)) \
 	$(addprefix ./vision/, $(VISION_OBJS))   \
 	$(addprefix ../core/vision/, $(CORE_VISION_OBJS)) \
-    $(addprefix ../core/dbase/, $(DBASE_OBJS)) \
-	$(addprefix ../core/misc/, $(MISC_OBJS)) \
+    $(addprefix ../core/mysql/, $(DBASE_OBJS)) \
+	$(addprefix ../core/nlp/, $(MISC_OBJS)) \
 	$(addprefix ../core/ipc/,  $(IPC_OBJS))	 \
 	$(addprefix ../abkInstant/threads/, $(INSTANT_OBJS)) \
 	$(addprefix ../core/kinetic/, $(KINETIC_OBJS))
