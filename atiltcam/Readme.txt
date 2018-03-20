@@ -1,5 +1,15 @@
+# TiltPan Camera 
+- PiSCAM Board
+
 *******************************  TiltPan Camera  ***************************
 This app is intended to work with Pi Cam Scanner from Beyond Kinetics, Inc.
+
+## The Beyond Kinetics PiCAMScan Feature set:
+* 2 Servos  (PWM signals for Pan and Tilt)
+* 8 Analog Inputs
+* 10 Lowside drivers
+* GPS connector
+* CAN transceiver
 
 It allows the user to control the Tilt and Pan of the camera from a Android 
 cell phone or other bkInstant device.
