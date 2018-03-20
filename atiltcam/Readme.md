@@ -1,5 +1,4 @@
-# TiltPan Camera 
-- PiSCAM Board
+# TiltPan Camera - PiSCAM Board
 
 *******************************  TiltPan Camera  ***************************
 This app is intended to work with Pi Cam Scanner from Beyond Kinetics, Inc.
