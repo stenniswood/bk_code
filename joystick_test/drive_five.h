@@ -30,6 +30,7 @@ public:
 	DriveFive( const char* mDeviceName, uint32_t time_out );
 	~DriveFive();
 
+
 	void	set_baud		( int speed );
 	
 	void	set_device_name	( const char* mDeviceName );
@@ -38,10 +39,12 @@ public:
 	int 	available		( );
 	char	serialGetchar	( );
 	bool 	send_command	( char* mFiveCommand  );
+	bool 	replace_ctrl_characters( char* mStr, char mReplacement );
 	bool 	read_response	(  );
+	void 	print_response  ( );
+	
 	void 	clear			( );
-
-	bool 	contains_NAK( );
+	bool 	contains_NAK	( );
 	
 	char	 m_response[2048];
 		

@@ -8,12 +8,17 @@
 #include <pthread.h>
 #include "joystick.hpp"
 
-
+void help_mapping() 
+{
+	printf(" **** PS4 CONTROLLER MAPPING ****");
+	printf(" **** PS4 CONTROLLER MAPPING ****");
+	printf(" **** PS4 CONTROLLER MAPPING ****");	
+}
 
 int 		quitState  = 0;
 #define    	CUR_SIZ  16				// cursor size, pixels beyond centre dot
 
-#define Debug 0
+#define Debug 1   
 pthread_t inputThread_id;
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #define Dprintf if (Debug) printf("%s ", __FILENAME__); if (Debug) printf
@@ -34,8 +39,10 @@ void* eventThread(void *arg)
 	if (joy->joystick_fd >= 0) {
 		printf( "Opened Joystick:  %s\n", dev_name );
 	} else {
-		printf("Joystick not available!\n");
-		fprintf(stderr, "Error opening Joystick!\n");
+		perror( "Joystick not available!");
+		printf("This app uses the Linux joydev API. ");
+		printf("To use a PS4 controller, you need to install and run ds4drv ");
+		printf("See:  https://github.com/chrippa/ds4drv  \n\n");
 		quitState = 1;
 		return &quitState;
 	}
@@ -61,44 +68,77 @@ void Joystick::Initialize()
 	Dprintf("Joystick::Initialize() ...\n");
 	
 	// CREATE A THREAD TO READ FROM DEVICE:
-	int result = pthread_create( &inputThread_id, NULL, &eventThread, this );
-	if (result != 0) {
-		if (Debug) fprintf(stderr, "Unable to initialize the Joystick\n");
+	for (int retries=0; retries<3; retries++) 
+	{	
+		int result = pthread_create( &inputThread_id, NULL, &eventThread, this );
+		if (result != 0) {
+			if (Debug) fprintf(stderr, "Unable to initialize the Joystick\n");
+			sleep(1);
+			printf("Retrying... connection to joystick.");
+			continue;
+		}
+		break;
 	}
 } 	
 
+#ifdef PS4
+std::string get_ps4_button_name( int mButtonIndex )
+{
+	switch (mButtonIndex)
+	{
+	case PS_PAD_PUSH 		: return "TOUCH PAD PUSH";	
+	case PS_BUTTON 			: return "PS";
+	case PS_LEFT_JOY_PUSH 	: return "LEFT_JOY_PUSH";
+	case PS_RIGHT_JOY_PUSH 	: return "RIGHT_JOY_PUSH";
+	case PS_SHARE 			: return "SHARE";
+	case PS_OPTIONS 		: return "OPTIONS";
+	case PS_LEFT_TOP 		: return "L1";
+	case PS_RIGHT_BOTTOM 	: return "R2";
+	case PS_LEFT_BOTTOM 	: return "L2";
+	case PS_RIGHT_TOP 		: return "R1";
+	case PS_TRIANGLE 		: return "TRIANGLE";
+	case PS_CIRCLE 			: return "CIRCLE";
+	case PS_X 				: return "X";
+	case PS_SQUARE 			: return "SQUARE";
+	default: return "Unknown";
+	};
+}
+#else
 std::string get_button_name( int mButtonIndex )
 {
 	switch (mButtonIndex)
 	{
-	case PS3_SELECT 		: return "SELECT";
-	case PS3_LEFT_JOY_PUSH 	: return "LEFT_JOY_PUSH";
-	case PS3_RIGHT_JOY_PUSH : return "RIGHT_JOY_PUSH";
-	case PS3_START 			: return "START";
-	case PS3_UP 			: return "UP";
-	case PS3_RIGHT 			: return "RIGHT";
-	case PS3_DOWN 			: return "DOWN";
-	case PS3_LEFT 			: return "LEFT";
-	case PS3_LEFT_TOP 		: return "LEFT_TOP";
-	case PS3_RIGHT_BOTTOM 	: return "RIGHT_BOTTOM";
-	case PS3_LEFT_BOTTOM 	: return "LEFT_BOTTOM";
-	case PS3_RIGHT_TOP 		: return "RIGHT_TOP";
-	case PS3_TRIANGLE 		: return "TRIANGLE";
-	case PS3_CIRCLE 		: return "CIRCLE";
-	case PS3_X 				: return "X";
-	case PS3_SQUARE 		: return "SQUARE";
+	case PS_SELECT 			: return "SELECT";
+	case PS_LEFT_JOY_PUSH 	: return "LEFT_JOY_PUSH";
+	case PS_RIGHT_JOY_PUSH 	: return "RIGHT_JOY_PUSH";
+	case PS_START 			: return "START";
+	case PS_UP 				: return "UP";
+	case PS_RIGHT 			: return "RIGHT";
+	case PS_DOWN 			: return "DOWN";
+	case PS_LEFT 			: return "LEFT";
+	case PS_LEFT_TOP 		: return "L1";
+	case PS_RIGHT_BOTTOM 	: return "R2";
+	case PS_LEFT_BOTTOM 	: return "L2"; 
+	case PS_RIGHT_TOP 		: return "R1";
+	case PS_TRIANGLE 		: return "TRIANGLE";
+	case PS_CIRCLE 		: return "CIRCLE";
+	case PS_X 				: return "X";
+	case PS_SQUARE 		: return "SQUARE";
 	default: return "Unknown";
 	};
 }
+#endif
+
+
 
 std::string get_axis_name( int mAxisIndex )
 {
 	switch (mAxisIndex)
 	{
-	case PS3_AXIS_LPOD_LEFT_RIGHT : return "LEFT - LR";
-	case PS3_AXIS_LPOD_UP_DOWN    : return "LEFT - UD";
-	case PS3_AXIS_RPOD_LEFT_RIGHT : return "RIGHT - LR";
-	case PS3_AXIS_RPOD_UP_DOWN 	  : return "RIGHT - UD";
+	case PS_AXIS_LPOD_LEFT_RIGHT : return "LEFT - LR";
+	case PS_AXIS_LPOD_UP_DOWN    : return "LEFT - UD";
+	case PS_AXIS_RPOD_LEFT_RIGHT : return "RIGHT - LR";
+	case PS_AXIS_RPOD_UP_DOWN 	  : return "RIGHT - UD";
 	default: return "unknown"; break;
 	}
 }
@@ -110,7 +150,7 @@ void Joystick::print_event_info()
 	if (m_ev.type==JS_EVENT_BUTTON) 
 	{
 		//printf("time=%lu; Button #%d = %d\n", m_ev.time, m_ev.number, m_ev.value );
-		std::string button_name = get_button_name( m_ev.number );
+		std::string button_name = get_ps4_button_name( m_ev.number );
 		if (m_ev.value==1)
 			printf("time=%lu; Button %d %s down\n", m_ev.time, m_ev.number, button_name.c_str() );
 		else 
@@ -120,12 +160,23 @@ void Joystick::print_event_info()
 	{
 		if (m_ev.number==25)
 				return;
-		if (m_ev.number<4) {
+		// Only Print 0,1,2,5 which are the anlog pod positions.  Not the tilt angles.
+		if ((m_ev.number==PS_AXIS_LPOD_LEFT_RIGHT)  || (m_ev.number==PS_AXIS_LPOD_UP_DOWN) ||
+		    (m_ev.number==PS_AXIS_RPOD_LEFT_RIGHT) || (m_ev.number==PS_AXIS_RPOD_UP_DOWN) )		
+		{
 			std::string axis_name = get_axis_name( m_ev.number );
 			printf("time=%lu; Axis   %d %s = %d\n", m_ev.time, m_ev.number, axis_name.c_str(), m_ev.value );	
 		}
+	} else if (m_ev.type&0x80) {
+		char str[10];
+		sprintf(str,"unknown");
+		if ((m_ev.type&0x7F)==JS_EVENT_AXIS)
+			sprintf( str, "AXIS ");
+		else if ((m_ev.type&0x7F)==JS_EVENT_BUTTON)
+			sprintf (str, "Button");
+		printf("time=%lu; INIT %s; number=%d; value=%8x; \n", m_ev.time, str, m_ev.number, m_ev.value );	
 	} else 
-		printf("time=%lu; value=%d; type=%x; number=%d\n", m_ev.time, m_ev.value, m_ev.type, m_ev.number );	
+		printf("time=%lu; type=0x%2x; number=%d; value=%8x; \n", m_ev.time, m_ev.type, m_ev.number, m_ev.value );	
 }
 
 void Joystick::read_event()
@@ -135,9 +186,11 @@ void Joystick::read_event()
 	
 }
 void Joystick::handle_event()
-{		
-	if ((m_ev.type==JS_EVENT_AXIS) && (m_ev.number<4))
+{
+	//printf("Joystick::handle_event()\n");		
+	if ((m_ev.type==JS_EVENT_AXIS) && (m_ev.number<MAX_AXIS))
 	{	
+		// PS4 pods use (0 & 1) and right (2 & 5)
 		m_axis_latest[m_ev.number] = m_ev.value;
 	}
 	if ((m_ev.type==JS_EVENT_BUTTON) && (m_ev.number<MAX_BUTTONS))

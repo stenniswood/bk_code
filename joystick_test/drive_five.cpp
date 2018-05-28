@@ -6,6 +6,7 @@
 #include <math.h>
 #include <errno.h>
 
+
 #include <stdio.h>   /* Standard input/output definitions */
 #include <string.h>  /* String function definitions */
 #include <unistd.h>  /* UNIX standard function definitions */
@@ -68,10 +69,19 @@ void DriveFive::set_device_name	( const char* mDeviceName )
 
 void DriveFive::set_baud(int speed)
 {
+
 	//_cl_baud = speed;
 	printf("Baudrate = %d\n", speed);
 	struct termios options;
 	tcgetattr  ( fd, 	   		&options);
+	options.c_cflag &= ~PARENB;
+	options.c_cflag &= ~CSTOPB;
+	options.c_cflag &= ~CSIZE; /* Mask the character size bits */
+	options.c_cflag |= CS8;    /* Select 8 data bits */
+	//options.c_cflag &= ~CNEW_RTSCTS;
+	options.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    options.c_oflag &= ~OPOST;
+	
 	cfsetispeed( &options, 		speed );
 	cfsetospeed( &options, 		speed );
 	tcsetattr  ( fd, TCSANOW, 	&options);
@@ -126,6 +136,7 @@ char DriveFive::serialGetchar()
 	}
 }
 
+// IMEDIAT3E RETURN!
 int DriveFive::available()
 {
 	int retval = poll( &serial_poll, 1, 5 );	// 20 ms timeout
@@ -147,6 +158,9 @@ void DriveFive::clear()
 bool DriveFive::send_command(char* mFiveCommand) 
 {
 	tx_bytes = strlen(mFiveCommand);	
+	
+	if (Debug) printf("Sending %d bytes : %s\n", tx_bytes, mFiveCommand);
+	
 //	size_t retval = ::fwrite(tx_buffer, tx_bytes, 1, fd);	// if this blocks, we are okay.
 	size_t retval = ::write( fd, mFiveCommand, tx_bytes );	// if this blocks, we are okay.	
 	if (retval == -1)
@@ -166,25 +180,56 @@ bool DriveFive::contains_NAK( )
 	return isNAK;
 }
 
+bool DriveFive::replace_ctrl_characters( char* mStr, char mReplacement ) 
+{
+	size_t len = strlen(mStr);
+	for (int i=0; i<mReplacement; i++)
+	{
+		if (
+			(mStr[i] == '\r') | (mStr[i] == '\n') | (mStr[i] == '\b') | (mStr[i] == '\r') 
+			)
+			*mStr = mReplacement;			
+	}
+}
+
 bool DriveFive::read_response() 
 {
 	memset(m_response, 0, sizeof(m_response) );
 	
 	// blah get from comm port, don't know how - interrupt driven or blocking?	
 	while (!available()) { };
-	
+	char*  ptr      = m_response;
+	char*  null_ptr = ptr;
+	size_t timeout  = 100;	// ~10 seconds
+	int    total_bytes_rxd = 0;
 	do {
-	//	size_t retval = ::read(fd, m_reponse, 255);	// if this blocks, we are okay.	
-		rx_bytes = ::read(fd, m_response, 2048);	// if this blocks, we are okay.	
-		printf("read_reponse (%d bytes) = %s\n", rx_bytes, m_response);
+		rx_bytes = ::read(fd, ptr, 2048);	// if this blocks, we are okay.	
 		if (rx_bytes==-1)
 			perror("Error - read_response() ");
+
+		total_bytes_rxd  += rx_bytes;
+		null_ptr   = ptr + rx_bytes;
+		*null_ptr  = 0;
+		printf("read_reponse (%d bytes; %d total) \n", rx_bytes, total_bytes_rxd );
 		usleep(100000);
+		ptr += rx_bytes;
+		timeout--;
+		if (timeout==0) {
+			printf("read_response Timeout!");
+			break;
+		}
 	} while (available());	// b/c it may not all come at once
-	
+
+	replace_ctrl_characters( m_response, ' ' );
+	printf("full response (%d bytes) = %s\n", rx_bytes, m_response);
+
 	return rx_bytes>0;
 }
 
+void DriveFive::print_response() 
+{
+		printf("Drive Five Reponse: (%d bytes) = %s\n", rx_bytes, m_response);
+}
 
 char* get_error_string( uint32_t mStatus )
 {

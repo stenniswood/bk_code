@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "joystick_pendant.hpp"
 #include <unistd.h>
-
+#include <termios.h>
 
 #ifdef USES_ROBOCLAW
 #include "roboclaw.h"
@@ -20,9 +20,9 @@
 
 JoystickPendant joy;
 
-/* The way the board wiring harnesses are wired, Left & Right legs are separate 
-	roboclaw stacks.  
+/* For Two Legged Robot - the board wiring harnesses are wired seperately (Left & Right legs)
 */
+
 #ifdef USES_ROBOCLAW
 RoboClaw mot ("/dev/ttyACM0", 50000000);
 //RoboClaw mot2("/dev/ttyACM1", 10000);
@@ -87,21 +87,39 @@ void set_motor_speed(RoboClaw& mMot, int speed1, int speed2 )
 		mMot.BackwardM2( 0x80, -speed2 );
 //	printf(".");	fflush(stdout);
 }
-#else
+
+#else		// USES DRIVE FIVE BOARD : 
 DriveFive mot("/dev/ttyUSB0");
+
+char use_encoder_msg[] = "use encoders v w x y z";
+char read_status_msg[] = "read status";
 
 void init_robo_drivers()
 {
 	mot.open		( );
-	//mot.set_baud	( );
+	sleep(0.2);
+	mot.set_baud (B38400);
+	sleep(0.2);
 	
-//	mot.send_command( (char*)"read configuration");			
-//	mot.read_response();		// will read and store entire response;  scan for NAK 
-	
-	mot.send_command( (char*)"use encoders v w x y z");				mot.read_response();
-	mot.send_command( (char*)"read status");				mot.read_response();
-//	mot.send_command( (char*)"read robot info");			mot.read_response();	
-//	mot.send_command( (char*)"pwm v0.5 w0.75 x0.25 y0.5 z0.0");	mot.read_response();	
+	if (mot.available() )
+	{
+		printf("Data was found in DriveFive receive buffer.\n");
+		
+		mot.read_response();		// Need to clear read buffers - from introductory welcome text.
+		mot.print_response();
+		// Skip over help if its in that state (2 returns needed).		
+	}
+
+	mot.send_command( use_encoder_msg );				
+	mot.read_response();		// Need to clear read buffers 
+	mot.send_command( read_status_msg );				
+	mot.read_response();		// Need to clear read buffers 
+
+//	mot.set_baud	  ( );
+//	mot.send_command. ( (char*)"read configuration");			
+//	mot.read_response ( );		// will read and store entire response;  scan for NAK
+//	mot.send_command. ( (char*)"read robot info");			mot.read_response();	
+//	mot.send_command. ( (char*)"pwm v0.5 w0.75 x0.25 y0.5 z0.0");	mot.read_response();	
 }
 #endif
 
@@ -109,7 +127,7 @@ void init_robo_drivers()
 
 int main()
 {
-	//printf("main()  Begun!  joy=%p\n", &joy);
+	printf("main()  Begun!  joy=%p\n", &joy);
 	init_robo_drivers();
 	
 	int speed1 = 0;
@@ -117,48 +135,57 @@ int main()
 	int speed3 = 0;
 	int speed4 = 0;
 	int speed5 = 0;
+	int speed6 = 0;
+	printf("Entering while loop\n");
+	
 	while(1) 
 	{ 
+#ifdef USES_ROBOCLAW
 		speed1 = joy.m_robot_axes_speed[LEFT_LEG_BASE_INDEX ];		// L ankle
 		speed2 = joy.m_robot_axes_speed[RIGHT_LEG_BASE_INDEX ];		// R ankle
-		//printf("      = %4d,%4d\t", speed1, speed2);	fflush(stdout);
+		printf("Up/Dn   = %4d,%4d\t", speed1, speed2);	fflush(stdout);
 
 		speed3 = joy.m_robot_axes_speed[LEFT_LEG_BASE_INDEX+1 ];	// L knee
 		speed4 = joy.m_robot_axes_speed[RIGHT_LEG_BASE_INDEX+1];	// R knee
-		//printf("KNEE  = %4d,%4d\t", speed1, speed2 );	fflush(stdout);
-//		set_motor_speed( mot2, speed1, speed2 );
+		printf("to L/R  = %4d,%4d\t", speed3, speed4 );	fflush(stdout);
 
 		speed5 = joy.m_robot_axes_speed[LEFT_LEG_BASE_INDEX+2 ];	// L hip
-		//speed5 = joy.m_robot_axes_speed[RIGHT_LEG_BASE_INDEX+2];	// R hip
+		speed6 = joy.m_robot_axes_speed[RIGHT_LEG_BASE_INDEX+2];	// R hip
+
+		//set_motor_speed( mot2, speed1, speed2 );
 		//printf("HIP  = %4d,%4d\t", speed1, speed2 );	fflush(stdout);
 		//set_motor_speed( mot3, speed1, speed2 );
-
 		//speed1 = joy.m_robot_axes_speed[LEFT_LEG_BASE_INDEX+3 ];	// L rotate
 		//speed2 = joy.m_robot_axes_speed[RIGHT_LEG_BASE_INDEX+3];	// R rotate
 		//printf("ROT  = %4d,%4d\n", speed1, speed2 );
 		//set_motor_speed( mot4, speed1, speed2 ); 
-#ifdef USES_ROBOCLAW
+
 		// 4 RoboClaws = 8 motors
 		set_motor_speed(mot,   speed1, speed2 );
 		set_motor_speed(mot2,  speed3, speed4 );
 		set_motor_speed(mot3,  speed5, speed6 );		
 		set_motor_speed(mot4,  speed7, speed8 );						
-#else
+#else	
+
+		// DRIVE FIVE BOARD
 		char cmd[256];
 		float duty1,duty2,duty3,duty4,duty5;
-		duty1 = speed1/127.0;
-		duty2 = speed2/127.0;
-		duty3 = speed3/127.0;
-		duty4 = speed4/127.0;
-		duty5 = speed5/127.0;
+		duty1 = motor_letter_duty_cycles['v'];
+		duty2 = motor_letter_duty_cycles['w'];
+		duty3 = motor_letter_duty_cycles['x'];
+		duty4 = motor_letter_duty_cycles['y'];
+		duty5 = motor_letter_duty_cycles['z'];
+		
 		sprintf(cmd, "pwm v%1.3f w%1.3f x%1.3f y%1.3f z%1.3f",
-			duty1, duty2, duty3, duty4, duty5 );
-		printf("%s\n", cmd);
+						  duty1, duty2, duty3, duty4, duty5 );
+		//printf("%s\n", cmd);
 		mot.send_command( (char*)cmd );
 		mot.read_response();
-		//printf("%s\n", mot.m_response);
+//		sleep();
+		//mot.print_response();
 #endif
 		
 	};
 }
+
 //		printf("pods   1,2 = %d,%d\t", joy.m_axis_latest[PS3_AXIS_LPOD_UP_DOWN], joy.m_axis_latest[PS3_AXIS_RPOD_UP_DOWN]);		
