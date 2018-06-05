@@ -10,12 +10,16 @@
 #include "drive_five.h"
 #endif
 
+#include "sequencer_memory.hpp"
 
 #define USES_FIVE 1
 
 #ifndef USES_FIVE
 #define USES_ROBOCLAW 1
 #endif
+
+SequencerIPC shm;
+
 
 
 JoystickPendant joy;

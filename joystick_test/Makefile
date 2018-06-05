@@ -4,7 +4,7 @@ INC	=
 SELF_INC= ./
 CFLAGS 	= -lm -g
 DEPS   	= 
-OBJ     =   joystick.o joystick_pendant.o main.o drive_five.o
+OBJ     =   joystick.o joystick_pendant.o main.o drive_five.o shm_base.o sequencer_memory.o
 
 CPPOBJ    = 
 
