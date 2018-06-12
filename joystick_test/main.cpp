@@ -18,7 +18,6 @@
 #define USES_ROBOCLAW 1
 #endif
 
-SequencerIPC shm;
 
 
 
@@ -122,7 +121,7 @@ void init_robo_drivers()
 //	mot.set_baud	  ( );
 //	mot.send_command. ( (char*)"read configuration");			
 //	mot.read_response ( );		// will read and store entire response;  scan for NAK
-//	mot.send_command. ( (char*)"read robot info");			mot.read_response();	
+//	mot.send_command. ( (char*)"read robot info");			mot.read_response();
 //	mot.send_command. ( (char*)"pwm v0.5 w0.75 x0.25 y0.5 z0.0");	mot.read_response();	
 }
 #endif
@@ -133,6 +132,7 @@ int main()
 {
 	printf("main()  Begun!  joy=%p\n", &joy);
 	init_robo_drivers();
+	seqIPC.connect_shared_memory(TRUE);
 	
 	int speed1 = 0;
 	int speed2 = 0;
@@ -174,17 +174,37 @@ int main()
 		// DRIVE FIVE BOARD
 		char cmd[256];
 		float duty1,duty2,duty3,duty4,duty5;
-		duty1 = motor_letter_duty_cycles['v'];
+		struct  sequencer_ipc_memory_map*  memory = seqIPC.get_memory_seq();
+		if (memory->Sentence[0])
+		{
+			printf("%s\n", memory->Sentence );
+			mot.send_command( (char*)memory->Sentence );
+			mot.read_response();		
+			memory->Sentence[0] = 0;
+		}
+		if (strcmp( memory->Sentence[0], "get counts" ))
+		{
+			printf("%s\n", memory->Sentence );
+			sprintf(Response, "%d %d %d %d %d\n", MotorArray[0].count, MotorArray[1].count, 
+							MotorArray[2].count, MotorArray[3].count, MotorArray[4].count );
+		}
+
+		/*duty1 = motor_letter_duty_cycles['v'];
 		duty2 = motor_letter_duty_cycles['w'];
 		duty3 = motor_letter_duty_cycles['x'];
 		duty4 = motor_letter_duty_cycles['y'];
-		duty5 = motor_letter_duty_cycles['z'];
+		duty5 = motor_letter_duty_cycles['z'];  */
+		duty1 = memory->MotorArray[0].duty;
+		duty2 = memory->MotorArray[1].duty;
+		duty3 = memory->MotorArray[2].duty;
+		duty4 = memory->MotorArray[3].duty;
+		duty5 = memory->MotorArray[4].duty;		
 		
 		sprintf(cmd, "pwm v%1.3f w%1.3f x%1.3f y%1.3f z%1.3f",
 						  duty1, duty2, duty3, duty4, duty5 );
 		//printf("%s\n", cmd);
-		mot.send_command( (char*)cmd );
-		mot.read_response();
+//		mot.send_command( (char*)cmd );
+//		mot.read_response();
 //		sleep();
 		//mot.print_response();
 #endif

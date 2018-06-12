@@ -38,7 +38,7 @@ struct stDCMotorData
 {
 	float	duty;	// Requested vector (copy of data)
 	bool	encoder_or_pot;	
-	float	count;
+	long int	count;
 	float	speed;	
 };
 
@@ -66,6 +66,10 @@ struct sequencer_ipc_memory_map
 	Uint32_t ResponseAcknowledgedCounter;				// Incremented on change to any of below:
     char     ResponderName[100];                        // "instant", "simulator", etc
 
+	char	 PS4Buttons[20];
+	char	 AnalogInputs[20];
+	char	 LowsideDrivers[20];
+	
 	// PERFORMANCE DATA (for evaluation the robot's motion):
 	long int PerformanceUpdateCounter;			// Incremented on change to any of below:
 	long int PerformanceAcknowledgedCounter; 	

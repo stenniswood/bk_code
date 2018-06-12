@@ -39,27 +39,39 @@ float scale_joypad(short JoypadAxisValue)
 	return result;
 }
 
+#include "sequencer_memory.hpp"
+
 // TODO:
 // Create a C++ map which holds two integers.  
 //  a) imdex into the m_axis_latest[] array and 
 //  b) Index into the robot m_robot_axes_speed[]
 void JoystickPendant::file_AND_convert()
 {
+	struct  sequencer_ipc_memory_map*  memory = seqIPC.get_memory_seq();
+	 
 	if ((m_ev.type==JS_EVENT_AXIS) && (m_ev.number<MAX_AXIS))
 	{
 		// Get Motor Letter : 
 		if (m_buttons_latest[PS_LEFT_TOP] == 1)
 		{		 
-			if (m_ev.number == PS_AXIS_LPOD_UP_DOWN)
+			if (m_ev.number == PS_AXIS_LPOD_UP_DOWN) {
 				motor_letter_duty_cycles['x'] = scale_joypad( m_ev.value );		// Though the mapping is the same axis,
-			else if (m_ev.number == PS_AXIS_RPOD_UP_DOWN)
+				memory->MotorArray[2].duty = scale_joypad( m_ev.value );		// Though the mapping is the same axis,
+			}
+			else if (m_ev.number == PS_AXIS_RPOD_UP_DOWN) {
 				motor_letter_duty_cycles['y'] = scale_joypad( m_ev.value );		// Though the mapping is the same axis,
+				memory->MotorArray[3].duty = scale_joypad( m_ev.value );		// Though the mapping is the same axis,				
+			}
 		}
 		else {
-			if (m_ev.number == PS_AXIS_LPOD_UP_DOWN)
+			if (m_ev.number == PS_AXIS_LPOD_UP_DOWN) {
 				motor_letter_duty_cycles['v'] = scale_joypad( m_ev.value );		// Though the mapping is the same axis,
-			else if (m_ev.number == PS_AXIS_RPOD_UP_DOWN)
+				memory->MotorArray[0].duty = scale_joypad( m_ev.value );		// Though the mapping is the same axis,				
+			}
+			else if (m_ev.number == PS_AXIS_RPOD_UP_DOWN) {
 				motor_letter_duty_cycles['w'] = scale_joypad( m_ev.value );		// Though the mapping is the same axis,			
+				memory->MotorArray[1].duty = scale_joypad( m_ev.value );		// Though the mapping is the same axis,
+			}				
 		}
 	}
 }

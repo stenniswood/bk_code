@@ -37,6 +37,7 @@ AUTHOR	:  Stephen Tenniswood
 //#include "interrupt.h"
 #include "sequencer_memory.hpp"
 
+#include <stddef.h>
 
 #define Debug 1
 
@@ -51,6 +52,14 @@ char cname[] = "seq_shared_memseg_id.cfg";
 SequencerIPC::SequencerIPC()
 : SHMBase(IPC_KEY_SEQ, sizeof(struct sequencer_ipc_memory_map), cname )
 {
+	printf("Offsets:\n");
+	printf("DiagnosticArray %ld\n", offsetof( struct sequencer_ipc_memory_map , DiagnosticArray ));	
+	printf("Sentence %ld\n",        offsetof( struct sequencer_ipc_memory_map , Sentence ));
+	printf("Response %ld\n",        offsetof( struct sequencer_ipc_memory_map , Response ));
+		
+	printf("MotorArray %ld\n", offsetof( struct sequencer_ipc_memory_map , MotorArray ));
+	printf("DiagnosticArray %ld\n", offsetof( struct sequencer_ipc_memory_map , DiagnosticArray ));	
+	
 }
 SequencerIPC::~SequencerIPC()
 {
