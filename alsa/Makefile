@@ -1,14 +1,14 @@
 CC=g++
-OPTIONS	= -std=c++14 -lm -fno-rtti 
+OPTIONS	= -std=c++11 -lm -fno-rtti 
 INC	= 
 SELF_INC= ./
 CFLAGS 	= -lm -g
 DEPS   	= 
-OBJ     =   alsa_prep.o wave.o sound_playback.o 
+OBJ     =  dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o 
 
 CPPOBJ    = 
 
-LDFLAGS = -lpthread -lrt -lasound
+LDFLAGS = -lpthread -lrt -lasound -lcurl
 
 %.o: %.cpp $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) -c -o $@ $< $(CFLAGS)

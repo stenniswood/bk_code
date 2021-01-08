@@ -92,9 +92,14 @@ public:
 	float 			calc_zoom		( int mPixels, float mSamples );	
 
 	// EFFECTS:
+	void			amplify         ( float mGain );
+	void			pan		        ( float L_alpha, float R_alpha );
 	void			apply_fir       ( float* mIR, int length );
+	void			convert_to_stereo(  );	// wave must be mono to start with.
+	void			convert_to_mono  (  );	// wave must be stereo to start with.	
 	void			insert_mono_straight_shot( Wave& mMono, float mInitLeftConst, float mInitRightConst, int mSamplePeriod );
-	void 			tremolo( float LeftConst, float RightConst, int mSamplePeriod );
+	void 			tremolo( float LeftConst, float RightConst, float mPeriodSeconds );
+	
 
 	string 			get_format_string	();
 	string 			GetSampleRateStr	();

@@ -53,14 +53,14 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
 	size_t realsize = size * nmemb;
 
-	strcpy( pendant_values, contents );
+	strcpy( pendant_values, (char*)contents );
 	//printf( "%s\n", pendant_values ); 
 
 	char tmp[25];
 	char deliminator[] = ",";
 	int  slider_index = 0;
 	int  dial_index   = 0;
-	char * token = strtok( contents, "," );
+	char * token = strtok( (char*)contents, "," );
 
     // loop through the string to extract all other tokens
     while( token != NULL ) {

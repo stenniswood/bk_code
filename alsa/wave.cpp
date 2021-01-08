@@ -8,6 +8,7 @@
 #include <cstring>
 #include <math.h>
 #include <stdlib.h>
+#include <assert.h> 
  
 #include "wave.hpp"
 
@@ -122,6 +123,80 @@ void Wave::apply_fir( float* mIR, int length)
 	m_data = tmp;
 }
 
+void Wave::convert_to_mono(  )
+{
+	int nSrcSamps = m_bytes_recorded/m_block_align;
+	
+	/* Adjust Parameters */
+	m_number_channels = 1;
+	m_block_align     = m_number_channels * 2;
+	m_bytes_recorded  = nSrcSamps*m_block_align;
+	m_buffer_length   = m_bytes_recorded;
+	
+	/* Reallocate and copy data */
+	size_t samps_needed = nSrcSamps * m_number_channels;
+	short* new_data = new short[samps_needed];
+	
+	int i = 0;
+	for (int s=0; s<samps_needed; s+=2)
+	{
+		new_data[s] = 0.5 * m_data[i+0] + 0.5 * m_data[i+1];
+		i+=2;
+	}
+	delete m_data;
+	m_data = new_data;
+}
+
+// wave must be mono to start with.
+void Wave::convert_to_stereo(  )
+{
+	int nSrcSamps = m_bytes_recorded/m_block_align;
+	
+	/* Adjust Parameters */
+	m_number_channels = 2;
+	m_block_align     = m_number_channels * 2;
+	m_bytes_recorded  = nSrcSamps*m_block_align;
+	m_buffer_length   = m_bytes_recorded;
+	
+	/* Reallocate and copy data */
+	size_t samps_needed = nSrcSamps * m_number_channels;
+	short* new_data = new short[samps_needed];
+	
+	int i = 0;
+	for (int s=0; s<samps_needed; s+=2)
+	{
+		new_data[s+0] = m_data[i];
+		new_data[s+1] = m_data[i];
+		i++;
+	}
+	delete m_data;
+	m_data = new_data;
+}
+
+void Wave::amplify( float mGain )
+{
+
+	size_t n_samples = m_bytes_recorded / (2*m_number_channels);
+	for (int i=0; i<n_samples; i+=m_number_channels)
+	{
+		m_data[i+0] *= mGain;
+		if (m_number_channels>1)  m_data[i+1] *= mGain;
+	}		
+}
+
+void Wave::pan( float L_alpha, float R_alpha )
+{	
+	// ASSERT STEREO:
+	assert(m_number_channels==2); 
+	
+	size_t n_samples = m_bytes_recorded / 2*2;  // Bytes / 4 
+	for (int i=0; i<n_samples; i+=2)
+	{
+		m_data[i+0] *= L_alpha;
+		m_data[i+1] *= R_alpha;
+	}	
+}
+
 /*
 Input:  mInitLeftConst	1.0 [all left];   0.0
 		mInitRightConst 0.0 {no right};	  1.0 
@@ -149,21 +224,28 @@ void Wave::insert_mono_straight_shot( Wave& mMono, float mInitLeftConst, float m
 	printf("Done tremolo\n");
 }
 
-void Wave::tremolo( float LeftConst, float RightConst, int mSamplePeriod )
+void Wave::tremolo( float LeftConst, float RightConst, float mPeriodSeconds )
 {
-	printf("Tremolo coefs: ba=%d\n", m_block_align );
-//	unsigned char* m_dataB = (unsigned char*)m_data;
+	size_t samplePeriod = ceil(TimeToSamples( mPeriodSeconds ));	
+	printf("Tremolo coefs: bl=%5.3f %5.3f T=%d samples\n", LeftConst, RightConst, samplePeriod );
 	
-	int samps = m_buffer_length/m_block_align;
-	for (int i=0; i<samps; i+= m_block_align)
-	{
+	int NumSamples = m_bytes_recorded / m_block_align;
+	
+	int samps = samplePeriod;
+	float L_alpha = 1.0; 
+	float R_alpha = 0.0;
+	for (int i=0; i<NumSamples; i+=2)
+	{		
+		L_alpha = LeftConst  * sin ( (float)i / (float)samplePeriod ) + LeftConst;
+		R_alpha = RightConst * cos ( (float)i / (float)samplePeriod ) + RightConst;
 		
-		float L_alpha = 1.0; //LeftConst  * sin ( (float)i / (float)mSamplePeriod ) + LeftConst;
-		float R_alpha = 0.0; //RightConst * cos ( (float)i / (float)mSamplePeriod ) + RightConst;
+		if (L_alpha<0.0) L_alpha = 0.0;
+		if (R_alpha<0.0) R_alpha = 0.0;
+		
 		//printf("%3.3f %3.3f;  ", L_alpha, R_alpha );
 		//if ((i%32)==0) printf("\n");
-		if ( i > (samps/2)) 
-			{ L_alpha = 0.0; R_alpha=1.0; };
+		//if ( i > (samps/2)) 
+		//	{ L_alpha = 0.0; R_alpha=1.0; };
 		
 		m_data[i+0] = m_data[i+0] * L_alpha;
 		m_data[i+1] = m_data[i+1] * R_alpha;
@@ -705,18 +787,18 @@ bool TIMITWave::ReadHeader		(						)
 
 	char* value = Search_In_Header("channel_count");
 	m_number_channels = strtol( value, NULL, 10 );
-	//printf("channels = %d\n", m_number_channels );
+	printf("channels = %d\n", m_number_channels );
 
 	value = Search_In_Header("sample_count");
 	m_buffer_length = m_bytes_recorded = 2*strtol( value, NULL, 10 ) * m_number_channels;
-	printf("sample_count = %ld\n", m_buffer_length/2 );
+	printf("sample_count: %s = %ld\n", value, m_buffer_length/2 );
 
 	value = Search_In_Header("sample_n_bytes");
 	m_block_align = m_number_channels * strtol( value, NULL, 10 );
 	printf("sample_n_bytes = %d\n", m_block_align );
 
 	value = Search_In_Header("sample_rate");
-	m_samples_per_second = strtol( value, NULL, 10 ) / m_block_align;
+	m_samples_per_second = strtol( value, NULL, 10 );
 	printf("sample_rate = %d\n", m_samples_per_second );
 
 

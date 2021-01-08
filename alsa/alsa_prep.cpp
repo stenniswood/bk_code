@@ -69,6 +69,7 @@ snd_pcm_t* prepare_alsa( int m_number_channels, unsigned int msamples_per_second
 		printf("ERROR: Can't set channels number. %s\n", snd_strerror(pcm));
 
 	// 
+	printf("SETTING ALSA RATE: %d\n", msamples_per_second );
 	if (pcm = snd_pcm_hw_params_set_rate_near(pcm_handle, params, &msamples_per_second, 0) < 0) 
 		printf("ERROR: Can't set rate. %s\n", snd_strerror(pcm));
 
