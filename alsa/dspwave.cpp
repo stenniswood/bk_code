@@ -629,7 +629,7 @@ double DSPWave::compute_mean(int mStartIndex, int mEndIndex)
 /* 
 Waveform length must be (End-Start + Shift) number of samples.  ie. Shift samples past the end.
 */
-long int DSPWave::compute_auto_correlation ( int mStartIndex, int mEndIndex, int mSampleShift )	// Mono only.
+double DSPWave::compute_auto_correlation ( int mStartIndex, int mEndIndex, int mSampleShift )	// Mono only.
 {
 	//printf("compute_auto_correlation()\n");
 	
@@ -656,17 +656,23 @@ long int DSPWave::compute_auto_correlation ( int mStartIndex, int mEndIndex, int
 /* Given a region including several periods (3-4)
 	0.05 to 0.1 seconds total     
 	 */
-vector<long int> 	DSPWave::full_auto_correlation ( int mStartIndex, int mEndIndex )	// Mono only.
+vector<double> 	DSPWave::full_auto_correlation ( int mStartIndex, int mEndIndex )	// Mono only.
 {
 	printf("Full auto correlation\n");
 
-	vector<long int>  auto_corr;
+	vector<t_real>  auto_corr;
 	long int NumSamples = (mEndIndex - mStartIndex);
-	
+	double scale = 1.0;
+		
 	for (int d=0; d < NumSamples; d++)
 	{
-		long int tmp = compute_auto_correlation ( mStartIndex, mEndIndex, d );	// Mono only.	
-		auto_corr.push_back( tmp );
+		double result = compute_auto_correlation ( mStartIndex, mEndIndex, d );	// Mono only.	
+		if (d==0) {
+			printf("Autocorr at 0 delay = %9.3f\n", result);
+			scale = result;
+		}
+		
+		auto_corr.push_back( 1.0 * result / scale );
 	}
 	return auto_corr;
 }

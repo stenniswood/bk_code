@@ -74,8 +74,8 @@ public:
 	vector<t_real>	compute_time_between_beats( vector<t_index>& start_points );
 
 	// Auto Correlation:
-	long int 		compute_auto_correlation ( int mStartIndex, int mEndIndex, int mSampleShift );	// Mono only.
-	vector<long int> 	full_auto_correlation 	 ( int mStartIndex, int mEndIndex );	// Mono only.
+	double 			compute_auto_correlation ( int mStartIndex, int mEndIndex, int mSampleShift );	// Mono only.
+	vector<t_real> 	full_auto_correlation 	 ( int mStartIndex, int mEndIndex );	// Mono only.
 	
 
 

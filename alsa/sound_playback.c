@@ -29,6 +29,9 @@
 #include "dspwave.hpp"
 #include "alsa_prep.hpp"
 #include "read_pendant.h"
+#include "visual/gl_setup.hpp"
+#include "visual/gl_graph.hpp"
+
 
 
 #define PCM_DEVICE "default"
@@ -47,52 +50,87 @@ void pan_buffer(short* buff, int buff_size, int mPanPot )	// must be stereo!
 		buff[i+1] *= R_alpha;
 	}
 }
+BOOL VISUALIZE = TRUE;
+
+
+BOOL scan_args( int argc, char** argv, const char* mSearchArg )
+{
+	int result = 0;
+	for (int a=0; a<argc; a++)
+	{
+		result = strcmp(argv[a], mSearchArg);  	
+		if (result==0)
+			return TRUE;
+	}
+	return FALSE;	
+}
 
 int main(int argc, char **argv) 
 {
 	DSPWave imp;
+
 	Wave clap;
 	std::string cfn = "wavs/drums_clap_wide_bright.wav";
 	clap.Load( cfn );
 
 	std::string fn = "wavs/Clapping_2.wav";
 	if (argc > 1) {
-		fn = argv[1];
-		
-		if (argc >2) {
-			int result = strcmp(argv[2], "loop");  
-			if (result==0)  { LoopMode = true; printf("Running in Loop Mode"); }
+		fn = argv[1];	
+		BOOL found = FALSE;	
+		if (argc >1) 
+		{
+			found = scan_args( argc, argv, "loop" );
+			if (found==TRUE)  { LoopMode = true;  printf("Running in Loop Mode\n"); }
+
+			found = scan_args( argc, argv, "nogui" );
+			if (found==TRUE)  { VISUALIZE = FALSE; printf("Running in Nogui mode.\n"); }						
 		}
 	}
 
-	printf("Opening TIMIT speech file\n");	
+	/*printf("Opening TIMIT speech file\n");	
 	std::string sfn = "TIMIT/SA1.WAV";
 	TIMITWave sp_wave;
 	sp_wave.Load( sfn );
 	sp_wave.amplify(8.0);
-	printf("Opening TIMIT speech file\n");	
+	printf("Opening TIMIT speech file\n");	*/
 
 	//std::string ofn = "wavs/Front_Left_stereo.wav";
-	fn = "wavs/landofcotton.wav";	
-	// 0.417 to 0.560 seconds ==> Samples 18389 to 24696
-	
-	// Should give pitch of 118.6hz (122-116)
-	
-	
 	//std::string ofn = "wavs/landslide.wav";		
 	//std::string ofn = "wavs/jennie.wav";	
+
+	fn = "wavs/landofcotton.wav";	
+	// 0.417 to 0.560 seconds ==> Samples 18389 to 24696	
+	// Should give pitch of 118.6hz (122-116)
+		
 	std::string e_csv = "Energy.csv";			
-	/*imp.Load (fn);
+	imp.Load (fn);
 	//imp.convert_to_stereo(); 
 	
 	int Start = imp.TimeToSamples(0.417);
 	int End   = imp.TimeToSamples(0.560);
-	vector<long int> autocorr = imp.full_auto_correlation( Start, End );
+	vector<t_real> autocorr = imp.full_auto_correlation( Start, End );
+	
 	std::string a_corr = "auto_corr.csv";			
-	save_vector_long( autocorr, a_corr );	
+	save_vector( autocorr, a_corr );	
 	
+	if (VISUALIZE) {
+		size_t len = autocorr.size();
+		size_t maxlen =  SIZE_OF_GRAPH;
+		printf("AutoCorrel %ld Graph size=%ld\n", len, maxlen);
+
+		double maximum = 0;	
+		for (int i=0; i< maxlen; i++)
+		{
+			if (autocorr[i] > maximum)	maximum = autocorr[i];
+		
+			graph[i].y = autocorr[i];
+			graph[i].x = i;
+		}
+		int  graph_result = gl_main(  );	
+	}
+	//while(1) {};
 	
-	long int Samps1 = imp.TimeToSamples( 3.26 );
+/*	long int Samps1 = imp.TimeToSamples( 3.26 );
 	long int Samps2 = imp.TimeToSamples( 3.36 );
 	printf("3.26 to 3.36 seconds = samples:  <%d,%d>\n", Samps1, Samps2 ); 
 	
@@ -124,28 +162,27 @@ int main(int argc, char **argv)
 	imp.apply_fir( fir, MAX_FIR_LENGTH );
 */
 	// PRINT FORMAT INFO :
-	string info = sp_wave.get_format_string();
+	string info = imp.get_format_string();
 	printf( "%s\n\n", info.c_str() );
 
 
 	// PREPARE HARDWARE:
 	char* buff = NULL;		// buffer for ALSA
 	snd_pcm_uframes_t frames = 0;
-	snd_pcm_t       *pcm_handle = prepare_alsa( sp_wave.m_number_channels, sp_wave.m_samples_per_second,
+	snd_pcm_t       *pcm_handle = prepare_alsa( imp.m_number_channels, imp.m_samples_per_second,
 												 &buff, &frames );
-	size_t 			buff_size   = (frames-1) * sp_wave.m_number_channels * 2;  // BYTES
+	size_t 			buff_size   = (frames-1) * imp.m_number_channels * 2;  // BYTES
 
-	size_t d_len = sp_wave.get_data_length_bytes();
+	size_t d_len = imp.get_data_length_bytes();
 	size_t bytes_played = 0;
-	char*  ptr = (char*)sp_wave.m_data;		// points to Wave m_data
+	char*  ptr = (char*)imp.m_data;		// points to Wave m_data
 	int counter = 0;
 	bool done = true;
 	if (LoopMode) done = false;
 	do {
 		while ( (bytes_played+buff_size) <  d_len )
 		{
-			read_pendant();
-			
+			read_pendant();			
 			
 			//printf("counter=%d\n", counter++);
 			memcpy( buff, (char*)ptr, buff_size );
@@ -164,7 +201,7 @@ int main(int argc, char **argv)
 		}
 		// Restart:
 		bytes_played = 0;
-		ptr = (char*)sp_wave.m_data;
+		ptr = (char*)imp.m_data;
 	} while (!done);
 	
 	snd_pcm_drain(pcm_handle);

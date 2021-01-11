@@ -4,8 +4,7 @@ INC	= ./visual/ /usr/include/freetype2
 SELF_INC= ./
 CFLAGS 	= -lm -g
 DEPS   	= 
-OBJ     =  dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o visual/gl_graph.o visual/shader_utils.o \
-           visual/text.o visual/gl_setup.o 
+OBJ     =  dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o visual/gl_graph.o visual/shader_utils.o
 
 CPPOBJ    = 
 

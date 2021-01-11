@@ -1,15 +1,14 @@
 CC=g++
 OPTIONS	= -std=c++11 -lm -fno-rtti 
-INC	= ./visual/ /usr/include/freetype2
+INC	= -I./visual/
 SELF_INC= ./
 CFLAGS 	= -lm -g
 DEPS   	= 
-OBJ     =  dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o visual/gl_graph.o visual/shader_utils.o \
-           visual/text.o visual/gl_setup.o 
+OBJ     =  dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o visual/gl_graph.o visual/shader_utils.o
 
 CPPOBJ    = 
 
-LDFLAGS = -lpthread -lrt -lasound -lcurl -lglut -lGLEW -lGL -lfreetype
+LDFLAGS = -lpthread -lrt -lasound -lcurl -lglut -lGLEW -lGL
 
 %.o: %.cpp $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) -c -o $@ $< $(CFLAGS)
