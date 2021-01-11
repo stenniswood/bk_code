@@ -33,26 +33,23 @@ int init_resources()
 	init_text();
 
 	text_program = create_program("visual/text.v.glsl", "visual/text.f.glsl");
-	if (program == 0)
+	if (text_program == 0)
 		return 0;
-
+	attribute_coord = get_attrib (text_program, "coord");
+	uniform_tex     = get_uniform(text_program, "tex"  );
+	uniform_color   = get_uniform(text_program, "color");
+	if(attribute_coord == -1 || uniform_tex == -1 || uniform_color == -1)
+		return 0;
 
 	graph_program = create_program("visual/graph.v.glsl", "visual/graph.f.glsl");
-	if (program == 0)
+	if (graph_program == 0)
 		return 0;
-	attribute_coord2d = get_attrib(program, "coord2d");
-	uniform_offset_x = get_uniform(program, "offset_x");
-	uniform_scale_x = get_uniform(program, "scale_x");
-	uniform_sprite = get_uniform(program, "sprite");
-	uniform_mytexture = get_uniform(program, "mytexture");
+	attribute_coord2d = get_attrib (graph_program, "coord2d");
+	uniform_offset_x  = get_uniform(graph_program, "offset_x");
+	uniform_scale_x   = get_uniform(graph_program, "scale_x");
+	uniform_sprite    = get_uniform(graph_program, "sprite");
+	uniform_mytexture = get_uniform(graph_program, "mytexture");
 	if (attribute_coord2d == -1 || uniform_offset_x == -1 || uniform_scale_x == -1 || uniform_sprite == -1 || uniform_mytexture == -1)
-		return 0;
-
-
-	attribute_coord = get_attrib (program, "coord");
-	uniform_tex     = get_uniform(program, "tex"  );
-	uniform_color   = get_uniform(program, "color");
-	if(attribute_coord == -1 || uniform_tex == -1 || uniform_color == -1)
 		return 0;
 
 	/* Enable blending */
@@ -68,7 +65,7 @@ int init_resources()
 	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 #endif
 
-	/* Upload the texture for our point sprites *
+	/* Upload the texture for our point sprites */
 	glActiveTexture(GL_TEXTURE0);
 	glGenTextures(1, &texture_id);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -79,12 +76,7 @@ int init_resources()
 	
 	// Create the vertex buffer object
 	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-*/
-
-
-	// Tell OpenGL to copy our array to the buffer object
-	//glBufferData(GL_ARRAY_BUFFER, sizeof graph, graph, GL_STATIC_DRAW);
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 
 	return 1;
@@ -138,7 +130,8 @@ void keys_special(int key, int x, int y)
 
 void free_resources() 
 {
-	glDeleteProgram(program);
+	glDeleteProgram(text_program);
+	glDeleteProgram(graph_program);	
 }
 
 

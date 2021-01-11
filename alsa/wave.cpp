@@ -257,7 +257,7 @@ void Wave::tremolo( float LeftConst, float RightConst, float mPeriodSeconds )
 void Wave::Save(string mFileName)
 {
 	//CFile::modeCreate | CFile::modeWrite
-	FILE* File = fopen(mFileName.c_str(), "w" );
+	FILE* File = fopen(mFileName.c_str(), "w+" );
 	long int chunkSize = 18; //sizeof(WAVEFORMATEX);
 	printf("WAVEFORMATEX chunkSize = %ld\n", chunkSize );
 	
@@ -268,14 +268,18 @@ void Wave::Save(string mFileName)
 		perror("Cannot create file!");
 		exit(1);
 	}	
+			printf("writing RIFF block 0\n");
 	//size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream); 
 	size_t result = 0;
-	result = fwrite("RIFF", 4, 1, File); 
-		
+	char tag[] = "RIFF";
+	result = fwrite(tag, 4, 1, File); 
+		printf("Completed writing RIFF block 1\n");
+				
 	DWORD fSize = (get_data_length_bytes()+sizeof(WAVEFORMATEX) );
 	result = fwrite((&fSize), 			1, 4, File);	
 	result = fwrite("WAVE", 			4, 1, File); 
 	result = fwrite("fmt ", 			4, 1, File);
+
 	result = fwrite((&chunkSize), 			1, 4, File);
 	result = fwrite((&m_format_tag), 		1, 2, File);
 	result = fwrite((&m_number_channels), 	1, 2, File);
@@ -287,7 +291,11 @@ void Wave::Save(string mFileName)
 	WORD cbSize=0;
 	result = fwrite((&cbSize), 				1, 2, File);					
 
+	printf("Completed writing RIFF block\n");
+	
 	chunkSize = get_data_length_bytes( );
+	printf("chunkSize=%d\n", chunkSize );
+	
 	result = fwrite( "data", 				1, 4, File);
 	result = fwrite( &chunkSize, 			1, 4, File);	
 

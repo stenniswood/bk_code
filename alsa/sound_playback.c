@@ -56,7 +56,7 @@ BOOL VISUALIZE = TRUE;
 BOOL scan_args( int argc, char** argv, const char* mSearchArg )
 {
 	int result = 0;
-	for (int a=0; a<argc; a++)
+	for (int a=1; a<argc; a++)
 	{
 		result = strcmp(argv[a], mSearchArg);  	
 		if (result==0)
@@ -75,16 +75,18 @@ int main(int argc, char **argv)
 
 	std::string fn = "wavs/Clapping_2.wav";
 	if (argc > 1) {
-		fn = argv[1];	
-		BOOL found = FALSE;	
-		if (argc >1) 
-		{
-			found = scan_args( argc, argv, "loop" );
-			if (found==TRUE)  { LoopMode = true;  printf("Running in Loop Mode\n"); }
 
-			found = scan_args( argc, argv, "nogui" );
-			if (found==TRUE)  { VISUALIZE = FALSE; printf("Running in Nogui mode.\n"); }						
+		BOOL found = FALSE;	
+
+		found = scan_args( argc, argv[a], "loop" );
+		if (found==TRUE)  { 
+			LoopMode = true;  printf("Running in Loop Mode\n"); 
+		} 
+		found = scan_args( argc, argv[a], "nogui" );
+		if (found==TRUE)  {
+			 VISUALIZE = FALSE; printf("Running in Nogui mode.\n"); }						
 		}
+		fn = argv[argc];
 	}
 
 	/*printf("Opening TIMIT speech file\n");	
@@ -181,10 +183,9 @@ int main(int argc, char **argv)
 	if (LoopMode) done = false;
 	do {
 		while ( (bytes_played+buff_size) <  d_len )
-		{
-			read_pendant();			
-			
+		{			
 			//printf("counter=%d\n", counter++);
+			read_pendant();			
 			memcpy( buff, (char*)ptr, buff_size );
 			pan_buffer( (short*)buff, buff_size, Slider_values[0] );	// must be stereo!
 			ptr          += buff_size;
@@ -198,7 +199,7 @@ int main(int argc, char **argv)
 			} else if (pcm < 0) {
 				printf("ERROR. Can't write to PCM device. %s\n", snd_strerror(pcm));
 			}
-		}
+		}		
 		// Restart:
 		bytes_played = 0;
 		ptr = (char*)imp.m_data;

@@ -56,11 +56,14 @@ void draw_xaxis_labels(char* xAxisLabel, float sx, float sy )
 void draw_yaxis_labels(char* xAxisLabel, float sx, float sy )
 {
 	float width = compute_text_width(xAxisLabel, sx );	
-	float st = (0-width/2);
+	float st = -1;
 	glRotated( 90.0, 0, 0, 1 );
 	render_text(xAxisLabel, st, -1+50*sx, sx, sy);
 }
 
+void fill_data()
+{
+}
 
 /* This is the callback function in gl_setup() for drawing. */
 void graph_display() 
@@ -86,21 +89,24 @@ void graph_display()
 	/* Effects of alignment */
 	glUniform4fv(uniform_color, 1, white );
 
-	draw_title("Autocorrelation -vs- Lags", sx,sy);
-	draw_xaxis_labels("Lags",sx,sy );
-	draw_yaxis_labels("Correlation", sx, sy );	
+	char title[] = "Autocorrelation -vs- Lags";
+	draw_title(title, sx,sy);
+	//draw_xaxis_labels("Lags",sx,sy );
+	//draw_yaxis_labels("Correlation", sx, sy );	
 	
 	//glutSwapBuffers();
 	//return;
+	//============ NOW DRAW THE GRAPH DATA POINTS =============================
 	glUseProgram(graph_program);
 
 	glUniform1i(uniform_mytexture, 0);
-
 	glUniform1f(uniform_offset_x, offset_x);
 	glUniform1f(uniform_scale_x, scale_x);
 
 	/* Draw using the vertices in our vertex buffer object */
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	// Tell OpenGL to copy our array to the buffer object
+	glBufferData(GL_ARRAY_BUFFER, sizeof graph, graph, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(attribute_coord2d);
 	glVertexAttribPointer(attribute_coord2d, 2, GL_FLOAT, GL_FALSE, 0, 0);

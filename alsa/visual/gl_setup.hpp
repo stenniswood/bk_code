@@ -10,7 +10,7 @@ extern GLuint graph_program;
 extern GLuint text_program;
 
 
-extern int mode;
+extern int   mode;
 extern float offset_x;
 extern float scale_x;
 

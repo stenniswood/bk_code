@@ -5,6 +5,15 @@
 #include <GL/glut.h>
 
 
+extern GLint attribute_coord2d;
+extern GLint uniform_offset_x;
+extern GLint uniform_scale_x;
+extern GLint uniform_sprite;
+extern GLuint texture_id;
+extern GLint uniform_mytexture;
+extern GLuint vbo;
+
+
 struct point {
 	GLfloat x;
 	GLfloat y;

@@ -4,10 +4,9 @@ INC	= ./visual/ /usr/include/freetype2
 SELF_INC= ./
 CFLAGS 	= -lm -g
 DEPS   	= 
-OBJ     =  dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o visual/gl_graph.o visual/shader_utils.o \
-           visual/text.o visual/gl_setup.o 
+OBJ     =  alsa_record.o wave.o 
 
-CPPOBJ    = 
+CPPOBJ    = alsa_record.o wave.o 
 
 LDFLAGS = -lpthread -lrt -lasound -lcurl -lglut -lGLEW -lGL -lfreetype
 
@@ -16,7 +15,7 @@ LDFLAGS = -lpthread -lrt -lasound -lcurl -lglut -lGLEW -lGL -lfreetype
 %.o: %.c $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) $(addprefix -I,$(SELF_INC)) -c -o $@ $< $(OPTIONS) $(CFLAGS)
 	
-asynth: $(OBJ)
+alsa_record: $(OBJ)
 	$(CC) -o  $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:

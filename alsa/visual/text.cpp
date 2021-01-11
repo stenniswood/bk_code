@@ -23,7 +23,7 @@
 const char *fontfilename;
 FT_Library ft;
 FT_Face    face;
-GLuint t_vbo;
+GLuint     t_vbo;
 
 GLint attribute_coord;
 GLint uniform_tex;
@@ -116,8 +116,8 @@ void render_text(const char *text, float x, float y, float sx, float sy)
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		/* Advance the cursor to the start of the next character */
-		y += (g->advance.x >> 6) * sx;
-		x += (g->advance.y >> 6) * sy;
+		x += (g->advance.x >> 6) * sx;
+		y += (g->advance.y >> 6) * sy;
 	}
 
 	glDisableVertexAttribArray(attribute_coord);
