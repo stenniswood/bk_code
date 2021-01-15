@@ -15,7 +15,8 @@ else
 	LIBS = 
 endif
 
-LIBS +=  -lpthread -lm -lsmbus -L/usr/local/lib/ -L/usr/lib/arm-linux-gnueabihf/
+LIBS +=  -lpthread -lm -L/usr/local/lib/ -L/usr/lib/arm-linux-gnueabihf/ -li2c
+
 
 %.o: %.cpp $(DEPS)
 	$(CC) $(CFLAGS) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
