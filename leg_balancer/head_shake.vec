@@ -1,0 +1,30 @@
+:NAME: Shake head YES
+h tilt d-10
+h tilt d+30
+h tilt c400
+h tilt c600
+
+:NAME: Shake head NO
+h pan d-10
+h pan d+20
+h pan d-20
+h pan d+20
+
+:NAME: Raise arms
+la pit d180
+ra pit d180
+la elbow d0
+ra elbow d0
+
+:NAME: arms in front
+la pit d90
+ra pit d90
+la elbow d0
+ra elbow d0
+
+:NAME: arms down
+la pit d0
+ra pit d0
+la elbow d0
+ra elbow d0
+

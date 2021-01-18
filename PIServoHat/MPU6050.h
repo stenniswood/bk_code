@@ -89,20 +89,21 @@ extern "C" {
 #undef GYRO_RANGE
 
 
+extern int file_i2c;		// alias for f_dev in class
 
 
 class MPU6050 {
 public:
 		int f_dev; //Device file
+		float ax, ay, az, gr, gp, gy; //Temporary storage variables used in _update()
+		float _angle[3]; //Store all angles (accel roll, accel pitch, accel yaw, gyro roll, gyro pitch, gyro yaw, comb roll, comb pitch comb yaw)
 		
-	private:
 		void _update();
-
+								
+	private:
 		float _accel_angle[3];
 		float _gyro_angle[3];
-		float _angle[3]; //Store all angles (accel roll, accel pitch, accel yaw, gyro roll, gyro pitch, gyro yaw, comb roll, comb pitch comb yaw)
 
-		float ax, ay, az, gr, gp, gy; //Temporary storage variables used in _update()
 
 		int MPU6050_addr;
 
@@ -123,16 +124,38 @@ public:
 		bool calc_yaw;
 };
 
+struct stSnapShot {
+	float g_y;
+	float g_p;
+	float g_r;
+
+	float a_x;
+	float a_y;
+	float a_z;
+
+	float angle_r;
+	float angle_p;
+	float angle_y;	
+};
+#define HISTORY_SIZE 1024
+extern struct stSnapShot history[HISTORY_SIZE];
+extern int hist_index;
+
 class MPU6050_Velocity : public MPU6050 
 {
 public:
 	MPU6050_Velocity(int8_t addr);		
-	void	accumulate_accel();
+
+	void	update();
+	void 	add_to_history();
+	void 	print_history_item(int mIndex );
+	
 
 private:
 	float velocity_x;
 	float velocity_y;
-	float velocity_z;		
+	float velocity_z;	
+	bool  first_update;	
 
 };
 

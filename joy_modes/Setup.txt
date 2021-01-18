@@ -1,0 +1,13 @@
+Running:
+
+1) Turn off & unplug PS4.
+2) sudo ds4drv
+	No path needed.
+3) Press and Hold PS button and Share buttons for 10+ seconds until rapid 
+	flashing.
+	The ds4drv should show the device bluetooth address.
+4) if no js0 appears in /dev/input/ then plug in the controller via USB.
+5) Should see /dev/input/js0
+
+
+

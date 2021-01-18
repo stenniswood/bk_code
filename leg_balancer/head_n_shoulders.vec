@@ -1,0 +1,82 @@
+:POSE:
+-name-Parade_Rest
+-description-Arms down head straight
+h tilt 0.0
+h pan  0.0
+la pit 0.0
+ra pit 0.0
+la shoulder 0.0
+ra shoulder 0.0
+la elbow 0.0
+ra elbow 0.0
+
+:POSE:
+-name-Zombie_arms
+-description-Arms forward head straight
+h pan  0.0
+la pit -90.0
+ra pit -90.0
+la elbow 0.0
+ra elbow 0.0
+la shoulder 0.0
+ra shoulder 0.0
+
+:POSE:
+-name-Head Left
+-description-Look left
+h pan  -30.0
+
+:POSE:
+-name-Head Right
+-description-Look right
+h pan  +30.0
+
+:POSE:
+-name-Head Straight
+-description-Look straight ahead
+h pan  0.0
+
+:POSE:
+-name-Elbows bent
+-description-Bend elbows 90 degs
+la elbow  90.0
+ra elbow  90.0
+
+:POSE:
+-name-Elbows straight
+-description-Straighten elbows
+la elbow  0.0
+ra elbow  0.0
+
+:SEQUENCE: 
+-name-YES
+-description-Shake head YES
+h tilt d-10
+h tilt d+30
+h tilt c400
+h tilt c600
+
+:SEQUENCE: 
+-name-NO
+-description-Shake head NO
+h pan d-10
+h pan d+20
+h pan d-20
+h pan d+20
+
+:SEQUENCE: 
+-name-Out of Control
+-description- Danger Danger will robinson
+
+:POSE: arms in front
+la pit d90
+ra pit d90
+la elbow d0
+ra elbow d0
+
+:POSE: arms down
+la pit d0
+ra pit d0
+la elbow d0
+ra elbow d0
+

@@ -9,6 +9,7 @@ Robot::Robot( std::string mFilename )
 	m_setup_file_name = mFilename;
 	read_setup_file();
 	active_vector_played = false;
+	device.calc_yaw = true;
 
 	read_servo_positions( "LastCounts.csv" );
 	

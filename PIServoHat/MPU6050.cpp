@@ -4,6 +4,11 @@
 
 //Include the header file for this class
 #include "MPU6050.h"
+#include "i2c_switching.hpp"
+
+
+int file_i2c;
+
 
 
 MPU6050::MPU6050(int8_t addr) {
@@ -14,11 +19,11 @@ MPU6050::MPU6050(int8_t addr) {
 	_first_run = 1; //Variable for whether to set gyro angle to acceleration angle in compFilter
 	calc_yaw = false;
 
-	f_dev = open("/dev/i2c-1", O_RDWR); //Open the I2C device file
+	file_i2c = f_dev = open("/dev/i2c-1", O_RDWR); //Open the I2C device file
 	if (f_dev < 0) { //Catch errors
 		std::cout << "ERR (MPU6050.cpp:MPU6050()): Failed to open /dev/i2c-1. Please check that I2C is enabled with raspi-config\n"; //Print error message
 	}
-	printf("i2c-1 openend!\n");
+	printf("i2c-1 opened!\n");
 
 	status = ioctl(f_dev, I2C_SLAVE, MPU6050_addr); //Set the I2C bus to use the correct address
 	if (status < 0) {
@@ -39,7 +44,7 @@ MPU6050::MPU6050(int8_t addr) {
 	//Set offsets to zero
 	i2c_smbus_write_byte_data(f_dev, 0x06, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x07, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x08, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x09, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x0A, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x0B, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x00, 0b10000001), i2c_smbus_write_byte_data(f_dev, 0x01, 0b00000001), i2c_smbus_write_byte_data(f_dev, 0x02, 0b10000001);
 
-	std::thread(&MPU6050::_update, this).detach(); //Create a seperate thread, for the update routine to run in the background, and detach it, allowing the program to continue
+
 }
 
 void MPU6050::getGyroRaw(float *roll, float *pitch, float *yaw) {
@@ -110,10 +115,13 @@ int MPU6050::getAngle(int axis, float *result) {
 void MPU6050::_update() { //Main update function - runs continuously
 	clock_gettime(CLOCK_REALTIME, &start); //Read current time into start variable
 
-	while (1) { //Loop forever
+	//while (1) 
+	{ //Loop forever
+		switch_to_MPU();
 		getGyro(&gr, &gp, &gy); //Get the data from the sensors
 		getAccel(&ax, &ay, &az);
-
+		switch_to_servo_hat();
+		
 		//X (roll) axis
 		_accel_angle[0] = atan2(az, ay) * RAD_T_DEG - 90.0; //Calculate the angle with z and y convert to degrees and subtract 90 degrees to rotate
 		_gyro_angle[0] = _angle[0] + gr*dt; //Use roll axis (X axis)
@@ -172,20 +180,63 @@ void MPU6050::_update() { //Main update function - runs continuously
 }
 
 /**********************************************************************************/
+struct stSnapShot history[HISTORY_SIZE];
+int hist_index = 0;
+
 
 MPU6050_Velocity::MPU6050_Velocity( int8_t addr )
 :MPU6050(addr)
 {
-
+	first_update = true;
+//	initialize_RPI_servo_hat();
+	
+	std::thread(&MPU6050_Velocity::update, this).detach(); //Create a seperate thread, for the update routine to run in the background, and detach it, allowing the program to continue
 }
 
-void MPU6050_Velocity::accumulate_accel()
+void MPU6050_Velocity::add_to_history()
 {
-	float x,y,z;
-	getAccel( &x, &y, &z );
-	
-	velocity_x += x;
-	velocity_y += y;
-	velocity_z += z;
-	
+	struct stSnapShot* dd;
+	dd = &(history[hist_index]);
+
+	dd->g_r = gr;
+	dd->g_p = gp;
+	dd->g_y = gy;		
+	dd->a_x = ax;
+	dd->a_y = ay;
+	dd->a_z = az;			
+	dd->angle_r = _angle[0];
+	dd->angle_p = _angle[1];
+	dd->angle_y = _angle[2];
+		
+	velocity_x += ax;
+	velocity_y += ay;
+	velocity_z += az;
+
 }
+
+void MPU6050_Velocity::update()
+{
+	while (1) {
+		//printf("\n\nMPU6050_Velocity::update()  %d\n", hist_index);
+	
+		MPU6050::_update();
+		add_to_history();
+		print_history_item( hist_index );
+	
+		hist_index++;
+		if (hist_index>=HISTORY_SIZE)
+			hist_index = 0;	
+	}
+}
+
+void MPU6050_Velocity::print_history_item(int mIndex )
+{
+	struct stSnapShot* dd;
+	dd = &(history[mIndex]);
+
+	printf("MPU %d : accel=<%07.3f, %07.3f, %07.3f>", mIndex, dd->a_x, dd->a_y, dd->a_z  );	
+	printf("\t gyro=<%07.3f, %07.3f, %07.3f>", dd->g_r, dd->g_p, dd->g_y  );	
+	printf("\t angle=<%07.3f, %07.3f, %07.3f>", dd->angle_r, dd->angle_p, dd->angle_y );
+	printf("\n");
+}
+

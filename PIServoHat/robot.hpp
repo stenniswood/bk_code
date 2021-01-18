@@ -46,11 +46,10 @@ public:
 
 	// ACTIE ROBOT ROUTINES:  STANDING BALANCE:
 	void	stand_still();
-	
+
+	MPU6050_Velocity	device;		// 6 axis gyro, accel, etc.	
 	
 private:
-	MPU6050 device;		// 6 axis gyro, accel, etc.
-	
 	std::vector<Limb>	m_limbs;
 	std::string 		m_setup_file_name;
 

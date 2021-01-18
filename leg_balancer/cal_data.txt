@@ -1,0 +1,35 @@
+: MIN / MAX TRAVEL COUNTS : 
+h tilt  0 740 
+h pan   0 740 
+la pit 0 2600
+ra pit 0 2600
+la shoulder 0 1300
+ra shoulder 0 1300
+la wrist_rotate 0 2096
+ra wrist_rotate 0 2096
+
+: COUNTS PER DEGREE :
+h tilt 2096 CPR
+la pit 2600 CPR
+ra pit 2600 CPR
+la shoulder 2600 CPR
+ra shoulder 2600 CPR
+la wrist_rotate 2096 CPR
+ra wrist_rotate 2096 CPR
+
+: ZERO OFFSET :
+h tilt 350
+h pan  350
+la pit 1300
+ra pit 1300
+la shoulder 0
+ra shoulder 0
+la wrist_rotate 1048
+ra wrist_rotate 1048
+
+: DISABLE :
+
+la shoulder DISABLE
+ra shoulder DISABLE
+la elbow DISABLE
+ra elbow DISABLE

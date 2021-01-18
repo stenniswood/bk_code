@@ -10,23 +10,24 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "MPU6050.h"
+#include "robot.hpp"
+#include "i2c_switching.hpp"
 
-
-
-extern int file_i2c;
-
-MPU6050 device(0x68);
 
 static char buffer[5];   // Create a buffer for transferring data to the I2C device
 
-void initialize_RPI_servo_hat()
+
+void initialize_RPI_servo_hat( Robot& mRobot )
 {
   /*  We're not going to open the i2c file here.  
   	  That was done for us in the MPU6050 constructor.  
   	  Just point the file to that one...  */
-  file_i2c = device.f_dev;
+//  file_i2c = mRobot.device.f_dev;
+  printf("Initialized i2c file_i2c=%d\n", file_i2c);
+  
+  switch_to_servo_hat();
 
-  int addr = 0x40;    				// PCA9685 address
+/*  int addr = 0x40;    				// PCA9685 address
   ioctl(file_i2c, I2C_SLAVE, addr); // Set the I2C address for upcoming
                                     //  transactions
 
@@ -41,18 +42,18 @@ void initialize_RPI_servo_hat()
   // Enable multi-byte writing.
   buffer[0] = 0xfe;  
   buffer[1] = 0x1e;
-  write(file_i2c, buffer, length);
+  write(file_i2c, buffer, length);*/
 
 }
 
 
-void switch_to_servo_hat()
+void switch_to_servo_hat(  )
 {
   int addr = 0x40;    				// PCA9685 address
   int status = ioctl(file_i2c, I2C_SLAVE, addr); // Set the I2C address for upcoming
                                     //  transactions
   if (status < 0) {
-      std::cout << "ERR (main2.cpp:ServoHat()): Could not get I2C bus with 0x40 " << errno << " address. Please confirm that this address is correct\n"; //Print error message
+      std::cout << "ERR (i2c_switching.cpp:switch_to_servo_hat()): Could not get I2C bus with 0x40 " << errno << " address. Please confirm that this address is correct\n"; //Print error message
       perror("Error switching.");
   }
                                     
@@ -65,31 +66,26 @@ void switch_to_servo_hat()
   buffer[0] = 0xfe;  
   buffer[1] = 0x1e;
   //write(file_i2c, buffer, length);
+  //printf("switched to ServoHat done.\n");
 }
 
-void switch_to_MPU()
+void switch_to_MPU(  )
 {
+	//printf("switch_to_MPU  : file_i2c=%d\n", file_i2c);
+    int addr = 0x68;
 	int status = ioctl(file_i2c, I2C_SLAVE, 0x68); //Set the I2C bus to use the correct address
 	if (status < 0) {
-		std::cout << "ERR (main2.cpp:MPU6050()): Could not get I2C bus with 0x68" << errno << " address. Please confirm that this address is correct\n"; //Print error message
-	    perror("Error switching.");		
+		std::cout << "ERR (i2c_switching.cpp: switch_to_MPU()): "<< status <<" Could not get I2C bus with 0x68.  Please confirm that this address is correct\n"; //Print error message
+	    perror("Error switching.");	
 	}
 }
 
 float ax, ay, az, gr, gp, gy; //Variables to store the accel, gyro and angle values
 
-void timeslice_MPU6050()
+void timeslice_MPU6050( Robot& mRobot )
 {
-	device.calc_yaw = true;
-
-		int result = device.getAngle(0, &gr);
-		result = device.getAngle(1, &gp);
-		result = device.getAngle(2, &gy);
-		
-		
-		std::cout << "Current angle around the roll,pitch,yaw: " << gr << "\t";
-		std::cout << gp << "\t";
-		std::cout << gy << "\n";
-//		usleep(250000); //0.25sec
+	//printf("hist_index=%d\n", hist_index );
+	//mRobot.device.print_history_item( hist_index );
+//	device.calc_yaw = true;
 }
 
