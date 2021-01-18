@@ -13,9 +13,6 @@ public:
 	void 		 draw_graph_data( cairo_t *cr, int mSeriesIndex );
 	virtual void draw_graph		( cairo_t *cr );
 
-	void 	compute_average		( int mSeriesIndex);
-	void 	compute_stddev 		( int mSeriesIndex);
-
 	void 	compute_stats		( int mSeriesIndex );
 	void	bin_data			( int mSeriesIndex, int mNumBins = 10);
 

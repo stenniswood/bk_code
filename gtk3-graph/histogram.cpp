@@ -20,41 +20,14 @@ Histogram::~Histogram()
 
 }
 
-void Histogram::compute_average( int mSeriesIndex )
-{
-	size_t len = series_data[mSeriesIndex].data_length;
-	struct stDataPoint* dp  = series_data[mSeriesIndex].data;
-	double avg = 0;
-	for (int i=0; i<len; i++)
-	{
-		avg += dp[i].y;
-	}
-	avg /= len;
-	printf("Computed Average = %7.4f;  n=%ld\n", avg, len);
-	m_mean = avg;
-}
-
-void Histogram::compute_stddev( int mSeriesIndex )
-{
-	size_t len = series_data[mSeriesIndex].data_length;
-	struct stDataPoint* dp  = series_data[mSeriesIndex].data;
-	double stddev = 0;
-	for (int i=0; i<len; i++)
-	{
-		float dev = (dp[i].y - m_mean);
-		stddev += (dev * dev);
-	}	
-	stddev /= len;
-	stddev = sqrt( stddev );	
-	m_stddev = stddev;
-}
 
 void Histogram::compute_stats( int mSeriesIndex )
 {
-	size_t len              = series_data[mSeriesIndex].data_length;
-	struct stDataPoint* dp  = series_data[mSeriesIndex].data;
+	size_t len              = series_data[mSeriesIndex].size();
+
 	// Mean:
-	compute_average(mSeriesIndex);
+	series_data[mSeriesIndex].compute_average();
+	m_mean = series_data[mSeriesIndex].get_mean();
 	printf("Computed Average = %7.4f;  n=%ld\n", m_mean, len);
 
 	// Median: (equal number of dps above and below)
@@ -62,7 +35,8 @@ void Histogram::compute_stats( int mSeriesIndex )
 	// Mode:
 	
 	// StdDev:	
-	compute_stddev(mSeriesIndex);
+	series_data[mSeriesIndex].compute_stddev();
+	m_stddev = series_data[mSeriesIndex].get_stddev();
 	printf("Computed stddev = %7.4f;  n=%ld\n", m_stddev, len);	
 }
 
@@ -70,33 +44,35 @@ void Histogram::compute_stats( int mSeriesIndex )
 void Histogram::bin_data( int mSeriesIndex, int mNumBins )
 {
 	// Get Min & Max 
-	size_t len = series_data[mSeriesIndex].data_length;
-	gfloat 	dmin = get_min_y(series_data[mSeriesIndex].data, len );
-	gfloat 	dmax = get_max_y(series_data[mSeriesIndex].data, len );
+	size_t len = series_data[mSeriesIndex].size();
+	gfloat 	dmin = series_data[mSeriesIndex].get_min_y( );
+	gfloat 	dmax = series_data[mSeriesIndex].get_max_y( );
 
-	float range = (dmax - dmin);
+	float range     = (dmax - dmin);
 	float bin_width = (range / mNumBins);
 	
 	if (m_bins != NULL) delete m_bins;
 	
 	m_bins = new double[mNumBins];
 	
-	
-	size_t dlen = series_data[mSeriesIndex].data_length;
+	size_t dlen = series_data[mSeriesIndex].size();
 	for (int i=0; i<dlen; i++)	
 	{
 		// Which bin #?
-		float delta = (series_data[mSeriesIndex].data[i].y - dmin);
-		int bin_num = round(delta / bin_width);
-		if ((bin_num > 0) && (bin_num < mNumBins))
-			m_bins[bin_num] += 1.0;							
+		struct stDataPoint* dp = series_data[mSeriesIndex].get_data(i);
+		if (dp) {
+			float delta = (dp->y - dmin);
+			int bin_num = round(delta / bin_width);
+			if ((bin_num > 0) && (bin_num < mNumBins))
+				m_bins[bin_num] += 1.0;
+		}
 	}	
 }
 
 
 void Histogram::draw_graph_data( cairo_t *cr, int mSeriesIndex )
 {
-	stColor c = series_data[mSeriesIndex].color;	
+	stColor c = series_data[mSeriesIndex].get_color();	
 	cairo_set_source_rgb ( cr, c.red, c.green, c.blue );
 	
 	for (int b=0; b<m_num_bins; b++)
