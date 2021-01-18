@@ -48,7 +48,19 @@ int init_graph_data2()
 	return i;
 }
 
+int count = 0;
+gboolean new_data_timeout(gpointer user_data)
+{
+	Graph* g = (Graph*)user_data;	
 
+	struct stDataPoint dp;
+	dp.x = 100;
+	dp.y = 300.*(double)random()/(double)RAND_MAX;
+	g->scroll_new_data( 0, dp );
+
+	//printf("added %d %7.4f %7.4f\t", count++, dp.x, dp.y );
+    return G_SOURCE_CONTINUE;
+}
 
 int main (int argc, char **argv)
 {	
@@ -60,6 +72,8 @@ int main (int argc, char **argv)
 	init_graph_data2();
 	my_graph.create_window(WIDTH, HEIGHT);
 
+    g_timeout_add (1,  new_data_timeout, &my_graph);
+    
     gtk_main ();
 
     return 0;

@@ -4,6 +4,12 @@
 #include <linux/i2c-dev.h> // required for constant definitions
 #include <stdio.h>  // required for printf statements
 
+#include <math.h>
+#include <gtk/gtk.h>
+#include <cairo.h>
+#include <string.h>
+
+
 #include "drive_five.h"
 #include "servo.hpp"
 #include "dfServo.hpp"
@@ -14,12 +20,16 @@
 #include "vector.hpp"
 #include "i2c_switching.hpp"
 #include "jog_mode.hpp"
+#include "graph.hpp"
 
 
 int file_i2c;
 
 //DriveFive df_lArm( "/dev/ttyUSB1");
 //DriveFive df_rArm( "/dev/ttyUSB0");
+
+Graph mpu_graph("MPU6050 -vs- time", "Time", "Data");
+
 
 //#define SERVO_TEST 1
 #ifdef SERVO_TEST 
@@ -56,9 +66,17 @@ void exit_save_positions(int, void*)
 	// Save calibrations?  no. done when exiting jogging mode.	
 }
 
+bool ShowGraph = false;
 
-int main(void)
+int main(int argc, char **argv)
 {	
+	if (argc>1)
+	{
+		int result = strcmp(argv[1], "gui");
+		if (result==0)
+			ShowGraph = true;
+	}
+	
 //	int result = on_exit(  exit_save_positions, NULL);
 //	if (result!=0) printf("Warning cannot set the on_exit function!\n");
 
@@ -70,6 +88,12 @@ int main(void)
 #ifdef SERVO_TEST 	
 	while(1)	direct_servo_write_test();	
 #endif
+	
+	if (ShowGraph) {
+	    gtk_init (&argc, &argv);
+		mpu_graph.create_window( 960, 480 );
+	    gtk_main ();	
+	}
 	
 	while (1) 
 	{	
@@ -131,19 +155,6 @@ For 20Kg Red Servo:
 	524
 	1024
 	2048   +90deg
-*/
-
-						    
-		//serv4.set_counts( 136 );
-		//usleep(2000000); // sleep for 2s.
-		//serv4.set_counts( 640 );
-
-/*		rightArm.actuate_vector( TestVec1 );	
-		usleep(4000000); 	
-		rightArm.actuate_vector( TestVec2 );	
-		usleep(4000000); 
-		rightArm.actuate_vector( TestVec3 );	
-		usleep(4000000); 
 */
 	}
 
