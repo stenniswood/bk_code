@@ -2,6 +2,7 @@
 #include <math.h>
 #include <cairo.h>
 
+
 #include "graph.hpp"
  
 
@@ -142,7 +143,7 @@ Graph::~Graph()
 	int slen = series_data.size();
 	for (int series=0; series<slen; series++)
 	{	
-		delete series_data[series].data;		
+		series_data[series].delete_all();		
 	}
 }
 
@@ -151,7 +152,7 @@ int Graph::find_series_name( const char* mName )
 	int slen = series_data.size();
 	for (int series=0; series<slen; series++)
 	{
-		int result = strcmp( series_data[series].name, mName );
+		int result = strcmp( series_data[series].get_name(), mName );
 		if (result)
 			return series;
 	}	
@@ -163,27 +164,10 @@ int Graph::find_series_name( const char* mName )
 */
 void Graph::scroll_new_data( int mSeriesIndex, struct stDataPoint mNewDataPoint )
 {
-	char*  ptr = (char*)series_data[mSeriesIndex].data;
-	size_t data_struct_size = sizeof( struct stDataPoint );
-	size_t size = data_struct_size * (series_data[mSeriesIndex].data_length-1);	
-	memcpy (ptr, ptr+data_struct_size, size );
-
-
-	size_t length = series_data[mSeriesIndex].data_length-1;
-	
-	struct stDataPoint* dp = (series_data[mSeriesIndex].data);
-//	float xinc = (mNewDataPoint.x - dp->x)/(float)screen.width;
-		
-
-	//printf("data_length = %ld; %7.4f %7.4f\n", length, mNewDataPoint.x, mNewDataPoint.y);
-	series_data[mSeriesIndex].data[length] = mNewDataPoint;
-
-	for (int i=0; i<length; i++)
-		dp[i].x = 100 * ((float)i/(float)screen.width);
-	
+	series_data[mSeriesIndex].scroll_new_data(mNewDataPoint);	
 }
 
-void  Graph::add_data_series( struct stSeriesInfo& mSeries )
+void  Graph::add_data_series( DataSeries& mSeries )
 {
 	int slen = series_data.size();
 	
@@ -194,13 +178,13 @@ void  Graph::add_data_series( struct stSeriesInfo& mSeries )
 	p = (p_index % num_p_colors);
 		
 	//printf("palette colors = %7.4f\n", num_p_colors );	
-	mSeries.color = pallette[p];
+	mSeries.set_color( pallette[p] );
 	p_index++;
 	
 	series_data.push_back( mSeries );	
 }
 
-gfloat Graph::get_min_x(struct stDataPoint* mDP, int mLength )
+/*gfloat Graph::get_min_x(struct stDataPoint* mDP, int mLength )
 {
 	gfloat min_dp = 999999;	
 	for (int i=0; i<mLength; i++)
@@ -241,17 +225,15 @@ gfloat Graph::get_max_y(struct stDataPoint* mDP, int mLength )
 		if (mDP[i].y > max_dp)	max_dp = mDP[i].y;
 	}
 	return max_dp;
-}
+} */
 
 
-gfloat Graph::get_y_scale(struct stDataPoint* mDP, int mLength )
+gfloat Graph::get_y_scale(int mSeriesIndex )
 {
-	gfloat mmax = get_max_y( mDP, mLength );	
-	gfloat mmin = get_min_y( mDP, mLength );
+	gfloat mmax = series_data[mSeriesIndex].get_max_y( );	
+	gfloat mmin = series_data[mSeriesIndex].get_min_y( );
 	
 	gfloat screen_y_allotment = 100. - x_axis_margin - y_title_margin;
-	//printf("maxY=%7.4f minY=%7.4f screen_y_allotment=%7.4f\n", mmax, mmin, screen_y_allotment );
-	
 	gfloat scale = screen_y_allotment / (mmax-mmin);		// only half the screen.  Negative gets the other half.
 	return scale;
 }
@@ -263,10 +245,9 @@ gfloat Graph::compute_yscale_all_series(  )
 
 	for (int series=0; series<slen; series++)
 	{
-		gfloat tmps = get_y_scale( series_data[series].data, series_data[series].data_length );
+		gfloat tmps = get_y_scale( series );
 		if (tmps < min_scale) min_scale = tmps;	
 	}
-//	printf("yscale = %6.4f\n", min_scale);
 	return min_scale;	
 }
 
@@ -279,8 +260,8 @@ gfloat Graph::compute_xscale_all_series(  )
 	
 	for (int series=0; series<slen; series++)
 	{
-		gfloat tmpminx = get_min_x(series_data[series].data, series_data[series].data_length );
-		gfloat tmpmaxx = get_max_x(series_data[series].data, series_data[series].data_length );	
+		gfloat tmpminx = series_data[series].get_min_x( );
+		gfloat tmpmaxx = series_data[series].get_max_x( );	
 
 		if (tmpminx < min_x) min_x = tmpminx;	
 		if (tmpmaxx < max_x) max_x = tmpminx;
@@ -413,14 +394,15 @@ void Graph::draw_legend(  cairo_t *cr )
 
 	for (int series=0; series<slen; series++)
 	{	
-		cairo_text_extents(cr, series_data[series].name, &extents);		
+		cairo_text_extents(cr, series_data[series].get_name(), &extents);		
 		
-		cairo_set_source_rgb (cr, series_data[series].color.red, series_data[series].color.blue, series_data[series].color.green);
+		struct stColor c = series_data[series].get_color();
+		cairo_set_source_rgb (cr, c.red, c.blue, c.green);
 		cairo_rectangle (cr, +2.0, y-extents.height, 0.25, extents.height);
 		cairo_fill (cr);
 		
 		cairo_move_to(cr, 2.3, y);  
-		cairo_show_text(cr, series_data[series].name);  
+		cairo_show_text(cr, series_data[series].get_name());  
 
 		y+= extents.height;		
 	}
@@ -435,17 +417,18 @@ void Graph::draw_all_series(cairo_t *cr)
 	int slen = series_data.size();
 	for (int series=0; series<slen; series++)
 	{	
-		struct stDataPoint* d = series_data[series].data;
-		int    dlen = series_data[series].data_length;		
-		//printf("plotting series # %d\n", series);
+		int    dlen = series_data[series].size();		
+		//printf("plotting series # %d;  size=%d\n", series, dlen);
 						
 		for (int ndex = 0; ndex < dlen; ndex++)  {
-		   cairo_line_to (cr, d[ndex].x,  d[ndex].y*y_scale );
+			struct stDataPoint* dp = series_data[series].get_data( ndex );
+			if (dp)
+			    cairo_line_to (cr, dp->x,  dp->y * y_scale );
 		   //printf("x,y=%7.4f %7.4f\n", d[ndex].x, d[ndex].y );
 		}
 
 		/* Draw the curve */
-		struct stColor c = series_data[series].color;
+		struct stColor c = series_data[series].get_color();
 		cairo_set_source_rgba (cr, c.red, c.green, c.blue, c.alpha);
 		cairo_stroke (cr);
 	}
