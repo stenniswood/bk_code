@@ -58,8 +58,9 @@ public:
 	Graph( const char* mTitle, const char* mxAxis, const char* myAxis );
 	~Graph();
 	
-	void 	set_theme( struct stTheme* mNewTheme );
-	void	set_window( GtkWidget *widget );
+	void	create_window	( int mWidth, int mHeight   );
+	void 	set_theme		( struct stTheme* mNewTheme );
+	void	set_window		( GtkWidget *widget );
 	
 	void  	show_legend		( bool mShow )	{  m_show_legend = mShow; };
 	void  	show_grid  		( bool mShow )	{  m_show_grid   = mShow; };

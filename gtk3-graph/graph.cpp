@@ -76,6 +76,35 @@ void Graph::set_theme( struct stTheme* mNewTheme )
 	theme = mNewTheme;
 }
 
+static gboolean on_draw (GtkWidget *widget, cairo_t *cr, gpointer user_data)
+{
+	Graph* m_graph = (Graph*)user_data;
+	m_graph->set_window( widget );    
+	m_graph->draw_graph(cr);
+
+    return FALSE;
+}
+
+void Graph::create_window	( int mWidth, int mHeight )
+{
+    GtkWidget *widow;
+    GtkWidget *da;
+
+    widow = gtk_window_new     (GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_default_size (GTK_WINDOW (widow), mWidth, mHeight);
+    gtk_window_set_title (GTK_WINDOW (widow), title );    
+    g_signal_connect     (G_OBJECT (widow), "destroy", gtk_main_quit, NULL);
+
+    da = gtk_drawing_area_new ( );
+    gtk_container_add         ( GTK_CONTAINER (widow), da);
+
+    g_signal_connect (G_OBJECT (da),
+            "draw",
+            G_CALLBACK (on_draw),
+            this );
+    gtk_widget_show_all (widow);            
+}
+
 void Graph::set_window( GtkWidget *widget )
 {
 	window = gtk_widget_get_window(widget);

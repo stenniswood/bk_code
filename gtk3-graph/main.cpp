@@ -10,22 +10,6 @@
 
 
 Graph my_graph( "MPU6050 -vs- Time", "Time", "SensorOutput" );	
-	
-	
-
-static gboolean on_draw (GtkWidget *widget, cairo_t *cr, gpointer user_data)
-{
-	my_graph.set_window( widget );
-		
-    GdkWindow *window = gtk_widget_get_window(widget);
-    
-	my_graph.draw_graph(cr);
-
-    return FALSE;
-
-    /* Change the transformation matrix */
-    //cairo_translate (cr, da.width / 2, da.height / 2);
-}
 
 
 int init_graph_data()
@@ -64,35 +48,21 @@ int init_graph_data2()
 	return i;
 }
 
+
+
 int main (int argc, char **argv)
 {	
-    GtkWidget *window;
-    GtkWidget *da;
-
     gtk_init (&argc, &argv);
-    window = gtk_window_new     (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_default_size (GTK_WINDOW (window), WIDTH, HEIGHT);
-
-    gtk_window_set_title (GTK_WINDOW (window), my_graph.get_title() );
-    g_signal_connect     (G_OBJECT (window), "destroy", gtk_main_quit, NULL);
-
-    da = gtk_drawing_area_new ( );
-    gtk_container_add         ( GTK_CONTAINER (window), da);
-
 
 	// INITIALIZE GRAPH:
 	my_graph.show_grid(false);
-	init_graph_data();
+	init_graph_data ();
 	init_graph_data2();
+	my_graph.create_window(WIDTH, HEIGHT);
 
-
-    g_signal_connect (G_OBJECT (da),
-            "draw",
-            G_CALLBACK (on_draw),
-            &my_graph);
-
-    gtk_widget_show_all (window);
     gtk_main ();
 
     return 0;
 }
+
+
