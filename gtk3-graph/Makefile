@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -std=gnu++11
-PROG = hello
+PROG = graph
 INC  = ./ /usr/local/include /usr/lib/arm-linux-gnueabihf/perl/5.28.1/CORE/ \
        /usr/local/include/opencv4/
 

@@ -10,9 +10,6 @@ struct stDataPoint {
 	gfloat  y;
 };
 
-#define NUM_DATA_POINTS 640
-extern struct stDataPoint data[NUM_DATA_POINTS];
-
 struct stColor {
 	gfloat red;
 	gfloat green;
@@ -40,42 +37,82 @@ extern struct stColor pallette[14];
 struct stSeriesInfo 
 {
 	struct stDataPoint* data;
-	int     data_length;
-	stColor color;
-	char name[80];
+	int     			data_length;
+	stColor 			color;
+	char 				name[80];
 };
-extern std::vector<struct stSeriesInfo> series_data;
-
-struct stGraphInfo
+struct stTheme
 {
+	stColor		background;
+	stColor		title_text;
+	stColor		axis_area_background;
+	stColor		axis;
+	stColor		grid;	
+	int 		skip_pallette_index;		// no white on white/  black on black.
+};
+
+
+class Graph
+{
+public:
+	Graph( const char* mTitle, const char* mxAxis, const char* myAxis );
+	~Graph();
+	
+	void 	set_theme( struct stTheme* mNewTheme );
+	void	set_window( GtkWidget *widget );
+	
+	void  	show_legend		( bool mShow )	{  m_show_legend = mShow; };
+	void  	show_grid  		( bool mShow )	{  m_show_grid   = mShow; };
+	void  	add_data_series		( struct stSeriesInfo& mSeries );
+	void  	remove_data_series	( const char* mSeriesName );
+
+	void  	scroll_new_data		( int mSeriesIndex, struct stDataPoint mNewDataPoint );
+	
+	
+	void 	draw_graph      ( cairo_t *cr );
+	void 	draw_all_series ( cairo_t *cr);
+	void 	draw_legend     ( cairo_t *cr );
+	void 	draw_title      ( cairo_t *cr );
+	void 	draw_grid		( cairo_t *cr );	
+	void 	draw_axis_labels( cairo_t *cr );
+
+	char*	get_title()		{ return title; };
+	
+	gfloat 	get_min_x		(struct stDataPoint* mDP, int mLength );
+	gfloat 	get_max_x		(struct stDataPoint* mDP, int mLength );
+
+	gfloat 	get_min_y  		(struct stDataPoint* mDP, int mLength );
+	gfloat 	get_max_y  		(struct stDataPoint* mDP, int mLength );
+	gfloat 	get_y_scale		(struct stDataPoint* mDP, int mLength );
+	gfloat 	compute_yscale_all_series(  );	
+	gfloat 	compute_xscale_all_series(  );
+		
+protected:
+	int 	find_series_name( const char* mName );
+
+private:
+	struct stTheme* theme;
+	std::vector<struct stSeriesInfo> series_data;
+	GdkWindow*   window;
+    GdkRectangle screen;            /* GtkDrawingArea size */
+    	
 	float x_scale;
 	float y_scale;
+	float cr_x_scale;		// Scale for cairo pixels to -+100
+	float cr_y_scale;
+	
 	char  title[128];
 	char  xaxis_label[128];
 	char  yaxis_label[128];	
 	stColor backgroundColor;
-	bool  show_legend;
-	bool  show_grid;
+	bool  m_show_legend;
+	bool  m_show_grid;
 	float x_axis_margin;	// y space from edge to start of graph
 	float y_axis_margin;	// x space from edge to start of graph
+
+	float y_title_margin;	// x space from edge to start of graph
+	int   p_index;			// pallette index;
 };
 
-extern struct stGraphInfo graph_info;
-void create_graph( const char* mTitle, const char* mxAxis, const char* myAxis, float mWindowWidth, float mWindowHeight );
-
-
-gfloat get_min_x(struct stDataPoint* mDP, int mLength );
-gfloat get_max_x(struct stDataPoint* mDP, int mLength );
-
-gfloat get_max_y  (struct stDataPoint* mDP, int mLength );
-gfloat get_y_scale(struct stDataPoint* mDP, int mLength );
-gfloat compute_yscale_all_series(  );	
-gfloat compute_xscale_all_series(  );
-
-void draw_graph      ( cairo_t *cr, int window_width );
-void draw_all_series ( cairo_t *cr);
-void draw_legend     ( cairo_t *cr, int window_width );
-void draw_title      ( cairo_t *cr, int screen_width );
-void draw_axis_labels();
 
 #endif
