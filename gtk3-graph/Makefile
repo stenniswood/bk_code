@@ -4,7 +4,7 @@ PROG = graph
 INC  = ./ /usr/local/include /usr/lib/arm-linux-gnueabihf/perl/5.28.1/CORE/ \
        /usr/local/include/opencv4/
 
-SRCS  = main.o axis.o graph.o
+SRCS  = main.o axis.o graph.o histogram.o
  
 
 ALL_SRCS = $(SRCS)
