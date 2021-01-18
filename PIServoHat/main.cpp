@@ -23,7 +23,7 @@
 #include "graph.hpp"
 
 
-int file_i2c;
+//int file_i2c;
 
 //DriveFive df_lArm( "/dev/ttyUSB1");
 //DriveFive df_rArm( "/dev/ttyUSB0");
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 
 	walker.print_robot_setup();
 	
-	initialize_RPI_servo_hat();
+	initialize_RPI_servo_hat(walker);
 	switch_to_servo_hat();	
 
 #ifdef SERVO_TEST 	
