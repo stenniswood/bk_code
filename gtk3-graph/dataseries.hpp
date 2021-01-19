@@ -48,6 +48,7 @@ public:
 	double	get_mean			()	{ return m_mean;   };
 	double	get_stddev			()  { return m_stddev; };
 	//void	linefit();	
+	void	print_data			();
 	
 protected:
 

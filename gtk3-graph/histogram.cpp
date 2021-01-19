@@ -30,6 +30,8 @@ void Histogram::compute_stats( int mSeriesIndex )
 	m_mean = series_data[mSeriesIndex].get_mean();
 	printf("Computed Average = %7.4f;  n=%ld\n", m_mean, len);
 
+
+
 	// Median: (equal number of dps above and below)
 	
 	// Mode:
@@ -38,6 +40,10 @@ void Histogram::compute_stats( int mSeriesIndex )
 	series_data[mSeriesIndex].compute_stddev();
 	m_stddev = series_data[mSeriesIndex].get_stddev();
 	printf("Computed stddev = %7.4f;  n=%ld\n", m_stddev, len);	
+
+	bin_data(0, 10);
+	get_y_scale( mSeriesIndex );
+	printf("yscale = %7.4f\n", y_scale);
 }
 
 /* we onlyy concern ourselves with the Y data. */
@@ -50,10 +56,15 @@ void Histogram::bin_data( int mSeriesIndex, int mNumBins )
 
 	float range     = (dmax - dmin);
 	float bin_width = (range / mNumBins);
+	m_num_bins = mNumBins;
+	printf("bin_width = $%7.4f\n", bin_width );
+	
 	
 	if (m_bins != NULL) delete m_bins;
 	
 	m_bins = new double[mNumBins];
+	for (int b=0; b<mNumBins; b++)
+		m_bins[b] = 0.0;
 	
 	size_t dlen = series_data[mSeriesIndex].size();
 	for (int i=0; i<dlen; i++)	
@@ -63,24 +74,70 @@ void Histogram::bin_data( int mSeriesIndex, int mNumBins )
 		if (dp) {
 			float delta = (dp->y - dmin);
 			int bin_num = round(delta / bin_width);
-			if ((bin_num > 0) && (bin_num < mNumBins))
+			printf("bin:%d;   ", bin_num );
+			if ((bin_num >= 0) && (bin_num < mNumBins))
 				m_bins[bin_num] += 1.0;
 		}
 	}	
 }
 
+double Histogram::max_bin_count()
+{
+	double max_count = 0.0;
+	
+	for (int b=0; b<10; b++)
+	{
+		if ( m_bins[b] > max_count )
+			max_count = m_bins[b];
+	}
+//	printf("max_bin_count:  %7.4f\n", max_count );	
+	return max_count;
+}
+
+void Histogram::print_bins()
+{
+	printf("Bin Counts:\n");
+	for (int b=0; b<10; b++)
+	{
+		printf("%d: %7.4f\n", b, m_bins[b] );
+	}
+}
+
+gfloat 	Histogram::get_y_scale( int mSeriesIndex )
+{
+	double maxc = max_bin_count();
+	y_scale = DATA_AREA_Y_SIZE / maxc;
+	return y_scale;
+}
 
 void Histogram::draw_graph_data( cairo_t *cr, int mSeriesIndex )
 {
-	stColor c = series_data[mSeriesIndex].get_color();	
+	stColor c = series_data[mSeriesIndex].get_color();
 	cairo_set_source_rgb ( cr, c.red, c.green, c.blue );
+
+	double x = y_axis_margin;
+	double y = 100. - x_axis_margin;
 	
+	double bin_pix_width = 100. / (float)m_num_bins;
+	//printf("\n*** Draw graph data: \n");
+	double height=0;
+	
+	cairo_set_line_width(cr, 0.5);
 	for (int b=0; b<m_num_bins; b++)
 	{
-		cairo_rectangle(cr, 0, 100-x_axis_margin, 100, x_axis_margin);
+		height = m_bins[b] * y_scale;
+		y = 100-x_axis_margin-height;
+		
+		//printf("x,y=<%7.4f,%7.4f: %7.4f>\n", x,y, height );
+		cairo_set_source_rgb ( cr, c.red, c.green, c.blue );
+		cairo_rectangle(cr, x, y, bin_pix_width-2, height );
 		cairo_fill (cr);	
-		cairo_stroke(cr);
+
+		cairo_set_source_rgb ( cr, 0., 0., 1.0 );
+		cairo_rectangle(cr, x, y, bin_pix_width-2, height );		
+		cairo_stroke(cr);	
 			
+		x += bin_pix_width;
 	}
 }
 
@@ -103,7 +160,9 @@ void Histogram::draw_graph( cairo_t *cr )
 	y_scale = compute_yscale_all_series(  );
 	
 	draw_axis_labels( cr );
-	draw_all_series ( cr );
+	for (int s=0; s<series_data.size(); s++)	
+		draw_graph_data ( cr, s );
+		
 		
 	//if (m_show_legend)		draw_legend	( cr );
 	if (m_show_grid)		draw_grid   ( cr );	

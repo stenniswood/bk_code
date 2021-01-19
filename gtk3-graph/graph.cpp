@@ -7,10 +7,6 @@
  
 
 
-#define CENTER_X (50.0)
-#define CENTER_Y (50.0)
-#define DATA_AREA_Y_SIZE   (100.-x_axis_margin-y_title_margin)
-#define CENTER_Y_DATAPOINT (DATA_AREA_Y_SIZE/2. + y_title_margin)
 
 #define LABEL_FONT_SIZE 2.0
 #define TITLE_FONT_SIZE 3.0

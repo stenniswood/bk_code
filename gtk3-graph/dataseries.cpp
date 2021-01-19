@@ -125,3 +125,15 @@ void	DataSeries::set_color( struct stColor mColor )
 {
 	m_color = mColor;
 }
+
+void	DataSeries::print_data			()
+{
+	printf("DataSeries: \n");
+	size_t len = size();
+	for (int i=0; i<len; i++)
+	{
+		printf("%7.4f, ", m_data[i].y);
+		
+	}
+}
+	
