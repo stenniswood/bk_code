@@ -26,6 +26,7 @@ void DataSeries::delete_all( )
 void	DataSeries::append_datum		( struct stDataPoint mNewDataPoint )
 {
 	m_data.push_back( mNewDataPoint );
+	reindex_x();
 }
 
 void	DataSeries::scroll_new_data		( struct stDataPoint mNewDataPoint )

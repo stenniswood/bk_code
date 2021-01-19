@@ -1,9 +1,17 @@
 #ifndef _GRAPH_HPP_
 #define _GRAPH_HPP_
 
-
+#include <gtk/gtk.h>
+#include <math.h>
+#include <cairo.h>
 #include <vector>
 #include "dataseries.hpp"
+
+
+#define CENTER_X (50.0)
+#define CENTER_Y (50.0)
+#define DATA_AREA_Y_SIZE   (100.-x_axis_margin-y_title_margin)
+#define CENTER_Y_DATAPOINT (DATA_AREA_Y_SIZE/2. + y_title_margin)
 
 
 
@@ -24,13 +32,6 @@ extern const struct stColor RED_BROWN    ;  // 56 23 22
 extern struct stColor pallette[14];
 
 
-/*struct stSeriesInfo 
-{
-	struct stDataPoint* data;
-	int     			data_length;
-	stColor 			color;
-	char 				name[80];
-};*/
 
 struct stTheme
 {
@@ -55,10 +56,13 @@ public:
 	
 	void  	show_legend			( bool mShow )	{  m_show_legend = mShow; };
 	void  	show_grid  			( bool mShow )	{  m_show_grid   = mShow; };
-	void  	add_data_series		( DataSeries& mSeries );
+	void  	add_data_series		( DataSeries& mSeries     );
 	void  	remove_data_series	( const char* mSeriesName );
+	int 	find_series_name	( const char* mName );
+	DataSeries* get_series_named( const char* mName );
 
 	void  	scroll_new_data		( int mSeriesIndex, struct stDataPoint mNewDataPoint );
+	void  	append_new_data		( int mSeriesIndex, struct stDataPoint mNewDataPoint );	
 	
 	
 	virtual void 	draw_graph      ( cairo_t *cr );
@@ -75,13 +79,13 @@ public:
 	gfloat 	get_min_y  			(struct stDataPoint* mDP, int mLength );
 	gfloat 	get_max_y  			(struct stDataPoint* mDP, int mLength ); */
 	
-	gfloat 	get_y_scale			( int mSeriesIndex );
+	virtual gfloat 	get_y_scale			( int mSeriesIndex );
 	gfloat 	compute_yscale_all_series(  );	
 	gfloat 	compute_xscale_all_series(  );
 
 	GtkWidget*   da;		
 protected:
-	int 	find_series_name( const char* mName );
+	
 	struct stTheme* theme;
 	std::vector<DataSeries>	 series_data;
 	GdkWindow*   window;

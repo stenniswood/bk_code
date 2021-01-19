@@ -137,7 +137,7 @@ struct stSnapShot {
 	float angle_p;
 	float angle_y;	
 };
-#define HISTORY_SIZE 1024
+#define HISTORY_SIZE 10240
 extern struct stSnapShot history[HISTORY_SIZE];
 extern int hist_index;
 

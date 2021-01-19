@@ -83,8 +83,7 @@ void 	init_hist_data	(  )
 		mNewDP.y = hdata[i].duration;
 		hd.append_datum( mNewDP );		
 	}
-		
-	hd.print_data();
+	
 	float min_y = hd.get_min_y();
 	float max_y = hd.get_max_y();
 	printf("MinY:%7.4f  %7.4f\n", min_y, max_y );
@@ -105,12 +104,10 @@ int main (int argc, char **argv)
 	my_graph.create_window(WIDTH, HEIGHT);
     g_timeout_add (1,  new_data_timeout, &my_graph);
     
-    
-	my_hist.show_grid		( false );
+    my_hist.show_grid		( true );
 	init_hist_data  		(       );
 
-	my_hist.compute_stats	( 0 );
-	//my_hist.bin_data		( 0 );
+	my_hist.compute_stats	( 0, 20 );
 	my_hist.print_bins();
 	my_hist.create_window(640, HEIGHT);    
     

@@ -6,6 +6,8 @@
 #include "MPU6050.h"
 #include "i2c_switching.hpp"
 
+#include "graph.hpp"
+#include "dataseries.hpp"
 
 int file_i2c;
 
@@ -214,12 +216,38 @@ void MPU6050_Velocity::add_to_history()
 
 }
 
+extern Graph mpu_graph;
+
+void add_to_graph( int hist_index )
+{
+	struct stSnapShot* dd;
+	dd = &(history[hist_index]);
+
+	struct stDataPoint dp;
+	dp.y = dd->a_x;
+	dp.x = 100;
+	int s_index = mpu_graph.find_series_name	( "accel x" );
+	mpu_graph.append_new_data			( s_index, dp );
+
+	dp.y = dd->a_y;
+	dp.x = 100;
+	s_index = mpu_graph.find_series_name	( "accel y" );
+	mpu_graph.append_new_data		( s_index, dp );
+
+	dp.y = dd->angle_p;
+	dp.x = 100;
+	s_index = mpu_graph.find_series_name	( "pitch" );
+	mpu_graph.append_new_data		( s_index, dp );
+			
+}
+
 void MPU6050_Velocity::update()
 {
 	while (1) {
 		//printf("\n\nMPU6050_Velocity::update()  %d\n", hist_index);
 	
 		MPU6050::_update();
+		add_to_graph( hist_index );
 		add_to_history();
 		print_history_item( hist_index );
 	

@@ -26,6 +26,7 @@ void DataSeries::delete_all( )
 void	DataSeries::append_datum		( struct stDataPoint mNewDataPoint )
 {
 	m_data.push_back( mNewDataPoint );
+	reindex_x();
 }
 
 void	DataSeries::scroll_new_data		( struct stDataPoint mNewDataPoint )
@@ -125,3 +126,15 @@ void	DataSeries::set_color( struct stColor mColor )
 {
 	m_color = mColor;
 }
+
+void	DataSeries::print_data			()
+{
+	printf("DataSeries: \n");
+	size_t len = size();
+	for (int i=0; i<len; i++)
+	{
+		printf("%7.4f, ", m_data[i].y);
+		
+	}
+}
+	

@@ -92,6 +92,17 @@ int main(int argc, char **argv)
 	if (ShowGraph) {
 	    gtk_init (&argc, &argv);
 		mpu_graph.create_window( 960, 480 );
+
+		DataSeries ds;
+		ds.set_name("accel x");
+		mpu_graph.add_data_series( ds );
+		
+		ds.set_name("accel y");
+		mpu_graph.add_data_series( ds );
+
+		ds.set_name("pitch");
+		mpu_graph.add_data_series( ds );
+		
 	    gtk_main ();	
 	}
 	

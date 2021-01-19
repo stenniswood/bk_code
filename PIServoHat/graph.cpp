@@ -1,16 +1,8 @@
-#include <gtk/gtk.h>
-#include <math.h>
-#include <cairo.h>
-
 
 #include "graph.hpp"
  
 
 
-#define CENTER_X (50.0)
-#define CENTER_Y (50.0)
-#define DATA_AREA_Y_SIZE   (100.-x_axis_margin-y_title_margin)
-#define CENTER_Y_DATAPOINT (DATA_AREA_Y_SIZE/2. + y_title_margin)
 
 #define LABEL_FONT_SIZE 2.0
 #define TITLE_FONT_SIZE 3.0
@@ -157,6 +149,17 @@ int Graph::find_series_name( const char* mName )
 			return series;
 	}	
 	return -1;
+}
+
+DataSeries* Graph::get_series_named	( const char* mName )
+{
+	int s_index = find_series_name( mName );
+	return &(series_data[s_index]);	
+}
+
+void Graph::append_new_data( int mSeriesIndex, struct stDataPoint mNewDataPoint )
+{
+	series_data[mSeriesIndex].append_datum(mNewDataPoint);
 }
 
 /* Keep same buffer but scroll everything by 1 datapoint.  Append the new Data point
