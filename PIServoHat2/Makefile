@@ -5,7 +5,7 @@ INC		   = ./ /usr/local/include
 
 SRCS  = main.o sserial.o scan_usb_devs.o drive_five.o i2c_switching.o stance_catagory.o \
 	arm.o vector.o servo.o dfServo.o rcServo.o limb.o robot.o MPU6050.o jog_mode.o \
-	graph.o dataseries.o
+	graph.o dataseries.o read_pendant.o
  
 
 ALL_SRCS = $(SRCS)
@@ -16,7 +16,7 @@ else
 	LIBS = 
 endif
 
-LIBS +=  -lpthread -lm -L/usr/local/lib/ -L/usr/lib/arm-linux-gnueabihf/ -li2c \
+LIBS +=  -lpthread -lm -lcurl -L/usr/local/lib/ -L/usr/lib/arm-linux-gnueabihf/ -li2c \
 	`pkg-config --libs gtk+-3.0`
 
 

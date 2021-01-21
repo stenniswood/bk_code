@@ -39,7 +39,8 @@ struct stTheme
 	stColor		title_text;
 	stColor		axis_area_background;
 	stColor		axis;
-	stColor		grid;	
+	stColor		grid;
+	stColor		legend_text;
 	int 		skip_pallette_index;		// no white on white/  black on black.
 };
 
@@ -53,7 +54,8 @@ public:
 	void	create_window		( int mWidth, int mHeight   );
 	void 	set_theme			( struct stTheme* mNewTheme );
 	void	set_window			( GtkWidget *widget );
-	
+
+	void  	show_stats			( bool mShow )	{  m_show_stats  = mShow; };	
 	void  	show_legend			( bool mShow )	{  m_show_legend = mShow; };
 	void  	show_grid  			( bool mShow )	{  m_show_grid   = mShow; };
 	void  	add_data_series		( DataSeries& mSeries     );
@@ -63,14 +65,16 @@ public:
 
 	void  	scroll_new_data		( int mSeriesIndex, struct stDataPoint mNewDataPoint );
 	void  	append_new_data		( int mSeriesIndex, struct stDataPoint mNewDataPoint );	
-	
+	void	reindex_x		( int mSeriesIndex );	
 	
 	virtual void 	draw_graph      ( cairo_t *cr );
-	void 	draw_all_series 	( cairo_t *cr);
-	void 	draw_legend     	( cairo_t *cr );
-	void 	draw_title      	( cairo_t *cr );
-	void 	draw_grid			( cairo_t *cr );	
-	void 	draw_axis_labels	( cairo_t *cr );
+	void 	draw_all_series 		( cairo_t *cr );
+	double  compute_max_text_extent	( cairo_t *cr );
+	void 	draw_stats				( cairo_t *cr );
+	void 	draw_legend     		( cairo_t *cr );
+	void 	draw_title      		( cairo_t *cr );
+	void 	draw_grid				( cairo_t *cr );	
+	void 	draw_axis_labels		( cairo_t *cr );
 
 	char*	get_title			()		{ return title; };
 	
@@ -99,7 +103,9 @@ protected:
 	float y_scale;
 	bool  m_show_legend;
 	bool  m_show_grid;
-
+	bool  m_show_stats;
+	bool  m_independant_scales;
+	
 private:    		
 	char  title[128];
 	char  xaxis_label[128];

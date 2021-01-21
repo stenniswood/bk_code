@@ -11,6 +11,14 @@ DataSeries::DataSeries()
 //:m_data(10240, { 0.0, 0.0 } )
 {
 	strcpy (m_name, "unnamed");	
+	m_scale = 1.0;
+}
+
+DataSeries::DataSeries( const DataSeries& ds )
+: m_data( ds.m_data )
+{
+   strcpy (m_name, ds.m_name );     
+   m_color = ds.m_color;
 }
 
 DataSeries::~DataSeries()
@@ -23,6 +31,16 @@ void DataSeries::delete_all( )
 	m_data.erase( m_data.begin(), m_data.end() );
 }
 
+struct stDataPoint tmpDP;
+
+struct stDataPoint*	DataSeries::get_scaled_data( int mIndex )		
+{ 
+	tmpDP.x = m_data[mIndex].x;
+	tmpDP.y = (m_data[mIndex].y - m_yoffset) * m_scale;
+	
+	return &(tmpDP); 
+};
+
 void	DataSeries::append_datum		( struct stDataPoint mNewDataPoint )
 {
 	m_data.push_back( mNewDataPoint );
@@ -31,8 +49,8 @@ void	DataSeries::append_datum		( struct stDataPoint mNewDataPoint )
 
 void	DataSeries::scroll_new_data		( struct stDataPoint mNewDataPoint )
 {
-	
-	m_data.erase( m_data.begin() );
+	if (m_data.size() > 1)
+		m_data.erase( m_data.begin() );
 	m_data.push_back( mNewDataPoint );
 	reindex_x();
 }

@@ -3,6 +3,8 @@
 //Licensed under the CC BY-NC SA 4.0
 
 //Include the header file for this class
+#include <unistd.h>
+
 #include "MPU6050.h"
 #include "i2c_switching.hpp"
 
@@ -217,28 +219,74 @@ void MPU6050_Velocity::add_to_history()
 }
 
 extern Graph mpu_graph;
+#define SCROLL_THRESHOLD HISTORY_SIZE
+bool above_threshold = false;
+
+void add_dp ( std::vector<DataSeries>&  series_data, int s_index, stDataPoint mDP )
+{
+	if (s_index>=0) {
+		if (above_threshold)
+			mpu_graph.scroll_new_data	( s_index, dp );
+		else
+			mpu_graph.append_new_data	( s_index, dp );
+	}else {
+//		printf("Err: series named 'accel x' Not Found! \n" );	
+	}
+}
 
 void add_to_graph( int hist_index )
 {
 	struct stSnapShot* dd;
 	dd = &(history[hist_index]);
+	// This is a one way.  We don't return to appending data. Once scrolling always scroll
+	if (above_threshold==false)
+		above_threshold = (hist_index > SCROLL_THRESHOLD);
 
 	struct stDataPoint dp;
 	dp.y = dd->a_x;
 	dp.x = 100;
-	int s_index = mpu_graph.find_series_name	( "accel x" );
-	mpu_graph.append_new_data			( s_index, dp );
-
+	int s_index = mpu_graph.find_series_name( "accel x" );
+	add_dp( series_data, s_index, dp );
+	
 	dp.y = dd->a_y;
 	dp.x = 100;
 	s_index = mpu_graph.find_series_name	( "accel y" );
-	mpu_graph.append_new_data		( s_index, dp );
+	add_dp( series_data, s_index, dp );
 
+	dp.y = dd->a_z;
+	dp.x = 100;
+	s_index = mpu_graph.find_series_name	( "accel y" );
+	add_dp( series_data, s_index, dp );
+
+	// Gyro:
+	dp.y = dd->g_r;
+	dp.x = 100;
+	s_index = mpu_graph.find_series_name	( "g roll" );
+	add_dp( series_data, s_index, dp );
+	dp.y = dd->g_p;
+	dp.x = 100;
+	s_index = mpu_graph.find_series_name	( "g pitch" );
+	add_dp( series_data, s_index, dp );
+	dp.y = dd->g_y;
+	dp.x = 100;
+	s_index = mpu_graph.find_series_name	( "g yaw" );
+	add_dp( series_data, s_index, dp );
+
+	// Angles:
+	dp.y = dd->angle_r;
+	dp.x = 100;
+	s_index = mpu_graph.find_series_name	( "roll" );
+	add_dp( series_data, s_index, dp );
 	dp.y = dd->angle_p;
 	dp.x = 100;
 	s_index = mpu_graph.find_series_name	( "pitch" );
-	mpu_graph.append_new_data		( s_index, dp );
-			
+	add_dp( series_data, s_index, dp );
+	dp.y = dd->angle_y;
+	dp.x = 100;
+	s_index = mpu_graph.find_series_name	( "yaw" );
+	add_dp( series_data, s_index, dp );
+	
+	//printf("\n");
 }
 
 void MPU6050_Velocity::update()
@@ -247,13 +295,15 @@ void MPU6050_Velocity::update()
 		//printf("\n\nMPU6050_Velocity::update()  %d\n", hist_index);
 	
 		MPU6050::_update();
-		add_to_graph( hist_index );
 		add_to_history();
-		print_history_item( hist_index );
+		add_to_graph( hist_index );
+		//print_history_item( hist_index );
 	
 		hist_index++;
 		if (hist_index>=HISTORY_SIZE)
 			hist_index = 0;	
+			
+		usleep(2000);
 	}
 }
 

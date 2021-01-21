@@ -21,6 +21,7 @@ class DataSeries
 {
 public:
 	DataSeries();
+	DataSeries( const DataSeries& ds );
 	~DataSeries();
 	
 
@@ -30,7 +31,15 @@ public:
 
 	void	set_name			( const char* mName );
 	char* 	get_name			(  )	{ return m_name;  };
+
+	void	set_scale			( float mScale )		{ m_scale = mScale; };
+	float 	get_scale			( )						{ return m_scale;  };
+	void	set_yoffset			( float mYoffset )		{ m_yoffset = mYoffset; };
+	float 	get_yoffset			( )						{ return m_yoffset;  };
+
+	
 	struct stDataPoint*	get_data( int mIndex )		{ return &(m_data[mIndex]); };
+	struct stDataPoint*	get_scaled_data( int mIndex );
 
 	void	set_color			( struct stColor mColor );
 	struct stColor	get_color	()		{ return m_color;  };
@@ -54,6 +63,8 @@ protected:
 
 
 private:
+	float	m_scale;
+	float	m_yoffset;
 	std::vector<struct stDataPoint>	m_data;
 	char 	m_name[128];
 	double	m_mean;

@@ -21,7 +21,7 @@
 #include "i2c_switching.hpp"
 #include "jog_mode.hpp"
 #include "graph.hpp"
-
+#include "read_pendant.h"
 
 //int file_i2c;
 
@@ -68,46 +68,11 @@ void exit_save_positions(int, void*)
 
 bool ShowGraph = false;
 
-int main(int argc, char **argv)
-{	
-	if (argc>1)
-	{
-		int result = strcmp(argv[1], "gui");
-		if (result==0)
-			ShowGraph = true;
-	}
-	
-//	int result = on_exit(  exit_save_positions, NULL);
-//	if (result!=0) printf("Warning cannot set the on_exit function!\n");
-
-	walker.print_robot_setup();
-	
-	initialize_RPI_servo_hat(walker);
-	switch_to_servo_hat();	
-
-#ifdef SERVO_TEST 	
-	while(1)	direct_servo_write_test();	
-#endif
-	
-	if (ShowGraph) {
-	    gtk_init (&argc, &argv);
-		mpu_graph.create_window( 960, 480 );
-
-		DataSeries ds;
-		ds.set_name("accel x");
-		mpu_graph.add_data_series( ds );
+void main_processing()
+{
+	while(1) {
+		int  presult = read_pendant();
 		
-		ds.set_name("accel y");
-		mpu_graph.add_data_series( ds );
-
-		ds.set_name("pitch");
-		mpu_graph.add_data_series( ds );
-		
-	    gtk_main ();	
-	}
-	
-	while (1) 
-	{	
 		walker.play_active_vector();
 		if (running)
 		{
@@ -156,17 +121,55 @@ int main(int argc, char **argv)
 		{
 			printf("Quitting...\n");				
 			exit(0);
-		}
-		//setbuf(stdin, NULL);
-		
+		}		
 		usleep(200000); 
-/*
-For 20Kg Red Servo:
-	350    -90deg
-	524
-	1024
-	2048   +90deg
-*/
+	}
+}
+
+int main(int argc, char **argv)
+{	
+	if (argc>1)
+	{
+		int result = strcmp(argv[1], "gui");
+		if (result==0)
+			ShowGraph = true;
+	}
+	
+//	int result = on_exit(  exit_save_positions, NULL);
+//	if (result!=0) printf("Warning cannot set the on_exit function!\n");
+
+	walker.print_robot_setup();
+	
+	initialize_RPI_servo_hat(walker);
+	switch_to_servo_hat();	
+
+#ifdef SERVO_TEST 	
+	while(1)	direct_servo_write_test();	
+#endif
+	
+	std::thread(&main_processing).detach(); //Create a seperate thread, for the update routine to run in the background, and detach it, allowing the program to continue	
+		
+	if (ShowGraph) {
+		printf("\n\n*** SHOWING GRAPH...\n\n");
+	    gtk_init (&argc, &argv);
+		mpu_graph.create_window( 960, 480 );
+
+		DataSeries ds;
+		ds.set_name("accel x");
+		mpu_graph.add_data_series( ds );
+		
+		ds.set_name("accel y");
+		mpu_graph.add_data_series( ds );
+
+		ds.set_name("pitch");
+		mpu_graph.add_data_series( ds );
+		
+	    gtk_main ();	
+	}
+	
+	while (1) 
+	{			
+		usleep(200000); 
 	}
 
   return 0;
