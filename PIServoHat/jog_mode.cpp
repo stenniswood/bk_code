@@ -46,7 +46,26 @@ struct stOneCounts tmpL1;// = walker.get_active_vector_package();
 struct stOneCounts tmpL2;// = walker.get_active_vector_package();
 
 
+void help()
+{
+printf("Available Commands:\
+q,Q : serv0 up;		a,A : serv0 down;	1 : mark s0 min; ! : mark s0 max;\n	\
+w,W : serv0 up;		s,S : serv0 down;	2 : mark s0 min; @ : mark s0 max;\n	\
+e,E : serv0 up;		d,D : serv0 down;	3 : mark s0 min; # : mark s0 max;\n	\
+\n\
+r,R : serv0 up;		f,F : serv0 down;	4 : mark s0 min; $ : mark s0 max;\n	\
+t,T : serv0 up;		g,G : serv0 down;	5 : mark s0 min; % : mark s0 max;\n	\
+y,Y : serv0 up;		h,H : serv0 down;	6 : mark s0 min; ^ : mark s0 max;\n	\
+\n\
+z,x,c,v,b,n : Mark servo[0..5] center positions respectively.\n	\
+Z,X,C,V,B,N : Toggle servo[0..5] min,max,center positions respectively.\n	\
+\n \
+/ : show calibrations\n \
+> : save calibrations\n \
+");
+	
 
+}
 
 void mark_cal_min ( Servo* serv )
 {
@@ -189,7 +208,9 @@ void jog_mode( Robot& walker )
 			walker.actuate_vector( tmpL2 );		
 		}
 
-		if (input2 == '?')	{ 
+		if (input2 == '?')
+			help();
+		if (input2 == '/')	{ 
 			// Save Calibrations
 			walker.show_calibrations();
 		}

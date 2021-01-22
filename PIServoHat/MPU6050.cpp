@@ -116,9 +116,8 @@ int MPU6050::getAngle(int axis, float *result) {
 }
 
 void MPU6050::_update() 
-{  //Main update function - runs continuously
-	return; 
-	
+{  
+    //Main update function - runs continuously	
 	if (_first_run)
 		clock_gettime(CLOCK_REALTIME, &start); //Read current time into start variable
 
