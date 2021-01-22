@@ -4,6 +4,7 @@
 
 //Include the header file for this class
 #include <unistd.h>
+#include <assert.h>
 
 #include "MPU6050.h"
 #include "i2c_switching.hpp"
@@ -47,8 +48,6 @@ MPU6050::MPU6050(int8_t addr) {
 
 	//Set offsets to zero
 	i2c_smbus_write_byte_data(f_dev, 0x06, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x07, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x08, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x09, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x0A, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x0B, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x00, 0b10000001), i2c_smbus_write_byte_data(f_dev, 0x01, 0b00000001), i2c_smbus_write_byte_data(f_dev, 0x02, 0b10000001);
-
-
 }
 
 void MPU6050::getGyroRaw(float *roll, float *pitch, float *yaw) {
@@ -116,8 +115,12 @@ int MPU6050::getAngle(int axis, float *result) {
 	}
 }
 
-void MPU6050::_update() { //Main update function - runs continuously
-	clock_gettime(CLOCK_REALTIME, &start); //Read current time into start variable
+void MPU6050::_update() 
+{  //Main update function - runs continuously
+	return; 
+	
+	if (_first_run)
+		clock_gettime(CLOCK_REALTIME, &start); //Read current time into start variable
 
 	//while (1) 
 	{ //Loop forever
@@ -218,19 +221,21 @@ void MPU6050_Velocity::add_to_history()
 
 }
 
-extern Graph mpu_graph;
+extern  Graph mpu_graph;
 #define SCROLL_THRESHOLD HISTORY_SIZE
-bool above_threshold = false;
+bool    above_threshold = false;
 
-void add_dp ( std::vector<DataSeries>&  series_data, int s_index, stDataPoint mDP )
+void add_dp ( DataSeries*  series_data, stDataPoint& mDP )
 {
-	if (s_index>=0) {
+	assert(series_data);
+	
+	if (series_data) {
 		if (above_threshold)
-			mpu_graph.scroll_new_data	( s_index, dp );
+			series_data->scroll_new_data( mDP );
 		else
-			mpu_graph.append_new_data	( s_index, dp );
+			series_data->append_datum	( mDP );
 	}else {
-//		printf("Err: series named 'accel x' Not Found! \n" );	
+//		printf("Err: series named 'accel x' Not Found! \n" );
 	}
 }
 
@@ -245,46 +250,55 @@ void add_to_graph( int hist_index )
 	struct stDataPoint dp;
 	dp.y = dd->a_x;
 	dp.x = 100;
-	int s_index = mpu_graph.find_series_name( "accel x" );
-	add_dp( series_data, s_index, dp );
+	DataSeries* ds = mpu_graph.get_series_named( "accel x" );
+	if (ds)
+		add_dp( ds, dp );
 	
 	dp.y = dd->a_y;
 	dp.x = 100;
-	s_index = mpu_graph.find_series_name	( "accel y" );
-	add_dp( series_data, s_index, dp );
+	ds = mpu_graph.get_series_named( "accel y" );
+	if (ds)
+		add_dp( ds, dp );
 
 	dp.y = dd->a_z;
 	dp.x = 100;
-	s_index = mpu_graph.find_series_name	( "accel y" );
-	add_dp( series_data, s_index, dp );
+	ds = mpu_graph.get_series_named( "accel z" );
+	if (ds)
+		add_dp( ds, dp );
 
 	// Gyro:
 	dp.y = dd->g_r;
 	dp.x = 100;
-	s_index = mpu_graph.find_series_name	( "g roll" );
-	add_dp( series_data, s_index, dp );
+	ds = mpu_graph.get_series_named( "g roll" );
+	if (ds)
+		add_dp( ds, dp );
 	dp.y = dd->g_p;
 	dp.x = 100;
-	s_index = mpu_graph.find_series_name	( "g pitch" );
-	add_dp( series_data, s_index, dp );
+	ds = mpu_graph.get_series_named( "g pitch" );
+	if (ds)
+		add_dp( ds, dp );
 	dp.y = dd->g_y;
 	dp.x = 100;
-	s_index = mpu_graph.find_series_name	( "g yaw" );
-	add_dp( series_data, s_index, dp );
+	ds = mpu_graph.get_series_named( "g yaw" );
+	if (ds)
+		add_dp( ds, dp );
 
 	// Angles:
 	dp.y = dd->angle_r;
 	dp.x = 100;
-	s_index = mpu_graph.find_series_name	( "roll" );
-	add_dp( series_data, s_index, dp );
+	ds = mpu_graph.get_series_named( "roll" );
+	if (ds)
+		add_dp( ds, dp );
 	dp.y = dd->angle_p;
 	dp.x = 100;
-	s_index = mpu_graph.find_series_name	( "pitch" );
-	add_dp( series_data, s_index, dp );
+	ds = mpu_graph.get_series_named( "pitch" );
+	if (ds)
+		add_dp( ds, dp );
 	dp.y = dd->angle_y;
 	dp.x = 100;
-	s_index = mpu_graph.find_series_name	( "yaw" );
-	add_dp( series_data, s_index, dp );
+	ds = mpu_graph.get_series_named( "yaw" );
+	if (ds)
+		add_dp( ds, dp );
 	
 	//printf("\n");
 }

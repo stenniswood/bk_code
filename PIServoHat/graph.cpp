@@ -77,7 +77,7 @@ void Graph::set_theme( struct stTheme* mNewTheme )
 #include "read_pendant.h"
 
 float yMultiplier[6];
-float yShiftOffset[6];
+float yShiftOffset[4];
 
 static gboolean on_draw (GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
@@ -185,7 +185,10 @@ int Graph::find_series_name( const char* mName )
 DataSeries* Graph::get_series_named	( const char* mName )
 {
 	int s_index = find_series_name( mName );
-	return &(series_data[s_index]);	
+	if (s_index>=0)
+		return &(series_data[s_index]);	
+	else 
+		return NULL;
 }
 
 void Graph::append_new_data( int mSeriesIndex, struct stDataPoint mNewDataPoint )

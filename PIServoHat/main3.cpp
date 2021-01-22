@@ -23,6 +23,7 @@
 #include "graph.hpp"
 #include "read_pendant.h"
 
+//int file_i2c;
 
 //DriveFive df_lArm( "/dev/ttyUSB1");
 //DriveFive df_rArm( "/dev/ttyUSB0");
@@ -70,7 +71,7 @@ bool ShowGraph = false;
 void main_processing()
 {
 	while(1) {
-		//int  presult = read_pendant();
+		int  presult = read_pendant();
 		
 		walker.play_active_vector();
 		if (running)
@@ -147,7 +148,7 @@ int main(int argc, char **argv)
 #endif
 	
 	std::thread(&main_processing).detach(); //Create a seperate thread, for the update routine to run in the background, and detach it, allowing the program to continue	
-	
+		
 	if (ShowGraph) {
 		printf("\n\n*** SHOWING GRAPH...\n\n");
 	    gtk_init (&argc, &argv);
@@ -162,6 +163,7 @@ int main(int argc, char **argv)
 
 		ds.set_name("accel z");
 		mpu_graph.add_data_series( ds );
+
 
 		ds.set_name("pitch");
 		mpu_graph.add_data_series( ds );

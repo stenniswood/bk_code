@@ -25,9 +25,9 @@ void initialize_RPI_servo_hat( Robot& mRobot )
 //  file_i2c = mRobot.device.f_dev;
   printf("Initialized i2c file_i2c=%d\n", file_i2c);
   
-  switch_to_servo_hat();
+  //switch_to_servo_hat();
 
-/*  int addr = 0x40;    				// PCA9685 address
+  int addr = 0x40;    				// PCA9685 address
   ioctl(file_i2c, I2C_SLAVE, addr); // Set the I2C address for upcoming
                                     //  transactions
 
@@ -42,7 +42,7 @@ void initialize_RPI_servo_hat( Robot& mRobot )
   // Enable multi-byte writing.
   buffer[0] = 0xfe;  
   buffer[1] = 0x1e;
-  write(file_i2c, buffer, length);*/
+  write(file_i2c, buffer, length);
 
 }
 

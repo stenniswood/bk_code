@@ -36,7 +36,7 @@ public:
 	unsigned short  convert_deg_to_counts ( float mDegrees );
 	float 		    convert_counts_to_degs( float mCounts  );
 
-	virtual unsigned short	get_counts( 						) = 0;	
+	virtual unsigned short	get_counts( 				) = 0;	
 	virtual float	get_angle (  						) = 0;	
 	virtual	void    angle_to  ( float mDegree 		 	) = 0;
 	virtual	void    count_to  ( unsigned short mCounts 	) = 0;

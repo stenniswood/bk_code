@@ -84,7 +84,9 @@ void retrieve_current_counts( struct stOneCounts& tmpL, Limb* mlimb )
 	}
 }
 
-
+/*
+	
+*/
 void init_vects( Robot& walker )
 {
 	tmpL1.limb_num = 0;
@@ -187,11 +189,16 @@ void jog_mode( Robot& walker )
 			walker.actuate_vector( tmpL2 );		
 		}
 
+		if (input2 == '?')	{ 
+			// Save Calibrations
+			walker.show_calibrations();
+		}
 		if (input2 == '>')	{ 
 			// Save Calibrations
 			walker.save_calibrations("calibrations_newest.csv");
 		}
-		if (input2 == '=')	{ 
+		if ((input2 == '0') || (input2 == '='))	
+		{ 
 			walker.actuate_centers();
 			Limb* limb = walker.get_limb(0);
 			retrieve_current_counts( tmpL1, limb );

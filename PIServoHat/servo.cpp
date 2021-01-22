@@ -120,10 +120,11 @@ void Servo::parse_cal_line( std::string mStr )
 void Servo::print_parameters()
 {
 	char tmp[256];
-	sprintf(tmp, "%d, %d, %4d, %6.2f, %6.2f %6.2f", cal_min, cal_max, cal_center, Deg_min, Deg_max, Deg_center );
+	sprintf(tmp, "%d, %d, %4d, %6.2f, %6.2f %6.2f", 
+				cal_min, cal_max, cal_center, 
+				Deg_min, Deg_max, Deg_center );
 	size_t len = strlen( tmp );
 	printf("%s\n", tmp);
-
 }
 
 float Servo::get_angle()  
@@ -151,7 +152,7 @@ void Servo::save_cal_file_line( FILE* fd )
 	char tmp[256];
 	sprintf(tmp, "%d, %d, %4d, %6.2f, %6.2f, %6.2f\n", cal_min, cal_max, cal_center, Deg_min, Deg_max, Deg_center );
 	size_t len = strlen( tmp );
-	printf("%s\n", tmp);
+	printf("%s", tmp);
 	
 	fwrite( tmp, 1, len, fd );
 }

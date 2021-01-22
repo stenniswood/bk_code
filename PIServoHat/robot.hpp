@@ -35,7 +35,8 @@ public:
 	
 
 	Servo*				get_servo_handle( int mLimbIndex, int mServoIndex );
-	
+
+	void 				show_calibrations  ( );
 	void				read_servo_positions( std::string mCountsFileName );
 	void				save_servo_positions( std::string mCountsFileName );
 	FILE*  				save_calibrations  ( std::string mFilename );

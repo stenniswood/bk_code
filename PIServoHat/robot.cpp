@@ -161,10 +161,21 @@ void Robot::save_servo_positions( std::string mCountsFileName )
 	}	
 	fclose(fd);
 }
+
+void Robot::show_calibrations  ( )
+{
+	printf("\nC  : MIN MAX CENTER  D: MIN MAX CNTR \n" );
 	
+	for (int l=0; l<m_limbs.size(); l++)
+	{
+		m_limbs[l].print_parameters( );
+	}
+	printf("-------------------------------------------\n" );
+}	
+
 FILE* Robot::save_calibrations  ( std::string mFilename )
 {
-	printf("SAVE_CALIBRATINS....%s\n", mFilename.c_str() );
+	printf("SAVE_CALIBRATIONS....%s\n", mFilename.c_str() );
 	
 	FILE* fd = fopen( mFilename.c_str(), "wr+" );
 	if (fd==0) perror("Error cannot open cal file for writing.\n");
@@ -174,6 +185,8 @@ FILE* Robot::save_calibrations  ( std::string mFilename )
 		m_limbs[l].save_limb_calibrations( fd );
 	}
 	fclose( fd );
+	printf("\n");
+	
 	return NULL;
 }
 
