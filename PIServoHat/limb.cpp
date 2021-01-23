@@ -34,7 +34,6 @@ void	Limb::load_limb_structure( std::ifstream& mFile )
 	std::string num_servos_str = oneLine.substr( 0, 1 );
 	int num_servos = atoi( num_servos_str.c_str() );	
 	//printf("Limb::load_limb_structure has %d servos\n", num_servos);
-
 	
 	// LOAD CALIBRATION INFO FOR EACH SERVO:	
 	for (int i=0; i<num_servos; i++)
@@ -55,12 +54,16 @@ void	Limb::load_limb_structure( std::ifstream& mFile )
 				rc_num = atoi( rc_num_str.c_str() );				
 			}		
 			Servo* tmp = new rcServo( rc_num );
-
+			
+			//printf("Creating Servo id=%d\n", rc_num);
+			
 			// PROCESS REMAINDER OF LINE :
 			std::string subLine = oneLine.substr( pos+1, -1 );
 			//printf("pos=%d; subLine=%s;  rc_num=%d\n", pos, subLine.c_str(), rc_num );
 			tmp->parse_cal_line( subLine.c_str() );
-			m_servos.push_back( tmp );				
+			m_servos.push_back( tmp );	
+			// DEBUG:
+			//(m_servos.back())->print_parameters();			
 		}
 		else
 		{	

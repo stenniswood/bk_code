@@ -18,6 +18,10 @@ struct stOneCounts
 {
 	int limb_num;	
 	std::vector<unsigned short>	m_counts;
+	void 	print() {
+		for (int i=0; i<m_counts.size(); i++)
+			printf("%d ", m_counts[i]);
+	}	
 };
 
 

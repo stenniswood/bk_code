@@ -55,7 +55,7 @@ void direct_servo_write_test()
 #endif
 
 
-Robot walker("robot_setup.csv");
+Robot walker("robot_setup.ini");
 
 
 void exit_save_positions(int, void*)
@@ -127,16 +127,20 @@ void main_processing()
 
 int main(int argc, char **argv)
 {	
+	std::string SeqFN = "walk.txt";
 	if (argc>1)
 	{
 		int result = strcmp(argv[1], "gui");
 		if (result==0)
 			ShowGraph = true;
+		else 
+			SeqFN = argv[1];
 	}
 	
 //	int result = on_exit(  exit_save_positions, NULL);
 //	if (result!=0) printf("Warning cannot set the on_exit function!\n");
 
+	walker.read_vector_file( SeqFN );
 	walker.print_robot_setup();
 	
 	initialize_RPI_servo_hat(walker);

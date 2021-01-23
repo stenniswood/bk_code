@@ -117,13 +117,14 @@ void init_vects( Robot& walker )
 	for (int i=0; i<num_servs; i++)	
 		tmpL1.m_counts.push_back( 0 );		
 	retrieve_current_counts( tmpL1, limb );
-	
+	printf("Num Servos on Limb0 : %d", num_servs);
 	// LIMB #1
 	limb = walker.get_limb(1);
 	num_servs = limb->get_num_servos();
 	for (int i=0; i<num_servs; i++)	
 		tmpL2.m_counts.push_back( 0 );
 	retrieve_current_counts( tmpL2, limb );
+	printf("Num Servos on Limb1 : %d", num_servs);
 }
 
 void jog_mode( Robot& walker )
@@ -156,6 +157,10 @@ void jog_mode( Robot& walker )
 		if (input2 == '6')	{  serv = walker.get_servo_handle(1, 2);  mark_cal_min( serv );  }
 		if (input2 == '^')	{  serv = walker.get_servo_handle(1, 2);  mark_cal_max( serv );  }
 
+		if (input2 == '7')	{  serv = walker.get_servo_handle(1, 3);  mark_cal_min( serv );  }
+		if (input2 == '&')	{  serv = walker.get_servo_handle(1, 3);  mark_cal_max( serv );  }
+		if (input2 == '8')	{  serv = walker.get_servo_handle(1, 3);  mark_cal_min( serv );  }
+		if (input2 == '*')	{  serv = walker.get_servo_handle(1, 3);  mark_cal_max( serv );  }
 		
 		// KEYS TO MARK CALIBRATION ZERO: (servos: 0..2)
 		if (input2 == 'z')	{  serv = walker.get_servo_handle(0, 0);  mark_cal_center( serv );  }
@@ -165,33 +170,49 @@ void jog_mode( Robot& walker )
 		if (input2 == 'b')	{  serv = walker.get_servo_handle(1, 1);  mark_cal_center( serv );  }
 		if (input2 == 'n')	{  serv = walker.get_servo_handle(1, 2);  mark_cal_center( serv );  }
 
+		if (input2 == 'm')	{  serv = walker.get_servo_handle(0, 3);  mark_cal_center( serv );  }
+		if (input2 == ',')	{  serv = walker.get_servo_handle(1, 3);  mark_cal_center( serv );  }
+
+#define LARGE_INC 15
+#define SMALL_INC 1
+
 		// KEYS TO ADJUST SERVO POSITIONS (JOG style):	(servo #0..2)			
-		if (input2 == 'q')	{ tmpL1.m_counts[0] -= 1;	 }
-		if (input2 == 'a')	{ tmpL1.m_counts[0] += 1;	 }
-		if (input2 == 'w')	{ tmpL1.m_counts[1] -= 1;	 }
-		if (input2 == 's')	{ tmpL1.m_counts[1] += 1;	 }
-		if (input2 == 'e')	{ tmpL1.m_counts[2] -= 1;	 }
-		if (input2 == 'd')	{ tmpL1.m_counts[2] += 1;	 }
-		if (input2 == 'Q')	{ tmpL1.m_counts[0] -= 5;	 }
-		if (input2 == 'A')	{ tmpL1.m_counts[0] += 5;	printf("L1[0] counts=%d", tmpL1.m_counts[0]); }
-		if (input2 == 'W')	{ tmpL1.m_counts[1] -= 5;	 }
-		if (input2 == 'S')	{ tmpL1.m_counts[1] += 5;	 }
-		if (input2 == 'E')	{ tmpL1.m_counts[2] -= 5;	 }
-		if (input2 == 'D')	{ tmpL1.m_counts[2] += 5;	 }
+		if (input2 == 'q')	{ tmpL1.m_counts[0] -= SMALL_INC;	 }
+		if (input2 == 'a')	{ tmpL1.m_counts[0] += SMALL_INC;	 }
+		if (input2 == 'w')	{ tmpL1.m_counts[1] -= SMALL_INC;	 }
+		if (input2 == 's')	{ tmpL1.m_counts[1] += SMALL_INC;	 }
+		if (input2 == 'e')	{ tmpL1.m_counts[2] -= SMALL_INC;	 }
+		if (input2 == 'd')	{ tmpL1.m_counts[2] += SMALL_INC;	 }
+		if (input2 == 'Q')	{ tmpL1.m_counts[0] -= LARGE_INC;	 }
+		if (input2 == 'A')	{ tmpL1.m_counts[0] += LARGE_INC;	printf("L1[0] counts=%d", tmpL1.m_counts[0]); }
+		if (input2 == 'W')	{ tmpL1.m_counts[1] -= LARGE_INC;	 }
+		if (input2 == 'S')	{ tmpL1.m_counts[1] += LARGE_INC;	 }
+		if (input2 == 'E')	{ tmpL1.m_counts[2] -= LARGE_INC;	 }
+ 		if (input2 == 'D')	{ tmpL1.m_counts[2] += LARGE_INC;	 }
+
 
 		// KEYS TO ADJUST SERVO POSITIONS (JOG style):	(servo #4..6)			
-		if (input2 == 'r')	{ tmpL2.m_counts[0] -= 1;	 }
-		if (input2 == 'f')	{ tmpL2.m_counts[0] += 1;	 }
-		if (input2 == 't')	{ tmpL2.m_counts[1] -= 1;	 }
-		if (input2 == 'g')	{ tmpL2.m_counts[1] += 1;	 }
-		if (input2 == 'y')	{ tmpL2.m_counts[2] -= 1;	 }
-		if (input2 == 'h')	{ tmpL2.m_counts[2] += 1;	 }
-		if (input2 == 'R')	{ tmpL2.m_counts[0] -= 5;	 }
-		if (input2 == 'F')	{ tmpL2.m_counts[0] += 5;	 }
-		if (input2 == 'T')	{ tmpL2.m_counts[1] -= 5;	 }
-		if (input2 == 'G')	{ tmpL2.m_counts[1] += 5;	 }
-		if (input2 == 'Y')	{ tmpL2.m_counts[2] -= 5;	 }
-		if (input2 == 'H')	{ tmpL2.m_counts[2] += 5;	 }
+		if (input2 == 'r')	{ tmpL2.m_counts[0] -= SMALL_INC;	 }
+		if (input2 == 'f')	{ tmpL2.m_counts[0] += SMALL_INC;	 }
+		if (input2 == 't')	{ tmpL2.m_counts[1] -= SMALL_INC;	 }
+		if (input2 == 'g')	{ tmpL2.m_counts[1] += SMALL_INC;	 }
+		if (input2 == 'y')	{ tmpL2.m_counts[2] -= SMALL_INC;	 }
+		if (input2 == 'h')	{ tmpL2.m_counts[2] += SMALL_INC;	 }
+		if (input2 == 'u')	{ tmpL1.m_counts[3] += SMALL_INC;	 }		
+		if (input2 == 'j')	{ tmpL1.m_counts[3] -= SMALL_INC;	 }
+		if (input2 == 'i')	{ tmpL2.m_counts[3] += SMALL_INC;	 }		
+		if (input2 == 'k')	{ tmpL2.m_counts[3] -= SMALL_INC;	 }
+
+		if (input2 == 'R')	{ tmpL2.m_counts[0] -= LARGE_INC;	 }
+		if (input2 == 'F')	{ tmpL2.m_counts[0] += LARGE_INC;	 }
+		if (input2 == 'T')	{ tmpL2.m_counts[1] -= LARGE_INC;	 }
+		if (input2 == 'G')	{ tmpL2.m_counts[1] += LARGE_INC;	 }
+		if (input2 == 'Y')	{ tmpL2.m_counts[2] -= LARGE_INC;	 }
+		if (input2 == 'H')	{ tmpL2.m_counts[2] += LARGE_INC;	 }
+		if (input2 == 'U')	{ tmpL1.m_counts[3] += LARGE_INC;	 }
+		if (input2 == 'J')	{ tmpL1.m_counts[3] -= LARGE_INC;	 }		
+		if (input2 == 'I')	{ tmpL2.m_counts[3] += LARGE_INC;	 }
+		if (input2 == 'K')	{ tmpL2.m_counts[3] -= LARGE_INC;	 }
 
 		// KEYS TO TOGGLE LIVE POSITION : 
 		if (which_point>=3) which_point = 0;
@@ -203,6 +224,8 @@ void jog_mode( Robot& walker )
 		if (input2 == 'V')	{ serv = walker.get_servo_handle(1, 0); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[0]=cnts; }	else // zero offset
 		if (input2 == 'B')	{ serv = walker.get_servo_handle(1, 1); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[1]=cnts; }	else // zero offset
 		if (input2 == 'N')	{ serv = walker.get_servo_handle(1, 2); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[2]=cnts; }	else // zero offset
+		if (input2 == 'M')	{ serv = walker.get_servo_handle(1, 1); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[1]=cnts; }	else // zero offset
+		if (input2 == ',')	{ serv = walker.get_servo_handle(1, 2); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[2]=cnts; }	else // zero offset
 		{
 			walker.actuate_vector( tmpL1 );							
 			walker.actuate_vector( tmpL2 );		
@@ -219,17 +242,17 @@ void jog_mode( Robot& walker )
 			walker.save_calibrations("calibrations_newest.csv");
 		}
 		if ((input2 == '0') || (input2 == '='))	
-		{ 
+		{
 			walker.actuate_centers();
 			Limb* limb = walker.get_limb(0);
 			retrieve_current_counts( tmpL1, limb );
-	
+
 			limb = walker.get_limb(1);
-			retrieve_current_counts( tmpL2, limb );			
+			retrieve_current_counts( tmpL2, limb );
 		 }
 
-		printf("VectorL1: <%d, %d, %d>\n", tmpL1.m_counts[0], tmpL1.m_counts[1], tmpL1.m_counts[2]);
-		printf("VectorL2: <%d, %d, %d>\n", tmpL2.m_counts[0], tmpL2.m_counts[1], tmpL2.m_counts[2]);
+		printf("VectorL1: <"   );  tmpL1.print();
+		printf(">  VectorL2: <");  tmpL2.print();		printf(">\n");
 	}
 	
 	walker.save_servo_positions("LastCounts.csv");

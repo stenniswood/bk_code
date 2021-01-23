@@ -21,7 +21,8 @@ public:
 	
 	void 	select_move( int mMoveNum );
 	void 	do_move();
-	void 	read_setup_file();
+	void 	read_setup_file ( std::string mSetup_file_name );
+	void 	read_vector_file( std::string mSequenceName );
 
 	void	actuate_vector ( struct stOneVector mVec );
 	void	actuate_vector ( struct stOneCounts mVec );	
@@ -53,8 +54,6 @@ public:
 private:
 	std::vector<Limb>	m_limbs;
 	std::string 		m_setup_file_name;
-
-	std::ifstream  		file;
 
 	
 	std::vector<Vector*>	m_moves;

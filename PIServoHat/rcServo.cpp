@@ -99,7 +99,8 @@ void rcServo::load_current_position( std::ifstream& fd )
 	std::string oneLine;
 	std::getline(fd, oneLine);	
 
-	sscanf(oneLine.c_str(), "%d : %d \n", &ServoNum, &m_curr_counts );
+	int tmpServoIndex;
+	sscanf(oneLine.c_str(), "%d : %d \n", &tmpServoIndex, &m_curr_counts );
 	printf("Loaded: %d = %d\n", ServoNum, m_curr_counts );
 
 }

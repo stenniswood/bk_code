@@ -2,25 +2,25 @@
 
 
 
-
-Robot::Robot( std::string mFilename )
-:file( mFilename ), device(0x68)
+Robot::Robot( std::string mFilename  )
+:device(0x68)
 {
-	m_setup_file_name = mFilename;
-	read_setup_file();
 	active_vector_played = false;
 	device.calc_yaw = true;
 
-	read_servo_positions( "LastCounts.csv" );
-	
-	
+	read_setup_file(mFilename);
+
+	read_servo_positions( "LastCounts.csv" );		
+}
+
+void 	Robot::read_vector_file( std::string mSequenceName )
+{
 	// LOAD all basic Robot Moves:
-	Vector* vecs = new Vector("walk.txt");
+	Vector* vecs = new Vector(mSequenceName);
 	vecs->open_file();
 	vecs->read_file();
 	m_moves.push_back( vecs );
 	m_selected_move = 0;
-
 	
 	goto_first_sequence();
 }
@@ -42,13 +42,6 @@ void  Robot::print_robot_setup()
 	printf("==================================================\n");
 }
 
-/*struct stOneCounts	Robot::get_limb_zero_vector_package( int mLimbNum )
-{
-	int NumServos   = m_limbs[mLimbNum].get_num_servos();
-	return m_moves[0]->get_zeros_vector_package( mLimbNum, NumServos );
-	
-}*/
-
 void	Robot::stand_still()
 {
 
@@ -69,7 +62,7 @@ void Robot::play_active_vector( )
 
 void Robot::actuate_vector( struct stOneVector mVec )
 {
-//	printf("Robot::actuate_vector(angles).  Limb:%d\n", mVec.limb_num );	
+//	printf("Robot::actuate_vector(angles).  Limb:%d\n", mVec.limb_num );
 	m_limbs[mVec.limb_num].actuate_vector( mVec.m_angles );
 }
 void Robot::actuate_vector( struct stOneCounts mVec )
@@ -107,8 +100,11 @@ void Robot::do_move(  )
 {
 }
 
-void Robot::read_setup_file()
+void Robot::read_setup_file( std::string mSetup_file_name )
 {
+	printf("Reading Robot configuration file: %s\n", mSetup_file_name.c_str() );
+	std::ifstream  file( mSetup_file_name );
+
 	Limb tmp;
 	m_limbs.clear();
 	std::string oneLine;
@@ -118,10 +114,10 @@ void Robot::read_setup_file()
 	std::string num_limb_str = oneLine.substr( 0,1 );
 	int num_limb = atoi( num_limb_str.c_str() );	
 	//printf("Robot has %d limbs.\n", num_limb );
-	
-	// EXTRACT NAME of LIMBS (and add to the queue)
+
 	for(int i=0; i<num_limb; i++)
 	{
+		// EXTRACT NAME of LIMBS (and add to the queue)
 		std::getline(file, oneLine);
 		//printf("\tLimb #%d = %s\n", i, oneLine.c_str() );
 		tmp.set_name( oneLine );
@@ -132,7 +128,7 @@ void Robot::read_setup_file()
 	for(int i=0; i<num_limb; i++)
 	{
 		m_limbs[i].load_limb_structure( file );
-	}
+	}	
 }
 
 void  Robot::read_servo_positions( std::string mCountsFileName )
