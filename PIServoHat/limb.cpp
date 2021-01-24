@@ -25,6 +25,16 @@ Limb::~Limb()
 	
 static std::string delimiter = ",";
 
+void	Limb::setup_start_times()
+{
+	int num_servs = m_servos.size();
+	printf( "%s has %d servos\n", m_limb_name.c_str(),  num_servs );
+	for (int s=0; s<num_servs; s++)
+	{
+		m_servos[s]->setup_hawrdware();
+	}
+}
+
 void	Limb::load_limb_structure( std::ifstream& mFile )
 {	
 	std::string   oneLine;
@@ -122,8 +132,7 @@ void	Limb::actuate_vector( std::vector<float> mDegVector )
 	
 	for (int s=0; s < len; s++)
 	{
-		//printf("actuating Limb servo[%d] \n", s );
-		
+		//printf("actuating Limb servo[%d]=%6.3f \n", s, mDegVector[s] );		
 		m_servos[s]->angle_to( mDegVector[s] );
 	}
 }

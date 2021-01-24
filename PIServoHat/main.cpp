@@ -72,9 +72,10 @@ void main_processing()
 	while(1) {
 		//int  presult = read_pendant();
 		
-		walker.play_active_vector();
+
 		if (running)
 		{
+			walker.play_active_vector();
 			usleep(1000000); 
 			walker.next_sequence();
 			continue;
@@ -87,18 +88,26 @@ void main_processing()
 		{
 			printf("Previous...\n\n");
 			walker.prev_sequence();
+			walker.play_active_vector();			
 		} 
 		else if (input == '.')
 		{
-			printf("Next...\n\n");		
+			printf("Next...\n\n");
 			walker.next_sequence();
+			walker.play_active_vector();
 		}
+		else if (input == ';')
+		{
+			printf("Next Two...\n\n");		
+			walker.play_n(2);
+		}		
 		else if ((input >= '1') && (input <= '9'))
 		{
 			int mnum = input-'1';
 			printf("Select move #%d.\n\n", mnum );		
 
-			walker.select_move( mnum );			
+			walker.select_move( mnum );	
+			walker.play_active_vector();					
 		}
 		else if (input == 'r')
 		{
@@ -109,13 +118,17 @@ void main_processing()
 		{
 			printf("Stopping...\n");				
 			running = false;
-		}			
+		}		
 		else if (input == 'j')
 		{
 			printf("Jog mode...\n");	
 			jog_mode( walker );			
 		}
-		
+		else if (input == '?')
+		{
+			printf("MPU 0 Info: \n");	
+			walker.device.print_history_item();
+		}
 		else if (input == 'q')
 		{
 			printf("Quitting...\n");				

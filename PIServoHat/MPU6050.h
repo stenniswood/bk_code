@@ -148,7 +148,7 @@ public:
 
 	void	update();
 	void 	add_to_history();
-	void 	print_history_item(int mIndex );
+	void 	print_history_item(int mIndex = -1 );
 	
 
 private:

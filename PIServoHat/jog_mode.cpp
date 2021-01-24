@@ -112,13 +112,16 @@ void init_vects( Robot& walker )
 	tmpL2.limb_num = 1;
 
 	// LIMB #0
+	tmpL1.m_counts.clear();
 	Limb* limb = walker.get_limb(0);
 	int num_servs = limb->get_num_servos();
 	for (int i=0; i<num_servs; i++)	
 		tmpL1.m_counts.push_back( 0 );		
 	retrieve_current_counts( tmpL1, limb );
 	printf("Num Servos on Limb0 : %d", num_servs);
+
 	// LIMB #1
+	tmpL2.m_counts.clear();
 	limb = walker.get_limb(1);
 	num_servs = limb->get_num_servos();
 	for (int i=0; i<num_servs; i++)	
@@ -169,7 +172,6 @@ void jog_mode( Robot& walker )
 		if (input2 == 'v')	{  serv = walker.get_servo_handle(1, 0);  mark_cal_center( serv );  }
 		if (input2 == 'b')	{  serv = walker.get_servo_handle(1, 1);  mark_cal_center( serv );  }
 		if (input2 == 'n')	{  serv = walker.get_servo_handle(1, 2);  mark_cal_center( serv );  }
-
 		if (input2 == 'm')	{  serv = walker.get_servo_handle(0, 3);  mark_cal_center( serv );  }
 		if (input2 == ',')	{  serv = walker.get_servo_handle(1, 3);  mark_cal_center( serv );  }
 
@@ -224,12 +226,8 @@ void jog_mode( Robot& walker )
 		if (input2 == 'V')	{ serv = walker.get_servo_handle(1, 0); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[0]=cnts; }	else // zero offset
 		if (input2 == 'B')	{ serv = walker.get_servo_handle(1, 1); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[1]=cnts; }	else // zero offset
 		if (input2 == 'N')	{ serv = walker.get_servo_handle(1, 2); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[2]=cnts; }	else // zero offset
-		if (input2 == 'M')	{ serv = walker.get_servo_handle(1, 1); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[1]=cnts; }	else // zero offset
-		if (input2 == ',')	{ serv = walker.get_servo_handle(1, 2); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[2]=cnts; }	else // zero offset
-		{
-			walker.actuate_vector( tmpL1 );							
-			walker.actuate_vector( tmpL2 );		
-		}
+		if (input2 == 'M')	{ serv = walker.get_servo_handle(0, 3); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL1.m_counts[3]=cnts; }	else // zero offset
+		if (input2 == ',')	{ serv = walker.get_servo_handle(1, 3); cnts = serv->get_stop_counts(which_point++); serv->count_to(cnts);	tmpL2.m_counts[3]=cnts; };
 
 		if (input2 == '?')
 			help();
@@ -251,6 +249,8 @@ void jog_mode( Robot& walker )
 			retrieve_current_counts( tmpL2, limb );
 		 }
 
+		walker.actuate_vector( tmpL1 );							
+		walker.actuate_vector( tmpL2 );		
 		printf("VectorL1: <"   );  tmpL1.print();
 		printf(">  VectorL2: <");  tmpL2.print();		printf(">\n");
 	}

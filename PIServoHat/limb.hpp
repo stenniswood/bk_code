@@ -12,7 +12,8 @@ class Limb
 public:
 	Limb();
 	~Limb();
-	
+
+	void	setup_start_times();	
 	void	load_limb_structure   ( std::ifstream& mFile );
 	void	save_limb_calibrations( FILE* fd );
 	void	save_limb_positions   ( FILE* fd );
@@ -22,11 +23,13 @@ public:
 	Servo*	get_servo_handle(int mServoIndex) { return m_servos[mServoIndex]; 	};
 	
 	void	set_name( std::string mName );	
+
 	void	actuate_vector( std::vector<float> mDegVector );
 	void	actuate_vector( std::vector<unsigned short> mCountVector );	
 	void	actuate_centers(  );	
 	
 	void	print_parameters();
+
 	
 protected:
 	std::vector<Servo*> m_servos;

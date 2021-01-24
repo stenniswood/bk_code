@@ -53,7 +53,7 @@ void rcServo::print_parameters()
 }
 
 extern int file_i2c;
-char buffer[5];   // Create a buffer for transferring data to the I2C device
+char 	   buffer[5];   // Create a buffer for transferring data to the I2C device
 
 void rcServo::set_start_time( unsigned short mCounts )
 {
@@ -61,9 +61,9 @@ void rcServo::set_start_time( unsigned short mCounts )
   //  generate a high output.
 
   buffer[0] = StartAddresses[ServoNum];  // "start time" reg for channel 0
-  buffer[1] = 0;     // We want the pulse to start at time t=0
+  buffer[1] = 0;     	// We want the pulse to start at time t=0
   buffer[2] = 0;
-  int length = 3;        // 3 bytes total written
+  int length = 3;       // 3 bytes total written
   write(file_i2c, buffer, length); // initiate the write	
 }
 

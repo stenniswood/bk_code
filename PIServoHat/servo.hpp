@@ -30,6 +30,7 @@ public:
 	~Servo();
 
 	//void    load_cal_info();
+	virtual void	setup_hawrdware()	{ };	
 	void 			parse_cal_line  ( std::string mStr );
 	virtual void 	print_parameters( );
 	

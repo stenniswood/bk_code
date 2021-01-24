@@ -26,9 +26,11 @@ public:
 	virtual void    save_current_position( FILE* fd );	
 	virtual void	save_cal_file_line	 ( FILE* fd );	
 	virtual void 	print_parameters	 ( );	
-			
+
+	virtual void	setup_hawrdware()	{	set_start_time(0); 	};
+
 protected:
-	void 			set_start_time( unsigned short mCounts );
+	void 			set_start_time( unsigned short mCounts );			
 	void 			set_stop_time ( unsigned short mCounts );
 
 	unsigned char 	get_start_address( );

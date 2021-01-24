@@ -1,25 +1,27 @@
+#include <unistd.h>
+
 #include "vector.hpp"
 
 
 
-Vector::Vector( std::string mFilename )
+VectorSequence::VectorSequence( std::string mFilename )
 {
 	m_file_name = mFilename;
 	selected_line = -1;
 }
 
-Vector::~Vector()
+VectorSequence::~VectorSequence()
 {
 
 }
 
-void	Vector::open_file( )
+void	VectorSequence::open_file( )
 {
 	printf("==== VectorFile: Opening %s\n", m_file_name.c_str() );
 	m_file.open( m_file_name );
 }
 
-void  Vector::read_file( )
+void  VectorSequence::read_file( )
 {
 	std::string oneLine;
 	
@@ -30,41 +32,49 @@ void  Vector::read_file( )
 	printf("Read %d lines.\n", m_file_lines.size() );
 	selected_line = 0;
 	parse_line_nums();
-	
 	process_one_vector(  );
 }
 
-void	Vector::select_one_vector( int LineIndex )
-{
-	selected_line = LineIndex;
-}
-
-
-void Vector::goto_first_sequence()
+void VectorSequence::goto_first_sequence()
 {
 	selected_line = 0;
 }
 
-void	Vector::prev_sequence(  )
+void	VectorSequence::select_one_vector( int LineIndex )
 {
-	if (m_goto_pending)	{ m_goto_pending=false;		return ; }
+	if ((LineIndex<0) | (LineIndex>m_file_lines.size()))	
+	{
+		printf("Selected vector is past bounds!\n");
+		return;
+	}
 	
+	selected_line = LineIndex;	
+	process_one_vector( );	
+}
+
+void	VectorSequence::prev_sequence(  )
+{
+	if (m_goto_pending)	{ m_goto_pending=false;		return ; }	
 	selected_line--;
-	if (selected_line<0) 
-		selected_line = 0;
+	select_one_vector( selected_line );
 }
 
-void	Vector::next_sequence(  )
-{	
-	if (m_goto_pending)	{ m_goto_pending=false; 	return ; }
+void  VectorSequence::next_sequence(  )
+{
+	int tmpSL = selected_line+1;
 	
-	selected_line++;
-	if (selected_line>m_file_lines.size()) 
-		selected_line = m_file_lines.size();
+	if (m_goto_pending)
+	{
+		//select_one_vector( m_goto_index );
+		tmpSL = m_goto_index;
+		m_token = "unknown";		
+		m_goto_pending = false;
+	}
+
+	select_one_vector( tmpSL );
 }
 
-
-void Vector::parse_line_nums()
+void VectorSequence::parse_line_nums()
 {
 	for (int l=0; l<m_file_lines.size(); l++)
 	{
@@ -82,41 +92,7 @@ void Vector::parse_line_nums()
 	}
 }
 
-bool	Vector::process_one_vector(  )
-{
-	printf("Vector::Processing vector %d...\n", selected_line );
-	std::string oneLine = m_file_lines[selected_line];
-
-	// EXTRACT LINE NUMBER:
-	int pos = oneLine.find(':');			    
-	curr_line_num = -1;
-	if (pos != std::string::npos) 
-	{			
-		// extract Line #
-		std::string line_num_str = oneLine.substr( 0, pos );
-		curr_line_num = atoi( line_num_str.c_str() );				
-	}	
-	//printf("LineNum=%d;\t", curr_line_num);	
-	
-	// EXTRACT LIMB NUMBER:
-	std::string limb_delim_str = oneLine.substr( pos+2 );	
-	if (limb_delim_str[0] != 'L')
-    { 
-       parse_command( limb_delim_str );  
-       return false;
-    } else {
-		
-		std::string limb_num_str = oneLine.substr(pos+3, 1 );
-		curr_limb_num = atoi(limb_num_str.c_str() );
-		//printf("Limb Num=%d;\n", curr_limb_num);	
-		oneLine.erase(0, pos+5 );
-		//printf("remaining string=%s\n", oneLine.c_str() );
-		parse_vector_data( oneLine );
-	}
-	return true;
-}
-
-int	Vector::find_line_num( int mLineNum )		// returns index into m_file_lines;
+int	VectorSequence::find_line_num( int mLineNum )		// returns index into m_file_lines;
 {
 	for (int l=0; l<m_file_lines.size(); l++)
 	{
@@ -126,41 +102,133 @@ int	Vector::find_line_num( int mLineNum )		// returns index into m_file_lines;
 	return -1;
 }
 
-void Vector::parse_command(std::string mLine)
-{
 
-	int pos = mLine.find(' ');
-	std::string mToken = mLine.substr(0, pos);
-		
-	printf("Vector::parse_command ( %s )\n", mLine.c_str() );
-	
-	
-	if (mToken=="repeat")
-	{ 
-	}
-	else if (mToken=="goto")
+/* Parses the Selected_line into its components. */
+bool	VectorSequence::process_one_vector(  )
+{
+	printf("VectorSequence::Processing vector %d...\n", selected_line );
+	std::string oneLine = m_file_lines[selected_line];
+
+	// EXTRACT LINE NUMBER:
+	int pos = oneLine.find(':');
+	curr_line_num = -1;
+	if (pos != std::string::npos)
 	{
-		int line_num = atoi( mLine.substr(pos+1).c_str() );
-		int f_index = find_line_num( line_num );
-		
-		if (f_index > m_file_lines.size())
-			f_index = m_file_lines.size();
-		else if (f_index<0)
-			f_index = 0;
-		printf("Goto %d\n", f_index);
-		selected_line = f_index;	
-		m_goto_pending = true;		
+		std::string line_num_str = oneLine.substr( 0, pos );
+		curr_line_num = atoi( line_num_str.c_str() );				
 	}
-	else if (mToken=="delay")
-	{
+	printf("LineNum=%d;\t", curr_line_num);	
 	
-	} else {
-		printf("vector file - unknown command - ignoring!"); 
+	// EXTRACT LIMB NUMBER : 
+	std::string limb_delim_str = oneLine.substr( pos+2 );	
+	if (limb_delim_str[0] != 'L')
+    {
+		// EXTRACT TOKEN : 
+		pos     = limb_delim_str.find  ( ' '   );
+		m_token = limb_delim_str.substr( 0, pos);
+    
+		// Check for a special command (ie. delay, goto, etc)
+		std::string str = limb_delim_str.substr( pos+1 );
+		int result      = parse_command        ( str );
+		
+		m_is_command = (result>0);
+		return !m_is_command;
+    } 
+    else 
+    {
+		// normal vector...
+		m_is_command = false;
+		std::string limb_num_str = oneLine.substr( pos+3, 1 );
+		curr_limb_num = atoi(limb_num_str.c_str() );
+		//printf("Limb Num=%d;\n", curr_limb_num);
+		oneLine.erase(0, pos+5 );
+		//printf("remaining string=%s\n", oneLine.c_str() );
+		parse_vector_data( oneLine );		
+		return true;
 	}
-// etc.
+	return true;
 }
 
-void	Vector::parse_vector_data( std::string mData )
+int VectorSequence::parse_command(std::string mLine)
+{
+	printf("VectorSequence::parse_command ( %s )\n", mLine.c_str() );
+	int pos = 0; 
+
+	if (m_token=="repeat")
+	{ 
+		return 1;
+	}
+	else if (m_token=="goto")	// This will change the selected_line!
+	{
+		// Extract Line Num : 
+		int line_num = atoi( mLine.c_str() );
+
+		// Retrieve the Line text : 
+		m_goto_index = find_line_num( line_num );
+		if (m_goto_index<0) {
+			printf("Error in GOTO statement -- line not found.\n");
+		}
+		// Select it as the line:
+		printf("Goto %d : %d\n", line_num, m_goto_index );
+
+		// Flag as pending : 
+		m_goto_pending = true;
+		return 1;
+	}
+	else if (m_token=="delay_sec")
+	{
+		m_delay_time = atoi( mLine.substr(pos+1).c_str() );	
+		//sleep(m_delay_time);
+		return 1;	
+	}
+	else if (m_token=="delay_us")
+	{
+		m_delay_time = atoi( mLine.substr(pos+1).c_str() );	
+		//usleep(m_delay_time);
+		return 1;	
+	} 
+	else {
+		printf("vector file - unknown command - ignoring!"); 
+		return 0;		// Not processed.		
+	}
+	return 0;		// Not processed.
+}
+
+int VectorSequence::execute_command()
+{
+	int retval = 0;
+	if (m_token=="repeat")
+	{ 
+		retval = 1;
+	}
+	else if (m_token=="goto")	// This will change the selected_line!
+	{
+		// Select it as the line : 
+		// printf("Goto %d : %d\n", m_goto_index, line_num );		
+		//select_one_vector( m_goto_index );
+		//m_goto_pending = false;
+		retval = 1;		
+	}
+	else if (m_token=="delay_sec")
+	{
+		sleep(m_delay_time);
+		retval = 1;
+	}
+	else if (m_token=="delay_us")
+	{
+		usleep(m_delay_time);
+		retval = 1;
+	} else {
+		printf("vector file - unknown command - ignoring!");
+		retval = 0;		// Not processed.
+	}
+	
+	m_token = "processed";	// so it doesn't do it twice.
+	return retval;		// Not processed.
+}
+
+
+void	VectorSequence::parse_vector_data( std::string mData )
 {
 	m_angles.clear();
 	std::string substr;
@@ -187,7 +255,7 @@ void	Vector::parse_vector_data( std::string mData )
 		pos = pos2+1;
 }
 
-struct stOneVector	Vector::get_zeros_vector_package( int mLimbNum, int mNumServos )
+struct stOneVector	VectorSequence::get_zeros_vector_package( int mLimbNum, int mNumServos )
 {
 	struct stOneVector ov;
 	ov.limb_num = mLimbNum;
@@ -198,7 +266,7 @@ struct stOneVector	Vector::get_zeros_vector_package( int mLimbNum, int mNumServo
 	return ov;
 }
 
-struct stOneVector	Vector::get_vector_package()
+struct stOneVector	VectorSequence::get_vector_package()
 {
 	struct stOneVector ov;
 	ov.limb_num = curr_limb_num;

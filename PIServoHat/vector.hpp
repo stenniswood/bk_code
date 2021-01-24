@@ -13,6 +13,10 @@ struct stOneVector
 {
 	int limb_num;	
 	std::vector<float>	m_angles;
+	void 	print() {
+		for (int i=0; i<m_angles.size(); i++)
+			printf("%6.3f ", m_angles[i]);
+	}	
 };
 struct stOneCounts
 {
@@ -25,33 +29,36 @@ struct stOneCounts
 };
 
 
-class Vector
+class VectorSequence
 {
 public:
-	Vector( std::string mFilename );
-	~Vector();
+	VectorSequence( std::string mFilename );
+	~VectorSequence();
 
-	void	open_file( );	
-	void	read_file( );
-	void    parse_line_nums();	
-	int		find_line_num( int mLineNum );		// returns index into m_file_lines;
-	
-	void	select_one_vector( int LineIndex );
-	bool	process_one_vector( );
-//	void	execute_one_vector(  );
+	void	open_file	   		( );	
+	void	read_file	   		( );
+	void    parse_line_nums		( );	
+	int		find_line_num  		( int mLineNum );		// returns index into m_file_lines;
+
+	void	select_one_vector 	( int LineIndex );
+	bool	process_one_vector	( );
+
 	struct stOneVector	get_vector_package();
 	struct stOneVector	get_zeros_vector_package(int mLimbNum, int mNumServos );
 
-	void	goto_first_sequence();		
-	void	prev_sequence();
-	void	next_sequence();
+	void	goto_first_sequence	( );
+	void	prev_sequence		( );
+	void	next_sequence		( );
 
-	void 	parse_command(std::string mToken);
+	bool	get_is_command		( )	{ return m_is_command; };
+	int 	parse_command		( std::string mToken);
+	int 	execute_command		( );
 
 	bool	m_goto_pending;
+
 			
 protected:
-	void	parse_vector_data( std::string mData );
+	void	parse_vector_data	( std::string mData );
 
 private:
 	std::string   m_file_name;
@@ -60,7 +67,10 @@ private:
 	std::vector<std::string>  m_file_lines;
 	std::vector<int>		  m_line_nums;
 	
-
+	bool				m_is_command;
+	std::string 		m_token;		//tbd
+	int					m_goto_index;	// line index
+	long int 			m_delay_time;
 	
 	std::vector<float>	m_angles;
 	int	selected_line;

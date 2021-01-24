@@ -307,7 +307,7 @@ void MPU6050_Velocity::update()
 	while (1) {
 		//printf("\n\nMPU6050_Velocity::update()  %d\n", hist_index);
 	
-		MPU6050::_update();
+//		MPU6050::_update();
 		add_to_history();
 		add_to_graph( hist_index );
 		//print_history_item( hist_index );
@@ -322,6 +322,8 @@ void MPU6050_Velocity::update()
 
 void MPU6050_Velocity::print_history_item(int mIndex )
 {
+	if (mIndex<0)		mIndex = hist_index-1;
+	if (mIndex<0)		mIndex = 0;
 	struct stSnapShot* dd;
 	dd = &(history[mIndex]);
 

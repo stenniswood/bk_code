@@ -24,7 +24,6 @@ void initialize_RPI_servo_hat( Robot& mRobot )
   	  Just point the file to that one...  */
 //  file_i2c = mRobot.device.f_dev;
   printf("Initialized i2c file_i2c=%d\n", file_i2c);
-  
   //switch_to_servo_hat();
 
   int addr = 0x40;    				// PCA9685 address
@@ -44,6 +43,7 @@ void initialize_RPI_servo_hat( Robot& mRobot )
   buffer[1] = 0x1e;
   write(file_i2c, buffer, length);
 
+  mRobot.setup_start_times();
 }
 
 

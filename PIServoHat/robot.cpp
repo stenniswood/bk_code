@@ -16,13 +16,22 @@ Robot::Robot( std::string mFilename  )
 void 	Robot::read_vector_file( std::string mSequenceName )
 {
 	// LOAD all basic Robot Moves:
-	Vector* vecs = new Vector(mSequenceName);
+	VectorSequence* vecs = new VectorSequence(mSequenceName);
 	vecs->open_file();
 	vecs->read_file();
 	m_moves.push_back( vecs );
 	m_selected_move = 0;
 	
 	goto_first_sequence();
+}
+
+void Robot::setup_start_times( )
+{
+	size_t len = m_limbs.size();
+	for (int l=0; l<len; l++)
+	{
+		m_limbs[l].setup_start_times();
+	}	
 }
 
 Robot::~Robot()
@@ -48,26 +57,58 @@ void	Robot::stand_still()
 }
 
 void Robot::play_active_vector( )
-{
-	if (active_vector_played)	return;
-	
-	bool activate = m_moves[m_selected_move]->process_one_vector( );
-	if (activate)
+{	
+	bool cmd      = m_moves[m_selected_move]->get_is_command();
+	if (cmd)
 	{
+		// Skip.  Commands are 1 liners : 
+		printf("Command found executing \n");
+		m_moves[m_selected_move]->execute_command();		
+	} else {
+		printf("Vector found executing \n");
 		struct stOneVector newVec = m_moves[m_selected_move]->get_vector_package( );	
+		newVec.print();
 		actuate_vector( newVec );	
 	}
+		
 	active_vector_played = true;	
+}
+
+void Robot::play_n( int mNumVecsToPlay )
+{
+	int num_vectors_actuated = 0;	
+
+	do
+	{
+		m_moves[m_selected_move]->next_sequence( );	
+		bool cmd = m_moves[m_selected_move]->get_is_command();
+		if (cmd)
+		{
+			// Skip.  Commands are 1 liners : 
+			printf("Command found executing \n");
+			m_moves[m_selected_move]->execute_command();
+			//m_moves[m_selected_move]->next_sequence( );	
+		} else {
+			//if (num_vectors_actuated>0)
+			//	m_moves[m_selected_move]->next_sequence( );	
+			struct stOneVector newVec = m_moves[m_selected_move]->get_vector_package( );	
+			newVec.print();
+			actuate_vector( newVec );	
+			num_vectors_actuated++;
+			printf("PROCESSED VECTORS = %d\n", num_vectors_actuated);
+		}	
+		
+	} while (num_vectors_actuated < mNumVecsToPlay);	
 }
 
 void Robot::actuate_vector( struct stOneVector mVec )
 {
-//	printf("Robot::actuate_vector(angles).  Limb:%d\n", mVec.limb_num );
+	printf("Robot::actuate_vector(angles).  Limb:%d\n", mVec.limb_num );
 	m_limbs[mVec.limb_num].actuate_vector( mVec.m_angles );
 }
 void Robot::actuate_vector( struct stOneCounts mVec )
 {
-//	printf("Robot::actuate_vector(counts).  Limb:%d\n", mVec.limb_num );	
+	printf("Robot::actuate_vector(counts).  Limb:%d\n", mVec.limb_num );	
 	m_limbs[mVec.limb_num].actuate_vector( mVec.m_counts );
 }
 	
