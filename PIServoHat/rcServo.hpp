@@ -27,7 +27,7 @@ public:
 	virtual void	save_cal_file_line	 ( FILE* fd );	
 	virtual void 	print_parameters	 ( );	
 
-	virtual void	setup_hawrdware()	{	set_start_time(0); 	};
+	virtual void	setup_hardware()	{	set_start_time(0); 	};
 
 protected:
 	void 			set_start_time( unsigned short mCounts );			

@@ -1,5 +1,7 @@
+
 #include "robot.hpp"
 
+extern pthread_mutex_t lock; 
 
 
 Robot::Robot( std::string mFilename  )
@@ -23,15 +25,18 @@ void 	Robot::read_vector_file( std::string mSequenceName )
 	m_selected_move = 0;
 	
 	goto_first_sequence();
+	printf("read_vector_file() done\n");
 }
 
 void Robot::setup_start_times( )
 {
+//pthread_mutex_lock(&lock); 
 	size_t len = m_limbs.size();
 	for (int l=0; l<len; l++)
 	{
 		m_limbs[l].setup_start_times();
 	}	
+//pthread_mutex_lock(&lock); 	
 }
 
 Robot::~Robot()

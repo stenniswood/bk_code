@@ -31,8 +31,9 @@ void	Limb::setup_start_times()
 	printf( "%s has %d servos\n", m_limb_name.c_str(),  num_servs );
 	for (int s=0; s<num_servs; s++)
 	{
-		m_servos[s]->setup_hawrdware();
+		m_servos[s]->setup_hardware();
 	}
+	printf( "setup_start_times() done\n"  );
 }
 
 void	Limb::load_limb_structure( std::ifstream& mFile )

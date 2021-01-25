@@ -38,7 +38,7 @@ public:
 	void	open_file	   		( );	
 	void	read_file	   		( );
 	void    parse_line_nums		( );	
-	int		find_line_num  		( int mLineNum );		// returns index into m_file_lines;
+	int		find_label			( std::string mLabel );		// returns index into m_file_lines;
 
 	void	select_one_vector 	( int LineIndex );
 	bool	process_one_vector	( );
@@ -66,11 +66,13 @@ private:
 	
 	std::vector<std::string>  m_file_lines;
 	std::vector<int>		  m_line_nums;
+	std::vector<std::string>  m_labels;				// 1 to 1 correspond to m_file_lines.
 	
 	bool				m_is_command;
 	std::string 		m_token;		//tbd
-	int					m_goto_index;	// line index
+	std::string			m_goto_label;	// line index
 	long int 			m_delay_time;
+	int					m_return_index;	// for a gosub routine.
 	
 	std::vector<float>	m_angles;
 	int	selected_line;

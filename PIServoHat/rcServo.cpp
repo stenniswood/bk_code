@@ -7,20 +7,15 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <pthread.h> 
 
 #include "rcServo.hpp"
 
 
+extern pthread_mutex_t lock; 
 
-rcServo::rcServo( int mServoNumber )
-{
-	ServoNum = mServoNumber;
-}
-
-rcServo::~rcServo() 
-{
-
-}
+extern int file_i2c;
+char 	   buffer[5];   // Create a buffer for transferring data to the I2C device
 
 unsigned char StartAddresses[16] = { 
 0x06,	0x0A,	0x0E,	0x12,	
@@ -35,6 +30,15 @@ unsigned char StopAddresses[16] = {
 0x38,	0x3C,	0x40,	0x44
 };	
 
+rcServo::rcServo( int mServoNumber )
+{
+	ServoNum = mServoNumber;
+}
+
+rcServo::~rcServo() 
+{
+
+}
 
 unsigned char rcServo::get_start_address(  )
 {
@@ -52,8 +56,6 @@ void rcServo::print_parameters()
 	Servo::print_parameters();
 }
 
-extern int file_i2c;
-char 	   buffer[5];   // Create a buffer for transferring data to the I2C device
 
 void rcServo::set_start_time( unsigned short mCounts )
 {
@@ -64,7 +66,10 @@ void rcServo::set_start_time( unsigned short mCounts )
   buffer[1] = 0;     	// We want the pulse to start at time t=0
   buffer[2] = 0;
   int length = 3;       // 3 bytes total written
+
+//pthread_mutex_lock(&lock); 
   write(file_i2c, buffer, length); // initiate the write	
+//pthread_mutex_unlock(&lock);   
 }
 
 void rcServo::set_stop_time( unsigned short mCounts )
@@ -73,7 +78,9 @@ void rcServo::set_stop_time( unsigned short mCounts )
   buffer[1] = mCounts & 0xff;     // We want the pulse to start at time t=0
   buffer[2] = (mCounts>>8) & 0xff;
   int length = 3;        // 3 bytes total written
+//pthread_mutex_lock(&lock); 
   write(file_i2c, buffer, length); // initiate the write	
+//pthread_mutex_unlock(&lock);  
 }
 
 void rcServo::count_to( unsigned short mCounts )
@@ -81,7 +88,7 @@ void rcServo::count_to( unsigned short mCounts )
 	m_curr_counts = mCounts;
 	m_curr_angle  = convert_counts_to_degs( mCounts );
 	//printf("S%d : Counts = %d \n", ServoNum, mCounts );	
-		
+
 	set_stop_time( mCounts );	
 }
 
@@ -102,7 +109,6 @@ void rcServo::load_current_position( std::ifstream& fd )
 	int tmpServoIndex;
 	sscanf(oneLine.c_str(), "%d : %d \n", &tmpServoIndex, &m_curr_counts );
 	printf("Loaded: %d = %d\n", ServoNum, m_curr_counts );
-
 }
 
 void rcServo::save_current_position( FILE* fd )

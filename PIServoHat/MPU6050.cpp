@@ -5,6 +5,8 @@
 //Include the header file for this class
 #include <unistd.h>
 #include <assert.h>
+#include <pthread.h> 
+
 
 #include "MPU6050.h"
 #include "i2c_switching.hpp"
@@ -12,13 +14,21 @@
 #include "graph.hpp"
 #include "dataseries.hpp"
 
-int file_i2c;
 
+
+int file_i2c;
+extern pthread_mutex_t lock; 
 
 
 MPU6050::MPU6050(int8_t addr) {
 	int status;
 
+	if (pthread_mutex_init(&lock, NULL) != 0) { 
+        printf("\n mutex init has failed\n"); 
+        return ; 
+    } 
+    printf("\n mutex init finished.  MPU6050() \n"); 
+    
 	MPU6050_addr = addr;
 	dt = 0.009; //Loop time (recalculated with each loop)
 	_first_run = 1; //Variable for whether to set gyro angle to acceleration angle in compFilter
@@ -48,6 +58,10 @@ MPU6050::MPU6050(int8_t addr) {
 
 	//Set offsets to zero
 	i2c_smbus_write_byte_data(f_dev, 0x06, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x07, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x08, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x09, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x0A, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x0B, 0b00000000), i2c_smbus_write_byte_data(f_dev, 0x00, 0b10000001), i2c_smbus_write_byte_data(f_dev, 0x01, 0b00000001), i2c_smbus_write_byte_data(f_dev, 0x02, 0b10000001);
+}
+MPU6050::~MPU6050()
+{
+	pthread_mutex_destroy(&lock);
 }
 
 void MPU6050::getGyroRaw(float *roll, float *pitch, float *yaw) {
@@ -123,10 +137,14 @@ void MPU6050::_update()
 
 	//while (1) 
 	{ //Loop forever
+    //printf("\n MPU6050()::_update()  mutex locking.   \n"); 	
+		pthread_mutex_lock(&lock); 
 		switch_to_MPU();
 		getGyro(&gr, &gp, &gy); //Get the data from the sensors
 		getAccel(&ax, &ay, &az);
 		switch_to_servo_hat();
+		pthread_mutex_unlock(&lock); 
+    //printf("\n MPU6050()::_update()  mutex unlocked.   \n"); 			
 		
 		//X (roll) axis
 		_accel_angle[0] = atan2(az, ay) * RAD_T_DEG - 90.0; //Calculate the angle with z and y convert to degrees and subtract 90 degrees to rotate
@@ -307,7 +325,7 @@ void MPU6050_Velocity::update()
 	while (1) {
 		//printf("\n\nMPU6050_Velocity::update()  %d\n", hist_index);
 	
-//		MPU6050::_update();
+		MPU6050::_update();
 		add_to_history();
 		add_to_graph( hist_index );
 		//print_history_item( hist_index );

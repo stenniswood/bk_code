@@ -46,7 +46,7 @@ unsigned short Servo::convert_deg_to_counts( float mDegrees )
 	float cpd     = c_range / d_range;
 
 	float  degrees = (mDegrees - Deg_center);
-	float  count   = ((unsigned short)( degrees * cpd )) + cal_center;
+	float  count   = (unsigned short)(( degrees * cpd ) + cal_center);
 
 //printf("c_range=%6.3f; d_range=%6.3f\n", c_range, d_range );
 //printf("deg_del=%6.3f; c_center=%d\n", c_range, cal_center );

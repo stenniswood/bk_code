@@ -4,6 +4,8 @@
 #include <linux/i2c-dev.h> // required for constant definitions
 #include <stdio.h>  // required for printf statements
 
+#include <pthread.h> 
+
 #include <math.h>
 #include <gtk/gtk.h>
 #include <cairo.h>
@@ -22,6 +24,11 @@
 #include "jog_mode.hpp"
 #include "graph.hpp"
 #include "read_pendant.h"
+
+
+// THREAD LOCKING STUFF:
+//pthread_t tid[2]; 
+pthread_mutex_t lock; 
 
 
 //DriveFive df_lArm( "/dev/ttyUSB1");
@@ -71,7 +78,7 @@ void main_processing()
 {
 	while(1) {
 		//int  presult = read_pendant();
-		
+		//printf("main_processing() top of loop\n");
 
 		if (running)
 		{
@@ -163,7 +170,7 @@ int main(int argc, char **argv)
 	while(1)	direct_servo_write_test();	
 #endif
 	
-	std::thread(&main_processing).detach(); //Create a seperate thread, for the update routine to run in the background, and detach it, allowing the program to continue	
+	std::thread(&main_processing).detach(); //Create a separate thread, for the update routine to run in the background, and detach it, allowing the program to continue	
 	
 	if (ShowGraph) {
 		printf("\n\n*** SHOWING GRAPH...\n\n");
