@@ -3,7 +3,7 @@
 
 #include "vector.hpp"
 
-void permutate_vector( struct stOneVector, int mNumMutations, int mJoint );
+void permutate_vector( struct stFloatVector, int mNumMutations, int mJoint );
 
 
 

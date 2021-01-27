@@ -1,5 +1,6 @@
-
+#include <pthread.h> 
 #include "robot.hpp"
+
 
 extern pthread_mutex_t lock; 
 
@@ -30,13 +31,13 @@ void 	Robot::read_vector_file( std::string mSequenceName )
 
 void Robot::setup_start_times( )
 {
-//pthread_mutex_lock(&lock); 
+pthread_mutex_lock(&lock); 
 	size_t len = m_limbs.size();
 	for (int l=0; l<len; l++)
 	{
 		m_limbs[l].setup_start_times();
 	}	
-//pthread_mutex_lock(&lock); 	
+pthread_mutex_unlock(&lock); 	
 }
 
 Robot::~Robot()
@@ -61,57 +62,66 @@ void	Robot::stand_still()
 
 }
 
-void Robot::play_active_vector( )
+int Robot::play_active_vector( )
 {	
-	bool cmd      = m_moves[m_selected_move]->get_is_command();
+	bool cmd = m_moves[m_selected_move]->get_is_command();
 	if (cmd)
 	{
 		// Skip.  Commands are 1 liners : 
 		printf("Command found executing \n");
-		m_moves[m_selected_move]->execute_command();		
+		m_moves[m_selected_move]->execute_command();
+		return 0;		
 	} else {
-		printf("Vector found executing \n");
-		struct stOneVector newVec = m_moves[m_selected_move]->get_vector_package( );	
+		printf("Vector found actuating \n");
+		struct stFloatVector newVec = m_moves[m_selected_move]->get_vector_package( );
 		newVec.print();
-		actuate_vector( newVec );	
-	}
+			struct stCountVector vc;
+			convert_to_counts( newVec, vc );
+			vc.print();
 		
+		actuate_vector( newVec );	
+		return 1;
+	}		
 	active_vector_played = true;	
+}
+
+void Robot::play_group(  )
+{
+	int gs = m_moves[m_selected_move]->get_group_size();
+	play_n( gs );
 }
 
 void Robot::play_n( int mNumVecsToPlay )
 {
-	int num_vectors_actuated = 0;	
-
+	int num_vectors_actuated = 0;
 	do
 	{
 		m_moves[m_selected_move]->next_sequence( );	
-		bool cmd = m_moves[m_selected_move]->get_is_command();
-		if (cmd)
-		{
-			// Skip.  Commands are 1 liners : 
-			printf("Command found executing \n");
-			m_moves[m_selected_move]->execute_command();
-			//m_moves[m_selected_move]->next_sequence( );	
-		} else {
-			//if (num_vectors_actuated>0)
-			//	m_moves[m_selected_move]->next_sequence( );	
-			struct stOneVector newVec = m_moves[m_selected_move]->get_vector_package( );	
-			newVec.print();
-			actuate_vector( newVec );	
-			num_vectors_actuated++;
-			printf("PROCESSED VECTORS = %d\n", num_vectors_actuated);
-		}	
+		
+		int va = Robot::play_active_vector( );		
+		num_vectors_actuated++;
+		printf("PROCESSED LINES = %d / %d\n", num_vectors_actuated, mNumVecsToPlay);
 		
 	} while (num_vectors_actuated < mNumVecsToPlay);	
 }
 
-void Robot::actuate_vector( struct stOneVector mVec )
+void Robot::convert_to_counts ( struct stFloatVector& mDegVector, struct stCountVector& mCountVector )
 {
-	printf("Robot::actuate_vector(angles).  Limb:%d\n", mVec.limb_num );
+	mCountVector.limb_num = mDegVector.limb_num;
+	m_limbs[mDegVector.limb_num].convert_to_counts( mDegVector.m_angles, mCountVector.m_counts );
+}
+void Robot::convert_to_degrees( struct stCountVector& mCountVector,  struct stFloatVector& mDegVector )
+{
+	mCountVector.limb_num = mDegVector.limb_num;
+	m_limbs[mCountVector.limb_num].convert_to_degrees( mCountVector.m_counts, mDegVector.m_angles );
+}
+
+void Robot::actuate_vector( struct stFloatVector mVec )
+{
+	//printf("Robot::actuate_vector(angles).  Limb:%d\n", mVec.limb_num );
 	m_limbs[mVec.limb_num].actuate_vector( mVec.m_angles );
 }
-void Robot::actuate_vector( struct stOneCounts mVec )
+void Robot::actuate_vector( struct stCountVector mVec )
 {
 	printf("Robot::actuate_vector(counts).  Limb:%d\n", mVec.limb_num );	
 	m_limbs[mVec.limb_num].actuate_vector( mVec.m_counts );
@@ -243,5 +253,28 @@ void Robot::actuate_centers()
 Servo*	Robot::get_servo_handle( int mLimbIndex, int mServoIndex )
 {
 	return m_limbs[mLimbIndex].get_servo_handle( mServoIndex );
+}
+
+/* Just 1 sequence step */
+void  Robot::play_one_interpolator_sequence(  )
+{
+	int num_limbs = m_limbs.size();
+	
+	struct stFloatVector vec;
+	for (int l=0; l<num_limbs; l++)
+	{
+		interp.get_play_vector( l, vec );
+		actuate_vector        ( vec    );
+		interp.bump_sequence  ( );		
+	}	
+}
+
+void Robot::play_full_interpolator_sequence( )
+{
+	do {
+		play_one_interpolator_sequence();
+		usleep( 10000 );
+	} while (interp.has_completed() == false );
+	interp.restart();
 }
 

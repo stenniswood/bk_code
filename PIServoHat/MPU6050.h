@@ -28,9 +28,11 @@
 
 //Offsets - supply your own here (calculate offsets with getOffsets function)
 //     Accelerometer
-#define A_OFF_X 19402
-#define A_OFF_Y -2692
-#define A_OFF_Z -8625
+#define A_OFF_X 411
+#define A_OFF_Y 25500  
+//10634
+#define A_OFF_Z -13623
+
 //    Gyroscope
 #define G_OFF_X -733
 #define G_OFF_Y 433
@@ -73,20 +75,20 @@ extern "C" {
 #undef GYRO_RANGE
 
 
-#if GYRO_RANGE == 1
+#if ACCEL_RANGE == 1
 	#define ACCEL_SENS 8192.0
 	#define ACCEL_CONFIG 0b00001000
-#elif GYRO_RANGE == 2
+#elif ACCEL_RANGE == 2
 	#define ACCEL_SENS 4096.0
 	#define ACCEL_CONFIG 0b00010000
-#elif GYRO_RANGE == 3
+#elif ACCEL_RANGE == 3
 	#define ACCEL_SENS 2048.0
 	#define ACCEL_CONFIG 0b00011000
 #else //Otherwise, default to 0
 	#define ACCEL_SENS 16384.0
 	#define ACCEL_CONFIG 0b00000000
 #endif
-#undef GYRO_RANGE
+#undef ACCEL_RANGE
 
 
 extern int file_i2c;		// alias for f_dev in class
@@ -95,10 +97,12 @@ extern int file_i2c;		// alias for f_dev in class
 class MPU6050 {
 public:
 		int f_dev; //Device file
-		float ax, ay, az, gr, gp, gy; //Temporary storage variables used in _update()
+ 		int16_t raw_ax, raw_ay, raw_az; //Temporary storage variables used in _update()
+ 		float ax, ay, az, gr, gp, gy; //Temporary storage variables used in _update()
 		float _angle[3]; //Store all angles (accel roll, accel pitch, accel yaw, gyro roll, gyro pitch, gyro yaw, comb roll, comb pitch comb yaw)
 		
-		void _update();
+		void 	_update();
+		void 	print_raw_accel();
 								
 	private:
 		float _accel_angle[3];

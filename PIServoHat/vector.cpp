@@ -1,6 +1,9 @@
 #include <unistd.h>
+#include <assert.h>
 
 #include "vector.hpp"
+
+
 
 
 
@@ -63,10 +66,8 @@ void	VectorSequence::prev_sequence(  )
 void  VectorSequence::next_sequence(  )
 {
 	int tmpSL = selected_line+1;
+	printf("next_sequence() : \n");
 
-	printf("next_sequence() : Token=%s\n", m_token.c_str());
-	
-//	if (m_goto_pending)
 	if (m_token=="goto")
 	{
 		// Retrieve the Line text : 
@@ -89,7 +90,7 @@ void  VectorSequence::next_sequence(  )
 			printf("Error in GOSUB statement -- label not found.\n");
 		}
 		// Select it as the line:
-		printf("Gosub %s : %d\n", m_goto_label, goto_index );
+		//printf("Gosub %s : %d\n", m_goto_label.c_str(), goto_index );
 		tmpSL   = goto_index;
 		m_token = "processed";		
 		m_goto_pending = false;				
@@ -107,7 +108,7 @@ void  VectorSequence::next_sequence(  )
 	}
 	
 	select_one_vector( tmpSL );
-	printf("next_sequence() : Token=%s\n", m_token.c_str());	
+	//printf("next_sequence() : Token=%s\n", m_token.c_str());	
 }
 
 void VectorSequence::parse_line_nums()
@@ -150,49 +151,56 @@ bool	VectorSequence::process_one_vector(  )
 {
 	printf("VectorSequence::Processing vector %d...\n", selected_line );
 	std::string oneLine = m_file_lines[selected_line];
-
-	// EXTRACT LINE NUMBER:
+	curr_line_num = selected_line; //atoi( line_num_str.c_str() );				
+	
+	// EXTRACT LABEL:
 	int pos = oneLine.find(':');
-	curr_line_num = -1;
 	if (pos != std::string::npos)
 	{
 		std::string label_str = oneLine.substr( 0, pos );
-		curr_line_num = selected_line; //atoi( line_num_str.c_str() );				
+		//printf("LineLabel=%s;\t", label_str.c_str());	
 	}
-	//printf("LineNum=%d;\t", curr_line_num);	
+	
+	// EXTRACT VECTOR SIZE:
+	int pos2 = oneLine.find(':', pos+1);
+	if (pos2 != std::string::npos)
+	{
+		if (pos2 == (pos+1))
+			m_group_size = 1;		// default
+		else {
+			std::string size_str = oneLine.substr( pos, pos2 );
+			printf("Group Vector size=%s;\t", size_str.c_str());
+			m_group_size         = atoi( size_str.c_str() );
+		}
+	}
 
 	// EXTRACT LIMB NUMBER : 
-	std::string limb_delim_str = oneLine.substr( pos+2 );	
+	std::string token_str = oneLine.substr( pos2+2 );	
 
-		// EXTRACT TOKEN : 
-		pos     = limb_delim_str.find  ( ' '   );
-		m_token = limb_delim_str.substr( 0, pos);
+	// EXTRACT TOKEN : 
+	pos     = token_str.find  ( ' '   );
+	m_token = token_str.substr( 0, pos);
 
-	if (m_token[0] != 'L')
-    {
-		// EXTRACT TOKEN : 
-//		pos     = limb_delim_str.find  ( ' '   );
-//		m_token = limb_delim_str.substr( 0, pos);
-    
-		// Check for a special command (ie. delay, goto, etc)
-		std::string str = limb_delim_str.substr( pos+1 );
-		int result      = parse_command        ( str );
-		
-		m_is_command = (result>0);
-		return !m_is_command;
-    } 
-    else 
+	if (m_token[0] == 'L')
     {
 		// normal vector...
 		m_is_command = false;
-		std::string limb_num_str = oneLine.substr( pos+3, 1 );
+		std::string limb_num_str = m_token.substr( 1, 1 );
 		curr_limb_num = atoi(limb_num_str.c_str() );
 		//printf("Limb Num=%d;\n", curr_limb_num);
-		oneLine.erase(0, pos+5 );
+		oneLine.erase(0, pos2+5 );
 		//printf("remaining string=%s\n", oneLine.c_str() );
 		parse_vector_data( oneLine );		
 		return true;
 	}
+    else 
+    {    
+		// Check for a special command (ie. delay, goto, etc)
+		std::string str = token_str.substr( pos+1 );
+		int result      = parse_command   ( str );		
+		m_is_command = (result>0);
+		return !m_is_command;
+    }
 	return true;
 }
 
@@ -212,7 +220,7 @@ int VectorSequence::parse_command(std::string mLine)
 	else if (m_token=="gosub")
 	{ 
 		// like a goto, but returns (gosub):
-		m_goto_label   = mLine;
+		m_goto_label   = mLine.c_str();
 		m_return_index = curr_line_num+1;
 		m_goto_pending = true;		
 		return 1;
@@ -314,9 +322,9 @@ void	VectorSequence::parse_vector_data( std::string mData )
 		pos = pos2+1;
 }
 
-struct stOneVector	VectorSequence::get_zeros_vector_package( int mLimbNum, int mNumServos )
+struct stFloatVector	VectorSequence::get_zeros_vector_package( int mLimbNum, int mNumServos )
 {
-	struct stOneVector ov;
+	struct stFloatVector ov;
 	ov.limb_num = mLimbNum;
 	ov.m_angles.clear();
 		
@@ -325,9 +333,9 @@ struct stOneVector	VectorSequence::get_zeros_vector_package( int mLimbNum, int m
 	return ov;
 }
 
-struct stOneVector	VectorSequence::get_vector_package()
+struct stFloatVector	VectorSequence::get_vector_package()
 {
-	struct stOneVector ov;
+	struct stFloatVector ov;
 	ov.limb_num = curr_limb_num;
 	ov.m_angles = m_angles;	
 	return ov;

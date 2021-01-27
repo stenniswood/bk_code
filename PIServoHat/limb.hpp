@@ -24,6 +24,9 @@ public:
 	
 	void	set_name( std::string mName );	
 
+	void	convert_to_counts ( std::vector<float> mDegVector, 			  std::vector<unsigned short>& mCountVector );
+	void	convert_to_degrees( std::vector<unsigned short> mCountVector, std::vector<float>& mDegVector );
+	
 	void	actuate_vector( std::vector<float> mDegVector );
 	void	actuate_vector( std::vector<unsigned short> mCountVector );	
 	void	actuate_centers(  );	

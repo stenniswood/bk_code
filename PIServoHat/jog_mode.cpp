@@ -42,8 +42,8 @@ int kbhit(void)
 
 bool running = false;
 
-struct stOneCounts tmpL1;// = walker.get_active_vector_package();
-struct stOneCounts tmpL2;// = walker.get_active_vector_package();
+struct stCountVector tmpL1;// = walker.get_active_vector_package();
+struct stCountVector tmpL2;// = walker.get_active_vector_package();
 
 
 void help()
@@ -88,7 +88,7 @@ void mark_cal_center ( Servo* serv )
 
 
 /* Retrieve from the servo objects held in the Limb object. */
-void retrieve_current_counts( struct stOneCounts& tmpL, Limb* mlimb )
+void retrieve_current_counts( struct stCountVector& tmpL, Limb* mlimb )
 {
 	unsigned short cnts = 0;
 

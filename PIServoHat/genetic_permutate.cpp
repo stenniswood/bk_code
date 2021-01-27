@@ -6,14 +6,14 @@ void init_genetics()
 	srand();
 }
 
-std::vector<struct stOneVector> permutate_vector( Servo* mServ, struct stOneVector mSeed, int mNumMutations, int mJoint )
+std::vector<struct stFloatVector> permutate_vector( Servo* mServ, struct stFloatVector mSeed, int mNumMutations, int mJoint )
 {
 	float base_angle = mSeed.m_angle[mJoint];
 	
 	// Do we do small limit around the base_angle or full range?	
 	float variance = (mServ->get_cal_max() - mServ->get_cal_min());
 	
-	std::vector<struct stOneVector> mutations;
+	std::vector<struct stFloatVector> mutations;
 	
 	for (int M=0; M<mNumMutations; M++)
 	{

@@ -127,10 +127,31 @@ void	Limb::save_limb_calibrations( FILE* fd )
 	}
 }
 
+void Limb::convert_to_degrees( std::vector<unsigned short> mCountVector, std::vector<float>& mDegVector )
+{
+	size_t len = m_servos.size();
+	mDegVector.clear();
+	
+	for (int s=0; s < len; s++)
+	{	
+		mDegVector.push_back( m_servos[s]->convert_counts_to_degs( mCountVector[s] ) );		
+	}
+}
+
+void  Limb::convert_to_counts( std::vector<float> mDegVector, std::vector<unsigned short>& mCountVector )
+{
+	size_t len = m_servos.size();
+	mCountVector.clear();
+	for (int s=0; s < len; s++)
+	{	
+		mCountVector.push_back( m_servos[s]->convert_deg_to_counts( mDegVector[s] ) );
+	}
+}
+
+
 void	Limb::actuate_vector( std::vector<float> mDegVector )
 {
 	size_t len = m_servos.size();
-	
 	for (int s=0; s < len; s++)
 	{
 		//printf("actuating Limb servo[%d]=%6.3f \n", s, mDegVector[s] );		

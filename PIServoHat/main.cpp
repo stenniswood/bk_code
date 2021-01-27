@@ -25,6 +25,8 @@
 #include "graph.hpp"
 #include "read_pendant.h"
 
+#include "interpolator.hpp"
+
 
 // THREAD LOCKING STUFF:
 //pthread_t tid[2]; 
@@ -100,8 +102,9 @@ void main_processing()
 		else if (input == '.')
 		{
 			printf("Next...\n\n");
-			walker.next_sequence();
-			walker.play_active_vector();
+			//walker.next_sequence();
+			walker.play_group();
+			//walker.play_active_vector();
 		}
 		else if (input == ';')
 		{
@@ -135,6 +138,7 @@ void main_processing()
 		{
 			printf("MPU 0 Info: \n");	
 			walker.device.print_history_item();
+			walker.device.print_raw_accel   ();
 		}
 		else if (input == 'q')
 		{
@@ -145,8 +149,46 @@ void main_processing()
 	}
 }
 
+void measure_MPU_offsets()
+{
+	float ax_off;
+	float ay_off;
+	float az_off;
+	
+	float gr_off;
+	float gp_off;
+	float gy_off;
+	walker.device.getOffsets( &ax_off, &ay_off,  &az_off, 
+							  &gr_off, &gp_off,  &gy_off);
+	printf("OFFSETS:\n");
+	printf("ax,ay,az: %6.3f %6.3f %6.3f \n", ax_off, ay_off, az_off );
+	printf("gr,gp,gy: %6.3f %6.3f %6.3f \n", gr_off, gp_off, gy_off );
+}
+
 int main(int argc, char **argv)
 {	
+	OneLimbInterpolator ol(10,4);
+	
+	struct stFloatVector End;
+	End.m_angles.push_back(90.0);
+	End.m_angles.push_back(45.0);
+	End.m_angles.push_back(20.0);
+	End.m_angles.push_back(0.0);
+	End.limb_num = 0;
+
+	ol.set_new_vector( End );
+	ol.print_sequence();
+	
+	End.m_angles[0] = (-30.0);
+	End.m_angles[1] = (0.0);
+	End.m_angles[2] = (0.0);
+	End.m_angles[3] = (0.0);
+	ol.set_new_vector( End );
+	printf("\n");
+	ol.print_sequence();
+	
+
+
 	std::string SeqFN = "walk.txt";
 	if (argc>1)
 	{
@@ -165,6 +207,24 @@ int main(int argc, char **argv)
 	
 	initialize_RPI_servo_hat(walker);
 	switch_to_servo_hat();	
+
+/* Now Test the interpolator: 1st the old way -- just move the servos. 	
+	walker.actuate_vector( End );	
+
+	End.m_angles[0] = (-30.0);
+	End.m_angles[1] = (90.0);
+	End.m_angles[2] = (45.0);
+	End.m_angles[3] = (0.0);
+	End.print();
+	printf("Sleeping for 3\n");
+	sleep(3);
+	
+	walker.actuate_vector( End );		
+	return 0;
+*/
+
+	//measure_MPU_offsets();
+	
 
 #ifdef SERVO_TEST 	
 	while(1)	direct_servo_write_test();	

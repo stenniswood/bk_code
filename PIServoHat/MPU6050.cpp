@@ -80,18 +80,27 @@ void MPU6050::getGyro(float *roll, float *pitch, float *yaw) {
 	*yaw = round((*yaw - G_OFF_Z) * 1000.0 / GYRO_SENS) / 1000.0;
 }
 
-void MPU6050::getAccelRaw(float *x, float *y, float *z) {
-	int16_t X = i2c_smbus_read_byte_data(f_dev, 0x3b) << 8 | i2c_smbus_read_byte_data(f_dev, 0x3c); //Read X registers
-	int16_t Y = i2c_smbus_read_byte_data(f_dev, 0x3d) << 8 | i2c_smbus_read_byte_data(f_dev, 0x3e); //Read Y registers
-	int16_t Z = i2c_smbus_read_byte_data(f_dev, 0x3f) << 8 | i2c_smbus_read_byte_data(f_dev, 0x40); //Read Z registers
-	*x = (float)X;
-	*y = (float)Y;
-	*z = (float)Z;
+void MPU6050::getAccelRaw(float *x, float *y, float *z) 
+{
+	raw_ax = i2c_smbus_read_byte_data(f_dev, 0x3b) << 8 | i2c_smbus_read_byte_data(f_dev, 0x3c); //Read X registers
+	raw_ay = i2c_smbus_read_byte_data(f_dev, 0x3d) << 8 | i2c_smbus_read_byte_data(f_dev, 0x3e); //Read Y registers
+	raw_az = i2c_smbus_read_byte_data(f_dev, 0x3f) << 8 | i2c_smbus_read_byte_data(f_dev, 0x40); //Read Z registers
+
+	*x = (float)raw_ax;
+	*y = (float)raw_ay;
+	*z = (float)raw_az;
+}
+
+void MPU6050::print_raw_accel()
+{
+	printf("%4d %4d %4d \n", raw_ax, raw_ay, raw_az );
+	
 }
 
 void MPU6050::getAccel(float *x, float *y, float *z) {
 	getAccelRaw(x, y, z); //Store raw values into variables
-	*x = round((*x - A_OFF_X) * 1000.0 / ACCEL_SENS) / 1000.0; //Remove the offset and divide by the accelerometer sensetivity (use 1000 and round() to round the value to three decimal places)
+	*x = round((*x - A_OFF_X) * 1000.0 / ACCEL_SENS) / 1000.0; //Remove the offset and divide by the accelerometer sensetivity 
+	//(use 1000 and round() to round the value to three decimal places)
 	*y = round((*y - A_OFF_Y) * 1000.0 / ACCEL_SENS) / 1000.0;
 	*z = round((*z - A_OFF_Z) * 1000.0 / ACCEL_SENS) / 1000.0;
 }
@@ -103,7 +112,8 @@ void MPU6050::getOffsets(float *ax_off, float *ay_off, float *az_off, float *gr_
 	*gr_off = 0, *gp_off = 0, *gy_off = 0; //Initialize the offsets to zero
 	*ax_off = 0, *ay_off = 0, *az_off = 0; //Initialize the offsets to zero
 
-	for (int i = 0; i < 10000; i++) { //Use loop to average offsets
+#define NUM_SAMPLES 10000
+	for (int i = 0; i < NUM_SAMPLES; i++) { //Use loop to average offsets
 		getGyroRaw(&gyro_off[0], &gyro_off[1], &gyro_off[2]); //Raw gyroscope values
 		*gr_off = *gr_off + gyro_off[0], *gp_off = *gp_off + gyro_off[1], *gy_off = *gy_off + gyro_off[2]; //Add to sum
 
@@ -111,8 +121,8 @@ void MPU6050::getOffsets(float *ax_off, float *ay_off, float *az_off, float *gr_
 		*ax_off = *ax_off + accel_off[0], *ay_off = *ay_off + accel_off[1], *az_off = *az_off + accel_off[2]; //Add to sum
 	}
 
-	*gr_off = *gr_off / 10000, *gp_off = *gp_off / 10000, *gy_off = *gy_off / 10000; //Divide by number of loops (to average)
-	*ax_off = *ax_off / 10000, *ay_off = *ay_off / 10000, *az_off = *az_off / 10000;
+	*gr_off = *gr_off / NUM_SAMPLES, *gp_off = *gp_off / NUM_SAMPLES, *gy_off = *gy_off / NUM_SAMPLES; //Divide by number of loops (to average)
+	*ax_off = *ax_off / NUM_SAMPLES, *ay_off = *ay_off / NUM_SAMPLES, *az_off = *az_off / NUM_SAMPLES;
 
 	*az_off = *az_off - ACCEL_SENS; //Remove 1g from the value calculated to compensate for gravity)
 }
@@ -334,7 +344,7 @@ void MPU6050_Velocity::update()
 		if (hist_index>=HISTORY_SIZE)
 			hist_index = 0;	
 			
-		usleep(2000);
+		usleep(20000);
 	}
 }
 
