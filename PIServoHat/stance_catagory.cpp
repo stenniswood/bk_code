@@ -1,8 +1,7 @@
-
-
 #include "stance_catagory.hpp"
+#include "MPU6050.h"
 
-extern float ax, ay, az, gr, gp, gy; //Variables to store the accel, gyro and angle values
+//extern float ax, ay, az, gr, gp, gy; //Variables to store the accel, gyro and angle values
 
 
 enum robotStances
@@ -23,23 +22,22 @@ enum robotStances
 
 enum robotStances RobotPosition;
 
-void catagorize_MPU()
+enum robotStances catagorize_MPU( MPU6050_Velocity mpu )
 {
-	if ((gp>MIN_SIDE_LEFT_THRESHOLD) && (gp<MAX_SIDE_LEFT_THRESHOLD) )
+/*	if ((mpu._angle[1]>MIN_SIDE_LEFT_THRESHOLD) && (mpu._angle[1]<MAX_SIDE_LEFT_THRESHOLD) )
 	{
 		RobotPosition = RB_SIDE_RIGHT;
 	}
-	else if ((gp>MIN_SIDE_RIGHT_THRESHOLD) && (gp<MAX_SIDE_RIGHT_THRESHOLD) )
+	else if ((mpu._angle[1]>MIN_SIDE_RIGHT_THRESHOLD) && (mpu._angle[1]<MAX_SIDE_RIGHT_THRESHOLD) )
 	{
 		RobotPosition = RB_SIDE_LEFT;
-	}
+	}*/
 
-
-	if ((gp>MIN_FACE_DOWN_THRESHOLD) && (gp<MAX_FACE_DOWN_THRESHOLD) )
+	if ((mpu._angle[0]>MIN_FACE_DOWN_THRESHOLD) && (mpu._angle[0]<MAX_FACE_DOWN_THRESHOLD) )
 	{
 		RobotPosition = RB_FACEDOWN;
 	}
-	else if ((gp>MIN_FACE_UP_THRESHOLD) && (gp<MAX_FACE_UP_THRESHOLD) )
+	else if ((mpu._angle[0]>MIN_FACE_UP_THRESHOLD) && (mpu._angle[0]<MAX_FACE_UP_THRESHOLD) )
 	{
 		RobotPosition = RB_BELLY_UP;
 	}

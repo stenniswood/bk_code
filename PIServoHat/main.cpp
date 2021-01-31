@@ -187,8 +187,6 @@ int main(int argc, char **argv)
 	printf("\n");
 	ol.print_sequence();
 	
-
-
 	std::string SeqFN = "walk.txt";
 	if (argc>1)
 	{

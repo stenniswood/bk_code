@@ -3,6 +3,7 @@
 
 
 
+enum robotStances catagorize_MPU( MPU6050_Velocity mpu );
 
 
 

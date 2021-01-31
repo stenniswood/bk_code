@@ -87,7 +87,10 @@ int Robot::play_active_vector( )
 
 void Robot::play_group(  )
 {
+	m_moves[m_selected_move]->next_sequence( );	
 	int gs = m_moves[m_selected_move]->get_group_size();
+	printf("group size=%d\n", gs );
+	
 	play_n( gs );
 }
 
@@ -95,13 +98,14 @@ void Robot::play_n( int mNumVecsToPlay )
 {
 	int num_vectors_actuated = 0;
 	do
-	{
-		m_moves[m_selected_move]->next_sequence( );	
-		
+	{	
 		int va = Robot::play_active_vector( );		
 		num_vectors_actuated++;
 		printf("PROCESSED LINES = %d / %d\n", num_vectors_actuated, mNumVecsToPlay);
-		
+
+		if ((num_vectors_actuated < mNumVecsToPlay))
+			m_moves[m_selected_move]->next_sequence( );	
+	
 	} while (num_vectors_actuated < mNumVecsToPlay);	
 }
 

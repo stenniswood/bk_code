@@ -156,7 +156,6 @@ public:
 	void 	add_to_history();
 	void 	print_history_item(int mIndex = -1 );
 	
-
 private:
 	float velocity_x;
 	float velocity_y;
