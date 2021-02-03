@@ -69,6 +69,11 @@ enum dpad { N=0, NE=1, E=2, SE=3, S=4, SW=5, W=6, NW=7, Released=8 };
 #define PS_AXIS_ACCELY_VELOCITY_DATAPOS 	24
 #define PS_AXIS_ACCELZ_VELOCITY_DATAPOS 	26
 
+#define PS_TP_NUM_PACKETS_DATAPOS 35
+#define PS_TP_FINGERID_1_DATAPOS 37
+
+
+
 // NOW THE INDEX INTO m_axis_latest[]
 #define PS_AXIS_LPOD_LR		 	0
 #define PS_AXIS_LPOD_UD    		1
@@ -171,6 +176,9 @@ public:
 	short				m_axis_latest   [MAX_AXIS];
 	ButtonState			m_buttons_latest[MAX_BUTTONS];	
 
+	int					m_num_trackpad_packets;
+	int					m_num_fingerid_1;
+	
 	int					joystick_fd;
 };
 

@@ -8,13 +8,12 @@
 #include <unistd.h>
 #include "crc_32.h"
 #include "joystick_raw.hpp"
+#include "ps4_hid_outputs.hpp"
 
-#define BUFFER_SIZE 1024
-unsigned char oBuffer[BUFFER_SIZE];
 
 int adr = 0;
 	
-void append_1b( int& mAdr, unsigned char mData )
+/*void append_1b( int& mAdr, unsigned char mData )
 {
 	oBuffer[mAdr++] = (mData & 0x00FF);
 }
@@ -24,7 +23,7 @@ void append_2b( int& mAdr, unsigned short mData )
 	oBuffer[mAdr++] = (mData & 0xFF00) >> 8;
 }
 
-/*	HID Report header & footer  */
+/*	HID Report header & footer  *
 int form_header()
 {
 	append_2b( adr,  0x02  );
@@ -44,22 +43,12 @@ int form_HID_portion( unsigned char* mData )
 	// Now Pack 72 bytes of the data here!
 	return adr;
 }
-
-void append_checksum(unsigned char* mData, int mLength)
-{
-	unsigned long crc = crc_32( mData, mLength );
-	append_1b( adr,  crc & 0xff  );		crc >>= 8;
-	append_1b( adr,  crc & 0xff  );		crc >>= 8;
-	append_1b( adr,  crc & 0xff  );		crc >>= 8;
-	append_1b( adr,  crc & 0xff  );		crc >>= 8;
-}
-
 void form_full_packet( unsigned char* mData, int mLength )
 {
 	form_header();
 	form_HID_portion( mData );
-	append_checksum ( mData, mLength );
-}
+	//append_checksum ( mData, mLength );
+}*/
 
 
 JoystickRaw joy;
@@ -94,6 +83,30 @@ int main(int argc, char** argv )
 	 path_name += argv[1];
 	 joy.open( path_name.c_str() );
 
+
+	 byte red = 255;
+	 byte green = 0;
+	 byte blue  = 0;
+
+	 byte Strong = 0xFF;
+	 byte Weak   = 0xFF;
+	 send_Rumble( joy.joystick_fd, Strong,  Weak );
+	 sleep(3);
+	 send_Rumble( joy.joystick_fd, Strong,  0 );
+	 sleep(3);
+	 send_Rumble( joy.joystick_fd, 0, Weak );
+	 sleep(3);
+	 send_Rumble( joy.joystick_fd, 0,  0 );
+	 
+	 while(1) { 
+		 set_LED_color( joy.joystick_fd, red, green, 0x02 );	 
+		 green += 10;
+		 red   -= 10;
+//		 if (red)
+		usleep(100000);
+		 
+	 };
+	 
 	 while (1) {
 		joy.update();
 		if (show_buttons)	joy.print_button_info ( );

@@ -294,7 +294,13 @@ void  JoystickRaw::extract_analogs()
 
 void JoystickRaw::extract_touchpad()
 {
+	m_num_trackpad_packets = iBuffer[PS_TP_NUM_PACKETS_DATAPOS] & 0x0F;
 
+	if ((iBuffer[PS_TP_FINGERID_1_DATAPOS] & 0x80)==0)
+	{		
+		m_num_fingerid_1 = iBuffer[PS_TP_FINGERID_1_DATAPOS]& 0x7F;
+		printf("Finger1 active - ID=%x\n", m_num_fingerid_1 );
+	}	
 }
 
 void JoystickRaw::open( const char* mPathname )

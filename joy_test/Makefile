@@ -1,10 +1,10 @@
 CC=g++
-OPTIONS	= -std=gnu99 -lm -fno-rtti 
+OPTIONS	= -lm -fno-rtti 
 INC	= 
 SELF_INC= ./
 CFLAGS 	= -lm -g
 DEPS   	= 
-OBJ     =   joystick.o main.o 
+OBJ     =   joystick_raw.o crc_32.o ps4_hid_outputs.o ff_main.o 
 
 CPPOBJ    = 
 
