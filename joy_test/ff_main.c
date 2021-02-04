@@ -10,6 +10,8 @@
 #include "joystick_raw.hpp"
 #include "ps4_hid_outputs.hpp"
 
+#include "rumble_effects.hpp"
+
 
 int adr = 0;
 	
@@ -83,12 +85,13 @@ int main(int argc, char** argv )
 	 path_name += argv[1];
 	 joy.open( path_name.c_str() );
 
-
+	 init_rumble_effects();
+	
 	 byte red = 255;
 	 byte green = 0;
 	 byte blue  = 0;
 
-	 byte Strong = 0xFF;
+	 /*byte Strong = 0xFF;
 	 byte Weak   = 0xFF;
 	 send_Rumble( joy.joystick_fd, Strong,  Weak );
 	 sleep(3);
@@ -96,10 +99,10 @@ int main(int argc, char** argv )
 	 sleep(3);
 	 send_Rumble( joy.joystick_fd, 0, Weak );
 	 sleep(3);
-	 send_Rumble( joy.joystick_fd, 0,  0 );
+	 send_Rumble( joy.joystick_fd, 0,  0 ); */
 	 
 	 while(1) { 
-		 set_LED_color( joy.joystick_fd, red, green, 0x02 );	 
+// 		 set_LED_color( joy.joystick_fd, red, green, 0x02 );	 
 		 green += 10;
 		 red   -= 10;
 //		 if (red)
