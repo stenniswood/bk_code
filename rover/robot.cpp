@@ -1,5 +1,6 @@
 #include <pthread.h> 
 #include <unistd.h>
+#include <assert.h>
 
 #include "robot.hpp"
 
@@ -129,6 +130,8 @@ void Robot::actuate_vector( struct stFloatVector mVec )
 }
 void Robot::actuate_vector( struct stCountVector mVec )
 {
+	assert(mVec.limb_num < m_limbs.size());
+	
 	printf("Robot::actuate_vector(counts).  Limb:%d\n", mVec.limb_num );	
 	m_limbs[mVec.limb_num].actuate_vector( mVec.m_counts );
 }

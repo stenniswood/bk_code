@@ -80,9 +80,9 @@ int form_Rumble( byte mStrong, byte mWeak )
 	return adr;
 }
 
-void append_checksum( int adr, unsigned long int mChecksum )
+void append_checksum( unsigned long int mChecksum )
 {
-	//int adr = 75;
+	int adr = 75;
 	append_1b( adr,  mChecksum & 0xff  );		mChecksum >>= 8;
 	append_1b( adr,  mChecksum & 0xff  );		mChecksum >>= 8;
 	append_1b( adr,  mChecksum & 0xff  );		mChecksum >>= 8;
@@ -101,7 +101,7 @@ int send_Rumble( int fd, byte mStrong, byte mWeak )
 	int crc_start  = 0;
 	int send_start = 1;
 	uint32_t crc = crc_32( &(oBuffer[crc_start]), 75 );
-	append_checksum( 75, crc );
+	append_checksum( crc );
 	dump_obuffer();
 	
 	size_t bytes_written = write(fd, &(oBuffer[send_start]), 75+4 -1 );
@@ -130,7 +130,7 @@ int set_Volume( int fd, byte mLeft, byte mRight, byte mMicrophone )
 	int crc_start  = 0;
 	int send_start = 1;
 	uint32_t crc   = crc_32( &(oBuffer[crc_start]), 75 );
-	append_checksum( 75, crc );
+	append_checksum( crc );
 	
 	size_t bytes_written = write(fd, &(oBuffer[send_start]), 75+4 -1 );
 	//printf("set_LED_color:: result = %d\n", bytes_written );
@@ -151,7 +151,7 @@ int set_LED_color( int fd, byte mRed, byte mGreen, byte mBlue )
 	int crc_start = 0;
 	int send_start = 1;
 	uint32_t crc = crc_32( &(oBuffer[crc_start]), 75 );
-	append_checksum( 75, crc );
+	append_checksum( crc );
 	
 	size_t bytes_written = write(fd, &(oBuffer[send_start]), 75+4 -1 );
 	//printf("set_LED_color:: result = %d\n", bytes_written );

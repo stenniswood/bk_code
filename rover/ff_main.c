@@ -16,9 +16,17 @@
 
 int adr = 0;
 	
-/*
+/*void append_1b( int& mAdr, unsigned char mData )
+{
+	oBuffer[mAdr++] = (mData & 0x00FF);
+}
+void append_2b( int& mAdr, unsigned short mData )
+{
+	oBuffer[mAdr++] = (mData & 0x00FF);			// PS4 uses Little endian
+	oBuffer[mAdr++] = (mData & 0xFF00) >> 8;
+}
 
-*	HID Report header & footer  *
+/*	HID Report header & footer  *
 int form_header()
 {
 	append_2b( adr,  0x02  );
@@ -27,6 +35,22 @@ int form_header()
 	append_2b( adr, 0x4F00 );
 	append_2b( adr, 0x4200 );	
 	return adr;
+}
+
+int form_HID_portion( unsigned char* mData )
+{
+	append_1b( adr,  0xA1  );
+	append_1b( adr,  0x11  );
+	append_1b( adr,  0xC0  );
+
+	// Now Pack 72 bytes of the data here!
+	return adr;
+}
+void form_full_packet( unsigned char* mData, int mLength )
+{
+	form_header();
+	form_HID_portion( mData );
+	//append_checksum ( mData, mLength );
 }*/
 
 
@@ -63,7 +87,8 @@ int main(int argc, char** argv )
 	 joy.open( path_name.c_str() );
 
 
-	 set_Volume( joy.joystick_fd, 255, 255, 255 );	 
+	 set_Volume( joy.joystick_fd, 255, 255, 255 );
+	 
 	 send_audio_buffer( joy.joystick_fd );
 		
 	// init_rumble_effects();
@@ -82,7 +107,7 @@ int main(int argc, char** argv )
 	 sleep(3);
 	 send_Rumble( joy.joystick_fd, 0,  0 ); */
 	 
-//	 while(1) 
+	 while(1) 
 	 { 
 // 		 set_LED_color( joy.joystick_fd, red, green, 0x02 );	 
 		 green += 10;

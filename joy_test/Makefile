@@ -4,7 +4,7 @@ INC	=
 SELF_INC= ./
 CFLAGS 	= -lm -g
 DEPS   	= 
-OBJ     =   joystick_raw.o crc_32.o ps4_hid_outputs.o rumble_effects.o ff_main.o 
+OBJ     =   joystick_raw.o crc_32.o ps4_hid_outputs.o rumble_effects.o ps4_audio.o ff_main.o 
 
 CPPOBJ    = 
 

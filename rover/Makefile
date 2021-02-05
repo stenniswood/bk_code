@@ -1,9 +1,9 @@
 CC = g++
 CFLAGS = -std=gnu++11 `pkg-config --cflags gtk+-3.0`
-PROG = arm_servs
+PROG = rover
 INC		   = ./ /usr/local/include
 
-SRCS  = main.o sserial.o i2c_switching.o \
+SRCS  = main.o sserial.o i2c_switching.o joystick_raw.o crc_32.o \
 	vector.o servo.o rcServo.o limb.o robot.o jog_mode.o \
 	graph.o dataseries.o read_pendant.o 
  

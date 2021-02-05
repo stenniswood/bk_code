@@ -154,7 +154,7 @@ void	Limb::actuate_vector( std::vector<float> mDegVector )
 	size_t len = m_servos.size();
 	for (int s=0; s < len; s++)
 	{
-		//printf("actuating Limb servo[%d]=%6.3f \n", s, mDegVector[s] );		
+		printf("actuating Limb servo[%d]=%6.3f \n", s, mDegVector[s] );		
 		m_servos[s]->angle_to( mDegVector[s] );
 	}
 }

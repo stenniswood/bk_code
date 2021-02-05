@@ -140,7 +140,7 @@ public:
 	
 	void			Initialize(); 			// int mouse_init()
 
-	void 			open 					( const char* mPathname );
+	void 			open 					( const char* mPathname = NULL );
 	long int 		read_report				( );
 	void 			close					( );
 
@@ -163,6 +163,8 @@ protected:
 	void			extract_touchpad	( );
 	void			print_button		( int mAxisIndex );
 	void			print_axis			( int mAxisIndex );
+private:
+	char			full_device_name[80];
 
 public:
 	// VARIABLES:

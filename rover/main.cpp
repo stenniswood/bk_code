@@ -13,11 +13,8 @@
 #include <string.h>
 
 
-//#include "drive_five.h"
 #include "servo.hpp"
-//#include "dfServo.hpp"
 #include "rcServo.hpp"
-//#include "arm.hpp"
 #include "limb.hpp"
 #include "robot.hpp"
 #include "vector.hpp"
@@ -25,6 +22,7 @@
 #include "jog_mode.hpp"
 #include "graph.hpp"
 #include "read_pendant.h"
+#include "joystick_raw.hpp"
 
 //#include "interpolator.hpp"
 
@@ -166,70 +164,33 @@ void measure_MPU_offsets()
 	printf("gr,gp,gy: %6.3f %6.3f %6.3f \n", gr_off, gp_off, gy_off );
 }
 
+JoystickRaw joy;
+
 int main(int argc, char **argv)
 {	
-/*	OneLimbInterpolator ol(10,4);
-	
-	struct stFloatVector End;
-	End.m_angles.push_back(90.0);
-	End.m_angles.push_back(45.0);
-	End.m_angles.push_back(20.0);
-	End.m_angles.push_back(0.0);
-	End.limb_num = 0;
-
-	ol.set_new_vector( End );
-	ol.print_sequence();
-	
-	End.m_angles[0] = (-30.0);
-	End.m_angles[1] = (0.0);
-	End.m_angles[2] = (0.0);
-	End.m_angles[3] = (0.0);
-	ol.set_new_vector( End );
-	printf("\n");
-	ol.print_sequence();
-*/	
-	std::string SeqFN = "walk.txt";
+	printf("argc=%d\n", argc );
 	if (argc>1)
 	{
+		
 		int result = strcmp(argv[1], "gui");
 		if (result==0)
 			ShowGraph = true;
-		else 
-			SeqFN = argv[1];
 	}
 	
-//	int result = on_exit(  exit_save_positions, NULL);
-//	if (result!=0) printf("Warning cannot set the on_exit function!\n");
+	joy.open( NULL );
 
-	walker.read_vector_file( SeqFN );
 	walker.print_robot_setup();
 	
 	initialize_RPI_servo_hat(walker);
 	switch_to_servo_hat();	
 
-/* Now Test the interpolator: 1st the old way -- just move the servos. 	
-	walker.actuate_vector( End );	
-
-	End.m_angles[0] = (-30.0);
-	End.m_angles[1] = (90.0);
-	End.m_angles[2] = (45.0);
-	End.m_angles[3] = (0.0);
-	End.print();
-	printf("Sleeping for 3\n");
-	sleep(3);
-	
-	walker.actuate_vector( End );		
-	return 0;
-*/
-
 	//measure_MPU_offsets();
-	
 
 #ifdef SERVO_TEST 	
-	while(1)	direct_servo_write_test();	
+	while(1)	direct_servo_write_test();
 #endif
 	
-	std::thread(&main_processing).detach(); //Create a separate thread, for the update routine to run in the background, and detach it, allowing the program to continue	
+//	std::thread(&main_processing).detach(); //Create a separate thread, for the update routine to run in the background, and detach it, allowing the program to continue	
 	
 	if (ShowGraph) {
 		printf("\n\n*** SHOWING GRAPH...\n\n");
@@ -252,8 +213,24 @@ int main(int argc, char **argv)
 	    gtk_main ();	
 	}
 	
+	struct stFloatVector mVec;
+	mVec.limb_num = 0;
+	mVec.m_angles.push_back( 0.0 );
+	mVec.m_angles.push_back( 0.0 );
+	mVec.m_angles.push_back( 0.0 );
+	mVec.m_angles.push_back( 0.0 );			
 	while (1) 
 	{			
+		short lr    = joy.m_axis_latest[ PS_AXIS_LPOD_LR ] - 0x80;
+		float range = (90);
+		float deg   = (lr/128.) * (range);
+		mVec.m_angles[0] = mVec.m_angles[1] = mVec.m_angles[2] = mVec.m_angles[3] = deg;
+
+		short throttle = joy.m_axis_latest[ PS_AXIS_RTRIGGER ];		
+		printf("Throttle=%d;   ", throttle );
+		printf("New Vector: "); mVec.print();
+		
+		walker.actuate_vector ( mVec );
 		usleep(200000); 
 	}
 
