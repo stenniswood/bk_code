@@ -4,18 +4,21 @@ INC	= ./visual/ /usr/include/freetype2
 SELF_INC= ./
 CFLAGS 	= -lm -g
 DEPS   	= 
-OBJ     =  alsa_record.o wave.o 
 
-CPPOBJ    = alsa_record.o wave.o 
+MIDI_OBJ=  midi_synth.o sound_patch.o
+OBJ     =  main.o dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o resample.o \
+		generate.o
 
-LDFLAGS = -lpthread -lrt -lasound -lcurl -lglut -lGLEW -lGL -lfreetype
+VISUAL_OBJ = visual/gl_graph.o visual/shader_utils.o visual/gl_setup.o
+CPPOBJ     = 
+LDFLAGS    = -lpthread -lrt -lasound -lcurl -lglut -lGLEW -lGL -lfreetype -L./midi/ -lmidifile
 
 %.o: %.cpp $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) -c -o $@ $< $(CFLAGS)
 %.o: %.c $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) $(addprefix -I,$(SELF_INC)) -c -o $@ $< $(OPTIONS) $(CFLAGS)
 	
-alsa_record: $(OBJ)
+asynth: $(OBJ) $(MIDI_OBJ)
 	$(CC) -o  $@ $^ $(CFLAGS) $(LDFLAGS)
 
 clean:
