@@ -21,20 +21,23 @@
 #include <alsa/asoundlib.h>
 #include "wave.hpp"
 
-  int i;
-  int err;
-  char *buffer;
-  size_t buffer_size=0;
-  snd_pcm_uframes_t  buffer_frames = 1023;
-  unsigned int rate = 44100;
-  snd_pcm_t *capture_handle;
-  snd_pcm_hw_params_t *hw_params;
-  snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
-  size_t loops = 0;
+
+int i;
+int err;
+char *buffer;
+size_t buffer_size=0;
+snd_pcm_uframes_t  buffer_frames = 1023;
+unsigned int rate = 44100;
+snd_pcm_t *capture_handle;
+snd_pcm_hw_params_t *hw_params;
+snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
+static size_t loops = 0;
+	
 	      
 void init_hw_record()
 {
-  if ((err = snd_pcm_open (&capture_handle, "plughw:2,0", SND_PCM_STREAM_CAPTURE, 0)) < 0) {
+// "plughw:2,0"
+  if ((err = snd_pcm_open (&capture_handle, "hw:2,0", SND_PCM_STREAM_CAPTURE, 0)) < 0) {
     printf ("cannot open audio device %s (%s)\n", 
              "plughw:2,0",
              snd_strerror (err));
@@ -143,18 +146,17 @@ void clean_up()
 	
 }
 
-int main (int argc, char *argv[])
-{
-	size_t BufferSizeSamples = 3 * 60 * 44100 * 1;		//  about 8MB
-	Wave recorded( 1, 44100, BufferSizeSamples, NULL );
+Wave recorded( 1, 44100, 3 * 60 * 44100 * 1, NULL );
 
-	
-	init_hw_record();
+void* record( void* argp )
+{
+	size_t BufferSizeSamples = recorded.get_samples_allocated();
+
 	short* ptr 		  = recorded.m_data;
-	float  time = recorded.SamplesToTime( buffer_size/2 );
+	float  time 	  = recorded.SamplesToTime( buffer_size/2 ); // alsa buffer
 
 	useconds_t usec = ceil(time*1000000);
-	printf("Delay time = %6.3f;  d=%d\n", time, usec );
+	printf("Delay time = %6.3f  : %d usecs\n", time, usec );
 		
 	for (i = 0; i < loops; ++i) {
 		usleep( usec );		
@@ -168,20 +170,18 @@ int main (int argc, char *argv[])
 		} else if (rc != (int)buffer_frames) {
 			printf( "short read, read %d frames\n", rc);
 		}
-			
+
 		printf( "read %d done\n", i);
 		memcpy( (char*)ptr, buffer, buffer_size );
 		ptr += (buffer_size >> 1);		
 	}
-	recorded.m_bytes_recorded = (ptr - recorded.m_data) * 2;
-	printf("Bytes Recorded = %ld\n", recorded.m_bytes_recorded );
-	//std::string fmt_str       = recorded.get_format_string();
-	//printf("%s\n", fmt_str.c_str() );
-	recorded.m_bytes_recorded = BufferSizeSamples*2;
+
+	size_t bytes_rec = (ptr - recorded.m_data) * 2;
+	recorded.m_bytes_recorded = BufferSizeSamples*2;	
+	printf("Bytes Recorded/Allocated = %ld / \n", bytes_rec, recorded.m_bytes_recorded );
+	
 	std::string ofn = "ALSA_Rec.wav";
 	recorded.Save( ofn );
 
-	
-    clean_up();
-	return 1;
+	return NULL;
 }

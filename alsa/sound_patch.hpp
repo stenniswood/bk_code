@@ -59,7 +59,7 @@ public:
 	void			gen_square	( int mMidiNote, float mVolume, short* mData, int mLength );
 	void			gen_triangle( int mMidiNote, float mVolume, short* mData, int mLength );
 	void			gen_saw		( int mMidiNote, float mVolume, short* mData, int mLength );
-	void			gen_sine	( int mMidiNote, float mVolume, short* mData, int mLength );
+	void			gen_sine	( int mMidiNote, float mVolume, short* mData, int mLength, int mUnisonNotes );
 	
 private:
 	enum eGenType	m_type;

@@ -126,6 +126,7 @@ void GendSoundSource::set_envelope( int mSamplesPerSecond, struct stEnvelope mEn
 	
 	printf("set_envelope() : Attack Samples %6.3f %d\n", m_envelope.attack_time, m_attack_samples );
 	printf(": Decay Samples %6.3f %d\n",   m_envelope.decay_time,   m_decay_samples   );
+	printf(": Sustain Samples %6.3f %d\n", m_envelope.sustain_time, m_sustain_samples );
 	printf(": Release Samples %6.3f %d\n", m_envelope.release_time, m_release_samples );	
 	
 	printf(": Decay Level %6.3f\n", 	 m_envelope.decay_level );
@@ -151,24 +152,24 @@ float GendSoundSource::phase_tracking( bool mRestart, float mMaxVolume )
 	switch(m_phase)
 	{
 	case ATTACK :  if (m_phase_counter >= m_attack_samples) 
-					{ m_phase++;  m_phase_counter=0; printf("New Phase\n"); };
+					{ m_phase++;  m_phase_counter=0; printf("New Phase decay\n"); };
 					VolumeFraction = ((float)m_phase_counter / (float)m_attack_samples) * mMaxVolume;
 			break;
 	case DECAY :	if (m_phase_counter >= m_decay_samples ) 
-					{ m_phase++;  m_phase_counter=0; printf("New Phase\n"); };
+					{ m_phase++;  m_phase_counter=0; printf("New Phase sustain\n"); };
 					VolumeFraction = mMaxVolume - ((float)m_phase_counter / (float)m_decay_samples) * ( mMaxVolume-decayVol );
 			break;
 	case SUSTAIN :	if (m_phase_counter >= m_sustain_samples ) 
-					{ m_phase++;  m_phase_counter=0; printf("New Phase\n"); };
+					{ m_phase++;  m_phase_counter=0; printf("New Phase release\n"); };
 					VolumeFraction = ( decayVol );
 			break;
 
 	case RELEASE :  if (m_phase_counter >= m_release_samples ) 
-					{ m_phase++;  m_phase_counter=0; printf("New Phase\n"); };
+					{ m_phase++;  m_phase_counter=0; printf("Note done\n"); };
 					VolumeFraction = decayVol - 
 							((float)m_phase_counter / (float)m_release_samples) * decayVol;
 			break;
-	default : 
+	default : VolumeFraction = 0.0;
 			break;	
 	}	
 	//printf("%6.3f  ", VolumeFraction);
@@ -177,7 +178,7 @@ float GendSoundSource::phase_tracking( bool mRestart, float mMaxVolume )
 
 #define GEND_AMPLITUDE 16384
 
-void GendSoundSource::gen_sine( int mMidiNote, float mVolume, short* mData, int mLength )
+void GendSoundSource::gen_sine( int mMidiNote, float mVolume, short* mData, int mLength, int mUnisonNotes )
 {
 	int   PeriodSamps = get_note_num_period( mMidiNote-21 );
 	int   max_ampl        = GEND_AMPLITUDE * mVolume;
@@ -193,7 +194,6 @@ void GendSoundSource::gen_sine( int mMidiNote, float mVolume, short* mData, int 
 	{
 		// ENVELOPE SHAPING:
 		float ampl = phase_tracking(false, max_ampl);	
-		//float ampl = max_ampl;
 		
 		// WAVEFORM:
 		newdata = ampl * sin( (float)i/(float)PeriodSamps * 2.0*M_PI );
@@ -204,17 +204,21 @@ void GendSoundSource::gen_sine( int mMidiNote, float mVolume, short* mData, int 
 void GendSoundSource::gen_saw( int mMidiNote, float mVolume, short* mData, int mLength )
 {
 	int   PeriodSamps = get_note_num_period( mMidiNote-21 );
-
-	int dec 	 = GEND_AMPLITUDE / PeriodSamps;
-	int new_data  = GEND_AMPLITUDE;
+	int   max_ampl        = GEND_AMPLITUDE * mVolume;
+	
+	int dec 	 = max_ampl / PeriodSamps;
+	int new_data  = max_ampl;
 	int value    = 0;
 
 	for (int i=0; i<mLength; i++)
 	{
+		// ENVELOPE SHAPING:
+		float ampl = phase_tracking(false, max_ampl);	
+
 		value    -= dec;
 		if (value <=0) 	value = GEND_AMPLITUDE;
 
-		new_data   = value - ( GEND_AMPLITUDE >> 1 );
+		new_data   = ampl* ( value - ( max_ampl >> 1 ));
 		mData[i]   = add_value( mData[i], new_data  );
 	}
 }
@@ -222,18 +226,22 @@ void GendSoundSource::gen_saw( int mMidiNote, float mVolume, short* mData, int m
 void GendSoundSource::gen_triangle( int mMidiNote, float mVolume, short* mData, int mLength )
 {
 	int   PeriodSamps = get_note_num_period( mMidiNote-21 );
-	int   dec 	 	  = GEND_AMPLITUDE / (PeriodSamps >> 1);
+	int   max_ampl        = GEND_AMPLITUDE * mVolume;
 	
-	short new_data     = mVolume*(GEND_AMPLITUDE-GEND_AMPLITUDE/2);
-	short value 	  = GEND_AMPLITUDE;
+	int   dec 	 	  = max_ampl / (PeriodSamps >> 1);
+	short new_data    = (max_ampl-max_ampl/2);
+	short value 	  = max_ampl;
 
 	for (int i=0; i<mLength; i++)
 	{
+		// ENVELOPE SHAPING:
+		float ampl = phase_tracking(false, mVolume);	
+	
 		value      -= dec;
-		if (value <= 0) 			  dec = -fabs(dec);
-		if (value >= GEND_AMPLITUDE)  dec = fabs(dec);
+		if (value <= 0) 			dec = -fabs(dec);
+		if (value >= max_ampl)  	dec = fabs(dec);
 
-		new_data   = value - ( GEND_AMPLITUDE >> 1 );
+		new_data   = ampl* (value - ( max_ampl >> 1 ));
 		mData[i] = add_value (mData[i], new_data );
 	}
 }
@@ -241,15 +249,21 @@ void GendSoundSource::gen_triangle( int mMidiNote, float mVolume, short* mData, 
 void GendSoundSource::gen_square( int mMidiNote, float mVolume, short* mData, int mLength )
 {
 	int   PeriodSamps = get_note_num_period( mMidiNote-21 );
+	int   max_ampl    = GEND_AMPLITUDE * mVolume;
+		
 	int   half        = PeriodSamps >> 2;
-	short newdata     = mVolume*(GEND_AMPLITUDE-GEND_AMPLITUDE/2);
+	short newdata     = (max_ampl-max_ampl/2);
 
 	for (int i=0; i<mLength; i++)
 	{
+		// ENVELOPE SHAPING:
+		float ampl = phase_tracking(false, max_ampl);	
+	
 		if ((i%PeriodSamps)<half) {
+			newdata = ampl - (max_ampl>>1);
 			mData[i] = add_value( mData[i], newdata );
 		} else 
-			mData[i] = 0;
+			mData[i] = 0- (max_ampl>>1);
 	}
 }
 

@@ -7,7 +7,7 @@ DEPS   	=
 
 MIDI_OBJ=  midi_synth.o sound_patch.o
 OBJ     =  main.o dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o resample.o \
-		generate.o
+		generate.o alsa_record.o
 
 VISUAL_OBJ = visual/gl_graph.o visual/shader_utils.o visual/gl_setup.o
 CPPOBJ     = 
