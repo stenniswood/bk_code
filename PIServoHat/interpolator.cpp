@@ -93,7 +93,7 @@ void  OneLimbInterpolator::print_sequence( )
 {
 	for (int n=0; n<m_num_points; n++)
 	{
-		printf("%d:  ", n);
+		printf("%d::  ", n);
 		m_Sequence[n].print();
 	}		
 }
@@ -120,23 +120,10 @@ void FullInterpolator::get_play_vector( int mLimb,
 	}
 }
 
-/*void FullInterpolator::redimension( int mNumInterpolations )
+void  FullInterpolator::get_vector_string( std::string& mNewLine, int mIndex=-1 )
 {
-	int num_limbs = mRobot.get_num_limbs();
-	m_num_points = mNumInterpolations;
-	
-	// INIT a OneLimbInterpolator for each limb:
-	for (int i=0; i<num_limbs; i++)
-	{
-		int num_servos = 0;
-		Limb* l =  mRobot.get_limb( i );
-		if (l)
-			num_servos = l->get_num_servos();
-			
-		OneLimbInterpolator one( m_num_points, num_servos );
-		m_limb.push_back( one );
-	}	
-}*/
+
+}
 
 void  FullInterpolator::add_empty_limb  ( int mNumServos )
 {

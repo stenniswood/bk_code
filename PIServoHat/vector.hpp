@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <iostream>
+#include "interpolator.hpp"
 
 
 struct stFloatVector 
@@ -14,7 +15,7 @@ struct stFloatVector
 	int limb_num;	
 	std::vector<float>	m_angles;
 	void 	print() {
-		printf("L%d: ", limb_num);
+		printf("L%d ", limb_num);
 		for (int i=0; i<m_angles.size(); i++)
 			printf("%6.3f ", m_angles[i]);
 		printf("\n");
@@ -33,11 +34,12 @@ struct stCountVector
 };
 
 
+
 /* Given 2 vectors, create n vector sequence so that the end points are reached
-   simultaneously */
+   simultaneously 
 void time_resample(struct stFloatVector mStart, struct stFloatVector mEnd, int n,
 				std::vector<struct stFloatVector>& mSequence );
-
+*/
 struct stGosubInfo {
 	std::string 		m_token;		//ie. gosub or goto
 	std::string			m_goto_label;	// line index
@@ -48,8 +50,8 @@ struct stGosubInfo {
 class VectorSequence
 {
 public:
-	VectorSequence( std::string mFilename );
-	~VectorSequence();
+	VectorSequence	( std::string mFilename );
+	~VectorSequence	( );
 
 	void	open_file	   		( );	
 	void	read_file	   		( );
@@ -70,12 +72,14 @@ public:
 	int 	parse_command		( std::string mToken);
 	int 	execute_command		( );
 
-	int		get_group_size()	{ return m_group_size; };
+	int		get_group_size		( )	{ return m_group_size; };
 	bool	m_goto_pending;
 
+	void	insert_line			( std::string mStr );
 			
 protected:
 	void	parse_vector_data	( std::string mData );
+
 
 private:
 	std::string   m_file_name;
@@ -85,6 +89,8 @@ private:
 	std::vector<int>		  m_line_nums;
 	std::vector<std::string>  m_labels;				// 1 to 1 correspond to m_file_lines.
 	
+	FullInterpolator	interp;
+		
 	bool				m_is_command;
 
 	std::string 		m_token;		//tbd

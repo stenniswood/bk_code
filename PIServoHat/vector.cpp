@@ -33,11 +33,10 @@ void  VectorSequence::read_file( )
 		m_file_lines.push_back( oneLine );
 	}
 	printf("Read %d lines.\n", m_file_lines.size() );
-	selected_line = 0;
 	parse_line_nums();
+	selected_line = 0;
 	process_one_vector(  );
 }
-
 
 void	VectorSequence::select_one_vector( int LineIndex )
 {
@@ -144,8 +143,6 @@ int	VectorSequence::find_label( std::string mLabel )		// returns index into m_fi
 	return -1;
 }
 
-
-
 /* Parses the Selected_line into its components. */
 bool	VectorSequence::process_one_vector(  )
 {
@@ -158,7 +155,7 @@ bool	VectorSequence::process_one_vector(  )
 	if (pos != std::string::npos)
 	{
 		std::string label_str = oneLine.substr( 0, pos );
-		//printf("LineLabel=%s;\t", label_str.c_str());	
+		//printf("LineLabel=%s;\t", label_str.c_str());
 	}
 	
 	// EXTRACT VECTOR SIZE:
@@ -168,9 +165,9 @@ bool	VectorSequence::process_one_vector(  )
 		if (pos2 == (pos+1))
 			m_group_size = 1;		// default
 		else {
-			std::string size_str = oneLine.substr( pos, pos2 );
-			printf("Group Vector size=%s;\t", size_str.c_str());
+			std::string size_str = oneLine.substr( pos+1, (pos2-(pos+1)) );
 			m_group_size         = atoi( size_str.c_str() );
+			//printf("Group Vector size=%s; %d\t", size_str.c_str(), m_group_size);
 		}
 	}
 
@@ -214,6 +211,10 @@ int VectorSequence::parse_command(std::string mLine)
 		return 1;
 	}
 	else if (m_token=="return")
+	{ 
+		return 1;
+	}
+	else if (m_token=="pose")
 	{ 
 		return 1;
 	}
@@ -294,6 +295,9 @@ int VectorSequence::execute_command()
 	return retval;		// Not processed.
 }
 
+void VectorSequence::insert_line( std::string mStr )
+{
+}
 
 void	VectorSequence::parse_vector_data( std::string mData )
 {

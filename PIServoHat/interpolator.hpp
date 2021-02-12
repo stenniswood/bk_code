@@ -21,6 +21,7 @@ public:
 
 	void	set_new_vector ( struct stFloatVector mNewPos  );
 	void	get_play_vector( struct stFloatVector& mNewPos, int mIndex=-1 );
+	void	get_vector_string( std::string& mNewLine, int mIndex=-1 );
 
 	void	restart()		{ m_index = 0; };
 	void	print_sequence();
@@ -46,15 +47,10 @@ public:
 	FullInterpolator(  );
 	~FullInterpolator();
 
-	void	set_num_points( int mNum ) 		  { m_num_points = mNum; };	
-	void	clear_dimensions( int mNumLimbs ) { m_limb.clear(); };
+	void	set_num_points	( int mNum ) 	{ m_num_points = mNum; };	
+	void	clear_limbs		( )  			{ m_limb.clear(); };
 	void	add_empty_limb  ( int mNumServos );	
 	
-	/* Given 2 vectors, create n vector sequence so that the end points are reached
-   simultaneously */
-	void 	time_resample(	struct stFloatVector mStart, 
-							struct stFloatVector mEnd, int n );
-
 	void	set_new_vector ( struct stFloatVector mNewPos );
 
 	void	get_play_vector( int mLimb, struct stFloatVector& mNewPos, int mSeqIndex=-1 );
