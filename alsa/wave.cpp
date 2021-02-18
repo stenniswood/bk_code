@@ -387,17 +387,18 @@ bool Wave::Open( std::string& Filename)
 bool Wave::ReadHeader( )
 {
 	//printf("Wave::ReadHeader( )\t");
+	long int chunkSize=0;
 	
 	// Read RIFF :
 	char tmp[8];
-	int result   = fread( tmp, 1, 4, m_inFile );			// "RIFF" 
+	int result = fread( tmp, 1, 4, m_inFile );			// "RIFF" 
 	tmp[4] = 0;
 
 	int comp = strncmp(tmp,"RIFF",4);
 	if(comp != 0)
 	{ 
-	    ErrStr = "not a wave riff file";  
-	    printf("Error:%s\n", ErrStr.c_str() ); 
+		result = fread( &chunkSize, 1, 4, m_inFile );	// should be 16, 18, or 40	
+	    printf("Error: not a wave riff file. Chunk:%s: size=%ld \n", tmp, chunkSize ); 
 		for (int i=0; i<4; i++)
 			printf("%c", tmp[i] );
 		return false;
@@ -415,7 +416,6 @@ bool Wave::ReadHeader( )
 	}
 	
 	// FORMAT "fmt "   - might need to seek for the fmt chunk.  If some other chunks come before the "fmt " one.
-	long int chunkSize=0;
 	result = fread( tmp, 1, 4, m_inFile );
 	bool cmp = (strncmp(tmp,"fmt ",4) == 0);
 	if (!cmp)	   
@@ -521,7 +521,7 @@ bool Wave::Load( std::string& Filename)
 	
 	ok = ReadHeader();			// Virtual (Timit or regular .wav)
 	if (ok==false) {
-		printf("COULD NOT READ HEADER!\n");
+		printf("COULD NOT READ HEADER! %s\n", Filename.c_str() );
 		fclose( m_inFile );
 		return ok;
 	}

@@ -13,6 +13,8 @@ void* record( void* argp );
 void clean_up();
 
 
+void* record_thread_func( void* argp );
+
 
 
 #endif

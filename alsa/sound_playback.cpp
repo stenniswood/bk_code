@@ -65,7 +65,7 @@ int sound_playback( DSPWave& wav, bool mLoopMode )
 	int    counter = 0;
 	bool   done = true;
 	if (mLoopMode) done = false;
-	printf("Entering loop...\n");
+	printf("Entering playback loop...\n");
 	
 	do {
 		while ( (bytes_played+buff_size) <  d_len )
@@ -178,9 +178,3 @@ int sound_play_main(int argc, char **argv)
 	return 0;
 }
 
-	/*printf("Opening TIMIT speech file\n");	
-	std::string sfn = "TIMIT/SA1.WAV";
-	TIMITWave sp_wave;
-	sp_wave.Load( sfn );
-	sp_wave.amplify(8.0);
-	printf("Opening TIMIT speech file\n");	*/

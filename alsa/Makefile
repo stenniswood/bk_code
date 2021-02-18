@@ -7,11 +7,12 @@ DEPS   	=
 
 MIDI_OBJ=  midi_synth.o sound_patch.o
 OBJ     =  main.o dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o resample.o \
-		generate.o alsa_record.o
+		generate.o alsa_record.o beat_detect.o beat_gen.o
 
 VISUAL_OBJ = visual/gl_graph.o visual/shader_utils.o visual/gl_setup.o
 CPPOBJ     = 
-LDFLAGS    = -lpthread -lrt -lasound -lcurl -lglut -lGLEW -lGL -lfreetype -L./midi/ -lmidifile
+LDFLAGS    = -lpthread -lrt -lasound -lcurl -lglut -lGLEW -lGL -lfreetype -L./midi/ -lmidifile -lfftw3
+
 
 %.o: %.cpp $(DEPS)
 	$(CC) $(addprefix -I,$(INC)) -c -o $@ $< $(CFLAGS)

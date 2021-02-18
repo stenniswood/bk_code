@@ -103,6 +103,8 @@ snd_pcm_t* prepare_alsa( int m_number_channels, unsigned int msamples_per_second
 	buff_size = *frames * m_number_channels*2; 
 	*buff      = (char *) malloc(buff_size);
 
+	printf("Sound Playback :  prepare_alsa() done\n");
+	
 	return pcm_handle;
 }
 

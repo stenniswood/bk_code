@@ -14,12 +14,27 @@
 #include "sound_playback.hpp"
 #include "sound_patch.hpp"
 #include "midi_synth.hpp"
+#include "dspwave.hpp"
 #include "alsa_record.hpp"
+#include "beat_detect.hpp"
+#include "beat_gen.hpp"
 
 
 bool LoopMode = false;
 BOOL VISUALIZE = TRUE;
 
+void help()
+{
+	printf(" Audio Synthesizer \n");
+	printf(" ./asynth [mode] [filename]\n\n");
+	
+	printf(" loop - Continuous looping of an audiofile. \n");
+	printf(" beat - play a drum pattern Overlay melodies. \n");
+	printf(" audio - Play and process an audio file for Musical DNA.\n");
+	printf(" midi - read a midifile and synthesize it. \n");			
+	printf(" test  \n");	
+	exit(1);
+}
 
 bool scan_args( int argc, char** argv, const char* mSearchArg )
 {
@@ -76,12 +91,22 @@ void print_freq()
 	}
 }
 
+#define MIDIFILE  1
+#define AUDIOFILE 2
+#define TEST 	  3
+#define BEATBOX   4
+
 std::string fn = "midi/mario-dies.mid";
+int InputFileType = 0;
 
 void process_args( int argc, char** argv )
 {
 	if (argc > 1) {
 		bool found = FALSE;	
+		found = scan_args( argc, argv, "help" );
+		if (found==true)  { 
+			help();
+		} 
 
 		found = scan_args( argc, argv, "loop" );
 		if (found==true)  { 
@@ -91,8 +116,30 @@ void process_args( int argc, char** argv )
 		if (found==true)  {
 			 VISUALIZE = false; printf("Running in Nogui mode.\n"); 						
 		}
-		if (!found)
-			fn = argv[1];
+		
+		found = scan_args( argc, argv, "midi" );
+		if (found==true)  { 
+			InputFileType=MIDIFILE;   printf("Running in Midi File\n"); 
+			fn = argv[2];
+		} 
+		found = scan_args( argc, argv, "beat" );
+		if (found==true)  { 
+			InputFileType=BEATBOX;   printf("Running in BeatBox Mode\n"); 
+		} 
+
+		found = scan_args( argc, argv, "audio" );
+		if (found==true)  { 
+			InputFileType=AUDIOFILE;   printf("Running in Audio File\n"); 
+			fn = argv[2];
+		} 
+
+		found = scan_args( argc, argv, "test" );
+		if (found==true)  { 
+			InputFileType=TEST;   printf("Running in Test Mode\n"); 
+		} 
+
+		//if (!found)
+		//	fn = argv[1];
 	}
 }
 
@@ -117,27 +164,49 @@ void synthesize_midifile()
 int main (int argc, char** argv)
 {
 	process_args(argc, argv );
-	
-	GendSoundSource square( eGenType::GS_SQUARE );	
-	struct stEnvelope test;
-	test.attack_time  = 0.01;
-	test.decay_time   = 0.50;
-	test.sustain_time = 3.00;	
-	test.release_time = 1.50;
-	test.decay_level  = 0.25;
-	square.set_envelope(44100, test);
-	square.stamp_wave( 0x40, 1.0, wave.m_data, 44100*60*2 );
 
-//	synthesize_midifile();
-	
-	wave.Save("WaveSynth.wav");
+	if (InputFileType==TEST) {
+		
+		GendSoundSource square( eGenType::GS_SQUARE );	
+		struct stEnvelope test;
+		test.attack_time  = 0.01;
+		test.decay_time   = 0.50;
+		test.sustain_time = 3.00;	
+		test.release_time = 1.50;
+		test.decay_level  = 0.25;
+		square.set_envelope(44100, test);
+		square.stamp_wave( 0x40, 1.0, wave.m_data, 44100*60*2 );
+	} 
+	else if (InputFileType==MIDIFILE) {
+		synthesize_midifile();
+		wave.Save("WaveSynth.wav");
+	}
+	else if (InputFileType==AUDIOFILE)
+	{
+		// OPEN AUDIO FILE AND PROCESS IT:  (for beat detection)
+		recorded.Load( fn );
+		printf("Waveform read.\n");
+		process_waveform();
+	}
+	else if (InputFileType==BEATBOX)
+	{
+#define NUM_BEATS_DESIRED 4*4
+		beat_gen_init();
 
-	init_hw_record();
-	pthread_t thread_id; 
-	pthread_create(&thread_id, NULL, record, NULL); 
+		float BeatsPerMin = 120.0;
+		float time = (1.0/(BeatsPerMin / 60.0)) * NUM_BEATS_DESIRED;
+		size_t SampLen = wave.TimeToSamples( time );
 
-	//int result = sound_playback( wave, false );		
-	clean_up();
-	
+		wave.Resize( SampLen+5 );
+		generate_full( wave, BeatsPerMin );
+		int result = sound_playback( wave, true );		
+	}
+	else {
+		// RECORD & PLAYBACK : 
+		pthread_t thread_id; 
+		pthread_create(&thread_id, NULL, record_thread_func, NULL); 
+		int result = sound_playback( wave, false );		
+		while(1) {};
+	}
 	return 0;
 }

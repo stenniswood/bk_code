@@ -19,79 +19,80 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <alsa/asoundlib.h>
-#include "wave.hpp"
+#include "dspwave.hpp"
+#include "beat_detect.hpp"
 
 
-int i;
-int err;
-char *buffer;
-size_t buffer_size=0;
-snd_pcm_uframes_t  buffer_frames = 1023;
-unsigned int rate = 44100;
-snd_pcm_t *capture_handle;
+
+FILE*    fd = 0;
+
+int    				i;
+int    				err;
+char   				*buffer;
+size_t 				buffer_size	  = 0;
+snd_pcm_uframes_t  	buffer_frames = 2046;
+unsigned int 		rate 		  = 44100;
+snd_pcm_t *			capture_handle;
 snd_pcm_hw_params_t *hw_params;
-snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
-static size_t loops = 0;
-	
+snd_pcm_format_t 	format 			= SND_PCM_FORMAT_S16_LE;
+static size_t 		loops 			= 0;
+
+DSPWave 				recorded( 1, 44100, 3*60*44100*1, NULL );
+
 	      
 void init_hw_record()
 {
-// "plughw:2,0"
-  if ((err = snd_pcm_open (&capture_handle, "hw:2,0", SND_PCM_STREAM_CAPTURE, 0)) < 0) {
+  char dev_name[] = "plughw:2,0";
+	
+  if ((err = snd_pcm_open (&capture_handle, dev_name, SND_PCM_STREAM_CAPTURE, 0)) < 0) {
     printf ("cannot open audio device %s (%s)\n", 
-             "plughw:2,0",
+             dev_name,
              snd_strerror (err));
     exit (1);
   }
-
-  printf( "audio interface opened\n");
+  //printf( "audio interface opened\n");
 		   
   if ((err = snd_pcm_hw_params_malloc (&hw_params)) < 0) {
     printf ( "cannot allocate hardware parameter structure (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-
-  printf( "hw_params allocated\n");
+  //printf( "hw_params allocated\n");
 				 
   if ((err = snd_pcm_hw_params_any (capture_handle, hw_params)) < 0) {
     printf ("cannot initialize hardware parameter structure (%s)\n",
              snd_strerror(err) );
     exit (1);
   }
-
-  printf( "hw_params initialized\n");
+  //printf( "hw_params initialized\n");
 	
   if ((err = snd_pcm_hw_params_set_access (capture_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
     printf ( "cannot set access type (%s)\n",
              snd_strerror (err));
     exit (1);
   }
+  //printf( "hw_params access set\n");
 
-  printf( "hw_params access set\n");
-	
   if ((err = snd_pcm_hw_params_set_format (capture_handle, hw_params, format)) < 0) {
     printf ( "cannot set sample format (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-
-  printf( "hw_params format set\n");
+  //printf( "hw_params format set\n");
 	
   if ((err = snd_pcm_hw_params_set_rate_near (capture_handle, hw_params, &rate, 0)) < 0) {
     printf ( "cannot set sample rate (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-  printf("hw_params rate set\n");
+  //printf("hw_params rate set\n");
 
   if ((err = snd_pcm_hw_params_set_channels (capture_handle, hw_params, 1)) < 0) {
     printf ( "cannot set channel count (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-
-  printf( "hw_params channels set\n");
+  //printf( "hw_params channels set\n");
 
     /* Set period size to 32 frames. */
 	int dir=1;
@@ -102,19 +103,18 @@ void init_hw_record()
              snd_strerror (err));
     exit (1);
   }
-  printf( "hw_params set\n");
+  //printf( "hw_params set\n");
   
 	/* Use a buffer large enough to hold one period */
 	snd_pcm_hw_params_get_period_size(hw_params, &buffer_frames, &dir );
-	buffer_size = buffer_frames * 2; /* 2 bytes/sample, 2 channels */
+	buffer_size = buffer_frames * 2; /* 2 bytes/sample, 1 channels */
 	buffer = (char *)new short[buffer_frames];
 	printf("new short[ %ld ]\n", buffer_frames);
-	
-  
-  /* We want to loop for 5 seconds */
+
+  /* We want to loop for 20 seconds */
    unsigned int val = 44100;
    snd_pcm_hw_params_get_period_time(hw_params, &val, &dir);
-   loops = 5000000 / val;
+   loops = 20000000 / val;
    printf("buffer_size = %ld;  loops=%ld\n", buffer_size, loops );
 
 	
@@ -124,41 +124,65 @@ void init_hw_record()
     exit (1);
   }
 
-  printf( "audio interface prepared\n");
-  //buffer = (char*) malloc(128 * snd_pcm_format_width(format) / 8 * 2);
-
-  printf( "buffer allocated\n");
+  printf( "================== RECORDING =================================\n");
 }
 
 void clean_up()
 {
-  printf( "hw_params freed 0\n");
   snd_pcm_hw_params_free (hw_params);
-  printf( "hw_params freed 1\n");
-
-  printf( "audio interface closing\n");
   snd_pcm_close (capture_handle);
-  printf( "audio interface closed\n");
 
 //  free(buffer);
   delete buffer;
-  printf( "buffer freed\n");
-	
+  printf( "======== MEMORY CLEANED ===========\n");	
 }
 
-Wave recorded( 1, 44100, 3 * 60 * 44100 * 1, NULL );
 
-void* record( void* argp )
+void write_vector( std::vector<t_real> mVec)
+{
+	char str[256];
+	for (int i=0; i<mVec.size(); i++)
+	{
+		sprintf(str, "%6.3f", mVec[i] );
+		size_t len = strlen(str);
+		fwrite(str, 1, len, fd);
+	}
+	fwrite("\n", 1, 2, fd);	
+}
+
+extern void bass_drum_detect( short* mData, int mLength );
+
+void process_window( short* mSamps, int mLength, short* mOBuffer )
+{
+	int Start = recorded.TimeToSamples( 0.417 );
+	int End   = recorded.TimeToSamples( 0.560 );
+	//std::vector<t_real> autocorr = recorded.full_auto_correlation( Start, End );	
+	//write_vector( autocorr );
+	
+	bass_drum_detect( mSamps, mLength );
+	
+	double energy = log(compute_energy( mSamps, (long int)mLength ));
+	Energies[EnergiesIndex++] = energy;
+}
+
+
+
+
+void record(  )
 {
 	size_t BufferSizeSamples = recorded.get_samples_allocated();
 
 	short* ptr 		  = recorded.m_data;
-	float  time 	  = recorded.SamplesToTime( buffer_size/2 ); // alsa buffer
+	float  time 	  = recorded.SamplesToTime( buffer_frames ); // alsa buffer
 
 	useconds_t usec = ceil(time*1000000);
-	printf("Delay time = %6.3f  : %d usecs\n", time, usec );
+	printf("Delay time=%6.3f  : %d usecs\n", time, usec );
+		printf("smaller Low/High ratio ==> snare drum\n");
 		
-	for (i = 0; i < loops; ++i) {
+	EnergiesIndex = 0;
+	
+	for (i = 0; i < loops; ++i) 
+	{
 		usleep( usec );		
 		int rc = snd_pcm_readi (capture_handle, buffer, buffer_frames);
 		if (rc == -EPIPE) {
@@ -170,12 +194,23 @@ void* record( void* argp )
 		} else if (rc != (int)buffer_frames) {
 			printf( "short read, read %d frames\n", rc);
 		}
+		//printf( "%d read %d done\n", i, rc );
 
-		printf( "read %d done\n", i);
+		// WINDOW : 
+		short owBuffer[513];	
+		
+		for (int w=0; w<4; w++)
+		{
+			process_window( (short*)buffer, 512, owBuffer);
+			//short* corrs = Correlation( owBuffer, 512 );
+			//peak_pick( corrs, 2, &peak1, &peak2, &peak3 );
+		}
+		
 		memcpy( (char*)ptr, buffer, buffer_size );
-		ptr += (buffer_size >> 1);		
+		ptr += (buffer_frames);	
 	}
-
+	printf("======================= FINISHED RECORDING ========================\n" );
+	printf("Read %d buffers \n", loops );	
 	size_t bytes_rec = (ptr - recorded.m_data) * 2;
 	recorded.m_bytes_recorded = BufferSizeSamples*2;	
 	printf("Bytes Recorded/Allocated = %ld / \n", bytes_rec, recorded.m_bytes_recorded );
@@ -183,5 +218,21 @@ void* record( void* argp )
 	std::string ofn = "ALSA_Rec.wav";
 	recorded.Save( ofn );
 
-	return NULL;
+	process_waveform( );
+	
+	return ;
 }
+
+
+
+void* record_thread_func( void* argp )
+{
+	fd = fopen("Record_Energy.csv", "a+");
+	
+	init_hw_record();
+	record();
+
+	fclose(fd);
+	clean_up();
+	return NULL;
+};
