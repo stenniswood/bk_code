@@ -160,6 +160,7 @@ void synthesize_midifile()
 	ms.synth_midi( wave ); 
 }
 
+#define NUM_BEATS_DESIRED 4*4
 
 int main (int argc, char** argv)
 {
@@ -184,13 +185,11 @@ int main (int argc, char** argv)
 	else if (InputFileType==AUDIOFILE)
 	{
 		// OPEN AUDIO FILE AND PROCESS IT:  (for beat detection)
-		recorded.Load( fn );
-		printf("Waveform read.\n");
-		process_waveform();
+		recorded.Load   ( fn       );
+		process_waveform( recorded );
 	}
 	else if (InputFileType==BEATBOX)
 	{
-#define NUM_BEATS_DESIRED 4*4
 		beat_gen_init();
 
 		float BeatsPerMin = 120.0;
@@ -199,6 +198,10 @@ int main (int argc, char** argv)
 
 		wave.Resize( SampLen+5 );
 		generate_full( wave, BeatsPerMin );
+
+		// RECORD & PLAYBACK : 
+		pthread_t thread_id; 
+		pthread_create(&thread_id, NULL, record_thread_func, NULL); 
 		int result = sound_playback( wave, true );		
 	}
 	else {

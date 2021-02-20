@@ -50,50 +50,42 @@ void init_hw_record()
              snd_strerror (err));
     exit (1);
   }
-  //printf( "audio interface opened\n");
 		   
   if ((err = snd_pcm_hw_params_malloc (&hw_params)) < 0) {
     printf ( "cannot allocate hardware parameter structure (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-  //printf( "hw_params allocated\n");
 				 
   if ((err = snd_pcm_hw_params_any (capture_handle, hw_params)) < 0) {
     printf ("cannot initialize hardware parameter structure (%s)\n",
              snd_strerror(err) );
     exit (1);
   }
-  //printf( "hw_params initialized\n");
 	
   if ((err = snd_pcm_hw_params_set_access (capture_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
     printf ( "cannot set access type (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-  //printf( "hw_params access set\n");
 
   if ((err = snd_pcm_hw_params_set_format (capture_handle, hw_params, format)) < 0) {
     printf ( "cannot set sample format (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-  //printf( "hw_params format set\n");
 	
   if ((err = snd_pcm_hw_params_set_rate_near (capture_handle, hw_params, &rate, 0)) < 0) {
     printf ( "cannot set sample rate (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-  //printf("hw_params rate set\n");
 
   if ((err = snd_pcm_hw_params_set_channels (capture_handle, hw_params, 1)) < 0) {
     printf ( "cannot set channel count (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-  //printf( "hw_params channels set\n");
-
     /* Set period size to 32 frames. */
 	int dir=1;
 	snd_pcm_hw_params_set_period_size_near(capture_handle, hw_params, &buffer_frames, &dir);
@@ -103,7 +95,6 @@ void init_hw_record()
              snd_strerror (err));
     exit (1);
   }
-  //printf( "hw_params set\n");
   
 	/* Use a buffer large enough to hold one period */
 	snd_pcm_hw_params_get_period_size(hw_params, &buffer_frames, &dir );
@@ -117,13 +108,11 @@ void init_hw_record()
    loops = 20000000 / val;
    printf("buffer_size = %ld;  loops=%ld\n", buffer_size, loops );
 
-	
   if ((err = snd_pcm_prepare (capture_handle)) < 0) {
     printf ( "cannot prepare audio interface for use (%s)\n",
              snd_strerror (err));
     exit (1);
   }
-
   printf( "================== RECORDING =================================\n");
 }
 
@@ -131,8 +120,6 @@ void clean_up()
 {
   snd_pcm_hw_params_free (hw_params);
   snd_pcm_close (capture_handle);
-
-//  free(buffer);
   delete buffer;
   printf( "======== MEMORY CLEANED ===========\n");	
 }
@@ -150,28 +137,57 @@ void write_vector( std::vector<t_real> mVec)
 	fwrite("\n", 1, 2, fd);	
 }
 
-extern void bass_drum_detect( short* mData, int mLength );
 
-void process_window( short* mSamps, int mLength, short* mOBuffer )
+double  EnergyThreshold = 12.0;
+bool	InHighEnergy = false;
+int		prev_Drum    = 0;
+
+void process_window( short* mSamps, int mLength, size_t mSampleIndex )
 {
-	int Start = recorded.TimeToSamples( 0.417 );
-	int End   = recorded.TimeToSamples( 0.560 );
+	//int Start = recorded.TimeToSamples( 0.417 );
+	//int End   = recorded.TimeToSamples( 0.560 );
 	//std::vector<t_real> autocorr = recorded.full_auto_correlation( Start, End );	
 	//write_vector( autocorr );
-	
-	bass_drum_detect( mSamps, mLength );
-	
+	//short* corrs = Correlation( owBuffer, 512 );
+	//peak_pick( corrs, 2, &peak1, &peak2, &peak3 );
+
 	double energy = log(compute_energy( mSamps, (long int)mLength ));
+	double LHRatio = 0.0;
+	
+	if (energy > EnergyThreshold)			
+	{
+		int drum = bass_drum_detect( mSamps, mLength, LHRatio );
+		if (InHighEnergy==false) 
+		{
+			float t = recorded.SamplesToTime( mSampleIndex );
+
+			printf("Energy: t=%6.3f; %6.3lf: %7.3lf ", t, energy, LHRatio);  
+			switch (drum)
+			{
+			case 2 : printf("Drum=Snare\t" );	break;
+			case 1 : printf("Drum=Bass \t"  );   break;
+			default : break;
+			}	
+		}
+		prev_Drum    = drum;	
+		InHighEnergy = true;
+	}
+	else 
+	{
+		if (InHighEnergy)
+			printf("Energy Done: %ld;\n", mSampleIndex);
+		InHighEnergy = false;
+	};
 	Energies[EnergiesIndex++] = energy;
 }
-
-
 
 
 void record(  )
 {
 	size_t BufferSizeSamples = recorded.get_samples_allocated();
-
+	size_t FrameCounter = 0;
+	size_t SampleCounter = 0;
+	
 	short* ptr 		  = recorded.m_data;
 	float  time 	  = recorded.SamplesToTime( buffer_frames ); // alsa buffer
 
@@ -194,18 +210,15 @@ void record(  )
 		} else if (rc != (int)buffer_frames) {
 			printf( "short read, read %d frames\n", rc);
 		}
-		//printf( "%d read %d done\n", i, rc );
 
 		// WINDOW : 
-		short owBuffer[513];	
-		
+		//short owBuffer[513];		
 		for (int w=0; w<4; w++)
 		{
-			process_window( (short*)buffer, 512, owBuffer);
-			//short* corrs = Correlation( owBuffer, 512 );
-			//peak_pick( corrs, 2, &peak1, &peak2, &peak3 );
+			SampleCounter = (FrameCounter++ * 512);
+			process_window( (short*)buffer, 512, SampleCounter );			
 		}
-		
+
 		memcpy( (char*)ptr, buffer, buffer_size );
 		ptr += (buffer_frames);	
 	}
@@ -218,12 +231,11 @@ void record(  )
 	std::string ofn = "ALSA_Rec.wav";
 	recorded.Save( ofn );
 
-	process_waveform( );
+	//print_energy_array();
+	//process_waveform( );
 	
 	return ;
 }
-
-
 
 void* record_thread_func( void* argp )
 {
