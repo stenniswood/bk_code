@@ -1,5 +1,5 @@
 CC=g++
-PROG=aanal
+PROG=amidi
 OPTIONS	= -std=c++11 -lm -fno-rtti 
 INC	= ./visual/ /usr/include/freetype2
 SELF_INC= ./
@@ -7,7 +7,7 @@ CFLAGS 	= -lm -g
 DEPS   	= 
 
 MIDI_OBJ=  midi_synth.o sound_patch.o
-OBJ     =  main_anal.o dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o resample.o \
+OBJ     =  main_midi.o dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o resample.o \
 		generate.o alsa_record.o beat_detect.o beat_gen.o histo_bin.o
 
 VISUAL_OBJ = visual/gl_graph.o visual/shader_utils.o visual/gl_setup.o
