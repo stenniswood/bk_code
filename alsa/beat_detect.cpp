@@ -4,15 +4,22 @@
 #include <vector>
 #include <fftw3.h>
 
+#include "gtk/dataseries.hpp"
 #include "dspwave.hpp"
 #include "alsa_record.hpp"
 #include "beat_detect.hpp"
 #include "histo_bin.hpp"
+#include "gtk/graph.hpp"
+#include "gtk/annotated_graph.hpp"
 
 #define WINDOW_SIZE 512
 
+
 double Energies[NUM_FRAMES*2];
 size_t EnergiesIndex = 0;
+double SmoothEnergies[NUM_FRAMES*2];
+size_t SmoothLength = 0;
+
 
 double learned_scale_1 = 1.25;	// Weights for accepting a peak energy. narrow.
 double learned_scale_2 = 1.25;	// wider
@@ -24,6 +31,30 @@ int BestDelta = 40;
 #define MIN_FRAME_DIST 20	/* no faster than 200 beats per min */
 #define MAX_FRAME_DIST 172  /* no slower than 30 beats per min */
 
+/*  */
+void AddEnergyGraphData(AnnotatedGraph* mGraph )
+{
+	DataSeries  si;
+	// RAW ENERGIES
+	si.set_name( "Energy_Raw" );
+	si.set_data( Energies, EnergiesIndex );	
+	mGraph->add_data_series( si );
+
+	// Smoothed ENERGIES
+	si.delete_all();
+	si.set_name( "Energy_Smoothed" );
+	si.set_data( SmoothEnergies, SmoothLength );	
+	mGraph->add_data_series( si );
+	int smoothed_series = mGraph->find_series_name( "Energy_Smoothed" );
+	//printf("Added Smoothed Data Series : %d\n", smoothed_series );
+	
+	// Annotate Peaks Detected:
+	for (int i=0; i<peak_indices.size(); i++)
+	{
+		mGraph->mark_data( smoothed_series, peak_indices[i], RED, STYLE_X );
+	}
+	printf("Added Annotations\n");
+}
 
 
 /* Compute Energy on a Window (typically 256 to 512 samples) */
@@ -42,35 +73,6 @@ double compute_energy( short* mSamps, long int mLength )
 	return energy;
 }
 
-/* Pick peaks based on surrounding energy levels. */
-void peak_pick_energy()
-{
-	double above,below,on;
-	double above2,below2;
-	double avg_ab;
-	double avg_ab2;
-	
-	peak_indices.clear();
-	
-	for (int i=4; i<(EnergiesIndex-4); i++)
-	{
-		on     = Energies[i];
-		above  = Energies[i+4];			// Narrow 
-		below  = Energies[i-4];
-		if ((i>=8) && (i<(EnergiesIndex-9))) {
-			above2 = Energies[i+8];		// Wide band
-			below2 = Energies[i-8];
-			avg_ab2 = learned_scale_2 * (above2+below2)/2.0;
-		}
-
-		avg_ab  = learned_scale_1 * (above+below)/2.0;		
-		if ((on > avg_ab) || (on > avg_ab2))
-		{
-			peak_indices.push_back( i );
-			i = i+4;
-		}
-	}
-}
 
 /*  For all detected peaks, get the number of frames between.   */
 void compute_peak_deltas()
@@ -84,6 +86,7 @@ void compute_peak_deltas()
 		if ((delta>MIN_FRAME_DIST) && (delta<MAX_FRAME_DIST))
 			peak_deltas.push_back( delta );
 	}
+	printf("compute_peak_deltas() : %ld peak_deltas\n", peak_deltas.size() );
 }
 
 
@@ -131,6 +134,7 @@ void bin_peak_deltas()
 {
 	set_data_I  ( peak_deltas );	
 	init_bins   ( 15 );
+//	printf("bin_peak_deltas() : Bins initted...\n");
 	bin_data    (    );
 	std::vector<int>	m2Lambdas;	
 	get_2lambdas( m2Lambdas );
@@ -138,7 +142,10 @@ void bin_peak_deltas()
 	
 	print_bins();
 	int  mode_index = get_mode( );
-	BestDelta       = peak_deltas[mode_index];	
+	
+	printf("bin_peak_deltas() : mode = %d\n", mode_index );	
+	if (mode_index>=0)
+		BestDelta       = peak_deltas[mode_index];	
 	
 	printf("MaxOccupancyBin[%d]=%d;  value=%d\n", mode_index, get_count(mode_index), BestDelta );		
 }
@@ -163,33 +170,35 @@ float determine_beats_per_min()
 	return (bpm);	
 }
 
+/************************************************************/
+
 void  process_waveform( DSPWave& wav )
 {
 	long int len = wav.get_samples_recorded();
-	printf("length=%ld;  %d  %d \n", len, wav.m_block_align, wav.m_bytes_recorded );
 
-	size_t FrameCounter = 0;
-	size_t SampleCounter = 0;
-	
+	size_t FrameCounter  = 0;
+	size_t SampleCounter = 0;	
 	long int frames = (len / WINDOW_SIZE);
 	short* ptr = wav.m_data;
 	
+	// COMPUTE ENERGIES (FOR EACH WINDOW):
 	for (int f=0; f<frames; f++)
 	{
 		SampleCounter = (FrameCounter++ * WINDOW_SIZE);	
 		process_window( ptr, WINDOW_SIZE, SampleCounter );
 		ptr += WINDOW_SIZE;
 	}
+	printf("%d Energy computed done.\n", EnergiesIndex );
+	// ENERGIES[]  --> peak_indices[]  --> peak_deltas[]  
 	
-	// printf("Energy computed done.");
-	// print_array		();
-	peak_pick_energy	();
-	compute_peak_deltas ();
+//	print_energy_array		();
+	peak_pick_energy	(SmoothEnergies, SmoothLength);
+/*	compute_peak_deltas ();
 	bin_peak_deltas		();
 	determine_beats_per_min();
 	
 	print_peaks     	();
-	print_deltas		();
+	print_deltas		();  */
 }
 
 ///////////////////// PRINTING FUNCTIONS ///////////////////////////
@@ -205,17 +214,6 @@ void print_energy_array( )
 	printf("\n");
 }
 
-void print_peaks( )
-{
-	printf("Peak Energies Array[%d] = \n", peak_indices.size() );
-	char str[256];
-	for (int i=0; i < peak_indices.size(); i++)
-	{
-		sprintf(str, "Energies[%d] = %6.3lf\n", peak_indices[i], Energies[peak_indices[i]] );
-		printf("%s,  ", str );
-	}
-	printf("\n");
-}
 
 void print_deltas( )
 {

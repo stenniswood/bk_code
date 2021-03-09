@@ -4,17 +4,16 @@
 
 
 
+extern bool 	stop_recording;
+
 extern DSPWave recorded;
 
-void init_hw_record();
-
+int   init_hw_record();
 void* record( void* argp );
+void  clean_up();
 
-void clean_up();
 
-
-void process_window( short* mSamps, int mLength, size_t mSampleIndex );
-
+void  process_window( short* mSamps, int mLength, size_t mSampleIndex );
 void* record_thread_func( void* argp );
 
 

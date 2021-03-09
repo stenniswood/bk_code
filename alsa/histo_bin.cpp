@@ -18,8 +18,8 @@ size_t HistoIndex = 0;
 /* Find Min/Max data  */
 void min_max_data( std::vector<double>& mHistData,  double& mMin, double& mMax )
 {
-	mMin = -32767;
-	mMax = +32767;
+	mMin = +32767;
+	mMax = -32767;
 	for (int i=0; i < mHistData.size(); i++)
 	{
 		if (mHistData[i] < mMin )			mMin = mHistData[i];
@@ -32,8 +32,12 @@ void set_data_I( std::vector<int> mData )
 {
 	HistoData.clear();	
 	for (int i=0; i<mData.size(); i++)
+	{
+		printf("HistoData[%d] = %d\n", i, mData[i] );
 		HistoData.push_back( (double)mData[i] );		
+	}
 }
+
 void set_data_S( std::vector<short> mData )
 {
 	HistoData.clear();	
@@ -55,6 +59,8 @@ void init_bins( int mNumBins ) {
 
 	double BMax, BMin;
 	min_max_data( HistoData, BMin, BMax );
+	printf("init_bins() : Min=%6.4lf; Max=%6.4lf\n\n", BMin, BMax );
+	
 	
 	double range = (BMax - BMin);
 	increment    = (range / (double)mNumBins);

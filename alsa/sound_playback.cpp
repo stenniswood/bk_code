@@ -84,12 +84,13 @@ int sound_playback( DSPWave& wav, bool mLoopMode )
 			} else if (pcm < 0) {
 				printf("ERROR. Can't write to PCM device. %s\n", snd_strerror(pcm));
 			}
+			printf("snd_pcm_writei() \n");
 		}		
 		// Restart:
 		bytes_played = 0;
 		ptr = (char*)wav.m_data;
 	} while (!done);
-	printf("Exitted loop...\n");
+	printf("Finished playback...\n");
 	
 	snd_pcm_drain(pcm_handle);
 	snd_pcm_close(pcm_handle);

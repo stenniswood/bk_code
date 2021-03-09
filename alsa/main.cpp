@@ -6,6 +6,9 @@
 #include <iostream>
 #include <pthread.h>
 
+#include "gtk/graph.hpp"
+#include "gtk/annotated_graph.hpp"
+
 
 #include "midi/MidiFile.h"
 #include "dspwave.hpp"
@@ -20,6 +23,9 @@
 #include "beat_gen.hpp"
 
 
+#include "gtk/gtk_main.hpp"
+
+
 bool LoopMode = false;
 BOOL VISUALIZE = TRUE;
 
@@ -28,11 +34,15 @@ void help()
 	printf(" Audio Synthesizer \n");
 	printf(" ./asynth [mode] [filename]\n\n");
 	
-	printf(" loop - Continuous looping of an audiofile. \n");
+	printf(" loop 			 - Continuous looping of an audiofile. \n");
+	printf(" gui  [filename] - read a audio file and display it. \n");			
+	printf(" midi [filename] - read a midifile and synthesize it. \n");			
+	
 	printf(" beat - play a drum pattern Overlay melodies. \n");
-	printf(" audio - Play and process an audio file for Musical DNA.\n");
-	printf(" midi - read a midifile and synthesize it. \n");			
-	printf(" test  \n");	
+	printf(" anal [filename] - Play and process an audio file for Musical DNA.\n");
+	printf(" rp   [filename] - Record & Playback mode.\n");	
+
+	printf(" test  - Generates a square wave with envelope. \n");	
 	exit(1);
 }
 
@@ -95,6 +105,7 @@ void print_freq()
 #define AUDIOFILE 2
 #define TEST 	  3
 #define BEATBOX   4
+#define RECORD_PLAY 5
 
 std::string fn = "midi/mario-dies.mid";
 int InputFileType = 0;
@@ -112,9 +123,11 @@ void process_args( int argc, char** argv )
 		if (found==true)  { 
 			LoopMode = true;  printf("Running in Loop Mode\n"); 
 		} 
-		found = scan_args( argc, argv, "nogui" );
+		found = scan_args( argc, argv, "gui" );
 		if (found==true)  {
-			 VISUALIZE = false; printf("Running in Nogui mode.\n"); 						
+			InputFileType=AUDIOFILE; 
+			fn = argv[2];			
+			VISUALIZE = true; printf("Running in GUI mode.\n"); 						
 		}
 		
 		found = scan_args( argc, argv, "midi" );
@@ -127,19 +140,22 @@ void process_args( int argc, char** argv )
 			InputFileType=BEATBOX;   printf("Running in BeatBox Mode\n"); 
 		} 
 
-		found = scan_args( argc, argv, "audio" );
+		found = scan_args( argc, argv, "anal" );
 		if (found==true)  { 
-			InputFileType=AUDIOFILE;   printf("Running in Audio File\n"); 
+			InputFileType=AUDIOFILE;   printf("Running in Audio Analysis \n"); 
+			fn = argv[2];
+		} 
+
+		found = scan_args( argc, argv, "rp" );
+		if (found==true)  { 
+			InputFileType=RECORD_PLAY;   printf("Running in Record/Playback Mode\n"); 
 			fn = argv[2];
 		} 
 
 		found = scan_args( argc, argv, "test" );
 		if (found==true)  { 
-			InputFileType=TEST;   printf("Running in Test Mode\n"); 
+			InputFileType=TEST;   printf("Running in Test Mode. Square wave with envelope.\n"); 
 		} 
-
-		//if (!found)
-		//	fn = argv[1];
 	}
 }
 
@@ -186,7 +202,27 @@ int main (int argc, char** argv)
 	{
 		// OPEN AUDIO FILE AND PROCESS IT:  (for beat detection)
 		recorded.Load   ( fn       );
+		std::string info = recorded.get_format_string();
+		printf("%s\n", info.c_str() );
+		if (recorded.m_number_channels==2)
+			recorded.convert_to_mono();
+
 		process_waveform( recorded );
+		if (VISUALIZE)
+		{						
+		printf("VISUALIZE annotatedGraph \n");		
+			// Energies into Graph : 
+			int ok  = graph_init( );
+		printf("graph_init %d \n", ok );					
+			AnnotatedGraph* e_graph = create_annotated_graph( "Energy -vs- Time", "Window", "Energy", 
+					Energies, EnergiesIndex  );
+
+		printf("created annotatedGraph \n");
+		
+			AddEnergyGraphData( e_graph );
+
+			int graph_result = graph_main( );
+		}
 	}
 	else if (InputFileType==BEATBOX)
 	{
@@ -204,12 +240,16 @@ int main (int argc, char** argv)
 		pthread_create(&thread_id, NULL, record_thread_func, NULL); 
 		int result = sound_playback( wave, true );		
 	}
-	else {
+	else if (InputFileType==RECORD_PLAY)  {
+		wave.Load   ( fn       );
+		size_t play_samples = wave.get_samples_recorded();		
+		float time = wave.SamplesToTime(play_samples);
+		printf("Playing %6.3f seconds of audio; \n", time);
+		
 		// RECORD & PLAYBACK : 
 		pthread_t thread_id; 
 		pthread_create(&thread_id, NULL, record_thread_func, NULL); 
 		int result = sound_playback( wave, false );		
-		while(1) {};
 	}
 	return 0;
 }

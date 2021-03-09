@@ -36,11 +36,21 @@ snd_pcm_t *			capture_handle;
 snd_pcm_hw_params_t *hw_params;
 snd_pcm_format_t 	format 			= SND_PCM_FORMAT_S16_LE;
 static size_t 		loops 			= 0;
+bool 				stop_recording  = false;
 
 DSPWave 				recorded( 1, 44100, 3*60*44100*1, NULL );
 
+
+char alsa_device[80];
+char* get_alsa_device()
+{
+	FILE* fd = fopen("alsa_device.txt", "r");
+	size_t num_bytes = fread(alsa_device, 1, 79, fd );
+	fclose(fd);
+	return alsa_device;
+}
 	      
-void init_hw_record()
+int init_hw_record()
 {
   char dev_name[] = "plughw:2,0";
 	
@@ -48,43 +58,43 @@ void init_hw_record()
     printf ("cannot open audio device %s (%s)\n", 
              dev_name,
              snd_strerror (err));
-    exit (1);
+   return 0;
   }
 		   
   if ((err = snd_pcm_hw_params_malloc (&hw_params)) < 0) {
     printf ( "cannot allocate hardware parameter structure (%s)\n",
              snd_strerror (err));
-    exit (1);
+   return 0;
   }
 				 
   if ((err = snd_pcm_hw_params_any (capture_handle, hw_params)) < 0) {
     printf ("cannot initialize hardware parameter structure (%s)\n",
              snd_strerror(err) );
-    exit (1);
+   return 0;
   }
 	
   if ((err = snd_pcm_hw_params_set_access (capture_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
     printf ( "cannot set access type (%s)\n",
              snd_strerror (err));
-    exit (1);
+   return 0;
   }
 
   if ((err = snd_pcm_hw_params_set_format (capture_handle, hw_params, format)) < 0) {
     printf ( "cannot set sample format (%s)\n",
              snd_strerror (err));
-    exit (1);
+   return 0;
   }
 	
   if ((err = snd_pcm_hw_params_set_rate_near (capture_handle, hw_params, &rate, 0)) < 0) {
     printf ( "cannot set sample rate (%s)\n",
              snd_strerror (err));
-    exit (1);
+   return 0;
   }
 
   if ((err = snd_pcm_hw_params_set_channels (capture_handle, hw_params, 1)) < 0) {
     printf ( "cannot set channel count (%s)\n",
              snd_strerror (err));
-    exit (1);
+   return 0;
   }
     /* Set period size to 32 frames. */
 	int dir=1;
@@ -93,7 +103,7 @@ void init_hw_record()
   if ((err = snd_pcm_hw_params (capture_handle, hw_params)) < 0) {
     printf ( "cannot set parameters (%s)\n",
              snd_strerror (err));
-    exit (1);
+   return 0;
   }
   
 	/* Use a buffer large enough to hold one period */
@@ -111,9 +121,10 @@ void init_hw_record()
   if ((err = snd_pcm_prepare (capture_handle)) < 0) {
     printf ( "cannot prepare audio interface for use (%s)\n",
              snd_strerror (err));
-    exit (1);
+   return 0;
   }
   printf( "================== RECORDING =================================\n");
+  return 1;
 }
 
 void clean_up()
@@ -181,6 +192,15 @@ void process_window( short* mSamps, int mLength, size_t mSampleIndex )
 	Energies[EnergiesIndex++] = energy;
 }
 
+bool past_end(short* ptr, size_t buff_size )
+{
+	char* ptr1 = ((char*)ptr+buff_size);
+	char* ptr2 = (char*)recorded.m_data + recorded.get_data_length_bytes();
+	if (ptr1<ptr2)
+		return true;
+	else
+		return false;
+}
 
 void record(  )
 {
@@ -197,13 +217,13 @@ void record(  )
 		
 	EnergiesIndex = 0;
 	
-	for (i = 0; i < loops; ++i) 
+	while ( (!stop_recording) && !past_end(ptr, buffer_size) )
 	{
 		usleep( usec );		
+		
 		int rc = snd_pcm_readi (capture_handle, buffer, buffer_frames);
 		if (rc == -EPIPE) {
-			/* EPIPE means overrun */
-			printf( "overrun occurred\n");
+			printf( "overrun occurred\n");				/* EPIPE means overrun */
 			snd_pcm_prepare(capture_handle);
 		} else if (rc < 0) {
 			printf( "error from read: %s\n", snd_strerror(rc));					
@@ -211,14 +231,14 @@ void record(  )
 			printf( "short read, read %d frames\n", rc);
 		}
 
-		// WINDOW : 
-		//short owBuffer[513];		
+		// WINDOW : 	
 		for (int w=0; w<4; w++)
 		{
 			SampleCounter = (FrameCounter++ * 512);
-			process_window( (short*)buffer, 512, SampleCounter );			
+			process_window( (short*)buffer, 512, SampleCounter );
 		}
 
+		// RETRIEVE DATA & UPDATE POINTER :
 		memcpy( (char*)ptr, buffer, buffer_size );
 		ptr += (buffer_frames);	
 	}
@@ -227,7 +247,7 @@ void record(  )
 	size_t bytes_rec = (ptr - recorded.m_data) * 2;
 	recorded.m_bytes_recorded = BufferSizeSamples*2;	
 	printf("Bytes Recorded/Allocated = %ld / \n", bytes_rec, recorded.m_bytes_recorded );
-	
+
 	std::string ofn = "ALSA_Rec.wav";
 	recorded.Save( ofn );
 
@@ -241,10 +261,16 @@ void* record_thread_func( void* argp )
 {
 	fd = fopen("Record_Energy.csv", "a+");
 	
-	init_hw_record();
-	record();
+	int result_rec = init_hw_record();
+	if (result_rec==0)
+	{
+		printf("Cannot open audio HW for recording...\n");
+		return NULL;
+	}
 
+	record();
 	fclose(fd);
 	clean_up();
+
 	return NULL;
 };

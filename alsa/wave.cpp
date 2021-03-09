@@ -257,6 +257,8 @@ void Wave::tremolo( float LeftConst, float RightConst, float mPeriodSeconds )
 void Wave::Save( std::string mFileName)
 {
 	//CFile::modeCreate | CFile::modeWrite
+	printf("Saving wav %s\n", mFileName.c_str() );
+	
 	FILE* File = fopen(mFileName.c_str(), "w+" );
 	long int chunkSize = 18; //sizeof(WAVEFORMATEX);
 	//printf("WAVEFORMATEX chunkSize = %ld\n", chunkSize );
@@ -529,7 +531,7 @@ bool Wave::Load( std::string& Filename)
 	if (m_data)
 		delete m_data;
 
-	//printf("Creating Wave m_data of %ld bytes; %ld samples; \n", m_buffer_length, get_samples_allocated() );
+	printf("Loaded %s %ld bytes; %ld samples; \n", Filename.c_str(), m_buffer_length, get_samples_allocated() );
 	m_data = (short*) new short[m_buffer_length/(m_bits_per_sample/8)];
 	result = fread( (void*)m_data, 1, m_buffer_length, m_inFile );	// data size
 	fclose( m_inFile );	
