@@ -86,6 +86,7 @@ public:
 
 	void 			Set_Absolute_Position( t_index new_smp );	// moves file pointer with fseek
 	Wave&			operator=			 ( Wave& mOriginal );
+	short&			operator[](int mIndex)	{ return m_data[mIndex]; };	
 	
 // Remove these from this base class:
 	float 			calc_zoom		( int mPixels, float mSamples );	

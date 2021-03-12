@@ -149,11 +149,8 @@ void write_vector( std::vector<t_real> mVec)
 }
 
 
-double  EnergyThreshold = 12.0;
-bool	InHighEnergy = false;
-int		prev_Drum    = 0;
 
-void process_window( short* mSamps, int mLength, size_t mSampleIndex )
+/*void process_window( short* mSamps, int mLength, size_t mSampleIndex )
 {
 	//int Start = recorded.TimeToSamples( 0.417 );
 	//int End   = recorded.TimeToSamples( 0.560 );
@@ -190,7 +187,7 @@ void process_window( short* mSamps, int mLength, size_t mSampleIndex )
 		InHighEnergy = false;
 	};
 	Energies[EnergiesIndex++] = energy;
-}
+}*/
 
 bool past_end(short* ptr, size_t buff_size )
 {
@@ -235,7 +232,7 @@ void record(  )
 		for (int w=0; w<4; w++)
 		{
 			SampleCounter = (FrameCounter++ * 512);
-			process_window( (short*)buffer, 512, SampleCounter );
+			//process_window( (short*)buffer, 512, SampleCounter );
 		}
 
 		// RETRIEVE DATA & UPDATE POINTER :

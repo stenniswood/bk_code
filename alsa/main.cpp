@@ -24,6 +24,7 @@
 
 
 #include "gtk/gtk_main.hpp"
+#include "sound_processing.hpp"
 
 
 bool LoopMode = false;
@@ -207,19 +208,24 @@ int main (int argc, char** argv)
 		if (recorded.m_number_channels==2)
 			recorded.convert_to_mono();
 
-		process_waveform( recorded );
+		energies_n_peaks( recorded );
+		//process_waveform( recorded );
+		pitch_detect	( recorded );
+		
 		if (VISUALIZE)
 		{						
 		printf("VISUALIZE annotatedGraph \n");		
 			// Energies into Graph : 
 			int ok  = graph_init( );
-		printf("graph_init %d \n", ok );					
-			AnnotatedGraph* e_graph = create_annotated_graph( "Energy -vs- Time", "Window", "Energy", 
-					Energies, EnergiesIndex  );
+		createGraphs();
+		
+		AddEnergiesData	( e_graph );
+		AddPitchData	( c_graph );
+		AddWaveform		( wave_graph, &recorded );
 
 		printf("created annotatedGraph \n");
 		
-			AddEnergyGraphData( e_graph );
+
 
 			int graph_result = graph_main( );
 		}

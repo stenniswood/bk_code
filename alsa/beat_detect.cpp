@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <vector>
 #include <fftw3.h>
-
 #include "gtk/dataseries.hpp"
 #include "dspwave.hpp"
 #include "alsa_record.hpp"
@@ -31,30 +30,6 @@ int BestDelta = 40;
 #define MIN_FRAME_DIST 20	/* no faster than 200 beats per min */
 #define MAX_FRAME_DIST 172  /* no slower than 30 beats per min */
 
-/*  */
-void AddEnergyGraphData(AnnotatedGraph* mGraph )
-{
-	DataSeries  si;
-	// RAW ENERGIES
-	si.set_name( "Energy_Raw" );
-	si.set_data( Energies, EnergiesIndex );	
-	mGraph->add_data_series( si );
-
-	// Smoothed ENERGIES
-	si.delete_all();
-	si.set_name( "Energy_Smoothed" );
-	si.set_data( SmoothEnergies, SmoothLength );	
-	mGraph->add_data_series( si );
-	int smoothed_series = mGraph->find_series_name( "Energy_Smoothed" );
-	//printf("Added Smoothed Data Series : %d\n", smoothed_series );
-	
-	// Annotate Peaks Detected:
-	for (int i=0; i<peak_indices.size(); i++)
-	{
-		mGraph->mark_data( smoothed_series, peak_indices[i], RED, STYLE_X );
-	}
-	printf("Added Annotations\n");
-}
 
 
 /* Compute Energy on a Window (typically 256 to 512 samples) */
@@ -96,7 +71,6 @@ void learn_peaks( std::vector<int>& m2Lambdas_HistIndex )
 	// frame index -- energy
 	// 
 }
-
 
 /* Given an expected place for a peak.  Find out why it was not detected and 
    adjust the learning weights accordingly.    								*/
@@ -172,34 +146,6 @@ float determine_beats_per_min()
 
 /************************************************************/
 
-void  process_waveform( DSPWave& wav )
-{
-	long int len = wav.get_samples_recorded();
-
-	size_t FrameCounter  = 0;
-	size_t SampleCounter = 0;	
-	long int frames = (len / WINDOW_SIZE);
-	short* ptr = wav.m_data;
-	
-	// COMPUTE ENERGIES (FOR EACH WINDOW):
-	for (int f=0; f<frames; f++)
-	{
-		SampleCounter = (FrameCounter++ * WINDOW_SIZE);	
-		process_window( ptr, WINDOW_SIZE, SampleCounter );
-		ptr += WINDOW_SIZE;
-	}
-	printf("%d Energy computed done.\n", EnergiesIndex );
-	// ENERGIES[]  --> peak_indices[]  --> peak_deltas[]  
-	
-//	print_energy_array		();
-	peak_pick_energy	(SmoothEnergies, SmoothLength);
-/*	compute_peak_deltas ();
-	bin_peak_deltas		();
-	determine_beats_per_min();
-	
-	print_peaks     	();
-	print_deltas		();  */
-}
 
 ///////////////////// PRINTING FUNCTIONS ///////////////////////////
 void print_energy_array( )

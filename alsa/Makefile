@@ -8,9 +8,9 @@ DEPS   	=
 
 MIDI_OBJ=  midi_synth.o sound_patch.o
 OBJ     =  main.o dsp_funcs.o read_pendant.o alsa_prep.o dspwave.o wave.o sound_playback.o resample.o \
-		generate.o alsa_record.o beat_detect.o beat_gen.o histo_bin.o
+		generate.o alsa_record.o beat_detect.o beat_gen.o histo_bin.o sound_processing.o
 
-GTK_OBJ   = gtk/peak_pick.o gtk/annotated_graph.o gtk/graph.o gtk/linegraph.o gtk/histogram.o gtk/axis.o gtk/dataseries.o gtk/gtk_main.o
+GTK_OBJ   = gtk/peak_pick.o gtk/wavegraph.o gtk/annotated_graph.o gtk/graph.o gtk/linegraph.o gtk/histogram.o gtk/axis.o gtk/dataseries.o gtk/gtk_main.o
 
 VISUAL_OBJ = visual/gl_graph.o visual/shader_utils.o visual/gl_setup.o
 CPPOBJ     = 

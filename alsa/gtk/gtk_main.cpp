@@ -121,6 +121,21 @@ AnnotatedGraph* create_annotated_graph( char* mTitle,
 	newGraph->create_window(WIDTH, HEIGHT);	
 	return newGraph;
 }
+WaveGraph* create_wave_graph( char* mTitle, 
+			char* mXAxisName, char* mYAxisName, 
+			double* mValues, int mNumValues  )
+{
+	WaveGraph* newGraph = new WaveGraph( mTitle, mXAxisName, mYAxisName );
+	if (newGraph==NULL) {
+		printf("Cannot Allocate new Graph\n");
+		return NULL;
+	}
+	
+	newGraph->set_theme( &black_theme );
+	newGraph->show_grid(false);
+	newGraph->create_window(WIDTH, HEIGHT);	
+	return newGraph;
+}
 
 
 int graph_main( )

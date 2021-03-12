@@ -10,10 +10,13 @@
 extern double Energies[NUM_FRAMES*2];
 extern size_t EnergiesIndex;
 extern double SmoothEnergies[NUM_FRAMES*2];
-extern size_t SmoothedLength;
+extern size_t SmoothLength;
 
 
-void AddEnergyGraphData(AnnotatedGraph* mGraph );
+extern std::vector<int>	peak_indices;
+extern std::vector<int>	peak_deltas;
+
+//void AddEnergyGraphData(AnnotatedGraph* mGraph );
 
 void	process_waveform	( DSPWave& wav );
 
