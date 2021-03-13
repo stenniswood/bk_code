@@ -20,6 +20,11 @@ struct stHData {
 };
 extern struct stHData hdata[100];
 
+AnnotatedGraph* e_graph = NULL;
+AnnotatedGraph* c_graph = NULL;
+AnnotatedGraph* ec_graph = NULL;
+WaveGraph* 		wave_graph = NULL;
+
 
 Graph EnergyGraph( "Energy -vs- Time", "Time", "Energy" );
 Graph CorrelGraph( "Correlation -vs- Shift", "Shift", "Correlation" );
@@ -115,15 +120,14 @@ AnnotatedGraph* create_annotated_graph( char* mTitle,
 		return NULL;
 	}
 	
-	
 	newGraph->set_theme( &black_theme );
 	newGraph->show_grid(false);
 	newGraph->create_window(WIDTH, HEIGHT);	
 	return newGraph;
 }
+
 WaveGraph* create_wave_graph( char* mTitle, 
-			char* mXAxisName, char* mYAxisName, 
-			double* mValues, int mNumValues  )
+			char* mXAxisName, char* mYAxisName )
 {
 	WaveGraph* newGraph = new WaveGraph( mTitle, mXAxisName, mYAxisName );
 	if (newGraph==NULL) {
@@ -132,15 +136,38 @@ WaveGraph* create_wave_graph( char* mTitle,
 	}
 	
 	newGraph->set_theme( &black_theme );
-	newGraph->show_grid(false);
+	newGraph->show_grid( false );
 	newGraph->create_window(WIDTH, HEIGHT);	
 	return newGraph;
 }
 
 
+void createGraphs(Wave* mWave)
+{
+	// Energies/Beat
+/*	e_graph = create_annotated_graph( "Energy -vs- Time", "Window", "Energy", 
+			Energies, EnergiesIndex  );
+
+	// Single Full Correlation:
+	c_graph = create_annotated_graph( "Correlation -vs- Shift", "Correlation", "Shift", 
+			Energies, EnergiesIndex  );
+
+	// Correlation of Entire Waveform:
+	ec_graph = create_annotated_graph( "Correlation -vs- Shift", "Correlation", "Shift", 
+			Energies, EnergiesIndex  );
+*/
+
+	// Waveform Plot : 
+	wave_graph = create_wave_graph( "Waveform", "Amplitude", "Time" );
+	
+//	AddEnergiesData ( e_graph );
+//	AddPitchData	( c_graph );	
+//	AddWaveform ( wave_graph, mWave );	
+}
+
+
 int graph_main( )
 {
-
     //g_timeout_add (1,  new_data_timeout, &my_graph);
     //g_timeout_add (1,  new_data_timeout, &my_graph);
     

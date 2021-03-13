@@ -73,8 +73,8 @@ public:
 	void  	append_new_data		( int mSeriesIndex, struct stDataPoint mNewDataPoint );	
 
 	void 	compute_mins_maxs	( );	
-	float	dataPoint_x_to_Pixel( double mX );
-	float	dataPoint_y_to_Pixel( double mY );
+	virtual float	dataPoint_x_to_Pixel( double mX );
+	virtual float	dataPoint_y_to_Pixel( double mY );
 	
 	float	Pixel_to_dataPoint	( double mX, double mY );
 	
@@ -87,8 +87,6 @@ public:
 	void 	draw_axis_labels	( cairo_t *cr );
 
 	char*	get_title			()		{ return title; };
-	
-	
 	
 	virtual gfloat 	get_y_scale			( int mSeriesIndex );
 	gfloat 	compute_yscale_all_series(  );	
@@ -113,6 +111,10 @@ protected:
 	float 	y_scale;
 	bool  	m_show_legend;
 
+	double m_xmax_all;	
+	double m_xscale;
+	double m_xmin_all;	
+	double m_x_start;	// [0..(m_xmax_all/m_xscale)] -- datapoint x for left edge of graph.	
 
 private:    		
 	char  title[128];
@@ -123,10 +125,6 @@ private:
 	
 	double m_ymin_all;
 	
-	double m_xmin_all;	
-	double m_xmax_all;	
-	double m_xscale;
-	double m_x_start;	// [0..(m_xmax_all/m_xscale)] -- datapoint x for left edge of graph.	
 };
 
 

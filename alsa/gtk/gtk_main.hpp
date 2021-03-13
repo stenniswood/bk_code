@@ -17,9 +17,13 @@ AnnotatedGraph* create_annotated_graph( char* mTitle,
 					double* mValues, int mNumValues  );
 					
 WaveGraph* create_wave_graph( char* mTitle, 
-			char* mXAxisName, char* mYAxisName, 
-			double* mValues, int mNumValues  );
+			char* mXAxisName, char* mYAxisName );
 		
+extern AnnotatedGraph* e_graph ;
+extern AnnotatedGraph* c_graph ;
+extern AnnotatedGraph* ec_graph;
+extern WaveGraph* 	wave_graph ;
+
 
 //int init_graph_data2();
 

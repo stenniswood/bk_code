@@ -3,10 +3,6 @@
 #include "alsa_record.hpp"
 
 
-AnnotatedGraph* e_graph = NULL;
-AnnotatedGraph* c_graph = NULL;
-AnnotatedGraph* ec_graph = NULL;
-WaveGraph* 		wave_graph = NULL;
 
 
 double  EnergyThreshold = 12.0;
@@ -101,7 +97,7 @@ void  find_waveform( DSPWave& RecordedWave, Wave* mSrcWave )
 
 double  spectral_distortion( DSPWave& wav )
 {
-
+	return 0.0;
 }
 
 std::vector<int> m_indices;
@@ -110,28 +106,6 @@ void  spectral_segmentation( DSPWave& wav )
 
 }
 
-void createGraphs()
-{
-	// Energies/Beat
-	e_graph = create_annotated_graph( "Energy -vs- Time", "Window", "Energy", 
-			Energies, EnergiesIndex  );
-
-	// Single Full Correlation:
-	c_graph = create_annotated_graph( "Correlation -vs- Shift", "Correlation", "Shift", 
-			Energies, EnergiesIndex  );
-
-	// Correlation of Entire Waveform:
-	ec_graph = create_annotated_graph( "Correlation -vs- Shift", "Correlation", "Shift", 
-			Energies, EnergiesIndex  );
-
-	// Waveform Plot : 
-	
-	
-	AddEnergiesData ( e_graph );
-	AddPitchData	( c_graph );	
-//	AddWaveform ( wave_graph, wave );		
-	
-}
 
 /*  */
 void AddEnergiesData(AnnotatedGraph* mGraph )
@@ -182,9 +156,4 @@ void AddPitchData(AnnotatedGraph* mGraph )
 		mGraph->mark_data( smoothed_series, peak_indices[i], RED, STYLE_X );
 	}
 	printf("Added Annotations\n");
-}
-
-void AddWaveform( WaveGraph* mGraph, Wave* mWav )
-{
-
 }

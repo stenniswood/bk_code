@@ -68,7 +68,11 @@ Graph::Graph( const char* mTitle, const char* mxAxis, const char* myAxis )
 	theme = &white_theme;
 	p_index = 0;	
 	
-	m_xscale  = 2.0;
+	x_axis_margin  = 0;
+	y_title_margin = 0;
+	
+	m_xmin_all = 0;
+	m_xscale  = 1.0;
 	m_x_start = 0.0;
 }
 
@@ -166,7 +170,7 @@ void Graph::create_window	( int mWidth, int mHeight )
     g_signal_connect (G_OBJECT (da), "draw", G_CALLBACK (on_draw), this );
  
     // GUI BELOW GRAPH : 
-    GtkWidget*	 box2 = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 0 );
+ /*   GtkWidget*	 box2 = gtk_box_new( GTK_ORIENTATION_HORIZONTAL, 0 );
 	gtk_box_pack_start (GTK_BOX (box1), box2, FALSE, FALSE, 0);
 	gtk_widget_set_hexpand 	( box2, TRUE );		
 	gtk_widget_set_halign   ( box2, GTK_ALIGN_FILL); 
@@ -191,8 +195,8 @@ void Graph::create_window	( int mWidth, int mHeight )
 	// STATS/INFO TEXT AREA:
     ta = gtk_drawing_area_new ( );
 	gtk_box_pack_start (GTK_BOX (box1), ta, TRUE, TRUE, 0);
-    g_signal_connect (G_OBJECT (da), "draw", G_CALLBACK (on_draw_stats), this );
-	
+    //g_signal_connect (G_OBJECT (da), "draw", G_CALLBACK (on_draw_stats), this );
+*/	
 	    
     gtk_widget_show_all (widow);  
     
@@ -201,7 +205,7 @@ void Graph::create_window	( int mWidth, int mHeight )
 
 void Graph::set_window( GtkWidget *widget )
 {
-	window = gtk_widget_get_window(widget);
+	window = gtk_widget_get_window( widget );
 	/* Determine GtkDrawingArea dimensions */
     gdk_window_get_geometry (window,
             &screen.x,
@@ -217,8 +221,7 @@ void Graph::set_window( GtkWidget *widget )
 	y_axis_margin = 0.05 * 100.;	// is in x units
 	
 	// NOTE:  we have to do this after DrawTitle() b/c that's where the y_title_margin gets set.
-	//y_scale = compute_yscale_all_series(  );
-		
+	//y_scale = compute_yscale_all_series(  );		
 	//printf("cr_x,y_scale = %7.4f %7.4f\n", cr_x_scale, cr_y_scale);
 }
 
@@ -298,6 +301,8 @@ gfloat Graph::get_y_scale(int mSeriesIndex )
 gfloat Graph::compute_yscale_all_series(  )
 {
 	int slen         = series_data.size();
+	if (slen==0) return y_scale;		// maintain derived class may have set it.
+	
 	gfloat min_scale = 100000;
 
 	for (int series=0; series<slen; series++)

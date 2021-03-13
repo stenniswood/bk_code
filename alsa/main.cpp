@@ -208,24 +208,22 @@ int main (int argc, char** argv)
 		if (recorded.m_number_channels==2)
 			recorded.convert_to_mono();
 
-		energies_n_peaks( recorded );
+		//energies_n_peaks( recorded );
 		//process_waveform( recorded );
-		pitch_detect	( recorded );
+		//pitch_detect	( recorded );
 		
 		if (VISUALIZE)
 		{						
-		printf("VISUALIZE annotatedGraph \n");		
+			printf("VISUALIZE annotatedGraph \n");		
 			// Energies into Graph : 
 			int ok  = graph_init( );
-		createGraphs();
-		
-		AddEnergiesData	( e_graph );
-		AddPitchData	( c_graph );
-		AddWaveform		( wave_graph, &recorded );
-
-		printf("created annotatedGraph \n");
-		
-
+			createGraphs( &recorded);		// in gtk_main.cpp
+			
+			//AddEnergiesData( e_graph );
+			//AddPitchData	 ( c_graph );
+			
+			wave_graph->set_wave( &recorded );
+			printf("created annotatedGraph \n");
 
 			int graph_result = graph_main( );
 		}

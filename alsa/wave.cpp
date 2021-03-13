@@ -258,7 +258,7 @@ void Wave::Save( std::string mFileName)
 {
 	//CFile::modeCreate | CFile::modeWrite
 	printf("Saving wav %s\n", mFileName.c_str() );
-	
+	  
 	FILE* File = fopen(mFileName.c_str(), "w+" );
 	long int chunkSize = 18; //sizeof(WAVEFORMATEX);
 	//printf("WAVEFORMATEX chunkSize = %ld\n", chunkSize );
@@ -833,6 +833,29 @@ bool TIMITWave::ReadHeader		(						)
 	//printf("repositioned to first sample\n" );
 	return true;
 }
+
+short	Wave::get_max_sample	()
+{
+	short max_value=0;
+	
+	for (int i=0; i < get_samples_recorded(); i++)
+	{
+		if (m_data[i] > max_value)	max_value = m_data[i];
+	}
+	return max_value;
+}
+
+short	Wave::get_min_sample	()
+{
+	short min_value=0;
+	for (int i=0; i < get_samples_recorded(); i++)
+	{
+		if (m_data[i] < min_value)	min_value = m_data[i];
+	}
+	return min_value;
+}
+
+
 
 
 /*void Wave::ConsolidateList()

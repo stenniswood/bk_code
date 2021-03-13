@@ -100,6 +100,9 @@ public:
 	void			insert_mono_straight_shot( Wave& mMono, float mInitLeftConst, float mInitRightConst, int mSamplePeriod );
 	void 			tremolo( float LeftConst, float RightConst, float mPeriodSeconds );
 	
+	short			get_max_sample	();
+	short			get_min_sample	();	
+	
 
 	std::string 			get_format_string	();
 	std::string 			GetSampleRateStr	();

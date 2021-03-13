@@ -13,10 +13,6 @@
 #include "gtk/gtk_main.hpp"
 
 
-extern AnnotatedGraph* e_graph ;
-extern AnnotatedGraph* c_graph ;
-extern AnnotatedGraph* ec_graph;
-extern WaveGraph* 	wave_graph ;
 
 
 void	energies_n_peaks( DSPWave& wav );
@@ -32,10 +28,10 @@ double  spectral_distortion( DSPWave& wav );
 void	spectral_segmentation( DSPWave& wav );
 
 
-void	createGraphs	( );
+void	createGraphs	( Wave* mWave );
 void 	AddEnergiesData	( AnnotatedGraph* mGraph );
 void 	AddPitchData	( AnnotatedGraph* mGraph );
-void 	AddWaveform		( WaveGraph* mGraph, Wave* mWav );
+//void 	AddWaveform		( WaveGraph* mGraph, Wave* mWav );
 
 
 #endif
