@@ -22,7 +22,6 @@ LIBS +=  -lpthread -lm -L/usr/local/lib/ -L/usr/lib/arm-linux-gnueabihf/ $(LIBS_
 LIBS = `pkg-config --libs gtk+-3.0`
 CFLAGS = `pkg-config --cflags gtk+-3.0`
 
-
 %.o: %.cpp $(DEPS)
 	$(CC) $(CFLAGS) $(addprefix -I,$(INC)) -c -o $@ $< $(OPTIONS) 
 %.o: %.c $(DEPS) 

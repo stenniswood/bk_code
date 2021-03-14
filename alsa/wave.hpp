@@ -16,7 +16,6 @@ typedef double t_real;
 typedef long t_signed;
 
 
-using namespace std;
 
 const unsigned short WAVE_FORMAT_PCM 		= 0x0001;
 const unsigned short WAVE_FORMAT_IEEE_FLOAT = 0x0003;
@@ -60,10 +59,10 @@ public:
 	Wave	( BYTE mChannels, int mSamplesPerSecond, int mBufferSizeSamples, short* mData=NULL );
 	virtual ~Wave();
 
-	bool			Open				( string& Filename	);	// just opens the file
+	bool			Open				( std::string& Filename	);	// just opens the file
 	virtual bool	ReadHeader			(					);	// reads and separates out the entities.
-	virtual bool	Load				( string& Filename	);  // opens, reads header & data
-	void 			Save				( string mFileName	);	// 
+	virtual bool	Load				( std::string& Filename	);  // opens, reads header & data
+	void 			Save				( std::string mFileName	);	// 
 	
 	WAVEHDR* 		extract_channel_data( int mChannel		);	// Extract audio data of one channel from stereo signal
 	void 			AppendData 			( WAVEHDR& mHeader	);
@@ -87,6 +86,7 @@ public:
 
 	void 			Set_Absolute_Position( t_index new_smp );	// moves file pointer with fseek
 	Wave&			operator=			 ( Wave& mOriginal );
+	short&			operator[](int mIndex)	{ return m_data[mIndex]; };	
 	
 // Remove these from this base class:
 	float 			calc_zoom		( int mPixels, float mSamples );	
@@ -100,11 +100,14 @@ public:
 	void			insert_mono_straight_shot( Wave& mMono, float mInitLeftConst, float mInitRightConst, int mSamplePeriod );
 	void 			tremolo( float LeftConst, float RightConst, float mPeriodSeconds );
 	
+	short			get_max_sample	();
+	short			get_min_sample	();	
+	
 
-	string 			get_format_string	();
-	string 			GetSampleRateStr	();
-    string 			GetNumSamplesStr	();
-	string 			GetTotalTimeStr		();
+	std::string 			get_format_string	();
+	std::string 			GetSampleRateStr	();
+    std::string 			GetNumSamplesStr	();
+	std::string 			GetTotalTimeStr		();
 
 	WORD			m_format_tag;
 	int	  			m_number_channels;
@@ -130,7 +133,7 @@ public:
 	TIMITWave ();
 	~TIMITWave();
 	
-	char*			Search_In_Header(const string& option	);
+	char*			Search_In_Header(const std::string& option	);
 	virtual bool	ReadHeader		(						);
 
 private:

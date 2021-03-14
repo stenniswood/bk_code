@@ -12,11 +12,15 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <ostream> 
+
 
 #include "wave.hpp"
 #include "dspwave.hpp"
 #include "dsp_funcs.h"
 
+
+//using namespace std;
 
 #define NO_BURST_FRACTION 0.05			// 0.1%  ==> can be lower (0.01 %)!
 #define ENERGY_THRESHOLD 75000000
@@ -65,7 +69,7 @@ void save_vector( std::vector<t_real>& mRealSave, std::string mFilename )
 
 // fft:  preemphasized vector of time samples (variable vet_re)
 // and returns the real (vet_re) and the immaginary (vet_im) parts of its fft
-void Fft_Call(vector<double>& vet_re, vector<double>& vet_im)
+void Fft_Call( std::vector<double>& vet_re, std::vector<double>& vet_im)
 {	
 	xft(vet_re.data(), vet_im.data(), 8, -1);	
 }
@@ -83,6 +87,12 @@ DSPWave::DSPWave ()
 		create_hamming_window();
 		HammingWindowCreated = true;
 	}
+}
+
+DSPWave::DSPWave( BYTE mChannels, int mSamplesPerSecond, int mBufferSizeSamples, short* mData )
+:Wave( mChannels, mSamplesPerSecond, mBufferSizeSamples, mData )
+{
+
 }
 
 DSPWave::~DSPWave()
@@ -148,9 +158,9 @@ void DSPWave::LoadWindow()		// put current samples into window[] array
 	memcpy( window, &(m_data[window_start_index]), length );
 }
 
-vector<short>& DSPWave::GetRawSamples()
+std::vector<short>& DSPWave::GetRawSamples()
 {
-	static vector<short> retval;
+	static std::vector<short> retval;
 	retval.resize(WINDOW_SIZE);
 	int length = WINDOW_SIZE;
 	long int total_samples = m_bytes_recorded / (2 * m_number_channels);
@@ -202,28 +212,28 @@ tFeatureVector&  DSPWave::get_features( )
 	return feats;
 }
 
-void DSPWave::output_features( ostream& out, long int& fv_index, char delim )
+void DSPWave::output_features( std::ostream& out, long int& fv_index, char delim )
 {
 	for (int i=0; i<NUM_FEATURE_VECTORS; i++)
 		out << feature_vector[i] << delim;
 }
 
-void DSPWave::output_window( ostream& out, long int& fv_index )
+void DSPWave::output_window( std::ostream& out, long int& fv_index )
 {
 	out << fv_index << " : ";
 	for (int i=0; i<WINDOW_SIZE/8; i++)
 		out << window[i] << " ";
-	out << endl;
-	out << endl;
+	out << std::endl;
+	out << std::endl;
 }
 
-void DSPWave::output_dft( ostream& out, long int& fv_index )
+void DSPWave::output_dft( std::ostream& out, long int& fv_index )
 {
 	out << fv_index << " : ";
 	for (int i=0; i<WINDOW_SIZE/8; i++)
 		out << freq_real_space[i] << " ";
-	out << endl;
-	out << endl;
+	out << std::endl;
+	out << std::endl;
 }
 
 t_index DSPWave::GetWindowPosition	( )
@@ -343,16 +353,16 @@ void DSPWave::resample ( float mMultiplier )
 #define MOVING_AVG_PERIOD 10
 
 
-vector<t_real> DSPWave::compute_simple_moving_avg( vector<t_real>& mData )
+std::vector<t_real> DSPWave::compute_simple_moving_avg( std::vector<t_real>& mData )
 {
-	vector<t_real> energy_simple_moving;
+	std::vector<t_real> energy_simple_moving;
 	printf("Waveform Moving Avg Energies scan:\n");
-	vector<t_real>::iterator bin_start = mData.begin();
-	vector<t_real>::iterator bin_end = (mData.begin()+MOVING_AVG_PERIOD);
+	std::vector<t_real>::iterator bin_start = mData.begin();
+	std::vector<t_real>::iterator bin_end = (mData.begin()+MOVING_AVG_PERIOD);
 	while (bin_end != mData.end() )
 	{
 		long int average = 0.0;
-		for (vector<t_real>::iterator iter=bin_start; iter<=bin_end; iter++)
+		for (std::vector<t_real>::iterator iter=bin_start; iter<=bin_end; iter++)
 			average += *iter;
 		average /= MOVING_AVG_PERIOD;
 		energy_simple_moving.push_back(average);							
@@ -362,7 +372,7 @@ vector<t_real> DSPWave::compute_simple_moving_avg( vector<t_real>& mData )
 	return energy_simple_moving;
 }
 
-void DSPWave::print_energies( vector<t_real>& mEnergies )
+void DSPWave::print_energies( std::vector<t_real>& mEnergies )
 {
 	printf("Time domain energies:\n");
 	//printf("Waveform Window energies\tMoving Avg:\n");
@@ -373,7 +383,7 @@ void DSPWave::print_energies( vector<t_real>& mEnergies )
 	printf("\nend. Total energies=%ld \n", mEnergies.size() );
 }
 
-void DSPWave::print_detects_w_time( vector<t_index>& start_points, vector<t_real>& times  )
+void DSPWave::print_detects_w_time( std::vector<t_index>& start_points, std::vector<t_real>& times  )
 {
 	printf("Detected Beat Starts\tTime Delta:\n");
 	t_index size = start_points.size();
@@ -386,7 +396,7 @@ void DSPWave::print_detects_w_time( vector<t_index>& start_points, vector<t_real
 
 }
 
-void DSPWave::print_detects( vector<t_index>& start_points )
+void DSPWave::print_detects( std::vector<t_index>& start_points )
 {
 	printf("Detected Beat Starts\n");
 	t_index size = start_points.size();
@@ -400,7 +410,7 @@ void DSPWave::print_detects( vector<t_index>& start_points )
 }
 
 
-t_real get_max( vector<t_real>& data, t_index& max_index )
+t_real get_max( std::vector<t_real>& data, t_index& max_index )
 {
 	t_real mmax = -32767.0;
 	max_index = -1;
@@ -411,7 +421,7 @@ t_real get_max( vector<t_real>& data, t_index& max_index )
 	}
 	return mmax;
 }
-t_real get_min( vector<t_real>& data, t_index& min_index )
+t_real get_min( std::vector<t_real>& data, t_index& min_index )
 {
 	t_real mmin = +32767.0;
 	min_index   = -1;
@@ -423,7 +433,7 @@ t_real get_min( vector<t_real>& data, t_index& min_index )
 	return mmin;
 }
 
-void DSPWave::create_histogram( vector<t_real>& data, int mNumBins  )
+void DSPWave::create_histogram( std::vector<t_real>& data, int mNumBins  )
 {
 	t_index max_index;
 	t_index min_index;
@@ -432,7 +442,7 @@ void DSPWave::create_histogram( vector<t_real>& data, int mNumBins  )
 	t_real bin_width = ((hmax-hmin) / (t_real)mNumBins);
 	printf("%d bins : bin_width=%5.3f\n", mNumBins, bin_width );
 	
-	vector<t_index>  bin_occupancy;
+	std::vector<t_index>  bin_occupancy;
 	for (int b=0; b<mNumBins; b++)
 		bin_occupancy.push_back(0);
 
@@ -463,9 +473,9 @@ void DSPWave::create_histogram( vector<t_real>& data, int mNumBins  )
 	and the moving average is still below 0.9 * 75 million (when it goes above, we are 
 				in the middle of the beat.)	
 */
-vector<t_index> DSPWave::detect_beat_starts2( vector<t_real>& energies )
+std::vector<t_index> DSPWave::detect_beat_starts2( std::vector<t_real>& energies )
 {
-	vector<t_index> start_points;
+	std::vector<t_index> start_points;
 	start_points.clear();
 	
 	printf("detect_beat_starts():\n");
@@ -487,7 +497,7 @@ vector<t_index> DSPWave::detect_beat_starts2( vector<t_real>& energies )
 	return start_points;
 }
 
-vector<t_index> DSPWave::remove_close_duplicates( vector<t_index>& start_points )
+std::vector<t_index> DSPWave::remove_close_duplicates( std::vector<t_index>& start_points )
 {	
 	printf("remove_close_duplicates():\n");
 	t_index esize 	  = start_points.size();
@@ -512,15 +522,15 @@ vector<t_index> DSPWave::remove_close_duplicates( vector<t_index>& start_points 
 	and the moving average is still below 0.9 * 75 million (when it goes above, we are 
 				in the middle of the beat.)	
 */
-vector<t_index> DSPWave::detect_beat_starts(vector<t_real>& energies)
+std::vector<t_index> DSPWave::detect_beat_starts(std::vector<t_real>& energies)
 {
-	vector<t_index> start_points;
+	std::vector<t_index> start_points;
 	bool last_window_was_detect = false;
 	printf("detect_beat_starts():\n");
 	t_index e_index   = MOVING_AVG_PERIOD;
 	t_index mae_index = 0;
 	t_index esize 	  = energies.size();
-	vector<t_real> energy_simple_moving = compute_simple_moving_avg( energies );
+	std::vector<t_real> energy_simple_moving = compute_simple_moving_avg( energies );
 	
 	start_points.clear();
 	while (e_index <= esize )
@@ -558,9 +568,9 @@ vector<t_index> DSPWave::detect_beat_starts(vector<t_real>& energies)
 }
 
 
-vector<t_real> DSPWave::compute_time_between_beats( vector<t_index>& start_points )
+std::vector<t_real> DSPWave::compute_time_between_beats( std::vector<t_index>& start_points )
 {
-	vector<t_real> time_deltas;
+	std::vector<t_real> time_deltas;
 	t_index sample_delta;
 	t_real time_delta;
 	printf("compute_time_between_beats()  channels=%d \n", m_number_channels);
@@ -578,9 +588,9 @@ vector<t_real> DSPWave::compute_time_between_beats( vector<t_index>& start_point
 }
 
 // Scan entire waveform and no more.
-vector<t_real> DSPWave::create_energy_contour(  )
+std::vector<t_real> DSPWave::create_energy_contour(  )
 {
-	vector<t_real> energies;
+	std::vector<t_real> energies;
 	printf("Scanning energy_only()...\n");
 	PositionWindow( 0 );		// start of waveform.
 	while  (window_is_past_end()==false )
@@ -594,10 +604,10 @@ vector<t_real> DSPWave::create_energy_contour(  )
 	return energies;
 }
 
-void DSPWave::read_feature_vector( ifstream& in, long int& fv_index, string& mSymbol )
+void DSPWave::read_feature_vector( std::ifstream& in, long int& fv_index, std::string& mSymbol )
 {
-	/* This reads 1 line from the feature vector file: */
-	string symbol,tmp,file_index;
+	/* This reads 1 line from the feature std::vector file: */
+	std::string symbol,tmp,file_index;
 	in >> file_index;
 	in >> fv_index;
 	in >> window_start_index;
@@ -656,11 +666,11 @@ double DSPWave::compute_auto_correlation ( int mStartIndex, int mEndIndex, int m
 /* Given a region including several periods (3-4)
 	0.05 to 0.1 seconds total     
 	 */
-vector<double> 	DSPWave::full_auto_correlation ( int mStartIndex, int mEndIndex )	// Mono only.
+std::vector<double> 	DSPWave::full_auto_correlation ( int mStartIndex, int mEndIndex )	// Mono only.
 {
 	printf("Full auto correlation\n");
 
-	vector<t_real>  auto_corr;
+	std::vector<t_real>  auto_corr;
 	long int NumSamples = (mEndIndex - mStartIndex);
 	double scale = 1.0;
 		

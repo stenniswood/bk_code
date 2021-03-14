@@ -12,7 +12,7 @@
  
 #include "wave.hpp"
 
-using namespace std;
+
 
 
 //////////////////////////////////////////////////////////////////////
@@ -254,12 +254,14 @@ void Wave::tremolo( float LeftConst, float RightConst, float mPeriodSeconds )
 	printf("Done tremolo\n");
 }
 
-void Wave::Save(string mFileName)
+void Wave::Save( std::string mFileName)
 {
 	//CFile::modeCreate | CFile::modeWrite
+	printf("Saving wav %s\n", mFileName.c_str() );
+	  
 	FILE* File = fopen(mFileName.c_str(), "w+" );
 	long int chunkSize = 18; //sizeof(WAVEFORMATEX);
-	printf("WAVEFORMATEX chunkSize = %ld\n", chunkSize );
+	//printf("WAVEFORMATEX chunkSize = %ld\n", chunkSize );
 	
 	if (File==NULL)
 	{
@@ -268,12 +270,12 @@ void Wave::Save(string mFileName)
 		perror("Cannot create file!");
 		exit(1);
 	}	
-			printf("writing RIFF block 0\n");
+			//printf("writing RIFF block 0\n");
 	//size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream); 
 	size_t result = 0;
 	char tag[] = "RIFF";
 	result = fwrite(tag, 4, 1, File); 
-		printf("Completed writing RIFF block 1\n");
+		//printf("Completed writing RIFF block 1\n");
 				
 	DWORD fSize = (get_data_length_bytes()+sizeof(WAVEFORMATEX) );
 	result = fwrite((&fSize), 			1, 4, File);	
@@ -291,10 +293,10 @@ void Wave::Save(string mFileName)
 	WORD cbSize=0;
 	result = fwrite((&cbSize), 				1, 2, File);					
 
-	printf("Completed writing RIFF block\n");
+	//printf("Completed writing RIFF block\n");
 	
 	chunkSize = get_data_length_bytes( );
-	printf("chunkSize=%d\n", chunkSize );
+	//("chunkSize=%d\n", chunkSize );
 	
 	result = fwrite( "data", 				1, 4, File);
 	result = fwrite( &chunkSize, 			1, 4, File);	
@@ -334,7 +336,7 @@ void Wave::Save(string mFileName)
 }*/
 bool Wave::read_chunk(FILE* mFile, char mName[4], long int* mSize)
 {
-	string ErrStr;
+	std::string ErrStr;
 	char id[4];
 	size_t result;
 	// Read ID:
@@ -368,8 +370,8 @@ void  Wave::set_wave_format	( WAVEFORMATEX* mFormat )
 
 BYTE extension[40];
 WAVEFORMATEX fmt;
-string ErrStr;
-bool Wave::Open(string& Filename)
+std::string ErrStr;
+bool Wave::Open( std::string& Filename)
 {
 	m_inFile = fopen( Filename.c_str(), "r" );	// binary?	
 	if(m_inFile==NULL)
@@ -387,17 +389,18 @@ bool Wave::Open(string& Filename)
 bool Wave::ReadHeader( )
 {
 	//printf("Wave::ReadHeader( )\t");
+	long int chunkSize=0;
 	
 	// Read RIFF :
 	char tmp[8];
-	int result   = fread( tmp, 1, 4, m_inFile );			// "RIFF" 
+	int result = fread( tmp, 1, 4, m_inFile );			// "RIFF" 
 	tmp[4] = 0;
 
 	int comp = strncmp(tmp,"RIFF",4);
 	if(comp != 0)
 	{ 
-	    ErrStr = "not a wave riff file";  
-	    printf("Error:%s\n", ErrStr.c_str() ); 
+		result = fread( &chunkSize, 1, 4, m_inFile );	// should be 16, 18, or 40	
+	    printf("Error: not a wave riff file. Chunk:%s: size=%ld \n", tmp, chunkSize ); 
 		for (int i=0; i<4; i++)
 			printf("%c", tmp[i] );
 		return false;
@@ -414,20 +417,29 @@ bool Wave::ReadHeader( )
 	  return false;  
 	}
 	
-	//long int pos = ftell(m_inFile);
-	//printf("pos=%d\n", pos );
-
 	// FORMAT "fmt "   - might need to seek for the fmt chunk.  If some other chunks come before the "fmt " one.
-	result = fread( tmp, 1, 4, m_inFile );	  
-	if(strncmp(tmp,"fmt ",4) != 0)	   
+	result = fread( tmp, 1, 4, m_inFile );
+	bool cmp = (strncmp(tmp,"fmt ",4) == 0);
+	if (!cmp)	   
 	{
-		ErrStr = "expected a fmt chunk in wave file";  
+		ErrStr = "Ignoring chunk:";  
+		ErrStr += tmp[0];	ErrStr += tmp[1];	ErrStr += tmp[2];	ErrStr += tmp[3];
 		printf("%s.\n", ErrStr.c_str() );
-		return false;
-	}
+	
+		char dummy[2048];	// DISCARD ANY NON FMT CHUNK.
+		do {
+			result = fread( &chunkSize, 1, 4, m_inFile );	// should be 16, 18, or 40	
+			//printf("chunksize=%ld\n", chunkSize );
+			
+			result = fread( &dummy, 1, chunkSize, m_inFile );	// should be 16, 18, or 40		
+			result = fread( tmp, 1, 4, m_inFile );  // READ NEXT TAG.
+			cmp = (strncmp(tmp,"fmt ",4) == 0);
+		} while  (!cmp);
+		//return false;
+	} 
 
-	long int chunkSize=0;
-	result = fread( &chunkSize, 1, 4, m_inFile );	// should be 16, 18, or 40
+	// FMT Chunk...
+	result = fread( &chunkSize, 1, 4, m_inFile );	// should be 16, 18, or 40	
 	//printf("fmt Chunksize = %ld\n", chunkSize );
 	
 	if (chunkSize > sizeof(WAVEFORMATEX))
@@ -498,7 +510,7 @@ void Wave::Resize( int mNumSamples )
 	m_data = tmp;
 }
 
-bool Wave::Load(string& Filename)
+bool Wave::Load( std::string& Filename)
 {
 	size_t result;
 	
@@ -511,7 +523,7 @@ bool Wave::Load(string& Filename)
 	
 	ok = ReadHeader();			// Virtual (Timit or regular .wav)
 	if (ok==false) {
-		printf("COULD NOT READ HEADER!\n");
+		printf("COULD NOT READ HEADER! %s\n", Filename.c_str() );
 		fclose( m_inFile );
 		return ok;
 	}
@@ -519,7 +531,7 @@ bool Wave::Load(string& Filename)
 	if (m_data)
 		delete m_data;
 
-	//printf("Creating Wave m_data of %ld bytes; %ld samples; \n", m_buffer_length, get_samples_allocated() );
+	printf("Loaded %s %ld bytes; %ld samples; \n", Filename.c_str(), m_buffer_length, get_samples_allocated() );
 	m_data = (short*) new short[m_buffer_length/(m_bits_per_sample/8)];
 	result = fread( (void*)m_data, 1, m_buffer_length, m_inFile );	// data size
 	fclose( m_inFile );	
@@ -569,7 +581,7 @@ void Wave::AppendData(WAVEHDR &mHeader)
 
 #include <sstream>
 
-string Wave::get_format_string()
+std::string Wave::get_format_string()
 {
 	std::ostringstream s;
 	s << "Wave Format : ";
@@ -594,24 +606,24 @@ string Wave::get_format_string()
    return s.str();
 }
 
-string Wave::GetSampleRateStr()
+std::string Wave::GetSampleRateStr()
 {  
 	std::ostringstream s;
 	s << "SamplesPerSecond="  << m_samples_per_second;
 	return s.str();
 }
 
-string Wave::GetNumSamplesStr()
+std::string Wave::GetNumSamplesStr()
 {
 	std::ostringstream s;
-	string Tmp;
+	std::string Tmp;
 	float samps_recorded = round(m_bytes_recorded/m_block_align);
 	s << m_bytes_recorded << "/" << m_buffer_length << " Bytes recorded. SamplesRecorded="
 	  << samps_recorded;
 	return s.str();
 }
 
-string Wave::GetTotalTimeStr()
+std::string Wave::GetTotalTimeStr()
 {
 	std::ostringstream s;
     float samps_recorded = round(m_bytes_recorded/m_block_align);
@@ -748,7 +760,7 @@ sample_byte_format -s2 01
 sample_sig_bits -i 16
 end_head
 */ 
-char* TIMITWave::Search_In_Header(const string& option)
+char* TIMITWave::Search_In_Header(const std::string& option)
 {
 	char str[120];
 	char* ptr= str;
@@ -777,7 +789,6 @@ char* TIMITWave::Search_In_Header(const string& option)
 
 bool TIMITWave::ReadHeader		(						)
 {
-	
 	char str[120];
 	// Read First line - Must be NIST_xx !
 	if (fgets(str, 120, m_inFile) != NULL)
@@ -822,6 +833,29 @@ bool TIMITWave::ReadHeader		(						)
 	//printf("repositioned to first sample\n" );
 	return true;
 }
+
+short	Wave::get_max_sample	()
+{
+	short max_value=0;
+	
+	for (int i=0; i < get_samples_recorded(); i++)
+	{
+		if (m_data[i] > max_value)	max_value = m_data[i];
+	}
+	return max_value;
+}
+
+short	Wave::get_min_sample	()
+{
+	short min_value=0;
+	for (int i=0; i < get_samples_recorded(); i++)
+	{
+		if (m_data[i] < min_value)	min_value = m_data[i];
+	}
+	return min_value;
+}
+
+
 
 
 /*void Wave::ConsolidateList()
