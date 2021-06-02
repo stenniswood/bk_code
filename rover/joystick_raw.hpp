@@ -138,6 +138,7 @@ public:
 	JoystickRaw (  );	
 	~JoystickRaw();
 	
+	void 			connect();
 	void			Initialize(); 			// int mouse_init()
 
 	void 			open 					( const char* mPathname = NULL );

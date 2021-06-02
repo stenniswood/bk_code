@@ -102,10 +102,10 @@ int send_Rumble( int fd, byte mStrong, byte mWeak )
 	int send_start = 1;
 	uint32_t crc = crc_32( &(oBuffer[crc_start]), 75 );
 	append_checksum( crc );
-	dump_obuffer();
+	//dump_obuffer();
 	
 	size_t bytes_written = write(fd, &(oBuffer[send_start]), 75+4 -1 );
-	printf("send_Rumble:: result = %d\n", bytes_written );
+	//printf("send_Rumble:: result = %d\n", bytes_written );
 	
 	return bytes_written;
 }

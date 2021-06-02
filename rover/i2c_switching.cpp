@@ -52,6 +52,7 @@ void initialize_RPI_servo_hat( Robot& mRobot )
   buffer[1] = 0x1e;
   write(file_i2c, buffer, length);
 
+	/* NOTE:  Max Count is 4095 */
   mRobot.setup_start_times();
 }
 

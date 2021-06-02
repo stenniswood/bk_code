@@ -97,7 +97,7 @@ void rcServo::angle_to( float mDegree )
 	m_curr_angle  = mDegree;
 	m_curr_counts = convert_deg_to_counts( mDegree );
 		
-	printf("S%d : Angle %6.1f = %d \n", ServoNum, mDegree, m_curr_counts );	
+	//printf("S%d : Angle %6.1f = %d \n", ServoNum, mDegree, m_curr_counts );	
 	set_stop_time( m_curr_counts );	
 }
 

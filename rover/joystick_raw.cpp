@@ -10,6 +10,8 @@
 #include <pthread.h>
 #include "crc_32.h"
 #include "joystick_raw.hpp"
+#include "gpio_in.hpp"
+
 
 #define PACKET_SIZE 83
 
@@ -26,23 +28,29 @@ char* find_latest_hidraw_dev( )
 	struct dirent *d_entry = NULL;
 	char num_str[5];
 	int  number  = 0;
-    	int  highest_number = number;
+    int  highest_number = number;
+    int	 num_hidraw_devices = 0;
+    
     do {
     	d_entry = readdir( dir );
-	if (d_entry==NULL)	break;
-	int cmp = strncmp( d_entry->d_name, "hidraw", 6 );
-	if (cmp==0) {
-		strcpy(num_str, &(d_entry->d_name[6]) );
-		number = atoi(num_str);
-		if ( number > highest_number )
-		{
-			highest_number = number;
+		if (d_entry==NULL)	break;
+		int cmp = strncmp( d_entry->d_name, "hidraw", 6 );
+		if (cmp==0) {
+			strcpy(num_str, &(d_entry->d_name[6]) );
+			number = atoi(num_str);
+			if ( number > highest_number )
+			{
+				highest_number = number;
+			}
+			num_hidraw_devices++;
 		}
-	}
     } while (d_entry != NULL);
     
+    if (num_hidraw_devices==0)
+    	return NULL;
+
     sprintf(hidraw_name, "/dev/hidraw%d", highest_number );
-    printf("USING:  /dev/%s\n", hidraw_name );
+    printf("USING:  %s\n", hidraw_name );
 	return hidraw_name;
 }
 
@@ -75,10 +83,8 @@ void* eventThread(void *arg)
 
 JoystickRaw::JoystickRaw()
 {
-	find_latest_hidraw_dev();
-	strcpy( full_device_name, hidraw_name );
-
 	Initialize();
+
 }
 
 JoystickRaw::~JoystickRaw()
@@ -86,11 +92,35 @@ JoystickRaw::~JoystickRaw()
 
 }
 
+void JoystickRaw::connect()
+{
+	char* namePtr = NULL;
+	while (namePtr==NULL)
+	{
+		namePtr = find_latest_hidraw_dev();	
+		printf("waiting for PS4 controller connection...\n");
+		usleep(100000);
+	}
+	strcpy( full_device_name, namePtr );
+	flash_leds = FLASH_MODE_NONE;
+}
+
 void JoystickRaw::Initialize()
 { 
 	//Dprintf("JoystickRaw::Initialize() ...\n");
 	for (int i=0; i<MAX_AXIS; i++)
 		m_axis_latest[i] = 0;
+	//for (int i=0; i<MAX_BUTTONS; i++)
+	//	m_buttons_latest[MAX_BUTTONS];	
+
+	m_new_axis = false;
+	m_new_button = false;
+	m_new_event  = false;	
+	m_bytes_read = 0;
+	m_report_counter = 0;	
+	m_num_trackpad_packets = 0;
+	m_num_fingerid_1 = 0;	
+	joystick_fd = 0;
 
 	// CREATE A THREAD TO READ FROM DEVICE : 
 /*	for (int retries=0; retries<3; retries++) 

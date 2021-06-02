@@ -1,11 +1,11 @@
 CC = g++
 CFLAGS = -std=gnu++11 `pkg-config --cflags gtk+-3.0`
 PROG = rover
-INC		   = ./ /usr/local/include
+INC		   = ./ /usr/local/include /opt/vc/include/
 
 SRCS  = main.o sserial.o i2c_switching.o joystick_raw.o crc_32.o \
 	vector.o servo.o rcServo.o limb.o robot.o jog_mode.o \
-	graph.o dataseries.o read_pendant.o 
+	graph.o dataseries.o read_pendant.o gpio_in.o ps4_hid_outputs.o
  
 
 ALL_SRCS = $(SRCS)
@@ -16,7 +16,7 @@ else
 	LIBS = 
 endif
 
-LIBS +=  -lpthread -lm -lcurl -L/usr/local/lib/ -L/usr/lib/arm-linux-gnueabihf/ -li2c \
+LIBS +=  -L/opt/vc/lib -lbcm_host -lpthread -lm -lcurl -L/usr/local/lib/ -L/usr/lib/arm-linux-gnueabihf/ -li2c \
 	`pkg-config --libs gtk+-3.0`
 
 

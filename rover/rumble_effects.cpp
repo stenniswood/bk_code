@@ -13,11 +13,11 @@
 
 std::vector<struct stEffect> Effects;
 bool running_effect = false;
-int selected_effect = 0;
-int envelope_index  = 0;
-int ms_delay 		= 50;
+int  selected_effect = 0;
+int  envelope_index  = 0;
+int  ms_delay 		= 50;
 
-pthread_t effectsThread_id = 0;
+pthread_t  effectsThread_id = 0;
 
 // eventThread reads from the JoystickRaw input file
 void* effectsThread( void *arg )
